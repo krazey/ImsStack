@@ -932,8 +932,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_temporary_block_timer_min_int";
         public static final String KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL =
                 KEY_PREFIX + "ut_support_cf_action_erasure_bool";
-        public static final String KEY_UT_SUPPORT_CFNR_TIMER_BOOL =
-                KEY_PREFIX + "ut_support_cfnr_timer_bool";
+        public static final String KEY_UT_CFNR_TIMER_UPDATE_METHOD_INT =
+                KEY_PREFIX + "ut_cfnr_timer_update_method_int";
         public static final String KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL =
                 KEY_PREFIX + "ut_query_cf_all_and_cf_all_conditional_support_bool";
         public static final String KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT =

@@ -85,9 +85,6 @@ public final class SscConfig {
     public static final int SERVICE_TYPE_ACR =
             CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_ACR; // 20
 
-    public static final int URI_TYPE_TEL = 0;
-    public static final int URI_TYPE_SIP = 1;
-
     @IntDef(prefix = {"SERVICE_TYPE_"}, value = {
             SERVICE_TYPE_INVALID,
             SERVICE_TYPE_CW,
@@ -111,6 +108,21 @@ public final class SscConfig {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CarrierConfigServiceType {}
+
+    public static final int URI_TYPE_TEL = 0;
+    public static final int URI_TYPE_SIP = 1;
+
+    public static final int CFNR_TIMER_UPDATE_METHOD_NOT_SUPPORT = 0;
+    public static final int CFNR_TIMER_UPDATE_METHOD_CDIV_NODE = 1;
+    public static final int CFNR_TIMER_UPDATE_METHOD_ACTIONS_NODE = 2;
+
+    @IntDef(prefix = {"CFNR_TIMER_UPDATE_METHOD_"}, value = {
+            CFNR_TIMER_UPDATE_METHOD_NOT_SUPPORT,
+            CFNR_TIMER_UPDATE_METHOD_CDIV_NODE,
+            CFNR_TIMER_UPDATE_METHOD_ACTIONS_NODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CfnrTimerUpdateMethod {}
 
     private static HashMap<Integer, ConfigInterface> sConfigInterfaces = new HashMap<>();
 
@@ -277,8 +289,8 @@ public final class SscConfig {
         return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
     }
 
-    static boolean isCfnrTimerSupported(int slotId) {
-        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SUPPORT_CFNR_TIMER_BOOL);
+    static @CfnrTimerUpdateMethod int getCfnrTimerUpdateMethod(int slotId) {
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_CFNR_TIMER_UPDATE_METHOD_INT);
     }
 
     static boolean isCfQueryAllAndCfAllConditionalSupported(int slotId) {

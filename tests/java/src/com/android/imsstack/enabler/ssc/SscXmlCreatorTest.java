@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -405,11 +406,20 @@ public class SscXmlCreatorTest {
     }
 
     @Test
-    public void createXml_updateNoReplyTimerWhenNoNoReplyTimerInXml() {
+    public void createXml_updateNoReplyTimerWhenNoNoReplyTimerInXml_insertInCdivNode() {
         String xmlData = "<ss:simservs>"
                 + "<ss:communication-diversion active=\"true\">"
                 + "<cp:ruleset>"
-                + "<cp:rule id=\"call-diversion-unconditional\">"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
                 + "</cp:rule>"
                 + "</cp:ruleset>"
                 + "</ss:communication-diversion>"
@@ -419,6 +429,7 @@ public class SscXmlCreatorTest {
                 SscConstant.CONDITION_CFNR_TIMER, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 25);
 
         SscXmlFormat.setIsNoReplyTimerOmitted(SLOT_0, true);
+        SscXmlFormat.setIsNoReplyTimerInRule(SLOT_0, false);
 
         Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
 
@@ -426,7 +437,7 @@ public class SscXmlCreatorTest {
         assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CD), xml.getTagName());
 
         NodeList nodeList = xml.getChildNodes();
-        assertEquals(2, nodeList.getLength());
+        assertEquals(2, nodeList.getLength()); // Ruleset and NoReplyTimer.
 
         Element noReplyTimer = (Element) nodeList.item(0);
         assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
@@ -435,6 +446,103 @@ public class SscXmlCreatorTest {
 
         Element ruleSet = (Element) nodeList.item(1);
         assertEquals(SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET), ruleSet.getTagName());
+    }
+
+    @Test
+    public void createXml_updateCfnrAndNoReplyTimerWhenNoNoReplyTimerInXml_insertInActionsNode() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 25);
+
+        SscXmlFormat.setIsNoReplyTimerOmitted(SLOT_0, true);
+        SscXmlFormat.setIsNoReplyTimerInRule(SLOT_0, true);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+
+        NodeList nodeList = xml.getChildNodes();
+        assertEquals(2, nodeList.getLength()); // Conditions and Actions.
+
+        Element actions = (Element) nodeList.item(1);
+        assertEquals(SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.ACTIONS), actions.getTagName());
+
+        nodeList = actions.getChildNodes();
+        assertEquals(2, nodeList.getLength()); // Forward-to and NoReplyTimer.
+
+        Element noReplyTimer = (Element) nodeList.item(1);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
+                noReplyTimer.getTagName());
+        assertEquals("25", noReplyTimer.getTextContent());
+
+        assertTrue(SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0)); // No change here.
+    }
+
+    @Test
+    public void createXml_updateCfnrAndNoReplyTimerWhenNoReplyTimerInXml_updateTimer() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "<ss:NoReplyTimer>10</ss:NoReplyTimer>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 25);
+
+        SscXmlFormat.setIsNoReplyTimerOmitted(SLOT_0, true);
+        SscXmlFormat.setIsNoReplyTimerInRule(SLOT_0, true);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+
+        NodeList nodeList = xml.getChildNodes();
+        assertEquals(2, nodeList.getLength()); // Conditions and Actions.
+
+        Element actions = (Element) nodeList.item(1);
+        assertEquals(SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.ACTIONS), actions.getTagName());
+
+        nodeList = actions.getChildNodes();
+        assertEquals(2, nodeList.getLength()); // Forward-to and NoReplyTimer.
+
+        Element noReplyTimer = (Element) nodeList.item(1);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
+                noReplyTimer.getTagName());
+        assertEquals("25", noReplyTimer.getTextContent());
+
+        assertFalse(SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0)); // Shall be changed to false.
     }
 
     @Test

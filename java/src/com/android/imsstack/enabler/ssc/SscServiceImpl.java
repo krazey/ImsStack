@@ -576,7 +576,8 @@ public class SscServiceImpl implements IUtInterface {
                 return;
             }
 
-            if (!SscConfig.isCfnrTimerSupported(mSlotId)) {
+            if (SscConfig.getCfnrTimerUpdateMethod(mSlotId)
+                    == SscConfig.CFNR_TIMER_UPDATE_METHOD_NOT_SUPPORT) {
                 ImsLog.d(mSlotId, "CFNR Timer is not supported");
                 timeSeconds = 0;
             }

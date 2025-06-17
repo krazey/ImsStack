@@ -222,7 +222,14 @@ public class SscXmlParser {
                 SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER));
         if (timerList.getLength() == 0) {
             SscXmlFormat.setIsNoReplyTimerOmitted(slotId, true);
-            SscXmlFormat.setIsNoReplyTimerInRule(slotId, false);
+
+            if (SscConfig.getCfnrTimerUpdateMethod(slotId)
+                    == SscConfig.CFNR_TIMER_UPDATE_METHOD_CDIV_NODE) {
+                SscXmlFormat.setIsNoReplyTimerInRule(slotId, false);
+            } else if (SscConfig.getCfnrTimerUpdateMethod(slotId)
+                    == SscConfig.CFNR_TIMER_UPDATE_METHOD_ACTIONS_NODE) {
+                SscXmlFormat.setIsNoReplyTimerInRule(slotId, true);
+            }
             return;
         }
 

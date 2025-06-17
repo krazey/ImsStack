@@ -17,8 +17,8 @@
 <carrier_config>
     <!-- Ims General -->
     <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
-    <!-- Ut/Xcap -->
-    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
+    <!-- Ssc -->
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
     <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 </carrier_config>

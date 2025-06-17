@@ -388,28 +388,47 @@ public class SscXmlCreator {
                 Element targetElement = getElementByTagName(cfRuleElement, targetTag);
                 if (targetElement == null) {
                     targetElement = doc.createElement(targetTag);
-                    String forwrdToTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.FORWARD_TO);
-                    Element forwrdToElement = getElementByTagName(cfRuleElement, forwrdToTag);
-                    if (forwrdToElement == null) {
-                        forwrdToElement = doc.createElement(forwrdToTag);
+                    String forwardToTag =
+                            SscXmlFormat.getSsElement(slotId, SscXmlFormat.FORWARD_TO);
+                    Element forwardToElement = getElementByTagName(cfRuleElement, forwardToTag);
+                    if (forwardToElement == null) {
+                        forwardToElement = doc.createElement(forwardToTag);
                         String actionsTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
                         Element actionsElement = getElementByTagName(cfRuleElement, actionsTag);
                         if (actionsElement == null) {
                             actionsElement = doc.createElement(actionsTag);
                             cfRuleElement.appendChild(actionsElement);
                         }
-                        actionsElement.appendChild(forwrdToElement);
+                        actionsElement.appendChild(forwardToElement);
 
                     }
-                    forwrdToElement.appendChild(targetElement);
+                    forwardToElement.appendChild(targetElement);
                 }
                 targetElement.setTextContent(getSscUtils().getUriFromNumber(slotId,
                         cfData.getForwardToNumber()));
             }
 
-            // Set Timer only when CFNR timer is in rule
+            // Set Timer only when CFNR timer is in rule.
             if (cfData.getReplyTimer() > 0 && cfData.getCondition() == SscConstant.CONDITION_CFNR) {
                 if (SscXmlFormat.getIsNoReplyTimerInRule(slotId)) {
+                    if (SscXmlFormat.getIsNoReplyTimerOmitted(slotId)) {
+                        String noReplyTimerTag = SscXmlFormat.getSsElement(slotId,
+                                SscXmlFormat.NOREPLYTIMER);
+                        if (getElementByTagName(cfRuleElement, noReplyTimerTag) != null) {
+                            ImsLog.d(slotId,
+                                    "noReplyTimer is already inserted. Don't create it again");
+                            SscXmlFormat.setIsNoReplyTimerOmitted(slotId, false);
+                        } else {
+                            String actionsTag = SscXmlFormat.getCpElement(slotId,
+                                    SscXmlFormat.ACTIONS);
+                            Element actionsElement = getElementByTagName(cfRuleElement, actionsTag);
+                            if (actionsElement != null) {
+                                Element noReplyTimerElement = doc.createElement(noReplyTimerTag);
+                                actionsElement.appendChild(noReplyTimerElement);
+                            }
+                        }
+                    }
+
                     updateNoReplyTimer(doc, data);
                 }
             }

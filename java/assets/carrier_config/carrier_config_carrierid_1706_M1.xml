@@ -31,6 +31,6 @@
     </int-array>
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 
-    <!-- Ut/Xcap -->
-    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
+    <!-- Ssc -->
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
 </carrier_config>

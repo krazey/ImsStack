@@ -17,10 +17,14 @@
 package com.android.imsstack.enabler.ssc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -50,7 +54,7 @@ public class SscXmlParserTest {
     private static final int SLOT_0 = 0;
 
     private SscXmlParser mSscXmlParser;
-    private int mTransactionId = 1;
+    private final int mTransactionId = 1;
 
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigInterface mMockConfigInterface;
@@ -60,6 +64,8 @@ public class SscXmlParserTest {
         MockitoAnnotations.initMocks(this);
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_CFNR_TIMER_UPDATE_METHOD_INT)))
+                .thenReturn(SscConfig.CFNR_TIMER_UPDATE_METHOD_CDIV_NODE);
         SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         SscXmlFormat.init(SLOT_0);
@@ -112,11 +118,11 @@ public class SscXmlParserTest {
     public void getSscServiceFromDoc_entireDocumentQueryForUpdatingXmlFormat() {
         processEntireDocumentQuery();
 
-        assertEquals(false, SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0));
-        assertEquals(false, SscXmlFormat.getIsNoReplyTimerInRule(SLOT_0));
-        assertEquals(true, SscXmlFormat.getCfnlExist(SLOT_0));
-        assertEquals(true, SscXmlFormat.isNamespaceSsSupported(SLOT_0));
-        assertEquals(true, SscXmlFormat.isNamespaceCpSupported(SLOT_0));
+        assertFalse(SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0));
+        assertFalse(SscXmlFormat.getIsNoReplyTimerInRule(SLOT_0));
+        assertTrue(SscXmlFormat.getCfnlExist(SLOT_0));
+        assertTrue(SscXmlFormat.isNamespaceSsSupported(SLOT_0));
+        assertTrue(SscXmlFormat.isNamespaceCpSupported(SLOT_0));
         assertEquals("ss:communication-waiting",
                 SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CW));
         assertEquals("ss:communication-diversion",
@@ -995,38 +1001,38 @@ public class SscXmlParserTest {
 
         processEntireDocumentQuery();
 
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFU));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFB));
-        assertEquals(false, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertFalse(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFNR));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFNRC));
-        assertEquals(false, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertFalse(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFNL));
 
-        assertEquals(true, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
                 SscXmlFormat.MEDIA_TYPE_AUDIO));
-        assertEquals(true, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
                 SscXmlFormat.MEDIA_TYPE_VIDEO));
 
-        assertEquals(false, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertFalse(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BAIC));
-        assertEquals(false, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertFalse(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BAOC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BOIC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BOIC_EXHC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BIC_WR));
-        assertEquals(false, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertFalse(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_ACR));
 
-        assertEquals(true, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
                 SscXmlFormat.MEDIA_TYPE_AUDIO));
-        assertEquals(true, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
                 SscXmlFormat.MEDIA_TYPE_VIDEO));
 
         SscConfig.clear(SLOT_0);
@@ -1041,41 +1047,99 @@ public class SscXmlParserTest {
         documentQueryData.setResponseCode(SscConstant.HTTP_OK);
         mSscXmlParser.getSscServiceFromDoc(documentQueryData, getEmptyXmlDoc(), null);
 
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFU));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFB));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFNR));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFNRC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CD,
                 SscConstant.CONDITION_CFNL));
 
-        assertEquals(false, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
+        assertFalse(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
                 SscXmlFormat.MEDIA_TYPE_AUDIO));
-        assertEquals(false, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
+        assertFalse(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CD,
                 SscXmlFormat.MEDIA_TYPE_VIDEO));
 
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BAIC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BAOC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BOIC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BOIC_EXHC));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_BIC_WR));
-        assertEquals(true, SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
+        assertTrue(SscXmlFormat.getProvisionStatus(SLOT_0, SscXmlFormat.SC_CB,
                 SscConstant.CONDITION_ACR));
 
-        assertEquals(false, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
+        assertFalse(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
                 SscXmlFormat.MEDIA_TYPE_AUDIO));
-        assertEquals(false, SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
+        assertFalse(SscXmlFormat.getMediaCapability(SLOT_0, SscXmlFormat.SC_CB,
                 SscXmlFormat.MEDIA_TYPE_VIDEO));
 
         SscConfig.clear(SLOT_0);
+    }
+
+    @Test
+    @SmallTest
+    public void checkCfnrTimerPosition_noCfnrTimerAndUpdateMethodCdivNode() {
+        String xml = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_CFNR_TIMER_UPDATE_METHOD_INT)))
+                .thenReturn(SscConfig.CFNR_TIMER_UPDATE_METHOD_CDIV_NODE);
+
+        mSscXmlParser.updateTagsAndRules(SLOT_0, getDocumentFromString(xml));
+
+        assertTrue(SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0));
+        assertFalse(SscXmlFormat.getIsNoReplyTimerInRule(SLOT_0));
+    }
+
+    @Test
+    @SmallTest
+    public void checkCfnrTimerPosition_noCfnrTimerAndUpdateMethodActionNode() {
+        String xml = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_CFNR_TIMER_UPDATE_METHOD_INT)))
+                .thenReturn(SscConfig.CFNR_TIMER_UPDATE_METHOD_ACTIONS_NODE);
+
+        mSscXmlParser.updateTagsAndRules(SLOT_0, getDocumentFromString(xml));
+
+        assertTrue(SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0));
+        assertTrue(SscXmlFormat.getIsNoReplyTimerInRule(SLOT_0));
     }
 
     private void processEntireDocumentQuery() {
