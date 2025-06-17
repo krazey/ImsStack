@@ -1891,6 +1891,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
         mCallDetails.set(CallDetails.CALL_END_FINISHED);
+
+        // the Telephony doesn't require a termination notification for this reason.
+        if (reasonInfo.getCode() == CallReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING) {
+            return;
+        }
+
         mCallback.invokeTerminated(this, reasonInfo);
     }
 

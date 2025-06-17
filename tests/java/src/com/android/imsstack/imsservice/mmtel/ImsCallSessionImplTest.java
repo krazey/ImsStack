@@ -1065,6 +1065,16 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
         verify(mMockImsCallSessionCallback, times(2)).invokeTerminated(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+
+        // verify not notifies the Telephony.
+        mImsCallSession = createImsCallSession("4");
+        mCallDetails.set(mCallDetails.MO_STARTED);
+        CallReasonInfo mockSrvccReasonInfo = Mockito.mock(CallReasonInfo.class);
+        mockSrvccReasonInfo.mCode = CallReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING;
+        mImsCallSession.getCallListenerProxy().onCallTerminated(mMockMtcCall, mockSrvccReasonInfo);
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        verify(mMockImsCallSessionCallback, times(2)).invokeTerminated(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
     }
 
     @Test
