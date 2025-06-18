@@ -190,7 +190,7 @@ TEST_F(UceAppTest, AoSControl)
     IMS_TRACE_D("NotifyPublishState", 0, 0, 0);
     EXPECT_CALL(objMockIImsAos, Control(_)).Times(1);
     pUceApp->setNetworkType(eUCE_RAT_GERAN);
-    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REFRESH);
+    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
     EXPECT_TRUE(pUceApp->sendMessage(objMsg));
 }
 

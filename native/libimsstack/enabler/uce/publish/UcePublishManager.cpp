@@ -1715,7 +1715,8 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
         IMS_TRACE_D("No Reason header present.Send Register Recovery message to the App", 0, 0, 0);
-        IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REFRESH);
+        IMSMSG objMsg(
+                AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
         MessageService::PostMessage(m_strAppName, objMsg);
         return IMS_TRUE;
     }
@@ -1729,7 +1730,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
             return IMS_TRUE;
         }
     }
-    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REFRESH);
+    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
     MessageService::PostMessage(m_strAppName, objMsg);
     IMS_TRACE_D("Send Register Recovery message to the App", 0, 0, 0);
     return IMS_TRUE;
