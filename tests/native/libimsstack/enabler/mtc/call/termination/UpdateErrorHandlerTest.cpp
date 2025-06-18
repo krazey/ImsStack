@@ -262,7 +262,7 @@ TEST_F(UpdateErrorHandlerTest,
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     EXPECT_CALL(objPassiveTimerHolder,
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
-                    IMS_FALSE))
+                    IMS_FALSE, IMS_FALSE))
             .Times(1);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }
