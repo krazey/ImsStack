@@ -389,7 +389,8 @@ CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
     if (IsAlternativeEmergencyService(objMessage))
     {
         AString strCountrySpecificUrn;
-        if (eSosType == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
+        if (eSosType == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC ||
+                eSosType == EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED)
         {
             strCountrySpecificUrn = m_objContext.GetMessageUtils().GetUri(
                     &objMessage, IMS_FALSE, ISipHeader::CONTACT_NORMAL);

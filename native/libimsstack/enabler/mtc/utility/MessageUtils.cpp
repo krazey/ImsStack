@@ -621,37 +621,29 @@ PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMe
     {
         return EXTRA_CODE_EMERGENCYSERVICE_GENERIC;
     }
+    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_AIEC))
+    {
+        return EXTRA_CODE_EMERGENCYSERVICE_AIEC;
+    }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_AMBULANCE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE;
-    }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_ANIMAL_CONTROL))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL;
     }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_FIRE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_FIRE;
     }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_GAS))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_GAS;
-    }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_MARINE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_MARINE;
     }
+    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_MIEC))
+    {
+        return EXTRA_CODE_EMERGENCYSERVICE_MIEC;
+    }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_MOUNTAIN))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN;
-    }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_PHYSICIAN))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN;
-    }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_POISON))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_POISON;
     }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_POLICE))
     {
@@ -666,7 +658,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMe
         return EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
     }
 
-    return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
+    return EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED;
 }
 
 PUBLIC IMS_SINT32 MessageUtils::GetCauseFromReasonHeader(

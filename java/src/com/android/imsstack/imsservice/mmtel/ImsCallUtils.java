@@ -115,6 +115,8 @@ public class ImsCallUtils {
     private static final String SOS_SERVICE_URN_FIRE = "urn:service:sos.fire";
     private static final String SOS_SERVICE_URN_MARINE = "urn:service:sos.marine";
     private static final String SOS_SERVICE_URN_MOUNTAIN = "urn:service:sos.mountain";
+    private static final String SOS_SERVICE_URN_MIEC = "urn:service:sos.ecall.manual";
+    private static final String SOS_SERVICE_URN_AIEC = "urn:service:sos.ecall.automatic";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
     //To-Do: Need to check AOSP behaviour.
     // for supplementary Service
@@ -480,6 +482,10 @@ public class ImsCallUtils {
             return SOS_SERVICE_URN_MARINE;
         } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE) != 0) {
             return SOS_SERVICE_URN_MOUNTAIN;
+        } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MIEC) != 0) {
+            return SOS_SERVICE_URN_MIEC;
+        } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AIEC) != 0) {
+            return SOS_SERVICE_URN_AIEC;
         } else {
             return SOS_SERVICE_URN_GENERIC;
         }
@@ -523,7 +529,20 @@ public class ImsCallUtils {
                         EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE;
                 break;
             }
-            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC: {
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MIEC: {
+                sosUrn = SOS_SERVICE_URN_MIEC;
+                emergencyServiceCategory =
+                        EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MIEC;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_AIEC: {
+                sosUrn = SOS_SERVICE_URN_AIEC;
+                emergencyServiceCategory =
+                        EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AIEC;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC:
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED: {
                 if (info.mExtraMessage.length() > 0) {
                     sosUrn = info.mExtraMessage;
                 } else {
