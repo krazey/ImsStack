@@ -1234,11 +1234,6 @@ PROTECTED IMS_BOOL AosRegistration::IsPdnReconnectWithDelayRequiredOnWfcSetupFai
         return IMS_FALSE;
     }
 
-    if (!IsImsCall())
-    {
-        return IMS_FALSE;
-    }
-
     if (!m_piContext->GetNetTracker()->IsRoaming())
     {
         return IMS_FALSE;
@@ -1251,6 +1246,64 @@ PROTECTED IMS_BOOL AosRegistration::IsPdnReconnectWithDelayRequiredOnWfcSetupFai
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+void AosRegistration::ProcessStopForPdnReconnectWithAwt()
+{
+    if (m_nState == STATE_REGISTERED || m_nState == STATE_REFRESHSTOP)
+    {
+        A_IMS_TRACE_D(REGID, "ProcessStopForPdnReconnectWithAwt :: Deregister", 0, 0, 0);
+
+        StopSubscription();
+
+        if (SendDeregister())
+        {
+            SetState(STATE_DEREGISTERING);
+            PrepareTrafficForDeregister();
+            m_pUtil->AddFeature(PENDING_PDN_RECONNECT_WITH_AWT, m_nTxnPending);
+
+            /* NOTE: ReportTryingState() is shouldn't be called here.
+             * AosApplication state is CONNECTING at this moment, changed by
+             * AosApplication::ProcessRegFailed_NoNextPcscfOnScscfRestoration().
+             * ReportTryingState() starts ImsEstablishmentTimer if App state is CONNECTING.
+             * This is not the expected behavior in this scenario. */
+
+            return;
+        }
+    }
+
+    Destroy();
+    ReconnectPdnWithDelayOnWfcSetupFail();
+}
+
+PROTECTED
+void AosRegistration::PrepareTrafficForDeregister()
+{
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+    if (piTransaction != IMS_NULL)
+    {
+        if (piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
+        {
+            SetTrafficForDeregister(IMS_TRUE);
+            StartTimer(TIMER_DEREG_TRAFFIC, DEREGISTRATION_TRAFFIC_MAX_TIME * 1000);
+        }
+        else
+        {
+            SetTrafficPriorityBlocked(IMS_TRUE);
+            m_pUtil->AddFeature(PENDING_STOP, m_nTxnPending);
+        }
+    }
+}
+
+PROTECTED
+void AosRegistration::ReconnectPdnWithDelayOnWfcSetupFail()
+{
+    m_nPdnReactivateWaitTime =
+            GET_N_CONFIG(m_nSlotId)->GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam();
+    A_IMS_TRACE_D(REGID, "ReconnectPdnWithDelayOnWfcSetupFail :: PDN reconnect with ATW(%d)",
+            m_nPdnReactivateWaitTime, 0, 0);
+    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
 }
 
 PROTECTED
@@ -1741,6 +1794,12 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
 {
     A_IMS_TRACE_I(REGID, "DestroyRegistration", 0, 0, 0);
 
+    if (GetState() == STATE_DEREGISTERING &&
+            m_pUtil->IsFeatureOn(PENDING_PDN_RECONNECT_WITH_AWT, m_nTxnPending))
+    {
+        ReconnectPdnWithDelayOnWfcSetupFail();
+    }
+
     ClearAuthChallengedCount();
     ClearPending();
     ClearNetworkBindingFeatures();
@@ -2137,20 +2196,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStop()
     }
     SetState(STATE_DEREGISTERING);
 
-    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
-    if (piTransaction != IMS_NULL)
-    {
-        if (piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
-        {
-            SetTrafficForDeregister(IMS_TRUE);
-            StartTimer(TIMER_DEREG_TRAFFIC, DEREGISTRATION_TRAFFIC_MAX_TIME * 1000);
-        }
-        else
-        {
-            SetTrafficPriorityBlocked(IMS_TRUE);
-            m_pUtil->AddFeature(PENDING_STOP, m_nTxnPending);
-        }
-    }
+    PrepareTrafficForDeregister();
 
     ReportTryingState();
     return IMS_TRUE;
@@ -3318,7 +3364,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateIpcan()
 PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
         IN IMS_UINT32 nUnavailableTimeForCurrentPcscf)
 {
-    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration() :: nUnavailableTimeForCurrentPcscf (%d)",
+    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration :: nUnavailableTimeForCurrentPcscf (%d)",
             nUnavailableTimeForCurrentPcscf, 0, 0);
 
     IAosPcscf* piPcscf = m_piContext->GetPcscf();
@@ -3348,23 +3394,19 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
         IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
         if (piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested())
         {
-            piHandleMtc->NotifyAllPcscfsUnavailable();
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_NO_PCSCF_AVAILABLE);
+
+            if (IsPdnReconnectWithDelayRequiredOnWfcSetupFailure())
+            {
+                ProcessStopForPdnReconnectWithAwt();
+                return;
+            }
         }
 
         Destroy();
 
-        if (IsPdnReconnectWithDelayRequiredOnWfcSetupFailure())
-        {
-            m_nPdnReactivateWaitTime =
-                    GET_N_CONFIG(m_nSlotId)
-                            ->GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam();
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
-        }
-        else
-        {
-            // make p-cscf discovery
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
-        }
+        // make p-cscf discovery
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
     }
 }
 
@@ -5586,13 +5628,22 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Removed()
     A_IMS_TRACE_I(REGID, "Registration_Removed", 0, 0, 0);
 
     IMS_BOOL bDeregisteringState = (GetState() == STATE_DEREGISTERING) ? IMS_TRUE : IMS_FALSE;
+    IMS_UINT32 nTxnPending = m_nTxnPending;
 
     Destroy();
-    ReportStateChanged(RESULT_SUCCESS);
 
     if (bDeregisteringState)
     {
         SipFactory::GetTransportHelper(m_piContext->GetSlotId())->DestroyAllSockets(0, m_objIpa);
+
+        if (m_pUtil->IsFeatureOn(PENDING_PDN_RECONNECT_WITH_AWT, nTxnPending))
+        {
+            ReconnectPdnWithDelayOnWfcSetupFail();
+        }
+        else
+        {
+            ReportStateChanged(RESULT_SUCCESS);
+        }
     }
 }
 

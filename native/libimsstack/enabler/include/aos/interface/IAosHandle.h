@@ -60,7 +60,6 @@ public:
 
     virtual IMS_BOOL IsRegFeatureTagRequired() = 0;
     virtual IMS_BOOL IsRegToNextPcscfRequested() = 0;
-    virtual void NotifyAllPcscfsUnavailable() = 0;
 
     virtual AosFeatureTagList& GetFeatureTagList() = 0;
     virtual AosFeatureTagList& GetBindedFeatureTagList() = 0;

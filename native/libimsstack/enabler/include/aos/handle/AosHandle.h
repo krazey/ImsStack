@@ -81,7 +81,6 @@ public:
 
     IMS_BOOL IsRegFeatureTagRequired() override;
     IMS_BOOL IsRegToNextPcscfRequested() override;
-    void NotifyAllPcscfsUnavailable() override;
 
     AosFeatureTagList& GetFeatureTagList() override;
     AosFeatureTagList& GetBindedFeatureTagList() override;

@@ -1962,6 +1962,9 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateConnected(IN IMS_UI
         case IAosRegistration::REASON_FAILURE_FORBIDDEN_IN_WIFI:
             ProcessRegForbiddenInWifi();
             break;
+        case IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE:
+            ProcessRegFailed_NoNextPcscfOnScscfRestoration();
+            break;
 
         default:
             break;
@@ -2200,6 +2203,16 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Terminated()
         SetAppState(STATE_CONNECTING);
         Report_StateChanged();
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
+    }
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_NoNextPcscfOnScscfRestoration()
+{
+    if (GetState() == STATE_CONNECTED)
+    {
+        SetOffReason(AosReason::REG_ALL_PCSCF_FAILED);
+        SetAppState(STATE_CONNECTING);
+        Report_StateChanged();
     }
 }
 

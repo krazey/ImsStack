@@ -42,6 +42,7 @@
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "../../../engine/interface/sipcore/MockISipMessageBodyPart.h"
 #include "../../../engine/interface/registration/MockIRegistration.h"
+#include "../../../engine/interface/registration/MockIRegistrationManager.h"
 #include "../../../engine/interface/registration/MockIRegContact.h"
 #include "../../../engine/interface/registration/MockIRegParameter.h"
 #include "../../../engine/interface/registration/MockIRegSubscription.h"
@@ -234,6 +235,11 @@ public:
         m_piRegContact = piContact;
         m_piRegParameter = piParam;
         m_pSubscription = pSubs;
+    }
+
+    inline void SetRegistrationManager(IN IRegistrationManager* piRegManager)
+    {
+        m_piRegManager = piRegManager;
     }
 
     inline AosUtil* GetUtil() { return m_pUtil; }
@@ -523,6 +529,7 @@ public:
     MockILocationInfo m_objMockILocationInfo;
     MockILocationProperties m_objMockILocationProperties;
     MockIRegistration m_objMockIRegistration;
+    MockIRegistrationManager m_objMockIRegistrationManager;
     MockIRegContact m_objMockIRegContact;
     MockIRegParameter m_objMockIRegParameter;
     MockIAosAppContext m_objMockIAosAppContext;
@@ -1175,6 +1182,28 @@ TEST_F(AosRegistrationTest, StartWithNextPcscfIfAvailableWhenRequestForScscfRest
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
+TEST_F(AosRegistrationTest, ReportFailureIfNoAvailablePcscfWhenRequestForScscfRestoration)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTC))
+            .WillByDefault(Return(&m_objMockIAosHandle));
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN: The GIVEN condition should be met.
+}
+
 TEST_F(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenRequestForScscfRestoration)
 {
     // GIVEN
@@ -1191,11 +1220,11 @@ TEST_F(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenRequestForScscfRes
 }
 
 TEST_F(AosRegistrationTest,
-        ShouldReconnectPdnWithDelayIfWfcSetupFailedForAllPcscfsWithCsRoamingWhenScscfRestoration)
+        ReconnectPdnWithDelayIfDeregFailsWhenWfcSetupFailedForAllPcscfsWithCsRoaming)
 {
     // GIVEN
-    m_pAosRegistration->SetImsCall(IMS_TRUE);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
             .WillByDefault(Return(120));
@@ -1203,6 +1232,11 @@ TEST_F(AosRegistrationTest,
     ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
             .WillByDefault(Return(NW_REPORT_RADIO_GSM));
+    ON_CALL(m_objMockIRegistration, Deregister()).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE));
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
@@ -1211,8 +1245,52 @@ TEST_F(AosRegistrationTest,
     // WHEN
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
 
-    // THEN
+    // THEN: The GIVEN and below conditions should be met.
     EXPECT_EQ(m_pAosRegistration->GetPdnReactivateWaitTime(), 120);
+}
+
+TEST_F(AosRegistrationTest, ShouldBeDeregisteringStateIfDeregisterSuccessWhileScscfRestoration)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_GSM));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Deregister()).WillByDefault(Return(IMS_SUCCESS));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_DEREGISTERING);
+}
+
+TEST_F(AosRegistrationTest, ShouldDestroyRegistrationIfDeregisterFailedWhileScscfRestoration)
+{
+    // GIVEN
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetRegistrationManager(&m_objMockIRegistrationManager);
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_GSM));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Deregister()).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIRegistrationManager, DestroyRegistration(_, _));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosRegistrationTest, ClearErrorCountWhenRequestToClearServerSocketErrorCount)
@@ -5472,6 +5550,28 @@ TEST_F(AosRegistrationTest, RegistrationRemovedDestroysRegistration)
     m_pAosRegistration->Registration_Removed();
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest,
+        ReconnectPdnWithDelayOnWfcSetupFailWhenDeregisteredIfTriggeredByScscfRestoration)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_DEREGISTERING);
+    m_pAosRegistration->SetTxnPending(AosRegistration::PENDING_PDN_RECONNECT_WITH_AWT);
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
+
+    // WHEN
+    m_pAosRegistration->Registration_Removed();
+
+    // THEN: The GIVEN and below conditions should be met.
+    EXPECT_EQ(m_pAosRegistration->GetPdnReactivateWaitTime(), 120);
+    EXPECT_FALSE(
+            m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_PDN_RECONNECT_WITH_AWT));
 }
 
 TEST_F(AosRegistrationTest, DoNotStartInternalErrorTimerAgainIfExistWhenRegTerminated)

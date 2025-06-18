@@ -233,15 +233,6 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegToNextPcscfRequested()
     return m_bRegToNextPcscfRequested;
 }
 
-PUBLIC VIRTUAL void AosHandle::NotifyAllPcscfsUnavailable()
-{
-    m_bRegToNextPcscfRequested = IMS_FALSE;
-    m_bNotify = IMS_TRUE;
-
-    SetReason(AosReason::REG_ALL_PCSCF_FAILED);
-    App_Notify();
-}
-
 PUBLIC VIRTUAL AosFeatureTagList& AosHandle::GetFeatureTagList()
 {
     return m_objFeatureTagList;

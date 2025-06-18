@@ -218,6 +218,7 @@ protected:
     virtual void ProcessRegFailed_Start(IN IMS_UINT32 nReason);
     virtual void ProcessRegFailed_Update(IN IMS_UINT32 nReason);
     virtual void ProcessRegFailed_Terminated();
+    virtual void ProcessRegFailed_NoNextPcscfOnScscfRestoration();
 
     virtual void ProcessDisconnectingState(IN IMS_UINT32 nReason = 0);
     virtual void ProcessNetworkEvent(

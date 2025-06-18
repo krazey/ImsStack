@@ -163,6 +163,10 @@ protected:
     IMS_BOOL UpdateCallingNumberVerification();
     IMS_BOOL IsPdnReconnectWithDelayRequiredOnWfcSetupFailure();
 
+    void ProcessStopForPdnReconnectWithAwt();
+    void PrepareTrafficForDeregister();
+    void ReconnectPdnWithDelayOnWfcSetupFail();
+
     /// Set Detail State
     void UpdateDetailState(IN IMS_UINT32 nState);
 
@@ -491,7 +495,8 @@ public:
         PENDING_TERMINATED = 0x80,
 
         PENDING_TRAFFIC = 0x100,
-        PENDING_STOP = 0x200
+        PENDING_STOP = 0x200,
+        PENDING_PDN_RECONNECT_WITH_AWT = 0x400
     };
 
     enum

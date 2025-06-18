@@ -881,34 +881,6 @@ TEST_F(AosHandleTest,
     // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosHandleTest, ShouldNotifyWithRegAllPcscfFailedIfNotifiedAllPcscfUnavailable)
-{
-    // GIVEN
-    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
-    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
-    m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
-
-    EXPECT_CALL(
-            m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_ALL_PCSCF_FAILED, _));
-
-    // WHEN
-    m_pAosHandle->NotifyAllPcscfsUnavailable();
-
-    // THEN: The GIVEN condition should be met.
-}
-
-TEST_F(AosHandleTest, ShouldResetRegToNextPcscfRequestedIfNotifiedAllPcscfUnavailable)
-{
-    // GIVEN
-    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
-
-    // WHEN
-    m_pAosHandle->NotifyAllPcscfsUnavailable();
-
-    // THEN
-    EXPECT_FALSE(m_pAosHandle->IsRegToNextPcscfRequested());
-}
-
 TEST_F(AosHandleTest, ShouldResetRegToNextPcscfRequestedIfStateChangedToConnected)
 {
     // GIVEN
