@@ -780,6 +780,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_rtt_guard_timer_millis_int";
         public static final String KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL =
                 KEY_PREFIX + "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
+        public static final String KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL =
+                KEY_PREFIX + "silent_retry_emergency_call_with_delay_of_retry_after_bool";
         public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT =
                 KEY_PREFIX + "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
         public static final String KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY =

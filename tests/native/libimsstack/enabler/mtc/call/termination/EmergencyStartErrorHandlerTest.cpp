@@ -15,6 +15,7 @@
  */
 
 #include "CallReasonInfo.h"
+#include "ISipHeader.h"
 #include "ImsAosParameter.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
@@ -111,6 +112,13 @@ protected:
     {
         CallReasonInfo objResult = pHandler->Handle(&objMessage);
         return objResult == CallReasonInfo(nCode, nExtraCode);
+    }
+
+    IMS_BOOL CheckHandleResult(
+            IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode, AString strExtraMessage)
+    {
+        CallReasonInfo objResult = pHandler->Handle(&objMessage);
+        return objResult == CallReasonInfo(nCode, nExtraCode, strExtraMessage);
     }
 };
 
@@ -253,6 +261,38 @@ TEST_F(EmergencyStartErrorHandlerTest,
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_FALSE(
             CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandleRedialsWithRetryAfterInSipErrorResponse)
+{
+    const IMS_SINT32 nRetryAfterInSeconds = 10;
+    AString strRetryAfterInMillis;
+    strRetryAfterInMillis.SetNumber(nRetryAfterInSeconds * 1000);
+    ON_CALL(objMessageUtils,
+            GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
+            .WillByDefault(Return(nRetryAfterInSeconds));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandleDoesNotRedialsWithRetryAfterInSipErrorResponse)
+{
+    const IMS_SINT32 nRetryAfterInSeconds = 10;
+    AString strRetryAfterInMillis;
+    strRetryAfterInMillis.SetNumber(nRetryAfterInSeconds * 1000);
+    ON_CALL(objMessageUtils,
+            GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
+            .WillByDefault(Return(nRetryAfterInSeconds));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(CheckHandleResult(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis));
 }
 
 }  // namespace android

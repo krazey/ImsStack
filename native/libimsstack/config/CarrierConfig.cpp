@@ -1146,6 +1146,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX
         "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL[] = KEY_IMS_EMERGENCY_PREFIX
+        "silent_retry_emergency_call_with_delay_of_retry_after_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_PREALERTING_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "prealerting_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[] =
