@@ -19,6 +19,7 @@
 
 class MtsSipFormUtils;
 class MtsSmUtils;
+class MtsGeolocationUtils;
 
 class IMtsDynamicLoader
 {
@@ -42,6 +43,15 @@ public:
      * @return A pointer to the MtsSmUtils object.
      */
     virtual MtsSmUtils* GetMtsSmUtils() const = 0;
+
+    /**
+     * @brief Gets an instance of the MtsGeolocationUtils class.
+     *
+     * This class provides utility functions related to the geolocation.
+     *
+     * @return A pointer to the MtsGeolocationUtils object.
+     */
+    virtual MtsGeolocationUtils* GetMtsGeolocationUtils() const = 0;
 };
 
 #endif

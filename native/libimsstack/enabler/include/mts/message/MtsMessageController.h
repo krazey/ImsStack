@@ -81,7 +81,10 @@ private:
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);
 
     IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objContent,
-            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergencyNumber);
+            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergencyNumber,
+            IN MtsServiceType eServiceType);
+    void AddGeolocationPidf(
+            IN IMessage* piMessage, IN IMS_BOOL bEmergencyNumber, IN MtsServiceType eServiceType);
     IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, OUT AString& strDestination);
     const ByteArray& ProcessReceivedMessage(

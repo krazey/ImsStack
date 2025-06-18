@@ -47,6 +47,7 @@
 #include "message/MtsMessage.h"
 #include "message/MtsMessageController.h"
 #include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsGeolocationUtils.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
 
@@ -565,7 +566,8 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     piMtsMessage->SetSeqId(nSeqId);
     piMtsMessage->SetRetryCount(nRetryCount);
     IMessage* piMessage = piPageMessage->GetNextRequest();
-    if (ConstructSendMessage(piMessage, *pContent, eSmsFormat, bEmergencyNumber) == IMS_FALSE)
+    if (ConstructSendMessage(piMessage, *pContent, eSmsFormat, bEmergencyNumber, eServiceType) ==
+            IMS_FALSE)
     {
         ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         delete piMtsMessage;
@@ -663,7 +665,8 @@ PRIVATE void MtsMessageController::ReportMtSms(
 
 PRIVATE
 IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
-        IN const ByteArray& objContent, IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergencyNumber)
+        IN const ByteArray& objContent, IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergencyNumber,
+        IN MtsServiceType eServiceType)
 {
     if (piMessage == IMS_NULL)
     {
@@ -710,20 +713,28 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
         }
     }
 
-    if (bEmergencyNumber)
-    {
-        ICarrierConfig* piCc =
-                ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId());
-        IMS_BOOL bSupportPidf = piCc->GetBoolean(
-                CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
-
-        if (bSupportPidf)
-        {
-            SetLocationToMessage(piMessage);
-        }
-    }
+    AddGeolocationPidf(piMessage, bEmergencyNumber, eServiceType);
 
     return IMS_TRUE;
+}
+
+PRIVATE
+void MtsMessageController::AddGeolocationPidf(
+        IN IMessage* piMessage, IN IMS_BOOL bEmergencyNumber, IN MtsServiceType eServiceType)
+{
+    IMS_BOOL bWlan = m_objContext.GetService(eServiceType).IsWlan();
+    IMS_SINT32 nGeolocationPidfType =
+            m_objContext.GetDynamicLoader().GetMtsGeolocationUtils()->GetGeolocationPidfAllowedType(
+                    bWlan, bEmergencyNumber);
+    ICarrierConfig* piCc =
+            ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId());
+    ImsVector<IMS_SINT32> objSupportPidf = piCc->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY);
+
+    if (objSupportPidf.Contains(nGeolocationPidfType))
+    {
+        SetLocationToMessage(piMessage);
+    }
 }
 
 PRIVATE
