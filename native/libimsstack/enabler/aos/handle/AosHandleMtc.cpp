@@ -547,28 +547,36 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
     // Manage current blocks
     ReevaluateCapabilities();
 
-    // Manage holding blocks
+    // Remove holding blocks for capable features
     if (IsEpdgEnabled())
     {
         IMS_UINT32 nMobileNetworkType = GetMobileNetworkType();
-
         if (IsSupportedNetworkTypeForCellular(nMobileNetworkType))
         {
-            ProcessBlock(BLOCK_VOLTE_CAPABILITY,
-                    !IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VOICE));
-            ProcessBlock(BLOCK_VILTE_CAPABILITY,
-                    !IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VIDEO));
+            if (IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VOICE))
+            {
+                ProcessBlock(BLOCK_VOLTE_CAPABILITY, IMS_FALSE);
+            }
+
+            if (IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VIDEO))
+            {
+                ProcessBlock(BLOCK_VILTE_CAPABILITY, IMS_FALSE);
+            }
         }
     }
     else
     {
         if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
         {
-            ProcessBlock(BLOCK_VOWIFI_CAPABILITY,
-                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
+            if (IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE))
+            {
+                ProcessBlock(BLOCK_VOWIFI_CAPABILITY, IMS_FALSE);
+            }
 
-            ProcessBlock(BLOCK_VIWIFI_CAPABILITY,
-                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
+            if (IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO))
+            {
+                ProcessBlock(BLOCK_VIWIFI_CAPABILITY, IMS_FALSE);
+            }
         }
     }
 }
