@@ -288,7 +288,12 @@ public:
     {
         m_nAuthChallengeCount = AosRegistration::AUTHENTICATION_RETRY_MAX_COUNT;
     }
+    inline void SetRetryCountForAuthentication(IN IMS_UINT32 nCount)
+    {
+        m_nAuthChallengeCount = nCount;
+    }
     inline IMS_UINT32 GetAuthChallengeCount() { return m_nAuthChallengeCount; }
+    inline void SetAuthFailureRetryCount(IN IMS_UINT32 nCount) { m_nAuthFailureCount = nCount; }
     inline void SetMaxErrorCountForServerSocket()
     {
         m_nErrorCountForServerSocket = AosRegistration::RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT;
@@ -4746,6 +4751,19 @@ TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenMoreAuthChal
 
     EXPECT_FALSE(bResponseToChallenge);
     EXPECT_EQ(m_pAosRegistration->GetAuthChallengeCount(), nCurrentCount + 1);
+}
+
+TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenAuthFailCntIsReached)
+{
+    m_pAosRegistration->SetRetryCountForAuthentication(1);
+    m_pAosRegistration->SetAuthFailureRetryCount(1);
+    ON_CALL(m_objMockIAosNConfiguration, GetAuthFailureRetryMaxCnt()).WillByDefault(Return(2));
+
+    IMS_BOOL bResponseToChallenge = IMS_FALSE;
+    m_pAosRegistration->Registration_AuthenticationChallenged(
+            Credential::TYPE_MD5, bResponseToChallenge);
+
+    EXPECT_FALSE(bResponseToChallenge);
 }
 
 TEST_F(AosRegistrationTest, TriggerRegReInitateIfFailToProcessAuthenticationChallenged)
