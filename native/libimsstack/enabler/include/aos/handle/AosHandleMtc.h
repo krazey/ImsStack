@@ -89,6 +89,7 @@ protected:
     IMS_BOOL IsPlmnBlockCondition() const;
     IMS_BOOL IsVoiceCapableOnWiFiCalling() const;
     IMS_BOOL IsVolteHysTimerStartingCondition() const;
+    IMS_BOOL IsVolteHysTimerBlocked() const;
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
@@ -96,6 +97,8 @@ protected:
     void ProcessVolteHysTimerExpired();
     void ProcessVopsStateChanged(
             IN IMS_UINT32 nState, IN const AString& strPlmn, IN IMS_BOOL bUpdateState = IMS_TRUE);
+    void ClearVolteHysTimerBlocks();
+    void SetVolteHysTimerBlock(IN IMS_UINT32 nBlock);
 
     // Timer
     IMS_BOOL StartVolteHysTimer(IN IMS_UINT32 nDuration);
@@ -115,6 +118,13 @@ protected:
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
+    enum
+    {
+        VOLTE_HYS_TIMER_BLOCK_NONE = 0,
+        VOLTE_HYS_TIMER_BLOCK_VOPS_PLMN_CHANGED = 0x1,
+        VOLTE_HYS_TIMER_BLOCK_DATA_DISCONNECTED = 0x2
+    };
+
 protected:
     IImsRadio* m_piImsRadio;
     ITimer* m_piVolteHysTimer;
@@ -125,6 +135,6 @@ protected:
     IMS_UINT32 m_nVopsState;
     IMS_UINT32 m_nHoldingVopsState;
     AString m_strVopsPlmn;
-    IMS_BOOL m_bVopsPlmnChanged;
+    IMS_UINT32 m_nVolteHysTimerBlocks;
 };
 #endif  // AOS_HANDLE_MTC_H_
