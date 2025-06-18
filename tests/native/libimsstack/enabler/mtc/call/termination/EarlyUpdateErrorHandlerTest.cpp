@@ -230,8 +230,8 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithCombinedAttachReturnsCsR
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
     ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(
-            objPassiveTimer, AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _))
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _, _))
             .Times(1);
 
     EXPECT_EQ(
@@ -252,8 +252,8 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithNotCombinedAttachReturns
     ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
-    EXPECT_CALL(
-            objPassiveTimer, AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _))
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _, _))
             .Times(0);
 
     AString strRetryAfter;

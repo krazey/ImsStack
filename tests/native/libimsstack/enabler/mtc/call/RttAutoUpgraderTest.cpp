@@ -136,7 +136,7 @@ TEST_F(RttAutoUpgraderTest, IsRequiredByCallType)
 TEST_F(RttAutoUpgraderTest,
         StartRttGuardTimerAfterRttEmergencyCallIsTerminatedWithoutBeingNoticedEstablished)
 {
-    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _)).Times(1);
+    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _, _)).Times(1);
     EXPECT_CALL(objPassiveTimer, AddListener(_, _)).Times(1);
 
     pRttAutoUpgrader->OnCallStateChanged(
@@ -145,7 +145,7 @@ TEST_F(RttAutoUpgraderTest,
 
 TEST_F(RttAutoUpgraderTest, StartRttGuardTimerAfterRttEmergencyCallIsTerminated)
 {
-    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _)).Times(1);
+    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _, _)).Times(1);
     EXPECT_CALL(objPassiveTimer, AddListener(_, _)).Times(1);
 
     pRttAutoUpgrader->OnCallStateChanged(
@@ -156,7 +156,7 @@ TEST_F(RttAutoUpgraderTest, StartRttGuardTimerAfterRttEmergencyCallIsTerminated)
 
 TEST_F(RttAutoUpgraderTest, StartRttGuardTimerAgainAtSecondRttEmergencyCallIsTerminated)
 {
-    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _)).Times(2);
+    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _, _)).Times(2);
     EXPECT_CALL(objPassiveTimer, AddListener(_, _)).Times(2);
 
     pRttAutoUpgrader->OnCallStateChanged(
@@ -174,7 +174,7 @@ TEST_F(RttAutoUpgraderTest,
     pRttAutoUpgrader->OnCallStateChanged(
             CALL_KEY, IMtcCall::State::TERMINATING, CallType::RTT, IMS_TRUE, 0);
 
-    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _)).Times(0);
+    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _, _)).Times(0);
     EXPECT_CALL(objPassiveTimer, AddListener(_, _)).Times(0);
 
     pRttAutoUpgrader->OnCallStateChanged(
@@ -196,7 +196,7 @@ TEST_F(RttAutoUpgraderTest, NotStartRttGuardTimerAfterNonEmergencyCallTerminatin
     pRttAutoUpgrader->OnCallStateChanged(
             CALL_KEY, IMtcCall::State::TERMINATING, CallType::RTT, IMS_TRUE, 0);
 
-    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _)).Times(0);
+    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _, _)).Times(0);
     EXPECT_CALL(objPassiveTimer, AddListener(_, _)).Times(0);
 
     pRttAutoUpgrader->OnCallStateChanged(
@@ -211,7 +211,7 @@ TEST_F(RttAutoUpgraderTest, NotStartRttGuardTimerAfterNonRttCallTerminating)
     pRttAutoUpgrader->OnCallStateChanged(
             CALL_KEY, IMtcCall::State::TERMINATING, CallType::RTT, IMS_TRUE, 0);
 
-    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _)).Times(0);
+    EXPECT_CALL(objPassiveTimer, AddTimer(_, _, _, _)).Times(0);
     EXPECT_CALL(objPassiveTimer, AddListener(_, _)).Times(0);
 
     pRttAutoUpgrader->OnCallStateChanged(

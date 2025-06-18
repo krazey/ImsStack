@@ -807,8 +807,8 @@ TEST_F(StartErrorHandlerTest,
 
     MockIPassiveTimerHolder objPassiveTimer;
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
-    EXPECT_CALL(
-            objPassiveTimer, AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _))
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _, _))
             .Times(0);
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(0);
     EXPECT_TRUE(CheckHandleResult(
@@ -843,8 +843,8 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(nullptr));
     MockIPassiveTimerHolder objPassiveTimer;
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
-    EXPECT_CALL(
-            objPassiveTimer, AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _))
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _, _))
             .Times(0);
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(0);
 
@@ -883,7 +883,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
     EXPECT_CALL(objPassiveTimer,
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
-                    _))
+                    _, _))
             .Times(1);
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(0);
@@ -910,7 +910,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
     EXPECT_CALL(objPassiveTimer,
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
-                    _))
+                    _, _))
             .Times(0);
 
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
@@ -937,7 +937,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
     EXPECT_CALL(objPassiveTimer,
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
-                    _))
+                    _, _))
             .Times(1);
 
     EXPECT_TRUE(CheckHandleResult(
@@ -965,7 +965,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
     EXPECT_CALL(objPassiveTimer,
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
-                    _))
+                    _, _))
             .Times(0);
 
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "10000"));

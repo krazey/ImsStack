@@ -118,7 +118,7 @@ PRIVATE void RttAutoUpgrader::StartRttGuardTimer()
     IMS_TRACE_D("StartRttGuardTimer GuardTime[%d]", nRttGuardTime, 0, 0);
 
     m_objContext.GetPassiveTimerHolder().AddTimer(
-            IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD, nRttGuardTime, IMS_TRUE);
+            IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD, nRttGuardTime, IMS_TRUE, IMS_TRUE);
     m_objContext.GetPassiveTimerHolder().AddListener(
             IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD, this);
 }

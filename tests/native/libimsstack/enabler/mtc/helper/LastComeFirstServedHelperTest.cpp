@@ -156,7 +156,8 @@ TEST_F(LastComeFirstServedHelperTest, OnCallReceivedStartsTimerIfNoPreExistingIn
     ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
             .WillByDefault(Return(VALID_TIME));
     EXPECT_CALL(objPassiveTimerHolder,
-            AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, VALID_TIME, IMS_TRUE));
+            AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, VALID_TIME, IMS_TRUE,
+                    IMS_FALSE));
 
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
 }
@@ -168,7 +169,7 @@ TEST_F(LastComeFirstServedHelperTest,
 
     SetUpForNetworkInfo(IMS_FALSE, IMS_TRUE);
     EXPECT_CALL(
-            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _))
+            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _, _))
             .Times(0);
 
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
@@ -227,7 +228,7 @@ TEST_F(LastComeFirstServedHelperTest,
 
     SetUpForNetworkInfo(IMS_FALSE);
     EXPECT_CALL(
-            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _))
+            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _, _))
             .Times(0);
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
 }
@@ -255,7 +256,7 @@ TEST_F(LastComeFirstServedHelperTest,
 
     SetUpForNetworkInfo(IMS_FALSE);
     EXPECT_CALL(
-            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _))
+            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _, _))
             .Times(0);
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
 }
@@ -283,7 +284,7 @@ TEST_F(LastComeFirstServedHelperTest,
 
     SetUpForNetworkInfo(IMS_FALSE);
     EXPECT_CALL(
-            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _))
+            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, _, _, _))
             .Times(0);
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
 }
@@ -312,7 +313,8 @@ TEST_F(LastComeFirstServedHelperTest,
     ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
             .WillByDefault(Return(VALID_TIME));
     EXPECT_CALL(objPassiveTimerHolder,
-            AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, VALID_TIME, IMS_TRUE));
+            AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, VALID_TIME, IMS_TRUE,
+                    IMS_FALSE));
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
 }
 

@@ -67,7 +67,7 @@ TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseInitially)
 
 TEST_F(PassiveTimerHolderTest, AddTimerCreatesTimerAndLetsIsActiveReturnTrue)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
@@ -75,7 +75,7 @@ TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeDoesNothingIfDurationIsNegati
 {
     EXPECT_CALL(objTimer, SetTimer(_, _)).Times(0);
 
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, -1, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, -1, IMS_TRUE, IMS_FALSE);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
@@ -83,9 +83,9 @@ TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeDoesNothingIfNotAllowsReset)
 {
     EXPECT_CALL(objTimer, SetTimer(ANY_TIMER_DURATION, pPassiveTimerHolder)).Times(1);
 
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
@@ -93,15 +93,15 @@ TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeResetsTimerIfAllowsReset)
 {
     EXPECT_CALL(objTimer, SetTimer(ANY_TIMER_DURATION, pPassiveTimerHolder)).Times(2);
 
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
 TEST_F(PassiveTimerHolderTest, RemoveTimerReleasesTimer)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->RemoveTimer(ANY_TIMER_TYPE);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
@@ -114,15 +114,15 @@ TEST_F(PassiveTimerHolderTest, RemoveTimerDoesNothingIfNoMatchingTimer)
 
 TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0, 0);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
 TEST_F(PassiveTimerHolderTest, NotNotifyingListenerAfterAosDisconnected)
 {
-    pPassiveTimerHolder->AddTimer(
-            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
     pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0, 0);
 
@@ -139,14 +139,14 @@ TEST_F(PassiveTimerHolderTest, SetNormalServiceAddsAosStateListener)
 
 TEST_F(PassiveTimerHolderTest, TimerExpiredReleasesTimer)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
 TEST_F(PassiveTimerHolderTest, InvalidTimerExpiredInvokesNothing)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
     MockITimer* pDiffTimer = new MockITimer();
     pPassiveTimerHolder->Timer_TimerExpired(pDiffTimer);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
@@ -156,8 +156,8 @@ TEST_F(PassiveTimerHolderTest, InvalidTimerExpiredInvokesNothing)
 
 TEST_F(PassiveTimerHolderTest, AddListenerAndTimerExpiringInvokesNotifyingListener)
 {
-    pPassiveTimerHolder->AddTimer(
-            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
     EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(1);
     pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
@@ -166,8 +166,8 @@ TEST_F(PassiveTimerHolderTest, AddListenerAndTimerExpiringInvokesNotifyingListen
 TEST_F(PassiveTimerHolderTest,
         AddListenerAndRemoveListenerAndTimerExpiringNotInvokesNotifyingListener)
 {
-    pPassiveTimerHolder->AddTimer(
-            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
     MockIPassiveTimerListener objListener2;
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener2);
@@ -178,8 +178,8 @@ TEST_F(PassiveTimerHolderTest,
     EXPECT_CALL(objListener2, OnPassiveTimerExpired).Times(1);
     pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
 
-    pPassiveTimerHolder->AddTimer(
-            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener2);
     pPassiveTimerHolder->RemoveListener(
@@ -208,16 +208,16 @@ TEST_F(PassiveTimerHolderTest, AddListenerAndRemoveListenerDoesNothingWithNoTime
 TEST_F(PassiveTimerHolderTest,
         AddListenerAndTimerExpiringAndRemoveListenerRightAfterThatIgnoresRemoveListener)
 {
-    pPassiveTimerHolder->AddTimer(
-            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
     MockIPassiveTimerListener objListener2;
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener2);
 
     MockITimer objTimer2;
     objTimerService.SetTimer(&objTimer2);
-    pPassiveTimerHolder->AddTimer(
-            IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
     MockIPassiveTimerListener objListener3;
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, &objListener3);
 
@@ -238,4 +238,51 @@ TEST_F(PassiveTimerHolderTest,
     EXPECT_CALL(objListener3, OnPassiveTimerExpired).Times(0);
 
     pPassiveTimerHolder->Timer_TimerExpired(&objTimer2);
+}
+
+TEST_F(PassiveTimerHolderTest, ReleaseAllTimerInfoByCheckingKeepOnAosDisconnectAfterAosDisconnected)
+{
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER,
+            ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION,
+            IMS_FALSE, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X,
+            ANY_TIMER_DURATION, IMS_FALSE, IMS_FALSE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD,
+            ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+
+    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0, 0);
+    EXPECT_FALSE(
+            pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER));
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING));
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING));
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD));
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD));
+
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER,
+            ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X,
+            ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+    pPassiveTimerHolder->AddTimer(IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD,
+            ANY_TIMER_DURATION, IMS_FALSE, IMS_TRUE);
+
+    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0, 0);
+    EXPECT_TRUE(
+            pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER));
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING));
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING));
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD));
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD));
 }

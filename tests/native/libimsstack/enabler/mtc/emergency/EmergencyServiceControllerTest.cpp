@@ -527,7 +527,7 @@ TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimer)
             .WillByDefault(Return(nTimer));
 
     EXPECT_CALL(objPassiveTimer,
-            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE))
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE, IMS_FALSE))
             .Times(1);
 
     pController->Start();
@@ -543,7 +543,7 @@ TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimerForWifi)
             .WillByDefault(Return(nTimer));
 
     EXPECT_CALL(objPassiveTimer,
-            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE))
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE, IMS_FALSE))
             .Times(1);
 
     pController->Start();
@@ -663,7 +663,7 @@ TEST_F(EmergencyServiceControllerTest,
             1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
 
     EXPECT_CALL(objPassiveTimer,
-            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE));
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE, IMS_FALSE));
 
     pController->OnCallStateChanged(
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);

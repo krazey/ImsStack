@@ -101,7 +101,7 @@ TEST_F(SsacTimerHandlerTest, StartBarringInvokesAddNetworkWatcherListenerAndAddT
 
     EXPECT_CALL(objService, AddNetworkWatcherListener(_)).Times(0);
     EXPECT_CALL(
-            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _))
+            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _, _))
             .Times(1);
     pSsacTimerHandler->StartBarringTimer(CallType::VOIP);
 
@@ -110,7 +110,7 @@ TEST_F(SsacTimerHandlerTest, StartBarringInvokesAddNetworkWatcherListenerAndAddT
 
     EXPECT_CALL(objService, AddNetworkWatcherListener(_)).Times(1);
     EXPECT_CALL(
-            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _))
+            objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _, _))
             .Times(1);
     pSsacTimerHandler->StartBarringTimer(CallType::VOIP);
 }

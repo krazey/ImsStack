@@ -41,13 +41,15 @@ PUBLIC VIRTUAL PassiveTimerHolder::~PassiveTimerHolder()
         m_piService->RemoveAosStateListener(this);
     }
 
-    ReleaseAllTimerInfo();
+    ReleaseAllTimerInfo(IMS_FALSE);
 }
 
 PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eType,
-        IN IMS_SINT32 nTimeInMillis, IN IMS_BOOL bAllowReset /* = IMS_FALSE */)
+        IN IMS_SINT32 nTimeInMillis, IN IMS_BOOL bAllowReset /* = IMS_FALSE */,
+        IN IMS_BOOL bKeepOnAosDisconnect /* = IMS_FALSE */)
 {
-    IMS_TRACE_D("AddTimer Type[%d] Duration[%d]", eType, nTimeInMillis, 0);
+    IMS_TRACE_D("AddTimer Type[%d] Duration[%d], Keep on Aos disconnect[%s]", eType, nTimeInMillis,
+            _TRACE_B_(bKeepOnAosDisconnect));
 
     if (nTimeInMillis < 0)
     {
@@ -66,7 +68,7 @@ PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eT
     }
 
     ITimer* piTimer = TimerService::GetTimerService()->CreateTimer();
-    m_objTimerInfoByType.Add(eType, new TimerInfo(piTimer));
+    m_objTimerInfoByType.Add(eType, new TimerInfo(piTimer, bKeepOnAosDisconnect));
     piTimer->SetTimer(nTimeInMillis, this);
 }
 
@@ -90,12 +92,9 @@ PUBLIC VIRTUAL void PassiveTimerHolder::OnAosStateChanged(IN
         IN MtcAosState eState, IN [[maybe_unused]] IMS_UINT32 eAosReason,
         IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
-    // All timers are released by normal AoS disconnection. If aother policy comes up, This logic
-    // needs to move into each class to handle the policies differently. Or, we can add differencial
-    // logic into this api.
     if (eState == MtcAosState::DISCONNECTED)
     {
-        ReleaseAllTimerInfo();
+        ReleaseAllTimerInfo(IMS_TRUE);
     }
 }
 
@@ -180,14 +179,18 @@ void PassiveTimerHolder::ReleaseTimerInfo(IN IPassiveTimerHolder::Type eType)
 }
 
 PRIVATE
-void PassiveTimerHolder::ReleaseAllTimerInfo()
+void PassiveTimerHolder::ReleaseAllTimerInfo(IN IMS_BOOL bCheckKeepOnAosDisconnected)
 {
-    while (!m_objTimerInfoByType.IsEmpty())
+    for (IMS_SINT32 i = static_cast<IMS_SINT32>(m_objTimerInfoByType.GetSize()) - 1; i >= 0; i--)
     {
-        TimerInfo* pTimerInfo = m_objTimerInfoByType.GetValueAt(0);
+        TimerInfo* pTimerInfo = m_objTimerInfoByType.GetValueAt(i);
+        if (bCheckKeepOnAosDisconnected && pTimerInfo->bKeepOnAosDisconnect)
+        {
+            continue;
+        }
         pTimerInfo->piTimer->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(pTimerInfo->piTimer);
         delete pTimerInfo;
-        m_objTimerInfoByType.RemoveAt(0);
+        m_objTimerInfoByType.RemoveAt(i);
     }
 }

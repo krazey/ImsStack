@@ -47,9 +47,10 @@ public:
      * @param eType The type of the timer.
      * @param nTimeInMillis The duration time of the timer to be active. Do nothing if < 0.
      * @param bAllowReset Reset the active timer if it is true.
+     * @param bKeepOnAosDisconnect Not release the timer when AOS_DISCONNECTED if it is true
      */
     virtual void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_SINT32 nTimeInMillis,
-            IN IMS_BOOL bAllowReset = IMS_FALSE) = 0;
+            IN IMS_BOOL bAllowReset = IMS_FALSE, IN IMS_BOOL bKeepOnAosDisconnect = IMS_FALSE) = 0;
 
     /**
      * @brief Removes a timer with a specific type.

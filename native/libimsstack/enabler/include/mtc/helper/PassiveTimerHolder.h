@@ -39,7 +39,8 @@ public:
     PassiveTimerHolder& operator=(IN const PassiveTimerHolder&) = delete;
 
     void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_SINT32 nTimeInMillis,
-            IN IMS_BOOL bAllowReset = IMS_FALSE) override;
+            IN IMS_BOOL bAllowReset = IMS_FALSE,
+            IN IMS_BOOL bKeepOnAosDisconnect = IMS_FALSE) override;
     void RemoveTimer(IN IPassiveTimerHolder::Type eType) override;
     IMS_BOOL IsActive(IN IPassiveTimerHolder::Type eType) const override;
     void AddListener(IN IPassiveTimerHolder::Type eType,
@@ -58,10 +59,11 @@ private:
     struct TimerInfo
     {
     public:
-        inline explicit TimerInfo(IN ITimer* piTimer) :
+        inline explicit TimerInfo(IN ITimer* piTimer, IN IMS_BOOL bKeep) :
                 piTimer(piTimer),
                 objListeners(ImsList<IPassiveTimerListener*>()),
-                bIsTerminating(IMS_FALSE)
+                bIsTerminating(IMS_FALSE),
+                bKeepOnAosDisconnect(bKeep)
         {
         }
 
@@ -107,11 +109,12 @@ private:
         ITimer* piTimer;
         ImsList<IPassiveTimerListener*> objListeners;
         IMS_BOOL bIsTerminating;
+        IMS_BOOL bKeepOnAosDisconnect;
     };
 
     IMS_SLONG GetIndexOfTimerInfo(IN const ITimer* piTimer) const;
     void ReleaseTimerInfo(IN IPassiveTimerHolder::Type eType);
-    void ReleaseAllTimerInfo();
+    void ReleaseAllTimerInfo(IN IMS_BOOL bCheckKeepOnAosDisconnected);
 
     IMtcService* m_piService;
     ImsMap<IPassiveTimerHolder::Type, TimerInfo*> m_objTimerInfoByType;
