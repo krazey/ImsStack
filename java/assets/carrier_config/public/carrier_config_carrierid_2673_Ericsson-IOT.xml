@@ -78,9 +78,6 @@
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="imsvt.hevc_payload_type_int_array" num="1">
-            <item value="125"/>
-        </int-array>
         <int-array name="imsvt.h264_payload_type_int_array" num="2">
             <item value="119"/>
             <item value="120"/>

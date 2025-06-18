@@ -78,9 +78,6 @@
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="imsvt.hevc_payload_type_int_array" num="1">
-            <item value="115"/>
-        </int-array>
         <int-array name="imsvt.h264_payload_type_int_array" num="3">
             <item value="116"/>
             <item value="117"/>
@@ -127,7 +124,7 @@
         <item value="1"/>
         <item value="2"/>
     </int-array>
-    <int name="imsvt.video_as_bandwidth_kbps_int" value="560"/>
+    <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="5200"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
     <int name="imsvt.video_rtp_inactivity_timer_millis_int" value="30000"/>
