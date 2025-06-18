@@ -79,6 +79,7 @@ public:
             bUseSecurityServerPortInRegContactOfInitReg(IMS_FALSE),
             bUseWfcCountryCodeAvailabilityCheck(IMS_FALSE),
             bVideoOverWifiSupportedWithoutVoice(IMS_FALSE),
+            nAuthFailureRetryMaxCnt(0),
             nContactUserInfoPolicyForNonRegMessage(
                     CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_DEFAULT),
             nEmcPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
@@ -187,6 +188,7 @@ public:
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitReg;
     IMS_BOOL bUseWfcCountryCodeAvailabilityCheck;
     IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
+    IMS_SINT32 nAuthFailureRetryMaxCnt;
     IMS_SINT32 nContactUserInfoPolicyForNonRegMessage;
     IMS_SINT32 nEmcPreferredIpType;
     IMS_SINT32 nEmcRegRetryMaxCnt;

@@ -835,6 +835,44 @@ public:
     virtual IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const = 0;
 
     /**
+     * @brief Indicate retry count to consider as a failure when receiving 401 response to the
+     *        REGISTER message repeatedly and AKA result is successful.
+     *
+     * @return IMS_SINT32 retry count to consider as a auth failure
+     * @see {@code ims.auth_failure_retry_max_cnt_int}
+     */
+    virtual IMS_SINT32 GetAuthFailureRetryMaxCnt() const = 0;
+
+    /**
+     * @brief Indicate which policy is applied to set user info for none register message.
+     *        It will be applied in all the outgoing SIP request and response
+     *        except for register request.
+     *
+     *        Possible values are,
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_DEFAULT
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NONE
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NO_IMSI
+     *
+     * @return IMS_SINT32 Return the policy of setting the user info
+     * @see {@code ims.contact_user_info_policy_for_non_reg_message_int}
+     */
+    virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const = 0;
+
+    /**
+     * @brief Indicate which policy is applied for creating geolocation pidf.
+     *
+     *        Possible values are,
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_POSITION
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITH_POSITION
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_CIVIC
+     *
+     * @return IMS_SINT32 Return the policy of setting the user info
+     * @see {@code ims.geolocation_pidf_forming_policy_int}
+     */
+    virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const = 0;
+
+    /**
      * @brief Get the IMS establishment time for LTE.
      *
      * @return IMS_SINT32 Returns IMS establishment time for LTE.
@@ -1435,35 +1473,6 @@ public:
      * @see {@code ims.reg_pcscf_update_policy_int}
      */
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const = 0;
-
-    /**
-     * @brief Indicate which policy is applied to set user info for none register message.
-     *        It will be applied in all the outgoing SIP request adn response
-     *        except for register request.
-     *
-     *        Possible values are,
-     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_DEFAULT
-     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NONE
-     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NO_IMSI
-     *
-     * @return IMS_SINT32 Return the policy of setting the user info
-     * @see {@code ims.contact_user_info_policy_for_non_reg_message_int}
-     */
-    virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const = 0;
-
-    /**
-     * @brief Indicate which policy is applied for creating geolocation pidf.
-     *
-     *        Possible values are,
-     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_POSITION
-     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITH_POSITION
-     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY
-     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_CIVIC
-     *
-     * @return IMS_SINT32 Return the policy of setting the user info
-     * @see {@code ims.geolocation_pidf_forming_policy_int}
-     */
-    virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const = 0;
 
     /**
      * @brief Get the retry attempt count about pcscfs being discovered in combined network

@@ -748,6 +748,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
 
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_AUTH_FAILURE_RETRY_MAX_CNT_INT, -1))
+            .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT, -1))
             .WillOnce(Return(1));
@@ -1003,6 +1006,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsTestModeEnabled(
             CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION));
 
+    EXPECT_EQ(0, m_pAosNConfiguration->GetAuthFailureRetryMaxCnt());
     EXPECT_EQ(1, m_pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
     EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyPreferredIpType());
     EXPECT_EQ(2, m_pAosNConfiguration->GetEmcRegRetryMaxCnt());

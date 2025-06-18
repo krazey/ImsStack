@@ -118,6 +118,9 @@ public:
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetIsimIndexForImpu, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetAuthFailureRetryMaxCnt, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetGeolocationPidfFormingPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsEstablishmentTimeForLte, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsEstablishmentTimeForNr, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredImsDscp, (), (const, override));
@@ -162,8 +165,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMaxCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetGeolocationPidfFormingPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached, (),
             (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached, (),
