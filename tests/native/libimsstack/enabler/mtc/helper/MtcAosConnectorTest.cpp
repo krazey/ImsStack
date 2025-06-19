@@ -281,12 +281,20 @@ TEST_F(MtcAosConnectorTest, NotifyEpsfbCallStateInvokesImsAosInfoApi)
     pConnector->NotifyEpsfbCallState(nAnyState);
 }
 
-TEST_F(MtcAosConnectorTest, RegisterWithNextPcscfInvokesImsAosInfoApi)
+TEST_F(MtcAosConnectorTest, RegisterWithNextPcscfInvokesImsAosApi)
 {
     IMS_UINT32 nAnyTime = 0;
     EXPECT_CALL(objMockIImsAos, RegisterWithNextPcscf(nAnyTime)).Times(1);
 
     pConnector->RegisterWithNextPcscf(nAnyTime);
+}
+
+TEST_F(MtcAosConnectorTest, ReinitiateRegistrationInvokesImsAosApi)
+{
+    IMS_UINT32 nAnyTime = 0;
+    EXPECT_CALL(objMockIImsAos, ReinitiateRegistration(nAnyTime)).Times(1);
+
+    pConnector->ReinitiateRegistration(nAnyTime);
 }
 
 }  // namespace android

@@ -95,6 +95,10 @@ public:
     void OnTerminatedBeforeCreatingSession(IN CallKey nCallKey) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
+    inline IMS_UINT32 GetRegistrationThrottlingTimeMillis() const override
+    {
+        return m_nRegistrationThrottlingTimeMillis;
+    }
 
     // IInterfaceHolderListener
     void OnSessionInterfaceReleased(IN CallKey nKey) override;
@@ -122,6 +126,8 @@ private:
     IMS_UINT32 ConvertRatType(IN IMS_SINT32 eRatType) const;
     void AddCallKey(IN MtcTrafficInfo& objMtcTrafficInfo, IN CallKey nCallKey);
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
+    void MaybeStoreRegistrationThrottlingTime(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
     MtcTrafficInfo* GetCallTrafficInfo(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
     MtcTrafficInfo* CreateCallTrafficInfo(
@@ -141,6 +147,7 @@ private:
     IImsRadio* m_piImsRadio;
     ImsList<IMtcRadioCheckerListener*> m_objMtcRadioCheckerListeners;
     ImsList<MtcTrafficInfo*> m_objMtcTrafficInfos;
+    IMS_UINT32 m_nRegistrationThrottlingTimeMillis;
 };
 
 class MtcTrafficInfo final : public IImsRadioConnectionListener
