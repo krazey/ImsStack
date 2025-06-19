@@ -272,7 +272,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_FALSE;
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -289,14 +289,14 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
             .Times(1);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergencyNumber, RETRY_COUNT);
 }
 
 TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_FALSE;
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -313,7 +313,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
             .Times(1);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergencyNumber, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
@@ -322,7 +322,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_FALSE;
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -340,7 +340,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
             .Times(1);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergencyNumber, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_ACCESS_DENIED, 400, 2000);
 }
@@ -349,7 +349,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_FALSE;
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -366,7 +366,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)
             .Times(1);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergencyNumber, RETRY_COUNT);
     // Invalid traffic type
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO);
@@ -376,7 +376,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_FALSE;
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -393,12 +393,12 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
             .Times(1);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergencyNumber, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergencyNumber, RETRY_COUNT);
 }
 
 TEST_F(MtsServiceTest, InvalidGuardTimerExpired)
@@ -412,7 +412,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
 {
     AString strTargetAddress = "911";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_TRUE;
+    IMS_BOOL bEmergencyNumber = IMS_TRUE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -431,7 +431,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergencyNumber, RETRY_COUNT);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MO);
@@ -441,7 +441,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowedButDoNotUseEPDN)
 {
     AString strTargetAddress = "911";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_TRUE;
+    IMS_BOOL bEmergencyNumber = IMS_TRUE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -459,7 +459,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowedButDoNotUseEPDN)
     EXPECT_CALL(objMockIImsEmergencyAos, Control(ImsAosControl::REGISTER_START)).Times(0);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergencyNumber, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
@@ -468,7 +468,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
 {
     AString strTargetAddress = "911";
     SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
-    IMS_BOOL bEmergency = IMS_TRUE;
+    IMS_BOOL bEmergencyNumber = IMS_TRUE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -487,13 +487,13 @@ TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergencyNumber, RETRY_COUNT);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MO);
 
     pMtsService->SendMoSms(
-            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergencyNumber, RETRY_COUNT);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
 }
 

@@ -52,7 +52,7 @@ public:
     // IMtsMessageController
     IMS_BOOL HasPendingMoSms() const override;
     void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount) override;
     void ProcessMtSms(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType) override;
     void ClearAllMessages() override;
@@ -74,14 +74,14 @@ private:
 
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType);
     IMS_RESULT SendMtsMessage(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount);
     void ReportMoStatus(
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);
 
     IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objContent,
-            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);
+            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergencyNumber);
     IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, OUT AString& strDestination);
     const ByteArray& ProcessReceivedMessage(

@@ -194,12 +194,12 @@ PUBLIC VIRTUAL IMS_BOOL MtsMessageController::HasPendingMoSms() const
 }
 
 PUBLIC void MtsMessageController::ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
         IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount)
 {
     IMS_TRACE_I("ProcessMoSms", 0, 0, 0);
 
-    if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType,
+    if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, eServiceType,
                 nRetryCount) == IMS_FAILURE)
     {
         delete pContent;
@@ -488,7 +488,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
 
 PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         IN ByteArray* pContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
-        IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount)
+        IN IMS_BOOL bEmergencyNumber, IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount)
 {
     IMS_TRACE_I("SendMtsMessage : eSmsFormat[%s], nSeqId[%d], eServiceType[%s]",
             PS_SmsFormatType(eSmsFormat), nSeqId, PS_ServiceType(eServiceType));
@@ -565,7 +565,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     piMtsMessage->SetSeqId(nSeqId);
     piMtsMessage->SetRetryCount(nRetryCount);
     IMessage* piMessage = piPageMessage->GetNextRequest();
-    if (ConstructSendMessage(piMessage, *pContent, eSmsFormat, bEmergency) == IMS_FALSE)
+    if (ConstructSendMessage(piMessage, *pContent, eSmsFormat, bEmergencyNumber) == IMS_FALSE)
     {
         ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         delete piMtsMessage;
@@ -604,8 +604,8 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     m_pRetryContent = pContent;
     m_objRetryFunction = [=, this]()
     {
-        ProcessMoSms(
-                eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType, nRetryCount);
+        ProcessMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, eServiceType,
+                nRetryCount);
     };
 
     SetMessageInfo(piPageMessage, *pContent, eSmsFormat, strDestination,
@@ -663,7 +663,7 @@ PRIVATE void MtsMessageController::ReportMtSms(
 
 PRIVATE
 IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
-        IN const ByteArray& objContent, IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency)
+        IN const ByteArray& objContent, IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergencyNumber)
 {
     if (piMessage == IMS_NULL)
     {
@@ -710,7 +710,7 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
         }
     }
 
-    if (bEmergency)
+    if (bEmergencyNumber)
     {
         ICarrierConfig* piCc =
                 ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId());

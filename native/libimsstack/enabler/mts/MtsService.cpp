@@ -84,7 +84,7 @@ void MtsService::Init()
 }
 
 PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
         IN IMS_UINT32 nRetryCount)
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
@@ -96,7 +96,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
 
         // Will be reset in Traffic_OnConnectionSetupPrepared upon successful connection setup.
         m_pSmsInfo = std::make_unique<SmsSendRequestInfo>(
-                eSmsFormat, pContent, strAddress, nSeqId, bEmergency, nRetryCount);
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
         return;
     }
 
@@ -104,14 +104,14 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
     {
         case MtsTrafficStartResult::TRAFFIC_READY:
             m_objContext.GetMessageController().ProcessMoSms(eSmsFormat, pContent, strAddress,
-                    nSeqId, bEmergency, m_eServiceType, nRetryCount);
+                    nSeqId, bEmergencyNumber, m_eServiceType, nRetryCount);
             break;
 
         case MtsTrafficStartResult::TRAFFIC_AWAITING_SETUP:
             // Radio connection is not yet ready. Store MO SMS request and this will be reset in
             // Traffic_OnConnectionSetupPrepared upon successful connection setup.
             m_pSmsInfo = std::make_unique<SmsSendRequestInfo>(
-                    eSmsFormat, pContent, strAddress, nSeqId, bEmergency, nRetryCount);
+                    eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
             break;
 
         default:  // TRAFFIC_NOT_ALLOWED, TRAFFIC_NOT_FOUND
@@ -226,7 +226,7 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
         case MtsTrafficStartResult::TRAFFIC_READY:
             m_objContext.GetMessageController().ProcessMoSms(m_pSmsInfo->eSmsFormat,
                     m_pSmsInfo->pContent, m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId,
-                    m_pSmsInfo->bEmergency, m_eServiceType, m_pSmsInfo->nRetryCount);
+                    m_pSmsInfo->bEmergencyNumber, m_eServiceType, m_pSmsInfo->nRetryCount);
             break;
 
         case MtsTrafficStartResult::TRAFFIC_AWAITING_SETUP:
@@ -369,8 +369,8 @@ void MtsService::Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_U
 
     piMoTraffic->StartRadioGuardTimer();
     m_objContext.GetMessageController().ProcessMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->pContent,
-            m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency, m_eServiceType,
-            m_pSmsInfo->nRetryCount);
+            m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergencyNumber,
+            m_eServiceType, m_pSmsInfo->nRetryCount);
     m_pSmsInfo.reset();
 }
 
@@ -544,7 +544,7 @@ IMS_BOOL MtsService::IsEmergencySmsOverImsSupported() const
 PRIVATE
 IMS_BOOL MtsService::IsEmergencySmsReadyToSend() const
 {
-    return (m_pSmsInfo != IMS_NULL && m_pSmsInfo->bEmergency);
+    return (m_pSmsInfo != IMS_NULL && m_pSmsInfo->bEmergencyNumber);
 }
 
 PRIVATE
