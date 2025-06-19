@@ -185,6 +185,11 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
 PUBLIC VIRTUAL void MtcRadioChecker::OnRatChanged(IN ServiceType eServiceType,
         IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
+    if (eRatType == INetworkWatcher::RADIOTECH_TYPE_INVALID)
+    {
+        return;
+    }
+
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
     {
         MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nIndex);

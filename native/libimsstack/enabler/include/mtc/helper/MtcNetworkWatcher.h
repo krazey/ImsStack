@@ -85,7 +85,7 @@ public:
 
     /**
      * @brief Updates internal states when the service is disconnected and notifies listeners
-     *        if there's a change.
+     *        {@code INetworkWatcher::RADIOTECH_TYPE_INVALID} if there's a change.
      */
     virtual void OnDisconnected();
 
