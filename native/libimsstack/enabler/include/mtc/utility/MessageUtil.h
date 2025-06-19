@@ -52,15 +52,13 @@ public:
     static const IMS_CHAR STR_RELEASE_CAUSE_6[];
     static const IMS_CHAR STR_REPLACES[];
     static const IMS_CHAR STR_SERVICE[];
+    static const IMS_CHAR STR_SOS_AIEC[];
     static const IMS_CHAR STR_SOS_AMBULANCE[];
-    static const IMS_CHAR STR_SOS_ANIMAL_CONTROL[];
     static const IMS_CHAR STR_SOS_COUNTRY_SPECIFIC[];
     static const IMS_CHAR STR_SOS_FIRE[];
-    static const IMS_CHAR STR_SOS_GAS[];
     static const IMS_CHAR STR_SOS_MARINE[];
+    static const IMS_CHAR STR_SOS_MIEC[];
     static const IMS_CHAR STR_SOS_MOUNTAIN[];
-    static const IMS_CHAR STR_SOS_PHYSICIAN[];
-    static const IMS_CHAR STR_SOS_POISON[];
     static const IMS_CHAR STR_SOS_POLICE[];
     static const IMS_CHAR STR_SOS[];
     static const IMS_CHAR STR_SRVCC_FEATURE_A[];

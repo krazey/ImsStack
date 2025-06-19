@@ -144,18 +144,18 @@ public class CallReasonInfo implements Parcelable {
     public static final int EXTRA_USER_TERMINATED_ECT = 0;
 
     // CODE_SIP_ALTERNATE_EMERGENCY_CALL
+    // android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories
     public static final int EXTRA_CODE_EMERGENCYSERVICE_INVALID = -1;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_GENERIC = 0;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE = 1;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL = 2;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_POLICE = 1;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE = 2;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_FIRE = 3;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_GAS = 4;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_MARINE = 5;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN = 6;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN = 7;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_POISON = 8;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_POLICE = 9;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC = 10;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_MARINE = 4;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN = 5;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_MIEC = 6;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_AIEC = 7;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC = 8;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED = 9;
 
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_406 = 1;
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_488 = 2;

@@ -607,29 +607,23 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
+    objHeaders.SetAt("<urn:service:sos.police>", 0);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
+            EXTRA_CODE_EMERGENCYSERVICE_POLICE);
+
     objHeaders.SetAt("<urn:service:sos.ambulance>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE);
 
-    objHeaders.SetAt("<urn:service:sos.animal-control>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL);
-
     objHeaders.SetAt("<urn:service:sos.fire>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_FIRE);
-
-    objHeaders.SetAt("<urn:service:sos.gas>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_GAS);
 
     objHeaders.SetAt("<urn:service:sos.marine>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
@@ -643,23 +637,17 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN);
 
-    objHeaders.SetAt("<urn:service:sos.physician>", 0);
+    objHeaders.SetAt("<urn:service:sos.ecall.manual>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN);
+            EXTRA_CODE_EMERGENCYSERVICE_MIEC);
 
-    objHeaders.SetAt("<urn:service:sos.poison>", 0);
+    objHeaders.SetAt("<urn:service:sos.ecall.automatic>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_POISON);
-
-    objHeaders.SetAt("<urn:service:sos.police>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_POLICE);
+            EXTRA_CODE_EMERGENCYSERVICE_AIEC);
 
     objHeaders.SetAt("<urn:service:sos.country-specific>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
@@ -672,6 +660,12 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC);
+
+    objHeaders.SetAt("<urn:service:sos.gas>", 0);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
+            EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED);
 
     objHeaders.SetAt("<urn:nonserviceurn>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
