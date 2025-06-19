@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 #include "ICoreService.h"
 #include "ISdpReader.h"
@@ -37,7 +38,8 @@ MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
         m_pTextNego(std::make_shared<TextNego>(nSlotId)),
         m_pMediaEnvironment(IMS_NULL),
         m_eSessionType(MEDIA_TYPE_INVALID),
-        m_bForking(IMS_FALSE)
+        m_bForking(IMS_FALSE),
+        m_bPreviewMode(IMS_FALSE)
 {
     IMS_TRACE_I("MediaNego(): Slot[%d]", nSlotId, 0, 0);
 }
@@ -102,9 +104,9 @@ IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
     IMS_TRACE_I("FormSdp(): direction audio[%d],  video[%d], text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
 
-    if (m_pMediaEnvironment == IMS_NULL || m_eNegoState == STATE_OFFER_SENT)
+    if (m_pMediaEnvironment == IMS_NULL || m_eNegoState == STATE_OFFER_SENT || m_bPreviewMode)
     {
-        IMS_TRACE_E(0, "FormSdp(): invalid arguments", 0, 0, 0);
+        IMS_TRACE_E(0, "FormSdp(): invalid request, mode[%d]", m_bPreviewMode, 0, 0);
         return IMS_FALSE;
     }
 
@@ -520,8 +522,9 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
 
     // Change the negotiation state
     UpdateNegoState(IMS_FALSE);
+    m_bPreviewMode = pSession->IsSdpOaInPreviewMode();
 
-    IMS_TRACE_D("NegotiateSdp(): state[%d]", GetNegoState(), 0, 0);
+    IMS_TRACE_D("NegotiateSdp(): state[%d], preview[%d]", GetNegoState(), m_bPreviewMode, 0);
     IMS_TRACE_D("NegotiateSdp(): AudioDirection[%d], VideoDirection[%d], TextDirection[%d]",
             nAudioDirection, nVideoDirection, nTextDirection);
     IMS_TRACE_D("NegotiateSdp(): AudioQuality[%d], VideoQuality[%d], TextQuality[%d]",
@@ -710,6 +713,18 @@ IMS_BOOL MediaNego::IsForking()
     return m_bForking;
 }
 
+PUBLIC
+IMS_BOOL MediaNego::IsPreviewMode()
+{
+    return m_bPreviewMode;
+}
+
+PUBLIC
+void MediaNego::SetPreviewMode(IMS_BOOL bIsPreview)
+{
+    m_bPreviewMode = bIsPreview;
+}
+
 PRIVATE
 ImsList<IMedia*> MediaNego::CreateIMediaListFromSession(
         IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType)
@@ -827,7 +842,14 @@ void MediaNego::UpdateNegoState(IMS_BOOL bFormSdp)
     {
         case STATE_IDLE:
         case STATE_NEGOTIATED:
-            m_eNegoState = bFormSdp ? STATE_OFFER_SENT : STATE_OFFER_RECEIVED;
+            if (m_bPreviewMode && !bFormSdp)
+            {
+                m_eNegoState = STATE_NEGOTIATED;
+            }
+            else
+            {
+                m_eNegoState = bFormSdp ? STATE_OFFER_SENT : STATE_OFFER_RECEIVED;
+            }
             break;
         case STATE_OFFER_RECEIVED:
             if (bFormSdp)

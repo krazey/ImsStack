@@ -518,7 +518,6 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
         IN IMS_UINTP nNegoId, OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2)
 {
     IMS_TRACE_I("SetOptions() - OptionType[%d], param1[%d], param2[%d]", type, param1, param2);
-    std::shared_ptr<MediaNego> pMediaNego = IMS_NULL;
 
     switch (type)
     {
@@ -530,6 +529,16 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             }
             break;
         case SET_CONFIRMED_SESSION:
+            if (m_pMediaNegoHandler != IMS_NULL)
+            {
+                std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->FindMediaNego(nNegoId);
+
+                if (pMediaNego != IMS_NULL)
+                {
+                    pMediaNego->SetPreviewMode(IMS_FALSE);
+                }
+            }
+
             if (m_pAudioController != IMS_NULL)
             {
                 m_pAudioController->SetCallSessionState(param1);
@@ -598,7 +607,6 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SendMessage(IN IMS_SINT32 nMsg, IN IMS_UIN
 
 PUBLIC
 VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType)
-
 {
     std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->FindMediaNego(nNegoId);
 
@@ -613,6 +621,22 @@ VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TY
     {
         m_pVideoController->SetMediaPemType(ePemType);
     }
+}
+
+IMS_BOOL MediaSession::IsPreviewMode(IMS_UINTP nNegoId)
+{
+    if (m_pMediaNegoHandler != IMS_NULL)
+    {
+        std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->FindMediaNego(nNegoId);
+
+        if (pMediaNego != IMS_NULL)
+        {
+            return pMediaNego->IsPreviewMode();
+        }
+    }
+
+    IMS_TRACE_E(0, "IsPreviewMode() - invalid negoId[%d]", nNegoId, 0, 0);
+    return IMS_FALSE;
 }
 
 PROTECTED

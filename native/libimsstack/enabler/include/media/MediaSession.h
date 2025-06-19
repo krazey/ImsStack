@@ -110,6 +110,7 @@ public:
     IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus) override;
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) override;
     void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType) override;
+    IMS_BOOL IsPreviewMode(IMS_UINTP nNegoId) override;
 
 protected:
     QosRequestParam* FindQosParam(const QosRequestParam* param);

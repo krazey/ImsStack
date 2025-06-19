@@ -68,5 +68,6 @@ public:
     MOCK_METHOD(IMS_BOOL, SendMessage, (IN IMS_SINT32 nMsg, IN IMS_UINTP pParam), (override));
     MOCK_METHOD(
             void, SetMediaPemType, (IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType), (override));
+    MOCK_METHOD(IMS_BOOL, IsPreviewMode, (IMS_UINTP nNegoId), (override));
 };
 #endif
