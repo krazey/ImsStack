@@ -503,6 +503,15 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         logi("SessionModification-Request(RECV) :: "
                 + ImsCallMediaUtils.toString(requestedProfile));
 
+        // If a remote requests Video direction change except `inactive` when the UE is in
+        // multitasking state(background), the UE should keep `inactive` direction.
+        if ((requestedProfile.getVideoState() != VideoProfile.STATE_PAUSED)
+                && isMultitaskingState()) {
+            requestedProfile = new VideoProfile(VideoProfile.STATE_PAUSED);
+            sendSessionModifyResponse(requestedProfile);
+            return;
+        }
+
         mVideoCallProvider.receiveSessionModifyRequest(requestedProfile);
     }
 

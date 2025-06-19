@@ -344,6 +344,12 @@ public class ImsVideoCallSessionTest {
 
         mVideoSession.receiveSessionModifyRequest(-1, mediaInfo);
         verify(mVideoCallProvider).receiveSessionModifyRequest(any(VideoProfile.class));
+        clearInvocations(mVideoCallProvider);
+
+        mVideoSession.setMultitaskingState(IVideoCallSession.MULTITASKING_ACTIVATED);
+        mVideoSession.receiveSessionModifyRequest(IVideoCallSession.MODIFICATION_VIDEO_PROFILE,
+                mediaInfo);
+        verifyNoMoreInteractions(mVideoCallProvider);
     }
 
     @Test
