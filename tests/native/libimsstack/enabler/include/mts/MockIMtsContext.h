@@ -24,6 +24,7 @@
 class IJniMtsAppThread;
 class IMtsDynamicLoader;
 class IMtsMessageController;
+class IMtsNetworkTracker;
 class IMtsService;
 
 class MockIMtsContext : public IMtsContext
@@ -35,6 +36,7 @@ public:
     MOCK_METHOD(
             const IMtsService&, GetService, (IN MtsServiceType eServiceType), (const, override));
     MOCK_METHOD(IMtsMessageController&, GetMessageController, (), (override));
+    MOCK_METHOD(const IMtsNetworkTracker&, GetNetworkTracker, (), (const, override));
     MOCK_METHOD(const IMtsDynamicLoader&, GetDynamicLoader, (), (const, override));
     MOCK_METHOD(IJniMtsAppThread*, GetJniAppThread, (), (const, override));
 };

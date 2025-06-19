@@ -23,6 +23,7 @@
 class IJniMtsAppThread;
 class IMtsDynamicLoader;
 class IMtsMessageController;
+class IMtsNetworkTracker;
 class IMtsService;
 
 class IMtsContext
@@ -52,6 +53,13 @@ public:
      * @return Reference to the IMtsMessageController instance.
      */
     virtual IMtsMessageController& GetMessageController() = 0;
+
+    /**
+     * @brief Gets the IMtsNetworkTracker instance associated with this context.
+     *
+     * @return Reference to the IMtsNetworkTracker instance.
+     */
+    virtual const IMtsNetworkTracker& GetNetworkTracker() const = 0;
 
     /**
      * @brief Gets the IMtsDynamicLoader instance associated with this context.

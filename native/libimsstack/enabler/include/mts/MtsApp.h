@@ -22,6 +22,7 @@
 #include "IMtsJni.h"
 #include "ImsApp.h"
 #include "MtsDef.h"
+#include "MtsNetworkTracker.h"
 #include "MtsService.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
@@ -29,6 +30,7 @@
 class IJniMtsAppThread;
 class IMtsDynamicLoader;
 class IMtsMessageController;
+class IMtsNetworkTracker;
 class IMtsService;
 
 class MtsApp final : public IMtsApp, public ImsApp, public IMtsContext, public IMtsJni
@@ -50,6 +52,10 @@ public:
     {
         return m_objMtsMessageController;
     }
+    inline const IMtsNetworkTracker& GetNetworkTracker() const override
+    {
+        return m_objMtsNetworkTracker;
+    }
     inline const IMtsDynamicLoader& GetDynamicLoader() const override
     {
         return m_objMtsDynamicLoader;
@@ -70,6 +76,7 @@ private:
     MtsService m_objNormalService;
     MtsService m_objEmergencyService;
     MtsMessageController m_objMtsMessageController;
+    MtsNetworkTracker m_objMtsNetworkTracker;
     MtsDynamicLoader m_objMtsDynamicLoader;
 };
 

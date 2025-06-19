@@ -21,6 +21,7 @@
 #include "IMtsService.h"
 #include "MtsDef.h"
 
+class IImsAos;
 class ICoreService;
 class IMtsServiceState;
 
@@ -30,6 +31,7 @@ public:
     virtual ~MockIMtsService() {}
 
     MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));
+    MOCK_METHOD(IImsAos*, GetIImsAos, (), (const, override));
     MOCK_METHOD(IMtsServiceState*, GetIMtsServiceState, (), (const, override));
     MOCK_METHOD(
             void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (const, override));

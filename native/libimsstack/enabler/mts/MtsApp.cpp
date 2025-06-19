@@ -24,6 +24,7 @@
 #include "JniEnablerConnector.h"
 #include "MtsApp.h"
 #include "MtsService.h"
+#include "MtsNetworkTracker.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "message/MtsMessageController.h"
@@ -40,6 +41,7 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         m_objNormalService(MtsService(*this, MtsServiceType::NORMAL)),
         m_objEmergencyService(MtsService(*this, MtsServiceType::EMERGENCY)),
         m_objMtsMessageController(MtsMessageController(*this)),
+        m_objMtsNetworkTracker(MtsNetworkTracker(*this)),
         m_objMtsDynamicLoader(MtsDynamicLoader(*this))
 {
     IMS_TRACE_I("+MtsApp [slot_%d]", m_nSlotId, 0, 0);

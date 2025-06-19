@@ -32,6 +32,7 @@
 #include "MockIJniMtsAppThread.h"
 #include "MockIMtsContext.h"
 #include "MockIMtsMessageController.h"
+#include "MockIMtsNetworkTracker.h"
 #include "MockIReference.h"
 #include "MtsDef.h"
 #include "MtsService.h"
@@ -39,7 +40,6 @@
 #include "PlatformContext.h"
 #include "TestConfigService.h"
 #include "TestImsRadioService.h"
-#include "TestPhoneInfoService.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -66,24 +66,23 @@ public:
     MockIJniMtsAppThread objJniMtsAppThread;
     MockIMtsContext objContext;
     MockIMtsMessageController objMessageController;
+    MockIMtsNetworkTracker objNetworkTracker;
     MtsService* pMtsService;
 
     TestConfigService objConfigService;
     TestImsRadioService objImsRadioService;
-    TestPhoneInfoService objPhoneInfoService;
 
 protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetMessageController).WillByDefault(ReturnRef(objMessageController));
+        ON_CALL(objContext, GetNetworkTracker).WillByDefault(ReturnRef(objNetworkTracker));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
         ON_CALL(objConfigService.GetMockCarrierConfig(),
                 GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
@@ -573,7 +572,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughHSPA)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
-    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkType())
+    EXPECT_CALL(objNetworkTracker, GetNetworkType())
             .WillRepeatedly(Return(INetworkWatcher::RADIOTECH_TYPE_HSPA));
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
@@ -591,7 +590,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughLTE)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
-    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkType())
+    EXPECT_CALL(objNetworkTracker, GetNetworkType())
             .WillRepeatedly(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
@@ -609,7 +608,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughNR)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
-    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkType())
+    EXPECT_CALL(objNetworkTracker, GetNetworkType())
             .WillRepeatedly(Return(INetworkWatcher::RADIOTECH_TYPE_NR));
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
@@ -627,7 +626,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughUnknownNetworkType)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
-    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkType())
+    EXPECT_CALL(objNetworkTracker, GetNetworkType())
             .WillRepeatedly(Return(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN));
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);

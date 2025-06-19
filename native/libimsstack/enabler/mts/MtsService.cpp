@@ -23,6 +23,7 @@
 #include "IJniEnabler.h"
 #include "IJniMtsAppThread.h"
 #include "IMtsContext.h"
+#include "IMtsNetworkTracker.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipHeader.h"
 #include "ImsAos.h"
@@ -48,7 +49,6 @@ MtsService::MtsService(IN IMtsContext& objContext, IN MtsServiceType eServiceTyp
         m_objContext(objContext),
         m_eServiceType(eServiceType),
         m_piImsAos(IMS_NULL),
-        m_piNetWatcherInfo(IMS_NULL),
         m_strAppId(ImsServiceConfig::GetAppName(ImsAppId::MTS)),
         m_piCoreService(IMS_NULL),
         m_piMtsServiceState(new MtsServiceState(m_objContext.GetSlotId())),
@@ -75,8 +75,6 @@ void MtsService::Init()
     AttachAos();
     AttachCoreService();
     InitMtsServiceState();
-    m_piNetWatcherInfo =
-            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
 
     IMS_UINT32 nTrafficType = GetTrafficTypeOfService();
     m_objMtsTraffics.Append(
@@ -568,7 +566,7 @@ MtsTrafficStartResult MtsService::StartMtTraffic()
                 PS_TrafficType(piMtTraffic->GetTrafficType()),
                 PS_TrafficDirection(piMtTraffic->GetDirection()), 0);
         IMS_UINT32 nAccessNetworkType =
-                ConvertToAccessNetworkType(m_piNetWatcherInfo->GetNetworkType());
+                ConvertToAccessNetworkType(m_objContext.GetNetworkTracker().GetNetworkType());
         m_piImsRadio->StartImsTraffic(
                 nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MT, piMtTraffic);
     }
@@ -601,7 +599,7 @@ MtsTrafficStartResult MtsService::StartMoTrafficIfNeeded()
         IMS_TRACE_I("StartMoTrafficIfNeeded : StartImsTraffic[%s][%s]",
                 PS_TrafficType(nTrafficType), PS_TrafficDirection(nDirection), 0);
         IMS_UINT32 nAccessNetworkType =
-                ConvertToAccessNetworkType(m_piNetWatcherInfo->GetNetworkType());
+                ConvertToAccessNetworkType(m_objContext.GetNetworkTracker().GetNetworkType());
         m_piImsRadio->StartImsTraffic(nTrafficType, nAccessNetworkType, nDirection, piMoTraffic);
         return MtsTrafficStartResult::TRAFFIC_AWAITING_SETUP;
     }

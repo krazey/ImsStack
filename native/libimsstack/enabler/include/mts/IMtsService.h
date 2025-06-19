@@ -21,6 +21,7 @@
 #include "ImsTypeDef.h"
 #include "MtsDef.h"
 
+class IImsAos;
 class ICoreService;
 class IMtsServiceState;
 
@@ -35,6 +36,13 @@ public:
      * @return The ICoreService object.
      */
     virtual ICoreService* GetICoreService() const = 0;
+
+    /**
+     * @brief Gets the IImsAos pointer.
+     *
+     * @return The IImsAos pointer.
+     */
+    virtual IImsAos* GetIImsAos() const = 0;
 
     /**
      * @brief Gets the IMtsServiceState object.
