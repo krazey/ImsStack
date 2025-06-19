@@ -908,6 +908,7 @@ CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& o
                             ConfigVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT));
             break;
         case EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF:
+        case EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS:
             m_bWaitingServiceConnectedForRedial = IMS_TRUE;
             break;
         case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK:

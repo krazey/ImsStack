@@ -44,6 +44,7 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+    <boolean name="imsemergency.silent_redial_with_anonymous_by_network_rejection_bool" value="true"/>
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>

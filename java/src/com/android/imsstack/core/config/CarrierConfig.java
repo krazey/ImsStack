@@ -813,6 +813,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_emergency_urn_int_array";
         public static final String KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL =
                 KEY_PREFIX + "silent_redial_with_voip_by_rtt_rejection_bool";
+        public static final String KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL =
+                KEY_PREFIX + "silent_redial_with_anonymous_by_network_rejection_bool";
         public static final String KEY_NUMBER_NEED_OIP_STRING_ARRAY =
                 KEY_PREFIX + "number_need_oip_string_array";
         public static final String KEY_NUMBER_NEED_OIR_STRING_ARRAY =

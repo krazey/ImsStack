@@ -1290,6 +1290,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_INT_ARR
         KEY_IMS_EMERGENCY_PREFIX "policy_for_emergency_urn_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "silent_redial_with_voip_by_rtt_rejection_bool";
+const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "silent_redial_with_anonymous_by_network_rejection_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[] =
         KEY_IMS_WFC_PREFIX "override_media_inactivity_to_wifi_lost_bool";
 
