@@ -67,11 +67,13 @@
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
     </int-array>
-    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
-        <item value="0"/> <!-- EMERGENCY_LTE -->
-        <item value="0"/> <!-- EMERGENCY_WIFI : GEOLOCATION_PIDF_INFO_LAT_AND_LONG -->
-        <item value="0"/> <!-- NORMAL_LTE -->
-        <item value="0"/> <!-- NORMAL_WIFI -->
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
+        <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
+        <item value="0"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
     </int-array>
     <int name="ims.location_policy_update_type_int" value="1"/> <!-- LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED -->
     <int name="ims.location_acquisition_policy_int" value="86672"/>
