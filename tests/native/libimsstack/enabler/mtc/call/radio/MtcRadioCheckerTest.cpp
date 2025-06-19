@@ -268,6 +268,14 @@ TEST_F(MtcRadioCheckerTest, CheckWithEmergencyInvokesStartImsTrafficWithEmergenc
                     INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
+TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficIfInvalidRat)
+{
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(0);
+
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_INVALID);
+}
+
 TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficBecauseNoMtcTrafficInfo)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(0);
