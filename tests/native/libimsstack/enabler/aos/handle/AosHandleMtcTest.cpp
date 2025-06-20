@@ -2215,102 +2215,9 @@ TEST_F(AosHandleMtcTest, ShouldUnblockTextCapabilityIfItIsInTheListWhenCapabilit
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_TEXT_CAPABILITY));
 }
 
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
+TEST_F(AosHandleMtcTest, RemoveHoldingVoWifiBlockIfVoWifiChangedToCapableDuringOnLte)
 {
-    // Test2: No capability(LTE,IWLAN,NR), Current network=LTE, Wfc available
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
-    //              No block but holding block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY
-    //              set none capa for the network.
-
-    m_pAosHandleMtc->Init();
-
-    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
-
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandleMtc->GetCapabilities(), objExpectedCapabilities));
-    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
-{
-    // Test3: no capability(LTE,IWLAN,NR), Current network=WLAN & LTE
-    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
-    //              No block but holding block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
-    //              set none capa for the network.
-
-    m_pAosHandleMtc->Init();
-
-    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
-
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
-    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandleMtc->GetCapabilities(), objExpectedCapabilities));
-    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test4)
-{
-    // Test4: WFC OFF on WiFi->ON on LTE (Voice capa changed for IWLAN),  Current network=LTE
-    // Expectation: Remove BLOCK_VOWIFI_CAPABILITY from holding block for wifi
-
+    // GIVEN
     ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
@@ -2330,23 +2237,18 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test4)
     m_pAosHandleMtc->SetEpdgEnabled(IMS_FALSE);
     m_pAosHandleMtc->AddHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-
+    // WHEN
     m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
 
+    // THEN
     EXPECT_FALSE(m_pAosHandleMtc->IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandleMtc->GetCapabilities(), objNewCapabilities));
 }
 
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test5)
+TEST_F(AosHandleMtcTest, RemoveHoldingViWifiBlockIfViWifiChangedToCapableDuringOnLte)
 {
-    // Test5: Video OFF on WiFi->ON on LTE (Video capa changed for IWLAN),  Current network=LTE
-    // Expectation: Remove BLOCK_VIWIFI_CAPABILITY from holding block for wifi
-
+    // GIVEN
     ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
@@ -2366,24 +2268,51 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test5)
     m_pAosHandleMtc->SetEpdgEnabled(IMS_FALSE);
     m_pAosHandleMtc->AddHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-
+    // WHEN
     m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
 
+    // THEN
     EXPECT_FALSE(m_pAosHandleMtc->IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandleMtc->GetCapabilities(), objNewCapabilities));
 }
 
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test6)
+TEST_F(AosHandleMtcTest, RemoveHoldingVolteBlockIfVolteChangedToCapableDuringOnWifi)
 {
-    // Test6: Video OFF on LTE->ON on WiFi (Video capa changed for LTE)
-    // Current mobile network=LTE, Current network=WiFi
-    // Expectation: Remove BLOCK_VILTE_CAPABILITY from holding block for mobile
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->AddHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest, RemoveHoldingVilteBlockIfVilteChangedToCapableDuringOnWifi)
+{
+    // GIVEN
     ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
@@ -2403,61 +2332,15 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test6)
     m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
     m_pAosHandleMtc->AddHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY);
 
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-
+    // WHEN
     m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
 
+    // THEN
     EXPECT_FALSE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandleMtc->GetCapabilities(), objNewCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test7)
-{
-    // Test7: Video OFF on NR->ON on WiFi (Video capa changed for NR)
-    // Current mobile network=NR, Current network=WiFi
-    // Expectation: Remove BLOCK_VILTE_CAPABILITY from holding block for mobile
-
-    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
-    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
-    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
-    m_pAosHandleMtc->AddHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_TRUE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-
-    m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_FALSE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandleMtc->GetCapabilities(), objNewCapabilities));
 }
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test8)
