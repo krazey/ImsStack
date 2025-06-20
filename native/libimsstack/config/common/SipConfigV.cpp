@@ -255,6 +255,9 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 
     m_objSession.bSdpNonRprAllowed =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL);
+    m_objSession.bIgnoreSubsequentSdpAnswerInPreviewMode = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL,
+            IMS_TRUE);
 
     m_bRespByAppForCapabilities = IMS_TRUE;
     m_bRespByAppForPageMessage = IMS_TRUE;
