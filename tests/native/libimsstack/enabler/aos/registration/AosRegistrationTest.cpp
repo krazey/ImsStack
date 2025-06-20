@@ -965,12 +965,49 @@ TEST_F(AosRegistrationTest, UpdateRegBindingIfInRegStopStateOnReconfig)
     EXPECT_FALSE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_RECONFIG));
 }
 
+TEST_F(AosRegistrationTest, NotifyImsFeatureChangeIfNormalRegTypeOnReconfig)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosHandle, IsRegBinded()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosHandle, GetRequestType()).WillByDefault(Return(IAosHandle::DETACH));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyImsFeatureChanged(IAosRegistration::IMS_REG_TYPE_NORMAL, _, _));
+
+    m_pAosRegistration->Reconfig();
+}
+
+TEST_F(AosRegistrationTest, ShouldNotNotifyImsFeatureChangeBeforeRegistered)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    ON_CALL(m_objMockIAosHandle, IsRegBinded()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosHandle, GetRequestType()).WillByDefault(Return(IAosHandle::DETACH));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyImsFeatureChanged(_, _, _)).Times(0);
+
+    m_pAosRegistration->Reconfig();
+}
+
+TEST_F(AosRegistrationTest, ShouldNotNotifyImsFeatureChangeIfNotNormalRegTypeOnReconfig)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosHandle, IsRegBinded()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosHandle, GetRequestType()).WillByDefault(Return(IAosHandle::DETACH));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyImsFeatureChanged(_, _, _)).Times(0);
+
+    m_pAosRegistration->Reconfig();
+}
+
 TEST_F(AosRegistrationTest, ReregisterAfterUpdatingRegBindingIfInRegisteredStateOnReconfig)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosHandle, IsRegBinded()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosHandle, GetRequestType()).WillByDefault(Return(IAosHandle::ATTACH));
 
-    EXPECT_CALL(m_objMockIAosHandle, IsRegBinded()).WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosHandle, GetRequestType()).WillRepeatedly(Return(IAosHandle::ATTACH));
     AosFeatureTagList objFeatureTagList;
     objFeatureTagList.AddFeatureTag(FeatureTags::CDMALESS);
     EXPECT_CALL(m_objMockIAosHandle, GetFeatureTagList())
@@ -1078,9 +1115,9 @@ TEST_F(AosRegistrationTest, RecalculateCallerCapabilitiesWhenRequestToRefreshReg
 TEST_F(AosRegistrationTest, CreateRegBindingIfRegIsNotBindedWhenRequestToUpdateRegBinding)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosHandle, IsRegBinded()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosHandle, GetRequestType()).WillByDefault(Return(IAosHandle::ATTACH));
 
-    EXPECT_CALL(m_objMockIAosHandle, IsRegBinded()).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosHandle, GetRequestType()).WillRepeatedly(Return(IAosHandle::ATTACH));
     EXPECT_CALL(m_objMockIRegistration, CreateBinding(_, _));
     EXPECT_CALL(m_objMockIAosHandle, SetRegBinded(IMS_TRUE));
 

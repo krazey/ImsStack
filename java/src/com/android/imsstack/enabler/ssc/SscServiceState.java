@@ -824,8 +824,14 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus){
+        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
             // do nothing
+        }
+
+        @Override
+        public void notifyImsFeatureChanged(
+                int regType, NetworkType networkType, int featureTagBits) {
+            // do nothing.
         }
 
         public boolean getImsRegistrationState() {

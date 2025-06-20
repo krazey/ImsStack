@@ -454,6 +454,153 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
+    public void testNotifyImsFeatureChanged_ShouldNotifyRegisteredCapabilityChangesOnly() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        int updatedFeatures = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO);
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, updatedFeatures);
+
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
+        verify(mMockFeatureCapabilityListener, times(2))
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyImsFeatureChanged_NotifyDisabledCapability() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        int updatedFeatures = IAosRegistrationListener.FeatureTagMask.NONE;
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, updatedFeatures);
+
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE);
+        verify(mMockFeatureCapabilityListener, times(2))
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyImsFeatureChanged_NotifyEnabledCapability() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP
+                | IAosRegistrationListener.FeatureTagMask.USSI);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        int updatedFeatures = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, updatedFeatures);
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+        MmTelFeature.MmTelCapabilities expectedCapabilities =
+                new MmTelFeature.MmTelCapabilities(capabilities);
+        verify(mMockFeatureCapabilityListener, times(2))
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyImsFeatureChanged_ShouldNotNotifyIfNotNormalRegType() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        int updatedFeatures = IAosRegistrationListener.FeatureTagMask.MMTEL;
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.EMERGENCY,
+                IAosRegistrationListener.NetworkType.LTE, updatedFeatures);
+
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
+        verify(mMockFeatureCapabilityListener, never())
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyImsFeatureChanged_ShouldNotNotifyIfNotRegisteredNetworkType() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        int updatedFeatures = IAosRegistrationListener.FeatureTagMask.MMTEL;
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.NR, updatedFeatures);
+
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
+        verify(mMockFeatureCapabilityListener, never())
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyImsFeatureChanged_ShouldNotNotifyIfNotChanged() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features);
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+        MmTelFeature.MmTelCapabilities expectedCapabilities =
+                new MmTelFeature.MmTelCapabilities(capabilities);
+        // onFeatureCapabilityChanged is invoked only once when it registered first time.
+        verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyImsFeatureChanged_ShouldNotNotifyIfNotRegisteredFeatureChange() {
+        // update registered features
+        int features = IAosRegistrationListener.FeatureTagMask.USSI;
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify IMS feature changes
+        int updatedFeatures = IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.USSI;
+        mAosRegListener.notifyImsFeatureChanged(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, updatedFeatures);
+
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
+        verify(mMockFeatureCapabilityListener, never())
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
     public void testchangeCapabilities_null() {
         assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
 

@@ -1968,6 +1968,17 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateRegBinding()
 
     if (bChanged)
     {
+        if (IsRegistered())
+        {
+            IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+            IMS_SINT32 nImsRegType = GetImsRegType();
+            if (piService != IMS_NULL && nImsRegType == IAosRegistration::IMS_REG_TYPE_NORMAL)
+            {
+                piService->NotifyImsFeatureChanged(
+                        nImsRegType, GetNetworkTypeForImsRegState(), GetRegFeatures());
+            }
+        }
+
         UpdateFinalAddFeatureTag();
         m_piRegContact->RecalculateCallerCapabilities();
     }

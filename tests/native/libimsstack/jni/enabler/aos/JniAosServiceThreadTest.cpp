@@ -147,6 +147,16 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegEventState)
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyImsFeatureChanged)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyImsFeatureChanged(0, 0, 0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
+}
+
 TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenRequestPhoneNumberRetry)
 {
     // GIVEN

@@ -1077,6 +1077,12 @@ TEST_F(AosServiceTest, NotifyRegEventState)
     EXPECT_TRUE(m_pAosService->NotifyRegEventState(200, objImpus));
 }
 
+TEST_F(AosServiceTest, NotifyImsFeatureChanged)
+{
+    EXPECT_TRUE(m_pAosService->NotifyImsFeatureChanged(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1));
+}
+
 TEST_F(AosServiceTest, RequestPhoneNumberRetry)
 {
     EXPECT_TRUE(m_pAosService->RequestPhoneNumberRetry(AosPhoneNumberRetryCommand::INITIAL));

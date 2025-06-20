@@ -1094,6 +1094,19 @@ public class SscServiceStateTest {
     }
 
     @Test
+    public void testRegistrationListener_notifyImsFeatureChanged() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
+        when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
+        createAndInitSscServiceState();
+
+        mSscServiceState.mRegiStateListener.notifyImsFeatureChanged(0, NetworkType.LTE, 0);
+        processAllMessages();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+    }
+
+    @Test
     public void testMobileDataStateListener_onUserMobileDataStateChangedToOffFromOn() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL))

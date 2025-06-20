@@ -1191,6 +1191,12 @@ public class AosDebug implements IAosDebug {
         public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
             // Do nothing.
         }
+
+        @Override
+        public void notifyImsFeatureChanged(
+                int regType, NetworkType networkType, int featureTagBits) {
+            // Do nothing.
+        }
     }
 
     @VisibleForTesting

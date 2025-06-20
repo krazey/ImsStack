@@ -791,6 +791,20 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegEventState(
     return IMS_TRUE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyImsFeatureChanged(
+        IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyImsFeatureChanged", 0, 0, 0);
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
+    {
+        piJniThread->NotifyImsFeatureChanged(
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits);
+    }
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand)
 {
     A_IMS_TRACE_I(AOSTAG, "RequestPhoneNumberRetry", 0, 0, 0);

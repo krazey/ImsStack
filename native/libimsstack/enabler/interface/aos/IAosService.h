@@ -215,6 +215,19 @@ public:
             IN const ImsList<AString>& objImpus = ImsList<AString>()) = 0;
 
     /**
+     * Notify the application that the supported IMS feature is changed.
+     *
+     * @param nRegType Type of the registration.
+     * @param eNetworkType The radio access technology.
+     * @param nFeatureTagBits Type of bits an integer.
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
+     * @see class AosNetworkType
+     * @see class ImsAosFeature
+     */
+    virtual IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits) = 0;
+
+    /**
      * Request the application to phone number retry.
      * AosService(Native) -> AosService(Java)
      *

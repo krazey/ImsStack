@@ -98,6 +98,8 @@ public:
     IMS_BOOL NotifyAosIsimState(IN AosIsimState eState) override;
     IMS_BOOL NotifyRegEventState(IN IMS_UINT32 nStatusCode,
             IN const ImsList<AString>& objImpus = ImsList<AString>()) override;
+    IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits) override;
     IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
     ImsMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
