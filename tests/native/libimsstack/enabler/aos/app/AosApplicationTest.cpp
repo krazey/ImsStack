@@ -2637,6 +2637,31 @@ TEST_F(AosApplicationTest, RequestUpdateStopRetryTimerWhenImsEstTimerIsExpired)
     m_pAosApplication->ProcessImsEstablishmentTimerExpired();
 }
 
+TEST_F(AosApplicationTest,
+        NotifyTempPlmnBlockAndDisconnectPdnWithDelayWhenProcessImsEstTimerExpired)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_LTE);
+    ON_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_TRAFFIC_PRIORITY_BLOCK, _, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(AosProperty::AOS_FALSE), Return(0)));
+    ON_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_REG_FAILURE_COUNT, _, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(0), Return(0)));
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetReleasePdnDelaySecAfterTempPlmnBlock())
+            .WillByDefault(Return(5));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
+    EXPECT_CALL(m_objMockAosConnector, Stop(5));
+
+    m_pAosApplication->ProcessImsEstablishmentTimerExpired();
+}
+
 TEST_F(AosApplicationTest, RegTerminating)
 {
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
@@ -2752,25 +2777,42 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeR
 }
 
 TEST_F(AosApplicationTest,
-        ProcessPdnDisconnectShouldNotifyDeregisteredWithPlmnBlockWithTimeOutWhenNr)
+        NotifyTempPlmnBlockAndDisconnectPdnWithDelayWhenProcessPdnDisconnectWithNr)
 {
-    // GIVEN
     m_pAosApplication->SetNetTrackerListener();
     m_pAosApplication->SetRat(NW_REPORT_RADIO_NR);
-
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(
                     Return(CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+    ON_CALL(m_objMockIAosNConfiguration, GetReleasePdnDelaySecAfterTempPlmnBlock())
+            .WillByDefault(Return(5));
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
-                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(1);
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
+    EXPECT_CALL(m_objMockAosConnector, Stop(5));
 
-    // WHEN
     m_pAosApplication->ProcessPdnDisconnect();
+}
 
-    // THEN : GIVEN conditions should be met.
+TEST_F(AosApplicationTest,
+        NotifyTempPlmnBlockAndDisconnectPdnWithDelayWhenProcessPdnDisconnectWithEpsOnly)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_LTE);
+    m_pAosApplication->SetLteAttachState(IMS_LTE_INFO_EPS_ONLY_ATTACHED);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(
+                    Return(CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+    ON_CALL(m_objMockIAosNConfiguration, GetReleasePdnDelaySecAfterTempPlmnBlock())
+            .WillByDefault(Return(0));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
+    EXPECT_CALL(m_objMockAosConnector, Stop(0));
+
+    m_pAosApplication->ProcessPdnDisconnect();
 }
 
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAttach)

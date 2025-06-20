@@ -2443,7 +2443,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     if (bPlmnBlockByConfig)
     {
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
-        m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+        m_pConnector->Stop(GET_N_CONFIG(m_nSlotId)->GetReleasePdnDelaySecAfterTempPlmnBlock());
     }
     else
     {
@@ -2650,7 +2650,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
         return;
     }
 
-    m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+    m_pConnector->Stop(GET_N_CONFIG(m_nSlotId)->GetReleasePdnDelaySecAfterTempPlmnBlock());
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRatBlockTimerExpired()
