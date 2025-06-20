@@ -154,11 +154,13 @@
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
     </int-array>
-    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
-        <item value="1"/> <!-- EMERGENCY_LTE-->
-        <item value="1"/> <!-- EMERGENCY_WIFI -->
-        <item value="0"/> <!-- NORMAL_LTE -->
-        <item value="0"/> <!-- NORMAL_WIFI -->
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
+        <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
+        <item value="1"/> <!-- EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
     </int-array>
     <string-array name="imsvoice.caller_id_service_codes_for_restriction_string_array" num="2">
         <item value="#31#"/>

@@ -129,6 +129,10 @@ public class LocationAgent implements LocationInterface {
     private static final float HORIZONTAL_SCALE_FACTOR = 1.42155f;
     private static final float VERTICAL_SCALE_FACTOR = 1.645f;
 
+    // Expanded GeolocationPidfAllowedType
+    private static final int GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI = 5;
+    private static final int GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR = 6;
+
     private LocationApi.Listener mLocationListener = new LocationApi.Listener () {
         public void onLocationChanged(Location location) {
             ImsLog.d(this, mSlotId, "onLocationChanged: " + LocationApi.getProvider(location));
@@ -1723,11 +1727,13 @@ public class LocationAgent implements LocationInterface {
         }
 
         for (int type : pidfInviteSupportTypes) {
-            if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+            if ((type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+                    || type == GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI)
                     && isConfigForIdentifiedCarrier) {
                 mPidfLoRequiredOnEmergencyCall = true;
                 mPidfLoRequiredOnVoWifiCall = true;
-            } else if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR) {
+            } else if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR
+                    || type == GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR) {
                 mPidfLoRequiredOnEmergencyCall = true;
             } else if (type == GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI
                     && isConfigForIdentifiedCarrier) {

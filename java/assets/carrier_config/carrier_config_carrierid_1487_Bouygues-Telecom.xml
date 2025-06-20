@@ -19,6 +19,17 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="3"/> <!-- USE_GENERIC_FOR_MULTIPLE_CATEGORIES  -->
     </int-array>
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
+        <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
+        <item value="1"/> <!-- EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
+    </int-array>
 
     <!-- Aos -->
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>

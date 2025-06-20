@@ -38,9 +38,14 @@ public:
     MtcConfigurationResolver& operator=(IN const MtcConfigurationResolver&) = delete;
 
     inline static IMS_SINT32 GetGeolocationLevel(IN const MtcConfigurationProxy& objProxy,
-            IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi, IN const AString& strRemoteNumber)
+            IN IMS_SINT32 eGeolocationPidfAllowedType, IN const AString& strRemoteNumber)
     {
-        if (!bEmergency && bWifi &&
+        // CDR-WiFi-1320 / CDR-WiFi-1460
+        if ((eGeolocationPidfAllowedType ==
+                            CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI ||
+                    eGeolocationPidfAllowedType ==
+                            CarrierConfig::Ims::
+                                    GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI) &&
                 objProxy.Contains(
                         ConfigWfc::KEY_PIDF_SHORT_CODE_STRING_ARRAY, strRemoteNumber.GetStr()))
         {
@@ -48,7 +53,7 @@ public:
         }
         return objProxy.GetIntFromArray(
                 ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY,
-                (bEmergency ? 0 : 2) + (bWifi ? 1 : 0));
+                eGeolocationPidfAllowedType - 1);
     }
 
     inline static AString GetTerminateReasonHeader(

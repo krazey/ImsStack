@@ -55,29 +55,19 @@ LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_RENDER[] = "render";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_HANDLING_OPTIONAL[] = "handling=optional";
 
-LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi)
+LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN EmergencyType eEmergencyType, IN IMS_BOOL bWifi)
 {
-    if (bWifi)
+    switch (eEmergencyType)
     {
-        if (bEmergency)
-        {
-            return ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI;
-        }
-        else
-        {
-            return ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI;
-        }
-    }
-    else
-    {
-        if (bEmergency)
-        {
-            return ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
-        }
-        else
-        {
-            return ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
-        }
+        case EmergencyType::EMERGENCY_ROUTING:
+            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+                         : ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
+        case EmergencyType::NORMAL_ROUTING:
+            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI
+                         : ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR;
+        default:
+            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI
+                         : ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
     }
 }
 
@@ -267,7 +257,8 @@ PRIVATE
 IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
     return MtcConfigurationResolver::GetGeolocationLevel(m_objContext.GetConfigurationProxy(),
-            m_objContext.GetCallInfo().IsEmergency(), m_objContext.GetService().IsWlanIpCanType(),
+            GetGeolocationPidfAllowedType(m_objContext.GetCallInfo().eEmergencyType,
+                    m_objContext.GetService().IsWlanIpCanType()),
             m_objContext.GetParticipantInfo().GetRemoteNumber());
 }
 
@@ -342,7 +333,7 @@ PRIVATE
 IMS_BOOL MtcLocationObject::IsGeolocationBlockedByConfig(IN IMtcCallContext& objContext)
 {
     const IMS_SINT32 nType = GetGeolocationPidfAllowedType(
-            objContext.GetCallInfo().IsEmergency(), objContext.GetService().IsWlanIpCanType());
+            objContext.GetCallInfo().eEmergencyType, objContext.GetService().IsWlanIpCanType());
     if (!objContext.GetConfigurationProxy().Contains(
                 ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY, nType))
     {

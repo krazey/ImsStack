@@ -31,10 +31,11 @@
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
     <int name="ims.request_uri_type_int" value="1"/>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="3">
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="4">
         <item value="1"/>
         <item value="2"/>
         <item value="4"/>
+        <item value="5"/>
     </int-array>
     <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
     <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>

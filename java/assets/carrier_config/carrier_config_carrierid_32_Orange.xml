@@ -69,6 +69,18 @@
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
     <boolean name="imsvoice.csfb_when_all_pcscf_unavailable_bool" value="true"/>
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
+        <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
+        <item value="1"/> <!-- EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
+    </int-array>
+
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
     <int name="sms_retry_policy_for_expiry_timer_f_int" value="4"/>
