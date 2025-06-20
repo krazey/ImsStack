@@ -1285,6 +1285,18 @@ public:
     virtual IMS_SINT32 GetRegRetrySip305CodePolicy() const = 0;
 
     /**
+     * @brief Indicate the delay time to release pdn after temporary plmn block.
+     *
+     *        If the value is 0, release ims pdn immediately after temporary plmn block.
+     *        If the value is greater than 0, release ims pdn in the value(delay time) after
+     *        temporary plmn block.
+     *
+     * @return Return the delay time (Seconds)
+     * @see {@code ims.release_pdn_delay_sec_after_temp_plmn_block_int}
+     */
+    virtual IMS_SINT32 GetReleasePdnDelaySecAfterTempPlmnBlock() const = 0;
+
+    /**
      * @brief Indicate the SIP 305 response policy for reregistration
      *
      *        Possible values are,

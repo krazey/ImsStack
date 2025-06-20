@@ -812,6 +812,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT, -1))
             .WillOnce(Return(0));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Ims::KEY_RELEASE_PDN_DELAY_SEC_AFTER_TEMP_PLMN_BLOCK_INT, -1))
+            .WillOnce(Return(5));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REREG_RETRY_305_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT));
     EXPECT_CALL(objCarrierConfig,
@@ -1037,6 +1040,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());
 
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegTimerForEmcCall());
+    EXPECT_EQ(5, m_pAosNConfiguration->GetReleasePdnDelaySecAfterTempPlmnBlock());
     EXPECT_EQ(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT,
             m_pAosNConfiguration->GetReregRetrySip305CodePolicy());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,

@@ -104,6 +104,7 @@ public:
             nRegRetryDefaultPolicy(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC),
             nRegRetryTimerFPolicy(CarrierConfig::Ims::TIMER_F_POLICY_NONE),
             nRegTimerForEmcCallMillis(0),
+            nReleasePdnDelaySecAfterTempPlmnBlock(5),
             nReregRetry305Policy(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT),
             nRoamingPreferredEmcReg(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
@@ -212,6 +213,7 @@ public:
     IMS_SINT32 nRegRetryDefaultPolicy;
     IMS_SINT32 nRegRetryTimerFPolicy;
     IMS_SINT32 nRegTimerForEmcCallMillis;
+    IMS_SINT32 nReleasePdnDelaySecAfterTempPlmnBlock;
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nRoamingPreferredEmcReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;

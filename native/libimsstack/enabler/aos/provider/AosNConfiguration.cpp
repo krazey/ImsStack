@@ -737,6 +737,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetrySip305CodePolicy() const
     return m_objAsset.nRegRetry305Policy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReleasePdnDelaySecAfterTempPlmnBlock() const
+{
+    return m_objAsset.nReleasePdnDelaySecAfterTempPlmnBlock;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregRetrySip305CodePolicy() const
 {
     return m_objAsset.nReregRetry305Policy;
@@ -1629,6 +1634,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_TIMER_F_POLICY_INT);
     m_objAsset.nRegTimerForEmcCallMillis =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT);
+    m_objAsset.nReleasePdnDelaySecAfterTempPlmnBlock =
+            piCc->GetInt(CarrierConfig::Ims::KEY_RELEASE_PDN_DELAY_SEC_AFTER_TEMP_PLMN_BLOCK_INT);
     m_objAsset.nReregRetry305Policy =
             piCc->GetInt(CarrierConfig::Ims::KEY_REREG_RETRY_305_POLICY_INT);
     m_objAsset.nRoamingPreferredEmcReg =
