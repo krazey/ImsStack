@@ -202,7 +202,6 @@ protected:
 
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
-    static IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage);
     IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
 
     // TODO: move these into MtcTimerWrapper? Is it used by All MTC classes?

@@ -111,6 +111,7 @@ public:
     void SetSrvccState(IN SrvccState eState) override;
     IMS_BOOL IsOnHold() override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
+    virtual IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
 
 private:
     void UpdateLocalTone(IN ISession* piSession, IN const IMessage* piMessage);
@@ -118,7 +119,7 @@ private:
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
 
     IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN const IMessage* piMessage);
-    IMS_UINTP GetMediaNegoId(IN const ISession* piSession);
+    IMS_UINTP GetMediaNegoId(IN const ISession* piSession) const;
     IMS_UINT32 GetWaitingNetworkToneDuration(IN ISession* piSession, IN const IMessage* piMessage);
 
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);

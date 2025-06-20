@@ -1024,6 +1024,27 @@ TEST_F(OutgoingStateTest, SessionStartedRemovesInactiveSessions)
     EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionStarted(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionStartedTerminatesCallIfPreviewMode)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ON_CALL(objMediaManager, IsPreviewMode(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInviteMethod));
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_RESPONSE));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStarted(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionStartFailedKeepsOutgoingStateIfSrvccStartedAndAosDisconnected)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
@@ -2161,6 +2182,25 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
+TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesNegotiateSdpForPreviewMode)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
+    EXPECT_CALL(objMediaManager, NegotiateSdp(&objSession));
+
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0));
+}
+
 TEST_F(OutgoingStateTest, SessionRprReceivedStopsTimers)
 {
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
@@ -2625,6 +2665,28 @@ TEST_F(OutgoingStateTest, SessionRprReceivedWithNegoFailureTerminatesSessionAndK
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(1);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession2))).Times(0);
 
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesNegotiateSdpWhenPreviewMode)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInviteMethod));
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_RESPONSE));
+    ON_CALL(objMediaManager, IsPreviewMode(_)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMediaManager, NegotiateSdp(&objSession));
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }
 

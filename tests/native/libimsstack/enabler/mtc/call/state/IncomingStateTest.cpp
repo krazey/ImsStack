@@ -110,15 +110,6 @@ protected:
         delete pEpsFbTrigger;
     }
 
-    void MakeIsPreviewOfAnswerReturnsTrue(IN const SipMethod& objMethod)
-    {
-        ON_CALL(objISession, IsSdpNegotiationAllowedForNonRpr).WillByDefault(Return(IMS_FALSE));
-        ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
-        ON_CALL(objIMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
-        ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objISipMessage));
-        ON_CALL(objISipMessage, IsMessageRpr).WillByDefault(Return(IMS_FALSE));
-    }
-
     void SetParamsForIncomingCallReceived()
     {
         ON_CALL(objCallContext, GetCallKey).WillByDefault(Return(1));
@@ -279,7 +270,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
 
     const SipMethod objMethod(SipMethod::INVITE);
-    MakeIsPreviewOfAnswerReturnsTrue(objMethod);
+
     ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))

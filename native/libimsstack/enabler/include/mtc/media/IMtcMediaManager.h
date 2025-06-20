@@ -275,6 +275,13 @@ public:
      * @return Media Types which are supported.
      */
     virtual IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Checks if the SDP negotiation is done in preview mode
+     * @param piSession ISession instance to get media profile id.
+     * @return IMS_TRUE if the SDP negotiation is done in preview mode, otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL IsPreviewMode(IN ISession* piSession) const = 0;
 };
 
 #endif
