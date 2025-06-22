@@ -288,10 +288,14 @@ PROTECTED VIRTUAL void MediaSession::RequestQosParam(
         if (pQosParams->m_bResult)  // The qos already acquired
         {
             IMS_TRACE_D("RequestQosParam() - Qos already acquired", 0, 0, 0);
-            for (const auto& negoId : pQosParams->m_objListNegoId)
+            MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+            if (pMediaManager != nullptr)
             {
-                m_pClientListener->MediaSession_NotifyQos(
-                        negoId, pQosParams->m_bResult, pQosParams->m_eMediaType);
+                ImsMediaMsgQosParam* pQosInfoParam = new ImsMediaMsgQosParam(
+                        pQosParams->m_eMediaType, pQosParams->m_objIpAddress, pQosParams->m_nPort);
+                pQosInfoParam->m_bResult = pQosParams->m_bResult;
+                pMediaManager->PostMessage(
+                        IJniMedia::NOTIFY_QOS_INFO, m_nCallKey, (IMS_UINTP)pQosInfoParam);
             }
         }
         else  // request again

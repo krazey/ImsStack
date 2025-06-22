@@ -34,8 +34,6 @@ public:
 protected:
     inline IImsActivityController* GetController() override { return IMS_NULL; }
     inline virtual IMS_BOOL OnMessage(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
-
-private:
     // ImsActivity
     inline IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override { return OnMessage(objMsg); }
 };
