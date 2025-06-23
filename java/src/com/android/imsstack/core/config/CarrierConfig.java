@@ -901,8 +901,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sms_reg_policy_for_503_response_int";
         public static final String KEY_SMS_REG_POLICY_FOR_504_RESPONSE_INT =
                 KEY_PREFIX + "sms_reg_policy_for_504_response_int";
-        public static final String KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL =
-                KEY_PREFIX + "sms_geolocation_pidf_for_emergency_bool";
+        public static final String KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY =
+                KEY_PREFIX + "sms_geolocation_pidf_in_sip_message_support_int_array";
         public static final String KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT =
                 KEY_PREFIX + "sms_retry_after_max_time_sec_int";
         public static final String KEY_SMS_RETRY_AFTER_MAX_COUNT_INT =

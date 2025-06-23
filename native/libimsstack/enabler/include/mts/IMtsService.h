@@ -84,6 +84,14 @@ public:
     virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN IMS_UINT32 nRetryCount) = 0;
+
+    /**
+     * @brief Checks if the currently used access network is WLAN.
+     *
+     * @return {@code IMS_TRUE} if the access network is WLAN,
+     *                   {@code IMS_FALSE} otherwise.
+     */
+    virtual IMS_BOOL IsWlan() const = 0;
 };
 
 #endif

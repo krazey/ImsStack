@@ -421,6 +421,21 @@ void MtsService::InitMtsServiceState()
     m_piMtsServiceState->Init(m_piImsAos);
 }
 
+PUBLIC
+IMS_BOOL MtsService::IsWlan() const
+{
+    IMS_UINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
+    if (m_piImsAos != IMS_NULL)
+    {
+        nReportedIpcan = m_piImsAos->GetAosInfo()->GetIpcanType();
+    }
+    else
+    {
+        IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
+    }
+    return nReportedIpcan == IIpcan::CATEGORY_WLAN;
+}
+
 PRIVATE
 void MtsService::AttachAos()
 {

@@ -1417,8 +1417,8 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT[] 
         KEY_IMS_SMS_PREFIX "sms_reg_policy_for_503_response_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_504_RESPONSE_INT[] =
         KEY_IMS_SMS_PREFIX "sms_reg_policy_for_504_response_int";
-const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL[] =
-        KEY_IMS_SMS_PREFIX "sms_geolocation_pidf_for_emergency_bool";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY[] =
+        KEY_IMS_SMS_PREFIX "sms_geolocation_pidf_in_sip_message_support_int_array";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT[] =
         KEY_IMS_SMS_PREFIX "sms_retry_after_max_time_sec_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT[] =
