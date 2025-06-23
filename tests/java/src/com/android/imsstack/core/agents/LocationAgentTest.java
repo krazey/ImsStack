@@ -168,12 +168,31 @@ public class LocationAgentTest {
     public void testRequestLocationUpdate() {
         LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
                 SystemServiceProxy.LocationManagerProxy.class);
+        when(lmp.isProviderEnabled(any(String.class))).thenReturn(true);
+
+        int waitTimeMs = 2000; // 2s
+        int requestId = mLocationAgent.requestLocationUpdate(waitTimeMs);
+
+        ArgumentCaptor<CancellationSignal> cancellationSignalCaptor =
+                ArgumentCaptor.forClass(CancellationSignal.class);
+        verify(lmp).getCurrentLocation(any(String.class), any(LocationRequest.class),
+                cancellationSignalCaptor.capture(), any(Executor.class), any(Consumer.class));
+        assertFalse(cancellationSignalCaptor.getValue().isCanceled());
+        assertNotEquals(0, requestId);
+
+        mLocationAgent.cancelLocationUpdate(requestId);
+
+        assertTrue(cancellationSignalCaptor.getValue().isCanceled());
+    }
+
+    @Test
+    @SmallTest
+    public void testRequestLocationUpdateWhenAllProvidersDisabled() {
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
         when(lmp.isProviderEnabled(any(String.class))).thenReturn(false);
 
         int waitTimeMs = 2000; // 2s
-        assertEquals(0, mLocationAgent.requestLocationUpdate(waitTimeMs));
-
-        when(lmp.isProviderEnabled(any(String.class))).thenReturn(true);
         int requestId = mLocationAgent.requestLocationUpdate(waitTimeMs);
 
         ArgumentCaptor<CancellationSignal> cancellationSignalCaptor =

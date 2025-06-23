@@ -502,7 +502,7 @@ public class LocationAgent implements LocationInterface {
 
     @Override
     public int requestLocationUpdate(int waitTimeMs) {
-        String provider = mLocationApi.getPreferredProvider();
+        String provider = mLocationApi.getPreferredProvider(true);
 
         if (provider != null) {
             int requestId = mLocationUpdateRequestNextId.getAndIncrement();
@@ -720,13 +720,6 @@ public class LocationAgent implements LocationInterface {
                             // Do not get address by policy
                         } else {
                             address = translateLocationIntoAddress(location);
-
-                            if (address != null) {
-                                address.setLatitude(location.getLatitude());
-                                address.setLongitude(location.getLongitude());
-                            }
-
-                            cacheAddress(address);
                         }
                     }
                 } else {
@@ -741,6 +734,8 @@ public class LocationAgent implements LocationInterface {
                 ImsLog.d(this, mSlotId, "Address is null and no location information");
                 return null;
             }
+        } else {
+            cacheAddress(address, location);
         }
 
         // b/362156367 - confidence is defined as 90
@@ -892,15 +887,20 @@ public class LocationAgent implements LocationInterface {
         return false;
     }
 
-    private void cacheAddress(Address address) {
-        if (address != null) {
-            mResolvedAddress = address;
-
-            Bundle extras = new Bundle();
-            long cachedTime = SystemClock.elapsedRealtimeNanos();
-            extras.putLong("cachedTime", cachedTime);
-            mResolvedAddress.setExtras(extras);
+    private void cacheAddress(@NonNull Address address, @NonNull Location l) {
+        if (mResolvedAddress == address) {
+            // When calling using the cached address.
+            return;
         }
+        mResolvedAddress = address;
+        // Set positioning information.
+        mResolvedAddress.setLatitude(l.getLatitude());
+        mResolvedAddress.setLongitude(l.getLongitude());
+
+        Bundle extras = new Bundle();
+        long cachedTime = SystemClock.elapsedRealtimeNanos();
+        extras.putLong("cachedTime", cachedTime);
+        mResolvedAddress.setExtras(extras);
     }
 
     private boolean updateLocationByType(Location location) {
@@ -939,8 +939,10 @@ public class LocationAgent implements LocationInterface {
         }
 
         // Update cached data from the recent location when location is fixed.
-        if (resolveAddress && mPolicy.hasPolicy(
-                LocationPolicy.POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED)) {
+        if (resolveAddress
+                && (mResolvedAddress == null || mPolicy.hasPolicy(
+                        LocationPolicy.POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED))) {
+            ImsLog.i(this, mSlotId, "Location: resolving address...");
             mAddressResolver.updateLocationDetails(new Location(betterLocation));
         }
     }
@@ -1190,11 +1192,7 @@ public class LocationAgent implements LocationInterface {
             }
         }
 
-        if (location == null
-                && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_LOCATION)
-                && (mLocationApi.isProviderEnabled(LocationApi.GPS_PROVIDER)
-                        || mLocationApi.isProviderEnabled(LocationApi.NETWORK_PROVIDER)
-                        || mLocationApi.isProviderEnabled(LocationApi.FUSED_PROVIDER))) {
+        if (location == null && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_LOCATION)) {
             synchronized (mLock) {
                 location = findLatestLocation(
                         mLocations[CACHE_I_GPS],
@@ -1219,6 +1217,7 @@ public class LocationAgent implements LocationInterface {
     private void initLocationIfRequired() {
         synchronized (mLock) {
             if (mPolicy.hasPolicy(LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION)) {
+                ImsLog.d(this, mSlotId, "Clear cached location");
                 mGpsLocation = null;
                 mNetworkLocation = null;
                 mFusedLocation = null;
@@ -1433,12 +1432,7 @@ public class LocationAgent implements LocationInterface {
 
             if (!location.isMock()) {
                 setLastKnownCountryCode(address.getCountryCode());
-
-                if (mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_ADDRESS)) {
-                    address.setLatitude(location.getLatitude());
-                    address.setLongitude(location.getLongitude());
-                    cacheAddress(address);
-                }
+                cacheAddress(address, location);
             }
         }
 
@@ -1614,7 +1608,6 @@ public class LocationAgent implements LocationInterface {
             policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_VIA_OTHER_SCHEME;
             policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
             policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_TIME;
-            // policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_FROM_USIM;
 
             newLp.setAddressTolerableDistance(3000);
             newLp.setDefaultUpdateInterval(3600);
@@ -1767,9 +1760,15 @@ public class LocationAgent implements LocationInterface {
                         if (mLocationUpdater.isInProgress()) {
                             mLocationUpdater.cancel();
                         }
-                        mLocationUpdater.getCurrentLocation(
-                                mLocationApi.getPreferredProvider(),
-                                LocationUpdateRequest.DEFAULT_WAIT_TIME_MILLIS, false);
+
+                        // If PIDF-LO is required for emergency calling,
+                        // the location refresh is also updated for emergency purpose.
+                        boolean forEmergency = mPidfLoRequiredOnEmergencyCall;
+                        String provider = mLocationApi.getPreferredProvider(forEmergency);
+                        if (provider != null) {
+                            mLocationUpdater.getCurrentLocation(provider,
+                                    LocationUpdateRequest.DEFAULT_WAIT_TIME_MILLIS, forEmergency);
+                        }
                     }
                 }
             };
@@ -1811,9 +1810,12 @@ public class LocationAgent implements LocationInterface {
             if (mLocationUpdater.isInProgress()) {
                 mLocationUpdater.cancel();
             }
-            mLocationUpdater.getCurrentLocation(
-                    mLocationApi.getPreferredProvider(),
-                    LocationUpdateRequest.DEFAULT_WAIT_TIME_MILLIS, true);
+
+            String provider = mLocationApi.getPreferredProvider(true);
+            if (provider != null) {
+                mLocationUpdater.getCurrentLocation(provider,
+                        LocationUpdateRequest.DEFAULT_WAIT_TIME_MILLIS, true);
+            }
         }
     }
 
