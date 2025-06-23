@@ -220,6 +220,18 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
     {
         return;
     }
+    else if (m_piImsAos->GetAosInfo()->GetRegistrationMode() != IImsAosInfo::REG_MODE_NORMAL)
+    {
+        IJniMtsAppThread* piAppThread = m_objContext.GetJniAppThread();
+        if (piAppThread)
+        {
+            IMS_TRACE_E(0, "Emergency Registration Mode is not NORMAL", 0, 0, 0);
+            piAppThread->ReportMoStatus(MO_ERROR_GENERIC, m_pSmsInfo->eSmsFormat,
+                    m_pSmsInfo->nSeqId, m_objContext.GetSlotId());
+        }
+        m_pSmsInfo.reset();
+        return;
+    }
 
     switch (StartMoTrafficIfNeeded())
     {
@@ -262,6 +274,20 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDa
     {
         // if ims data connection is disconnected, terminate all pending messages.
         m_objContext.GetMessageController().ClearAllMessages();
+    }
+    else
+    {
+        if (m_pSmsInfo == IMS_NULL)
+        {
+            return;
+        }
+        IJniMtsAppThread* piAppThread = m_objContext.GetJniAppThread();
+        if (piAppThread)
+        {
+            piAppThread->ReportMoStatus(MO_ERROR_GENERIC, m_pSmsInfo->eSmsFormat,
+                    m_pSmsInfo->nSeqId, m_objContext.GetSlotId());
+        }
+        m_pSmsInfo.reset();
     }
 }
 
