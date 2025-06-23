@@ -17,9 +17,6 @@
 <carrier_config>
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <!-- Previous solution was using 80 and TCP, but O2 requirement is TLS -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="126">
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
