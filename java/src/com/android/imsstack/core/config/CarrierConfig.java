@@ -1388,6 +1388,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "one_way_video_call_by_remote_end_supported_bool";
         public static final String KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 KEY_PREFIX + "video_hold_with_direction_inactive_bool";
+        public static final String KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL =
+                KEY_PREFIX + "require_sip_signaling_on_multitasking_bool";
         // Media
         public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "video_rtp_port_range_int_array";

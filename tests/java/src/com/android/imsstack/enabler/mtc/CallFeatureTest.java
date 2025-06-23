@@ -149,5 +149,12 @@ public class CallFeatureTest {
                 .thenReturn(false);
         assertTrue(CallFeature.isWiFiEmcOverEmergencyPdn(SLOT_ID));
         assertFalse(CallFeature.isWiFiEmcOverEmergencyPdn(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsVt.KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isSipSignalingRequiredOnMultitasking(SLOT_ID));
+        assertFalse(CallFeature.isSipSignalingRequiredOnMultitasking(SLOT_ID));
     }
 }

@@ -126,6 +126,14 @@ public final class CallFeature {
     }
 
     /**
+     * Checks if the carrier requires additional SIP signaling based on Camera ID.
+     */
+    public static boolean isSipSignalingRequiredOnMultitasking(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig()
+                .getBoolean(CarrierConfig.ImsVt.KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL);
+    }
+
+    /**
      * Returns the configuration interface.
      *
      * @param slotId The slot-id to be retrieved.

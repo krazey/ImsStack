@@ -258,6 +258,7 @@
         <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
         <item value="2"/> <!-- CSFB_BLOCK_CONDITION_IN_WIFI -->
     </int-array>
+    <boolean name="imsvt.require_sip_signaling_on_multitasking_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>

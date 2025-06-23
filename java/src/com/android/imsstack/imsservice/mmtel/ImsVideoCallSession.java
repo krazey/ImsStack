@@ -18,6 +18,7 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.telecom.Connection;
 import android.telecom.VideoProfile;
+import android.telecom.VideoProfile.VideoState;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
@@ -27,6 +28,7 @@ import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
+import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
@@ -111,9 +113,11 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             log("SessionModification-InProgress: "
                     + ImsCallMediaUtils.toString(toProfile));
 
-            mVideoCallProvider.receiveSessionModifyResponse(
-                    Connection.VideoProvider.SESSION_MODIFY_REQUEST_INVALID,
-                    null, fromProfile);
+            if (!isPauseOrResumeRequest(fromProfile.getVideoState(), toProfile.getVideoState())) {
+                mVideoCallProvider.receiveSessionModifyResponse(
+                        Connection.VideoProvider.SESSION_MODIFY_REQUEST_INVALID,
+                        null, fromProfile);
+            }
             return;
         }
 
@@ -224,6 +228,12 @@ public final class ImsVideoCallSession implements IVideoCallSession {
              */
             clearSessionModificationInfo();
             finalizeSessionModification();
+
+            if (isResumeRequest(fromVideoState, toVideoState) && isMultitaskingState()) {
+                setMultitaskingState(MULTITASKING_NONE);
+                return;
+            }
+
             mVideoCallProvider.receiveSessionModifyResponse(
                     Connection.VideoProvider.SESSION_MODIFY_REQUEST_SUCCESS, toProfile, toProfile);
         } else if (isResumeRequest(fromVideoState, toVideoState) && !isCameraOn()) {
@@ -406,6 +416,44 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         mEventListener = listener;
     }
 
+    @Override
+    public void onSetCamera(String cameraId) {
+        logi("onSetCamera :: " + cameraId);
+
+        if (!CallFeature.isSipSignalingRequiredOnMultitasking(mCallContext.getSlotId())) {
+            return;
+        }
+
+        if (ImsCallUtils.isVoiceCall(getCallType())) {
+            return;
+        }
+
+        boolean isVideoDirectionInactive =
+                isVideoDirectionMatched(ImsStreamMediaProfile.DIRECTION_INACTIVE);
+        if (cameraId == null) {
+            // A camera ID null means a Video call went into background.
+            if (!isVideoDirectionInactive) {
+                // The Video call direction has to be `inactive`.
+                sendSessionModifyRequest(new VideoProfile(getVideoState()),
+                        new VideoProfile(getVideoState() | VideoProfile.STATE_PAUSED));
+            } else if (!isMultitaskingState()) {
+                // The Video call direction can be `inactive` if the UE was paused or held
+                // by a remote. So, in this case, no sip signaling is required and just save
+                // multitasking state.
+                setMultitaskingState(MULTITASKING_ACTIVATED);
+            }
+
+            return;
+        }
+
+        if (isMultitaskingState() && isVideoDirectionInactive) {
+            // If the UE was paused or held by a remote, remove multitasking state
+            // in the `handleVideoProfileUpdate`.
+            sendSessionModifyRequest(new VideoProfile(getVideoState() | VideoProfile.STATE_PAUSED),
+                    new VideoProfile(getVideoState()));
+        }
+    }
+
     public void finalizeSessionModification() {
         setUpdateState(UPDATE_STATE_IDLE);
     }
@@ -455,6 +503,15 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         logi("SessionModification-Request(RECV) :: "
                 + ImsCallMediaUtils.toString(requestedProfile));
 
+        // If a remote requests Video direction change except `inactive` when the UE is in
+        // multitasking state(background), the UE should keep `inactive` direction.
+        if ((requestedProfile.getVideoState() != VideoProfile.STATE_PAUSED)
+                && isMultitaskingState()) {
+            requestedProfile = new VideoProfile(VideoProfile.STATE_PAUSED);
+            sendSessionModifyResponse(requestedProfile);
+            return;
+        }
+
         mVideoCallProvider.receiveSessionModifyRequest(requestedProfile);
     }
 
@@ -503,6 +560,18 @@ public final class ImsVideoCallSession implements IVideoCallSession {
                 + reasonInfoCode + ", status=" + status
                 + ", request=" + ImsCallMediaUtils.toString(requestedProfile)
                 + ", response=" + ImsCallMediaUtils.toString(responseProfile));
+
+        if (responseProfile != null) {
+            boolean isVideoPaused = VideoProfile.isPaused(responseProfile.getVideoState());
+            if (isVideoPaused) {
+                setMultitaskingState(MULTITASKING_ACTIVATED);
+                return;
+            }
+            if (!isVideoPaused && isMultitaskingState()) {
+                setMultitaskingState(MULTITASKING_NONE);
+                return;
+            }
+        }
 
         mVideoCallProvider.receiveSessionModifyResponse(
                 status, requestedProfile, responseProfile);
@@ -718,6 +787,13 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         }
     }
 
+    private @VideoState int getVideoState() {
+        @VideoState int videoState =
+                isCameraOn() ? VideoProfile.STATE_BIDIRECTIONAL : VideoProfile.STATE_RX_ENABLED;
+
+        return videoState;
+    }
+
     private static boolean isCallTypeChanged(VideoProfile request, VideoProfile response) {
         if ((request == null) || (response == null)) {
             return false;
@@ -727,6 +803,16 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         int answeredCallType = ImsCallProfile.getCallTypeFromVideoState(response.getVideoState());
 
         return !ImsCallUtils.isCallTypeChanged(offeredCallType, answeredCallType);
+    }
+
+    private boolean isVideoDirectionMatched(int videoDirection) {
+        ImsStreamMediaProfile mediaProfile = getStreamMediaProfile();
+
+        if (mediaProfile == null) {
+            return false;
+        }
+
+        return mediaProfile.getVideoDirection() == videoDirection;
     }
 
     private static String modificationTypeToString(int type) {
