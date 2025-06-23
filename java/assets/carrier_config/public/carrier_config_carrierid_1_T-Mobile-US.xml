@@ -131,5 +131,5 @@
     <int name="imsvt.video_rs_bandwidth_bps_int" value="5200"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
     <int name="imsvt.video_rtp_inactivity_timer_millis_int" value="30000"/>
-    <int name="imsvt.video_rtcp_inactivity_timer_millis_int" value="30000"/>
+    <int name="imsvt.video_rtcp_inactivity_timer_millis_int" value="0"/>
 </carrier_config>
