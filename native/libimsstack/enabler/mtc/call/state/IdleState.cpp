@@ -51,6 +51,7 @@
 #include "call/block/WfcBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IdleState.h"
+#include "call/termination/CancelHandler.h"
 #include "conferencecall/ConferenceDef.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -224,6 +225,17 @@ PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const CallReasonInfo& objRe
 {
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
+    return CallStateName::TERMINATING;
+}
+
+PUBLIC VIRTUAL CallStateName IdleState::SessionTerminated(IN ISession* piSession)
+{
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
+
+    CallReasonInfo objReason = piMessage ? CancelHandler(m_objContext).Handle(*piMessage)
+                                         : CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR);
+
+    m_objContext.GetUiNotifier().SendIncomingCallRejected(objReason);
     return CallStateName::TERMINATING;
 }
 

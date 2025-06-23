@@ -54,6 +54,8 @@ public:
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName HandleIncoming(IN ISession* piSession) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
     CallStateName OnAttached() override;
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
