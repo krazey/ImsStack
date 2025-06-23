@@ -142,7 +142,8 @@ PRIVATE void RttAutoUpgrader::DetermineIfRttUpgradeIsNeeded(IN CallKey nCallKey)
     IMS_TRACE_D("DetermineIfRttUpgradeIsNeeded CallKey[%d], rtt guard timer active[%d], rtt "
                 "setting[%d]",
             nCallKey, bIsRttGuardTimerActive, nRttSetting);
-    if (bIsRttGuardTimerActive && (nRttSetting == IMS_RTT_ALWAYS_VISIBLE))
+    if (bIsRttGuardTimerActive &&
+            (nRttSetting == IMS_RTT_ALWAYS_VISIBLE || nRttSetting == IMS_RTT_VISIBLE_DURING_CALL))
     {
         m_nIncomingVoiceCallKey = nCallKey;
     }
