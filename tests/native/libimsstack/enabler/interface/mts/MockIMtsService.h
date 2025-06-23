@@ -41,6 +41,7 @@ public:
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber, IN IMS_UINT32 nRetryCount),
             (override));
+    MOCK_METHOD(IMS_BOOL, IsWlan, (), (const override));
 };
 
 #endif

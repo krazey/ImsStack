@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "GeolocationHelper.h"
+#include "IIpcan.h"
 #include "IPageMessage.h"
 #include "ImsTypeDef.h"
 #include "IuMtsApp.h"
@@ -230,6 +231,7 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWithEmergencyFlag)
     ImsList<AString> objCallIdHeaders;
     objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
     const AString strCallId(SipHeaderName::CALL_ID);
+    ImsVector<IMS_SINT32> objArray;
 
     ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     pContent->Append((IMS_BYTE)0x03);                     // message reference
@@ -239,8 +241,10 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWithEmergencyFlag)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
-            .WillByDefault(Return(IMS_FALSE));
+            GetIntArray(CarrierConfig::ImsSms::
+                                KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objArray));
     ON_CALL(objMockMtsService, GetICoreService()).WillByDefault(Return(&objMockCoreService));
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
@@ -878,6 +882,8 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithGeoLocationInformation)
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
     MockISipMessageBodyPart objMockISipMessageBodyPart;
+    ImsVector<IMS_SINT32> objArray;
+    objArray.Push(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR);
 
     ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     pContent->Append((IMS_BYTE)0x02);                     // message reference
@@ -887,8 +893,11 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithGeoLocationInformation)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
-            .WillByDefault(Return(IMS_TRUE));
+            GetIntArray(CarrierConfig::ImsSms::
+                                KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objArray));
+    ON_CALL(objMockMtsService, IsWlan()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsService, GetICoreService()).WillByDefault(Return(&objMockCoreService));
@@ -912,6 +921,59 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithGeoLocationInformation)
             .WillOnce(Return(IMS_SUCCESS));
     pMtsMessageController->ProcessMoSms(SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress,
             SEQ_ID, bEmergencyNumber, eServiceType, RETRY_COUNT);
+}
+
+TEST_F(MtsMessageControllerTest, SendMoSmsWithOutGeoLocationInformation)
+{
+    IMS_BOOL bEmergency = IMS_TRUE;
+    AString strContentType = "application/vnd.3gpp.sms";
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SipAddress objSipAddress;
+    MtsServiceType eServiceType = MtsServiceType::EMERGENCY;
+    objSipAddress.Create(strTargetAddress);
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+    ImsVector<IMS_SINT32> objArray;
+    objArray.Push(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR);
+    objArray.Push(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR);
+    objArray.Push(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI);
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x02);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::
+                                KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objArray));
+    ON_CALL(objMockMtsService, IsWlan()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsService, GetICoreService()).WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetMessage()).WillByDefault(Return(&objMockSipMessage));
+    ON_CALL(objMockSipMessage, CreateBodyPart()).WillByDefault(Return(&objMockISipMessageBodyPart));
+
+    EXPECT_CALL(objMockISipMessageBodyPart, SetContent(_)).Times(0);
+    EXPECT_CALL(objMockISipMessageBodyPart, SetHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::REQUEST_DISPOSITION), _))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _))
+            .Times(0)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::GEOLOCATION_ROUTING), _))
+            .Times(0)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    pMtsMessageController->ProcessMoSms(SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress,
+            SEQ_ID, bEmergency, eServiceType, RETRY_COUNT);
 }
 
 TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)

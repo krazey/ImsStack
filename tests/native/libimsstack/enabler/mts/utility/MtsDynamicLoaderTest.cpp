@@ -47,6 +47,7 @@ TEST_F(MtsDynamicLoaderTest, Constructor)
     ASSERT_NE(pMtsDynamicLoader, nullptr);
     ASSERT_NE(pMtsDynamicLoader->GetMtsSipFormUtils(), nullptr);
     ASSERT_NE(pMtsDynamicLoader->GetMtsSmUtils(), nullptr);
+    ASSERT_NE(pMtsDynamicLoader->GetMtsGeolocationUtils(), nullptr);
 }
 
 }  // namespace android
