@@ -543,8 +543,9 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
 
 TEST_F(UpdatingStateTest, OnNormalReasonCodeTerminatesCall)
 {
-    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillOnce(Return(nullptr));
 
     EXPECT_CALL(objUiNotifier, SendTerminated(_));
     EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionUpdateFailed(&objSession));
@@ -553,8 +554,25 @@ TEST_F(UpdatingStateTest, OnNormalReasonCodeTerminatesCall)
 TEST_F(UpdatingStateTest, OnInternalRetryUpdateStartsRetryUpdateTimer)
 {
     objCallInfo.ePeerType = PeerType::MO;
-    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
-            .WillByDefault(Return(&objMessage));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillOnce(Return(&objMessage));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+    SetActionConfigs(SipStatusCode::SC_491, {ConfigVoice::UPDATE_ERROR_ACTION_GLARE_CONDITION});
+
+    EXPECT_CALL(objMediaManager, RestoreSdp(_));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TIMER_RETRY_UPDATE, _));
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateFailed(&objSession));
+}
+
+TEST_F(UpdatingStateTest, OnInternalRetryUpdateStartsRetryUpdateTimerWithStaleUpdateCase)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    EXPECT_CALL(
+            objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_STALE_UPDATE, _))
+            .WillOnce(Return(&objMessage));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
     SetActionConfigs(SipStatusCode::SC_491, {ConfigVoice::UPDATE_ERROR_ACTION_GLARE_CONDITION});
 
@@ -566,8 +584,9 @@ TEST_F(UpdatingStateTest, OnInternalRetryUpdateStartsRetryUpdateTimer)
 
 TEST_F(UpdatingStateTest, OnCodeUnspecifiedReturnsToEstablished)
 {
-    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
-            .WillByDefault(Return(&objMessage));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillOnce(Return(&objMessage));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_403));
     SetActionConfigs(SipStatusCode::SC_403, {});
 
@@ -788,8 +807,30 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesOnMessageReceivedIfModified)
 
     // SetUp IsModified() true
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
-    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_UPDATE))
-            .WillByDefault(Return(&objMessage));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillRepeatedly(Return(&objMessage));
+
+    EXPECT_CALL(objMtcPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedInvokesOnMessageReceivedIfModifiedWithStaleUpdate)
+{
+    delete pUpdatingInfo;
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objContext);
+    ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
+    pUpdatingInfo->SetModifier();
+
+    // SetUp IsModified() true
+    ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    EXPECT_CALL(
+            objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_STALE_UPDATE, _))
+            .WillOnce(Return(&objMessage))
+            .WillOnce(Return(&objMessage));
 
     EXPECT_CALL(objMtcPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
