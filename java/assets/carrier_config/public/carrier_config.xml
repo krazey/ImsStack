@@ -16,7 +16,6 @@
 -->
 <carrier_config>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
-    <int name="imsemergency.refresh_geolocation_timeout_millis_int" value="5000"/>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
             <item value="127"/>
