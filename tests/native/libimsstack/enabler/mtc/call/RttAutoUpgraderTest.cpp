@@ -225,7 +225,7 @@ TEST_F(RttAutoUpgraderTest, NotStartRttGuardTimerAfterNonRttCallTerminating)
             CALL_KEY, IMtcCall::State::TERMINATING, CallType::RTT, IMS_TRUE, 0);
 }
 
-TEST_F(RttAutoUpgraderTest, UpgradeToRttWhenRttGuardTimerIsActive)
+TEST_F(RttAutoUpgraderTest, UpgradeToRttWhenRttGuardTimerIsActiveAndRttSettingIsAlwaysVisible)
 {
     ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
@@ -239,7 +239,21 @@ TEST_F(RttAutoUpgraderTest, UpgradeToRttWhenRttGuardTimerIsActive)
             CALL_KEY, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
 }
 
-TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenRttGuardTimerIsNotActive)
+TEST_F(RttAutoUpgraderTest, UpgradeToRttWhenRttGuardTimerIsActiveAndRttSettingIsVisibleDuringCall)
+{
+    ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
+            .WillByDefault(Return(IMS_RTT_VISIBLE_DURING_CALL));
+
+    EXPECT_CALL(objController, Update(_, _, _)).Times(1);
+
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY, IMtcCall::State::INCOMING, CallType::VOIP, IMS_FALSE, 0);
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenRttGuardTimerIsNotActiveAndRttSettingIsAlwaysVisible)
 {
     ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
@@ -253,9 +267,10 @@ TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenRttGuardTimerIsNotActive)
             CALL_KEY, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
 }
 
-TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenRttSettingIsNotAlwaysVisible)
+TEST_F(RttAutoUpgraderTest,
+        NotUpgradeToRttWhenRttGuardTimerIsNotActiveAndRttSettingIsVisibleDuringCall)
 {
-    ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
             .WillByDefault(Return(IMS_RTT_VISIBLE_DURING_CALL));
 
@@ -267,11 +282,39 @@ TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenRttSettingIsNotAlwaysVisible)
             CALL_KEY, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
 }
 
-TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenCallKeyIsNotMathed)
+TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenRttSettingIsWrong)
+{
+    ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
+            .WillByDefault(Return(IMS_RTT_NO_VISIBLE));
+
+    EXPECT_CALL(objController, Update(_, _, _)).Times(0);
+
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY, IMtcCall::State::INCOMING, CallType::VOIP, IMS_FALSE, 0);
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenCallKeyIsNotMathedAndRttSettingIsAlwaysVisible)
 {
     ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
             .WillByDefault(Return(IMS_RTT_ALWAYS_VISIBLE));
+
+    EXPECT_CALL(objController, Update(_, _, _)).Times(0);
+
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY, IMtcCall::State::INCOMING, CallType::VOIP, IMS_FALSE, 0);
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY + 1, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(RttAutoUpgraderTest, NotUpgradeToRttWhenCallKeyIsNotMathedAndRttSettingIsVisibleDuringCall)
+{
+    ON_CALL(objPassiveTimer, IsActive).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_RTT_SETTING))
+            .WillByDefault(Return(IMS_RTT_VISIBLE_DURING_CALL));
 
     EXPECT_CALL(objController, Update(_, _, _)).Times(0);
 
