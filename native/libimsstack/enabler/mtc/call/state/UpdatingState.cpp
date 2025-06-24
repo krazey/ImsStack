@@ -230,10 +230,10 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
 {
     StopTimer();
 
+    IMessage* piResponseMessage = GetUpdateResponse(piSession);
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
-        m_objContext.GetSession()->HandleResponse(ResponseType::ACCEPT_UPDATE,
-                *piSession->GetPreviousResponse(IMessage::SESSION_UPDATE));
+        m_objContext.GetSession()->HandleResponse(ResponseType::ACCEPT_UPDATE, *piResponseMessage);
     }
     else
     {
@@ -252,8 +252,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
     if (m_objContext.GetUpdatingInfo().IsModifier() && m_objContext.GetUpdatingInfo().IsModified())
     {
         // TO make remote QoS sendrecv.
-        m_objContext.GetPreconditionManager().OnMessageReceived(
-                piSession, piSession->GetPreviousResponse(IMessage::SESSION_UPDATE));
+        m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piResponseMessage);
     }
 
     return HandleModificationSucceeded();
@@ -261,9 +260,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
 {
-    IMessage* piResponse =
-            m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
-    CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
+    CallReasonInfo objReason =
+            UpdateErrorHandler(m_objContext).Handle(GetUpdateResponse(piSession));
 
     switch (objReason.nCode)
     {
@@ -451,6 +449,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprDeliveryFailed(IN ISession
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
+    // No SESSION_STATE_UPDATE is considerable for a non-final response case.
     IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_UPDATE, nIndex);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
@@ -634,11 +633,10 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     ISession* piSession = &m_objContext.GetSession()->GetISession();
 
-    IMessage* piMessage = IMS_NULL;
+    IMessage* piMessage;
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
-        piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
-                piSession, IMessage::SESSION_UPDATE);
+        piMessage = GetUpdateResponse(piSession);
     }
     else
     {
@@ -850,6 +848,27 @@ CallStateName UpdatingState::HandleRetry()
 
     // Other UpdateTypes are not used.
     return CallStateName::ESTABLISHED;
+}
+
+PRIVATE
+IMessage* UpdatingState::GetUpdateResponse(const IN ISession* piSession) const
+{
+    if (!piSession)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_SINT32 eServiceMethod;
+    if (piSession->GetState() == ISession::STATE_RENEGOTIATING)
+    {
+        IMS_TRACE_I("incoming UPDATE overwrote the transaction so get stale update", 0, 0, 0);
+        eServiceMethod = IMessage::SESSION_STALE_UPDATE;
+    }
+    else
+    {
+        eServiceMethod = IMessage::SESSION_UPDATE;
+    }
+    return m_objContext.GetMessageUtils().GetPreviousResponse(piSession, eServiceMethod);
 }
 
 PRIVATE

@@ -68,6 +68,8 @@ CallReasonInfo UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
         return CallReasonInfo(CODE_SIP_SERVER_ERROR);
     }
 
+    IMS_TRACE_D("Handle : status code[%d]", piMessage->GetStatusCode(), 0, 0);
+
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(),
             ConfigVoice::KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,

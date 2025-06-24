@@ -91,6 +91,7 @@ private:
     CallStateName HandleRequestedModificationSucceeded();
     CallStateName HandleReceivedModificationSucceeded();
     CallStateName HandleRetry();
+    IMessage* GetUpdateResponse(const IN ISession* piSession) const;
     void RecoverModificationFailure();
     void NotifyFailure();
     void StopTimer();
