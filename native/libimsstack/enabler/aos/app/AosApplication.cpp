@@ -2376,14 +2376,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTerminating()
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 {
-    IMS_UINT32 nFinalErr = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType();
-
-    A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: reg err final type - %d", nFinalErr, 0, 0);
-
     if (GET_N_CONFIG(m_nSlotId)->IsCallEndAndPdnReactivationByRegTerminated())
     {
         if (IsImsCall())
         {
+            A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: IMS call is not IDLE", 0, 0, 0);
             m_pConnector->Stop(DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS);
             SetOffReason(AosReason::REG_TERMINATING);
             SetAppState(STATE_NOTREADY);
@@ -2394,53 +2391,58 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 
     if (GetOffReason() == AosReason::DATA_PERMANENTLY_FAILED)
     {
+        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: Data permanently failed", 0, 0, 0);
         ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK);
         m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
         return;
     }
 
-    if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK)
-    {
-        PerformRatBlockActions(IMS_TRUE);
+    IMS_UINT32 nFinalErr = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType();
+    A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: reg err final type - %d", nFinalErr, 0, 0);
 
-        /*
-         * (b/379769225) Change the reason from RAT_BLOCK to PLMN_BLOCK.
-         * Original code:
-         *   NotifyDeregistered(AosReasonCode::RAT_BLOCK);
-         */
-        NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
-        return;
-    }
+    IMS_BOOL bNotifyPlmnBlock = IMS_FALSE;
 
-    IMS_BOOL bPlmnBlockByConfig = IMS_FALSE;
-    if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_REPEATED)
+    switch (nFinalErr)
     {
-        bPlmnBlockByConfig = IMS_TRUE;
-    }
-    else if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
-    {
-        if (m_nRat == NW_REPORT_RADIO_NR)
-        {
-            bPlmnBlockByConfig = IMS_TRUE;
-        }
-        else if (m_nRat == NW_REPORT_RADIO_LTE)
-        {
-            if (m_nLteAttachState != IMS_LTE_INFO_COMBINED_ATTACHED ||
-                        m_nLteExtraInfo != IMS_LTE_INFO_EXTRA_NONE)
+        case CarrierConfig::Ims::ERROR_TYPE_REPEATED:
+            bNotifyPlmnBlock = IMS_TRUE;
+            break;
+
+        case CarrierConfig::Ims::ERROR_TYPE_CRITICAL:
+            if (GET_N_CONFIG(m_nSlotId)->IsTestModeEnabled(CarrierConfig::Ims::
+                                TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION))
             {
-                bPlmnBlockByConfig = IMS_TRUE;
+                A_IMS_TRACE_I(
+                        APPID, "ProcessPdnDisconnect :: IMS PDN is not disconnected", 0, 0, 0);
+                return;
             }
-        }
-    }
-    else if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_CRITICAL &&
-            GET_N_CONFIG(m_nSlotId)->IsTestModeEnabled(
-                    CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION))
-    {
-        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: ims pdn is not disconnected", 0, 0, 0);
-        return;
+            break;
+
+        case CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK:
+            if (m_nRat == NW_REPORT_RADIO_NR)
+            {
+                bNotifyPlmnBlock = IMS_TRUE;
+            }
+            else if (m_nRat == NW_REPORT_RADIO_LTE)
+            {
+                if (m_nLteAttachState != IMS_LTE_INFO_COMBINED_ATTACHED ||
+                        m_nLteExtraInfo != IMS_LTE_INFO_EXTRA_NONE)
+                {
+                    bNotifyPlmnBlock = IMS_TRUE;
+                }
+            }
+            break;
+
+        case CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK:
+            PerformRatBlockActions(IMS_TRUE);
+            NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
+            return;
+
+        default:
+            break;
     }
 
-    if (bPlmnBlockByConfig)
+    if (bNotifyPlmnBlock)
     {
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
         m_pConnector->Stop(GET_N_CONFIG(m_nSlotId)->GetReleasePdnDelaySecAfterTempPlmnBlock());
