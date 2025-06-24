@@ -15,11 +15,21 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ims General -->
-    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
+    <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
 
-    <!-- Ut/Xcap -->
-    <int name="imsss.ut_cfnr_timer_update_method_int" value="2"/>
+    <!-- Mtc -->
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
 </carrier_config>
