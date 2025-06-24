@@ -146,14 +146,23 @@ public final class LocationApi {
 
     /**
      * Returns a preferred location provider for a location update.
+     *
+     * @param emergency A flag indicating an emergency service.
+     * @return A provider name.
      */
-    public String getPreferredProvider() {
+    public String getPreferredProvider(boolean emergency) {
         if (isProviderEnabled(FUSED_PROVIDER)) {
             return FUSED_PROVIDER;
         } else if (isProviderEnabled(NETWORK_PROVIDER)) {
             return NETWORK_PROVIDER;
         } else if (isProviderEnabled(GPS_PROVIDER)) {
             return GPS_PROVIDER;
+        } else {
+            // In case of an emergency, this is to obtain location information regardless of
+            // the provider's enablement (regardless of location settings).
+            if (emergency) {
+                return FUSED_PROVIDER;
+            }
         }
         return null;
     }
