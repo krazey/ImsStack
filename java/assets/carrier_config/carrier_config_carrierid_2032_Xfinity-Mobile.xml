@@ -36,6 +36,9 @@
     <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
     <boolean name="imsvoice.audio_rtcpxr_enable_bool" value="true"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/>
+    </int-array>
     <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
         <item value="20000"/>
         <item value="20000"/>
