@@ -219,16 +219,7 @@ public class ImsCallUtils {
         }
 
         profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
-
-        if (profile.getMediaProfile().getVideoDirection()
-                == ImsStreamMediaProfile.DIRECTION_INACTIVE) {
-            profile.updateMediaProfile(new ImsCallProfile(serviceType, callType, new Bundle(),
-                    new ImsStreamMediaProfile(mediaProfile.getAudioQuality(),
-                    mediaProfile.getAudioDirection(), mediaProfile.getVideoQuality(),
-                    ImsStreamMediaProfile.DIRECTION_INVALID, mediaProfile.getRttMode())));
-        }
-
-        return profile;
+        return getSanitizedCallProfileForVideoDirection(profile);
     }
 
     public static ImsCallProfile createCallProfileFromIncomingCallInfo(
@@ -304,6 +295,42 @@ public class ImsCallUtils {
         participant.putInt(ImsCallUtils.DISCONNECTED_CAUSE, disconnectedCause);
 
         return participant;
+    }
+
+    /**
+     * Sanitizes the video direction within an {@code ImsCallProfile} to prevent unexpected behavior
+     * from the dialer.
+     *
+     * If the video direction in the provided {@code ImsCallProfile}'s {@code ImsStreamMediaProfile}
+     * is {@code DIRECTION_INACTIVE}, it is converted to {@code DIRECTION_INVALID}. It's to address
+     * scenarios where the dialer assumes {@code DIRECTION_INACTIVE} as an unexpected status,
+     * leading to unintended video call resumption.
+     *
+     * @param profile The {@code ImsCallProfile} to be sanitized.
+     * @return A new {@code ImsCallProfile} instance with the sanitized video direction.
+     *         Null if {@code profile} is null.
+     */
+    public static ImsCallProfile getSanitizedCallProfileForVideoDirection(
+            final ImsCallProfile profile) {
+        if (profile == null) {
+            return null;
+        }
+
+        final ImsStreamMediaProfile mediaProfile = profile.getMediaProfile();
+        if (mediaProfile == null
+                || mediaProfile.getVideoDirection() != ImsStreamMediaProfile.DIRECTION_INACTIVE) {
+            return profile;
+        }
+
+        ImsCallProfile newProfile = cloneCallProfile(profile);
+        final ImsStreamMediaProfile newMediaProfile = new ImsStreamMediaProfile(
+                mediaProfile.getAudioQuality(),
+                mediaProfile.getAudioDirection(),
+                mediaProfile.getVideoQuality(),
+                ImsStreamMediaProfile.DIRECTION_INVALID,
+                mediaProfile.getRttMode());
+        newProfile.getMediaProfile().copyFrom(newMediaProfile);
+        return newProfile;
     }
 
     /**
