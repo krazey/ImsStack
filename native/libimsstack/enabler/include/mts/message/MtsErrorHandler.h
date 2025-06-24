@@ -21,19 +21,17 @@
 
 class ICarrierConfig;
 class IMessage;
+class IMtsContext;
 class IMtsDynamicLoader;
 class IMtsService;
 
 class MtsErrorHandler final : public IMtsErrorHandler
 {
 public:
-    explicit MtsErrorHandler(IN IMS_SINT32 nSlotId);
+    explicit MtsErrorHandler(IN IMtsContext& objContext);
     ~MtsErrorHandler();
 
-    IMS_SINT32 Handle(IN const IMtsService& objMtsService,
-            IN const IMtsDynamicLoader& objMtsDynamicLoader,
-            IN const IMessage* piMessage = IMS_NULL,
-            IMS_SINT32 nMti = SMS_3GPP_MTI_RP_DATA_FROM_MS) override;
+    IMS_SINT32 Handle(IN const IMtsService& objMtsService, IN IMtsMessage* piMtsMessage) override;
     inline IMS_SINT32 GetRetryAfterValue() const override { return m_nRetryAfterValue; }
     inline void ResetRetryAfterStatus() override
     {
@@ -61,8 +59,10 @@ private:
     void SetRetryAfterStatus(IN const IMS_SINT32 nRetryAfterValue);
     IMS_BOOL IsRetryPossible() const;
     IMS_BOOL IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const;
+    IMS_BOOL NeedToCheckRadioStatusForRetry(IN IMS_UINT32 nRetryCount) const;
 
 private:
+    IMtsContext& m_objContext;
     IMS_SINT32 m_nCumulativeDuration;
     IMS_SINT32 m_nCurrentRetryCount;
     IMS_SINT32 m_nRetryAfterValue;
