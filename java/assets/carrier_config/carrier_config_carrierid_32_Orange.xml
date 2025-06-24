@@ -35,9 +35,9 @@
         <item value="0"/>
         <item value="5"/>
     </int-array>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Mtc Assets -->
+    <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
     <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
