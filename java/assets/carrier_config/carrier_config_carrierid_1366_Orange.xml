@@ -33,4 +33,5 @@
         <item value="0"/>
         <item value="5"/>
     </int-array>
+    <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
 </carrier_config>
