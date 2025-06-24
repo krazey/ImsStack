@@ -3966,8 +3966,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
             }
 
+            boolean conferenceExtendedByRemote = isConferenceExtended(callInfo);
             onRttChanged(MtcCallUtils.isGttEnabled(mediaInfo.GTTMode),
-                MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode));
+                    MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode));
 
             int oldState = getState();
 
@@ -3993,6 +3994,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             setCallInfo(profile);
 
             mCallback.invokeUpdated(ImsCallSessionImpl.this, profile);
+
+            notifyCallSessionMultipartyStateChanged(conferenceExtendedByRemote);
 
             // Handle TTY mode related operations
             onTtyModeReceived(mediaInfo.GTTMode, false);

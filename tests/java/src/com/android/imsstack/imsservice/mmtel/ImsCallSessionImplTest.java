@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
@@ -1196,7 +1197,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testonCallResumeFailedWithUserTerminated() {
+    public void testOnCallResumeFailedWithUserTerminated() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
 
         mImsCallSession.setConferenceProxy(null);
@@ -1213,7 +1214,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testonCallResumeFailedWithCallTerminated() {
+    public void testOnCallResumeFailedWithCallTerminated() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
 
         mImsCallSession.setConferenceProxy(null);
@@ -1231,7 +1232,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void tesonCallResumeFailedWithTerminatedReasonOtherThanUserTerminated() {
+    public void testOnCallResumeFailedWithTerminatedReasonOtherThanUserTerminated() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
 
         mImsCallSession.setConferenceProxy(null);
@@ -1248,7 +1249,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testonCallResumeFailedWithCallReasonInfo() {
+    public void testOnCallResumeFailedWithCallReasonInfo() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
 
         mImsCallSession.setConferenceProxy(null);
@@ -1267,7 +1268,41 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testonCallUpdateReceivedForDowngradeToAudioFromRtt() {
+    public void testOnCallUpdatedWithoutMultiparty() {
+        mImsCallSession.setConferenceProxy(null);
+
+        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
+
+        MediaInfo mNewMockMediaInfo = Mockito.mock(MediaInfo.class);
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+
+        mImsCallSession.getCallListenerProxy().onCallUpdated(mMockMtcCall, mMockCallInfo,
+                mNewMockMediaInfo, mockSuppInfo);
+        verify(mMockImsCallSessionCallback, never()).invokeMultipartyStateChanged(
+                any(ImsCallSessionImplBase.class), anyBoolean());
+    }
+
+    @Test
+    public void testOnCallUpdatedWithMultiparty() {
+        mImsCallSession.setConferenceProxy(null);
+
+        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
+
+        mMockCallInfo.isConf = true;
+        MediaInfo mNewMockMediaInfo = Mockito.mock(MediaInfo.class);
+        mNewMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+
+        mImsCallSession.getCallListenerProxy().onCallUpdated(mMockMtcCall, mMockCallInfo,
+                mNewMockMediaInfo, mockSuppInfo);
+        verify(mMockImsCallSessionCallback).invokeMultipartyStateChanged(
+                any(ImsCallSessionImplBase.class), eq(true));
+    }
+
+    @Test
+    public void testOnCallUpdateReceivedForDowngradeToAudioFromRtt() {
         mImsCallProfile = new ImsCallProfile(
                 ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
         mImsCallProfile.getMediaProfile().mAudioDirection =
