@@ -355,6 +355,11 @@ public:
         m_pCounter->AddCount(__IMS_FUNC__);
         AosRegistration::ProcessAuthenticationFailed();
     }
+    void ProcessRegRequiredWithSamePcscf() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRegRequiredWithSamePcscf();
+    }
     void ProcessRegRequiredWithAvailableNextPcscf(
             IN IMS_BOOL bSetCurrentPcscfInvalid, IN IMS_UINT32 nReconnectTime) override
     {
@@ -3108,6 +3113,46 @@ TEST_F(AosRegistrationTest, StartOfflineRecoverTimerWhenRegRequiredWithWaitTimeW
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
+TEST_F(AosRegistrationTest, StartOfflineRecoverTimerWhenRegRequiredWithSamePcscfWithRetryAfter)
+{
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(Return(AString("30")));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->ProcessRegRequiredWithSamePcscf();
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, CreateRegistrationWhenRegRequiredWithSamePcscf)
+{
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->ProcessRegRequiredWithSamePcscf();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenRegRequiredWithSamePcscf)
+{
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessRegRequiredWithSamePcscf();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
 TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenRegRequiredWithNextPcscf)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
@@ -4661,7 +4706,7 @@ TEST_F(AosRegistrationTest, TriggerForbiddenFailHandlingWhenUpdateFailedWithPerm
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_403);
 }
 
-TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfConfiguredToRetryWithSamePcscfWhenUpdateFailed)
+TEST_F(AosRegistrationTest, RegRequiredWithSamePcscfWhenUpdateFailedIfRetryWithSamePcscfConfigured)
 {
     ImsVector<IMS_SINT32> ReregRetryErrCodeForInitRegWithSamePcscf;
     ReregRetryErrCodeForInitRegWithSamePcscf.Add(CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP);
@@ -4670,7 +4715,7 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfConfiguredToRetryWithSamePcscfW
 
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_302);
 
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRegRequiredWithSamePcscf"), 1);
 }
 
 TEST_F(AosRegistrationTest, ReportFailureIfPdnReactivationIsRequiredWhenUpdateFailed)
@@ -4765,64 +4810,16 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfFollowSpecifiedIntervalAwtPolic
             1);
 }
 
-TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfConfiguredToRetryWithSamePcscfWhenRegUpdateFail)
+TEST_F(AosRegistrationTest, RegRequiredWithSamePcscfWhenUpdateFailIfRetryWithSamePcscfConfigured)
 {
     ImsVector<IMS_SINT32> objErrCode;
     objErrCode.Add(CarrierConfig::Ims::REG_ERROR_CODE_OTHER);
     ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
             .WillByDefault(ReturnRef(objErrCode));
-    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .WillOnce(Return(IMS_FALSE));
 
     m_pAosRegistration->ProcessUpdateFailed_Others(IRegistration::REASON_NONE);
 
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
-}
-
-TEST_F(AosRegistrationTest, TriggerPdnReactivationIfRequiredWhenRegUpdateFailWithSocketError)
-{
-    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED));
-    ImsVector<IMS_SINT32> objExtraRegErrCode;
-    objExtraRegErrCode.Add(CarrierConfig::Ims::REG_ERROR_CODE_TRANSPORT);
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .WillByDefault(ReturnRef(objExtraRegErrCode));
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .WillByDefault(Return(1));
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .WillByDefault(Return(1));
-    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(1));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
-
-    m_pAosRegistration->ProcessUpdateFailed_Others(IRegistration::REASON_CLIENT_SOCKET_ERROR);
-}
-
-TEST_F(AosRegistrationTest,
-        TriggerFlowRecoveryIfPdnReactivationIsNotRequiredWhenRegUpdateFailWithSocketError)
-{
-    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED));
-    ImsVector<IMS_SINT32> objExtraRegErrCode;
-    objExtraRegErrCode.Add(CarrierConfig::Ims::REG_ERROR_CODE_TRANSPORT);
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .WillByDefault(ReturnRef(objExtraRegErrCode));
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .WillByDefault(Return(1));
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .WillByDefault(Return(1));
-    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(2));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .WillOnce(Return(IMS_FALSE));
-
-    m_pAosRegistration->ProcessUpdateFailed_Others(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRegRequiredWithSamePcscf"), 1);
 }
 
 TEST_F(AosRegistrationTest, TriggerAwtRecoveryWhenRegUpdateFail)
@@ -5557,24 +5554,17 @@ TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenUpdateFailedWithTxnTimeout)
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, ReportFailureWithPdnReconnectWhenUpdateFailedWithTxnTimeout)
+TEST_F(AosRegistrationTest,
+        RegRequiredWithSamePcscfWhenUpdateFailedWithTxnTimeoutIfRetryWithSamePcscfConfigured)
 {
-    // ProcessUpdateFailed_TxnTimeout
-    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED));
-
-    // IsPdnReactivationRequired returns true
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .WillOnce(Return(1));
-    EXPECT_CALL(
-            m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Ims::REG_ERROR_CODE_TIMER_F);
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
+            .WillByDefault(ReturnRef(objErrCode));
 
     m_pAosRegistration->Registration_UpdateFailed(IRegistration::REASON_TRANSACTION_TIMEOUT);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRegRequiredWithSamePcscf"), 1);
 }
 
 TEST_F(AosRegistrationTest, TriggerFlowRecoveryForUpdateWhenUpdateFailedWithTxnTimeout)

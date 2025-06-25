@@ -3796,6 +3796,30 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithWaitTime(IN IMS_SI
     StartTimer(TIMER_OFFLINE_RECOVER, nWaitTime * 1000);
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithSamePcscf()
+{
+    IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+
+    DestroyEx();
+
+    if (nRetryAfter > 0)
+    {
+        ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+        StartTimer(TIMER_OFFLINE_RECOVER, nRetryAfter * 1000);
+    }
+    else
+    {
+        if (!CreateRegistration())
+        {
+            ProcessUnpredictableFailure();
+            return;
+        }
+
+        SetState(STATE_REGISTERING);
+        ReportTryingState();
+    }
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithNextPcscf()
 {
     DestroyEx();
@@ -4992,22 +5016,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
     if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf(),
                 CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP))
     {
-        ProcessDefaultFlowRecovery_Update(nStatusCode);
-        return;
-    }
-
-    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
-            CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED)
-    {
-        if (m_bEps5GsOnly)
-        {
-            if (IsPdnReactivationRequired())
-            {
-                return;
-            }
-        }
-
-        ProcessDefaultFlowRecovery_Update(nStatusCode);
+        ProcessRegRequiredWithSamePcscf();
         return;
     }
 
@@ -5078,20 +5087,17 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
-                    CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED &&
-            m_bEps5GsOnly)
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf(),
+                CarrierConfig::Ims::REG_ERROR_CODE_TIMER_F))
     {
-        if (IsPdnReactivationRequired())
-        {
-            return;
-        }
+        ProcessRegRequiredWithSamePcscf();
+        return;
     }
 
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
+PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 /* nReason */)
 {
     if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
             CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
@@ -5103,28 +5109,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32
     if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf(),
                 CarrierConfig::Ims::REG_ERROR_CODE_OTHER))
     {
-        ProcessDefaultFlowRecovery_Update();
+        ProcessRegRequiredWithSamePcscf();
         return;
-    }
-
-    if (nReason == IRegistration::REASON_CLIENT_SOCKET_ERROR)
-    {
-        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
-                CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED)
-        {
-            if (m_bEps5GsOnly ||
-                    IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(),
-                            CarrierConfig::Ims::REG_ERROR_CODE_TRANSPORT))
-            {
-                if (IsPdnReactivationRequired())
-                {
-                    return;
-                }
-
-                ProcessDefaultFlowRecovery_Update();
-                return;
-            }
-        }
     }
 
     ProcessAwtRecovery();
