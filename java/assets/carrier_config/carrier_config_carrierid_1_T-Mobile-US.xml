@@ -54,6 +54,12 @@
         <item value="0"/>
         <item value="2"/>
     </int-array>
+    <int-array name="ims.rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="4">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="9"/>
+    </int-array>
     <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="3">
         <item value="420"/>
         <item value="421"/>
