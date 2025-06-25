@@ -57,37 +57,38 @@ using ::testing::ReturnRef;
 const IMS_SINT32 SLOT_ID = 0;
 const AString PROFILE_ID = AString("test");
 
-#define DECLARE_USING(Base)                           \
-    using Base::AddAosServiceListener;                \
-    using Base::RemoveAosServiceListener;             \
-    using Base::Event_NotifyEvent;                    \
-    using Base::CallTracker_StateChanged;             \
-    using Base::NetTracker_StatusChanged;             \
-    using Base::Subscriber_StateChanged;              \
-    using Base::Block_Changed;                        \
-    using Base::ServiceAvailable_RequestCommand;      \
-    using Base::NConfiguration_NotifyConfigChanged;   \
-    using Base::ServicePhone_AosStart;                \
-    using Base::ServicePhone_LocationInfoChanged;     \
-    using Base::ServicePhone_PhoneNumberStateChanged; \
-    using Base::ServicePhone_PlmnChanged;             \
-    using Base::ServicePhone_PowerOff;                \
-    using Base::ServiceSetting_AirplaneChanged;       \
-    using Base::ServiceSetting_ServiceChanged;        \
-    using Base::ServiceSetting_TtyChanged;            \
-    using Base::ServiceSetting_WifiChanged;           \
-    using Base::Init;                                 \
-    using Base::AddListener;                          \
-    using Base::RemoveListener;                       \
-    using Base::IsListenerEnabled;                    \
-    using Base::AddHold;                              \
-    using Base::RemoveHold;                           \
-    using Base::IsHeld;                               \
-    using Base::IsRefreshStarted;                     \
-    using Base::RequestCommand;                       \
-    using Base::UpdateRegistrationMode;               \
-    using Base::IsRttSupported;                       \
-    using Base::IsCombinedAttached;                   \
+#define DECLARE_USING(Base)                              \
+    using Base::AddAosServiceListener;                   \
+    using Base::RemoveAosServiceListener;                \
+    using Base::Event_NotifyEvent;                       \
+    using Base::CallTracker_StateChanged;                \
+    using Base::NetTracker_StatusChanged;                \
+    using Base::Subscriber_StateChanged;                 \
+    using Base::Block_Changed;                           \
+    using Base::ServiceAvailable_RequestCommand;         \
+    using Base::NConfiguration_NotifyConfigChanged;      \
+    using Base::ServicePhone_AosStart;                   \
+    using Base::ServicePhone_LocationInfoChanged;        \
+    using Base::ServicePhone_PhoneNumberStateChanged;    \
+    using Base::ServicePhone_PlmnChanged;                \
+    using Base::ServicePhone_PowerOff;                   \
+    using Base::ServicePhone_AllowedNetworkTypesChanged; \
+    using Base::ServiceSetting_AirplaneChanged;          \
+    using Base::ServiceSetting_ServiceChanged;           \
+    using Base::ServiceSetting_TtyChanged;               \
+    using Base::ServiceSetting_WifiChanged;              \
+    using Base::Init;                                    \
+    using Base::AddListener;                             \
+    using Base::RemoveListener;                          \
+    using Base::IsListenerEnabled;                       \
+    using Base::AddHold;                                 \
+    using Base::RemoveHold;                              \
+    using Base::IsHeld;                                  \
+    using Base::IsRefreshStarted;                        \
+    using Base::RequestCommand;                          \
+    using Base::UpdateRegistrationMode;                  \
+    using Base::IsRttSupported;                          \
+    using Base::IsCombinedAttached;                      \
     using Base::IsDeregRequiredForTty;
 
 class TestAosCondition : public AosCondition
@@ -1125,7 +1126,7 @@ TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonSimStat
             IMS_FALSE, PhoneNumberState::RETRY_SUCCESS);
 }
 
-TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconPlmlChanged)
+TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReasonPlmnChanged)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
@@ -1154,6 +1155,14 @@ TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNotNull)
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     m_pAosCondition->ServicePhone_PowerOff();
+}
+
+TEST_F(AosConditionTest, ServicePhone_AllowedNetworkTypesChanged_ResetBlocks)
+{
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
+
+    m_pAosCondition->ServicePhone_AllowedNetworkTypesChanged(0);
 }
 
 TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason)

@@ -80,7 +80,8 @@ public:
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
     void NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected) override;
-    void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo);
+    void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo) override;
+    void NotifyAllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) override;
 
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
@@ -119,6 +120,7 @@ protected:
     ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
     ImsList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
     ImsList<IAosServicePhoneListener*> m_objAosServicePhoneListeners;
+    IMS_BOOL m_bPlmnBlocked;
 
 private:
     void Init();

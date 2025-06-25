@@ -141,6 +141,14 @@ public:
      * connected.
      */
     virtual void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bCrossSimConnected) = 0;
+
+    /**
+     * Called to notify the change of the allowed network types.
+     * Called by AosService (Java).
+     *
+     * @param nNetworkTypesBitMask A {@code long} value representing the allowed network types.
+     */
+    virtual void ServicePhone_AllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) = 0;
 };
 
 /**
@@ -216,6 +224,8 @@ public:
     inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override{};
     inline void ServicePhone_PcoValueChanged(IN IMS_SINT32 /*nValue*/) override{};
     inline void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL /*bCrossSimConnected*/) override {};
+    inline void ServicePhone_AllowedNetworkTypesChanged(
+            IN IMS_ULONG /*nNetworkTypesBitMask*/) override {};
 };
 
 #endif  // INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_

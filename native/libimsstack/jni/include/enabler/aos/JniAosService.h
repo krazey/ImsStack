@@ -71,6 +71,7 @@ private:
     void NotifyCrossSimStatus(IN const android::Parcel& objParcel);
     void NotifyEmergencyCallbackModeChanged(IN const android::Parcel& objParcel);
     void NotifyNasSecurityAlgorithmChanged(IN const android::Parcel& objParcel);
+    void NotifyAllowedNetworkTypesChanged(IN const android::Parcel& objParcel);
 
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 

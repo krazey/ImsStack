@@ -78,6 +78,8 @@ public:
     MOCK_METHOD(void, NotifyCarrierSignalPcoValueChanged, (IN IMS_SINT32 nValue), (override));
     MOCK_METHOD(void, NotifyCrossSimStatus, (IN IMS_SINT32 nIsConnected), (override));
     MOCK_METHOD(void, NotifyNasSecurityAlgorithmChanged, (IN IMS_UINT32 nIsNullAlgo), (override));
+    MOCK_METHOD(void, NotifyAllowedNetworkTypesChanged, (IN IMS_ULONG nNetworkTypesBitMask),
+            (override));
 
     MOCK_METHOD(IMS_BOOL, NotifyRegistered,
             (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,

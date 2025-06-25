@@ -35,6 +35,7 @@ AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_objAosRegistrationControlListeners(ImsList<IAosRegistrationControlListener*>()),
         m_objAosServiceSettingListeners(ImsList<IAosServiceSettingListener*>()),
         m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
+        m_bPlmnBlocked(IMS_FALSE),
         m_nSlotId(nSlotId),
         m_bNullNasSecAlgo(IMS_FALSE),
         m_objCapabilities(ImsMap<IMS_UINT32, IMS_UINT32>())
@@ -668,6 +669,26 @@ PUBLIC VIRTUAL void AosService::NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 
     m_bNullNasSecAlgo = TO_BOOLEAN(nIsNullAlgo);
 }
 
+PUBLIC VIRTUAL void AosService::NotifyAllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyAllowedNetworkTypesChanged :: nNetworkTypesBitMask(%ld)",
+            nNetworkTypesBitMask, 0, 0);
+
+    if (m_bPlmnBlocked)
+    {
+        m_bPlmnBlocked = IMS_FALSE;
+        for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
+        {
+            IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
+
+            if (piListener != IMS_NULL)
+            {
+                piListener->ServicePhone_AllowedNetworkTypesChanged(nNetworkTypesBitMask);
+            }
+        }
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
         IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
         IN const ImsList<AString>& objFeatureTags)
@@ -703,6 +724,11 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyDeregistered - regType(%d), network(%d), reason(%d)", nRegType,
             static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
+    if (eReason == AosReasonCode::PLMN_BLOCK)
+    {
+        m_bPlmnBlocked = IMS_TRUE;
+    }
+
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {

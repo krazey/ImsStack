@@ -66,6 +66,10 @@ public:
     {
         return m_objAosServicePhoneListeners;
     }
+
+    inline IMS_BOOL IsPlmnBlocked() { return m_bPlmnBlocked; }
+
+    inline void SetPlmnBlocked(IN IMS_BOOL bBlock) { m_bPlmnBlocked = bBlock; }
 };
 
 class AosServiceTest : public ::testing::Test
@@ -1021,6 +1025,20 @@ TEST_F(AosServiceTest, ShouldReturnFalseWhenWhenNasSecurityAlgorithmChanged)
     m_pAosService->NotifyNasSecurityAlgorithmChanged(0);
 
     EXPECT_FALSE(m_pAosService->IsNasSecurityAlgorithmNull());
+}
+
+TEST_F(AosServiceTest, NotifyNetworkTypesWhenAllowedNetworkTypesChangedIfPlmnBlocked)
+{
+    MockIAosServicePhoneListener objMockListener;
+
+    m_pAosService->AddListener(&objMockListener);
+    m_pAosService->SetPlmnBlocked(IMS_TRUE);
+
+    EXPECT_CALL(objMockListener, ServicePhone_AllowedNetworkTypesChanged(_));
+
+    m_pAosService->NotifyAllowedNetworkTypesChanged(0);
+
+    EXPECT_FALSE(m_pAosService->IsPlmnBlocked());
 }
 
 TEST_F(AosServiceTest, NotifyRegistered)

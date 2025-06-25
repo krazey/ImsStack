@@ -49,6 +49,8 @@ protected:
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) final{};
     inline void ServicePhone_PlmnChanged(IN const AString& /*strPlmn*/) final {};
     inline void ServicePhone_PowerOff() final{};
+    inline void ServicePhone_AllowedNetworkTypesChanged(
+            IN IMS_ULONG /*nNetworkTypesBitMask*/) final {};
 };
 
 #endif  // AOS_E_CONDITION_H_

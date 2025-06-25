@@ -195,6 +195,13 @@ public interface IAosInfo {
     void notifyNasSecurityAlgorithmChanged(boolean isNullAlgo);
 
     /**
+     * Called to notify the change of the allowed network types.
+     *
+     * @param networkTypesBitMask A {@code long} value representing the allowed network types.
+     */
+    void notifyAllowedNetworkTypesChanged(long networkTypesBitMask);
+
+    /**
      * Represents the preferred voice network for roaming.
      */
     enum RoamingPreferredVoiceNetwork {
