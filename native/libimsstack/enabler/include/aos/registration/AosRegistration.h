@@ -289,6 +289,7 @@ protected:
     virtual void ProcessRegForbbidenInWifi();
     virtual void ProcessAuthenticationFailed();
     virtual void ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime);
+    virtual void ProcessRegRequiredWithSamePcscf();
     virtual void ProcessRegRequiredWithNextPcscf();
     virtual void ProcessRegRequiredWithAvailableNextPcscf(
             IN IMS_BOOL bSetCurrentPcscfInvalid, IN IMS_UINT32 nReconnectTime = 0);
