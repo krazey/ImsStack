@@ -4304,27 +4304,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
         {
             StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
             SetState(STATE_REGSTOP);
-            if (GET_N_CONFIG(m_nSlotId)->IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported())
-            {
-                if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() &&
-                        piPcscf->GetPcscfCount() > 1 && piPcscf->IsAllPcscfTried() &&
-                        piPcscf->IsFirstPcscf() &&
-                        GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() > 0)
-                {
-                    A_IMS_TRACE_I(REGID, "StartWithSpecifiedIntervalPolicy :: all pcscfs are tried",
-                            0, 0, 0);
-                    piPcscf->ResetAllPcscfTried();
-                    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PLMN_BLOCK_WITH_TIMEOUT);
-                }
-                else
-                {
-                    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-                }
-            }
-            else
-            {
-                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-            }
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
         }
         else
         {

@@ -98,8 +98,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallbackModeSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencySmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsContactUriValidationChecked, (), (const, override));
-    MOCK_METHOD(
-            IMS_BOOL, IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRetryWithIpVerFallback, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReleaseEPdnOfUnavailableNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReleaseEPdnUponECallEndInFakeMode, (), (const, override));

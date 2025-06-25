@@ -3740,25 +3740,6 @@ TEST_F(AosRegistrationTest,
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
-TEST_F(AosRegistrationTest, ResetPcscfTriedIfAllPcscfTriedWhenStartWithSpecifiedInterval)
-{
-    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported())
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
-    ON_CALL(m_objMockIAosPcscf, IsAllPcscfTried()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte()).WillByDefault(Return(10));
-
-    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTried());
-
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
-}
-
 TEST_F(AosRegistrationTest,
         ReportFailureDueToNoPcscfIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
 {

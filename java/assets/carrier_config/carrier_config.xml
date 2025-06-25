@@ -372,7 +372,6 @@
     <boolean name="ims.keep_reg_retry_timer_on_all_enablers_detached_bool" value="false"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="false"/>
     <boolean name="ims.reg_contact_validation_bool" value="false"/>
-    <boolean name="ims.reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool" value="false"/>
     <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="ims.remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="ims.request_ims_pdn_without_mmtel_bool" value="false"/>
