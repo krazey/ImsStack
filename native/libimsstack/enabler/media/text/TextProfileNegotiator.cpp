@@ -133,19 +133,23 @@ IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
+        TextProfile::Payload* pPeerPayload = pPeerProfile->GetPayloadAt(i);
 
-        if (pPayload == IMS_NULL)
+        if (pPeerPayload == IMS_NULL)
         {
             continue;
         }
 
-        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140") ||
-                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
+        if (pPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140") ||
+                pPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            if (FindT140InProfile(pLocalProfile, pPayload))
+            TextProfile::Payload* pLocalPayload = FindT140InProfile(pLocalProfile, pPeerPayload);
+            if (pLocalPayload != IMS_NULL)
             {
-                AppendT140Payload(pPayload, pNegotiatedProfile);
+                TextProfile::Payload* pNegotiatedPayload = CreatePayload(pPeerPayload->GetRtpMap(),
+                        pPeerPayload->GetFmtp() == IMS_NULL ? pLocalPayload->GetFmtp()
+                                                            : pPeerPayload->GetFmtp());
+                pNegotiatedProfile->GetPayloadList().Append(pNegotiatedPayload);
                 bRet = IMS_TRUE;
             }
         }
@@ -153,20 +157,20 @@ IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
 
     return bRet;
 }
-PRIVATE
-void TextProfileNegotiator::AppendT140Payload(
-        IN TextProfile::Payload* pPayload, OUT TextProfile* pNegotiatedProfile)
-{
-    TextProfile::Payload* pT140 = new TextProfile::Payload();
-    pT140->SetRtpMap(pPayload->GetRtpMap());
 
-    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
+PRIVATE
+TextProfile::Payload* TextProfileNegotiator::CreatePayload(
+        IN MediaBaseProfile::RtpMap& objRtpMap, IN MediaBaseProfile::BaseFmtp* pFmtp)
+{
+    TextProfile::Payload* pPayload = new TextProfile::Payload();
+    pPayload->SetRtpMap(objRtpMap);
+
+    if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && pFmtp != IMS_NULL)
     {
-        pT140->SetFmtp(
-                new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp())));
+        pPayload->SetFmtp(new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(pFmtp)));
     }
 
-    pNegotiatedProfile->GetPayloadList().Append(pT140);
+    return pPayload;
 }
 
 PRIVATE
@@ -310,13 +314,13 @@ void TextProfileNegotiator::NegotiateRtcpInterval(
     }
 }
 
-PRIVATE IMS_BOOL TextProfileNegotiator::FindT140InProfile(
+PRIVATE TextProfile::Payload* TextProfileNegotiator::FindT140InProfile(
         IN TextProfile* pProfile, IN TextProfile::Payload* pPayload)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
     {
         IMS_TRACE_E(0, "FindT140InProfile(): invalid argument", 0, 0, 0);
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
@@ -337,7 +341,7 @@ PRIVATE IMS_BOOL TextProfileNegotiator::FindT140InProfile(
             {
                 IMS_TRACE_D("FindT140InProfile(): Found T140 at [%d], Codec[%s]", i,
                         pComparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
-                return IMS_TRUE;
+                return pComparedPayload;
             }
         }
         else if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
@@ -351,26 +355,20 @@ PRIVATE IMS_BOOL TextProfileNegotiator::FindT140InProfile(
                         (TextProfile::RedFmtp*)pComparedPayload->GetFmtp();
                 TextProfile::RedFmtp* pReceivedFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
 
-                if (pReceivedFmtp == IMS_NULL)
+                if (pComparedFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                 {
-                    continue;
-                }
-
-                if (pReceivedFmtp->GetRedLevel() > pComparedFmtp->GetRedLevel() ||
-                        pReceivedFmtp->GetRedPayload() < 0)
-                {
-                    continue;
+                    IMS_TRACE_I("FindT140InProfile(): No fmtp to compare", 0, 0, 0);
                 }
 
                 IMS_TRACE_D("FindT140InProfile(): Found RED at [%d], Codec[%s]", i,
                         pComparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
 
-                return IMS_TRUE;
+                return pComparedPayload;
             }
         }
     }
 
-    return IMS_FALSE;
+    return IMS_NULL;
 }
 
 PRIVATE MEDIA_DIRECTION TextProfileNegotiator::UpdateDirectionToMine(
