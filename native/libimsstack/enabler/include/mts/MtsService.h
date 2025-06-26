@@ -31,7 +31,7 @@ class IImsRadio;
 class IMtsContext;
 class IMtsTraffic;
 
-class MtsService final :
+class MtsService :
         public ICoreServiceListener,
         public IImsAosListener,
         public IMtsService,
@@ -86,32 +86,30 @@ public:
     void Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
     void Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
 
-    // Test-Purpose
-    void InitMtsServiceState();
-    inline void SetIImsAos(IN IImsAos* piImsAos) { m_piImsAos = piImsAos; }
-
 private:
     void AttachAos();
     void AttachCoreService();
+    void DeInit();
+    void InitMtsServiceState();
+
     IMS_UINT32 ConvertToAccessNetworkType(IN IMS_SINT32 nReportedNetwork);
     IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
     IMS_UINT32 GetTrafficTypeOfService() const;
-    IMS_BOOL IsEmergencySmsOverImsSupported() const;
     IMS_BOOL IsEmergencySmsReadyToSend() const;
     MtsTrafficStartResult StartMtTraffic();
     MtsTrafficStartResult StartMoTrafficIfNeeded();
 
-    void DeInit();
-
     IMtsContext& m_objContext;
     MtsServiceType m_eServiceType;
-    IImsAos* m_piImsAos;
     AString m_strAppId;
-    ICoreService* m_piCoreService;
-    IMtsServiceState* m_piMtsServiceState;
     IImsRadio* m_piImsRadio;
     ImsList<IMtsTraffic*> m_objMtsTraffics;
     std::unique_ptr<SmsSendRequestInfo> m_pSmsInfo;
+
+protected:
+    ICoreService* m_piCoreService;
+    IImsAos* m_piImsAos;
+    IMtsServiceState* m_piMtsServiceState;
 };
 
 #endif
