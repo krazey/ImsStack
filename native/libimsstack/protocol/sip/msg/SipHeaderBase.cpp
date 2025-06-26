@@ -603,6 +603,13 @@ SIP_BOOL SipNameAddrHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         m_pNameAddr->m_pAddrSpec = pAddrSpec;
     }
 
+    if (GetHdrType() == SipHeaderBase::P_PREFERRED_IDENTITY ||
+            GetHdrType() == SipHeaderBase::P_ASSERTED_IDENTITY)
+    {
+        // name-addr or addr-spec is only allowed.
+        return SIP_TRUE;
+    }
+
     return (pTempNext != SIP_NULL) ? DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) : SIP_TRUE;
 }
 

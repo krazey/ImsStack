@@ -301,4 +301,35 @@ TEST_F(SipNameAddrHeaderTest, DecodeEncodeSipUri)
     pHeader->SipDelete();
     pHeader = nullptr;
 }
+
+TEST_F(SipNameAddrHeaderTest, DecodePPreferredIdentity)
+{
+    SipNameAddrHeader* pHeader = static_cast<SipNameAddrHeader*>(
+            SipNameAddrHeader::GetNewObj(SipHeaderBase::P_PREFERRED_IDENTITY, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    AStringBuffer objBuffer(128);
+    const SIP_CHAR* pszUri = "<sip:test@ims.com>";
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pszUri, SipPf_Strlen(pszUri)));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
+    EXPECT_STREQ(pszUri, objBuffer.GetCharString());
+    EXPECT_EQ(0, pHeader->GetParamCount());
+
+    pHeader->SipDelete();
+    objBuffer = AString::ConstNull();
+
+    pHeader = static_cast<SipNameAddrHeader*>(
+            SipNameAddrHeader::GetNewObj(SipHeaderBase::P_PREFERRED_IDENTITY, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    const SIP_CHAR* pszExpectedUri = "Test <sip:test@ims.com>";
+    const SIP_CHAR* pszUriWithParam = "Test <sip:test@ims.com>;service-priority=3";
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pszUriWithParam, SipPf_Strlen(pszUriWithParam)));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
+    EXPECT_STREQ(pszExpectedUri, objBuffer.GetCharString());
+    EXPECT_EQ(0, pHeader->GetParamCount());
+
+    pHeader->SipDelete();
+    objBuffer.Fill('\0');
+}
 }  // namespace android
