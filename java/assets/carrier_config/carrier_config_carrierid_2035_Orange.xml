@@ -17,11 +17,16 @@
 <!-- carrier_name: Orange (Liberia) -->
 <carrier_config>
     <!-- Aos -->
+    <boolean name="ims.pdn_reconnect_on_all_pcscfs_unavailable_bool" value="true"/>
     <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="2">
         <item value="0"/>
         <item value="5"/>
     </int-array>
     <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="2">
+        <item value="0"/>
+        <item value="5"/>
+    </int-array>
+    <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="2">
         <item value="0"/>
         <item value="5"/>
     </int-array>

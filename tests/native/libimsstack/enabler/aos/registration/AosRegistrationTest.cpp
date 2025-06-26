@@ -3247,6 +3247,24 @@ TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenRegRequiredWith
     m_pAosRegistration->ProcessRegRequiredWithNextPcscf();
 }
 
+TEST_F(AosRegistrationTest, ReportPdnReconnectWithAwtIfNoPcscfAvailableWhenRegRequiredWithNextPcscf)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsPdnReconnectOnAllPcscfsUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
+
+    // WHEN
+    m_pAosRegistration->ProcessRegRequiredWithNextPcscf();
+
+    // THEN: The GIVEN condition should be met.
+}
+
 TEST_F(AosRegistrationTest,
         StartOfflineRecoverTimerWithRetryAfterValueWhenRegRequiredWithAvailableNextPcscf)
 {
