@@ -650,7 +650,13 @@ public interface IAosRegistrationListener {
                         ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE)),
                 Map.entry(ReasonCode.NETWORK_TRIGGERED_DEREGISTER, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                        ImsReasonInfo.CODE_NETWORK_DETACH))
+                        ImsReasonInfo.CODE_NETWORK_DETACH)),
+                Map.entry(ReasonCode.PLMN_BLOCK, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR)),
+                Map.entry(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR))
         );
 
         /**
