@@ -308,6 +308,8 @@ protected:
     virtual void ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(IN IMS_UINT32 nRetryAfter);
     virtual void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
             IN IMS_UINT32 nRetryAfter);
+    virtual void ProcessDefaultFlowRecovery_StartWithFailureToEachPcscf(IN IMS_UINT32 nRetryAfter);
+    virtual void ProcessDefaultFlowRecovery_StartWithRfcRule(IN IMS_UINT32 nRetryAfter);
     virtual void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0);
     virtual void ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
             IN IMS_SINT32 nStatusCode, IN IMS_UINT32 nRetryAfter);

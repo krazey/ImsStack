@@ -4124,100 +4124,37 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 
     m_piContext->GetPcscf()->IncreaseCurrentPcscfTriedCount();
 
-    IMS_UINT32 nRetryAfter = 0;
+    IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
     if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDefined())
     {
-        if (IsErrorCodeExisted(
+        if (!IsErrorCodeExisted(
                     GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithRetryAfterTime(), nStatusCode))
         {
-            nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
-        }
-    }
-    else
-    {
-        nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
-    }
-
-    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
-    IMS_UINT32 nAwt = 0;
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
-    {
-        ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(nRetryAfter);
-        return;
-    }
-    else
-    {
-        IncreaseConsecutiveFailCount();
-    }
-
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
-    {
-        ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
-        return;
-    }
-    else
-    {
-        nAwt = GetActualWaitTime();
-    }
-
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
-    {
-        if (SetNextPcscf())
-        {
-            IMS_UINT32 nRetryTime = (nRetryAfter > 0) ? nRetryAfter : nAwt;
-            StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
-
-            SetState(STATE_REGSTOP);
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-            return;
-        }
-    }
-    else  // AWT_POLICY_RFC_RULE
-    {
-        IMS_BOOL bBlockPcscf = GET_N_CONFIG(m_nSlotId)->IsBlockPcscfOnRegFailure();
-
-        if (nRetryAfter > 0)  // IR.92
-        {
-            if (bBlockPcscf)
-            {
-                m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nRetryAfter);
-            }
-
-            if (TryNextPcscf())
-            {
-                SetState(STATE_REGISTERING);
-                ReportTryingState();
-                return;
-            }
-        }
-        else  // 3GPP TS 24.229
-        {
-            if (bBlockPcscf)
-            {
-                m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nAwt + 300);
-            }
-
-            if (SetNextPcscf())
-            {
-                StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
-                SetState(STATE_REGSTOP);
-                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-                return;
-            }
+            nRetryAfter = 0;
         }
     }
 
-    SetState(STATE_REGSTOP);
+    switch (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy())
+    {
+        case CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF:
+            ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(nRetryAfter);
+            break;
 
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
-    {
-        m_nPdnReactivateWaitTime = 0;
-        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
-    }
-    else  // AWT_POLICY_RFC_RULE
-    {
-        m_nPdnReactivateWaitTime = (nRetryAfter > 0) ? nRetryAfter : nAwt;
-        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        case CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL:
+            IncreaseConsecutiveFailCount();
+            ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
+            break;
+
+        case CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF:
+            IncreaseConsecutiveFailCount();
+            ProcessDefaultFlowRecovery_StartWithFailureToEachPcscf(nRetryAfter);
+            break;
+
+        case CarrierConfig::Ims::AWT_POLICY_RFC_RULE:  // FALL-THROUGH
+        default:
+            IncreaseConsecutiveFailCount();
+            ProcessDefaultFlowRecovery_StartWithRfcRule(nRetryAfter);
+            break;
     }
 }
 
@@ -4333,6 +4270,73 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
         else
         {
             // TODO: T3402 block
+            m_nPdnReactivateWaitTime = nAwt;
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        }
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithFailureToEachPcscf(
+        IN IMS_UINT32 nRetryAfter)
+{
+    if (SetNextPcscf())
+    {
+        IMS_UINT32 nRetryTime = (nRetryAfter > 0) ? nRetryAfter : GetActualWaitTime();
+        StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
+
+        SetState(STATE_REGSTOP);
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+    }
+    else
+    {
+        SetState(STATE_REGSTOP);
+        m_nPdnReactivateWaitTime = 0;
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithRfcRule(
+        IN IMS_UINT32 nRetryAfter)
+{
+    IMS_BOOL bBlockPcscf = GET_N_CONFIG(m_nSlotId)->IsBlockPcscfOnRegFailure();
+
+    if (nRetryAfter > 0)  // IR.92
+    {
+        if (bBlockPcscf)
+        {
+            m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nRetryAfter);
+        }
+
+        if (TryNextPcscf())
+        {
+            SetState(STATE_REGISTERING);
+            ReportTryingState();
+        }
+        else
+        {
+            SetState(STATE_REGSTOP);
+            m_nPdnReactivateWaitTime = nRetryAfter;
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        }
+    }
+    else  // 3GPP TS 24.229
+    {
+        IMS_UINT32 nAwt = GetActualWaitTime();
+
+        if (bBlockPcscf)
+        {
+            m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nAwt + 300);
+        }
+
+        if (SetNextPcscf())
+        {
+            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+            SetState(STATE_REGSTOP);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+        else
+        {
+            SetState(STATE_REGSTOP);
             m_nPdnReactivateWaitTime = nAwt;
             ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
         }
