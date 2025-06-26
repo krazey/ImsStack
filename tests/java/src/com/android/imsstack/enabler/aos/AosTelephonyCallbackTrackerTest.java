@@ -20,6 +20,8 @@ import static android.telephony.SecurityAlgorithmUpdate.CONNECTION_EVENT_NAS_SIG
 import static android.telephony.SecurityAlgorithmUpdate.CONNECTION_EVENT_VOLTE_SIP;
 import static android.telephony.SecurityAlgorithmUpdate.SECURITY_ALGORITHM_EEA0;
 import static android.telephony.SecurityAlgorithmUpdate.SECURITY_ALGORITHM_EEA2;
+import static android.telephony.TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER;
+import static android.telephony.TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER;
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.CALL_STATE_OFFHOOK;
 
@@ -30,6 +32,7 @@ import static com.android.imsstack.base.TestAppContext.SUB_ID_2;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -98,7 +101,11 @@ public class AosTelephonyCallbackTrackerTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT0);
         mAosTelephonyCallbackTracker = new AosTelephonyCallbackTracker(SLOT0);
 
+        mAosTelephonyCallbackTracker.createDummyForAllowedNetworkTypes();
+
         mAosTelephonyCallbackTracker.init();
+
+        mAosTelephonyCallbackTracker.mAllowedNetworkTypesListener = null;
     }
 
     @After
@@ -133,7 +140,6 @@ public class AosTelephonyCallbackTrackerTest {
                 EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         outgoingEmcCallListener.onOutgoingEmergencyCall(num911, SUB_ID_1);
-        processAllMessages();
 
         verify(mTelephonyManagerProxy, times(1)).registerTelephonyCallback(
                 any(Executor.class), eq(mAosTelephonyCallbackTracker.mEmergencyCallListener));
@@ -159,7 +165,6 @@ public class AosTelephonyCallbackTrackerTest {
                 EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         outgoingEmcCallListener.onOutgoingEmergencyCall(num911, SUB_ID_1);
-        processAllMessages();
 
         verify(mTelephonyManagerProxy, never()).registerTelephonyCallback(
                 any(Executor.class), eq(mAosTelephonyCallbackTracker.mCallStateListener));
@@ -180,7 +185,6 @@ public class AosTelephonyCallbackTrackerTest {
                 SECURITY_ALGORITHM_EEA2, false);
 
         secuAlgoListener.onSecurityAlgorithmsChanged(update);
-        processAllMessages();
 
         verify(mMockAosService, never()).notifyNasSecurityAlgorithmChanged(anyBoolean());
     }
@@ -198,9 +202,35 @@ public class AosTelephonyCallbackTrackerTest {
                 SECURITY_ALGORITHM_EEA0, false);
 
         secuAlgoListener.onSecurityAlgorithmsChanged(update);
-        processAllMessages();
 
         verify(mMockAosService, times(1)).notifyNasSecurityAlgorithmChanged(eq(true));
+    }
+
+    @Test
+    @SmallTest
+    public void doNotNotifyWhenAllowedNetworkTypesChangedIfNotUserReason() {
+        mAosTelephonyCallbackTracker.registerForAllowedNetworkTypes();
+
+        TelephonyCallback.AllowedNetworkTypesListener networkTypesListener =
+                captureAllowedNetworkTypesListener();
+
+        networkTypesListener.onAllowedNetworkTypesChanged(ALLOWED_NETWORK_TYPES_REASON_POWER, 1);
+
+        verify(mMockAosService, never()).notifyAllowedNetworkTypesChanged(anyLong());
+    }
+
+    @Test
+    @SmallTest
+    public void doNotifyWhenAllowedNetworkTypesChangedIfUserReason() {
+        mAosTelephonyCallbackTracker.registerForAllowedNetworkTypes();
+
+        TelephonyCallback.AllowedNetworkTypesListener networkTypesListener =
+                captureAllowedNetworkTypesListener();
+
+        networkTypesListener.onAllowedNetworkTypesChanged(ALLOWED_NETWORK_TYPES_REASON_USER, 1);
+        networkTypesListener.onAllowedNetworkTypesChanged(ALLOWED_NETWORK_TYPES_REASON_USER, 0);
+
+        verify(mMockAosService, times(2)).notifyAllowedNetworkTypesChanged(anyLong());
     }
 
     @Test
@@ -265,15 +295,20 @@ public class AosTelephonyCallbackTrackerTest {
         return (TelephonyCallback.SecurityAlgorithmsListener) captor.getValue();
     }
 
+    private TelephonyCallback.AllowedNetworkTypesListener captureAllowedNetworkTypesListener() {
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        ArgumentMatcher<TelephonyCallback> isNetworkTypesListener = callback ->
+                callback instanceof TelephonyCallback.AllowedNetworkTypesListener;
+        verify(mTelephonyManagerProxy, atLeastOnce()).registerTelephonyCallback(
+                any(), argThat(isNetworkTypesListener));
+        Mockito.verify(mTelephonyManagerProxy, atLeastOnce()).registerTelephonyCallback(
+                any(), captor.capture());
+        return (TelephonyCallback.AllowedNetworkTypesListener) captor.getValue();
+    }
+
     private Sim.Listener captureSimListener() {
         ArgumentCaptor<Sim.Listener> captor = ArgumentCaptor.forClass(Sim.Listener.class);
         verify(mSimInterface).addListener(captor.capture());
         return (Sim.Listener) captor.getValue();
-    }
-
-    private void processAllMessages() {
-        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
-            mTestableLooper.processAllMessages();
-        }
     }
 }

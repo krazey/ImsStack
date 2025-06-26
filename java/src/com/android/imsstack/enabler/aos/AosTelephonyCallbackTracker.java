@@ -50,6 +50,7 @@ public class AosTelephonyCallbackTracker {
     private Sim.Listener mSimListener;
     private boolean mNullIntegrityAlgorithm = false;
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
+    private long mNetworkTypesBitMask = 0;
 
     @VisibleForTesting
     protected EmergencyCallListener mEmergencyCallListener;
@@ -57,6 +58,8 @@ public class AosTelephonyCallbackTracker {
     protected CallStateListener mCallStateListener;
     @VisibleForTesting
     protected SecurityAlgorithmsListener mSecurityAlgorithmsListener;
+    @VisibleForTesting
+    protected AllowedNetworkTypesListener mAllowedNetworkTypesListener;
 
     AosTelephonyCallbackTracker(int slotId) {
         mSlotId = slotId;
@@ -80,6 +83,7 @@ public class AosTelephonyCallbackTracker {
         mSubId = MSimUtils.getSubId(mSlotId);
         if (mSubId != MSimUtils.INVALID_SUB_ID) {
             registerForEmergencyCall();
+            registerForAllowedNetworkTypes();
         }
     }
 
@@ -101,6 +105,10 @@ public class AosTelephonyCallbackTracker {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
         }
+
+        mNullIntegrityAlgorithm = false;
+        mCallState = TelephonyManager.CALL_STATE_IDLE;
+        mNetworkTypesBitMask = 0;
     }
 
     private void handleSimStateChanged() {
@@ -112,18 +120,22 @@ public class AosTelephonyCallbackTracker {
         synchronized (mLock) {
             int subId = sim.getSubId();
 
+            ImsLog.i(this, mSlotId, "handleSimStateChanged: subId=" + subId);
+
             if (mSubId == subId || subId == MSimUtils.INVALID_SUB_ID) {
                 return;
             }
 
-            ImsLog.i(this, mSlotId, "handleSimStateChanged: subId=" + subId);
             mSubId = subId;
-
             registerForEmergencyCall();
 
             if (mSecurityAlgorithmsListener != null) {
                 unregisterForSecurityAlgorithms();
                 registerForSecurityAlgorithms();
+            }
+            if (mAllowedNetworkTypesListener != null) {
+                unregisterForAllowedNetworkTypes();
+                registerForAllowedNetworkTypes();
             }
         }
     }
@@ -163,6 +175,18 @@ public class AosTelephonyCallbackTracker {
         }
     }
 
+    private void handleAllowedNetworkTypesChanged(long networkTypesBitMask) {
+        IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
+        if (aosInfo == null) {
+            return;
+        }
+
+        if (mNetworkTypesBitMask != networkTypesBitMask) {
+            aosInfo.notifyAllowedNetworkTypesChanged(networkTypesBitMask);
+            mNetworkTypesBitMask = networkTypesBitMask;
+        }
+    }
+
     private boolean isConnectionEventForNas(int event) {
         if (event == SecurityAlgorithmUpdate.CONNECTION_EVENT_NAS_SIGNALLING_LTE) {
             return true;
@@ -181,6 +205,10 @@ public class AosTelephonyCallbackTracker {
             return true;
         }
         return false;
+    }
+
+    private boolean isAllowedNetworkTypesChangedByUser(int reason) {
+        return reason == TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER;
     }
 
     private boolean isNasSecurityAlgorithmNotificationRequired() {
@@ -204,7 +232,6 @@ public class AosTelephonyCallbackTracker {
         }
     }
 
-    @VisibleForTesting
     protected void registerForEmergencyCall() {
         if (mEmergencyCallListener == null) {
             mEmergencyCallListener = new EmergencyCallListener();
@@ -234,10 +261,31 @@ public class AosTelephonyCallbackTracker {
         }
     }
 
+    @VisibleForTesting
+    protected void createDummyForAllowedNetworkTypes() {
+        mAllowedNetworkTypesListener = new AllowedNetworkTypesListener(mSubId);
+    }
+
+    @VisibleForTesting
+    protected void registerForAllowedNetworkTypes() {
+        if (mAllowedNetworkTypesListener == null) {
+            mAllowedNetworkTypesListener = new AllowedNetworkTypesListener(mSubId);
+            mAllowedNetworkTypesListener.register();
+        }
+    }
+
+    private void unregisterForAllowedNetworkTypes() {
+        if (mAllowedNetworkTypesListener != null) {
+            mAllowedNetworkTypesListener.unregister();
+            mAllowedNetworkTypesListener = null;
+        }
+    }
+
     private void unregisterTelephonyCallbacks() {
         unregisterForCallState();
         unregisterForEmergencyCall();
         unregisterForSecurityAlgorithms();
+        unregisterForAllowedNetworkTypes();
     }
 
     @VisibleForTesting
@@ -309,7 +357,7 @@ public class AosTelephonyCallbackTracker {
                 return;
             }
 
-            mHandler.post(() -> handleOutgoingEmergencyCall());
+            handleOutgoingEmergencyCall();
         }
     }
 
@@ -341,8 +389,40 @@ public class AosTelephonyCallbackTracker {
                 return;
             }
 
-            mHandler.post(() -> handleSecurityAlgorithmsChanged(
-                    securityAlgorithmUpdate.getIntegrity()));
+            handleSecurityAlgorithmsChanged(securityAlgorithmUpdate.getIntegrity());
+        }
+    }
+
+    private final class AllowedNetworkTypesListener extends TelephonyCallback implements
+            TelephonyCallback.AllowedNetworkTypesListener {
+        private final int mSubId;
+
+        AllowedNetworkTypesListener(int subId) {
+            mSubId = subId;
+        }
+
+        public void register() {
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.registerTelephonyCallback(mHandler::post, this);
+        }
+
+        public void unregister() {
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.unregisterTelephonyCallback(this);
+        }
+
+        @Override
+        public void onAllowedNetworkTypesChanged(
+                @TelephonyManager.AllowedNetworkTypesReason int reason,
+                @TelephonyManager.NetworkTypeBitMask long allowedNetworkType) {
+            ImsLog.i(this, mSlotId, "onAllowedNetworkTypesChanged: reason="
+                    + reason + " , network=" + allowedNetworkType);
+
+            if (!isAllowedNetworkTypesChangedByUser(reason)) {
+                return;
+            }
+
+            handleAllowedNetworkTypesChanged(allowedNetworkType);
         }
     }
 }

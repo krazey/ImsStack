@@ -72,6 +72,8 @@ public:
     /// IAosInfo(Java) -> IAosServicePhoneListener(Native)
     static const IMS_SINT32 J2N_NOTIFY_VOPS_STATE_CHANGED = EVENT_J2N_INFO + 24;
     static const IMS_SINT32 J2N_NOTIFY_NAS_ALGORITHM_CHANGED = EVENT_J2N_INFO + 25;
+    /// IAosInfo(Java) -> IAosServicePhoneListener(Native)
+    static const IMS_SINT32 J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED = EVENT_J2N_INFO + 26;
 
     /**
      * Messages from native layer to java layer

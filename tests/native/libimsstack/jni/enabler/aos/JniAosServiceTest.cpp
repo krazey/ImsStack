@@ -486,6 +486,21 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyNasSecurityAlgorithmCh
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyAllowedNetworkTypesChanged)
+{
+    // GIVEN
+    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED);
+    m_objParcel.writeInt64(1);
+    m_objParcel.setDataPosition(0);
+
+    EXPECT_CALL(m_objMockIAosService, NotifyAllowedNetworkTypesChanged(_));
+
+    // WHEN
+    m_pJniAosService->SendData(m_objParcel);
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyEmergencyCallbackModeChanged)
 {
     // GIVEN

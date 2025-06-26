@@ -151,6 +151,7 @@ protected:
             IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
     void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
     void ServicePhone_PowerOff() override;
+    void ServicePhone_AllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) override;
 
     // AosServiceSettingListener
     void ServiceSetting_AirplaneChanged(IN IMS_BOOL bIsOn) override;
@@ -185,6 +186,7 @@ protected:
     void ProcessWifiSettingEvent(IN IMS_BOOL bIsOn);
     void ProcessLocationInfo(IN LocationInfo eState);
     void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
+    void ProcessAllowedNetworkTypesEvent(IN IMS_ULONG nNetworkTypesBitMask);
 
     void ClearRegistrationAndDataFailureBlocks();
 

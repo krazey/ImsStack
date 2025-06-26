@@ -587,6 +587,16 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void notifyllowedNetworkTypesChanged() {
+        byte[] allowedNetworkTypesData = createBytesWithLong(
+                IIAosService.J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED, 1L);
+
+        mAosService.notifyAllowedNetworkTypesChanged(1L);
+
+        verify(mMockJniIms).sendData(mNativeObject, allowedNetworkTypesData);
+    }
+
+    @Test
     public void onSimStateChanged_simLoaded() {
         byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED.getValue());
@@ -1439,6 +1449,17 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(event);
         parcel.writeBoolean(isOn);
+
+        byte[] data = parcel.marshall();
+        parcel.recycle();
+
+        return data;
+    }
+
+    private byte[] createBytesWithLong(int event, long code) {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(event);
+        parcel.writeLong(code);
 
         byte[] data = parcel.marshall();
         parcel.recycle();

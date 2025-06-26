@@ -98,6 +98,7 @@ public:
     virtual void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) = 0;
     virtual void NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected) = 0;
     virtual void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo) = 0;
+    virtual void NotifyAllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) = 0;
 
     /**
      * Notify an emergency callback mode changed information by AosService (Java)

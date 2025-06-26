@@ -42,6 +42,8 @@ public:
     MOCK_METHOD(void, ServicePhone_PcoValueChanged, (IN IMS_SINT32 nValue), (override));
     MOCK_METHOD(
             void, ServicePhone_CrossSimStatusChanged, (IN IMS_BOOL bCrossSimConnected), (override));
+    MOCK_METHOD(void, ServicePhone_AllowedNetworkTypesChanged, (IN IMS_ULONG nNetworkTypesBitMask),
+            (override));
 };
 
 #endif  // MOCK_I_AOS_SERVICE_PHONE_LISTENER_H_

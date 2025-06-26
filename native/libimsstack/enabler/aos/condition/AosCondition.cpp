@@ -554,6 +554,14 @@ PROTECTED VIRTUAL void AosCondition::ServicePhone_PowerOff()
     ProcessPowerEvent();
 }
 
+PROTECTED VIRTUAL void AosCondition::ServicePhone_AllowedNetworkTypesChanged(
+        IN IMS_ULONG nNetworkTypesBitMask)
+{
+    A_IMS_TRACE_D(APPPROFILE, "ServicePhone_AllowedNetworkTypesChanged() :: network types(%ld)",
+            nNetworkTypesBitMask, 0, 0);
+    ProcessAllowedNetworkTypesEvent(nNetworkTypesBitMask);
+}
+
 // AosServiceSettingListener
 PROTECTED VIRTUAL void AosCondition::ServiceSetting_AirplaneChanged(IN IMS_BOOL bIsOn)
 {
@@ -857,6 +865,15 @@ void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStat
 
     m_bIsCombinedAttached =
             (nState == IMS_LTE_INFO_COMBINED_ATTACHED && nStateEx == IMS_LTE_INFO_EXTRA_NONE);
+}
+
+PROTECTED
+void AosCondition::ProcessAllowedNetworkTypesEvent(IN IMS_ULONG /*nNetworkTypesBitMask*/)
+{
+    A_IMS_TRACE_D(APPPROFILE, "ProcessAllowedNetworkTypesEvent", 0, 0, 0);
+    ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_CELLULAR_RAT_BLOCK);
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
 }
 
 PROTECTED

@@ -235,6 +235,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyNasSecurityAlgorithmChanged(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED:
+            NotifyAllowedNetworkTypesChanged(objParcel);
+            break;
+
         default:
             break;
     }
@@ -581,6 +585,16 @@ void JniAosService::NotifyNasSecurityAlgorithmChanged(IN const android::Parcel& 
     if (piAosService)
     {
         piAosService->NotifyNasSecurityAlgorithmChanged(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyAllowedNetworkTypesChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyAllowedNetworkTypesChanged(objParcel.readUint64());
     }
 }
 

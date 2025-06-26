@@ -453,6 +453,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
+    public void notifyAllowedNetworkTypesChanged(long networkTypesBitMask) {
+        ImsLog.d(mSlotId, "AosService: notifyAllowedNetworkTypesChanged - network types="
+                + networkTypesBitMask);
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(IIAosService.J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED);
+        parcel.writeLong(networkTypesBitMask);
+        sendRequest(parcel);
+    }
+
+    @Override
     public void onSimStateChanged() {
         ImsLog.d(mSlotId, "AosService: onSimStateChanged");
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
