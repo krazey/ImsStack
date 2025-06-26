@@ -62,6 +62,7 @@ public:
     IMS_BOOL IsAnonymousECallActionSupported() const override;
     IMS_BOOL IsRequiredVolteBlockBySsac() const override;
     IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const override;
+    IMS_BOOL IsGeolocationPidfInWfcInitReg() const override;
     IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const override;
     IMS_BOOL IsSipOverIpsecInRoamingEnabled() const override;
     IMS_BOOL UseWfcCountryCodeAvailabilityCheck() const override;

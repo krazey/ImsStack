@@ -206,6 +206,17 @@ public:
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const = 0;
 
     /**
+     * @brief Returns whether to add geolocation pidf in initial registration over wifi.
+     *
+     *        It's applied if CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI is set
+     *        in the CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY.
+     *
+     * @return IMS_BOOL Return whether to be sent re-registration or not
+     * @see {@code imswfc.geolocation_pidf_in_wfc_init_reg_bool}
+     */
+    virtual IMS_BOOL IsGeolocationPidfInWfcInitReg() const = 0;
+
+    /**
      * @brief Returns whether re-registration is sent on Wifi when the country is changed.
      *
      * @return IMS_BOOL Return whether to be sent re-registration or not

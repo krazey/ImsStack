@@ -216,6 +216,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsGibaSupportedForERegInRoaming() con
     return m_objAsset.bSupportGibaForERegInRoaming;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsGeolocationPidfInWfcInitReg() const
+{
+    return m_objAsset.bGeolocationPidfInWfcInitReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReregRetryWithChangedCountryOnWifi() const
 {
     return m_objAsset.bReregWithChangedCountryOnWifi;
@@ -1543,6 +1548,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::ImsWfc::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL);
+    m_objAsset.bGeolocationPidfInWfcInitReg =
+            piCc->GetBoolean(CarrierConfig::ImsWfc::KEY_GEOLOCATION_PIDF_IN_WFC_INIT_REG_BOOL);
     m_objAsset.bReregWithChangedCountryOnWifi =
             piCc->GetBoolean(CarrierConfig::ImsWfc::KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL);
     m_objAsset.bSipOverIpsecEnabledInRoaming =
