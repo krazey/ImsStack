@@ -413,6 +413,10 @@ public final class ImsPrivateProperties {
          * Keeps the PIDF location information.
          */
         public static final String KEY_PIDF_LOCATION = "pidf_location";
+        /**
+         * Keeps the PIDF address information.
+         */
+        public static final String KEY_PIDF_ADDRESS = "pidf_address";
 
         public static final String[] CONFIG_PROPERTIES = {
             KEY_CONFIG_PCSCF_ADDRESS_LIST,

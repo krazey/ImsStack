@@ -125,6 +125,8 @@ public class LocationAgent implements LocationInterface {
     private long mCachedTimeMotionDetected = 0L;
     private String mLastKnownCountryCode = GeocoderProxy.UNKNOWN_COUNTRY;
 
+    private static final String EXTRA_CACHED_TIME = "cachedTime";
+
     // b/362156367 - support confidence of 90% by following scale factors
     private static final float HORIZONTAL_SCALE_FACTOR = 1.42155f;
     private static final float VERTICAL_SCALE_FACTOR = 1.645f;
@@ -863,7 +865,7 @@ public class LocationAgent implements LocationInterface {
 
         if (validityPeriod > 0L) {
             Bundle extras  = mResolvedAddress.getExtras();
-            long cachedTime = extras.getLong("cachedTime");
+            long cachedTime = extras.getLong(EXTRA_CACHED_TIME);
             long currentTime = SystemClock.elapsedRealtimeNanos();
             long timeLag = (currentTime - cachedTime);
 
@@ -892,6 +894,8 @@ public class LocationAgent implements LocationInterface {
             // When calling using the cached address.
             return;
         }
+
+        ImsLog.d(this, mSlotId, "Address cached");
         mResolvedAddress = address;
         // Set positioning information.
         mResolvedAddress.setLatitude(l.getLatitude());
@@ -899,8 +903,10 @@ public class LocationAgent implements LocationInterface {
 
         Bundle extras = new Bundle();
         long cachedTime = SystemClock.elapsedRealtimeNanos();
-        extras.putLong("cachedTime", cachedTime);
+        extras.putLong(EXTRA_CACHED_TIME, cachedTime);
         mResolvedAddress.setExtras(extras);
+
+        writeAddress(mResolvedAddress);
     }
 
     private boolean updateLocationByType(Location location) {
@@ -1654,6 +1660,59 @@ public class LocationAgent implements LocationInterface {
         location.setElapsedRealtimeNanos(currentTimeNs);
         // Update the cached location as if it's obtained.
         updateLocationByType(location);
+
+        Address address = readAddress();
+
+        if (address != null && address.hasLatitude() && address.hasLongitude()
+                && Double.compare(address.getLatitude(), location.getLatitude()) == 0
+                && Double.compare(address.getLongitude(), location.getLongitude()) == 0) {
+            if (mResolvedAddress == null) {
+                ImsLog.d(this, mSlotId, "Cached address loaded");
+                mResolvedAddress = address;
+            }
+        }
+    }
+
+    private @Nullable Address readAddress() {
+        String encodedAddress = ImsPrivateProperties.Persistent.get(
+                ImsPrivateProperties.Persistent.KEY_PIDF_ADDRESS, "", mSlotId);
+
+        if (encodedAddress.isEmpty()) {
+            return null;
+        }
+
+        Address address = null;
+        Parcel parcel = Parcel.obtain();
+        try {
+            byte[] data = Base64.getDecoder().decode(encodedAddress);
+            parcel.unmarshall(data, 0, data.length);
+            parcel.setDataPosition(0);
+            address = Address.CREATOR.createFromParcel(parcel);
+        } catch (Exception e) {
+            ImsLog.d(this, mSlotId, "readAddress: " + e.toString());
+        } finally {
+            parcel.recycle();
+        }
+        return address;
+    }
+
+    private void writeAddress(@NonNull Address address) {
+        String encodedAddress = null;
+        Parcel parcel = Parcel.obtain();
+        try {
+            address.writeToParcel(parcel, 0);
+            byte[] data = parcel.marshall();
+            encodedAddress = Base64.getEncoder().encodeToString(data);
+        } catch (Exception e) {
+            ImsLog.d(this, mSlotId, "writeAddress: " + e.toString());
+        } finally {
+            parcel.recycle();
+        }
+
+        if (encodedAddress != null) {
+            ImsPrivateProperties.Persistent.set(
+                    ImsPrivateProperties.Persistent.KEY_PIDF_ADDRESS, encodedAddress, mSlotId);
+        }
     }
 
     private @Nullable Location readLocation() {
