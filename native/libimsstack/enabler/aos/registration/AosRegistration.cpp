@@ -1591,7 +1591,14 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() &&
                     GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
-                return IMS_TRUE;
+                if (GET_N_CONFIG(m_nSlotId)->IsGeolocationPidfInWfcInitReg())
+                {
+                    return IMS_TRUE;
+                }
+                else
+                {
+                    bRequired = IMS_TRUE;
+                }
             }
         }
 
@@ -1612,7 +1619,14 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() &&
                     GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
-                return IMS_TRUE;
+                if (GET_N_CONFIG(m_nSlotId)->IsGeolocationPidfInWfcInitReg())
+                {
+                    return IMS_TRUE;
+                }
+                else
+                {
+                    bRequired = IMS_TRUE;
+                }
             }
         }
 

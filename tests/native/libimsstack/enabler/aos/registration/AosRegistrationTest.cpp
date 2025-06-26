@@ -2576,6 +2576,42 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSuppor
     EXPECT_TRUE(bResult);
 }
 
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalIfPidfIsSupportedForWfcInitReg)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfInWfcInitReg())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->UpdateRegIpcanCategory();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
+
+    IMS_BOOL bResult = m_pAosRegistration->IsGeolocationInfoRequired();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredForNormalIfPidfIsNotSupportedForWfcInitReg)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfInWfcInitReg())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillByDefault(Return(IMS_FALSE));
+    m_pAosRegistration->UpdateRegIpcanCategory();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
+
+    IMS_BOOL bResult = m_pAosRegistration->IsGeolocationInfoRequired();
+
+    EXPECT_FALSE(bResult);
+}
+
 TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForWifi)
 {
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
@@ -2598,6 +2634,24 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSup
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
+
+    IMS_BOOL bResult = m_pAosRegistration->IsGeolocationInfoRequired();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyIfPidfIsSupportedForWfcInitReg)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfInWfcInitReg())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->UpdateRegIpcanCategory();
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
 
     IMS_BOOL bResult = m_pAosRegistration->IsGeolocationInfoRequired();
 
