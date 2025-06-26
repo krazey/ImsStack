@@ -112,12 +112,16 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC
-VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
+PUBLIC VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
 {
-    return (m_pProfileNegotiator != IMS_NULL)
-            ? m_pProfileNegotiator->GetNegotiatedResolution(GetNegotiatedPayload())
-            : VIDEO_RESOLUTION_INVALID;
+    MediaBaseProfile::BasePayload* pPayload = GetNegotiatedPayload();
+
+    if (m_pProfileNegotiator != IMS_NULL && pPayload != IMS_NULL)
+    {
+        return m_pProfileNegotiator->GetNegotiatedResolution(pPayload);
+    }
+
+    return VIDEO_RESOLUTION_INVALID;
 }
 
 PUBLIC VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)
