@@ -24,14 +24,14 @@
         <PreferenceScreen/> <!-- Empty for first row. -->
         <PreferenceCategory android:title="CarrierConfig: boolean"
             android:key="category_config_boolean">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="config_boolean_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="config_boolean_value"
                 android:dialogMessage="">
@@ -39,14 +39,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig: int"
             android:key="category_config_int">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="config_int_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="config_int_value"
                 android:dialogMessage="">
@@ -54,14 +54,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig: string"
             android:key="category_config_string">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="config_string_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="config_string_value"
                 android:dialogMessage="">
@@ -69,14 +69,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig: int-array"
             android:key="category_config_int_array">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="config_int_array_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="config_int_array_value"
                 android:dialogMessage="">
@@ -84,14 +84,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig: string-array"
             android:key="category_config_string_array">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="config_string_array_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="config_string_array_value"
                 android:dialogMessage="">
@@ -99,14 +99,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig: bundle"
             android:key="category_config_bundle">
-            <ListPreference android:title="Bundle"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Bundle"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="config_bundle_keys"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <ListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
@@ -126,14 +126,14 @@
         <PreferenceScreen/> <!-- Empty for first row. -->
         <PreferenceCategory android:title="CarrierConfig(assets): boolean"
             android:key="category_assets_config_boolean">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="assets_config_boolean_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="assets_config_boolean_value"
                 android:dialogMessage="">
@@ -141,14 +141,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig(assets): int"
             android:key="category_assets_config_int">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="assets_config_int_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="assets_config_int_value"
                 android:dialogMessage="">
@@ -156,14 +156,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig(assets): string"
             android:key="category_assets_config_string">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="assets_config_string_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="assets_config_string_value"
                 android:dialogMessage="">
@@ -171,14 +171,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig(assets): int-array"
             android:key="category_assets_config_int_array">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="assets_config_int_array_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="assets_config_int_array_value"
                 android:dialogMessage="">
@@ -186,14 +186,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig(assets): string-array"
             android:key="category_assets_config_string_array">
-            <ListPreference android:title="Item"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="assets_config_string_array_items"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <EditTextPreference android:title="Value"
                 android:key="assets_config_string_array_value"
                 android:dialogMessage="">
@@ -201,14 +201,14 @@
         </PreferenceCategory>
         <PreferenceCategory android:title="CarrierConfig(assets): bundle"
             android:key="category_assets_config_bundle">
-            <ListPreference android:title="Bundle"
+            <com.android.imsstack.test.menu.SearchableListPreference android:title="Bundle"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"
                 android:key="assets_config_bundle_keys"
                 android:defaultValue=""
                 android:enabled="true"
                 android:selectable="true">
-            </ListPreference>
+            </com.android.imsstack.test.menu.SearchableListPreference>
             <ListPreference android:title="Item"
                 android:entryValues="@array/carrier_config_items"
                 android:entries="@array/carrier_config_items"

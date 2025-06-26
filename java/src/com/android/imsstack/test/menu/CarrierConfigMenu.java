@@ -364,7 +364,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
         for (int i = 0; i < CONFIG_I_MAX; ++i) {
             String key = KEY_LIST_PREFERENCES.get(i);
             if (key != null) {
-                ListPreference itemList = (ListPreference) findPreference(key);
+                SearchableListPreference itemList = (SearchableListPreference) findPreference(key);
                 mConfigItems.put(i, itemList);
 
                 if (itemList != null) {
@@ -392,7 +392,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
         for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
             String key = KEY_BUNDLE_KEY_LIST_PREFERENCES.get(i);
             if (key != null) {
-                ListPreference keyList = (ListPreference) findPreference(key);
+                SearchableListPreference keyList = (SearchableListPreference) findPreference(key);
                 mConfigBundleKeys.put(i, keyList);
 
                 if (keyList != null) {
@@ -1167,14 +1167,15 @@ public class CarrierConfigMenu extends AppCompatActivity {
     }
 
     private void initBundleKeys() {
-        ListPreference keyList = mConfigBundleKeys.valueAt(CONFIG_I_BUNDLE);
+        SearchableListPreference keyList =
+                (SearchableListPreference) mConfigBundleKeys.valueAt(CONFIG_I_BUNDLE);
         if (keyList != null) {
             String[] entries = mBundleKeys.toArray(new String[0]);
             keyList.setEntries(entries);
             keyList.setEntryValues(entries);
         }
 
-        keyList = mConfigBundleKeys.valueAt(ASSETS_CONFIG_I_BUNDLE);
+        keyList = (SearchableListPreference) mConfigBundleKeys.valueAt(ASSETS_CONFIG_I_BUNDLE);
         if (keyList != null) {
             String[] entries = ASSETS_BUNDLE_KEYS.toArray(new String[0]);
             keyList.setEntries(entries);
@@ -1199,7 +1200,8 @@ public class CarrierConfigMenu extends AppCompatActivity {
                 Collection<String> keys = configKeys.valueAt(i);
                 String[] entries = keys.toArray(new String[0]);
 
-                ListPreference itemList = mConfigItems.valueAt(i);
+                SearchableListPreference itemList =
+                        (SearchableListPreference) mConfigItems.valueAt(i);
 
                 if (itemList != null) {
                     itemList.setEntries(entries);

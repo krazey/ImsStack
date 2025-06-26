@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  * limitations under the License.
 -->
 <resources>
-
-<string name="app_name">ImsStack</string>
-
-<string name="label_enabled">Enabled</string>
-<string name="label_disabled">Disabled</string>
-
-<!-- video-call: popup statements -->
-<string name="turning_off_camera_not_supported">Turning off a camera is not supported.</string>
-
-<string name="search_hint">Search options</string>
-
+    <string-array name="searchable_pref_test_entries">
+        <item>Apple</item>
+        <item>Banana</item>
+        <item>Orange</item>
+        <item>Pineapple</item>
+    </string-array>
+    <string-array name="searchable_pref_test_entry_values">
+        <item>val_1</item>
+        <item>val_2</item>
+        <item>val_3</item>
+        <item>val_4</item>
+    </string-array>
 </resources>

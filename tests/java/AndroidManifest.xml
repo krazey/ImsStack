@@ -50,6 +50,9 @@
             android:theme="@style/Theme.AppCompat"/>
         <activity android:name="com.android.imsstack.test.menu.TestConfigMenu"
             android:theme="@style/Theme.AppCompat"/>
+        <activity
+            android:name="com.android.imsstack.test.menu.SearchableListPreferenceTest$TestActivity"
+            android:theme="@style/Theme.AppCompat"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

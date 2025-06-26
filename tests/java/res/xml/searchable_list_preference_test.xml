@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<resources>
-
-<string name="app_name">ImsStack</string>
-
-<string name="label_enabled">Enabled</string>
-<string name="label_disabled">Disabled</string>
-
-<!-- video-call: popup statements -->
-<string name="turning_off_camera_not_supported">Turning off a camera is not supported.</string>
-
-<string name="search_hint">Search options</string>
-
-</resources>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.android.imsstack.test.menu.SearchableListPreference
+        android:key="searchable_pref_key"
+        android:title="Test Searchable Preference"
+        android:summary="%s"
+        android:entries="@array/searchable_pref_test_entries"
+        android:entryValues="@array/searchable_pref_test_entry_values"
+        android:defaultValue="val_0" />
+</PreferenceScreen>
