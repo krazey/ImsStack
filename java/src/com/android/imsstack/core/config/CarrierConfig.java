@@ -443,8 +443,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "no_init_reg_on_pcscf_change_bool";
         public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
                 KEY_PREFIX + "reg_contact_validation_bool";
-        public static final String KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL =
-                KEY_PREFIX + "reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool";
         public static final String KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL =
                 KEY_PREFIX + "reg_retry_with_ip_ver_fallback_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =

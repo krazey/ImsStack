@@ -48,7 +48,6 @@ public:
             bRegTimerForECallWithRatCheckEnabled(IMS_FALSE),
             bStopERegTimerOnEpdnConnected(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
-            bPlmnBlockWithTimeoutOnFailureWithAllPcscfs(IMS_FALSE),
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
@@ -158,7 +157,6 @@ public:
     IMS_BOOL bRegTimerForECallWithRatCheckEnabled;
     IMS_BOOL bStopERegTimerOnEpdnConnected;
     IMS_BOOL bNoInitRegOnPcscfChange;
-    IMS_BOOL bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;

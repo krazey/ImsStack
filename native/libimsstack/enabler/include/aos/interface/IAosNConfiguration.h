@@ -657,15 +657,6 @@ public:
     virtual IMS_BOOL IsContactUriValidationChecked() const = 0;
 
     /**
-     * @brief Returns flag indicating whether the PLMN block with timeout is supported
-     *        when registration failed with all PCSCFs.
-     *
-     * @return IMS_BOOL Return whether to be supported or not
-     * @see {@code ims.reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool}
-     */
-    virtual IMS_BOOL IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const = 0;
-
-    /**
      * @brief Returns whether IMS registration is retried based on IP version fallback
      *        from IPv6 to IPv4
      *

@@ -636,11 +636,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Ims::KEY_REG_CONTACT_VALIDATION_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::
-                               KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -983,7 +978,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsNoInitRegOnPcscfChange());
     EXPECT_FALSE(m_pAosNConfiguration->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsContactUriValidationChecked());
-    EXPECT_FALSE(m_pAosNConfiguration->IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegRetryWithIpVerFallback());
     EXPECT_TRUE(m_pAosNConfiguration->IsReleaseEPdnUponECallEndInFakeMode());
     EXPECT_FALSE(m_pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
