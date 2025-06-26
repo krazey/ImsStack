@@ -30,6 +30,7 @@
     <int name="ims.location_policy_update_type_int" value="1"/>
     <int name="ims.location_acquisition_policy_int" value="131328"/>
     <int name="ims.location_validity_period_min_int" value="3"/>
+    <int name="ims.location_address_validity_period_min_int" value="3"/>
     <int name="ims.registration_contact_user_info_part_int" value="1"/>
     <int name="ims.support_multiple_registration_int" value="0"/>
     <int name="ims.location_geodetic_shape_int" value="1"/>

@@ -28,6 +28,7 @@
     <int name="ims.location_address_resolution_time_millis_int" value="3000"/>
     <int name="ims.location_geodetic_shape_int" value="1"/>
     <int name="ims.location_validity_period_min_int" value="30"/>
+    <int name="ims.location_address_validity_period_min_int" value="30"/>
     <int name="ims.location_tolerable_distance_int" value="150"/>
 
     <!-- Aos -->

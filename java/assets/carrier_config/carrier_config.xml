@@ -349,8 +349,8 @@
     <boolean name="ims.location_allow_mock_location_update_bool" value="false"/>
     <int name="ims.location_acquisition_policy_int" value="0"/>
     <int name="ims.location_address_resolution_time_millis_int" value="2000"/>
-    <int name="ims.location_validity_period_min_int" value="0"/>
-    <int name="ims.location_address_validity_period_min_int" value="0"/>
+    <int name="ims.location_validity_period_min_int" value="240"/>
+    <int name="ims.location_address_validity_period_min_int" value="240"/>
     <int name="ims.location_tolerable_distance_int" value="0"/>
     <int name="ims.location_gps_searching_duration_sec_int" value="30"/>
     <int name="ims.location_geodetic_shape_int" value="0"/>
