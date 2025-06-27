@@ -16,11 +16,21 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="true"/>
     <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="ims.keep_reg_retry_timer_on_all_enablers_detached_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int-array name="ims.reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array" num="1">
+        <item value="6"/>
+    </int-array>
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
+        <int-array name="ims.extra_reg_err_code_int_array" num="2">
+            <item value="0"/>
+            <item value="2"/>
+        </int-array>
+    </pbundle_as_map>
     <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
         <item value="5"/>
     </int-array>
