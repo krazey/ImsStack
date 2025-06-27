@@ -630,9 +630,9 @@ public class PhoneStateAgent implements PhoneStateInterface,
                         NetworkRegistrationInfo.DOMAIN_PS,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
-                mCellularDataNetworkType = (nri == null || !nri.isNetworkRegistered())
-                        ? TelephonyManager.NETWORK_TYPE_UNKNOWN
-                        : nri.getAccessNetworkTechnology();
+                mCellularDataNetworkType = (nri != null)
+                        ? nri.getAccessNetworkTechnology()
+                        : TelephonyManager.NETWORK_TYPE_UNKNOWN;
             }
         }
 
