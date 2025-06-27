@@ -671,6 +671,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::ImsWfc::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsWfc::KEY_GEOLOCATION_PIDF_IN_WFC_INIT_REG_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::ImsWfc::KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -985,6 +988,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsRegRequiredAfterImsECallEndOnRegHeld());
     EXPECT_FALSE(m_pAosNConfiguration->IsRequiredVolteBlockBySsac());
     EXPECT_FALSE(m_pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
+    EXPECT_FALSE(m_pAosNConfiguration->IsGeolocationPidfInWfcInitReg());
     EXPECT_FALSE(m_pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
     EXPECT_TRUE(m_pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
