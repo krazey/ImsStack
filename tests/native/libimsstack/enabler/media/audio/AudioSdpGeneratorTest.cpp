@@ -79,12 +79,12 @@ protected:
         m_pAmrFmtpFull->SetModeChangeNeighbor(MODE_CHANGE_NEIGHBOR);
         m_pAmrFmtpFull->SetMaxRed(MAXRED);
 
-        m_pAmrFmtpFull->SetShowModeSet(IMS_TRUE);
-        m_pAmrFmtpFull->SetShowOctetAlign(IMS_TRUE);
-        m_pAmrFmtpFull->SetShowModeChangeCapability(IMS_TRUE);
-        m_pAmrFmtpFull->SetShowModeChangePeriod(IMS_TRUE);
-        m_pAmrFmtpFull->SetShowModeChangeNeighbor(IMS_TRUE);
-        m_pAmrFmtpFull->SetShowMaxRed(IMS_TRUE);
+        m_pAmrFmtpFull->SetVisibleModeSet(IMS_TRUE);
+        m_pAmrFmtpFull->SetVisibleOctetAlign(IMS_TRUE);
+        m_pAmrFmtpFull->SetVisibleModeChangeCapability(IMS_TRUE);
+        m_pAmrFmtpFull->SetVisibleModeChangePeriod(IMS_TRUE);
+        m_pAmrFmtpFull->SetVisibleModeChangeNeighbor(IMS_TRUE);
+        m_pAmrFmtpFull->SetVisibleMaxRed(IMS_TRUE);
     }
 
     virtual void TearDown() override
@@ -266,17 +266,17 @@ protected:
         m_pEvsFmtpFull->SetModeChangeCapability(MODE_CHANGE_CAPABILITY);
         m_pEvsFmtpFull->SetModeChangePeriod(MODE_CHANGE_PERIOD);
         m_pEvsFmtpFull->SetModeChangeNeighbor(MODE_CHANGE_NEIGHBOR);
-        m_pEvsFmtpFull->SetShowDtx(IMS_TRUE);
+        m_pEvsFmtpFull->SetVisibleDtx(IMS_TRUE);
         m_pEvsFmtpFull->SetShowHfOnly(IMS_TRUE);
         m_pEvsFmtpFull->SetShowEvsModeSwitch(IMS_TRUE);
-        m_pEvsFmtpFull->SetShowMaxRed(IMS_TRUE);
+        m_pEvsFmtpFull->SetVisibleMaxRed(IMS_TRUE);
         m_pEvsFmtpFull->SetShowCmr(IMS_TRUE);
         m_pEvsFmtpFull->SetShowChannelAwMode(IMS_TRUE);
-        m_pEvsFmtpFull->SetShowModeChangeCapability(IMS_TRUE);
-        m_pEvsFmtpFull->SetShowModeChangePeriod(IMS_TRUE);
-        m_pEvsFmtpFull->SetShowModeChangeNeighbor(IMS_TRUE);
+        m_pEvsFmtpFull->SetVisibleModeChangeCapability(IMS_TRUE);
+        m_pEvsFmtpFull->SetVisibleModeChangePeriod(IMS_TRUE);
+        m_pEvsFmtpFull->SetVisibleModeChangeNeighbor(IMS_TRUE);
         m_pEvsFmtpFull->SetSendCmr(IMS_TRUE);
-        m_pEvsFmtpFull->SetShowModeSet(IMS_TRUE);
+        m_pEvsFmtpFull->SetVisibleModeSet(IMS_TRUE);
     }
 
     virtual void TearDown() override

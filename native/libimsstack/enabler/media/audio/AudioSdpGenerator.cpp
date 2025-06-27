@@ -895,11 +895,11 @@ PROTECTED void AudioSdpGenerator::ForceToAddModeSetList(
 
     IMS_TRACE_I("ForceToAddModeSetList()", 0, 0, 0);
 
-    IMS_BOOL bShowModeSet = pFmtp->IsModeSetVisible();
-    pFmtp->SetShowModeSet(IMS_TRUE);
+    IMS_BOOL bVisibleModeSet = pFmtp->IsModeSetVisible();
+    pFmtp->SetVisibleModeSet(IMS_TRUE);
     AddModeSetListToFmtp(pFmtp, strFmtp);
-    pFmtp->SetShowModeSet(bShowModeSet);
-    IMS_TRACE_I("ForceToAddModeSetList(): mode-set visible[%d]", bShowModeSet, 0, 0);
+    pFmtp->SetVisibleModeSet(bVisibleModeSet);
+    IMS_TRACE_I("ForceToAddModeSetList(): mode-set visible[%d]", bVisibleModeSet, 0, 0);
 }
 
 PROTECTED void AudioSdpGenerator::ForceToAddOctetAlign(
@@ -911,10 +911,10 @@ PROTECTED void AudioSdpGenerator::ForceToAddOctetAlign(
         return;
     }
 
-    IMS_BOOL bShowOctetAlign = pFmtp->IsOctetAlignVisible();
-    pFmtp->SetShowOctetAlign(IMS_TRUE);
+    IMS_BOOL bVisibleOctetAlign = pFmtp->IsOctetAlignVisible();
+    pFmtp->SetVisibleOctetAlign(IMS_TRUE);
     AddOctetAlignToFmtp(pFmtp, strFmtp);
-    pFmtp->SetShowOctetAlign(bShowOctetAlign);
+    pFmtp->SetVisibleOctetAlign(bVisibleOctetAlign);
 
-    IMS_TRACE_I("ForceToAddOctetAlign(): octet-aligned visible[%d]", bShowOctetAlign, 0, 0);
+    IMS_TRACE_I("ForceToAddOctetAlign(): octet-aligned visible[%d]", bVisibleOctetAlign, 0, 0);
 }

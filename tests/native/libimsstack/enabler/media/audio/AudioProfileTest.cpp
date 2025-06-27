@@ -159,7 +159,7 @@ TEST_F(AudioProfileTest, testAudioFmtpShowModeSet)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
 
-    pFmtp->SetShowModeSet(AUDIO_FMTP_SHOW_MODESET);
+    pFmtp->SetVisibleModeSet(AUDIO_FMTP_SHOW_MODESET);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), AUDIO_FMTP_SHOW_MODESET);
 
     delete pFmtp;
@@ -170,7 +170,7 @@ TEST_F(AudioProfileTest, testAudioFmtpShowModeChangeCapability)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
 
-    pFmtp->SetShowModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
+    pFmtp->SetVisibleModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
 
     delete pFmtp;
@@ -181,7 +181,7 @@ TEST_F(AudioProfileTest, testAudioFmtpShowModeChangePeriod)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), IMS_FALSE);
 
-    pFmtp->SetShowModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
+    pFmtp->SetVisibleModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
 
     delete pFmtp;
@@ -192,7 +192,7 @@ TEST_F(AudioProfileTest, testAudioFmtpShowModeChangeNeighbor)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->IsModeChangeNeighborVisible(), IMS_FALSE);
 
-    pFmtp->SetShowModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
+    pFmtp->SetVisibleModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp->IsModeChangeNeighborVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
 
     delete pFmtp;
@@ -203,7 +203,7 @@ TEST_F(AudioProfileTest, testAudioFmtpShowMaxRed)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->IsMaxRedVisible(), IMS_FALSE);
 
-    pFmtp->SetShowMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
+    pFmtp->SetVisibleMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
     EXPECT_EQ(pFmtp->IsMaxRedVisible(), AUDIO_FMTP_SHOW_MAX_RED);
 
     delete pFmtp;
@@ -214,7 +214,7 @@ TEST_F(AudioProfileTest, testAudioFmtpShowDtx)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->IsDtxVisible(), IMS_FALSE);
 
-    pFmtp->SetShowDtx(AUDIO_FMTP_SHOW_DTX);
+    pFmtp->SetVisibleDtx(AUDIO_FMTP_SHOW_DTX);
     EXPECT_EQ(pFmtp->IsDtxVisible(), AUDIO_FMTP_SHOW_DTX);
 
     delete pFmtp;
@@ -251,12 +251,12 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     pFmtp1->SetModeChangeNeighbor(AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     pFmtp1->SetMaxRed(AUDIO_FMTP_MAX_RED);
     pFmtp1->SetDtx(AUDIO_FMTP_DTX);
-    pFmtp1->SetShowModeSet(AUDIO_FMTP_SHOW_MODESET);
-    pFmtp1->SetShowModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
-    pFmtp1->SetShowModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
-    pFmtp1->SetShowModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
-    pFmtp1->SetShowMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
-    pFmtp1->SetShowDtx(AUDIO_FMTP_SHOW_DTX);
+    pFmtp1->SetVisibleModeSet(AUDIO_FMTP_SHOW_MODESET);
+    pFmtp1->SetVisibleModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
+    pFmtp1->SetVisibleModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
+    pFmtp1->SetVisibleModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
+    pFmtp1->SetVisibleMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
+    pFmtp1->SetVisibleDtx(AUDIO_FMTP_SHOW_DTX);
 
     AudioProfile::AudioFmtp* pFmtp2 = new AudioProfile::AudioFmtp(*pFmtp1);
 
@@ -289,12 +289,12 @@ TEST_F(AudioProfileTest, testAmrFmtpOctetAlign)
     delete pFmtp;
 }
 
-TEST_F(AudioProfileTest, testAmrFmtpShowOctetAlign)
+TEST_F(AudioProfileTest, testAmrFmtpVisibleOctetAlign)
 {
     AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
     EXPECT_EQ(pFmtp->IsOctetAlignVisible(), IMS_FALSE);
 
-    pFmtp->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+    pFmtp->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
     EXPECT_EQ(pFmtp->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
 
     delete pFmtp;
@@ -335,15 +335,15 @@ TEST_F(AudioProfileTest, testAmrFmtpCreation)
     pFmtp1->SetModeChangeNeighbor(AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     pFmtp1->SetMaxRed(AUDIO_FMTP_MAX_RED);
     pFmtp1->SetDtx(AUDIO_FMTP_DTX);
-    pFmtp1->SetShowModeSet(AUDIO_FMTP_SHOW_MODESET);
-    pFmtp1->SetShowModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
-    pFmtp1->SetShowModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
-    pFmtp1->SetShowModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
-    pFmtp1->SetShowMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
-    pFmtp1->SetShowDtx(AUDIO_FMTP_SHOW_DTX);
+    pFmtp1->SetVisibleModeSet(AUDIO_FMTP_SHOW_MODESET);
+    pFmtp1->SetVisibleModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
+    pFmtp1->SetVisibleModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
+    pFmtp1->SetVisibleModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
+    pFmtp1->SetVisibleMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
+    pFmtp1->SetVisibleDtx(AUDIO_FMTP_SHOW_DTX);
 
     pFmtp1->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
-    pFmtp1->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+    pFmtp1->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
 
     AudioProfile::AmrFmtp* pFmtp2 = new AudioProfile::AmrFmtp(*pFmtp1);
 
@@ -617,12 +617,12 @@ TEST_F(AudioProfileTest, testEvsFmtpCreation)
     pFmtp1->SetModeChangeNeighbor(AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     pFmtp1->SetMaxRed(AUDIO_FMTP_MAX_RED);
     pFmtp1->SetDtx(AUDIO_FMTP_DTX);
-    pFmtp1->SetShowModeSet(AUDIO_FMTP_SHOW_MODESET);
-    pFmtp1->SetShowModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
-    pFmtp1->SetShowModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
-    pFmtp1->SetShowModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
-    pFmtp1->SetShowMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
-    pFmtp1->SetShowDtx(AUDIO_FMTP_SHOW_DTX);
+    pFmtp1->SetVisibleModeSet(AUDIO_FMTP_SHOW_MODESET);
+    pFmtp1->SetVisibleModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
+    pFmtp1->SetVisibleModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
+    pFmtp1->SetVisibleModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
+    pFmtp1->SetVisibleMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
+    pFmtp1->SetVisibleDtx(AUDIO_FMTP_SHOW_DTX);
 
     pFmtp1->SetHfOnly(EVS_FMTP_HF_ONLY);
     pFmtp1->SetEvsModeSwitch(EVS_FMTP_MODE_SWITCH);
@@ -787,7 +787,7 @@ TEST_F(AudioProfileTest, testAudioPayloadCreationForAmrWbFmtp)
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
     static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())
-            ->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+            ->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
     EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->IsOctetAlignVisible(),
             AMR_FMTP_SHOW_OCTET_ALIGN);
 
@@ -886,7 +886,7 @@ TEST_F(AudioProfileTest, testAudioPayloadAssignForAmrWbFmtp)
     EXPECT_NE(pPayload2->GetFmtp(), nullptr);
 
     static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())
-            ->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+            ->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
     EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->IsOctetAlignVisible(),
             AMR_FMTP_SHOW_OCTET_ALIGN);
 

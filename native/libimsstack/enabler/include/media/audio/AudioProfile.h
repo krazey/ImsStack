@@ -42,12 +42,12 @@ public:
                 m_nModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR),
                 m_nMaxRed(CodecAudioConfig::DEFAULT_MAXRED),
                 m_bDtx(CodecAudioConfig::DEFAULT_DTX),
-                m_bShowModeSet(IMS_FALSE),
-                m_bShowModeChangeCapability(IMS_FALSE),
-                m_bShowModeChangePeriod(IMS_FALSE),
-                m_bShowModeChangeNeighbor(IMS_FALSE),
-                m_bShowMaxRed(IMS_FALSE),
-                m_bShowDtx(IMS_FALSE)
+                m_bVisibleModeSet(IMS_FALSE),
+                m_bVisibleModeChangeCapability(IMS_FALSE),
+                m_bVisibleModeChangePeriod(IMS_FALSE),
+                m_bVisibleModeChangeNeighbor(IMS_FALSE),
+                m_bVisibleMaxRed(IMS_FALSE),
+                m_bVisibleDtx(IMS_FALSE)
         {
         }
 
@@ -59,12 +59,12 @@ public:
                 m_nModeChangeNeighbor(objFmtp.m_nModeChangeNeighbor),
                 m_nMaxRed(objFmtp.m_nMaxRed),
                 m_bDtx(objFmtp.m_bDtx),
-                m_bShowModeSet(objFmtp.m_bShowModeSet),
-                m_bShowModeChangeCapability(objFmtp.m_bShowModeChangeCapability),
-                m_bShowModeChangePeriod(objFmtp.m_bShowModeChangePeriod),
-                m_bShowModeChangeNeighbor(objFmtp.m_bShowModeChangeNeighbor),
-                m_bShowMaxRed(objFmtp.m_bShowMaxRed),
-                m_bShowDtx(objFmtp.m_bShowDtx)
+                m_bVisibleModeSet(objFmtp.m_bVisibleModeSet),
+                m_bVisibleModeChangeCapability(objFmtp.m_bVisibleModeChangeCapability),
+                m_bVisibleModeChangePeriod(objFmtp.m_bVisibleModeChangePeriod),
+                m_bVisibleModeChangeNeighbor(objFmtp.m_bVisibleModeChangeNeighbor),
+                m_bVisibleMaxRed(objFmtp.m_bVisibleMaxRed),
+                m_bVisibleDtx(objFmtp.m_bVisibleDtx)
         {
         }
 
@@ -99,30 +99,33 @@ public:
         inline IMS_SINT32 GetMaxRed() { return m_nMaxRed; }
         inline void SetDtx(IN const IMS_BOOL bDtx) { m_bDtx = bDtx; }
         inline IMS_BOOL IsDtxEnabled() { return m_bDtx; }
-        inline void SetShowModeSet(IN const IMS_BOOL bShowModeSet)
+        inline void SetVisibleModeSet(IN const IMS_BOOL bVisibleModeSet)
         {
-            m_bShowModeSet = bShowModeSet;
+            m_bVisibleModeSet = bVisibleModeSet;
         }
-        inline IMS_BOOL IsModeSetVisible() { return m_bShowModeSet; }
-        inline void SetShowModeChangeCapability(IN const IMS_BOOL bShowModeChangeCapability)
+        inline IMS_BOOL IsModeSetVisible() { return m_bVisibleModeSet; }
+        inline void SetVisibleModeChangeCapability(IN const IMS_BOOL bVisibleModeChangeCapability)
         {
-            m_bShowModeChangeCapability = bShowModeChangeCapability;
+            m_bVisibleModeChangeCapability = bVisibleModeChangeCapability;
         }
-        inline IMS_BOOL IsModeChangeCapabilityVisible() { return m_bShowModeChangeCapability; }
-        inline void SetShowModeChangePeriod(IN const IMS_BOOL bShowModeChangePeriod)
+        inline IMS_BOOL IsModeChangeCapabilityVisible() { return m_bVisibleModeChangeCapability; }
+        inline void SetVisibleModeChangePeriod(IN const IMS_BOOL bVisibleModeChangePeriod)
         {
-            m_bShowModeChangePeriod = bShowModeChangePeriod;
+            m_bVisibleModeChangePeriod = bVisibleModeChangePeriod;
         }
-        inline IMS_BOOL IsModeChangePeriodVisible() { return m_bShowModeChangePeriod; }
-        inline void SetShowModeChangeNeighbor(IN const IMS_BOOL bShowModeChangeNeighbor)
+        inline IMS_BOOL IsModeChangePeriodVisible() { return m_bVisibleModeChangePeriod; }
+        inline void SetVisibleModeChangeNeighbor(IN const IMS_BOOL bVisibleModeChangeNeighbor)
         {
-            m_bShowModeChangeNeighbor = bShowModeChangeNeighbor;
+            m_bVisibleModeChangeNeighbor = bVisibleModeChangeNeighbor;
         }
-        inline IMS_BOOL IsModeChangeNeighborVisible() { return m_bShowModeChangeNeighbor; }
-        inline void SetShowMaxRed(IN const IMS_BOOL bShowMaxRed) { m_bShowMaxRed = bShowMaxRed; }
-        inline IMS_BOOL IsMaxRedVisible() { return m_bShowMaxRed; }
-        inline void SetShowDtx(IN const IMS_BOOL bShowDtx) { m_bShowDtx = bShowDtx; }
-        inline IMS_BOOL IsDtxVisible() { return m_bShowDtx; }
+        inline IMS_BOOL IsModeChangeNeighborVisible() { return m_bVisibleModeChangeNeighbor; }
+        inline void SetVisibleMaxRed(IN const IMS_BOOL bVisibleMaxRed)
+        {
+            m_bVisibleMaxRed = bVisibleMaxRed;
+        }
+        inline IMS_BOOL IsMaxRedVisible() { return m_bVisibleMaxRed; }
+        inline void SetVisibleDtx(IN const IMS_BOOL bVisibleDtx) { m_bVisibleDtx = bVisibleDtx; }
+        inline IMS_BOOL IsDtxVisible() { return m_bVisibleDtx; }
 
     private:
         IMS_UINT32 m_nModeSetList;
@@ -132,12 +135,12 @@ public:
         IMS_SINT32 m_nModeChangeNeighbor;
         IMS_SINT32 m_nMaxRed;
         IMS_BOOL m_bDtx;
-        IMS_BOOL m_bShowModeSet;
-        IMS_BOOL m_bShowModeChangeCapability;
-        IMS_BOOL m_bShowModeChangePeriod;
-        IMS_BOOL m_bShowModeChangeNeighbor;
-        IMS_BOOL m_bShowMaxRed;
-        IMS_BOOL m_bShowDtx;
+        IMS_BOOL m_bVisibleModeSet;
+        IMS_BOOL m_bVisibleModeChangeCapability;
+        IMS_BOOL m_bVisibleModeChangePeriod;
+        IMS_BOOL m_bVisibleModeChangeNeighbor;
+        IMS_BOOL m_bVisibleMaxRed;
+        IMS_BOOL m_bVisibleDtx;
     };
 
     /**
@@ -155,14 +158,14 @@ public:
         AmrFmtp() :
                 AudioFmtp(),
                 m_nOctetAlign(DEFAULT_OCTETALIGN),
-                m_bShowOctetAlign(IMS_FALSE)
+                m_bVisibleOctetAlign(IMS_FALSE)
         {
         }
 
         AmrFmtp(IN const AmrFmtp& objFmtp) :
                 AudioFmtp(objFmtp),
                 m_nOctetAlign(objFmtp.m_nOctetAlign),
-                m_bShowOctetAlign(objFmtp.m_bShowOctetAlign)
+                m_bVisibleOctetAlign(objFmtp.m_bVisibleOctetAlign)
         {
         }
 
@@ -170,15 +173,15 @@ public:
 
         inline void SetOctetAlign(IN const IMS_SINT32 nOctetAlign) { m_nOctetAlign = nOctetAlign; }
         inline IMS_SINT32 GetOctetAlign() { return m_nOctetAlign; }
-        inline void SetShowOctetAlign(IN const IMS_BOOL bShowOctetAlign)
+        inline void SetVisibleOctetAlign(IN const IMS_BOOL bVisibleOctetAlign)
         {
-            m_bShowOctetAlign = bShowOctetAlign;
+            m_bVisibleOctetAlign = bVisibleOctetAlign;
         }
-        inline IMS_BOOL IsOctetAlignVisible() { return m_bShowOctetAlign; }
+        inline IMS_BOOL IsOctetAlignVisible() { return m_bVisibleOctetAlign; }
 
     private:
         IMS_SINT32 m_nOctetAlign;
-        IMS_BOOL m_bShowOctetAlign;
+        IMS_BOOL m_bVisibleOctetAlign;
     };
 
 public:
@@ -214,12 +217,12 @@ public:
                 m_nCmr(DEFAULT_CMR),
                 m_nChAwRecv(DEFAULT_CHANNEL_AWMODE),
                 m_nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
-                m_bShowHfOnly(IMS_FALSE),
-                m_bShowEvsModeSwitch(IMS_FALSE),
-                m_bShowCmr(IMS_FALSE),
-                m_bShowChannelAwMode(IMS_FALSE),
-                m_bShowBrList(IMS_TRUE),
-                m_bShowBwList(IMS_TRUE),
+                m_bVisibleHfOnly(IMS_FALSE),
+                m_bVisibleEvsModeSwitch(IMS_FALSE),
+                m_bVisibleCmr(IMS_FALSE),
+                m_bVisibleChannelAwMode(IMS_FALSE),
+                m_bVisibleBrList(IMS_TRUE),
+                m_bVisibleBwList(IMS_TRUE),
                 m_bSendCmr(IMS_FALSE)
         {
         }
@@ -237,12 +240,12 @@ public:
                 m_nCmr(objFmtp.m_nCmr),
                 m_nChAwRecv(objFmtp.m_nChAwRecv),
                 m_nReceivedChAwRecv(objFmtp.m_nReceivedChAwRecv),
-                m_bShowHfOnly(objFmtp.m_bShowHfOnly),
-                m_bShowEvsModeSwitch(objFmtp.m_bShowEvsModeSwitch),
-                m_bShowCmr(objFmtp.m_bShowCmr),
-                m_bShowChannelAwMode(objFmtp.m_bShowChannelAwMode),
-                m_bShowBrList(objFmtp.m_bShowBrList),
-                m_bShowBwList(objFmtp.m_bShowBwList),
+                m_bVisibleHfOnly(objFmtp.m_bVisibleHfOnly),
+                m_bVisibleEvsModeSwitch(objFmtp.m_bVisibleEvsModeSwitch),
+                m_bVisibleCmr(objFmtp.m_bVisibleCmr),
+                m_bVisibleChannelAwMode(objFmtp.m_bVisibleChannelAwMode),
+                m_bVisibleBrList(objFmtp.m_bVisibleBrList),
+                m_bVisibleBwList(objFmtp.m_bVisibleBwList),
                 m_bSendCmr(objFmtp.m_bSendCmr)
         {
         }
@@ -277,24 +280,33 @@ public:
             m_nReceivedChAwRecv = nReceivedChAwRecv;
         }
         inline IMS_SINT32 GetReceivedChAwRecv() { return m_nReceivedChAwRecv; }
-        inline void SetShowHfOnly(IN const IMS_BOOL bShowHfOnly) { m_bShowHfOnly = bShowHfOnly; }
-        inline IMS_BOOL IsHfOnlyVisible() { return m_bShowHfOnly; }
-        inline void SetShowEvsModeSwitch(IN const IMS_BOOL bShowEvsModeSwitch)
+        inline void SetShowHfOnly(IN const IMS_BOOL bVisibleHfOnly)
         {
-            m_bShowEvsModeSwitch = bShowEvsModeSwitch;
+            m_bVisibleHfOnly = bVisibleHfOnly;
         }
-        inline IMS_BOOL IsEvsModeSwitchVisible() { return m_bShowEvsModeSwitch; }
-        inline void SetShowCmr(IN const IMS_BOOL bShowCmr) { m_bShowCmr = bShowCmr; }
-        inline IMS_BOOL IsCmrVisible() { return m_bShowCmr; }
-        inline void SetShowChannelAwMode(IN const IMS_BOOL bShowChannelAwMode)
+        inline IMS_BOOL IsHfOnlyVisible() { return m_bVisibleHfOnly; }
+        inline void SetShowEvsModeSwitch(IN const IMS_BOOL bVisibleEvsModeSwitch)
         {
-            m_bShowChannelAwMode = bShowChannelAwMode;
+            m_bVisibleEvsModeSwitch = bVisibleEvsModeSwitch;
         }
-        inline IMS_BOOL IsChannelAwModeVisible() { return m_bShowChannelAwMode; }
-        inline void SetShowBrList(IN const IMS_BOOL bShowBrList) { m_bShowBrList = bShowBrList; }
-        inline IMS_BOOL IsBrListVisible() { return m_bShowBrList; }
-        inline void SetShowBwList(IN const IMS_BOOL bShowBwList) { m_bShowBwList = bShowBwList; }
-        inline IMS_BOOL IsBwListVisible() { return m_bShowBwList; }
+        inline IMS_BOOL IsEvsModeSwitchVisible() { return m_bVisibleEvsModeSwitch; }
+        inline void SetShowCmr(IN const IMS_BOOL bVisibleCmr) { m_bVisibleCmr = bVisibleCmr; }
+        inline IMS_BOOL IsCmrVisible() { return m_bVisibleCmr; }
+        inline void SetShowChannelAwMode(IN const IMS_BOOL bVisibleChannelAwMode)
+        {
+            m_bVisibleChannelAwMode = bVisibleChannelAwMode;
+        }
+        inline IMS_BOOL IsChannelAwModeVisible() { return m_bVisibleChannelAwMode; }
+        inline void SetShowBrList(IN const IMS_BOOL bVisibleBrList)
+        {
+            m_bVisibleBrList = bVisibleBrList;
+        }
+        inline IMS_BOOL IsBrListVisible() { return m_bVisibleBrList; }
+        inline void SetShowBwList(IN const IMS_BOOL bVisibleBwList)
+        {
+            m_bVisibleBwList = bVisibleBwList;
+        }
+        inline IMS_BOOL IsBwListVisible() { return m_bVisibleBwList; }
         inline void SetSendCmr(IN const IMS_BOOL bSendCmr) { m_bSendCmr = bSendCmr; }
         inline IMS_BOOL IsSendCmrEnabled() { return m_bSendCmr; }
 
@@ -310,12 +322,12 @@ public:
         IMS_SINT32 m_nCmr;
         IMS_SINT32 m_nChAwRecv;
         IMS_SINT32 m_nReceivedChAwRecv;
-        IMS_BOOL m_bShowHfOnly;
-        IMS_BOOL m_bShowEvsModeSwitch;
-        IMS_BOOL m_bShowCmr;
-        IMS_BOOL m_bShowChannelAwMode;
-        IMS_BOOL m_bShowBrList;
-        IMS_BOOL m_bShowBwList;
+        IMS_BOOL m_bVisibleHfOnly;
+        IMS_BOOL m_bVisibleEvsModeSwitch;
+        IMS_BOOL m_bVisibleCmr;
+        IMS_BOOL m_bVisibleChannelAwMode;
+        IMS_BOOL m_bVisibleBrList;
+        IMS_BOOL m_bVisibleBwList;
         IMS_BOOL m_bSendCmr;
     };
 

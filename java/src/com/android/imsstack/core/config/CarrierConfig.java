@@ -1355,6 +1355,14 @@ public class CarrierConfig {
                 KEY_PREFIX + "media_recvonly_early_session_bool";
         public static final String KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL =
                 KEY_PREFIX + "amr_codec_attribute_dtx_bool";
+        public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_CAPABILITY_BOOL =
+                KEY_PREFIX + "codec_attribute_visible_mode_change_capability_bool";
+        public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_PERIOD_BOOL =
+                KEY_PREFIX + "codec_attribute_visible_mode_change_period_bool";
+        public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_NEIGHBOR_BOOL =
+                KEY_PREFIX + "codec_attribute_visible_mode_change_neighbor_bool";
+        public static final String KEY_EVS_CODEC_ATTRIBUTE_VISIBLE_DTX_BOOL =
+                KEY_PREFIX + "evs_codec_attribute_visible_dtx_bool";
 
         private ImsVoice() {}
     }

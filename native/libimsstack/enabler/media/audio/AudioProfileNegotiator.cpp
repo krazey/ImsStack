@@ -295,13 +295,13 @@ AudioProfile::AmrFmtp* AudioProfileNegotiator::NegotiateAmrFmtp(IN AudioProfile*
     pAmrFmtp->SetModeSetList(nNegoModeSetList);
     pAmrFmtp->SetDefaultRtpModeSet(nNegoDefaultRtpModeSet);
     pAmrFmtp->SetDtx(pLocalFmtp->IsDtxEnabled());
-    pAmrFmtp->SetShowModeChangeCapability(pLocalFmtp->IsModeChangeCapabilityVisible());
+    pAmrFmtp->SetVisibleModeChangeCapability(pLocalFmtp->IsModeChangeCapabilityVisible());
     pAmrFmtp->SetModeChangeCapability(pLocalFmtp->GetModeChangeCapability());
-    pAmrFmtp->SetShowModeChangeNeighbor(pLocalFmtp->IsModeChangeNeighborVisible());
+    pAmrFmtp->SetVisibleModeChangeNeighbor(pLocalFmtp->IsModeChangeNeighborVisible());
     pAmrFmtp->SetModeChangeNeighbor(pLocalFmtp->GetModeChangeNeighbor());
-    pAmrFmtp->SetShowModeChangePeriod(pLocalFmtp->IsModeChangePeriodVisible());
+    pAmrFmtp->SetVisibleModeChangePeriod(pLocalFmtp->IsModeChangePeriodVisible());
     pAmrFmtp->SetModeChangePeriod(pLocalFmtp->GetModeChangePeriod());
-    pAmrFmtp->SetShowOctetAlign(pLocalFmtp->IsOctetAlignVisible());
+    pAmrFmtp->SetVisibleOctetAlign(pLocalFmtp->IsOctetAlignVisible());
     pAmrFmtp->SetOctetAlign(pLocalFmtp->GetOctetAlign());
 
     return pAmrFmtp;
@@ -394,11 +394,11 @@ AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile*
         IMS_TRACE_D("NegotiateEvsFmtp(): DTX updated in the destination profile", 0, 0, 0);
     }
 
-    pEvsFmtp->SetShowModeChangeCapability(pLocalFmtp->IsModeChangeCapabilityVisible());
+    pEvsFmtp->SetVisibleModeChangeCapability(pLocalFmtp->IsModeChangeCapabilityVisible());
     pEvsFmtp->SetModeChangeCapability(pLocalFmtp->GetModeChangeCapability());
-    pEvsFmtp->SetShowModeChangeNeighbor(pLocalFmtp->IsModeChangeNeighborVisible());
+    pEvsFmtp->SetVisibleModeChangeNeighbor(pLocalFmtp->IsModeChangeNeighborVisible());
     pEvsFmtp->SetModeChangeNeighbor(pLocalFmtp->GetModeChangeNeighbor());
-    pEvsFmtp->SetShowModeChangePeriod(pLocalFmtp->IsModeChangePeriodVisible());
+    pEvsFmtp->SetVisibleModeChangePeriod(pLocalFmtp->IsModeChangePeriodVisible());
     pEvsFmtp->SetModeChangePeriod(pLocalFmtp->GetModeChangePeriod());
 
     NegotiateUniDirectionBrBw(pEvsFmtp, nBitrateNegoList, nBandwidthNegoList);
@@ -490,7 +490,7 @@ void AudioProfileNegotiator::NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmt
         if (((pEvsFmtp->GetBrList() & 0x10) != 0) && ((pEvsFmtp->GetBrList() & 0xFFE0) == 0))
         {
             pEvsFmtp->SetModeSetList(0x07);  // mode-set = 0,1,2;
-            pEvsFmtp->SetShowModeSet(IMS_TRUE);
+            pEvsFmtp->SetVisibleModeSet(IMS_TRUE);
             IMS_TRACE_D("NegotiateModeSet(): add EVS mode-set", 0, 0, 0);
         }
     }

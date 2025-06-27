@@ -1320,8 +1320,14 @@ const IMS_CHAR
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
                 KEY_IMS_VOICE_PREFIX "audio_amrnb_codec_attribute_default_modeset_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "audio_show_codec_attribute_dtx_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_VISIBLE_DTX_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "evs_codec_attribute_visible_dtx_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_CAPABILITY_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "codec_attribute_visible_mode_change_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_PERIOD_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "codec_attribute_visible_mode_change_period_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_NEIGHBOR_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "codec_attribute_visible_mode_change_neighbor_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL[] =
         KEY_IMS_VOICE_PREFIX "audio_show_codec_attribute_amrwbio_modeset_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT[] =

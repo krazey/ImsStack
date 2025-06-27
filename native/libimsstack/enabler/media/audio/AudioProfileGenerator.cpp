@@ -129,7 +129,7 @@ PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCo
     }
 
     // TODO(b/414484057) : need to add a new asset to handle to include this attribute to SDP
-    pFmtp->SetShowModeChangeCapability(IMS_TRUE);
+    pFmtp->SetVisibleModeChangeCapability(IMS_TRUE);
 
     if (pCodecConfig->GetModeChangePeriod() != NOT_PRESENT)
     {
@@ -141,7 +141,7 @@ PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCo
     }
 
     // TODO(b/414484057) : need to add a new asset to handle to include this attribute to SDP
-    pFmtp->SetShowModeChangePeriod(IMS_FALSE);
+    pFmtp->SetVisibleModeChangePeriod(IMS_FALSE);
 
     if (pCodecConfig->GetModeChangeNeighbor() != NOT_PRESENT)
     {
@@ -153,17 +153,17 @@ PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCo
     }
 
     // TODO(b/414484057) : need to add a new asset to handle to include this attribute to SDP
-    pFmtp->SetShowModeChangeNeighbor(IMS_FALSE);
+    pFmtp->SetVisibleModeChangeNeighbor(IMS_FALSE);
 
     if (pAudioConfig->GetMaxRed() != NOT_PRESENT)
     {
         pFmtp->SetMaxRed(pAudioConfig->GetMaxRed());
-        pFmtp->SetShowMaxRed(IMS_TRUE);
+        pFmtp->SetVisibleMaxRed(IMS_TRUE);
     }
     else
     {
         pFmtp->SetMaxRed(AudioConfiguration::DEFAULT_MAX_RED);
-        pFmtp->SetShowMaxRed(IMS_FALSE);
+        pFmtp->SetVisibleMaxRed(IMS_FALSE);
     }
 }
 
@@ -183,22 +183,22 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
 
     SetAudioCodecFmtp(pAmrConfig, pAudioConfig, pAmrFmtp);
 
-    pAmrFmtp->SetModeSetList(pAmrConfig->GetAmrModeSetList());
-    pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultAmrModeSetList());
-    pAmrFmtp->SetShowModeSet(pAmrConfig->GetShowAmrModeSet());
+    pAmrFmtp->SetModeSetList(pAmrConfig->GetModeSetList());
+    pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultModeSetList());
+    pAmrFmtp->SetVisibleModeSet(pAmrConfig->GetVisibleModeSet());
 
-    pAmrFmtp->SetShowOctetAlign(IMS_FALSE);
+    pAmrFmtp->SetVisibleOctetAlign(IMS_FALSE);
     if (pAmrConfig->GetOctetAlign() != -1)
     {
         pAmrFmtp->SetOctetAlign(pAmrConfig->GetOctetAlign());
         if (pAmrFmtp->GetOctetAlign() == 1)
         {
-            pAmrFmtp->SetShowOctetAlign(IMS_TRUE);
+            pAmrFmtp->SetVisibleOctetAlign(IMS_TRUE);
         }
     }
     else
     {
-        pAmrFmtp->SetOctetAlign(CodecAmrConfig::DEFAULT_OCTET_ALIGN);
+        pAmrFmtp->SetOctetAlign(CodecAmrConfig::DEFAULT_PAYLOAD_FORMAT);
     }
 
     pAmrFmtp->SetDtx(pAmrConfig->GetDtx());
@@ -236,9 +236,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
     SetAudioCodecFmtp(pEvsConfig, pAudioConfig, pEvsFmtp);
 
     // Mode set list
-    pEvsFmtp->SetModeSetList(pEvsConfig->GetAmrModeSetList());
-    pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultAmrModeSetList());
-    pEvsFmtp->SetShowModeSet(pEvsConfig->GetShowAmrModeSet());
+    pEvsFmtp->SetModeSetList(pEvsConfig->GetModeSetList());
+    pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultModeSetList());
+    pEvsFmtp->SetVisibleModeSet(pEvsConfig->GetVisibleModeSet());
     pEvsFmtp->SetBrList(pEvsConfig->GetBrList());
     pEvsFmtp->SetBwList(pEvsConfig->GetBwList());
 
@@ -264,52 +264,31 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
         pEvsFmtp->SetShowBwList(IMS_TRUE);
     }
 
-    pEvsFmtp->SetShowDtx(pEvsConfig->GetShowDtx());
+    pEvsFmtp->SetVisibleDtx(pEvsConfig->GetVisibleDtx());
     pEvsFmtp->SetDtx(pEvsConfig->GetDtx());
 
-    if (pEvsConfig->GetHfOnly() == -1)  // Not Present
+    pEvsFmtp->SetHfOnly(pEvsConfig->GetHfOnly());
+    if (pEvsConfig->GetVisibleHfOnly())
     {
-        pEvsFmtp->SetHfOnly(CodecEvsConfig::DEFAULT_HF_ONLY);
-    }
-    else
-    {
-        pEvsFmtp->SetHfOnly(pEvsConfig->GetHfOnly());
         pEvsFmtp->SetShowHfOnly(IMS_TRUE);
     }
 
-    if (pEvsConfig->GetEvsModeSwitch() != -1)
+    pEvsFmtp->SetEvsModeSwitch(pEvsConfig->GetEvsModeSwitch());
+    if (pEvsConfig->GetVisibleEvsModeSwitch())
     {
-        pEvsFmtp->SetEvsModeSwitch(pEvsConfig->GetEvsModeSwitch());
         pEvsFmtp->SetShowEvsModeSwitch(IMS_TRUE);
     }
-    else
-    {
-        pEvsFmtp->SetEvsModeSwitch(CodecEvsConfig::DEFAULT_EVS_MODESWITCH);
-        pEvsFmtp->SetShowEvsModeSwitch(IMS_FALSE);
-    }
 
-    if (pEvsConfig->GetCmr() == CodecEvsConfig::CMR_NOT_PRESENT)
+    pEvsFmtp->SetCmr(pEvsConfig->GetCmr());
+    if (pEvsConfig->GetVisibleCmr())
     {
-        pEvsFmtp->SetCmr(CodecEvsConfig::DEFAULT_CMR);
-    }
-    else
-    {
-        pEvsFmtp->SetCmr(pEvsConfig->GetCmr());
         pEvsFmtp->SetShowCmr(IMS_TRUE);
     }
-    if (pEvsConfig->GetChAwareRecv() != -1)
-    {
-        pEvsFmtp->SetChAwRecv(pEvsConfig->GetChAwareRecv());
-        pEvsFmtp->SetShowChannelAwMode(IMS_TRUE);
 
-        if (pEvsConfig->GetChAwareRecv() == 99)
-        {
-            pEvsFmtp->SetChAwRecv(-1);
-        }
-    }
-    else
+    pEvsFmtp->SetChAwRecv(pEvsConfig->GetChAwareRecv());
+    if (pEvsConfig->GetVisibleChAwareRecv())
     {
-        pEvsFmtp->SetChAwRecv(-1);
+        pEvsFmtp->SetShowChannelAwMode(IMS_TRUE);
     }
 
     // set EVS codec fmtp
@@ -318,9 +297,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
             pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
     pEvsPayload->SetFmtp(pEvsFmtp);
 
-    IMS_TRACE_D("CreateEvsPayload(): Payload[%d], ShowDtx[%d], ShowAmrModeSet[%d]",
-            pEvsConfig->GetPayloadType(), pEvsConfig->GetShowDtx(),
-            pEvsConfig->GetShowAmrModeSet());
+    IMS_TRACE_D("CreateEvsPayload(): Payload[%d], VisibleDtx[%d], VisibleModeSet[%d]",
+            pEvsConfig->GetPayloadType(), pEvsConfig->GetVisibleDtx(),
+            pEvsConfig->GetVisibleModeSet());
 
     return pEvsPayload;
 }

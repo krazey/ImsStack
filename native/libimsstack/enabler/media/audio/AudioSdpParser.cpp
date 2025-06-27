@@ -353,7 +353,7 @@ IMS_BOOL AudioSdpParser::ParseModeSet(
             IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(i).ToInt32();
             pFmtp->SetModeSetList((pFmtp->GetModeSetList() | (1 << nModeSet)));
         }
-        pFmtp->SetShowModeSet(IMS_TRUE);
+        pFmtp->SetVisibleModeSet(IMS_TRUE);
 
         IMS_TRACE_D("ParseModeSet(): modeSetList[%d], visible[%d]", pFmtp->GetModeSetList(),
                 pFmtp->IsModeSetVisible(), 0);
@@ -377,7 +377,7 @@ IMS_BOOL AudioSdpParser::ParseModeChangeCapability(
     if (objSplitEqual.GetAt(0).Equals("mode-change-capability"))
     {
         pFmtp->SetModeChangeCapability((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowModeChangeCapability(IMS_TRUE);
+        pFmtp->SetVisibleModeChangeCapability(IMS_TRUE);
 
         IMS_TRACE_D("ParseModeChangeCapability(): mode-change-capability[%d], visible[%d]",
                 pFmtp->GetModeChangeCapability(), pFmtp->IsModeChangeCapabilityVisible(), 0);
@@ -401,7 +401,7 @@ IMS_BOOL AudioSdpParser::ParseModeChangePeriod(
     if (objSplitEqual.GetAt(0).Equals("mode-change-period"))
     {
         pFmtp->SetModeChangePeriod((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowModeChangePeriod(IMS_TRUE);
+        pFmtp->SetVisibleModeChangePeriod(IMS_TRUE);
 
         IMS_TRACE_D("ParseModeChangePeriod(): mode-change-period[%d], visible[%d]",
                 pFmtp->GetModeChangePeriod(), pFmtp->IsModeChangePeriodVisible(), 0);
@@ -425,7 +425,7 @@ IMS_BOOL AudioSdpParser::ParseModeChangeNeighbor(
     if (objSplitEqual.GetAt(0).Equals("mode-change-neighbor"))
     {
         pFmtp->SetModeChangeNeighbor((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
+        pFmtp->SetVisibleModeChangeNeighbor(IMS_TRUE);
 
         IMS_TRACE_D("ParseModeChangeNeighbor(): mode-change-neighbor[%d], visible[%d]",
                 pFmtp->GetModeChangeNeighbor(), pFmtp->IsModeChangeNeighborVisible(), 0);
@@ -449,7 +449,7 @@ IMS_BOOL AudioSdpParser::ParseMaxRed(
     if (objSplitEqual.GetAt(0).Equals("max-red"))
     {
         pFmtp->SetMaxRed((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowMaxRed(IMS_TRUE);
+        pFmtp->SetVisibleMaxRed(IMS_TRUE);
 
         IMS_TRACE_D("ParseMaxRed(): max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
                 pFmtp->IsMaxRedVisible(), 0);
@@ -473,7 +473,7 @@ void AudioSdpParser::ParseOctetAlign(
     if (objSplitEqual.GetAt(0).Equals("octet-align"))
     {
         pFmtp->SetOctetAlign((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowOctetAlign(IMS_TRUE);
+        pFmtp->SetVisibleOctetAlign(IMS_TRUE);
 
         IMS_TRACE_D("ParseOctetAlign(): octet-align[%d], visible[%d]", pFmtp->GetOctetAlign(),
                 pFmtp->IsOctetAlignVisible(), 0);
@@ -493,7 +493,7 @@ IMS_BOOL AudioSdpParser::ParseDtx(
     if (objSplitEqual.GetAt(0).Equals("dtx"))
     {
         pFmtp->SetDtx((IMS_BOOL)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowDtx(IMS_TRUE);
+        pFmtp->SetVisibleDtx(IMS_TRUE);
 
         IMS_TRACE_D("ParseDtx(): dtx[%d], visible[%d]", pFmtp->IsDtxEnabled(),
                 pFmtp->IsDtxVisible(), 0);

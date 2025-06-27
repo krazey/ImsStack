@@ -95,6 +95,7 @@ public:
     static const IMS_SINT32 DEFAULT_BW_LIST;
     static const IMS_SINT32 DEFAULT_CMR;
     static const IMS_SINT32 DEFAULT_CH_AW_RECV;
+    static const IMS_SINT32 NOT_DEFINED;
     static const IMS_SINT32 CMR_NOT_PRESENT;
 
 public:
@@ -129,7 +130,7 @@ public:
      * @return IMS_BOOL Return IMS_TRUE Include dtx to sdp
      * IMS_FALSE Not include dtx to sdp
      */
-    IMS_BOOL GetShowDtx() const;
+    IMS_BOOL GetVisibleDtx() const;
     /**
      * @brief Get the dtx recv
      *
@@ -138,11 +139,25 @@ public:
      */
     IMS_BOOL GetDtxRecv() const;
     /**
+     * @brief Get the information whether to include Header-full only in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include HfOnly to sdp
+     * IMS_FALSE Not include HfOnly to sdp
+     */
+    IMS_BOOL GetVisibleHfOnly() const;
+    /**
      * @brief Get the header-full only mode
      *
      * @return IMS_SINT32 Return the HFonly mode
      */
     IMS_SINT32 GetHfOnly() const;
+    /**
+     * @brief Get the information whether to include Evs mode switch in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include evs mode switch to sdp
+     * IMS_FALSE Not include evs mode switc to sdp
+     */
+    IMS_BOOL GetVisibleEvsModeSwitch() const;
     /**
      * @brief Get the evs mode switch
      *
@@ -168,17 +183,36 @@ public:
      */
     IMS_UINT32 GetBwList() const;
     /**
+     * @brief Get the information whether to include cmr in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include cmr to sdp
+     * IMS_FALSE Not include cmr to sdp
+     */
+    IMS_BOOL GetVisibleCmr() const;
+    /**
      * @brief Get the cmr
      *
      * @return IMS_SINT32 Return cmr (code-mode_request) value
      */
     IMS_SINT32 GetCmr() const;
     /**
+     * @brief Get the information whether to include channel-aware recv in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include channel-aware recv to sdp
+     * IMS_FALSE Not include channel-aware recv to sdp
+     */
+    IMS_BOOL GetVisibleChAwareRecv() const;
+    /**
      * @brief Get the channel-aware recv
      *
      * @return IMS_SINT32 Return the channel-aware recv value
      */
     IMS_SINT32 GetChAwareRecv() const;
+    /**
+     * @brief Create the default Evs codec
+     *
+     */
+    VIRTUAL void CreateDefaultEvsCodec();
 
 private:
     static IMS_SINT32 ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd);
@@ -186,14 +220,23 @@ private:
     static IMS_SINT32 GetEvsBitrateFromList(IN IMS_SINT32 nBitrateList);
     static IMS_SINT32 CheckEvsBandwidthWithBitrate(IN IMS_SINT32 nBwList, IN IMS_SINT32 nBrList);
 
-protected:
-    IMS_BOOL m_bShowDtx;          // Indicate whether dtx attribute to display in SDP
+private:
+    IMS_BOOL m_bVisibleDtx;     // Indicate whether dtx attribute to display in SDP
+    IMS_BOOL m_bVisibleHfOnly;  // Indicate whether hf-only attribute to display in SDP
+    IMS_BOOL m_bVisibleCmr;
+    IMS_BOOL m_bVisibleEvsModeSwitch;  // Indicate whether EvsModeSwitch attribute to display in SDP
+    IMS_BOOL m_bVisibleChannelAwMode;  // Indicate whether channel-aware mode to display in SDP
+    IMS_BOOL m_bVisibleAmrIOModeSet;
+    IMS_BOOL m_bVisibleChAwRecv;
+
     IMS_BOOL m_bDtxRecv;          // 1(default) is turn on DTX
     IMS_SINT32 m_nHfOnly;         // 0(default) is both used, other is only hf format used
     IMS_SINT32 m_nEvsModeSwitch;  // 0(default) is "primary mode start"
     IMS_SINT32 m_nBrList;         // EVS primary mode bitrate range (kbps)
     IMS_SINT32 m_nBwList;  // bw has a value from the set: nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb
     IMS_SINT32 m_nCmr;
+    IMS_UINT32 m_nAmrIOModeSetList;
+    IMS_UINT32 m_nDefaultAmrIOModeSetList;
     IMS_SINT32 m_nChAwRecv;  // -1: disabled / 0(default)
 };
 
