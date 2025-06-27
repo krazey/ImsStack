@@ -284,6 +284,8 @@ protected:
     virtual void ProcessUpdatePending();
     virtual void ProcessReconfigPending();
     virtual void ProcessUnpredictableFailure();
+    virtual void ProcessNextPcscfUnsuccessful(
+            IN IMS_UINT32 nPdnReactivateWaitTimeValue, IN IMS_UINT32 nReason);
     virtual IMS_BOOL ProcessUnpredictableFailureHeldByCall();
     virtual void ProcessRegTerminated();
     virtual void ProcessRegTerminatedByNotify();

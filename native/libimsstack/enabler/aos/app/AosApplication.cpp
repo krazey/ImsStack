@@ -2442,6 +2442,15 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
             break;
     }
 
+    IMS_BOOL bIsNrBlockCondition =
+            GET_N_CONFIG(m_nSlotId)->GetRegTempPlmnBlockRatsOnAllPcscfsFail().Contains(
+                    CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN) &&
+            m_nRat == NW_REPORT_RADIO_NR;
+    if (bIsNrBlockCondition)
+    {
+        bNotifyPlmnBlock = IMS_TRUE;
+    }
+
     if (bNotifyPlmnBlock)
     {
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);

@@ -417,6 +417,7 @@ public:
     AString m_strServiceId = AString("ims.service.test");
     ImsMap<AString, IAosHandle*> m_objHandles;
     AStringArray m_objPcscfs;
+    ImsVector<IMS_SINT32> m_objRegTempPlmnBlockRats;
 
 protected:
     void SetUp() override
@@ -446,6 +447,8 @@ protected:
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
                 .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegTempPlmnBlockRatsOnAllPcscfsFail())
+                .WillByDefault(ReturnRef(m_objRegTempPlmnBlockRats));
 
         // MockIAosNetTracker
         ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
@@ -2854,6 +2857,22 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteIn
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotStopWhenTestModeEnabledWithoutDeactivation)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_CRITICAL));
+
+    ON_CALL(m_objMockIAosNConfiguration, IsTestModeEnabled(_)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
+
+    // WHEN
+    m_pAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNotPlmnBlockConfig)
 {
     // GIVEN
@@ -2870,15 +2889,17 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNo
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotStopWhenTestModeEnabledWithoutDeactivation)
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisterWhenNrBlockCondition)
 {
     // GIVEN
+    m_objRegTempPlmnBlockRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_NR);
+
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_CRITICAL));
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED));
 
-    ON_CALL(m_objMockIAosNConfiguration, IsTestModeEnabled(_)).WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyDeregistered(_, _, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
 
     // WHEN
     m_pAosApplication->ProcessPdnDisconnect();

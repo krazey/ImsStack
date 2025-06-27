@@ -3689,6 +3689,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUnpredictableFailure()
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_INTERNAL);
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessNextPcscfUnsuccessful(
+        IN IMS_UINT32 nPdnReactivateWaitTime, IN IMS_UINT32 nReason)
+{
+    SetState(STATE_REGSTOP);
+    m_nPdnReactivateWaitTime = nPdnReactivateWaitTime;
+    ReportStateChanged(RESULT_FAILURE, nReason);
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUnpredictableFailureHeldByCall()
 {
     if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
@@ -4303,9 +4311,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithFail
     }
     else
     {
-        SetState(STATE_REGSTOP);
-        m_nPdnReactivateWaitTime = 0;
-        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        ProcessNextPcscfUnsuccessful(0, REASON_FAILURE_PDN_RECONNECT);
     }
 }
 
@@ -4328,9 +4334,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithRfcR
         }
         else
         {
-            SetState(STATE_REGSTOP);
-            m_nPdnReactivateWaitTime = nRetryAfter;
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+            ProcessNextPcscfUnsuccessful(nRetryAfter, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
         }
     }
     else  // 3GPP TS 24.229
@@ -4350,9 +4354,18 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithRfcR
         }
         else
         {
-            SetState(STATE_REGSTOP);
-            m_nPdnReactivateWaitTime = nAwt;
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+            IMS_BOOL bIsNrBlockCondition =
+                    GET_N_CONFIG(m_nSlotId)->GetRegTempPlmnBlockRatsOnAllPcscfsFail().Contains(
+                            CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN) &&
+                    GetNetworkTypeForImsRegState() == AosNetworkType::NR;
+            if (bIsNrBlockCondition)
+            {
+                ProcessNextPcscfUnsuccessful(0, REASON_FAILURE_PDN_RECONNECT);
+            }
+            else
+            {
+                ProcessNextPcscfUnsuccessful(nAwt, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+            }
         }
     }
 }
