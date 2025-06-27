@@ -926,20 +926,18 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     public void update(int callType, ImsStreamMediaProfile profile) {
         if (mVideoCallSession.isClearedSessionModificationInfo()) {
             ImsStreamMediaProfile existingMediaProfile = mCallProfile.getMediaProfile();
-            int videoDirection = existingMediaProfile.getVideoDirection();
-            if (videoDirection == ImsStreamMediaProfile.DIRECTION_INACTIVE) {
-                videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
-            }
 
             ImsCallProfile callProfile = ImsCallUtils.createCallProfile(
                     mCallProfile.getServiceType(), ImsCallMediaUtils.getVideoCallType(profile),
                     existingMediaProfile.getAudioQuality(),
                     existingMediaProfile.getAudioDirection(),
-                    existingMediaProfile.getVideoQuality(), videoDirection,
+                    existingMediaProfile.getVideoQuality(),
+                    existingMediaProfile.getVideoDirection(),
                     existingMediaProfile.getRttMode());
             setCallInfo(callProfile);
 
-            mCallback.invokeUpdated(ImsCallSessionImpl.this, callProfile);
+            mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                    ImsCallUtils.getSanitizedCallProfileForVideoDirection(callProfile));
             return;
         }
 
@@ -1369,7 +1367,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 log("updateCallProfileByCallManager");
                 if (updateCallTypeChangeCapability()
                         && getState() == ImsCallSessionImplBase.State.ESTABLISHED) {
-                    mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                    mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                            ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
                 }
             }
         }
@@ -3040,7 +3039,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mRemoteCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_OIR,
                             ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED);
 
-                    mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                    mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                            ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
                 }
             }
 
@@ -3412,7 +3412,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (ImsCallUtils.isAlternateEmergencyCall(callReasonInfo)) {
                 ImsCallUtils.setSosUrnFromCallReasonInfo(callReasonInfo, mCallProfile);
-                mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                        ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
                 mCallDetails.clear(CallDetails.MO_PROGRESSING);
             }
 
@@ -4153,8 +4154,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         try {
                             logi("Voice call is automatically accepted (RTT)");
                             sendRttModifyResponse(false);
-                            //FIXME: Need to Verify the Callprofile that is passed
-                            mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                            mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                                    ImsCallUtils.getSanitizedCallProfileForVideoDirection(
+                                            mCallProfile));
                         } catch (Throwable t) {
                             loge("onCallUpdateReceived: " + t.toString());
                         }
@@ -4238,7 +4240,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             mCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
-            mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+            mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                    ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
         }
 
         @Override

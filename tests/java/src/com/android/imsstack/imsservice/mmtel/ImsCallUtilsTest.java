@@ -173,6 +173,43 @@ public class ImsCallUtilsTest {
     }
 
     @Test
+    public void testGetSanitizedCallProfileForVideoDirection() {
+        assertNull(ImsCallUtils.getSanitizedCallProfileForVideoDirection(null));
+
+        ImsCallProfile profileWithNullMedia = new ImsCallProfile(
+                IUMtcCall.SERVICETYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE, null, null);
+        ImsCallProfile sanitizedProfile =
+                ImsCallUtils.getSanitizedCallProfileForVideoDirection(profileWithNullMedia);
+        assertNull(sanitizedProfile.getMediaProfile());
+
+        ImsCallProfile profileWithVideoSendReceive = ImsCallUtils.createCallProfile(
+                IUMtcCall.SERVICETYPE_NORMAL,
+                ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+                ImsStreamMediaProfile.AUDIO_QUALITY_NONE,
+                ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
+                ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
+                ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
+                ImsStreamMediaProfile.RTT_MODE_DISABLED);
+        sanitizedProfile =
+                ImsCallUtils.getSanitizedCallProfileForVideoDirection(profileWithVideoSendReceive);
+        assertEquals(ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
+                sanitizedProfile.getMediaProfile().mVideoDirection);
+
+        ImsCallProfile profileWithVideoInactive = ImsCallUtils.createCallProfile(
+                IUMtcCall.SERVICETYPE_NORMAL,
+                ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+                ImsStreamMediaProfile.AUDIO_QUALITY_NONE,
+                ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
+                ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
+                ImsStreamMediaProfile.DIRECTION_INACTIVE,
+                ImsStreamMediaProfile.RTT_MODE_DISABLED);
+        sanitizedProfile =
+                ImsCallUtils.getSanitizedCallProfileForVideoDirection(profileWithVideoInactive);
+        assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
+                sanitizedProfile.getMediaProfile().mVideoDirection);
+    }
+
+    @Test
     public void testCreateConferenceParticipant() {
         String user = "sip:anonymousX@example.com";
         String endpoint = "full";

@@ -1336,6 +1336,28 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallRatChanged() {
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
+        mImsCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, 0);
+        mImsCallProfile.getMediaProfile().mVideoDirection =
+                ImsStreamMediaProfile.DIRECTION_INACTIVE;
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+
+        mImsCallSession.getCallListenerProxy().onCallRatChanged(1);
+        processAllMessages();
+
+        ArgumentCaptor<ImsCallProfile> profileCaptor =
+                ArgumentCaptor.forClass(ImsCallProfile.class);
+        verify(mMockImsCallSessionCallback).invokeUpdated(
+                any(ImsCallSessionImplBase.class), profileCaptor.capture());
+        assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
+                profileCaptor.getValue().getMediaProfile().getVideoDirection());
+    }
+
+    @Test
     public void testOnCallTransferred() {
         mImsCallSession.mTransferTargetSession = createImsCallSession("1");
         ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;
