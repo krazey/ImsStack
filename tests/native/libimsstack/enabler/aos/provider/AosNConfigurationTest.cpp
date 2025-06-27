@@ -852,6 +852,15 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY, _))
             .WillOnce(Return(objRegRetryErrCodeWithoutIpsec));
 
+    ImsVector<IMS_SINT32> objTempPlmnBlockRats;
+    objTempPlmnBlockRats.Clear();
+    objTempPlmnBlockRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(
+                    CarrierConfig::Ims::KEY_REG_TEMP_PLMN_BLOCK_RATS_ON_ALL_PCSCFS_FAIL_INT_ARRAY,
+                    _))
+            .WillOnce(Return(objTempPlmnBlockRats));
+
     ImsVector<IMS_SINT32> objReregErrForCallEnd;
     objReregErrForCallEnd.Clear();
     objReregErrForCallEnd.Add(403);
@@ -1052,6 +1061,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Ims::REG_FEATURE_VIDEO));
     EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Ims::REG_FEATURE_TEXT));
     EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Ims::REG_FEATURE_SMS));
+
+    ImsVector<IMS_SINT32> objNetworkTypes =
+            m_pAosNConfiguration->GetRegTempPlmnBlockRatsOnAllPcscfsFail();
+    EXPECT_EQ(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN, objNetworkTypes.GetAt(0));
 
     ImsVector<IMS_SINT32> objErrCode = m_pAosNConfiguration->GetRegErrCodeForPcscfDiscovery();
     EXPECT_EQ(408, objErrCode.GetAt(0));

@@ -213,6 +213,7 @@ public:
     ImsVector<IMS_SINT32>& GetRegPermanentErrCode() override;
     ImsVector<IMS_SINT32>& GetRegPermanentErrMaxCount() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() override;
+    ImsVector<IMS_SINT32>& GetRegTempPlmnBlockRatsOnAllPcscfsFail() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() override;

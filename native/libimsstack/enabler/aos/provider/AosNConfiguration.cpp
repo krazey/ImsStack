@@ -974,6 +974,11 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithoutIps
     return m_objAsset.objRegRetryErrCodeWithoutIpsec;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegTempPlmnBlockRatsOnAllPcscfsFail()
+{
+    return m_objAsset.objTempPlmnBlockRats;
+}
+
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
 {
     return m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime;
@@ -1647,6 +1652,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY);
     m_objAsset.objRegRetryErrCodeWithoutIpsec =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY);
+    m_objAsset.objTempPlmnBlockRats = piCc->GetIntArray(
+            CarrierConfig::Ims::KEY_REG_TEMP_PLMN_BLOCK_RATS_ON_ALL_PCSCFS_FAIL_INT_ARRAY);
     m_objAsset.objReregErrCodeForCallEnd =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY);
     m_objAsset.objReregErrCodeForImsPdnReactivation = piCc->GetIntArray(

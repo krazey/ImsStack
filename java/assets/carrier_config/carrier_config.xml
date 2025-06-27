@@ -420,6 +420,8 @@
     </int-array>
     <int-array name="ims.reg_retry_err_code_without_ipsec_int_array" num="0">
     </int-array>
+    <int-array name="ims.reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array" num="0">
+    </int-array>
     <int-array name="ims.rereg_err_code_for_call_end_int_array" num="0">
     </int-array>
     <int-array name="ims.rereg_err_code_for_ims_pdn_reactivation_int_array" num="0">

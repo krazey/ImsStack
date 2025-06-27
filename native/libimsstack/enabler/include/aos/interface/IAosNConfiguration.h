@@ -1869,6 +1869,21 @@ public:
     virtual ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() = 0;
 
     /**
+     * @brief Indicate the list of RAT(Radio Access Technology) network types for which PLMN block
+     *        should be applied when IMS registration fails on all P-CSCFs.
+     *
+     *        This configuration specifies whether to block the PLMN in certain network types
+     *        if registration fails across all P-CSCFs.
+     *        Possible values are,
+     *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN (6)
+     *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN (3)
+     *
+     * @return vector of integer RAT network types
+     * @see {@code ims.reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array}
+     */
+    virtual ImsVector<IMS_SINT32>& GetRegTempPlmnBlockRatsOnAllPcscfsFail() = 0;
+
+    /**
      * @brief Indicate the list of the error response with time value containing Retry-After header
      *        for registration retry.
      *

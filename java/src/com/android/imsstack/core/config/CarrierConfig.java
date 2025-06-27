@@ -535,6 +535,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reg_permanent_err_max_cnt_int_array";
         public static final String KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY =
                 KEY_PREFIX + "reg_retry_err_code_without_ipsec_int_array";
+        public static final String KEY_REG_TEMP_PLMN_BLOCK_RATS_ON_ALL_PCSCFS_FAIL_INT_ARRAY =
+                KEY_PREFIX + "reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array";
         public static final String KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY =
                 KEY_PREFIX + "rereg_err_code_for_call_end_int_array";
         public static final String KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY =
