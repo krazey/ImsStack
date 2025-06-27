@@ -103,6 +103,7 @@
         <item value="423"/>
     </int-array>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imswfc.geolocation_pidf_in_wfc_init_reg_bool" value="true"/>
     <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="true"/>
     <int name="imswfc.registration_private_header_int" value="2"/>
     <int name="imswfc.sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int" value="3"/>
