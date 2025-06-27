@@ -15,9 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-
     <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>
