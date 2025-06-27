@@ -5404,6 +5404,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                                 mCallContext, callInfo, mediaInfo);
 
                         updateCallExtraForHDVoice(profile, mediaInfo);
+                        ImsCallUtils.setCallExtraIfPresent(mCallProfile,
+                                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT,
+                                profile);
 
                         // Update the session & media profiles
                         transientConfSession.initCallProfile(profile);
