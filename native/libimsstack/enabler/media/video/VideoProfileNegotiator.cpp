@@ -689,7 +689,7 @@ void VideoProfileNegotiator::NegotiateRtcpFb(OUT VideoProfile* pNegotiatedProfil
 
     if (!pNegotiatedProfile->IsAvpfSupported())
     {
-        IMS_TRACE_E(0, "NegotiateRtcpFb(): avpf unsupported", 0, 0, 0);
+        IMS_TRACE_D("NegotiateRtcpFb(): avpf unsupported", 0, 0, 0);
         return;
     }
 

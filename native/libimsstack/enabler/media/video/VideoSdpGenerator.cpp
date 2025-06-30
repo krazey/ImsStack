@@ -529,7 +529,7 @@ void VideoSdpGenerator::GenerateCapaNegoAttribute(
 
     if (!pProfile->IsCapaNegoForAvpfSupported())
     {
-        IMS_TRACE_E(0, "GenerateCapaNegoAttribute(): capa nego is not supported", 0, 0, 0);
+        IMS_TRACE_I("GenerateCapaNegoAttribute(): capa nego is not supported", 0, 0, 0);
         return;
     }
 

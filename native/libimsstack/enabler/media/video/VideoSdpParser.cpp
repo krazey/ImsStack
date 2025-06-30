@@ -833,7 +833,7 @@ PRIVATE VIDEO_RESOLUTION VideoSdpParser::GetResolutionFromSdp(IN VIDEO_CODEC /*c
     }
     else
     {
-        IMS_TRACE_E(0, "GetResolutionFromSdp(): no preferred resolution from SDP", 0, 0, 0);
+        IMS_TRACE_D("GetResolutionFromSdp(): no preferred resolution from SDP", 0, 0, 0);
         return VIDEO_RESOLUTION_NOT_USED;
     }
 }
