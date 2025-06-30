@@ -27,7 +27,7 @@ public:
             AosIpsecHelper()
     {
     }
-    ~MockAosIpsecHelper() {}
+    ~MockAosIpsecHelper() override {}
     MOCK_METHOD(IMS_BOOL, Create, (IN IMS_BOOL bInitial), (override));
     MOCK_METHOD(void, CreateOnChallenging, (), (override));
     MOCK_METHOD(IMS_BOOL, SetPcscfPortnSpi, (), (override));

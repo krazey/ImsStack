@@ -30,7 +30,7 @@ public:
             AosSubscription()
     {
     }
-    ~MockAosSubscription() {}
+    ~MockAosSubscription() override {}
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(IMS_BOOL, Start, (IN IMS_BOOL bIsRadioCheckRequired), (override));
     MOCK_METHOD(void, Stop, (), (override));
