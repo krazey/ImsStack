@@ -349,7 +349,7 @@ public:
      * @brief Constructor for the {@link AosReasonCodeWrapper} class.
      * @param eCode The {@link AosReasonCode} enum value to be wrapped.
      */
-    AosReasonCodeWrapper(IN AosReasonCode eCode) :
+    explicit AosReasonCodeWrapper(IN AosReasonCode eCode) :
             m_eCode(eCode)
     {
     }
