@@ -134,11 +134,11 @@ public:
         return m_objMonitorListeners;
     }
 
-    inline void SetPuids(IN AStringArray& objPuids) { m_objPuids = objPuids; }
+    inline void SetPuids(IN const AStringArray& objPuids) { m_objPuids = objPuids; }
 
-    inline void SetOrderedPuids(IN AStringArray& objPuids) { m_objOrderedPuids = objPuids; }
+    inline void SetOrderedPuids(IN const AStringArray& objPuids) { m_objOrderedPuids = objPuids; }
 
-    inline void SetPuidsForFake(IN AStringArray& objPuids) { m_objPuidsForFake = objPuids; }
+    inline void SetPuidsForFake(IN const AStringArray& objPuids) { m_objPuidsForFake = objPuids; }
 
     inline ITimer* GetTimerToIccLoadedWaiting() { return m_piTimerToIccLoadedWaiting; }
 
