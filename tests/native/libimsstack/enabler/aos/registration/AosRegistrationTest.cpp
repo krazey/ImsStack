@@ -327,7 +327,6 @@ public:
         return AosRegistration::CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
     }
     inline IMS_UINT32 GetPdnReactivateWaitTime() { return m_nPdnReactivateWaitTime; }
-    inline RcPtr<SipProfile>& GetSipProfile() { return m_pSipProfile; }
 
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
     IMS_BOOL CheckRadioReadyAndSetTxnPending() override
@@ -461,6 +460,7 @@ public:
     {
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
+        m_pSipProfile = new SipProfile();
 
         m_objPhoneInfoService.SetLocationInfo(&m_objMockILocationInfo);
         PlatformContext::GetInstance()->SetService(
@@ -526,6 +526,7 @@ public:
     IAosRetryRepository* m_piAosRetryRepository;
     IAosService* m_piAosService;
     IAosTransaction* m_piAosTransaction;
+    RcPtr<SipProfile> m_pSipProfile;
 
     MockAosIpsecHelper m_objMockAosIpsecHelper;
     MockAosSubscription m_objMockAosSubscription;
@@ -2105,13 +2106,13 @@ TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfWfcAndIpv6)
     ON_CALL(m_objMockIAosNConfiguration, GetSipMessageThresholdForTransportChange())
             .WillByDefault(Return(200));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, GetSipProfile()).WillByDefault(Return(m_pSipProfile.Get()));
+    m_pAosRegistration->GetRegistration()->SetSipProfile(m_pSipProfile.Get());
     m_pAosRegistration->SetIpAddress(IpAddress::IPv6LOOPBACK);
-
-    EXPECT_CALL(m_objMockIRegistration, SetSipProfile(_));
 
     m_pAosRegistration->SetTcpCriterionLength();
 
-    EXPECT_EQ(m_pAosRegistration->GetSipProfile()->GetTcpCriterionLength(), 1080);
+    EXPECT_EQ(m_pSipProfile->GetTcpCriterionLength(), 1080);
 }
 
 TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfMtuIsZeroAndIpv4)
@@ -2123,13 +2124,13 @@ TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfMtuIsZeroAndIpv4)
             .WillByDefault(Return(200));
     ON_CALL(m_objMockIAosNConfiguration, GetIpv4MtuSize()).WillByDefault(Return(0));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, GetSipProfile()).WillByDefault(Return(m_pSipProfile.Get()));
+    m_pAosRegistration->GetRegistration()->SetSipProfile(m_pSipProfile.Get());
     m_pAosRegistration->SetIpAddress(IpAddress::LOOPBACK);
-
-    EXPECT_CALL(m_objMockIRegistration, SetSipProfile(_));
 
     m_pAosRegistration->SetTcpCriterionLength();
 
-    EXPECT_EQ(m_pAosRegistration->GetSipProfile()->GetTcpCriterionLength(), 1300);
+    EXPECT_EQ(m_pSipProfile->GetTcpCriterionLength(), 1300);
 }
 
 TEST_F(AosRegistrationTest, IgnoreSetStaticIpQosIfPreferredDscpIsNone)

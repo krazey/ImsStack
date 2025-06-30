@@ -133,7 +133,6 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_nImsRegFeatures(ImsAosFeature::NONE),
         m_eImsRegNetwork(AosNetworkType::NONE),
         m_eImsReasonCode(AosReasonCode::UNSPECIFIED),
-        m_pSipProfile(IMS_NULL),
         m_nPdnReactivateWaitTime(RETRY_DEFAULT_WAIT_TIME),
         m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
 {
@@ -1818,6 +1817,13 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
         CreateIpsecHelper();
     }
 
+    RcPtr<SipProfile> pSipProfile = m_piRegistration->GetSipProfile();
+    if (pSipProfile.IsNull())
+    {
+        pSipProfile = new SipProfile();
+    }
+    m_piRegistration->SetSipProfile(pSipProfile.Get());
+
     SetTcpCriterionLength();
 
     return SendRegister(IMS_FALSE, IMS_TRUE);
@@ -2287,6 +2293,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddOperation_OnSendRegister()
     m_piRegContact->RemoveHeaderParameter(AosString::STR_ACCESS_TYPE_FEATURE);
     AddAccesstypeFeatureTag();
 
+    UpdatePaniHeader();
+
     ControlPrivateHeader();
 
     return IMS_TRUE;
@@ -2370,6 +2378,30 @@ PROTECTED VIRTUAL void AosRegistration::AddAccesstypeFeatureTag()
     }
 
     m_piRegContact->AddHeaderParameter(AosString::STR_ACCESS_TYPE_FEATURE, strValue);
+}
+
+PROTECTED VIRTUAL void AosRegistration::UpdatePaniHeader()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsPaniHeaderInWfcInitReg())
+    {
+        SipProfile* pSipProfile = m_piRegistration->GetSipProfile();
+        if (pSipProfile != IMS_NULL)
+        {
+            IMS_SINT32 nSipFeatureCaps = SipConfigProxy::GetSipFeatureCaps(m_nSlotId, pSipProfile);
+            if (m_piContext->GetConnection()->IsEpdgEnabled())
+            {
+                A_IMS_TRACE_I(REGID, "Add PANI header for init REG", 0, 0, 0);
+                pSipProfile->SetSipFeatureCaps(
+                        nSipFeatureCaps | ISipConfig::SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG);
+            }
+            else
+            {
+                A_IMS_TRACE_I(REGID, "Remove PANI header for init REG", 0, 0, 0);
+                pSipProfile->SetSipFeatureCaps(
+                        nSipFeatureCaps ^ ISipConfig::SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG);
+            }
+        }
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::AddFeatureTag(IN IAosHandle* piHandle)
@@ -2744,13 +2776,11 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
     A_IMS_TRACE_I(REGID, "SetTcpCriterionLength :: TCP length (%d), MTU (%d), Threshold (%d)",
             nLength, nMtu, nSipThresholdSize);
 
-    if (m_pSipProfile.IsNull())
+    SipProfile* pSipProfile = m_piRegistration->GetSipProfile();
+    if (pSipProfile != IMS_NULL)
     {
-        m_pSipProfile = new SipProfile();
+        pSipProfile->SetTcpCriterionLength(nLength);
     }
-
-    m_pSipProfile->SetTcpCriterionLength(nLength);
-    m_piRegistration->SetSipProfile(m_pSipProfile.Get());
 }
 
 PROTECTED VIRTUAL void AosRegistration::SetStaticIpQos()
