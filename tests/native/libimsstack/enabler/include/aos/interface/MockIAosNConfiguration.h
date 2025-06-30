@@ -48,6 +48,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySsac, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfInWfcInitReg, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsPaniHeaderInWfcInitReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReregRetryWithChangedCountryOnWifi, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSipOverIpsecInRoamingEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, UseWfcCountryCodeAvailabilityCheck, (), (const, override));

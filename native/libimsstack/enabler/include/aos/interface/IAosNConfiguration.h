@@ -211,10 +211,22 @@ public:
      *        It's applied if CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI is set
      *        in the CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY.
      *
-     * @return IMS_BOOL Return whether to be sent re-registration or not
+     * @return IMS_BOOL Return whether geolocation pidf is added to the initial registration or not
      * @see {@code imswfc.geolocation_pidf_in_wfc_init_reg_bool}
      */
     virtual IMS_BOOL IsGeolocationPidfInWfcInitReg() const = 0;
+
+    /**
+     * @brief Returns whether to add P-Access-Network-Info header in initial registration over wifi.
+     *
+     *        It's applied if CarrierConfig::Ims::
+     *        KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL is false.
+     *        P-Access-Network-Info header : PANI header
+     *
+     * @return IMS_BOOL Return whether PANI header is added to the initial registration or not
+     * @see {@code imswfc.pani_header_in_wfc_init_reg_bool}
+     */
+    virtual IMS_BOOL IsPaniHeaderInWfcInitReg() const = 0;
 
     /**
      * @brief Returns whether re-registration is sent on Wifi when the country is changed.

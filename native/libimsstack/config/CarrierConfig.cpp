@@ -1079,6 +1079,8 @@ const IMS_CHAR CarrierConfig::ImsWfc::KEY_COUNTRY_CODE_INT[] =
         KEY_IMS_WFC_PREFIX "country_code_int";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_GEOLOCATION_PIDF_IN_WFC_INIT_REG_BOOL[] =
         KEY_IMS_WFC_PREFIX "geolocation_pidf_in_wfc_init_reg_bool";
+const IMS_CHAR CarrierConfig::ImsWfc::KEY_PANI_HEADER_IN_WFC_INIT_REG_BOOL[] =
+        KEY_IMS_WFC_PREFIX "pani_header_in_wfc_init_reg_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL[] =
         KEY_IMS_WFC_PREFIX "rereg_with_changed_country_on_wifi_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
