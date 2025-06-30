@@ -80,7 +80,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
             m_pProfileNegotiator == IMS_NULL)
     {
         IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): invalid arguments", 0, 0, 0);
-        return MEDIA_TYPE_INVALID;
+        return IMS_FALSE;
     }
 
     OaModel objOaModel;
@@ -93,7 +93,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
     if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(objOaModel)))
     {
         IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to parse SDP", 0, 0, 0);
-        return MEDIA_TYPE_INVALID;
+        return IMS_FALSE;
     }
 
     // Make a negotiated profile from the local and peer profile
@@ -103,7 +103,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
                 IMS_TRUE, GetNegotiatedProfile(objOaModel), m_pConfig))
     {
         IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to negotiate SDP", 0, 0, 0);
-        return MEDIA_TYPE_INVALID;
+        return IMS_FALSE;
     }
 
     return (objOaModel.pNegotiatedProfile->GetPayloadList().GetSize() > 0 &&
@@ -262,45 +262,34 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
 
         if (pPrevOaModel == IMS_NULL)
         {
+            IMS_TRACE_E(0, "FormReoffer(): invalid state", 0, 0, 0);
             return IMS_FALSE;
         }
 
         if (pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
-                pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0 && bDisable)
+                pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0 && !bDisable)  // upgrade case
         {
-            if (pMediaSessionConfig->IsSdpReofferFullCapability())
-            {
-                pNewOaModel->pLocalProfile =
-                        MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
-            }
-            else
-            {
-                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                        m_eType, GetNegotiatedProfile(*pPrevOaModel));
-            }
+            pNewOaModel->pLocalProfile =
+                    MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
         }
         else
         {
-            if (bEnforceReofferMode)
+            if (bEnforceReofferMode || pMediaSessionConfig->IsSdpReofferFullCapability())
             {
                 pNewOaModel->pLocalProfile =
                         MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
             }
             else
             {
-                if (pMediaSessionConfig->IsSdpReofferFullCapability())
+                if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
                 {
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, m_pBaseProfile);
+                            m_eType, GetNegotiatedProfile(*pPrevOaModel));
                 }
                 else
                 {
-                    if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
-                    {
-                        pNewOaModel->pLocalProfile =
-                                MediaProfileFactory::GetInstance()->CreateProfile(
-                                        m_eType, GetNegotiatedProfile(*pPrevOaModel));
-                    }
+                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                            m_eType, m_pBaseProfile);
                 }
             }
         }
