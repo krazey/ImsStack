@@ -381,7 +381,7 @@ void AosSubscriberManager::ConfigureAsDefault()
         return;
     }
 
-    if (IsIsim())
+    if (m_bIsim)
     {
         if (!m_piSubscriberConfig->IsProvisioningDone())
         {
@@ -394,7 +394,7 @@ void AosSubscriberManager::ConfigureAsDefault()
             return;
         }
     }
-    else if (IsUsim())
+    else if (m_bUsim)
     {
         if (!UpdateSubscriberInfoWithTempImpu(m_objPuids))
         {
@@ -738,14 +738,14 @@ void AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
             break;
     }
 
-    if (IsIsim() && m_piSubscriberConfig != IMS_NULL && !m_piSubscriberConfig->IsIsimSupported())
+    if (m_bIsim && m_piSubscriberConfig != IMS_NULL && !m_piSubscriberConfig->IsIsimSupported())
     {
         A_IMS_TRACE_I(AOSTAG, "UpdateImsIdentity :: Enable ISIM", 0, 0, 0);
         m_piSubscriberConfig->EnableIsim();
     }
 
-    A_IMS_TRACE_I(AOSTAG, "UpdateImsIdentity :: ISIM(%s),USIM(%s)", _TRACE_B_(IsIsim()),
-            _TRACE_B_(IsUsim()), 0);
+    A_IMS_TRACE_I(AOSTAG, "UpdateImsIdentity :: ISIM(%s),USIM(%s)", _TRACE_B_(m_bIsim),
+            _TRACE_B_(m_bUsim), 0);
 }
 
 PROTECTED
@@ -801,7 +801,7 @@ IMS_BOOL AosSubscriberManager::ProcessPhoneNumberAvailable()
         return IMS_FALSE;
     }
 
-    if (!IsUsim())
+    if (!m_bUsim)
     {
         A_IMS_TRACE_I(AOSTAG, "ProcessPhoneNumberAvailable :: USIM is disabled", 0, 0, 0);
         return IMS_FALSE;
@@ -889,7 +889,7 @@ void AosSubscriberManager::ProcessPhoneRestartRecoveryTimerExpired()
 {
     StopTimer(TIMER_PHONE_RESTART_RECOVERY);
 
-    if (IsUsim())
+    if (m_bUsim)
     {
         ProcessPhoneNumberAvailable();
         return;
