@@ -27,6 +27,7 @@ PUBLIC
 AosBlock::AosBlock(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
         BLOCK_ENABLED(1),
+        REASON{},
         objServiceBlockReasons(ImsList<IMS_UINT32>())
 {
     m_strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
