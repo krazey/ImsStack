@@ -48,13 +48,13 @@ MtsService::MtsService(IN IMtsContext& objContext, IN MtsServiceType eServiceTyp
         ImsService(AString::ConstNull()),
         m_objContext(objContext),
         m_eServiceType(eServiceType),
-        m_piImsAos(IMS_NULL),
         m_strAppId(ImsServiceConfig::GetAppName(ImsAppId::MTS)),
-        m_piCoreService(IMS_NULL),
-        m_piMtsServiceState(new MtsServiceState(m_objContext.GetSlotId())),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
         m_objMtsTraffics(ImsList<IMtsTraffic*>()),
-        m_pSmsInfo(IMS_NULL)
+        m_pSmsInfo(IMS_NULL),
+        m_piCoreService(IMS_NULL),
+        m_piImsAos(IMS_NULL),
+        m_piMtsServiceState(new MtsServiceState(m_objContext.GetSlotId()))
 {
     IMS_TRACE_I("+MtsService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
 }
@@ -416,12 +416,6 @@ void MtsService::Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nD
 }
 
 PUBLIC
-void MtsService::InitMtsServiceState()
-{
-    m_piMtsServiceState->Init(m_piImsAos);
-}
-
-PUBLIC
 IMS_BOOL MtsService::IsWlan() const
 {
     IMS_UINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
@@ -502,6 +496,46 @@ void MtsService::AttachCoreService()
 }
 
 PRIVATE
+void MtsService::DeInit()
+{
+    IMS_TRACE_I("DeInit", 0, 0, 0);
+    if (m_piCoreService != IMS_NULL)
+    {
+        m_piCoreService->Close();
+        m_piCoreService = IMS_NULL;
+    }
+
+    if (m_piImsAos != IMS_NULL)
+    {
+        m_piImsAos->SetListener(IMS_NULL);
+        m_piImsAos = IMS_NULL;
+    }
+
+    if (m_piMtsServiceState != IMS_NULL)
+    {
+        delete m_piMtsServiceState;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objMtsTraffics.GetSize(); i++)
+    {
+        IMtsTraffic* piTmpMtsTraffic = m_objMtsTraffics.GetAt(i);
+
+        if (piTmpMtsTraffic)
+        {
+            delete piTmpMtsTraffic;
+        }
+    }
+
+    m_objMtsTraffics.Clear();
+}
+
+PRIVATE
+void MtsService::InitMtsServiceState()
+{
+    m_piMtsServiceState->Init(m_piImsAos);
+}
+
+PRIVATE
 IMS_UINT32 MtsService::ConvertToAccessNetworkType(IN IMS_SINT32 nReportedNetwork)
 {
     IMS_UINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
@@ -575,14 +609,6 @@ IMS_UINT32 MtsService::GetTrafficTypeOfService() const
 }
 
 PRIVATE
-IMS_BOOL MtsService::IsEmergencySmsOverImsSupported() const
-{
-    return ConfigService::GetConfigService()
-            ->GetCarrierConfig(m_objContext.GetSlotId())
-            ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL);
-}
-
-PRIVATE
 IMS_BOOL MtsService::IsEmergencySmsReadyToSend() const
 {
     return (m_pSmsInfo != IMS_NULL && m_pSmsInfo->bEmergencyNumber);
@@ -649,38 +675,4 @@ MtsTrafficStartResult MtsService::StartMoTrafficIfNeeded()
         IMS_TRACE_E(0, "RadioTraffic was not allowed", 0, 0, 0);
         return MtsTrafficStartResult::TRAFFIC_NOT_ALLOWED;
     }
-}
-
-PRIVATE
-void MtsService::DeInit()
-{
-    IMS_TRACE_I("DeInit", 0, 0, 0);
-    if (m_piCoreService != IMS_NULL)
-    {
-        m_piCoreService->Close();
-        m_piCoreService = IMS_NULL;
-    }
-
-    if (m_piImsAos != IMS_NULL)
-    {
-        m_piImsAos->SetListener(IMS_NULL);
-        m_piImsAos = IMS_NULL;
-    }
-
-    if (m_piMtsServiceState != IMS_NULL)
-    {
-        delete m_piMtsServiceState;
-    }
-
-    for (IMS_UINT32 i = 0; i < m_objMtsTraffics.GetSize(); i++)
-    {
-        IMtsTraffic* piTmpMtsTraffic = m_objMtsTraffics.GetAt(i);
-
-        if (piTmpMtsTraffic)
-        {
-            delete piTmpMtsTraffic;
-        }
-    }
-
-    m_objMtsTraffics.Clear();
 }
