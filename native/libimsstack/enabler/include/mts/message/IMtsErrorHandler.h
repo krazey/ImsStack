@@ -35,16 +35,12 @@ public:
      * attempting recovery and handling retry mechanisms.
      *
      * @param objMtsService A reference to the IMtsService object.
-     * @param objMtsDynamicLoader A reference to the IMtsDynamicLoader object.
-     * @param piMessage A pointer to the IMessage object associated with the error, if available.
-     * @param nMti The Message Type of the failed MO SMS.
+     * @param piMtsMessage A pointer to the IMtsMessage object associated with the error.
      *
      * @return A status code indicating the outcome of the error handling process.
      */
-    virtual IMS_SINT32 Handle(IN const IMtsService& objMtsService,
-            IN const IMtsDynamicLoader& objMtsDynamicLoader,
-            IN const IMessage* piMessage = IMS_NULL,
-            IMS_SINT32 nMti = SMS_3GPP_MTI_RP_DATA_FROM_MS) = 0;
+    virtual IMS_SINT32 Handle(
+            IN const IMtsService& objMtsService, IN IMtsMessage* piMtsMessage) = 0;
 
     /**
      * @brief Retrieves the Retry-After value.

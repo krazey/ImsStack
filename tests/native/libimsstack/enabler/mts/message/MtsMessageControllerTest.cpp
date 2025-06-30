@@ -1551,7 +1551,6 @@ TEST_F(MtsMessageControllerTest, SmmaPageMessageDeliveryFailsAndReportsError)
             .WillByDefault(Return(objSmmaGenericErrorCodes));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_406));
 
-    EXPECT_CALL(objMockPageMessage, GetPreviousResponse(_));
     EXPECT_CALL(objJniMtsAppThread, ReportMoStatus(MO_ERROR_GENERIC, _, _, SLOT_ID)).Times(1);
 
     pMtsMessageController->ProcessMoSms(SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress,

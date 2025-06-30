@@ -919,6 +919,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sms_in_reply_to_validation_bool";
         public static final String KEY_SMS_SUPPORT_CONTENT_TRANSFER_ENCODING_HEADER_BOOL =
                 KEY_PREFIX + "sms_support_content_transfer_encoding_header_bool";
+        public static final String KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL =
+                KEY_PREFIX + "sms_evaluate_radio_status_for_3rd_attempt_bool";
 
         private ImsSms() {}
     }

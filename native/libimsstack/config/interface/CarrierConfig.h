@@ -752,6 +752,7 @@ public:
         static const IMS_CHAR KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[];
         static const IMS_CHAR KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL[];
         static const IMS_CHAR KEY_SMS_SUPPORT_CONTENT_TRANSFER_ENCODING_HEADER_BOOL[];
+        static const IMS_CHAR KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL[];
 
         // SMS formats
         enum

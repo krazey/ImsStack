@@ -17,12 +17,17 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
+#include "ImsEventDef.h"
 #include "IuMtsApp.h"
 #include "MockICarrierConfig.h"
 #include "MockIMessage.h"
 #include "MockIMtsContext.h"
+#include "MockIMtsMessage.h"
+#include "MockIMtsNetworkTracker.h"
 #include "MockIMtsService.h"
+#include "MockIPageMessage.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
 #include "SipHeaderName.h"
@@ -42,13 +47,18 @@ namespace android
 {
 
 const IMS_SINT32 SLOT_ID = 0;
+const IMS_UINT32 RETRY_COUNT = 0;
+const IMS_UINT32 RETRY_COUNT_FOR_2ND_ATTEMPT = 1;
 
 class MtsErrorHandlerTest : public ::testing::Test
 {
 public:
     MockIMessage objMockMessage;
     MockIMtsContext objContext;
+    MockIMtsMessage objMockMtsMessage;
+    MockIMtsNetworkTracker objMockMtsNetworkTracker;
     MockIMtsService objMockMtsService;
+    MockIPageMessage objMockPageMessage;
     MtsDynamicLoader* pMtsDynamicLoader;
     MtsErrorHandler* pMtsErrorHandler;
     TestConfigService objConfigService;
@@ -57,11 +67,14 @@ protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMockMtsService));
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        ON_CALL(objContext, GetNetworkTracker).WillByDefault(ReturnRef(objMockMtsNetworkTracker));
+        ON_CALL(objMockMtsMessage, GetPageMessage).WillByDefault(Return(&objMockPageMessage));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
 
-        pMtsErrorHandler = new MtsErrorHandler(SLOT_ID);
+        pMtsErrorHandler = new MtsErrorHandler(objContext);
 
         pMtsDynamicLoader = new MtsDynamicLoader(objContext);
         ON_CALL(objContext, GetDynamicLoader).WillByDefault(ReturnRef(*pMtsDynamicLoader));
@@ -83,6 +96,10 @@ TEST_F(MtsErrorHandlerTest, Constructor)
 
 TEST_F(MtsErrorHandlerTest, Handle403Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -103,13 +120,16 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::REGISTER_REFRESH))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle404Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_404));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -129,13 +149,16 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::PCSCF_NEXT)).Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle406Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_406));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -156,13 +179,16 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::IPSEC_DISABLED))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle408Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_408));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -185,13 +211,16 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle500Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_500));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -212,13 +241,16 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle503Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -239,14 +271,17 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
 {
     AString strReasonPhrase = "OUTAGE";
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(objMockMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
@@ -266,14 +301,17 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::REGISTER_REINITIATE))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
 {
     AString strReasonPhrase = AString::ConstEmpty();
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(objMockMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
@@ -292,8 +330,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(_)).Times(0);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -306,6 +343,10 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithNextPcscfRequired)
     ImsList<AString> objRetryAfterHeaders;
     objRetryAfterHeaders.Append("130");
 
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetHeaders(strRetryAfter)).WillByDefault(Return(objRetryAfterHeaders));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
@@ -320,13 +361,16 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithNextPcscfRequired)
     EXPECT_CALL(objMockMtsService,
             RequestRegisterWithNextPcscf(objRetryAfterHeaders.GetAt(0).ToInt32()))
             .Times(1);
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle504Error)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_504));
 
     ImsVector<IMS_SINT32> objErrorCodes;
@@ -347,8 +391,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -359,6 +402,10 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
     objErrorCodes.Push(SipStatusCode::SC_503);
     objErrorCodes.Push(SipStatusCode::SC_INVALID);
 
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(IMS_NULL));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objErrorCodes));
@@ -372,7 +419,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -382,6 +429,10 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
     objErrorCodes.Push(SipStatusCode::SC_406);
     objErrorCodes.Push(SipStatusCode::SC_503);
 
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(IMS_NULL));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objErrorCodes));
@@ -398,7 +449,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_RETRY);
 }
 
@@ -408,6 +459,10 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
     objErrorCodes.Push(SipStatusCode::SC_406);
     objErrorCodes.Push(SipStatusCode::SC_503);
 
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(IMS_NULL));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objErrorCodes));
@@ -424,12 +479,16 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle380FallbackErrorCode)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_380));
 
     ImsVector<IMS_SINT32> objGenericErrorCodes;
@@ -446,13 +505,16 @@ TEST_F(MtsErrorHandlerTest, Handle380FallbackErrorCode)
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objFallbackErrorCodes));
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
 TEST_F(MtsErrorHandlerTest, HandleSmma400GenericErrorCode)
 {
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_SMMA));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
 
     ImsVector<IMS_SINT32> objGenericErrorCodes;
@@ -472,8 +534,7 @@ TEST_F(MtsErrorHandlerTest, HandleSmma400GenericErrorCode)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objSmmaGenericErrorCodes));
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(
-            objMockMtsService, *pMtsDynamicLoader, &objMockMessage, SMS_3GPP_MTI_RP_SMMA);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -487,6 +548,10 @@ TEST_F(MtsErrorHandlerTest, ResetRetryAfterConditionIfRetryAfterValueDoesNotExis
     objRetryAfterHeaders.Append("10");
     ImsList<AString> objNoHeaders;
 
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(5));
@@ -506,14 +571,79 @@ TEST_F(MtsErrorHandlerTest, ResetRetryAfterConditionIfRetryAfterValueDoesNotExis
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objErrorCodes));
 
-    IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_BY_RETRY_AFTER);
     EXPECT_EQ(pMtsErrorHandler->GetRetryAfterValue(), 10);
 
-    nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
     EXPECT_EQ(pMtsErrorHandler->GetRetryAfterValue(), 0);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusBefore3rdAttemptWhenLteEpsOnly)
+{
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT_FOR_2ND_ATTEMPT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsNetworkTracker, GetNetworkType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+    ON_CALL(objMockMtsNetworkTracker, GetLteAttachState)
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusBefore3rdAttemptWhenLteCombined)
+{
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT_FOR_2ND_ATTEMPT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsNetworkTracker, GetNetworkType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE_CA));
+    ON_CALL(objMockMtsNetworkTracker, GetLteAttachState)
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusBefore3rdAttemptWhenNr)
+{
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT_FOR_2ND_ATTEMPT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsNetworkTracker, GetNetworkType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_NR));
+    ON_CALL(objMockMtsNetworkTracker, IsInRoamingState).WillByDefault(Return(IMS_FALSE));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusBefore3rdAttemptWhenNrRoaming)
+{
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT_FOR_2ND_ATTEMPT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsNetworkTracker, GetNetworkType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_NR));
+    ON_CALL(objMockMtsNetworkTracker, IsInRoamingState).WillByDefault(Return(IMS_TRUE));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
 }  // namespace android

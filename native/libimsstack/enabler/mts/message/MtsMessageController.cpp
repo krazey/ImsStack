@@ -73,7 +73,7 @@ MtsMessageController::MtsMessageController(IN IMtsContext& objContext) :
 {
     IMS_TRACE_I("+MtsMessageController [slot_%d]", m_objContext.GetSlotId(), 0, 0);
 
-    m_piMtsErrorHandler = new MtsErrorHandler(m_objContext.GetSlotId());
+    m_piMtsErrorHandler = new MtsErrorHandler(m_objContext);
 }
 
 PUBLIC MtsMessageController::~MtsMessageController()
@@ -142,12 +142,9 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
         return;
     }
 
-    IMS_SINT32 nMti = piMtsMessage->GetMti();
-    IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
     // Should it control the emergency registration when it needs to?
-    IMS_SINT32 nResult =
-            m_piMtsErrorHandler->Handle(m_objContext.GetService(MtsServiceType::NORMAL),
-                    m_objContext.GetDynamicLoader(), piMessage, nMti);
+    IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(
+            m_objContext.GetService(MtsServiceType::NORMAL), piMtsMessage);
     if (nResult == MO_ERROR_BY_RETRY_AFTER)
     {
         StartRetryAfterTimer(m_piMtsErrorHandler->GetRetryAfterValue());
@@ -159,6 +156,7 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
     m_piMtsErrorHandler->ResetRetryAfterStatus();
 
+    IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "No received responses in the page message", 0, 0, 0);
@@ -167,6 +165,7 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
         return;
     }
 
+    IMS_SINT32 nMti = piMtsMessage->GetMti();
     if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
     {
         m_bProcessingMsg = IMS_FALSE;
