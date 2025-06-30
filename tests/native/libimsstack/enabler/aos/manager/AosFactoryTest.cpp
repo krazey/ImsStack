@@ -79,7 +79,7 @@ protected:
 
     void TearDown() override
     {
-        ImsAosManager* pAoSMngr = TestAosFactory::GetManager(IMS_SLOT_0);
+        const ImsAosManager* pAoSMngr = TestAosFactory::GetManager(IMS_SLOT_0);
         if (pAoSMngr != null)
         {
             TestAosFactory::Stop(IMS_SLOT_0);
