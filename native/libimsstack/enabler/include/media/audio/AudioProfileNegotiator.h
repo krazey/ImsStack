@@ -31,7 +31,7 @@ class AudioProfileNegotiator : public MediaProfileNegotiator
 {
 public:
     AudioProfileNegotiator();
-    virtual ~AudioProfileNegotiator();
+    virtual ~AudioProfileNegotiator() override;
 
     /**
      * @brief Make the negotiated profile using the local and peer profiles

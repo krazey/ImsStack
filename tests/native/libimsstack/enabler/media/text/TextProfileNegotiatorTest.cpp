@@ -207,7 +207,7 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
     ASSERT_NE(pNegoRed->GetFmtp(), nullptr);
-    TextProfile::RedFmtp* pNegoFmtp = static_cast<TextProfile::RedFmtp*>(pNegoRed->GetFmtp());
+    auto pNegoFmtp = static_cast<TextProfile::RedFmtp*>(pNegoRed->GetFmtp());
     // Check if the FMTP string reflects the peer's primary payload type
     EXPECT_EQ(pNegoFmtp->GetRedPayload(), kPeerT140Payload);
 

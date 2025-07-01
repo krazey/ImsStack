@@ -29,7 +29,7 @@ class TextProfileNegotiator : public MediaProfileNegotiator
 {
 public:
     TextProfileNegotiator();
-    virtual ~TextProfileNegotiator();
+    virtual ~TextProfileNegotiator() override;
 
     /**
      * @brief Make the negotiated profile using the local and peer profiles
@@ -62,7 +62,8 @@ private:
             OUT TextProfile* pNegotiatedProfile);
     void NegotiateBandwidthForOfferSent(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
-    void NegotiateRtcpInterval(OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig);
+    void NegotiateRtcpInterval(
+            OUT TextProfile* pNegotiatedProfile, IN const MediaConfiguration* pConfig);
     TextProfile::Payload* FindT140InProfile(
             IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(

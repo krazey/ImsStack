@@ -29,7 +29,7 @@ class VideoProfileNegotiator : public MediaProfileNegotiator
 {
 public:
     VideoProfileNegotiator();
-    virtual ~VideoProfileNegotiator();
+    virtual ~VideoProfileNegotiator() override;
 
     /**
      * @brief Make the negotiated profile using the local and peer profiles
@@ -67,7 +67,7 @@ public:
 
 private:
     void ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred, IN VideoProfile* pLocalProfile,
-            IN VideoProfile* pPeerProfile, OUT VideoProfile** pNegotiatedProfile);
+            IN const VideoProfile* pPeerProfile, OUT VideoProfile** pNegotiatedProfile);
     void NegotiateAvpf(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             OUT VideoProfile* pNegotiatedProfile);
     void NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile);
@@ -85,8 +85,8 @@ private:
             OUT VideoProfile::Payload** pTempPayload,
             OUT VideoProfile::Payload** pMatchedPeerPayload);
     VideoProfile::Payload* SetClosestPayload(IN VideoProfile* pLocalProfile,
-            IN VideoProfile* pNegotiatedProfile, OUT VideoProfile::Payload* pTempPayload,
-            OUT VideoProfile::Payload* pMatchedPeerPayload);
+            IN VideoProfile* pNegotiatedProfile, IN const VideoProfile::Payload* pTempPayload,
+            IN VideoProfile::Payload* pMatchedPeerPayload);
     IMS_BOOL SetClosestAvc(IN VideoProfile* pLocalProfile, OUT VideoProfile::Payload* pNegoPayload);
     IMS_BOOL SetClosestHevc(
             IN VideoProfile::Payload* pMatchedPeerPayload, OUT VideoProfile::Payload* pNegoPayload);
@@ -106,7 +106,7 @@ private:
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pLocalCapaNego,
             IN VideoProfile::CapaNego* pPeerCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
-    IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
+    IMS_BOOL MakeNegotiatedPayload(IN const VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload** pNegoPayload);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
     IMS_BOOL MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig, IN VideoProfile* pLocalProfile,

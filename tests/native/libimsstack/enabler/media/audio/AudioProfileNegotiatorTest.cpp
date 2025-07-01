@@ -207,7 +207,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
     EXPECT_GT(m_pNegotiatedProfile->GetDataPort(), 0);
     ASSERT_NE(pNegoPayload->GetFmtp(), nullptr);
-    AudioProfile::EvsFmtp* pNegoFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegoPayload->GetFmtp());
     // Check negotiated BW/BR (intersection)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x07);   // NB & WB & SWB
     EXPECT_EQ(pNegoFmtp->GetBrList(), 0x0FF);  // Lower BR set
@@ -371,7 +371,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeRe
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 101);
     ASSERT_NE(pNegoPayload->GetFmtp(), nullptr);
-    AudioProfile::EvsFmtp* pNegoFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegoPayload->GetFmtp());
     // Check negotiated BW/BR (intersection from CompareEvsBwBrMode)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x07);   // NB & WB & SWB (0x0F & 0x07)
     EXPECT_EQ(pNegoFmtp->GetBrList(), 0x0FF);  // Lower BR set (0xFFF & 0x0FF)
@@ -402,7 +402,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeLe
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 102);
     ASSERT_NE(pNegoPayload->GetFmtp(), nullptr);
-    AudioProfile::EvsFmtp* pNegoFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegoPayload->GetFmtp());
     // Check negotiated BW/BR (intersection from CompareEvsBwBrModeLegacy)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x04);   // SWB only (0x04 & 0x0F)
     EXPECT_EQ(pNegoFmtp->GetBrList(), 0x01F);  // Lower BR set (0x01F & 0xFFF)
