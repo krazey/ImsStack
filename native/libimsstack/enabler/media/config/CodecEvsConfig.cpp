@@ -35,20 +35,20 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         CodecAudioConfig(nType, nPayloadTypeNum),
         m_bVisibleDtx(IMS_FALSE),
         m_bVisibleHfOnly(IMS_FALSE),
+        m_bVisibleCmr(IMS_FALSE),
         m_bVisibleEvsModeSwitch(IMS_FALSE),
         m_bVisibleChannelAwMode(IMS_FALSE),
         m_bVisibleAmrIOModeSet(IMS_FALSE),
         m_bVisibleChAwRecv(IMS_FALSE),
-        m_bVisibleCmr(IMS_FALSE),
         m_bDtxRecv(DEFAULT_DTX_RECV),
         m_nHfOnly(DEFAULT_HF_ONLY),
         m_nEvsModeSwitch(DEFAULT_EVS_MODESWITCH),
         m_nBrList(DEFAULT_BR_LIST),
         m_nBwList(DEFAULT_BW_LIST),
         m_nCmr(DEFAULT_CMR),
-        m_nChAwRecv(DEFAULT_CH_AW_RECV),
         m_nAmrIOModeSetList(DEFAULT_MODESET_AMRWB),
-        m_nDefaultAmrIOModeSetList(DEFAULT_MODESET_AMRWB)
+        m_nDefaultAmrIOModeSetList(DEFAULT_MODESET_AMRWB),
+        m_nChAwRecv(DEFAULT_CH_AW_RECV)
 {
     IMS_TRACE_I("+CodecEvsConfig - Type[%d]", nType, 0, 0);
 }
