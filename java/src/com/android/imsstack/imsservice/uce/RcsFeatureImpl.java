@@ -42,7 +42,6 @@ public class RcsFeatureImpl extends RcsFeature {
     public RcsFeatureImpl(IContext iContext) {
         super(iContext.getExecutor());
         mIContext = iContext;
-        initialize(mIContext.getContext(), mIContext.getSlotId());
         setFeatureState(ImsFeature.STATE_READY);
     }
 
