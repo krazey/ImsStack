@@ -223,6 +223,7 @@ protected:
     virtual void CreateContact();
     virtual void AddSpecificOperation();
     virtual void AddAccesstypeFeatureTag();
+    virtual void UpdatePaniHeader();
 
     virtual void AddFeatureTag(IN IAosHandle* piHandle);
     virtual IMS_BOOL AddFeatureTagForMtc(IN IMS_UINT32 nRegFeatures, IN IMS_BOOL bFinalFeatureTag);
@@ -634,9 +635,6 @@ protected:
 
     /// the reason code that is notified with registration callback of telephony ims
     AosReasonCode m_eImsReasonCode;
-
-    /// this is used to set SIP Profile on run-time
-    RcPtr<SipProfile> m_pSipProfile;
 
     /// Wait time before reconnecting pdn (sec)
     IMS_UINT32 m_nPdnReactivateWaitTime;
