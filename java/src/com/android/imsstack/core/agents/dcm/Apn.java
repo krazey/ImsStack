@@ -16,7 +16,6 @@
 
 package com.android.imsstack.core.agents.dcm;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
@@ -33,6 +32,8 @@ import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.DeviceConfig;
@@ -62,6 +63,7 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -69,8 +71,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * This class is for providing the data connection interface
  */
 public abstract class Apn extends Handler implements IApn {
-
-    // Constants--------------------------------------------------
     protected static final int EVENT_NETWORK_AVAILABLE = 101;
     protected static final int EVENT_NETWORK_BLOCKED_STATUS_CHANGED = 102;
     protected static final int EVENT_NETWORK_CAPABILITIES_CHANGED = 103;
@@ -90,13 +90,11 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
 
     protected static final int FEATURE_NONE = 0;
-    protected static final int FEATURE_IPV6_DELAY = 0x00000001;
 
-    // Variables--------------------------------------------------
     protected static final LinkedHashMap<Integer, String> sEventToString;
 
     static {
-        sEventToString = new LinkedHashMap<Integer, String>();
+        sEventToString = new LinkedHashMap<>();
 
         // Network callbacks
         sEventToString.put(EVENT_NETWORK_AVAILABLE,
@@ -148,7 +146,7 @@ public abstract class Apn extends Handler implements IApn {
     protected int mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
     protected int mIpcanCategory = IPCAN_CATEGORY_MOBILE;
     protected final LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
-            new LinkedHashMap<Integer, MsgProcInterface>();
+            new LinkedHashMap<>();
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
     protected boolean mIsMonitoringCallbackRegistered = false;
@@ -157,7 +155,7 @@ public abstract class Apn extends Handler implements IApn {
     protected Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     protected Apn(Context context, int slotId, EApnType type) {
-        super(Looper.myLooper());
+        super(Objects.requireNonNull(Looper.myLooper()));
 
         mContext = context;
         mSlotId = slotId;
@@ -518,15 +516,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean hasLocalAddress(int version) {
-        if (mDcApn != null) {
-            String ip = mDcApn.getLocalAddress(mType.getType(), version);
-
-            if (ip != null) {
-                return true;
-            }
-        }
-
-        return false;
+        return mDcApn != null && mDcApn.getLocalAddress(mType.getType(), version) != null;
     }
 
     protected boolean isIpChanged() {
@@ -675,8 +665,8 @@ public abstract class Apn extends Handler implements IApn {
         // DcConstants.TYPE_XXX
         private final int mType;
         private Handler mTarget;
-        private int mEvents = 0;
-        private int mSlotId = 0;
+        private int mEvents;
+        private int mSlotId;
 
         @VisibleForTesting
         protected Network mNetwork = null;
@@ -728,13 +718,12 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         @Override
-        public void onAvailable(Network network) {
+        public void onAvailable(@NonNull Network network) {
             if (mNetwork != null && !mNetwork.equals(network)) {
                 onLost(mNetwork);
             }
 
             cacheLinkProperties(network);
-
             mNetwork = network;
 
             if (!isEventSet(EVENT_AVAILABLE)) {
@@ -756,7 +745,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         @Override
-        public void onLosing(Network network, int maxMsToLive) {
+        public void onLosing(@NonNull Network network, int maxMsToLive) {
             if (!isEventSet(EVENT_LOSING)) {
                 // no-op
                 return;
@@ -770,9 +759,8 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         @Override
-        public void onLost(Network network) {
+        public void onLost(@NonNull Network network) {
             clearLinkProperties();
-
             mNetwork = null;
 
             if (!isEventSet(EVENT_LOST)) {
@@ -804,8 +792,8 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         @Override
-        public void onCapabilitiesChanged(Network network,
-                NetworkCapabilities networkCapabilities) {
+        public void onCapabilitiesChanged(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities) {
             if (mIsPendingOnAvailable) {
                 ImsLog.w(mSlotId, "network is connected");
                 mIsPendingOnAvailable = false;
@@ -829,7 +817,8 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         @Override
-        public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {
+        public void onLinkPropertiesChanged(@NonNull Network network,
+                @NonNull LinkProperties linkProperties) {
             boolean ipChanged = isIpChanged(linkProperties);
             boolean pcscfChanged = isPcscfChanged(linkProperties);
 
@@ -847,7 +836,7 @@ public abstract class Apn extends Handler implements IApn {
                 ImsLog.d(mSlotId, "network=" + network + ", linkProperties=" + linkProperties
                         + ", ipChanged=" + ipChanged);
             } else {
-                ImsLog.i(mSlotId, "netwokr=" + network + ", ipChanged=" + ipChanged);
+                ImsLog.i(mSlotId, "network=" + network + ", ipChanged=" + ipChanged);
             }
 
             if (mTarget == null) {
@@ -920,18 +909,17 @@ public abstract class Apn extends Handler implements IApn {
             printAddress("cached ip address", cachedAddress);
             printAddress("new ip address", newAddress);
 
-            int nSize = 0;
             if (cachedAddress.length != newAddress.length) {
                 return true;
-            } else {
-                nSize = newAddress.length;
             }
 
+            int nSize = newAddress.length;
             for (int i = 0; i < nSize; i++) {
                 boolean bIsSame = false;
-                for (int ii = 0; ii < nSize; ii++) {
-                    if (cachedAddress[i].equals(newAddress[ii])) {
+                for (String address : newAddress) {
+                    if (cachedAddress[i].equals(address)) {
                         bIsSame = true;
+                        break;
                     }
                 }
 
@@ -939,7 +927,6 @@ public abstract class Apn extends Handler implements IApn {
                     return true;
                 }
             }
-
             return false;
         }
 
@@ -982,19 +969,16 @@ public abstract class Apn extends Handler implements IApn {
             printAddress("cached pcscf", cachedAddress);
             printAddress("new pcscf", newAddress);
 
-            int nSize = 0;
             if (cachedAddress.length != newAddress.length) {
                 return true;
-            } else {
-                nSize = newAddress.length;
             }
 
+            int nSize = newAddress.length;
             for (int i = 0; i < nSize; i++) {
                 if (!cachedAddress[i].equals(newAddress[i])) {
                     return true;
                 }
             }
-
             return false;
         }
 
@@ -1004,7 +988,6 @@ public abstract class Apn extends Handler implements IApn {
             }
 
             Iterator<LinkAddress> iterator = linkAddresses.iterator();
-
             if (iterator == null) {
                 return null;
             }
@@ -1014,28 +997,25 @@ public abstract class Apn extends Handler implements IApn {
             int i = 0;
             while (iterator.hasNext()) {
                 LinkAddress linkAddress = iterator.next();
-
                 if (linkAddress == null) {
                     ImsLog.w(mSlotId, "linkAddress is null");
                     continue;
                 }
 
                 InetAddress netAddress = linkAddress.getAddress();
-
                 if (netAddress == null) {
-                    ImsLog.w(mSlotId, "Resolving InetAddress failed - " + linkAddress.toString());
+                    ImsLog.w(mSlotId, "Resolving InetAddress failed - " + linkAddress);
                     continue;
                 }
 
                 if (netAddress.isAnyLocalAddress()
                         || netAddress.isLinkLocalAddress()
                         || netAddress.isLoopbackAddress()) {
-                    ImsLog.w(mSlotId, "Invalid InetAddress - " + linkAddress.toString());
+                    ImsLog.w(mSlotId, "Invalid InetAddress - " + linkAddress);
                     continue;
                 }
 
                 if (netAddress instanceof Inet6Address) {
-
                     String ip6Addr = netAddress.getHostAddress();
                     ImsLog.i(mSlotId, "ip6Address - " + ip6Addr);
 
@@ -1043,6 +1023,7 @@ public abstract class Apn extends Handler implements IApn {
                     for (int j = 0; j < i; j++) {
                         if (addr[j].equals(ip6Addr)) {
                             bSame = true;
+                            break;
                         }
                     }
 
@@ -1061,6 +1042,7 @@ public abstract class Apn extends Handler implements IApn {
                     for (int j = 0; j < i; j++) {
                         if (addr[j].equals(ip4Addr)) {
                             bSame = true;
+                            break;
                         }
                     }
 
@@ -1074,10 +1056,7 @@ public abstract class Apn extends Handler implements IApn {
 
             if (linkAddresses.size() != i) {
                 String[] addrToDeliver = new String[i];
-                for (int k = 0; k < i; k++) {
-                    addrToDeliver[k] = addr[k];
-                }
-
+                System.arraycopy(addr, 0, addrToDeliver, 0, i);
                 return addrToDeliver;
             }
 
@@ -1114,6 +1093,7 @@ public abstract class Apn extends Handler implements IApn {
                     for (int j = 0; j < i; j++) {
                         if (addr[j].equals(ipAddress)) {
                             bSame = true;
+                            break;
                         }
                     }
 
@@ -1126,10 +1106,7 @@ public abstract class Apn extends Handler implements IApn {
 
             if (inetAddresses.size() != i) {
                 String[] addrToDeliver = new String[i];
-                for (int k = 0; k < i; k++) {
-                    addrToDeliver[k] = addr[k];
-                }
-
+                System.arraycopy(addr, 0, addrToDeliver, 0, i);
                 return addrToDeliver;
             }
 
@@ -1144,9 +1121,9 @@ public abstract class Apn extends Handler implements IApn {
                     && leftAddresses.containsAll(rightAddresses);
         }
 
-        private void printAddress(String prifix, String[] addresses) {
+        private void printAddress(String prefix, String[] addresses) {
             StringBuilder sb = new StringBuilder();
-            sb.append(prifix).append(" : ");
+            sb.append(prefix).append(" : ");
 
             for (String address : addresses) {
                 sb.append(address).append(" / ");
@@ -1210,15 +1187,18 @@ public abstract class Apn extends Handler implements IApn {
                             handleHandoverFailure(networkType, causeCode);
                         }
                     } else {
-                        // update APN string
-                        String strApn = apnSetting.getApnName();
-                        if (strApn != null && !strApn.equals("(null)")) {
-                            mApnString = strApn;
-                        }
-                        // update APN protocol
-                        if (mDcNetWatcher != null) {
-                            mApnProtocol = (mDcNetWatcher.isDataNetworkRoaming())
-                                    ? apnSetting.getRoamingProtocol() : apnSetting.getProtocol();
+                        if (apnSetting != null) {
+                            // update APN string
+                            String strApn = apnSetting.getApnName();
+                            if (strApn != null && !strApn.equals("(null)")) {
+                                mApnString = strApn;
+                            }
+                            // update APN protocol
+                            if (mDcNetWatcher != null) {
+                                mApnProtocol = (mDcNetWatcher.isDataNetworkRoaming())
+                                        ? apnSetting.getRoamingProtocol()
+                                        : apnSetting.getProtocol();
+                            }
                         }
                     }
                     if (mNetworkType != networkType) {

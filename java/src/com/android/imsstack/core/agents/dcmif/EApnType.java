@@ -22,7 +22,7 @@ import com.android.imsstack.util.ImsLog;
 
 public enum EApnType {
     /**
-     * WIFI type is only for IMS internal usage. (16/05/09)
+     * WIFI type is only for IMS internal usage.
      * It's defined to synchronize the constant value in Native Layer.
      */
     IMS(DcConstants.TYPE_IMS,
@@ -52,25 +52,6 @@ public enum EApnType {
     }
 
     /**
-     * Returns an APN type from the given APN setting type.
-     */
-    public static int getTypeFromApnSettingType(String type) {
-        if (ApnSetting.TYPE_IMS_STRING.equals(type)) {
-            return IMS.getType();
-        } else if (ApnSetting.TYPE_DEFAULT_STRING.equals(type)) {
-            return INTERNET.getType();
-        } else if (ApnSetting.TYPE_EMERGENCY_STRING.equals(type)) {
-            return EMERGENCY.getType();
-        } else if (ApnSetting.TYPE_XCAP_STRING.equals(type)) {
-            return XCAP.getType();
-        }
-
-        ImsLog.w("Not-Exist-ApnType=" + type);
-
-        return DcConstants.TYPE_NONE;
-    }
-
-    /**
      * Returns an APN setting type from the given APN type.
      */
     public static String getApnSettingTypeFromType(int type) {
@@ -87,27 +68,6 @@ public enum EApnType {
         ImsLog.w("Not-Exist-Type=" + type);
 
         return null;
-    }
-
-    /**
-     * Returns a network capability from the given APN type.
-     */
-    public static int getNetCapabilityFromType(int type) {
-        if (IMS.getType() == type) {
-            return EApnType.IMS.getNetCapability();
-        } else if (INTERNET.getType() == type) {
-            return EApnType.INTERNET.getNetCapability();
-        } else if (EMERGENCY.getType() == type) {
-            return EApnType.EMERGENCY.getNetCapability();
-        } else if (XCAP.getType() == type) {
-            return EApnType.XCAP.getNetCapability();
-        } else if (WIFI.getType() == type) { // DNS :: SimpleResolver
-            return EApnType.WIFI.getNetCapability();
-        }
-
-        ImsLog.w("Not-Exist-Type=" + type);
-
-        return DcConstants.CAPABILITY_NONE;
     }
 
     public int getType() {

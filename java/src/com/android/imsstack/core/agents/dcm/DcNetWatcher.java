@@ -32,6 +32,8 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.VopsSupportInfo;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -52,6 +54,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -131,7 +134,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     private int mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
 
     private ISystem mSystem;
-    private int mSlotId = 0;
+    private final int mSlotId;
 
     // Static loading materials ----------------------------------
     // Public methods --------------------------------------------
@@ -798,15 +801,20 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         if (mDcSettings != null) {
             int[] supportedRats = mDcSettings.getImsSupportedRats();
-            for (int i = 0; i < supportedRats.length; i++) {
-                if (supportedRats[i] == AccessNetworkConstants.AccessNetworkType.EUTRAN) {
-                    mRatPolicy |= POLICY_RAT_4G;
-                } else if (supportedRats[i] == AccessNetworkConstants.AccessNetworkType.UTRAN) {
-                    mRatPolicy |= POLICY_RAT_3G;
-                } else if (supportedRats[i] == AccessNetworkConstants.AccessNetworkType.GERAN) {
-                    mRatPolicy |= POLICY_RAT_2G;
-                } else if (supportedRats[i] == AccessNetworkConstants.AccessNetworkType.IWLAN) {
-                    mRatPolicy |= POLICY_RAT_WLAN;
+            for (int supportedRat : supportedRats) {
+                switch (supportedRat) {
+                    case AccessNetworkConstants.AccessNetworkType.EUTRAN -> {
+                        mRatPolicy |= POLICY_RAT_4G;
+                    }
+                    case AccessNetworkConstants.AccessNetworkType.UTRAN  -> {
+                        mRatPolicy |= POLICY_RAT_3G;
+                    }
+                    case AccessNetworkConstants.AccessNetworkType.GERAN  -> {
+                        mRatPolicy |= POLICY_RAT_2G;
+                    }
+                    case AccessNetworkConstants.AccessNetworkType.IWLAN  -> {
+                        mRatPolicy |= POLICY_RAT_WLAN;
+                    }
                 }
             }
 
@@ -1154,17 +1162,12 @@ public class DcNetWatcher implements IDcNetWatcher {
             super(looper);
         }
 
-        public void handleMessage(Message msg) {
-            if (msg != null) {
-                ImsLog.i(mSlotId, "Message(" + msg.what + ")");
+        public void handleMessage(@NonNull Message msg) {
+            Objects.requireNonNull(msg, "msg must not be null");
+            ImsLog.i(mSlotId, "Message(" + msg.what + ")");
 
-                switch (msg.what) {
-                    case EVENT_AIRPLANE_MODE_CHANGED:
-                        handleAirplaneModeChanged(msg);
-                        break;
-                    default:
-                        break;
-                }
+            if (msg.what == EVENT_AIRPLANE_MODE_CHANGED) {
+                handleAirplaneModeChanged(msg);
             }
         }
 
@@ -1176,19 +1179,12 @@ public class DcNetWatcher implements IDcNetWatcher {
             }
 
             boolean state = intent.getBooleanExtra("state", false);
-            int stateFromIntent = 0;
             if (mAirplaneMode != state) {
-
-                if (state) {
-                    stateFromIntent = 1;
-                } else {
-                    stateFromIntent = 0;
-                }
-
                 if (mContext == null) {
                     return;
                 }
 
+                int stateFromIntent = state ? 1 : 0;
                 int stateFromSettings = getAirplaneMode();
 
                 ImsLog.i(
