@@ -16,7 +16,6 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="true"/>
     <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="ims.keep_reg_retry_timer_on_all_enablers_detached_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
