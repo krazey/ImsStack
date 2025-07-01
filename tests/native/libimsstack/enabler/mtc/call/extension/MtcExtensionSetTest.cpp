@@ -36,7 +36,7 @@ using ::testing::ReturnRef;
 
 const LOCAL AString OPTION_TAG("some_tag");
 
-MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext)
+static MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext)
 {
     ImsList<IMtcExtension*> lstExtensions;
     lstExtensions.Append(new MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_RPR, {}, {}));
@@ -44,7 +44,7 @@ MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext
     return MtcExtensionSet(objContext, lstExtensions);
 }
 
-MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objContext)
+static MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objContext)
 {
     ImsList<IMtcExtension*> lstExtensions;
     lstExtensions.Append(
@@ -53,7 +53,7 @@ MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objCon
     return MtcExtensionSet(objContext, lstExtensions);
 }
 
-MockIMtcExtension* CreateMockIMtcExtension(IN const AString& strOptionTag)
+static MockIMtcExtension* CreateMockIMtcExtension(IN const AString& strOptionTag)
 {
     MockIMtcExtension* pExtension = new MockIMtcExtension();
 

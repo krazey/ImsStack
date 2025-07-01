@@ -18,10 +18,9 @@
 #define OPERATION_ASYNC_RUNNER_MANAGER_H_
 
 #include "ImsTypeDef.h"
+#include "OperationAsyncRunner.h"
 #include <memory>
 #include <unordered_map>
-
-class OperationAsyncRunner;
 
 class OperationAsyncRunnerManager final
 {

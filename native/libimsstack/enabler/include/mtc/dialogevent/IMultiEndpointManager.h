@@ -17,10 +17,10 @@
 #ifndef INTERFACE_MULTI_ENDPOINT_MANAGER_H_
 #define INTERFACE_MULTI_ENDPOINT_MANAGER_H_
 
+#include "AString.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
-class AString;
 struct MediaInfo;
 
 class IMultiEndpointManager
