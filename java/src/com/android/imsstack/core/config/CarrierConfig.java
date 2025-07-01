@@ -1469,6 +1469,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_private_header_int";
         public static final String KEY_GEOLOCATION_PIDF_IN_WFC_INIT_REG_BOOL =
                 KEY_PREFIX + "geolocation_pidf_in_wfc_init_reg_bool";
+        public static final String KEY_PANI_HEADER_IN_WFC_INIT_REG_BOOL =
+                KEY_PREFIX + "pani_header_in_wfc_init_reg_bool";
         public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
                 KEY_PREFIX + "rereg_with_changed_country_on_wifi_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =

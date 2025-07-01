@@ -60,6 +60,7 @@ public:
             bRequiredVolteBlockBySsac(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
             bGeolocationPidfInWfcInitReg(IMS_FALSE),
+            bPaniHeaderInWfcInitReg(IMS_FALSE),
             bReregWithChangedCountryOnWifi(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
@@ -171,6 +172,7 @@ public:
     IMS_BOOL bRequiredVolteBlockBySsac;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
     IMS_BOOL bGeolocationPidfInWfcInitReg;
+    IMS_BOOL bPaniHeaderInWfcInitReg;
     IMS_BOOL bReregWithChangedCountryOnWifi;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
