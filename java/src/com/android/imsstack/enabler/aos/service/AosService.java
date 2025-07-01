@@ -827,7 +827,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         if (networkType == NetworkType.NONE) {
             if (reason == ReasonCode.PLMN_BLOCK
-                    || reason == ReasonCode.PLMN_BLOCK_WITH_TIMEOUT) {
+                    || reason == ReasonCode.PLMN_BLOCK_WITH_TIMEOUT
+                    || reason == ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED
+                    || reason == ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED) {
                 IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
                 if (dnw != null) {
                     networkType = getRegistrationNetworkType(dnw.getNetworkType());

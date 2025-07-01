@@ -145,7 +145,9 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
         logi("getSuggestedAction for reason:" + reason.toString());
         return switch (reason) {
             case PLMN_BLOCK -> RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK;
-            case PLMN_BLOCK_WITH_TIMEOUT ->
+            case PLMN_BLOCK_WITH_TIMEOUT,
+                 PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED,
+                 PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED ->
                     RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
             case RAT_BLOCK -> RegistrationManager.SUGGESTED_ACTION_TRIGGER_RAT_BLOCK;
             case CLEAR_RAT_BLOCKS -> RegistrationManager.SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS;

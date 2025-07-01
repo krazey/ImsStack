@@ -1254,6 +1254,52 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetworkAndVopsNotSupported() {
+        mAosService.setRegisteredNetworkType(NetworkType.NONE);
+        mAosService.addListener(mMockAosRegistrationListener);
+        when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_TD_SCDMA);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.NONE.getValue());
+        parcel.writeInt(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED.getValue());
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.UTRAN, ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED, null);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetworkAndSsacBarred() {
+        mAosService.setRegisteredNetworkType(NetworkType.NONE);
+        mAosService.addListener(mMockAosRegistrationListener);
+        when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_TD_SCDMA);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.NONE.getValue());
+        parcel.writeInt(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED.getValue());
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.UTRAN, ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED, null);
+    }
+
+    @Test
     public void jniImsListenerProxy_notifyTechnologyChangeFailed() {
         int reason = ReasonCode.REGISTRATION_ERROR.getValue();
         mAosService.addListener(mMockAosRegistrationListener);

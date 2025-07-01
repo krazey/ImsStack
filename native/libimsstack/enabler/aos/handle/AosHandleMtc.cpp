@@ -183,7 +183,16 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
             {
                 A_IMS_TRACE_I(APPPROFILE,
                         "CallTracker_StateChanged :: PLMN is blocked with timeout", 0, 0, 0);
-                m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT);
+                if (bIsHoldingVopsChanged)
+                {
+                    m_piAppContext->GetApp()->RequestCmd(
+                            ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED);
+                }
+                else
+                {
+                    m_piAppContext->GetApp()->RequestCmd(
+                            ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED);
+                }
             }
 
             if (bIsHoldingVopsChanged)
@@ -1121,7 +1130,8 @@ void AosHandleMtc::ProcessVopsStateChanged(
         {
             A_IMS_TRACE_I(
                     APPPROFILE, "ProcessVopsStateChanged :: PLMN is blocked with timeout", 0, 0, 0);
-            m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT);
+            m_piAppContext->GetApp()->RequestCmd(
+                    ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED);
         }
 
         ProcessBlock(BLOCK_VOPS, IMS_TRUE);
@@ -1264,7 +1274,8 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
         {
             A_IMS_TRACE_I(
                     APPPROFILE, "ImsRadio_OnSsacChanged :: PLMN is blocked with timeout", 0, 0, 0);
-            m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT);
+            m_piAppContext->GetApp()->RequestCmd(
+                    ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED);
         }
 
         ProcessBlock(BLOCK_SSAC, IMS_TRUE);

@@ -404,6 +404,8 @@ public interface IAosRegistrationListener {
         PLMN_BLOCK_WITH_TIMEOUT(ReasonCode.BASE_MODEM, 1),
         RAT_BLOCK(ReasonCode.BASE_MODEM, 2),
         CLEAR_RAT_BLOCKS(ReasonCode.BASE_MODEM, 3),
+        PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED(ReasonCode.BASE_MODEM, 4),
+        PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED(ReasonCode.BASE_MODEM, 5),
 
         /**
          * BASE_DATA : 3000 (Errors due to data failures.)
@@ -656,7 +658,13 @@ public interface IAosRegistrationListener {
                         ImsReasonInfo.CODE_REGISTRATION_ERROR)),
                 Map.entry(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                        ImsReasonInfo.CODE_REGISTRATION_ERROR))
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR)),
+                Map.entry(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ExtraReason.CODE_RADIO_VOPS_NOT_SUPPORTED)),
+                Map.entry(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ExtraReason.CODE_SSAC_BARRED))
         );
 
         /**
@@ -700,6 +708,16 @@ public interface IAosRegistrationListener {
      * ExtraReason
      */
     class ExtraReason {
+
+        /**
+         * Used as extra code when IMS termination due to VoPS not supported
+         */
+        public static final int CODE_RADIO_VOPS_NOT_SUPPORTED = 1518;
+
+        /**
+         * Used as extra code when IMS termination due to SSAC barred
+         */
+        public static final int CODE_SSAC_BARRED = 1519;
 
         /**
          * Used as extra code when IMS termination due to WFC missing 911 address

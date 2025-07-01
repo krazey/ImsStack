@@ -29,6 +29,8 @@ public:
         IMS_DISABLED,
         TTYMODEON,
         WIFI_OFF,
+        VOPS_NOT_SUPPORTED,
+        SSAC_BARRED,
         NOT_SPECIFIED,
 
         IP_CHANGED = 20,

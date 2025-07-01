@@ -559,7 +559,8 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, 0))
+    EXPECT_CALL(m_objMockIAosApplication,
+            RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED))
             .Times(1);
 
     m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
@@ -622,7 +623,7 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test5)
     m_pAosHandleMtc->SetHoldingVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     m_pAosHandleMtc->SetSsacHeld(IMS_TRUE);
 
-    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, 0))
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, _))
             .Times(0);
 
     m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
@@ -635,6 +636,31 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test5)
     EXPECT_TRUE(m_pAosHandleMtc->IsSsacBarred());
     EXPECT_FALSE(m_pAosHandleMtc->IsSsacHeld());
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_SSAC));
+}
+
+TEST_F(AosHandleMtcTest, ReportSsacBarredWhenPlmnBlockDueToHoldingSsac)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_FALSE));
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    m_pAosHandleMtc->SetHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+    m_pAosHandleMtc->SetSsacHeld(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // EXPECT
+    EXPECT_CALL(m_objMockIAosApplication,
+            RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED));
+
+    // WHEN
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
 }
 
 TEST_F(AosHandleMtcTest, TemporarilyVoiceCapableDuringWiFiCallingWhenWfcDisabledAndVideoAvailable)
@@ -3307,7 +3333,8 @@ TEST_F(AosHandleMtcTest, ShouldRequestPlmnBlockIfVopsIsNotSupportedOnNetworkChan
     ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, 0));
+    EXPECT_CALL(m_objMockIAosApplication,
+            RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED));
 
     // WHEN
     m_pAosHandleMtc->ProcessNetworkChanged();
@@ -3620,7 +3647,8 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test6)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, 0))
+    EXPECT_CALL(m_objMockIAosApplication,
+            RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED))
             .Times(1);
 
     m_pAosHandleMtc->ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("123456"));
@@ -4665,7 +4693,8 @@ TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_Test2)
 
     m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_OFF);
 
-    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, 0))
+    EXPECT_CALL(m_objMockIAosApplication,
+            RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED))
             .Times(1);
 
     m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);

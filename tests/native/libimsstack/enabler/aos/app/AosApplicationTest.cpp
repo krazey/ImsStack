@@ -4125,3 +4125,31 @@ TEST_F(AosApplicationTest, ReportDataFailureReasonWhenConnectionDeactiviated)
     EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
     EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
 }
+
+TEST_F(AosApplicationTest, NotifyDeregisteredWhenPlmnBlockDueToVopsNotSupported)
+{
+    ImsMessage objMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED, 0);
+    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->SetNetTrackerListener();
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED))
+            .Times(1);
+
+    EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
+}
+
+TEST_F(AosApplicationTest, NotifyDeregisteredWhenPlmnBlockDueToSsacBarred)
+{
+    ImsMessage objMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED, 0);
+    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->SetNetTrackerListener();
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED))
+            .Times(1);
+
+    EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
+}

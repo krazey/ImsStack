@@ -429,7 +429,7 @@ enum class AosReasonCode
     /// Registration failed due to internal error.
     INTERNAL_ERROR = TO_UINT32(AosReasonCodeBase::BASE) + 11,
 
-    // Registration termination triggered by network.
+    /// Registration termination triggered by network.
     NETWORK_TRIGGERED_DEREGISTER = TO_UINT32(AosReasonCodeBase::BASE) + 12,
 
     /**
@@ -449,6 +449,14 @@ enum class AosReasonCode
 
     /// Clears blocks for all RATs.
     CLEAR_RAT_BLOCKS = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 3,
+
+    /// Indicates that the IMS registration terminated due to VoPS not supported. The radio shall
+    /// block the current PLMN or disable the RAT during the time based on carrier requirement.
+    PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 4,
+
+    /// Indicates that the IMS registration terminated due to SSAC barred. The radio shall block the
+    /// current PLMN or disable the RAT during the time based on carrier requirement.
+    PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 5,
 
     /**
      * @brief : BASE_DATA(3000) - Errors due to DataFailCause

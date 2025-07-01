@@ -241,7 +241,7 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT:
-            PostMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, 0, 0);
+            PostMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, nReason, 0);
             break;
 
         default:
@@ -1175,8 +1175,20 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::ProcessMessage(IN IMSMSG& objMsg)
             break;
 
         case MSG_PLMN_BLOCK_WITH_TIMEOUT:
-            ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        {
+            IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
+            AosReasonCode eAosReasonCode = AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT;
+            if (nReason == AosReason::VOPS_NOT_SUPPORTED)
+            {
+                eAosReasonCode = AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED;
+            }
+            else if (nReason == AosReason::SSAC_BARRED)
+            {
+                eAosReasonCode = AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED;
+            }
+            ProcessPlmnBlock(eAosReasonCode);
             break;
+        }
 
         case MSG_RETRY_COUNT_INCREASE:
             ProcessRegRetryCount(objMsg);
