@@ -72,7 +72,7 @@ public:
 
     void AddBlock(IN IMS_UINT32 nBlock) { AosHandle::AddBlock(nBlock, m_nBlocks); }
     IMS_BOOL IsBlockedBase() { return AosHandle::IsBlocked(); }
-    IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock) const
+    IMS_BOOL IsHandleBlockedBase(IN IMS_UINT32 nBlock) const
     {
         return AosHandle::IsHandleBlocked(nBlock);
     }
@@ -556,7 +556,7 @@ TEST_F(AosHandleMtsTest,
     m_pAosHandleMts->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD);
 
     // THEN
-    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlockedBase(AosHandle::BLOCK_LIMITED_SMS));
 }
 
 TEST_F(AosHandleMtsTest,
@@ -573,5 +573,5 @@ TEST_F(AosHandleMtsTest,
     m_pAosHandleMts->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE);
 
     // THEN
-    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlockedBase(AosHandle::BLOCK_LIMITED_SMS));
 }
