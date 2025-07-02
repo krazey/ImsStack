@@ -419,10 +419,8 @@ PROTECTED VIRTUAL void AosCondition::NetTracker_StatusChanged()
 }
 
 PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
-        IN IMS_UINT32 nState, IN IMS_UINT32 nParam /* = 0 */)
+        IN IMS_UINT32 nState, IN IMS_UINT32 /*nParam = 0*/)
 {
-    (void)nParam;
-
     if (GET_N_CONFIG(m_nSlotId) != IMS_NULL &&
             GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
     {
