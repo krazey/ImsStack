@@ -32,7 +32,7 @@ class AosDnsQueryPrivate : public IThreadImpListener
 {
 public:
     explicit AosDnsQueryPrivate(IN AosDnsQuery* pDnsQueryer);
-    virtual ~AosDnsQueryPrivate();
+    ~AosDnsQueryPrivate() override;
 
 private:
     AosDnsQueryPrivate(IN const AosDnsQueryPrivate& objRhs);
