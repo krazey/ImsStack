@@ -86,12 +86,9 @@ PUBLIC VIRTUAL void AosERegistration::Start()
     AosRegistration::Start();
 }
 
-PUBLIC VIRTUAL void AosERegistration::Update(IN IMS_BOOL bIgnoreRetryTimer /* = IMS_FALSE */,
-        IN IMS_BOOL bExplicitUpdate /* = IMS_TRUE */)
+PUBLIC VIRTUAL void AosERegistration::Update(
+        IN IMS_BOOL /*bIgnoreRetryTimer = IMS_FALSE*/, IN IMS_BOOL /*bExplicitUpdate = IMS_TRUE*/)
 {
-    (void)bIgnoreRetryTimer;
-    (void)bExplicitUpdate;
-
     A_IMS_TRACE_I(
             REGID, "Update :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
@@ -508,10 +505,8 @@ PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_TxnTimeout()
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
+PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 /*nReason*/)
 {
-    (void)nReason;
-
     ProcessDefaultFlowRecovery_Update();
 }
 

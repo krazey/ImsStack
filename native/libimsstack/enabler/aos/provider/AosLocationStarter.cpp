@@ -188,11 +188,9 @@ PROTECTED VIRTUAL void AosLocationStarter::Event_NotifyEvent(
     }
 }
 
-PROTECTED VIRTUAL void AosLocationStarter::Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+PROTECTED VIRTUAL void AosLocationStarter::Block_Changed(
+        IN IMS_UINT32 /*nType*/, IN IMS_UINT32 /*nParam*/)
 {
-    (void)nType;
-    (void)nParam;
-
     if (IsFeatureEnabled(POLICY_START_ON_WFC_AVAILABILITY) ||
             IsFeatureEnabled(POLICY_START_ON_VOLTE_AVAILABLE) ||
             IsFeatureEnabled(POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON) ||
@@ -208,17 +206,13 @@ PROTECTED VIRTUAL void AosLocationStarter::Block_SilentChanged(
     Block_Changed(nType, nParam);
 }
 
-PROTECTED VIRTUAL void AosLocationStarter::OnFeatureEnabled(IN IMS_UINT32 nFeature)
+PROTECTED VIRTUAL void AosLocationStarter::OnFeatureEnabled(IN IMS_UINT32 /*nFeature*/)
 {
-    (void)nFeature;
-
     HandleStartConditionChanged();
 }
 
-PROTECTED VIRTUAL void AosLocationStarter::OnFeatureDisabled(IN IMS_UINT32 nFeature)
+PROTECTED VIRTUAL void AosLocationStarter::OnFeatureDisabled(IN IMS_UINT32 /*nFeature*/)
 {
-    (void)nFeature;
-
     HandleStartConditionChanged();
 }
 

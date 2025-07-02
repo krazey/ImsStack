@@ -264,11 +264,7 @@ PUBLIC VIRTUAL void AosHandle::ProcessFeatureTagChange()
     }
 }
 
-PUBLIC VIRTUAL void AosHandle::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState /* = 0 */)
-{
-    (void)nType;
-    (void)nState;
-}
+PUBLIC VIRTUAL void AosHandle::Request(IN IMS_UINT32 /*nType*/, IN IMS_UINT32 /*nState = 0*/) {}
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
 {
@@ -336,11 +332,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void AosHandle::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
-{
-    (void)nType;
-    (void)bBlocked;
-}
+PUBLIC VIRTUAL void AosHandle::Handle_Notify(IN IMS_UINT32 /*nType*/, IN IMS_BOOL /*bBlocked*/) {}
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 {

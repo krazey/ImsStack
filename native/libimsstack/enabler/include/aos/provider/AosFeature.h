@@ -49,8 +49,8 @@ public:
     IMS_BOOL IsFeatureDisabled(IN IMS_UINT32 nFeature) { return !IsFeatureEnabled(nFeature); }
     void InitFeatures(IN IMS_UINT32 nFeatures) { m_nFeatures = nFeatures; }
     IMS_UINT32 GetFeatures() { return m_nFeatures; }
-    virtual void OnFeatureEnabled(IN IMS_UINT32 nFeatures) { (void)nFeatures; }
-    virtual void OnFeatureDisabled(IN IMS_UINT32 nFeatures) { (void)nFeatures; }
+    virtual void OnFeatureEnabled(IN IMS_UINT32 /*nFeatures*/) {}
+    virtual void OnFeatureDisabled(IN IMS_UINT32 /*nFeatures*/) {}
 
     enum
     {

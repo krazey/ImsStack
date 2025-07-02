@@ -1062,10 +1062,7 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::ConvertRegInfoEvent(IN IMS_SINT32 
     }
 }
 
-PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Terminated(IN IMS_SINT32 nEvent)
-{
-    (void)nEvent;
-}
+PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Terminated(IN IMS_SINT32 /*nEvent*/) {}
 
 PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 nState)
 {
