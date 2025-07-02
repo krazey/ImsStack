@@ -883,35 +883,36 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromIsim(IN IMS_SINT32 nIpVersion)
         }
 
         IMS_SINT32 nPort = GetDefaultPcscfPort();
-        IpAddress objIpa;
-        objIpa.Parse(strHost);
-        if (objIpa.GetVersion() == nIpVersion)
+        IpAddress objIpaFromIsim;
+        objIpaFromIsim.Parse(strHost);
+        if (objIpaFromIsim.GetVersion() == nIpVersion)
         {
-            if (!IsSamePcscf(objIpa, nPort))
+            if (!IsSamePcscf(objIpaFromIsim, nPort))
             {
                 AddPcscf(strHost, nPort);
             }
         }
-        else if (objIpa.IsUnknownAddress())
+        else if (objIpaFromIsim.IsUnknownAddress())
         {
             A_IMS_TRACE_D(APPPROFILE, "DNS query :: host (%s)", strHost.GetStr(), 0, 0);
-            ImsList<IpAddress> objIpas;
-            if (m_piAppContext->GetConnection()->GetHostByName(strHost, objIpas, nIpVersion) == -1)
+            ImsList<IpAddress> objAddressList;
+            if (m_piAppContext->GetConnection()->GetHostByName(
+                        strHost, objAddressList, nIpVersion) == -1)
             {
                 continue;
             }
 
-            for (IMS_UINT32 i = 0; i < objIpas.GetSize(); ++i)
+            for (IMS_UINT32 i = 0; i < objAddressList.GetSize(); ++i)
             {
-                const IpAddress& objIpa = objIpas.GetAt(i);
-                if (objIpa.IsAnyAddress())
+                const IpAddress& objIpaFromDnsQuery = objAddressList.GetAt(i);
+                if (objIpaFromDnsQuery.IsAnyAddress())
                 {
                     continue;
                 }
 
-                if (!IsSamePcscf(objIpa, nPort))
+                if (!IsSamePcscf(objIpaFromDnsQuery, nPort))
                 {
-                    AddPcscf(objIpa.ToString(), nPort);
+                    AddPcscf(objIpaFromDnsQuery.ToString(), nPort);
                 }
             }
         }
