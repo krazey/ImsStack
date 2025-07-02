@@ -81,7 +81,7 @@ PUBLIC VIRTUAL IMS_BOOL SsacTimerHandler::IsSsacTimerRunning(IN CallType eCallTy
 
 PUBLIC VIRTUAL void SsacTimerHandler::StartBarringTimer(IN CallType eCallType)
 {
-    IImsRadio* pImsRadio =
+    const IImsRadio* pImsRadio =
             ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId());
     if (!pImsRadio)
     {

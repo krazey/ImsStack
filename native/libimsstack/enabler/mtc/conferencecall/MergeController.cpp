@@ -295,7 +295,7 @@ IMS_BOOL MergeController::RecoverOnConferenceCallFailed()
 {
     IMS_TRACE_I("RecoverOnConferenceCallFailed", 0, 0, 0);
 
-    IMtcCall* piConfCall = GetConferenceCall();
+    const IMtcCall* piConfCall = GetConferenceCall();
     if ((piConfCall->GetState() != IMtcCall::State::ESTABLISHED &&
                 piConfCall->GetState() != IMtcCall::State::UPDATING))
     {
@@ -321,14 +321,14 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             continue;
         }
 
-        ConfUser* pTempUser = m_pParticipantList->GetConfUser(i);
+        const ConfUser* pTempUser = m_pParticipantList->GetConfUser(i);
         if (pTempUser == IMS_NULL)
         {
             continue;
         }
         CallKey nTempCallKey = m_objConnectionIdManager.GetCallKey(pTempUser->nConnectionId);
 
-        IConferenceReference* piConfReference = m_pParticipantList->GetAt(i)->GetReference();
+        const IConferenceReference* piConfReference = m_pParticipantList->GetAt(i)->GetReference();
 
         if (piConfReference != IMS_NULL)
         {
@@ -355,7 +355,7 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             continue;
         }
 
-        IMtcCall* piTemp = m_objCallManager.GetCallByCallKey(nTempCallKey);
+        const IMtcCall* piTemp = m_objCallManager.GetCallByCallKey(nTempCallKey);
         if (piTemp == IMS_NULL || piTemp->GetState() == IMtcCall::State::TERMINATING)
         {
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : 1-to-1 is terminating", 0, 0, 0);

@@ -822,7 +822,7 @@ ImsList<ConferenceInfo::User*> ConferenceInfoUpdater::GetSameUserEntities(
 
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
-        ConferenceInfo::User* pTempUser = objUsers.GetAt(i);
+        const ConferenceInfo::User* pTempUser = objUsers.GetAt(i);
         if (pUser == pTempUser)
         {
             continue;

@@ -115,7 +115,8 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStartFailed(
         IN ISubscription* piSubscription)
 {
     IMS_TRACE_I("SubscriptionStartFailed", 0, 0, 0);
-    IMessage* piMessage = piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE);
+    const IMessage* piMessage =
+            piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE);
 
     if (piMessage == IMS_NULL)
     {
@@ -341,7 +342,7 @@ void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
     AString strEventPackage;
     for (IMS_UINT32 nIndex = 0; nIndex < objBodyParts.GetSize(); nIndex++)
     {
-        IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
+        const IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
         if (piBodyPart != IMS_NULL)
         {
             const ByteArray& objEventPackage = piBodyPart->GetContent();

@@ -92,9 +92,9 @@ TEST_F(ConferenceManagerTest, CreateControllerWithDifferentCallKeyReturnsNotNull
     MockIMtcCall* pCall1 = CreateMockIMtcCall(CONF_CALL_KEY1);
     MockIMtcCall* pCall2 = CreateMockIMtcCall(CONF_CALL_KEY2);
 
-    IConferenceController* piController1 =
+    const IConferenceController* piController1 =
             CreateConferenceController(CONF_CALL_KEY1, ConferenceType::MERGE_CALL);
-    IConferenceController* piController2 =
+    const IConferenceController* piController2 =
             CreateConferenceController(CONF_CALL_KEY2, ConferenceType::MERGE_CALL);
 
     ASSERT_NE(piController1, nullptr);
@@ -109,13 +109,13 @@ TEST_F(ConferenceManagerTest, CreateControllerWithDifferentConferenceTypeReturns
     const CallKey CONF_CALL_KEY = 1;
     MockIMtcCall* pCall = CreateMockIMtcCall(CONF_CALL_KEY);
 
-    IConferenceController* pParticipantController =
+    const IConferenceController* pParticipantController =
             CreateConferenceController(CONF_CALL_KEY, ConferenceType::PARTICIPANT);
-    IConferenceController* pGroupCallController =
+    const IConferenceController* pGroupCallController =
             CreateConferenceController(CONF_CALL_KEY, ConferenceType::GROUP_CALL);
-    IConferenceController* pMergeCallController =
+    const IConferenceController* pMergeCallController =
             CreateConferenceController(CONF_CALL_KEY, ConferenceType::MERGE_CALL);
-    IConferenceController* pExpandCallController =
+    const IConferenceController* pExpandCallController =
             CreateConferenceController(CONF_CALL_KEY, ConferenceType::EXPAND_CALL);
 
     ASSERT_NE(pParticipantController, nullptr);
@@ -134,9 +134,9 @@ TEST_F(ConferenceManagerTest, GetControllerWithDifferentCallKey)
     MockIMtcCall* pCall1 = CreateMockIMtcCall(CONF_CALL_KEY1);
     MockIMtcCall* pCall2 = CreateMockIMtcCall(CONF_CALL_KEY2);
 
-    IConferenceController* piController1 =
+    const IConferenceController* piController1 =
             CreateConferenceController(CONF_CALL_KEY1, ConferenceType::MERGE_CALL);
-    IConferenceController* piController2 =
+    const IConferenceController* piController2 =
             CreateConferenceController(CONF_CALL_KEY2, ConferenceType::MERGE_CALL);
 
     EXPECT_EQ(piController1, pConferenceManager->GetController(CONF_CALL_KEY1));

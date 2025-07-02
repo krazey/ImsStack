@@ -376,7 +376,7 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
 
 PUBLIC VIRTUAL CallType MtcCall::GetCallType() const
 {
-    IMtcSession* pSession = GetSession();
+    const IMtcSession* pSession = GetSession();
     if (!pSession)
     {
         return m_objCallInfo.eInitialCallType;

@@ -418,7 +418,7 @@ ICoreService* MessageFormatter::GetICoreService()
 PROTECTED
 IFeatureCaps* MessageFormatter::GetIFeatureCaps()
 {
-    ICoreService* piCoreService = GetICoreService();
+    const ICoreService* piCoreService = GetICoreService();
     if (piCoreService == IMS_NULL)
     {
         return IMS_NULL;
@@ -656,7 +656,7 @@ void MessageFormatter::SetReplacesHeader()
         return;
     }
 
-    IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
+    const IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
     if (!piMultiEndpointManager)
     {
         return;

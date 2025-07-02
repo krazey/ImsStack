@@ -260,11 +260,11 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityWithLegid)
 
     AString strAnyEntityWithLegid1 = USER_ENTITY1 + ";legid=1";
     AddUserToInfo(strAnyEntityWithLegid1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
     AString strAnyEntityWithLegid2 = USER_ENTITY2 + ";legid=2";
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -283,12 +283,12 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatching)
 
     AString strAnyEntity1WithPhone = USER_ENTITY1 + ";user=phone";
     AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 =
+    const ConfUser* pUser1 =
             AddParticipant(strAnyEntity1WithPhone, strAnyEntity1WithPhone, eStatusBefore1);
 
     AString strAnyEntity2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntity2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -462,12 +462,12 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotSetDisconnectedBeforeConnected)
     IMS_UINT32 eStatusAfter2 = STATUS_DISCONNECTED;
 
     // no User entity in the first NOTIFY case
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
     // disconnected status before connected case
     AString strAnyEntityWithLegid2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -485,13 +485,13 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateSetsDisconnectedAfterConnected)
     IMS_UINT32 eStatusAfter2 = STATUS_DISCONNECTED;
 
     // no User entity in the first NOTIFY case
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
     objParticipantList.GetAt(0)->SetInfoUpdated(IMS_TRUE);
 
     // disconnected status before connected case
     AString strAnyEntityWithLegid2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
     objParticipantList.GetAt(1)->SetInfoUpdated(IMS_TRUE);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
@@ -509,13 +509,13 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotSetDisconnectedIfPartial)
     IMS_UINT32 eStatusAfter2 = STATUS_CONNECTED;
 
     // no User entity in the first NOTIFY case
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
     objParticipantList.GetAt(0)->SetInfoUpdated(IMS_TRUE);
 
     // disconnected status before connected case
     AString strAnyEntityWithLegid2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
     objParticipantList.GetAt(1)->SetInfoUpdated(IMS_TRUE);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_PARTIAL, 1);
@@ -533,7 +533,7 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDisconnectingStatusAsDisconnected)
     IMS_UINT32 eStatusAfterModified1 = STATUS_DISCONNECTED;
 
     AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
     objParticipantList.GetAt(0)->SetInfoUpdated(IMS_TRUE);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);

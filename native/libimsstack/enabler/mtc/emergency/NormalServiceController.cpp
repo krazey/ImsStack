@@ -59,7 +59,7 @@ PUBLIC VIRTUAL void NormalServiceController::Start()
 
 IEmergencyServiceController::State NormalServiceController::GetState() const
 {
-    IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
     if (pNormalService && pNormalService->GetStatus() == ServiceStatus::SERVICE_ACTIVE)
     {
         return IEmergencyServiceController::State::OPENED;

@@ -176,7 +176,7 @@ ByteArray MtcLocationObject::CreateLocationBody() const
 {
     ByteArray objContent;
 
-    GeolocationPidfCreator* pPidfCreator =
+    const GeolocationPidfCreator* pPidfCreator =
             GeolocationHelper::GetInstance()->GetPidfCreator(m_objContext.GetSlotId());
     if (pPidfCreator == IMS_NULL)
     {
@@ -239,7 +239,7 @@ AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberCo
 PRIVATE
 AString MtcLocationObject::CreatePersonId() const
 {
-    ISubscriberInfo* pSubscriberInfo =
+    const ISubscriberInfo* pSubscriberInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_objContext.GetSlotId());
     if (pSubscriberInfo == IMS_NULL)
     {
@@ -268,7 +268,7 @@ AString MtcLocationObject::GetLocationBodyFrom(IN const IMessage& objMessage)
     ImsList<IMessageBodyPart*> lstMessageBodies = objMessage.GetBodyParts();
     for (IMS_UINT32 nIndex = 0; nIndex < lstMessageBodies.GetSize(); nIndex++)
     {
-        IMessageBodyPart* pBody = lstMessageBodies.GetAt(nIndex);
+        const IMessageBodyPart* pBody = lstMessageBodies.GetAt(nIndex);
 
         if (pBody->GetHeader(SipHeaderName::CONTENT_TYPE).EqualsIgnoreCase(CONTENT_TYPE_PIDF_XML))
         {

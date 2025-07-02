@@ -298,7 +298,7 @@ TEST_F(ConferenceParticipantListTest, ParticipantObtainedUsingIndexHasCorrespond
     pParticipantList->AddUser(pUser);
     delete pUser;
 
-    ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
+    const ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
 
     ASSERT_NE(pParticipantList->GetAt(0), nullptr);
     EXPECT_EQ(pParticipantList->GetAt(0)->GetConfUser(), pCopiedUser);

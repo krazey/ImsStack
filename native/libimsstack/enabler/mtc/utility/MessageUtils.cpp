@@ -97,7 +97,8 @@ PUBLIC IMessage* MessageUtils::GetRemotePreviousMessage(IN ISession* piSession,
 PUBLIC IMS_SINT32 MessageUtils::GetResponseStatusCode(
         IN ISession* piSession, IN IMS_SINT32 eServiceMethod, IN IMS_SINT32 nResponseIndex /*= -1*/)
 {
-    IMessage* piPreviousMessage = GetPreviousResponse(piSession, eServiceMethod, nResponseIndex);
+    const IMessage* piPreviousMessage =
+            GetPreviousResponse(piSession, eServiceMethod, nResponseIndex);
     if (piPreviousMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;
@@ -118,7 +119,7 @@ PUBLIC ImsList<AString> MessageUtils::GetRemoteUris(IN ISession* piSession, IN P
     ImsList<AString> lstAddresses = piSession->GetRemoteUserId();
     if (lstAddresses.IsEmpty())
     {
-        IMessage* piPreviousMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+        const IMessage* piPreviousMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
         if (piPreviousMessage == IMS_NULL)
         {
             return lstUris;
@@ -182,7 +183,7 @@ PUBLIC AString MessageUtils::GetSessionId(IN ISession* piSession)
 PUBLIC ImsList<AString> MessageUtils::GetHeaders(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return ImsList<AString>();
@@ -708,7 +709,7 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
 PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
         IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return objIms3gpp;
@@ -717,7 +718,7 @@ PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
     ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
     for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
@@ -747,7 +748,7 @@ PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
 PUBLIC Ims3gppData MessageUtils::GetIms3gppData(IN const IMessage* piMessage)
 {
     Ims3gppData objIms3gppData;
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return objIms3gppData;
@@ -756,7 +757,7 @@ PUBLIC Ims3gppData MessageUtils::GetIms3gppData(IN const IMessage* piMessage)
     ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
     for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
@@ -794,7 +795,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
         return SipStatusCode::SC_INVALID;
     }
 
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;
@@ -804,7 +805,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
     ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
     for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
@@ -830,7 +831,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
 
 PUBLIC IMS_BOOL MessageUtils::HasSdp(IN const IMessage* piMessage)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return IMS_FALSE;
@@ -956,7 +957,7 @@ PUBLIC IMS_BOOL MessageUtils::HasValue(IN const IMessage* piMessage, IN const AS
 PUBLIC IMS_BOOL MessageUtils::IsHeaderPresent(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return IMS_FALSE;
@@ -1072,7 +1073,7 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
     ImsList<std::tuple<AString, AString, AString>> objEntries;
     for (IMS_UINT32 i = 0; i < lstConfUser.GetSize(); i++)
     {
-        ConfUser* pConfUser = lstConfUser.GetAt(i);
+        const ConfUser* pConfUser = lstConfUser.GetAt(i);
         if (pConfUser == IMS_NULL)
         {
             continue;
@@ -1165,8 +1166,8 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
     ImsList<IMedia*> lstIMedia = piSession->GetMedia();
     for (IMS_UINT32 nIndex = 0; nIndex < lstIMedia.GetSize(); nIndex++)
     {
-        IMedia* piMedia = lstIMedia.GetAt(nIndex);
-        IMediaDescriptor* pDescriptor = IMS_NULL;
+        const IMedia* piMedia = lstIMedia.GetAt(nIndex);
+        const IMediaDescriptor* pDescriptor = IMS_NULL;
         if (bCheckRemote)
         {
             if (piMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)

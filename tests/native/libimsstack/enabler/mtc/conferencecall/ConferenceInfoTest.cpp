@@ -236,7 +236,7 @@ TEST_F(ConferenceInfoTest, GetUserInfoFromUsersReturnsValuesInXml)
     AString strXml = GetConferenceEventPackage();
     EXPECT_TRUE(objConferenceInfo.Parse(strXml));
     const ImsList<ConferenceInfo::User*>& objUsers = objConferenceInfo.GetUsers();
-    ConferenceInfo::User* pUser1 = objUsers.GetAt(0);
+    const ConferenceInfo::User* pUser1 = objUsers.GetAt(0);
     EXPECT_STREQ(pUser1->GetEntity().GetStr(), "sip:AnyUserEntity");
     EXPECT_EQ(pUser1->GetState(), ConferenceInfo::STATE_PARTIAL);
     EXPECT_STREQ(pUser1->GetDisplayText().GetStr(), "Any User Display Name");
@@ -252,8 +252,8 @@ TEST_F(ConferenceInfoTest, GetEndPointInfoFromEndPointsReturnsValueInXml)
     AString strXml = GetConferenceEventPackage();
     EXPECT_TRUE(objConferenceInfo.Parse(strXml));
     const ImsList<ConferenceInfo::User*>& objUsers = objConferenceInfo.GetUsers();
-    ConferenceInfo::User* pUser2 = objUsers.GetAt(1);
-    ConferenceInfo::User::EndPoint* pEndPoint1Of2 = pUser2->GetEndPoints().GetAt(0);
+    const ConferenceInfo::User* pUser2 = objUsers.GetAt(1);
+    const ConferenceInfo::User::EndPoint* pEndPoint1Of2 = pUser2->GetEndPoints().GetAt(0);
     EXPECT_STREQ(pEndPoint1Of2->GetEntity().GetStr(), "sip:AnyEpEntity@192.168.0.2");
     EXPECT_EQ(pEndPoint1Of2->GetState(), ConferenceInfo::STATE_DELETED);
     EXPECT_STREQ(pEndPoint1Of2->GetDisplayText().GetStr(), "Any EndPoint Display Name");
@@ -286,8 +286,8 @@ TEST_F(ConferenceInfoTest, ConvertStatusForAllCases)
         AString strXml = GetConferenceEventPackage();
         EXPECT_TRUE(objInfo.Parse(strXml));
         const ImsList<ConferenceInfo::User*>& objUsers = objInfo.GetUsers();
-        ConferenceInfo::User* pUser1 = objUsers.GetAt(0);
-        ConferenceInfo::User::EndPoint* pEndPoint1Of1 = pUser1->GetEndPoints().GetAt(0);
+        const ConferenceInfo::User* pUser1 = objUsers.GetAt(0);
+        const ConferenceInfo::User::EndPoint* pEndPoint1Of1 = pUser1->GetEndPoints().GetAt(0);
         EXPECT_EQ(pEndPoint1Of1->GetStatus(), objStatusEnum.at(nIndex));
         ++nIndex;
     }

@@ -162,7 +162,7 @@ TEST_F(UssiDataTest, ParseByParserReturnsNullIfParseFails)
 {
     UssiDataParser objParser;
     AString strEmptyXml;
-    UssiData* pData = objParser.Parse(strEmptyXml);
+    const UssiData* pData = objParser.Parse(strEmptyXml);
     EXPECT_EQ(pData, nullptr);
 }
 

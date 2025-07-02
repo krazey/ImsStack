@@ -230,7 +230,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const CallReasonInfo& objRe
 
 PUBLIC VIRTUAL CallStateName IdleState::SessionTerminated(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
 
     CallReasonInfo objReason = piMessage ? CancelHandler(m_objContext).Handle(*piMessage)
                                          : CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR);
@@ -602,7 +602,7 @@ IMS_BOOL IdleState::IsCallPull() const
 PRIVATE
 IMS_RESULT IdleState::HandleCallPull()
 {
-    IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
+    const IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
     if (!piMultiEndpointManager)
     {
         Terminate(CallReasonInfo(CODE_MULTIENDPOINT_NOT_SUPPORTED));

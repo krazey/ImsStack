@@ -114,7 +114,7 @@ IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServer
 
     if (piSipServerConnection)
     {
-        ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
+        const ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
         if (piSipMessage)
         {
             ImsList<AString> lstHeaders = piSipMessage->GetHeaders(ISipHeader::INFO_PACKAGE);
@@ -439,7 +439,7 @@ UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage) const
 
     for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
         if (piBodyPart != IMS_NULL)
         {
             const ByteArray& objUssiBody = piBodyPart->GetContent();

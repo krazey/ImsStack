@@ -277,7 +277,7 @@ CallReasonInfo SilentRedialHelper::HandleFailure(IN IMtcSession& objMtcSession) 
             break;
     }
 
-    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             &objMtcSession.GetISession(), IMessage::SESSION_START);
     if (piResponse == IMS_NULL)
     {
@@ -318,7 +318,7 @@ const AString SilentRedialHelper::GetRemoteTarget() const
 PRIVATE
 void SilentRedialHelper::ControlAos(IN IMS_UINT32 eCommand) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->Control(eCommand);

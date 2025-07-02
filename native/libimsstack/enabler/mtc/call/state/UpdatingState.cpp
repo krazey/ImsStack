@@ -113,7 +113,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     // TODO: Internal error handling
     pSession->AcceptUpdate();
 
-    IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
         m_objContext.GetUiNotifier().SendUpdated();
@@ -188,7 +188,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
     // TODO: Internal error handling
     pSession->AcceptUpdate();
 
-    IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
         m_objContext.GetUiNotifier().SendResumedBy();
@@ -542,7 +542,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN const CallReasonInf
 PUBLIC VIRTUAL CallStateName UpdatingState::QosReserved(
         IN ISession* piSession, IN [[maybe_unused]] IMS_UINT32 eMediaType)
 {
-    IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
+    const IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
     if (piMessage == IMS_NULL || piMessage->GetStatusCode() != SipStatusCode::SC_200)
     {
         return GetStateName();

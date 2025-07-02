@@ -164,7 +164,7 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByFormat(IN const ASt
 PRIVATE
 void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
 {
-    ICoreService* piCoreService = GetICoreService();
+    const ICoreService* piCoreService = GetICoreService();
     if (piCoreService == IMS_NULL)
     {
         return;
@@ -196,7 +196,7 @@ void EmergencyMessageFormatter::SetSipInstanceFeature()
         return;
     }
 
-    ICoreService* piCoreService = GetICoreService();
+    const ICoreService* piCoreService = GetICoreService();
     if (piCoreService == IMS_NULL)
     {
         return;
@@ -274,7 +274,7 @@ void EmergencyMessageFormatter::SetPComServiceTypeHeader()
 PRIVATE
 IMS_UINT32 EmergencyMessageFormatter::GetAosRegMode(IN ServiceType eServiceType) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(eServiceType);
+    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(eServiceType);
     if (pAosConnector == IMS_NULL)
     {
         return IImsAosInfo::REG_MODE_UNKNOWN;

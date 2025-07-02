@@ -170,7 +170,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
 PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("UssiStarted - ACK received", 0, 0, 0);
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
     m_objContext.GetSession()->HandleRequest(RequestType::ACK, *piMessage);
 
     UssiResult objResult = m_objContext.GetUssiController()->ParseUssiBodyAndCheckResult(
@@ -221,7 +221,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
 
 PUBLIC VIRTUAL CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
     if (piMessage == IMS_NULL)
     {
         return CallStateName::TERMINATING;
@@ -270,7 +270,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
 
 PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
-    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)

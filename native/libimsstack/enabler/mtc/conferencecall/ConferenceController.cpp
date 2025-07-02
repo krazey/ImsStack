@@ -313,7 +313,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
         return IndividualCallState::HOST;
     }
 
-    IMtcCall* piConfCall = GetConferenceCall();
+    const IMtcCall* piConfCall = GetConferenceCall();
     if (piConfCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_D("GetCallStatusInConference - Destroyed Host call", 0, 0, 0);
@@ -570,7 +570,7 @@ PROTECTED VIRTUAL IConferenceReference* ConferenceController::CreateReference(
 
     for (IMS_UINT32 index = 0; index < objUsers.GetSize(); index++)
     {
-        ConfUser* pUser = objUsers.GetAt(index);
+        const ConfUser* pUser = objUsers.GetAt(index);
         m_pParticipantList->SetReference(piConfRefer, pUser);
     }
 
@@ -1064,7 +1064,7 @@ void ConferenceController::GetFocusAddress(OUT AString& strAddress) const
     }
 
     ISession& objSession = pMtcSession->GetISession();
-    IMessage* piMessage = IMS_NULL;
+    const IMessage* piMessage = IMS_NULL;
 
     if (GetConferenceCall()->GetCallContext().GetCallInfo().ePeerType == PeerType::MO)
     {

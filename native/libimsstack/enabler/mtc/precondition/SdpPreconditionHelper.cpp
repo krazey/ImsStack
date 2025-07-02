@@ -122,7 +122,7 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormFailurePreconditionSdp(IN ISessio
     IMS_TRACE_D("FormFailurePreconditionSdp", 0, 0, 0);
 
     piSession->CreateFailureSdp();
-    ISessionParameter* piSessionParam = piSession->GetFailureSdp();
+    const ISessionParameter* piSessionParam = piSession->GetFailureSdp();
 
     if (piSessionParam == IMS_NULL)
     {
@@ -201,7 +201,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN IS
             continue;
         }
 
-        IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
+        const IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
         if (!piMediaDescriptor)
         {
             continue;
@@ -228,7 +228,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
         return IMS_FALSE;
     }
 
-    IMessage* piRequestMessage = piSession->GetPreviousRequest(nServiceMethod);
+    const IMessage* piRequestMessage = piSession->GetPreviousRequest(nServiceMethod);
     if (piRequestMessage == IMS_NULL)
     {
         IMS_TRACE_D("IsLocalResourceReservedInSdp : no request", 0, 0, 0);
@@ -256,7 +256,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
             return IMS_FALSE;
         }
 
-        IMessage* piResponseMessage = IMS_NULL;
+        const IMessage* piResponseMessage = IMS_NULL;
         for (IMS_UINT32 index = 0; index < lstResponseMessages.GetSize(); index++)
         {
             IMessage* piTempResponse = lstResponseMessages.GetAt(index);
@@ -458,7 +458,7 @@ IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
         return IMS_FALSE;
     }
 
-    ISipMessageBodyPart* piBodyPart = piSipMessage->GetSdpBodyPart();
+    const ISipMessageBodyPart* piBodyPart = piSipMessage->GetSdpBodyPart();
     if (piBodyPart == IMS_NULL)
     {
         IMS_TRACE_D("HasReservedResourceInSdp : ISipMessageBodyPart is null.", 0, 0, 0);

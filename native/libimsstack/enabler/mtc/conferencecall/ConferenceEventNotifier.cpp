@@ -249,13 +249,13 @@ IMtcCallContext* ConferenceEventNotifier::GetConferenceCallContext() const
 PRIVATE
 IJniMtcCallThread* ConferenceEventNotifier::GetCallThread() const
 {
-    IMtcCallContext* piConferenceCallContext = GetConferenceCallContext();
+    const IMtcCallContext* piConferenceCallContext = GetConferenceCallContext();
     if (piConferenceCallContext == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
+    const IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
             piConferenceCallContext->GetSlotId(), EnablerType::MTC_CALL, m_nConferenceCallKey);
     if (piJniMtcCall == IMS_NULL)
     {

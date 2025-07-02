@@ -67,7 +67,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN
     {
         for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
         {
-            MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
+            const MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
 
             if (pProfile->bForked == IMS_FALSE)
             {
@@ -81,7 +81,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN
             IMS_TRACE_D("CreateMediaProfile : the call has %d media profiles.",
                     m_objMediaProfiles.GetSize(), 0, 0);
 
-            MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(0);
+            const MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(0);
             if (pProfile)
             {
                 nParamId = pProfile->nNegoId;

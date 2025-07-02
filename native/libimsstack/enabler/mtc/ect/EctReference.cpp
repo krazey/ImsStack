@@ -63,7 +63,7 @@ PUBLIC VIRTUAL void EctReference::ReferenceDelivered(IN IReference* piReference)
 {
     IMS_TRACE_I("ReferenceDelivered", 0, 0, 0);
 
-    IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    const IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
 
     if (piReferMessage == IMS_NULL)
     {
@@ -142,7 +142,7 @@ PUBLIC VIRTUAL IMS_RESULT EctReference::SendInvite(IN const AString& strTransfer
 
 PUBLIC VIRTUAL IMS_UINT32 EctReference::GetResponseCode() const
 {
-    IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    const IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
 
     if (piReferMessage == IMS_NULL)
     {
@@ -162,7 +162,8 @@ IMS_RESULT EctReference::SendRefer(
         return IMS_FAILURE;
     }
 
-    IMtcCall* piTransfereeCall = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
+    const IMtcCall* piTransfereeCall =
+            m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
     if (piTransfereeCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_E(0, "transferee call is NullCall", 0, 0, 0);

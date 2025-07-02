@@ -105,7 +105,7 @@ TEST_F(MtcAppTest, GetSubscriberConfig)
 
 TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
 {
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
     ASSERT_EQ(piService, nullptr);
 
     pMtcApp->Start();
@@ -116,7 +116,7 @@ TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
 
 TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
 {
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
     ASSERT_EQ(piService, nullptr);
 
     pMtcApp->Start();
@@ -128,7 +128,7 @@ TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
 TEST_F(MtcAppTest, ReturnNullForGetServiceForUnknownType)
 {
     pMtcApp->Start();
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
     ASSERT_EQ(piService, nullptr);
     pMtcApp->Stop();
 }
@@ -162,7 +162,7 @@ TEST_F(MtcAppTest, GetNormalServiceAfterStop)
     TestMtcApp* pMtcApp = new TestMtcApp();
     pMtcApp->Start();
     pMtcApp->Stop();
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
     ASSERT_EQ(piService, nullptr);
 }
 
@@ -171,7 +171,7 @@ TEST_F(MtcAppTest, GetEmergencyServiceAfterStop)
     TestMtcApp* pMtcApp = new TestMtcApp();
     pMtcApp->Start();
     pMtcApp->Stop();
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
     ASSERT_EQ(piService, nullptr);
 }
 
@@ -188,76 +188,76 @@ TEST_F(MtcAppTest, StartTwiceWithoutStopNoDuplicatedServiceCreation)
 
 TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
 {
-    IEctManager* pFirstManager = &pMtcApp->GetEctManager();
-    IEctManager* pSecondManager = &pMtcApp->GetEctManager();
+    const IEctManager* pFirstManager = &pMtcApp->GetEctManager();
+    const IEctManager* pSecondManager = &pMtcApp->GetEctManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 
 TEST_F(MtcAppTest, CreateEmergencyManagerOnlyOnceWhenFirstGetterIsCalled)
 {
     pMtcApp->Start();  // to have MtcService
-    IMtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
-    IMtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
+    const IMtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
+    const IMtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 
 TEST_F(MtcAppTest, GetDialingPlanAfterConstructor)
 {
-    IMtcDialingPlan* piDialingPlan = &pMtcApp->GetDialingPlan();
+    const IMtcDialingPlan* piDialingPlan = &pMtcApp->GetDialingPlan();
     ASSERT_NE(piDialingPlan, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallControllerAfterConstructor)
 {
-    IMtcCallController* piCallController = &pMtcApp->GetCallController();
+    const IMtcCallController* piCallController = &pMtcApp->GetCallController();
     ASSERT_NE(piCallController, nullptr);
 }
 
 TEST_F(MtcAppTest, GetRadioCheckerAfterConstructor)
 {
-    IMtcRadioChecker* piTrafficChecker = &pMtcApp->GetRadioChecker();
+    const IMtcRadioChecker* piTrafficChecker = &pMtcApp->GetRadioChecker();
     ASSERT_NE(piTrafficChecker, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallManagerAfterConstructor)
 {
-    IMtcCallManager* piCallManager = &pMtcApp->GetCallManager();
+    const IMtcCallManager* piCallManager = &pMtcApp->GetCallManager();
     ASSERT_NE(piCallManager, nullptr);
 }
 
 TEST_F(MtcAppTest, GetConfigurationProxyAfterConstructor)
 {
-    MtcConfigurationProxy* piConfigProxy = &pMtcApp->GetConfigurationProxy();
+    const MtcConfigurationProxy* piConfigProxy = &pMtcApp->GetConfigurationProxy();
     ASSERT_NE(piConfigProxy, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallStateProxyAfterConstructor)
 {
-    ICallStateProxy* piCallStateProxy = &pMtcApp->GetCallStateProxy();
+    const ICallStateProxy* piCallStateProxy = &pMtcApp->GetCallStateProxy();
     ASSERT_NE(piCallStateProxy, nullptr);
 }
 
 TEST_F(MtcAppTest, GetEventReceiverAfterConstructor)
 {
-    IMtcImsEventReceiver* piEventReceiver = &pMtcApp->GetImsEventReceiver();
+    const IMtcImsEventReceiver* piEventReceiver = &pMtcApp->GetImsEventReceiver();
     ASSERT_NE(piEventReceiver, nullptr);
 }
 
 TEST_F(MtcAppTest, GetSipInterfaceFactoryAfterConstructor)
 {
-    IMtcSipInterfaceFactory* piSipInterfaceFactory = &pMtcApp->GetSipInterfaceFactory();
+    const IMtcSipInterfaceFactory* piSipInterfaceFactory = &pMtcApp->GetSipInterfaceFactory();
     ASSERT_NE(piSipInterfaceFactory, nullptr);
 }
 
 TEST_F(MtcAppTest, GetLocationRefresherAfterConstructor)
 {
-    MtcLocationRefresher* pLocationRefresher = &pMtcApp->GetLocationRefresher();
+    const MtcLocationRefresher* pLocationRefresher = &pMtcApp->GetLocationRefresher();
     ASSERT_NE(pLocationRefresher, nullptr);
 }
 
 TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)
 {
-    IConferenceManager* piConferenceManager = &pMtcApp->GetConferenceManager();
+    const IConferenceManager* piConferenceManager = &pMtcApp->GetConferenceManager();
     ASSERT_NE(piConferenceManager, nullptr);
 }
 
@@ -283,14 +283,14 @@ TEST_F(MtcAppTest, RunAsyncOperationAfterConstructor)
 
 TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)
 {
-    IMessageUtils* piMessageUtils = &pMtcApp->GetMessageUtils();
+    const IMessageUtils* piMessageUtils = &pMtcApp->GetMessageUtils();
     ASSERT_NE(piMessageUtils, nullptr);
 }
 
 TEST_F(MtcAppTest, CreateLastComeFirstServedHelperOnlyOnceWhenFirstGetterIsCalled)
 {
-    ILastComeFirstServedHelper* pFirstHelper = &pMtcApp->GetLastComeFirstServedHelper();
-    ILastComeFirstServedHelper* pSecondHelper = &pMtcApp->GetLastComeFirstServedHelper();
+    const ILastComeFirstServedHelper* pFirstHelper = &pMtcApp->GetLastComeFirstServedHelper();
+    const ILastComeFirstServedHelper* pSecondHelper = &pMtcApp->GetLastComeFirstServedHelper();
     EXPECT_EQ(pFirstHelper, pSecondHelper);
 }
 
@@ -321,7 +321,7 @@ TEST_F(MtcAppTest, CreateAndDestroyRttAutoUpgrader)
     EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), nullptr);
 
     objMtcApp.CreateRttAutoUpgrader();
-    RttAutoUpgrader* pRttAutoUpgrader = objMtcApp.GetRttAutoUpgrader();
+    const RttAutoUpgrader* pRttAutoUpgrader = objMtcApp.GetRttAutoUpgrader();
     ASSERT_NE(pRttAutoUpgrader, nullptr);
 
     objMtcApp.CreateRttAutoUpgrader();

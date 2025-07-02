@@ -242,7 +242,7 @@ PUBLIC VIRTUAL IMS_SINT32 QosStatusTable::GetDirectionTag(
 
     for (IMS_UINT32 index = 0; index < lstRecords.GetSize(); index++)
     {
-        QosStatusRecord* pRecord = lstRecords.GetAt(index);
+        const QosStatusRecord* pRecord = lstRecords.GetAt(index);
         if (pRecord->eAttrType == SdpAttribute::DES &&
                 pRecord->eStrengthTag >= SdpPrecondition::STRENGTH_NONE)
         {
@@ -313,7 +313,7 @@ PUBLIC VIRTUAL IMS_SINT32 QosStatusTable::GetStrengthTag(
         return SdpPrecondition::STRENGTH_NOTUSED;
     }
 
-    QosStatusRecord* pRecord = lstRecords.GetAt(0);
+    const QosStatusRecord* pRecord = lstRecords.GetAt(0);
     IMS_SINT32 eStrengthTag = pRecord->eStrengthTag;
 
     return eStrengthTag;
@@ -356,7 +356,7 @@ PUBLIC VIRTUAL IMS_BOOL QosStatusTable::IsLocalResourceConfirmed(IN IMS_SINT32 e
         return IMS_FALSE;
     }
 
-    QosStatusRecord* pRecord = lstRecords.GetAt(0);
+    const QosStatusRecord* pRecord = lstRecords.GetAt(0);
     IMS_BOOL bResult = pRecord->bLocalResourceConfirmed;
     IMS_TRACE_D("IsLocalResourceConfirmed : (%s) %s",
             QosStringUtils::ConvertSdpMediaType(eSdpMediaType), _TRACE_B_(bResult), 0);
@@ -540,7 +540,7 @@ void QosStatusTable::UpdateDesiredStatus(
     ImsList<QosStatusRecord*> lstRecords = GetRecords(eSdpMediaType);
     for (IMS_UINT32 index = 0; index < lstRecords.GetSize(); index++)
     {
-        QosStatusRecord* pRecord = lstRecords.GetAt(index);
+        const QosStatusRecord* pRecord = lstRecords.GetAt(index);
         if (pRecord->eAttrType == SdpAttribute::DES && !pRecord->bDesiredCheck)
         {
             SetStrengthTag(pRecord->eSdpMediaType, pRecord->eStatusType, pRecord->eDirTag,

@@ -247,7 +247,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
 {
-    IMessage* piMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    const IMessage* piMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(piMessage) &&
             piMessage->GetMethod().Equals(SipMethod::INVITE);
     IMS_TRACE_D("AcceptUpdate Offerless case[%s]", _TRACE_B_(bAnswerForOfferlessReInvite), 0, 0);
@@ -639,7 +639,7 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
 PRIVATE
 IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature) const
 {
-    IMtcAosConnector* pAosConnector =
+    const IMtcAosConnector* pAosConnector =
             m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType());
     if (pAosConnector == IMS_NULL)
     {

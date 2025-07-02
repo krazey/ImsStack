@@ -574,7 +574,7 @@ PRIVATE
 QosStatus MtcPreconditionManager::GetQosStatus(
         IN ISession* piSession, IN IMS_UINT32 eMediaType) const
 {
-    QosInfo* pInfo = GetQosInfo(piSession);
+    const QosInfo* pInfo = GetQosInfo(piSession);
     if (pInfo == IMS_NULL)
     {
         return QosStatus::IDLE;
@@ -962,7 +962,7 @@ void MtcPreconditionManager::UpdateQosAttributesFromRemoteSdp(IN ISession* piSes
     ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         if (piMedia == IMS_NULL)
         {
             continue;
@@ -1106,7 +1106,7 @@ IMS_BOOL MtcPreconditionManager::IsLocalResourceReservedForVideoOrText(IN ISessi
 PRIVATE
 IMS_BOOL MtcPreconditionManager::IsPreconditionSupported(IN ISession* piSession) const
 {
-    QosInfo* pInfo = GetQosInfo(piSession);
+    const QosInfo* pInfo = GetQosInfo(piSession);
     IMS_BOOL bResult = (pInfo != IMS_NULL) ? pInfo->IsPreconditionSupported() : IMS_FALSE;
     IMS_TRACE_D("IsPreconditionSupported [%s]", _TRACE_B_(bResult), 0, 0);
     return bResult;
@@ -1153,7 +1153,7 @@ PRIVATE
 IMS_BOOL MtcPreconditionManager::IsNeedToStartWaitAudioDedicatedBearerTimer(
         IN ISession* piSession, IN IMS_BOOL bSendingInitialInvite) const
 {
-    QosInfo* pInfo = GetQosInfo(piSession);
+    const QosInfo* pInfo = GetQosInfo(piSession);
     if (pInfo == IMS_NULL)
     {
         return IMS_FALSE;
@@ -1301,7 +1301,7 @@ IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN IMedia* piMedia)
 PRIVATE
 const SdpMedia* MtcPreconditionManager::GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote)
 {
-    IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
+    const IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
     if (piMediaDescriptor == IMS_NULL)
     {
         return IMS_NULL;

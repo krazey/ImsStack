@@ -136,7 +136,7 @@ TEST_F(UriFormatterTest, GetReferToForByeEmptyUserEntity)
 {
     // emnpty User Entity -> Invited URI
     AString strUri;
-    ConfUser* pConfUser = new ConfUser();
+    const ConfUser* pConfUser = new ConfUser();
     UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 }

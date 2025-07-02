@@ -249,12 +249,12 @@ void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
     ImsList<IMtcCall*> objCalls = objCallManager.GetCalls();
     for (IMS_UINT32 nSessIndex = 0; nSessIndex < objCalls.GetSize(); nSessIndex++)
     {
-        IMtcCall* piTempCall = objCalls.GetAt(nSessIndex);
+        const IMtcCall* piTempCall = objCalls.GetAt(nSessIndex);
 
         for (IMS_UINT32 nIndex = 0; nIndex < m_objParticipants.GetSize(); nIndex++)
         {
             ConferenceParticipant* pTempParticipant = m_objParticipants.GetAt(nIndex);
-            ConfUser* pTempUser = pTempParticipant->GetConfUser();
+            const ConfUser* pTempUser = pTempParticipant->GetConfUser();
             if (pTempUser &&
                     objConnectionIdManager.GetCallKey(pTempUser->nConnectionId) ==
                             piTempCall->GetKey())

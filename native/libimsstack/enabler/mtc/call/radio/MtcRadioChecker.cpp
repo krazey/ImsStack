@@ -157,7 +157,7 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficT
         return;
     }
 
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+    const MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
     if (!pMtcTrafficInfo)
     {
         return;
@@ -175,7 +175,7 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
     IMS_TRACE_D("OnConnectionSetupPrepared TrafficType[%d] direction[%d]", eTrafficType,
             eCallDirection, 0);
 
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+    const MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
     if (!pMtcTrafficInfo)
     {
         return;
@@ -406,7 +406,7 @@ PRIVATE MtcTrafficInfo* MtcRadioChecker::CreateCallTrafficInfo(
 PRIVATE IMS_BOOL MtcRadioChecker::IsTrafficActivated(
         IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const
 {
-    MtcTrafficInfo* pMtcTrafficInfo =
+    const MtcTrafficInfo* pMtcTrafficInfo =
             GetCallTrafficInfo(ConvertCallTypeToTrafficType(eCallType, bEmergency),
                     static_cast<CallDirection>(ePeerType));
 
@@ -452,7 +452,7 @@ PRIVATE void MtcRadioChecker::StopTrafficChecking(IN MtcTrafficInfo& objTrafficI
 
 PRIVATE IMS_BOOL MtcRadioChecker::IsCallTerminated(IN CallKey nKey)
 {
-    IMtcCall* pCall = m_objContext.GetCallManager().GetCallByCallKey(nKey);
+    const IMtcCall* pCall = m_objContext.GetCallManager().GetCallByCallKey(nKey);
     return pCall->GetKey() == IMtcCall::CALL_KEY_INVALID ||
             pCall->GetState() == IMtcCall::State::TERMINATING;
 }

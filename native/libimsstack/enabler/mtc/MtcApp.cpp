@@ -140,7 +140,7 @@ PUBLIC VIRTUAL IMtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eService
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
     {
-        IMtcService* piService = m_lstServices.GetAt(i);
+        const IMtcService* piService = m_lstServices.GetAt(i);
 
         if (eServiceType == piService->GetServiceType())
         {

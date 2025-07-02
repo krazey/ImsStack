@@ -102,7 +102,7 @@ VIRTUAL PUBLIC void DialogSubscription::SubscriptionNotify(
     AString strEventPackage;
     for (IMS_UINT32 nIndex = 0; nIndex < objBodyParts.GetSize(); nIndex++)
     {
-        IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
+        const IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
         if (piBodyPart != IMS_NULL)
         {
             const ByteArray& objEventPackage = piBodyPart->GetContent();

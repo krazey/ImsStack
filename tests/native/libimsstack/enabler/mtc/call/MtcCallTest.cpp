@@ -833,8 +833,8 @@ TEST_F(MtcCallTest, GetSessionWithISessionReturnsMatchingSession)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
-    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+    const IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    const IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
 
     EXPECT_EQ(pMtcSession1, objCall.GetSession(&objSession1));
     EXPECT_EQ(pMtcSession2, objCall.GetSession(&objSession2));
@@ -853,8 +853,8 @@ TEST_F(MtcCallTest, GetSessionReturnsLastSession)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
-    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+    const IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    const IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
 
     EXPECT_NE(pMtcSession1, objCall.GetSession());
     EXPECT_EQ(pMtcSession2, objCall.GetSession());
@@ -866,8 +866,8 @@ TEST_F(MtcCallTest, GetSessionsReturnsAllSessions)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
-    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+    const IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    const IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
 
     ImsList<IMtcSession*> objSessions = objCall.GetSessions();
 
@@ -948,7 +948,7 @@ TEST_F(MtcCallTest, GetCurrentLocationDiscoveryControllerCreatesInstance)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
 
-    CurrentLocationDiscoveryController* pCurrentLocationDiscoveryController =
+    const CurrentLocationDiscoveryController* pCurrentLocationDiscoveryController =
             &objCall.GetCurrentLocationDiscoveryController();
 
     EXPECT_NE(nullptr, pCurrentLocationDiscoveryController);
@@ -1081,7 +1081,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsCapabilityOfSession)
     MockISession objSession;
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
 
-    IMtcSession* pSession = objCall.CreateSession(&objSession);
+    const IMtcSession* pSession = objCall.CreateSession(&objSession);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(pSession->IsRttCapable(), objJniCallInfo.bRttCapable);
@@ -1145,7 +1145,7 @@ TEST_F(MtcCallTest, RemoveSessionRemovesMatchingSession)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
+    const IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
     IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
 
     objCall.RemoveSession(*piMtcSession2);
@@ -1160,8 +1160,8 @@ TEST_F(MtcCallTest, RemoveAllSessionsRemovesAllSessions)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
-    IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
+    const IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
+    const IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
 
     objCall.RemoveAllSessions();
 
@@ -1250,7 +1250,7 @@ TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunsAllPendingOperationIfUp
 TEST_F(MtcCallTest, GetTimerReturnsMember)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    MtcTimerWrapper* pTimer = &objCall.GetTimer();
+    const MtcTimerWrapper* pTimer = &objCall.GetTimer();
 
     EXPECT_NE(pTimer, nullptr);
 }
@@ -1258,7 +1258,7 @@ TEST_F(MtcCallTest, GetTimerReturnsMember)
 TEST_F(MtcCallTest, GetSupplementaryServiceReturnsMember)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    MtcSupplementaryService* pSuppService = &objCall.GetSupplementaryService();
+    const MtcSupplementaryService* pSuppService = &objCall.GetSupplementaryService();
 
     EXPECT_NE(pSuppService, nullptr);
 }

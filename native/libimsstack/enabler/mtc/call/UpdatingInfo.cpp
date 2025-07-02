@@ -268,7 +268,7 @@ PUBLIC GLOBAL IMS_BOOL UpdatingInfo::IsValidResumeDirection(
 PRIVATE
 CallType UpdatingInfo::GetCurrentCallType() const
 {
-    IMtcSession* pSession = m_objContext.GetSession();
+    const IMtcSession* pSession = m_objContext.GetSession();
     if (!pSession)
     {
         return CallType::UNKNOWN;

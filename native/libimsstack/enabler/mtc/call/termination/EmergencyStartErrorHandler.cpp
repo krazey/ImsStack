@@ -221,7 +221,7 @@ CallReasonInfo EmergencyStartErrorHandler::HandleRedialEmergencyWithNextPcscf() 
 PRIVATE
 void EmergencyStartErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->Control(nCommand);

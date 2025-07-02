@@ -156,7 +156,7 @@ CallReasonInfo UpdateErrorHandler::HandleBlockCallByTimer(IN const IMessage& obj
 PRIVATE
 void UpdateErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->RegisterWithNextPcscf(nRetryAfter > 0 ? nRetryAfter : 0);

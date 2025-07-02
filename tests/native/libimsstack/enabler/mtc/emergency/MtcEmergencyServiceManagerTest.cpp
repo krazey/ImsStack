@@ -137,7 +137,7 @@ TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNotStopRegistrationForEmergen
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForServiceType)
 {
-    IEmergencyServiceController* pPreviousController = nullptr;
+    const IEmergencyServiceController* pPreviousController = nullptr;
     pEsm->StartOpen(ServiceType::EMERGENCY);
 
     pPreviousController = pEsm->GetController();

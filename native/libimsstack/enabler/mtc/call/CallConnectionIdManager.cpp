@@ -315,7 +315,7 @@ PRIVATE
 void CallConnectionIdManager::ClearConnectionIdsInConference(IN IMS_UINT32 nControllerIndex)
 {
     // no null check
-    IConferenceController* piController = m_objControllers.GetAt(nControllerIndex);
+    const IConferenceController* piController = m_objControllers.GetAt(nControllerIndex);
     IMS_SINT32 nSize = m_objCallKeyConnections.GetSize();
     IMS_TRACE_D("ClearConnectionIdsInConference total size=[%d]", nSize, 0, 0);
 

@@ -61,7 +61,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
         return IMS_FALSE;
     }
 
-    IElement* piElement = piDocument->GetDocumentElement();
+    const IElement* piElement = piDocument->GetDocumentElement();
     if (piElement == IMS_NULL)
     {
         piDocument->DestroyDocument();
@@ -82,7 +82,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
         return IMS_FALSE;
     }
 
-    INodeList* piNodeListEvents = piElement->GetChildNodes();
+    const INodeList* piNodeListEvents = piElement->GetChildNodes();
     if (piNodeListEvents == IMS_NULL || piNodeListEvents->GetLength() <= 0)
     {
         IMS_TRACE_E(0, "no 'ussd-data' NodeList", 0, 0, 0);
@@ -101,7 +101,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
             INode* piNodeChild = piNodeEvent->GetFirstChild();
             if (piNodeChild != IMS_NULL && piNodeChild->GetNodeType() == INode::TEXT_NODE)
             {
-                IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
+                const IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
                 m_strLanguage = piText->GetData();
             }
         }
@@ -110,13 +110,13 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
             INode* piNodeChild = piNodeEvent->GetFirstChild();
             if (piNodeChild != IMS_NULL && piNodeChild->GetNodeType() == INode::TEXT_NODE)
             {
-                IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
+                const IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
                 m_strUssdString = piText->GetData();
             }
         }
         else if (strName.EqualsIgnoreCase(UssiConstants::ELEMENT_ERROR_CODE))
         {
-            INode* piNodeChild = piNodeEvent->GetFirstChild();
+            const INode* piNodeChild = piNodeEvent->GetFirstChild();
             if (piNodeChild != IMS_NULL)
             {
                 m_eErrorCode = (UssiError)piNodeChild->GetNodeValue().ToInt32();
@@ -139,7 +139,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
 PRIVATE
 void UssiData::CreateAnyExtension(IN INode* piNode)
 {
-    INode* piElement = piNode->GetFirstChild();
+    const INode* piElement = piNode->GetFirstChild();
     AString strName;
 
     while (piElement != IMS_NULL)
@@ -156,7 +156,7 @@ void UssiData::CreateAnyExtension(IN INode* piNode)
         }
         else if (strName.EqualsIgnoreCase(UssiConstants::ELEMENT_ALERTING_PATTERN))
         {
-            INode* piNode_Value = piElement->GetFirstChild();
+            const INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {

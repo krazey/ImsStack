@@ -50,7 +50,7 @@ PUBLIC VIRTUAL void TerminatingState::OnEnter()
 {
     m_objContext.GetMediaManager().DestroyMediaSession();
 
-    ISession* piSession = GetISession();
+    const ISession* piSession = GetISession();
     if (piSession && piSession->GetState() == ISession::STATE_TERMINATED)
     {
         HandleCallSessionReleased();
@@ -145,7 +145,7 @@ void TerminatingState::MaybeRequestRegisterStop()
     }
 
     IMS_TRACE_I("Request REGISTER_STOP", 0, 0, 0);
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector != IMS_NULL)
     {
         pAosConnector->Control(ImsAosControl::REGISTER_STOP);

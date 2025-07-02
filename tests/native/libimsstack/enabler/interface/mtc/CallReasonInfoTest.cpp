@@ -61,7 +61,7 @@ TEST(CallReasonInfoTest, EqualToOperator)
 TEST(CallReasonInfoTest, EqualToOperatorByAddress)
 {
     CallReasonInfo objReason(1);
-    CallReasonInfo* pReason = &objReason;
+    const CallReasonInfo* pReason = &objReason;
     EXPECT_EQ(objReason, *pReason);
 }
 

@@ -655,7 +655,7 @@ IMS_BOOL StartErrorHandler::IsCsfbActionRequiredStatusCode(IN IMS_SINT32 nStatus
 PRIVATE
 void StartErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->Control(nCommand);
@@ -665,7 +665,7 @@ void StartErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
 PRIVATE
 IMS_BOOL StartErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->RegisterWithNextPcscf(nRetryAfter > 0 ? nRetryAfter : 0);
@@ -678,7 +678,7 @@ IMS_BOOL StartErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
 PRIVATE
 void StartErrorHandler::ReinitiateRegistrationWithStoredWaitTime() const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->ReinitiateRegistration(
@@ -706,21 +706,21 @@ IMS_BOOL StartErrorHandler::HasActiveCalls() const
 PRIVATE
 AString StartErrorHandler::GetPathHeader() const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     return pAosConnector ? pAosConnector->GetPathHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetServiceRouteHeader() const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     return pAosConnector ? pAosConnector->GetServiceRouteHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetSupported() const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     return pAosConnector ? pAosConnector->GetSupportedHeaderValue() : AString::ConstNull();
 }
 

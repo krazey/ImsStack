@@ -94,7 +94,7 @@ IMS_BOOL ConferenceInfo::Parse(IN const AString& strConferenceInfoPackage)
         return IMS_FALSE;
     }
 
-    IElement* piElement = piDocument->GetDocumentElement();
+    const IElement* piElement = piDocument->GetDocumentElement();
     if (piElement == IMS_NULL)
     {
         piDocument->DestroyDocument();
@@ -130,7 +130,7 @@ void ConferenceInfo::CreateConferenceInfo(IN const IElement& objElement)
     // "version" attribute
     m_nVersion = objElement.GetAttribute(ATTR_VERSION).ToInt32();
 
-    INode* piNode = objElement.GetFirstChild();
+    const INode* piNode = objElement.GetFirstChild();
     while (piNode != IMS_NULL)
     {
         const AString& strName = piNode->GetLocalName();
@@ -177,7 +177,7 @@ void ConferenceInfo::CreateUsers(IN const INode& objNode)
 
     for (IMS_UINT32 i = 0; i < objUserElements.GetSize(); i++)
     {
-        IElement* piUserElement = objUserElements.GetAt(i);
+        const IElement* piUserElement = objUserElements.GetAt(i);
 
         User* pUser = new User();
         pUser->strEntity = piUserElement->GetAttribute(ATTR_ENTITY);
@@ -203,7 +203,7 @@ void ConferenceInfo::CreateEndPointEntity(IN const IElement& objElement, IN User
 
     for (IMS_UINT32 i = 0; i < objEndPointElements.GetSize(); i++)
     {
-        IElement* piEndPointElement = objEndPointElements.GetAt(i);
+        const IElement* piEndPointElement = objEndPointElements.GetAt(i);
 
         User::EndPoint* pEndPoint = new User::EndPoint();
 
@@ -248,7 +248,7 @@ PRIVATE
 const AString& ConferenceInfo::GetSubElementValue(IN const IElement& objElement,
         IN const IMS_CHAR* pszSubElementName, OUT AString& strSubElementValue)
 {
-    INode* piNode = objElement.GetFirstChild();
+    const INode* piNode = objElement.GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
@@ -256,7 +256,7 @@ const AString& ConferenceInfo::GetSubElementValue(IN const IElement& objElement,
 
         if (strName.EqualsIgnoreCase(pszSubElementName))
         {
-            INode* piNode_Value = piNode->GetFirstChild();
+            const INode* piNode_Value = piNode->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {

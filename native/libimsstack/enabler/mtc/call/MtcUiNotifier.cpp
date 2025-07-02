@@ -407,7 +407,7 @@ void MtcUiNotifier::SendReplacedBy(IN IMS_SINTP /* nKey */, IN IMS_UINTP /* nTyp
 {
     IMS_TRACE_I("SendReplacedBy", 0, 0, 0);
 
-    IJniMtcCallThread* piThread = GetCallThread();
+    const IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
     {
         return;
@@ -434,7 +434,7 @@ void MtcUiNotifier::SendCallPushCompleted(
 {
     IMS_TRACE_I("SendCallPushCompleted", 0, 0, 0);
 
-    IJniMtcCallThread* piThread = GetCallThread();
+    const IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
     {
         return;
@@ -472,7 +472,7 @@ PUBLIC VIRTUAL const CallReasonInfo MtcUiNotifier::GetStartFailedReason() const
 PRIVATE
 IJniMtcCallThread* MtcUiNotifier::GetCallThread() const
 {
-    IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
+    const IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
             m_objContext.GetSlotId(), EnablerType::MTC_CALL, m_objContext.GetCallKey());
     if (piJniMtcCall == IMS_NULL)
     {

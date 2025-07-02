@@ -222,7 +222,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
 
 PUBLIC VIRTUAL IJniMtcServiceThread* MtcService::GetJniServiceThread() const
 {
-    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+    const IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
             m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
     if (piJniEnabler == IMS_NULL)
     {

@@ -36,8 +36,8 @@ protected:
 
 TEST_F(MtcContextRepositoryTest, GetInstanceCreateInstanceOnlyOnce)
 {
-    MtcContextRepository* pContextRepository1 = MtcContextRepository::GetInstance();
-    MtcContextRepository* pContextRepository2 = MtcContextRepository::GetInstance();
+    const MtcContextRepository* pContextRepository1 = MtcContextRepository::GetInstance();
+    const MtcContextRepository* pContextRepository2 = MtcContextRepository::GetInstance();
 
     EXPECT_EQ(pContextRepository1, pContextRepository2);
 }
@@ -45,7 +45,7 @@ TEST_F(MtcContextRepositoryTest, GetInstanceCreateInstanceOnlyOnce)
 TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithInvalidSlotId)
 {
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-    IMtcContext* pContextByGetter = MtcContextRepository::GetContext();
+    const IMtcContext* pContextByGetter = MtcContextRepository::GetContext();
     MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
     EXPECT_EQ(&objContext, pContextByGetter);
@@ -54,7 +54,7 @@ TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithInvalidSlot
 TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithSlotId0)
 {
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-    IMtcContext* pContextByGetter = MtcContextRepository::GetContext(IMS_SLOT_0);
+    const IMtcContext* pContextByGetter = MtcContextRepository::GetContext(IMS_SLOT_0);
     MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
     EXPECT_EQ(&objContext, pContextByGetter);
@@ -63,7 +63,7 @@ TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithSlotId0)
 TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextBySlot)
 {
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-    IMtcContext* pContextByGetter =
+    const IMtcContext* pContextByGetter =
             MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_0);
     MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
@@ -76,9 +76,9 @@ TEST_F(MtcContextRepositoryTest, AddContextsWithDifferentSlot)
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_1, &objContextSlot1);
 
-    IMtcContext* pContextByGetterSlot0 =
+    const IMtcContext* pContextByGetterSlot0 =
             MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_0);
-    IMtcContext* pContextByGetterSlot1 =
+    const IMtcContext* pContextByGetterSlot1 =
             MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_1);
 
     MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
@@ -91,7 +91,7 @@ TEST_F(MtcContextRepositoryTest, AddContextAndRemove)
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
     MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
-    IMtcContext* pContextByGetterSlot0 =
+    const IMtcContext* pContextByGetterSlot0 =
             MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_0);
 
     EXPECT_EQ(pContextByGetterSlot0, nullptr);

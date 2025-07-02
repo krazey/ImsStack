@@ -151,7 +151,7 @@ CallType MtcMessageMediator::GetCallType() const
 PRIVATE
 IMS_UINT32 MtcMessageMediator::GetAosEmergencyRegMode() const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
         IMS_TRACE_E(0, "IMtcAosConnector is null", 0, 0, 0);

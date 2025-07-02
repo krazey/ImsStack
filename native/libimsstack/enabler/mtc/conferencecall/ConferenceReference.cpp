@@ -98,7 +98,7 @@ PUBLIC VIRTUAL void ConferenceReference::ReferenceDelivered(IN IReference* piRef
         return m_objListener.OnReferenceStarted(this);
     }
 
-    IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    const IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
 
     if (piReferMessage == IMS_NULL)
     {
@@ -166,7 +166,7 @@ PUBLIC VIRTUAL IMS_RESULT ConferenceReference::SendInvite(
 {
     IMS_TRACE_I("SendInvite", 0, 0, 0);
 
-    IMtcCall* piConfCall = GetConferenceCall();
+    const IMtcCall* piConfCall = GetConferenceCall();
     if (piConfCall == IMS_NULL)
     {
         // TODO: check for KR conference call cases.
@@ -233,7 +233,7 @@ PUBLIC VIRTUAL IMS_UINT32 ConferenceReference::GetResponseCode() const
         return SipStatusCode::SC_INVALID;
     }
 
-    IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    const IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
     if (piReferMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;
@@ -356,7 +356,7 @@ void ConferenceReference::SetReplaces(IN IMtcCall* pi1To1Call)
 PRIVATE
 void ConferenceReference::SetReferredByHeader()
 {
-    IMtcService* piMtcService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* piMtcService = m_objContext.GetServiceByType(ServiceType::NORMAL);
     if (piMtcService == IMS_NULL)
     {
         return;

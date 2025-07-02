@@ -40,7 +40,7 @@ CallReasonInfo TerminationHandler::Handle(IN const ISession& objSession) const
 
     if (objReasonInfo.nCode == CODE_USER_TERMINATED_BY_REMOTE)
     {
-        IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_TERMINATE);
+        const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_TERMINATE);
         if (piMessage == IMS_NULL)
         {
             return objReasonInfo;

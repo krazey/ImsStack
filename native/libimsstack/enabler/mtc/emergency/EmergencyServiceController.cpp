@@ -268,7 +268,7 @@ void EmergencyServiceController::Notify(IN IuMtcService::EmergencyServiceState e
 
 PRIVATE void EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
         return;
@@ -323,7 +323,7 @@ IMS_BOOL EmergencyServiceController::IsRetryOverImsPdnRequired(IN IMS_SINT32 eAo
         return IMS_FALSE;
     }
 
-    IMtcService* pService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* pService = m_objContext.GetServiceByType(ServiceType::NORMAL);
     if (!pService || !pService->IsActive() || pService->IsWlanIpCanType())
     {
         return IMS_FALSE;
@@ -337,7 +337,7 @@ IMS_BOOL EmergencyServiceController::IsRetryOverImsPdnRequired(IN IMS_SINT32 eAo
 PRIVATE
 void EmergencyServiceController::Start18xWaitingTimer()
 {
-    IMtcService* pService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
+    const IMtcService* pService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
     if (!pService)
     {
         IMS_TRACE_E(0, "IMtcService is null", 0, 0, 0);

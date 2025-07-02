@@ -60,7 +60,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImei(IN IMtcCallContext& objContext
 
 PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN IMtcCallContext& objContext)
 {
-    ISubscriberInfo* pSubscriberInfo =
+    const ISubscriberInfo* pSubscriberInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(objContext.GetSlotId());
 
     AString strImsi;
@@ -85,7 +85,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetMacAddress(IN IMtcCallContext& objC
 PRIVATE GLOBAL AString TemplateFormatter::GetIpAddress(IN IMtcCallContext& objContext)
 {
     ServiceType eType = objContext.GetService().GetServiceType();
-    IMtcAosConnector* pAosConnector = objContext.GetAosConnector(eType);
+    const IMtcAosConnector* pAosConnector = objContext.GetAosConnector(eType);
     if (pAosConnector == IMS_NULL)
     {
         IMS_TRACE_E(0, "IMtcAosConnector is null", 0, 0, 0);
@@ -109,7 +109,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetIpAddress(IN IMtcCallContext& objCo
 PRIVATE GLOBAL AString TemplateFormatter::GetPort(IN IMtcCallContext& objContext)
 {
     ServiceType eType = objContext.GetService().GetServiceType();
-    IMtcAosConnector* pAosConnector = objContext.GetAosConnector(eType);
+    const IMtcAosConnector* pAosConnector = objContext.GetAosConnector(eType);
     if (pAosConnector == IMS_NULL)
     {
         IMS_TRACE_E(0, "IMtcAosConnector is null", 0, 0, 0);
@@ -181,7 +181,7 @@ PRIVATE GLOBAL void TemplateFormatter::Replace(IN_OUT AString& strText,
 PRIVATE GLOBAL IMS_BOOL TemplateFormatter::IsInUnknownCountry(IN IMS_SINT32 nSlotId)
 {
     AString strCountry;
-    ILocationInfo* piLocationInfo =
+    const ILocationInfo* piLocationInfo =
             PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);
     if (piLocationInfo != IMS_NULL)
     {

@@ -69,7 +69,7 @@ PUBLIC GLOBAL
 IMS_BOOL CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoReceived(
         IN const ISipServerConnection& objSipServerConnection)
 {
-    ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
+    const ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
     if (piSipMessage == IMS_NULL)
     {
         return IMS_FALSE;
@@ -105,7 +105,7 @@ void CurrentLocationDiscoveryController::OnCurrentLocationDiscoveryInfoReceived(
         return;
     }
 
-    ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
+    const ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
     IMS_BOOL bNeedToSendPublish = (piSipMessage != IMS_NULL) ?
             HasRequestForCurrentLocation(*piSipMessage) : IMS_FALSE;
     SendResponseForInfo(objSipServerConnection, SipStatusCode::SC_200);
@@ -153,7 +153,7 @@ IMS_BOOL CurrentLocationDiscoveryController::HasRequestForCurrentLocation(
 
     for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;

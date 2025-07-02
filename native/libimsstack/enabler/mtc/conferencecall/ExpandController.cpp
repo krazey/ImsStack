@@ -420,7 +420,7 @@ void ExpandController::ProcessJoinAfterExpand()
 
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
     {
-        ConfUser* pConfUser = m_pParticipantList->GetConfUsers().GetAt(i);
+        const ConfUser* pConfUser = m_pParticipantList->GetConfUsers().GetAt(i);
         if (pConfUser->eStatus == STATUS_IDLE)
         {
             nStartIndex = i;

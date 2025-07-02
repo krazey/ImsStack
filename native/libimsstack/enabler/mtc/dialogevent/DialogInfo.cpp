@@ -171,7 +171,7 @@ PUBLIC GLOBAL AString& DialogInfo::GetSubElementValue(
 PUBLIC GLOBAL AString& DialogInfo::GetElementValue(
         IN const IElement* piElement, OUT AString& strElementValue)
 {
-    INode* piNode = piElement->GetFirstChild();
+    const INode* piNode = piElement->GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
@@ -189,7 +189,7 @@ PUBLIC GLOBAL AString& DialogInfo::GetElementValue(
 PUBLIC GLOBAL IMS_BOOL DialogInfo::IsElementExist(
         IN const IElement* piElement, IN const IMS_CHAR* pszElement)
 {
-    INode* piNode = piElement->GetFirstChild();
+    const INode* piNode = piElement->GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
@@ -444,7 +444,7 @@ void Dialog::Participant::Update(IN const IElement* piElementParticipant)
     while (piNode != IMS_NULL)
     {
         const AString& strName = piNode->GetLocalName();
-        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+        const IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
 
         if (strName.EqualsIgnoreCase(ELEMENT_IDENTITY))
         {
@@ -473,7 +473,7 @@ void Dialog::Target::Update(IN const IElement* piElementTarget)
 
         if (strName.EqualsIgnoreCase(ELEMENT_PARAM))
         {
-            IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+            const IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
             AString strPname = piElement->GetAttribute(ATTR_PARAM_PNAME);
             AString strval = piElement->GetAttribute(ATTR_PARAM_PVAL);
             m_objParamMap.Add(strPname, strval);

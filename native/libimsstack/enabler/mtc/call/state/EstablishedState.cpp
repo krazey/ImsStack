@@ -196,7 +196,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
     // Use CallType before it's updated by receiving INVITE.
     m_objContext.GetUpdatingInfo().GetOriginalInfo() =
@@ -499,7 +499,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnTimerExpired(IN IMS_SINT32 nTyp
 
 PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateType eType)
 {
-    IMtcSession* piMtcSession = m_objContext.GetSession();
+    const IMtcSession* piMtcSession = m_objContext.GetSession();
     if (piMtcSession == IMS_NULL)
     {
         return GetStateName();
@@ -607,7 +607,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
         return CallReasonInfo(CODE_NONE);
     }
 
-    IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
         eStateName = CallStateName::ESTABLISHED;
@@ -630,7 +630,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateN
 {
     IMS_TRACE_D("HandleReceivedUpdateWithoutOffer", 0, 0, 0);
     eStateName = CallStateName::UPDATING;
-    IMessage* piMessage =
+    const IMessage* piMessage =
             m_objContext.GetSession()->GetISession().GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
@@ -661,7 +661,7 @@ IMS_BOOL EstablishedState::IsConferenceCallParticipant() const
         return IMS_FALSE;
     }
 
-    IConferenceController* piConfController =
+    const IConferenceController* piConfController =
             m_objContext.GetConferenceManager().GetController(objConfCalls.GetAt(0)->GetKey());
     if (piConfController == IMS_NULL)
     {

@@ -233,7 +233,7 @@ TEST_F(MtcPreconditionManagerTest, DoNotCreateQosInfoIfAlreadyCreated)
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
 
     pPreconditionManager->CreateQos(&objISession);
-    QosInfo* pInfo = pPreconditionManager->GetInfo(&objISession);
+    const QosInfo* pInfo = pPreconditionManager->GetInfo(&objISession);
     EXPECT_NE(pInfo, nullptr);
 
     pPreconditionManager->CreateQos(&objISession);

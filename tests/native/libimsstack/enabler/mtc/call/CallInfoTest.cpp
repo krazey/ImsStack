@@ -51,7 +51,7 @@ TEST(CallInfoTest, CallInfoAssignmentOperator)
 TEST(CallInfoTest, CallInfoEqualToOperator)
 {
     CallInfo objCallInfo;
-    CallInfo* pCallInfo = &objCallInfo;
+    const CallInfo* pCallInfo = &objCallInfo;
     EXPECT_TRUE(objCallInfo == *pCallInfo);
 
     CallInfo objCallInfoWithValues;
