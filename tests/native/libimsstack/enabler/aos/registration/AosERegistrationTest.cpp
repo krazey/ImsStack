@@ -168,8 +168,6 @@ public:
         m_eImsReasonCode = eImsReasonCode;
     }
 
-    inline IMS_BOOL IsTransactionStarted() { return m_bIsTransactionStarted; }
-
     inline AosUtil* GetUtil() { return m_pUtil; }
 
     inline IMS_UINT32 GetFeature() { return m_nFeature; }

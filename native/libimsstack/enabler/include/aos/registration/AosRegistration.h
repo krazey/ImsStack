@@ -177,9 +177,6 @@ protected:
     /// Log
     AString FeatureToString();
 
-    /// For Test Only
-    inline IMS_UINT32 GetPdnReactivateWaitTime() { return m_nPdnReactivateWaitTime; }
-
     /// ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 

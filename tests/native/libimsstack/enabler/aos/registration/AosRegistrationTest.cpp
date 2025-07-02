@@ -109,7 +109,6 @@ using ::testing::SetArgReferee;
     using Base::DestroySubscription;                              \
     using Base::GetActualWaitTime;                                \
     using Base::GetNetworkTypeForImsRegState;                     \
-    using Base::GetPdnReactivateWaitTime;                         \
     using Base::GetReasonCode;                                    \
     using Base::IncreaseConsecutiveFailCount;                     \
     using Base::Init;                                             \
