@@ -29,7 +29,7 @@ class CallTypeBlockRule final : public IMtcBlockRule
 {
 public:
     explicit CallTypeBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~CallTypeBlockRule();
+    virtual ~CallTypeBlockRule() override;
     CallTypeBlockRule(IN const CallTypeBlockRule&) = delete;
     CallTypeBlockRule& operator=(IN const CallTypeBlockRule&) = delete;
 

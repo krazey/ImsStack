@@ -67,7 +67,7 @@ class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
 public:
     explicit MtcApp(IN IMS_SINT32 nSlotId);
-    virtual ~MtcApp();
+    virtual ~MtcApp() override;
     MtcApp(IN const MtcApp&) = delete;
     MtcApp& operator=(IN const MtcApp&) = delete;
 

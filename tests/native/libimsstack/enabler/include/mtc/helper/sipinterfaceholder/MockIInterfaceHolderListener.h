@@ -24,7 +24,7 @@
 class MockIInterfaceHolderListener : public IInterfaceHolderListener
 {
 public:
-    ~MockIInterfaceHolderListener() {}
+    ~MockIInterfaceHolderListener() override {}
     MOCK_METHOD(void, OnSessionInterfaceReleased, (IN CallKey), (override));
     MOCK_METHOD(void, OnReferenceInterfaceCleared, (), (override));
     MOCK_METHOD(void, OnSubscriptionInterfaceCleared, (), (override));

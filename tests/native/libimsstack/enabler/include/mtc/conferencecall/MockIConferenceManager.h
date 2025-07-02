@@ -28,7 +28,7 @@ enum class ConferenceType;
 class MockIConferenceManager : public IConferenceManager
 {
 public:
-    virtual ~MockIConferenceManager() {}
+    virtual ~MockIConferenceManager() override {}
 
     MOCK_METHOD(IConferenceController&, CreateController,
             (IN CallKey nCallKey, IN ConferenceType eType), (override));

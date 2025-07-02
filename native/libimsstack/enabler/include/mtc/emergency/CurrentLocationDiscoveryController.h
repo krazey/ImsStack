@@ -33,7 +33,7 @@ class CurrentLocationDiscoveryController : public RetryCmd
 {
 public:
     explicit CurrentLocationDiscoveryController(IN IMtcCallContext& objContext);
-    virtual ~CurrentLocationDiscoveryController();
+    virtual ~CurrentLocationDiscoveryController() override;
     CurrentLocationDiscoveryController(IN const CurrentLocationDiscoveryController&) = delete;
     CurrentLocationDiscoveryController& operator=(
             IN const CurrentLocationDiscoveryController&) = delete;

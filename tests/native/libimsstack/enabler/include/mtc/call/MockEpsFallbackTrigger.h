@@ -29,7 +29,7 @@ public:
             EpsFallbackTrigger(objContext)
     {
     }
-    ~MockEpsFallbackTrigger() {}
+    ~MockEpsFallbackTrigger() override {}
 
     MOCK_METHOD(void, StartWatchdog, (), (override));
     MOCK_METHOD(void, OnEpsFallbackCompleted, (), (override));

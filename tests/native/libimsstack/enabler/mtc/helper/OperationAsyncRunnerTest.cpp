@@ -37,7 +37,7 @@ public:
             BaseThread()
     {
     }
-    inline ~TestBaseThread() {}
+    inline ~TestBaseThread() override {}
 };
 
 class OperationAsyncRunnerTest : public ::testing::Test

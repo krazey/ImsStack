@@ -28,7 +28,7 @@ class LastComeFirstServedHelper final : public ILastComeFirstServedHelper
 {
 public:
     explicit LastComeFirstServedHelper(IN IMtcContext& objContext);
-    virtual ~LastComeFirstServedHelper();
+    virtual ~LastComeFirstServedHelper() override;
     LastComeFirstServedHelper(IN const LastComeFirstServedHelper&) = delete;
     LastComeFirstServedHelper& operator=(IN const LastComeFirstServedHelper&) = delete;
 

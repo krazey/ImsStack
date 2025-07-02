@@ -34,7 +34,7 @@ class ConferenceManager final : public IConferenceControllerListener, public ICo
 {
 public:
     explicit ConferenceManager(IN IMtcContext& objContext);
-    virtual ~ConferenceManager();
+    virtual ~ConferenceManager() override;
     ConferenceManager(IN const ConferenceManager&) = delete;
     ConferenceManager& operator=(IN const ConferenceManager&) = delete;
 

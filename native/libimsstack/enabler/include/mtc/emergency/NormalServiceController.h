@@ -31,7 +31,7 @@ class NormalServiceController : public IEmergencyServiceController, public IMtcC
 public:
     explicit NormalServiceController(
             IN IMtcEmergencyServiceManager& objServiceManager, IN IMtcContext& objContext);
-    virtual ~NormalServiceController();
+    virtual ~NormalServiceController() override;
     NormalServiceController(IN const NormalServiceController&) = delete;
     NormalServiceController& operator=(IN const NormalServiceController&) = delete;
 

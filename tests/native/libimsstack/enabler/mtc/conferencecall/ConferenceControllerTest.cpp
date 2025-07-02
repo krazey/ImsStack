@@ -75,7 +75,7 @@ public:
             ConferenceController(nConfCallKey, objContext, objConnectionIdManager, objFactory)
     {
     }
-    virtual ~TestConferenceController() {}
+    virtual ~TestConferenceController() override {}
 
     void SetStateForTest(IN IMS_SINT32 nState) { SetState(nState); }
 };

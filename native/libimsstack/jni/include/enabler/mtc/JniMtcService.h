@@ -29,7 +29,7 @@ class JniMtcService : public BaseService
 {
 public:
     JniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
-    virtual ~JniMtcService();
+    virtual ~JniMtcService() override;
 
     virtual int SendData(const android::Parcel& objParcel) override;
 

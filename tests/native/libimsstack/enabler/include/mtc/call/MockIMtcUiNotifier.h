@@ -28,7 +28,7 @@ class AString;
 class MockIMtcUiNotifier : public IMtcUiNotifier
 {
 public:
-    virtual ~MockIMtcUiNotifier() {}
+    virtual ~MockIMtcUiNotifier() override {}
 
     MOCK_METHOD(void, SendPreIncomingCallReceived, (), (override));
     MOCK_METHOD(void, SendIncomingCallReceived, (), (override));

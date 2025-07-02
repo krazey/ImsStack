@@ -32,7 +32,7 @@ class MtcUiNotifier final : public IMtcUiNotifier
 {
 public:
     explicit MtcUiNotifier(IN IMtcCallContext& objContext);
-    virtual ~MtcUiNotifier();
+    virtual ~MtcUiNotifier() override;
     MtcUiNotifier(IN const MtcUiNotifier&) = delete;
     MtcUiNotifier& operator=(IN const MtcUiNotifier&) = delete;
 

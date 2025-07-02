@@ -32,7 +32,7 @@ public:
             SessionInterfaceHolder()
     {
     }
-    ~MockSessionInterfaceHolder() {}
+    ~MockSessionInterfaceHolder() override {}
     MOCK_METHOD(void, SessionAlerting, (IN ISession*), (override));
     MOCK_METHOD(void, SessionReferenceReceived, (IN ISession*, IN IReference*), (override));
     MOCK_METHOD(void, SessionStarted, (IN ISession*), (override));

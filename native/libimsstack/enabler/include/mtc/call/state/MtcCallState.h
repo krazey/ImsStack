@@ -49,7 +49,7 @@ class MtcCallState : public IMtcCallState
 {
 public:
     MtcCallState(IN CallStateName eStateName, IN IMtcCallContext& objContext);
-    virtual ~MtcCallState();
+    virtual ~MtcCallState() override;
     MtcCallState(IN const MtcCallState&) = delete;
     MtcCallState& operator=(IN const MtcCallState&) = delete;
 

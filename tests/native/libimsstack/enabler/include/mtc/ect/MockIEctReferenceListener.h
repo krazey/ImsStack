@@ -23,7 +23,7 @@
 class MockIEctReferenceListener : public IEctReferenceListener
 {
 public:
-    virtual ~MockIEctReferenceListener() {}
+    virtual ~MockIEctReferenceListener() override {}
 
     MOCK_METHOD(void, OnReferenceStarted, (), (override));
     MOCK_METHOD(void, OnReferenceStartFailed, (), (override));

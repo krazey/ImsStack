@@ -30,7 +30,7 @@ struct CallReasonInfo;
 class IMtcSession : public IMtcMessageHandler
 {
 public:
-    virtual ~IMtcSession() {}
+    virtual ~IMtcSession() override {}
 
     /**
      * @brief Starts

@@ -31,7 +31,7 @@ class SessionInterfaceHolder : public ISessionListener, public ITimerListener
 {
 public:
     explicit SessionInterfaceHolder();
-    virtual ~SessionInterfaceHolder();
+    virtual ~SessionInterfaceHolder() override;
     SessionInterfaceHolder(IN const SessionInterfaceHolder&) = delete;
     SessionInterfaceHolder& operator=(IN const SessionInterfaceHolder&) = delete;
 

@@ -31,7 +31,7 @@ class PreconditionExtension final : public MtcExtension
 public:
     explicit PreconditionExtension(IN IMtcCallContext& objContext);
     PreconditionExtension(IN const PreconditionExtension& objRhs);
-    virtual ~PreconditionExtension();
+    virtual ~PreconditionExtension() override;
     PreconditionExtension& operator=(IN const PreconditionExtension&) = delete;
 
     IMtcExtension* Clone() const override;

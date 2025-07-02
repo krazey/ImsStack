@@ -34,7 +34,7 @@ struct MediaInfo;
 class MockIMtcMediaManager : public IMtcMediaManager
 {
 public:
-    ~MockIMtcMediaManager() {}
+    ~MockIMtcMediaManager() override {}
     MOCK_METHOD(void, SetMediaReportEventListener, (IN IMediaReportEventListener* pListener),
             (override));
     MOCK_METHOD(void, SetQosListener, (IN IMediaQosEventListener* pListener), (override));

@@ -36,7 +36,7 @@ enum class SrvccState;
 class MockIMtcService : public IMtcService
 {
 public:
-    virtual ~MockIMtcService() {}
+    virtual ~MockIMtcService() override {}
 
     MOCK_METHOD(ServiceType, GetServiceType, (), (const, override));
     MOCK_METHOD(void, AddAosStateListener, (IN IMtcAosStateListener*), (override));

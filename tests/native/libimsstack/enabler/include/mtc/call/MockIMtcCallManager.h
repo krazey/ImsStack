@@ -28,7 +28,7 @@
 class MockIMtcCallManager : public IMtcCallManager
 {
 public:
-    ~MockIMtcCallManager() {}
+    ~MockIMtcCallManager() override {}
 
     MOCK_METHOD(IMtcCall*, CreateCall, (IN ServiceType eServiceType, IN CallInfo& objCallInfo),
             (override));

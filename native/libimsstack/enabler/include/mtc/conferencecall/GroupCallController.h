@@ -34,7 +34,7 @@ class GroupCallController final : public ConferenceController
 public:
     explicit GroupCallController(IN CallKey nConfCallKey, IMtcContext& objContext,
             IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
-    virtual ~GroupCallController();
+    virtual ~GroupCallController() override;
     GroupCallController(IN const GroupCallController&) = delete;
     GroupCallController& operator=(IN const GroupCallController&) = delete;
 

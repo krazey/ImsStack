@@ -31,7 +31,7 @@ class EmergencyMessageFormatter : public MessageFormatter
 {
 public:
     EmergencyMessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
-    virtual ~EmergencyMessageFormatter();
+    virtual ~EmergencyMessageFormatter() override;
     EmergencyMessageFormatter(IN const MessageFormatter&) = delete;
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 

@@ -30,7 +30,7 @@ public:
             MtcNetworkWatcher(objService, nSlotId)
     {
     }
-    ~MockMtcNetworkWatcher() {}
+    ~MockMtcNetworkWatcher() override {}
 
     MOCK_METHOD(void, AddListener, (IN IMtcNetworkWatcherListener&), (override));
     MOCK_METHOD(void, RemoveListener, (IN IMtcNetworkWatcherListener&), (override));

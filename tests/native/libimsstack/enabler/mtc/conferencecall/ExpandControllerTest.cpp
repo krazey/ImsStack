@@ -74,7 +74,7 @@ public:
             ExpandController(nConfCallKey, objContext, objConnectionIdManager, objFactory)
     {
     }
-    virtual ~TestExpandController() {}
+    virtual ~TestExpandController() override {}
 
     void SetStateForTest(IN IMS_SINT32 nState) { SetState(nState); }
 };

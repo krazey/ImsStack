@@ -27,7 +27,7 @@
 class MockIDialogInfoManager : public IDialogInfoManager
 {
 public:
-    virtual ~MockIDialogInfoManager() {}
+    virtual ~MockIDialogInfoManager() override {}
 
     MOCK_METHOD(IMS_RESULT, Update, (IN const AString&), (override));
     MOCK_METHOD(const ImsList<Dialog*>&, GetDialogs, (), (const, override));

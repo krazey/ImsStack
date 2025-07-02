@@ -58,7 +58,7 @@ class CallStateProxy final : public ImsActivity, public ICallStateProxy
 {
 public:
     explicit CallStateProxy(IN IMtcCallManager& objCallManager);
-    virtual ~CallStateProxy();
+    virtual ~CallStateProxy() override;
     CallStateProxy(IN const CallStateProxy&) = delete;
     CallStateProxy& operator=(IN const CallStateProxy&) = delete;
 

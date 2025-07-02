@@ -24,7 +24,7 @@
 class MockISsacTimerHandler : public ISsacTimerHandler
 {
 public:
-    virtual ~MockISsacTimerHandler() = default;
+    virtual ~MockISsacTimerHandler() override = default;
 
     MOCK_METHOD(IMS_BOOL, IsSsacTimerRunning, (IN CallType), (const, override));
     MOCK_METHOD(void, StartBarringTimer, (IN CallType), (override));

@@ -28,7 +28,7 @@ class CallStateFactory final : public IMtcCallStateFactory
 {
 public:
     explicit CallStateFactory();
-    virtual ~CallStateFactory();
+    virtual ~CallStateFactory() override;
     CallStateFactory(IN const CallStateFactory&) = delete;
     CallStateFactory& operator=(IN const CallStateFactory&) = delete;
 

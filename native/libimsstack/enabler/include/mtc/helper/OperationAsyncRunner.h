@@ -25,7 +25,7 @@ class OperationAsyncRunner final : public ImsMessage::IMessageCallback
 {
 public:
     explicit OperationAsyncRunner(IN IMS_SINT32 nSlotId);
-    ~OperationAsyncRunner();
+    ~OperationAsyncRunner() override;
     OperationAsyncRunner(IN const OperationAsyncRunner&) = delete;
     OperationAsyncRunner& operator=(IN const OperationAsyncRunner&) = delete;
 

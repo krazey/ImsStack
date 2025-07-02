@@ -37,7 +37,7 @@ class IncomingState : public MtcCallState
 {
 public:
     explicit IncomingState(IN IMtcCallContext& objContext);
-    virtual ~IncomingState();
+    virtual ~IncomingState() override;
     IncomingState(IN const IncomingState&) = delete;
     IncomingState& operator=(IN const IncomingState&) = delete;
 

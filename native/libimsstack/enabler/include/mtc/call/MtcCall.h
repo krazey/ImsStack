@@ -102,7 +102,7 @@ class MtcCall final :
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
             IN std::unique_ptr<IMtcCallStateFactory> pStateFactory);
-    virtual ~MtcCall();
+    virtual ~MtcCall() override;
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
 

@@ -29,7 +29,7 @@ public:
     explicit MtcNetworkWatcher(IN IMtcService& objService, IN IMS_SINT32 nSlotId);
     MtcNetworkWatcher(const MtcNetworkWatcher&) = delete;
     MtcNetworkWatcher& operator=(const MtcNetworkWatcher&) = delete;
-    virtual ~MtcNetworkWatcher();
+    virtual ~MtcNetworkWatcher() override;
 
     virtual void AddListener(IN IMtcNetworkWatcherListener& objListener);
     virtual void RemoveListener(IN IN IMtcNetworkWatcherListener& objListener);

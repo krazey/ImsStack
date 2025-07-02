@@ -33,7 +33,7 @@ public:
             QosInfo(pListener)
     {
     }
-    ~MockQosInfo() {}
+    ~MockQosInfo() override {}
     MOCK_METHOD(QosStatus, GetAudioStatus, (), (const, override));
     MOCK_METHOD(QosStatus, GetVideoStatus, (), (const, override));
     MOCK_METHOD(QosStatus, GetTextStatus, (), (const, override));

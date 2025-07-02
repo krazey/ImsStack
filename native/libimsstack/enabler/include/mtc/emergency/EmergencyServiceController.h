@@ -39,7 +39,7 @@ class EmergencyServiceController final :
 public:
     explicit EmergencyServiceController(
             IN IMtcEmergencyServiceManager& objServiceManager, IN IMtcContext& objContext);
-    virtual ~EmergencyServiceController();
+    virtual ~EmergencyServiceController() override;
     EmergencyServiceController(IN const EmergencyServiceController&) = delete;
     EmergencyServiceController& operator=(IN const EmergencyServiceController&) = delete;
 

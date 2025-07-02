@@ -26,7 +26,7 @@ class AString;
 class MockIDialogSubscriptionListener : public IDialogSubscriptionListener
 {
 public:
-    virtual ~MockIDialogSubscriptionListener() {}
+    virtual ~MockIDialogSubscriptionListener() override {}
 
     MOCK_METHOD(void, OnSubscriptionStarted, (), (override));
     MOCK_METHOD(void, OnSubscriptionStartFailed, (), (override));
@@ -37,7 +37,7 @@ public:
 class MockIDialogSubscription : public IDialogSubscription
 {
 public:
-    virtual ~MockIDialogSubscription() {}
+    virtual ~MockIDialogSubscription() override {}
 
     MOCK_METHOD(IMS_RESULT, Subscribe, (), (override));
     MOCK_METHOD(void, Unsubscribe, (), (override));

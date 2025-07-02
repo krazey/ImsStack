@@ -31,7 +31,7 @@ class ParticipantInfo final : public IMtcMessageHandler
 {
 public:
     explicit ParticipantInfo(IN IMtcCallContext& objContext);
-    ~ParticipantInfo();
+    ~ParticipantInfo() override;
     ParticipantInfo(IN const ParticipantInfo&) = delete;
     ParticipantInfo& operator=(IN const ParticipantInfo&) = delete;
 

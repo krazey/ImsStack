@@ -36,7 +36,7 @@ class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListe
 {
 public:
     explicit MtcMediaManager(IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager);
-    virtual ~MtcMediaManager();
+    virtual ~MtcMediaManager() override;
     MtcMediaManager(IN const MtcMediaManager&) = delete;
     MtcMediaManager& operator=(IN const MtcMediaManager&) = delete;
 
@@ -105,9 +105,9 @@ public:
     virtual PemType GetPemType(IN ISession* piSession) override;  // remove..?
 
     virtual IMS_BOOL IsAudioInactive() override;
-    virtual void AdjustDirectionForAutoOffer(IN CallType eCallType);
-    virtual void AdjustDirectionForAutoAnswer();
-    virtual void AdjustDirectionForLocalResourceConfirmation(IN CallType eCallType);
+    virtual void AdjustDirectionForAutoOffer(IN CallType eCallType) override;
+    virtual void AdjustDirectionForAutoAnswer() override;
+    virtual void AdjustDirectionForLocalResourceConfirmation(IN CallType eCallType) override;
     void SetSrvccState(IN SrvccState eState) override;
     IMS_BOOL IsOnHold() override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;

@@ -24,7 +24,7 @@
 class MockILastComeFirstServedHelper : public ILastComeFirstServedHelper
 {
 public:
-    virtual ~MockILastComeFirstServedHelper() = default;
+    virtual ~MockILastComeFirstServedHelper() override = default;
 
     MOCK_METHOD(void, OnCallReceived, (IN CallKey), (override));
 };

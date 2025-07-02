@@ -27,7 +27,7 @@ class LocationBlockRule final : public IMtcBlockRule, public ILocationUpdateList
 {
 public:
     explicit LocationBlockRule(IN IMtcCallContext& objContext);
-    virtual ~LocationBlockRule();
+    virtual ~LocationBlockRule() override;
     LocationBlockRule(IN const LocationBlockRule&) = delete;
     LocationBlockRule& operator=(IN const LocationBlockRule&) = delete;
 

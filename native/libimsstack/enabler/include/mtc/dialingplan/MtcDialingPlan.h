@@ -35,7 +35,7 @@ class MtcDialingPlan : public IMtcDialingPlan
 {
 public:
     explicit MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo);
-    virtual ~MtcDialingPlan();
+    virtual ~MtcDialingPlan() override;
     MtcDialingPlan(IN const MtcDialingPlan&) = delete;
     MtcDialingPlan& operator=(IN const MtcDialingPlan&) = delete;
 

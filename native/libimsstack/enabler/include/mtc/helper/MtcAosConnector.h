@@ -31,7 +31,7 @@ public:
             m_objImsAosInfo(objImsAosInfo)
     {
     }
-    virtual inline ~MtcAosConnector() {}
+    virtual inline ~MtcAosConnector() override {}
     MtcAosConnector(IN const MtcAosConnector&) = delete;
     MtcAosConnector& operator=(IN const MtcAosConnector&) = delete;
 
@@ -41,7 +41,7 @@ public:
     {
         return m_objImsAos.GetSuspendedReason();
     }
-    inline IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const
+    inline IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const override
     {
         return m_objImsAos.IsFeatureConnected(nFeature);
     }

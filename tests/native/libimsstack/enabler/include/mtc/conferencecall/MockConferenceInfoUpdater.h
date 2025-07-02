@@ -33,7 +33,7 @@ public:
             ConferenceInfoUpdater(objFactory, objConfigProxy)
     {
     }
-    ~MockConferenceInfoUpdater() {}
+    ~MockConferenceInfoUpdater() override {}
     MOCK_METHOD(IMS_UINT32, Update,
             (IN ConferenceParticipantList * pParticipantList, IN const AString& strEventPackage),
             (override));

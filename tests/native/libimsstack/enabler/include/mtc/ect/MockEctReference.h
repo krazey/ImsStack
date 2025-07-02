@@ -32,7 +32,7 @@ public:
             EctReference(objContext, nTransfereeKey, objListener)
     {
     }
-    virtual ~MockEctReference() {}
+    virtual ~MockEctReference() override {}
 
     MOCK_METHOD(IMS_RESULT, SendInvite, (IN CallKey), (override));
     MOCK_METHOD(IMS_RESULT, SendInvite, (IN const AString&), (override));

@@ -27,7 +27,7 @@ struct CallReasonInfo;
 class MockIMessageSender : public IMessageSender
 {
 public:
-    virtual ~MockIMessageSender() {}
+    virtual ~MockIMessageSender() override {}
 
     MOCK_METHOD(IMS_RESULT, Start, (IN CallType eCallType), (override));
     MOCK_METHOD(IMS_RESULT, SendProvisionalResponse,

@@ -25,7 +25,7 @@
 class MockIMtcCallStateListener : public IMtcCallStateListener
 {
 public:
-    inline virtual ~MockIMtcCallStateListener() {}
+    inline virtual ~MockIMtcCallStateListener() override {}
 
     MOCK_METHOD(void, OnCallStateChanged,
             (IN CallKey, IN IMtcCallStateListener::State, IN IMtcCallStateListener::Type,

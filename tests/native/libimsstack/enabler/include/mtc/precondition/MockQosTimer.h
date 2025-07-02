@@ -33,7 +33,7 @@ public:
             QosTimer(pListener)
     {
     }
-    ~MockQosTimer() {}
+    ~MockQosTimer() override {}
 
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piExpiredTimer), (override));
     MOCK_METHOD(void, StartQosTimer, (IN QosTimerType eType, IN IMS_SINT32 nDuration), (override));

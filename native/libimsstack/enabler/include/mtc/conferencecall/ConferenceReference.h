@@ -36,7 +36,7 @@ public:
             IN ConfUser* pConfUser, IN IConferenceReferenceListener& objListener);
     explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
-    virtual ~ConferenceReference();
+    virtual ~ConferenceReference() override;
     ConferenceReference(IN const ConferenceReference&) = delete;
     ConferenceReference& operator=(IN const ConferenceReference&) = delete;
 

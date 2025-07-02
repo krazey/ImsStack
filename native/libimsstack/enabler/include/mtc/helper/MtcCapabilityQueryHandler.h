@@ -34,7 +34,7 @@ class MtcCapabilityQueryHandler : public IMessageMediator
 public:
     explicit MtcCapabilityQueryHandler(IN IMtcContext& objContext,
             IN const ICoreServiceConfig* piCoreServiceConfig, IN const IMediaConfig* piMediaConfig);
-    virtual ~MtcCapabilityQueryHandler();
+    virtual ~MtcCapabilityQueryHandler() override;
     MtcCapabilityQueryHandler(IN const MtcCapabilityQueryHandler&) = delete;
     MtcCapabilityQueryHandler& operator=(IN const MtcCapabilityQueryHandler&) = delete;
 

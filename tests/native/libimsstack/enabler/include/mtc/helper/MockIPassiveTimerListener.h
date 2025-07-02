@@ -24,7 +24,7 @@
 class MockIPassiveTimerListener : public IPassiveTimerListener
 {
 public:
-    virtual ~MockIPassiveTimerListener() = default;
+    virtual ~MockIPassiveTimerListener() override = default;
 
     MOCK_METHOD(void, OnPassiveTimerExpired, (IN IPassiveTimerHolder::Type eType), (override));
 };

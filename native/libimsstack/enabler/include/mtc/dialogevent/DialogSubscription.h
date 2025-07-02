@@ -31,14 +31,14 @@ class DialogSubscription final : public IDialogSubscription, public ISubscriptio
 public:
     explicit DialogSubscription(IN IMtcContext& objContext,
             IN IDialogSubscriptionListener& objListener, IN const AString& strTargetUri);
-    virtual ~DialogSubscription();
+    virtual ~DialogSubscription() override;
     DialogSubscription(IN const DialogSubscription&) = delete;
     DialogSubscription& operator=(IN const DialogSubscription&) = delete;
 
     IMS_RESULT Subscribe() override;
     void Unsubscribe() override;
 
-    inline void SubscriptionForkedNotify(IN ISubscription*, IN ISubscription*) {}
+    inline void SubscriptionForkedNotify(IN ISubscription*, IN ISubscription*) override {}
     void SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage* piNotify) override;
     void SubscriptionStarted(IN ISubscription* piSubscription) override;
     void SubscriptionStartFailed(IN ISubscription* piSubscription) override;

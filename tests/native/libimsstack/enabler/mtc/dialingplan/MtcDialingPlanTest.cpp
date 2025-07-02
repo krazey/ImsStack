@@ -46,7 +46,7 @@ public:
             MtcDialingPlan(objContext, objSubscriberInfo)
     {
     }
-    inline ~TestMtcDialingPlan() {}
+    inline ~TestMtcDialingPlan() override {}
 
     inline void ReplaceImsIdentityProxy(IN ImsIdentityProxy* pProxy)
     {

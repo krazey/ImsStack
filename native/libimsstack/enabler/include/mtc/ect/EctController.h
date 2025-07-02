@@ -35,7 +35,7 @@ class EctController : public IEctReferenceListener, public ITimerListener
 public:
     explicit EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
             IN IEctControllerListener& objListener, IN EctFactory& objFactory);
-    virtual ~EctController();
+    virtual ~EctController() override;
     EctController(IN const EctController&) = delete;
     EctController& operator=(IN const EctController&) = delete;
 

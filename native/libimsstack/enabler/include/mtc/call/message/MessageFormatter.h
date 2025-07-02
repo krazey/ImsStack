@@ -37,7 +37,7 @@ class MessageFormatter : public IReasonHeaderSetter
 {
 public:
     MessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
-    virtual ~MessageFormatter();
+    virtual ~MessageFormatter() override;
     MessageFormatter(IN const MessageFormatter&) = delete;
     MessageFormatter& operator=(IN const MessageFormatter&) = delete;
 

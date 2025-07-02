@@ -23,7 +23,7 @@
 class MockIEctControllerListener : public IEctControllerListener
 {
 public:
-    virtual ~MockIEctControllerListener() {}
+    virtual ~MockIEctControllerListener() override {}
 
     MOCK_METHOD(void, OnEctCompleted, (), (override));
 };

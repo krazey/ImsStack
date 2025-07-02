@@ -31,7 +31,7 @@ public:
             ConsultativeTransferController(objContext, nCallKey, objListener, objFactor)
     {
     }
-    ~MockConsultativeTransferController() {}
+    ~MockConsultativeTransferController() override {}
 
     MOCK_METHOD(void, Transfer, (), (override));
 };

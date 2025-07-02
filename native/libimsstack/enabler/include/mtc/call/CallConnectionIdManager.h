@@ -28,7 +28,7 @@ class CallConnectionIdManager : public IMtcCallStateListener
 {
 public:
     explicit CallConnectionIdManager(IN IMtcContext& objContext);
-    virtual ~CallConnectionIdManager();
+    virtual ~CallConnectionIdManager() override;
     CallConnectionIdManager(IN const CallConnectionIdManager&) = delete;
     CallConnectionIdManager& operator=(IN const CallConnectionIdManager&) = delete;
 

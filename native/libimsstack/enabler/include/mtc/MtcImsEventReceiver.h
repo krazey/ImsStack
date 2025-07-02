@@ -32,7 +32,7 @@ class MtcImsEventReceiver final : public IEventListener, public IMtcImsEventRece
 {
 public:
     explicit MtcImsEventReceiver(IN IMS_SINT32 nSlotId);
-    virtual ~MtcImsEventReceiver();
+    virtual ~MtcImsEventReceiver() override;
     MtcImsEventReceiver(const MtcImsEventReceiver&) = delete;
     MtcImsEventReceiver& operator=(const MtcImsEventReceiver&) = delete;
 

@@ -35,7 +35,7 @@ class JniMtcCallThread final : public BaseServiceThread, public IJniMtcCallThrea
 {
 public:
     JniMtcCallThread();
-    virtual ~JniMtcCallThread();
+    virtual ~JniMtcCallThread() override;
 
     void OnStarted(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;

@@ -38,7 +38,7 @@ public:
             ConferenceSubscription(objContext, nConfCallKey, objList, objListener, objFactory)
     {
     }
-    ~MockConferenceSubscription() {}
+    ~MockConferenceSubscription() override {}
     MOCK_METHOD(void, SubscriptionForkedNotify, (IN ISubscription*, IN ISubscription*), (override));
     MOCK_METHOD(void, SubscriptionNotify,
             (IN ISubscription* piSubscription, IN IMessage* piNotify), (override));

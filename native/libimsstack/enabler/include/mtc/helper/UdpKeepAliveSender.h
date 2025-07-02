@@ -29,7 +29,7 @@ class UdpKeepAliveSender : public ITimerListener
 public:
     explicit UdpKeepAliveSender(
             IN ISipKeepAliveHelper* pKeepAliveHelper, IN IMtcCallContext& objContext);
-    virtual ~UdpKeepAliveSender();
+    virtual ~UdpKeepAliveSender() override;
     UdpKeepAliveSender(IN const UdpKeepAliveSender&) = delete;
     UdpKeepAliveSender& operator=(IN const UdpKeepAliveSender&) = delete;
 

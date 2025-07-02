@@ -35,7 +35,7 @@ public:
     static NullCall* const s_pNullCall;
 
     explicit MtcCallManager(IN IMtcContext& objContext);
-    virtual ~MtcCallManager();
+    virtual ~MtcCallManager() override;
     MtcCallManager(IN const MtcCallManager&) = delete;
     MtcCallManager& operator=(IN const MtcCallManager&) = delete;
 

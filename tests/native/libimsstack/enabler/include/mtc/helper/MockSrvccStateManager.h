@@ -28,7 +28,7 @@ public:
             SrvccStateManager()
     {
     }
-    ~MockSrvccStateManager() {}
+    ~MockSrvccStateManager() override {}
     MOCK_METHOD(void, AddListener, (IN ISrvccStateListener*), (override));
     MOCK_METHOD(void, RemoveListener, (IN ISrvccStateListener*), (override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState), (override));

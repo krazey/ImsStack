@@ -31,7 +31,7 @@ class SubscriptionInterfaceHolder : public ISubscriptionListener, public ITimerL
 {
 public:
     explicit SubscriptionInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    virtual ~SubscriptionInterfaceHolder();
+    virtual ~SubscriptionInterfaceHolder() override;
     SubscriptionInterfaceHolder(IN const SubscriptionInterfaceHolder&) = delete;
     SubscriptionInterfaceHolder& operator=(IN const SubscriptionInterfaceHolder&) = delete;
 

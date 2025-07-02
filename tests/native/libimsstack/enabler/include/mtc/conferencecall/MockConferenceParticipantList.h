@@ -29,7 +29,7 @@ class IMtcCallManager;
 class MockConferenceParticipantList : public ConferenceParticipantList
 {
 public:
-    ~MockConferenceParticipantList() {}
+    ~MockConferenceParticipantList() override {}
     MOCK_METHOD(void, SetLocalUri, (IN const AString& strLocalUri), ());
     MOCK_METHOD(const AString&, GetLocalUri, (), (const));
     MOCK_METHOD(void, SetXmlVersion, (IN IMS_SINT32 nVersion), ());
