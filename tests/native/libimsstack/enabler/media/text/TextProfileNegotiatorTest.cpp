@@ -214,6 +214,75 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
 }
 
+TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInLocalPayload)
+{
+    // Arrange
+    // Local profile has a valid T140, but its RED payload has a null fmtp.
+    m_pLocalProfile->GetPayloadList().Append(CreateT140Payload(kLocalT140Payload));
+    TextProfile::Payload* pLocalRed = CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1);
+    delete pLocalRed->GetFmtp();  // Make fmtp null
+    pLocalRed->SetFmtp(IMS_NULL);
+    m_pLocalProfile->GetPayloadList().Append(pLocalRed);
+
+    // Peer profile has valid T140 and RED payloads.
+    m_pPeerProfile->GetPayloadList().Append(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->GetPayloadList().Append(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(7004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(
+            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+
+    // Assert
+    // The overall negotiation should succeed because T140 is a valid fallback.
+    EXPECT_TRUE(bResult);
+    // Only T140 should be negotiated. RED negotiation should fail due to the null fmtp.
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
+    TextProfile::Payload* pNegoPayload1 = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadType(), "t140");
+    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    TextProfile::Payload* pNegoPayload2 = m_pNegotiatedProfile->GetPayloadAt(1);
+    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadType(), "red");
+    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_NE(pNegoPayload2->GetFmtp(), IMS_NULL);
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInPeerPayload)
+{
+    // Arrange
+    // Local profile has a valid T140, but its RED payload has a null fmtp.
+    m_pLocalProfile->GetPayloadList().Append(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->GetPayloadList().Append(
+            CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
+
+    // Peer profile has valid T140 and RED payloads.
+    m_pPeerProfile->GetPayloadList().Append(CreateT140Payload(kPeerT140Payload));
+    TextProfile::Payload* pPeerRed = CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1);
+    delete pPeerRed->GetFmtp();  // Make fmtp null
+    pPeerRed->SetFmtp(IMS_NULL);
+    m_pPeerProfile->GetPayloadList().Append(pPeerRed);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(7004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(
+            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+
+    // Assert
+    // The overall negotiation should succeed because T140 is a valid fallback.
+    EXPECT_TRUE(bResult);
+    // Only T140 should be negotiated. RED negotiation should fail due to the null fmtp.
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
+    TextProfile::Payload* pNegoPayload1 = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadType(), "t140");
+    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    TextProfile::Payload* pNegoPayload2 = m_pNegotiatedProfile->GetPayloadAt(1);
+    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadType(), "red");
+    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_NE(pNegoPayload2->GetFmtp(), IMS_NULL);
+}
+
 TEST_F(TextProfileNegotiatorTest, NegotiateNoMatchingPayloadReturnsFalse)
 {
     // Arrange
