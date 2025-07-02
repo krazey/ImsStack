@@ -6530,10 +6530,33 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
 {
     if (nFailureReason == IImsRadio::REASON_ACCESS_DENIED)
     {
-        Destroy();
+        if (GetState() == STATE_REFRESHSTOP)
+        {
+            A_IMS_TRACE_I(REGID, "Reg update failed but do not destroy for retry", 0, 0, 0);
+            m_pUtil->RemoveFeature(PENDING_TRANSACTION, m_nTxnPending);
+            SetRadioWaiting(IMS_FALSE);
+            UpdateTransactionStarted();
+            SetTraffic(IMS_FALSE);
 
-        ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
-        StartTimer(TIMER_OFFLINE_RECOVER, CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME * 1000);
+            // Refresh time is calculated according to the 3GPP requirements.
+            // If the RegExpires is greater than 1200 sec, nWaitTime is set to the default value.
+            // If the RegExpires is less than 1200 sec, it is set to allow at least 10 retries.
+            IMS_SINT32 nRemainedTime = GetRegExpires() / 2;
+            IMS_UINT32 nWaitTime = CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
+            IMS_UINT32 nMinRetryDuration = nWaitTime * MIN_RETRY_NUMBER_DURING_ACCESS_BARRING;
+            if (nRemainedTime > 0 && nRemainedTime < nMinRetryDuration)
+            {
+                nWaitTime = nRemainedTime / MIN_RETRY_NUMBER_DURING_ACCESS_BARRING;
+            }
+
+            StartTimer(TIMER_STOP_RETRY, nWaitTime * 1000);
+        }
+        else
+        {
+            Destroy();
+            ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+            StartTimer(TIMER_OFFLINE_RECOVER, CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME * 1000);
+        }
     }
     else
     {
