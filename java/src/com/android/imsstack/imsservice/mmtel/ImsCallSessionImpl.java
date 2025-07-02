@@ -2440,6 +2440,15 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 fromProfile.getMediaProfile().getRttMode()));
     }
 
+    private static boolean shouldUpdateVideoCapabilityBeforeModifyRequest(
+            ImsCallProfile originalProfile, ImsCallProfile proposedProfile) {
+        return ImsCallUtils.isVideoCall(proposedProfile.getCallType())
+                && !originalProfile.getCallExtraBoolean(
+                ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, false)
+                && proposedProfile.getCallExtraBoolean(
+                ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, false);
+    }
+
     private static void log(String s) {
         ImsLog.d("[GII-IMPL] " + s);
     }
@@ -4125,8 +4134,24 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     return;
                 }
 
-                mVideoCallSession.receiveSessionModifyRequest(
-                        ImsVideoCallSession.MODIFICATION_CALL_TYPE, mediaInfo);
+                if (shouldUpdateVideoCapabilityBeforeModifyRequest(
+                        mCallProfile, mProposedCallProfile)) {
+                    mCallProfile.setCallExtraBoolean(
+                            ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, true);
+                    updateCallTypeChangeCapability();
+                    mCallback.invokeUpdated(ImsCallSessionImpl.this,
+                            ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
+
+                    log("onCallUpdateReceived :: delay the video upgrade"
+                            + "to sync video capability with the call framework");
+                    mCallContext.getCallHandler().postDelayed(
+                            () -> mVideoCallSession.receiveSessionModifyRequest(
+                            ImsVideoCallSession.MODIFICATION_CALL_TYPE, mediaInfo), 100);
+                } else {
+                    mVideoCallSession.receiveSessionModifyRequest(
+                                ImsVideoCallSession.MODIFICATION_CALL_TYPE, mediaInfo);
+                }
+
                 return;
             } else if (ImsCallUtils.isVideoProfileChanged(mCallProfile, callInfo, mediaInfo)) {
                 if (checkAndRejectSessionModificationRequest()) {
