@@ -34,8 +34,6 @@ public:
             AosHandleUce(piAppContext, strAppId, strServiceId, nServiceType)
     {
     }
-
-    inline IMS_BOOL IsRegFeatureTagRequired() { return m_bRegFeatureTagRequired; }
 };
 
 class AosHandleUceTest : public ::testing::Test
