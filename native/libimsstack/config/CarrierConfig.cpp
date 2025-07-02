@@ -1457,6 +1457,8 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTE
         KEY_IMS_SMS_PREFIX "sms_evaluate_radio_status_for_3rd_attempt_bool";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_ERROR_CODE_WHEN_MT_SMS_BLOCKED_INT[] =
         KEY_IMS_SMS_PREFIX "sms_error_code_when_mt_sms_blocked_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY[] =
+        KEY_IMS_SMS_PREFIX "sms_evaluate_radio_status_for_error_codes_int_array";
 
 PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsVoLteEnabled(IN IMS_SINT32 nSlotId)
 {

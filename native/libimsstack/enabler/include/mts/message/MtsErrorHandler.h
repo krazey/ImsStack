@@ -60,6 +60,8 @@ private:
     IMS_BOOL IsRetryPossible() const;
     IMS_BOOL IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const;
     IMS_BOOL NeedToCheckRadioStatusForRetry(IN IMS_UINT32 nRetryCount) const;
+    IMS_SINT32 EvaluateNetworkStatusForErrorCode(
+            IN const IMtsService& objMtsService, IN const IMessage* piMessage) const;
 
 private:
     IMtsContext& m_objContext;

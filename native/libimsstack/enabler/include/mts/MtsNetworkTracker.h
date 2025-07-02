@@ -38,6 +38,7 @@ public:
             IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     // IMtsNetworkTracker
+    IMS_SINT32 GetCellularServiceState() const override;
     inline IMS_UINT32 GetLteAttachState() const override { return m_nLteAttachState; }
     IMS_SINT32 GetNetworkType() const override;
     inline IMS_BOOL IsInRoamingState() const override { return m_bDataRoaming; }

@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
@@ -644,6 +645,101 @@ TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusBefore3rdAttemptWhenNrRoaming)
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusWhen500ErrorReceivedInCellularNetwork)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_500));
+    ON_CALL(objMockMtsService, IsWlan()).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+    ON_CALL(objMockMtsNetworkTracker, GetCellularServiceState)
+            .WillByDefault(Return(INetworkWatcher::STATE_IN_SERVICE));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusWhen503ErrorReceivedOverWlanInHome)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_503);
+
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objMockMtsService, IsWlan()).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(objMockMtsNetworkTracker, IsInRoamingState).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsNetworkTracker, GetCellularServiceState)
+            .WillByDefault(Return(INetworkWatcher::STATE_IN_SERVICE));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusWhen503ErrorReceivedOverWlanInRoaming)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_503);
+
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objMockMtsService, IsWlan()).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(objMockMtsNetworkTracker, IsInRoamingState).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsNetworkTracker, GetCellularServiceState)
+            .WillByDefault(Return(INetworkWatcher::STATE_IN_SERVICE));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+}
+
+TEST_F(MtsErrorHandlerTest, EvaluateNetworkStatusWhen503ErrorReceivedOverWlanDuringRadioPowerOff)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_503);
+
+    ON_CALL(objMockMtsMessage, GetRetryCount).WillByDefault(Return(RETRY_COUNT));
+    ON_CALL(objMockMtsMessage, GetMti).WillByDefault(Return(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(
+                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY,
+                    _))
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objMockMtsService, IsWlan()).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(objMockMtsNetworkTracker, IsInRoamingState).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsNetworkTracker, GetCellularServiceState)
+            .WillByDefault(Return(INetworkWatcher::STATE_POWER_OFF));
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, &objMockMtsMessage);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 }  // namespace android
