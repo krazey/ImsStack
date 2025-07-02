@@ -37,7 +37,7 @@ __IMS_TRACE_TAG_AOS__;
 #define CNXID m_strTag.GetStr()
 
 PUBLIC
-AosNetTracker::AosNetTracker(IN IAosAppContext* piAppContext) :
+AosNetTracker::AosNetTracker(IN const IAosAppContext* piAppContext) :
         m_nCnxPolicy(0),
         m_nCnxPolicyInRoaming(0),
         m_piNetWatcherInfo(IMS_NULL),

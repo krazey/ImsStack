@@ -39,7 +39,7 @@ class AosNetTracker :
         public ITimerListener
 {
 public:
-    explicit AosNetTracker(IN IAosAppContext* piAppContext);
+    explicit AosNetTracker(IN const IAosAppContext* piAppContext);
     ~AosNetTracker() override;
 
 public:
