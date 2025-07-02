@@ -26,7 +26,7 @@ class UceConfig : public ICarrierConfigListener
 {
 public:
     explicit UceConfig();
-    virtual ~UceConfig();
+    virtual ~UceConfig() override;
 
     static UceConfig* GetInstance();
 

@@ -96,7 +96,7 @@ class UcePublishManager :
 public:
     explicit UcePublishManager(IN ICoreService* _piCoreService, IN const AString& strAppName,
             IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UcePublishManager();
+    virtual ~UcePublishManager() override;
 
 public:
     enum INTERNAL_TIMER

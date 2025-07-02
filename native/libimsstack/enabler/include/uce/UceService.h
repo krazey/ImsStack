@@ -36,7 +36,7 @@ class UceService : public ImsService, public ICoreServiceListener
 public:
     explicit UceService(IN const AString& strAppName, IN const IMS_SINT32 nSlotId);
     explicit UceService(IN ICoreService* piCoreService);
-    virtual ~UceService();
+    virtual ~UceService() override;
     /* ------------------------------------------------------------------------------------------
         Method
     ---------------------------------------------------------------------------------------------

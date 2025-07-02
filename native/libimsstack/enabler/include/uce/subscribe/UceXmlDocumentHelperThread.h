@@ -42,7 +42,7 @@ class UceXmlDocumentHelperThread :
 
 public:
     explicit UceXmlDocumentHelperThread(IN const AString& strQueryName, IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UceXmlDocumentHelperThread();
+    virtual ~UceXmlDocumentHelperThread() override;
     IMS_BOOL Start(IN const AString& strName, IN IMS_UINT32 nIndex = 10);
     void Terminate();
     void SendMsg(IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam);
