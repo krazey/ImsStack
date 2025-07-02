@@ -159,7 +159,7 @@ protected:
     virtual void ClearConnector();
 
     virtual IMS_UINT32 GetReportState();
-    virtual IMS_SINT32 GetDataFailureReason() const;
+    IMS_SINT32 GetDataFailureReason() const override;
 
     // ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
