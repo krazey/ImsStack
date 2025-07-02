@@ -16,6 +16,8 @@
 #ifndef __SIP_MAP_H__
 #define __SIP_MAP_H__
 
+#include <utility>
+
 #include "SipDebug.h"
 #include "SipSortedVector.h"
 

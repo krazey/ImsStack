@@ -17,6 +17,8 @@
 #ifndef BASE_NEGO_H_
 #define BASE_NEGO_H_
 
+#include <memory>
+
 #include "ImsSlot.h"
 #include "ISession.h"
 

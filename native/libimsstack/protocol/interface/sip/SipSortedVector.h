@@ -16,6 +16,8 @@
 #ifndef __SIP_SORTED_VECTOR_H__
 #define __SIP_SORTED_VECTOR_H__
 
+#include <algorithm>
+#include <iterator>
 #include <vector>
 
 #include "SipVector.h"

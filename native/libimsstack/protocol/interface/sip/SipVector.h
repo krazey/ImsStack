@@ -17,6 +17,7 @@
 #ifndef __SIP_VECTOR_H__
 #define __SIP_VECTOR_H__
 
+#include <type_traits>
 #include <vector>
 
 #define IN
