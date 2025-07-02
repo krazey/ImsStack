@@ -46,7 +46,7 @@ class UssiController;
 class IMtcCallContext : public IMtcContext
 {
 public:
-    virtual ~IMtcCallContext(){};
+    virtual ~IMtcCallContext() override {};
 
     /**
      * @brief Gets

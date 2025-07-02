@@ -31,7 +31,7 @@ class MockMultiEndpointFactory : public MultiEndpointFactory
 {
 public:
     // MockMultiEndpointFactory() : MultiEndpointFactory() {}
-    virtual ~MockMultiEndpointFactory() {}
+    virtual ~MockMultiEndpointFactory() override {}
 
     MOCK_METHOD(std::unique_ptr<IDialogInfoManager>, CreateDialogInfoManager, (), (override));
     MOCK_METHOD(std::unique_ptr<IDialogSubscription>, CreateDialogSubscription,

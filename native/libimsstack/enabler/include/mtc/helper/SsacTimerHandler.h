@@ -33,7 +33,7 @@ class SsacTimerHandler final :
 {
 public:
     explicit SsacTimerHandler(IN IMtcContext& objContext);
-    virtual ~SsacTimerHandler();
+    virtual ~SsacTimerHandler() override;
     SsacTimerHandler(IN const SsacTimerHandler&) = delete;
     SsacTimerHandler& operator=(IN const SsacTimerHandler&) = delete;
 

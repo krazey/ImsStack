@@ -26,7 +26,7 @@ class AString;
 class MockIMtcExtension : public IMtcExtension
 {
 public:
-    virtual ~MockIMtcExtension() {}
+    virtual ~MockIMtcExtension() override {}
 
     MOCK_METHOD(IMtcExtension*, Clone, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsAvailableOnRemote, (), (const, override));

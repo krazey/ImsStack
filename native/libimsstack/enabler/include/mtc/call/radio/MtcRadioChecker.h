@@ -84,7 +84,7 @@ class MtcRadioChecker final :
 {
 public:
     explicit MtcRadioChecker(IN IMtcContext& objContext);
-    ~MtcRadioChecker();
+    ~MtcRadioChecker() override;
     MtcRadioChecker(IN const MtcRadioChecker&) = delete;
     MtcRadioChecker& operator=(IN const MtcRadioChecker&) = delete;
 
@@ -162,7 +162,7 @@ public:
             m_objCallKeys()
     {
     }
-    ~MtcTrafficInfo() = default;
+    ~MtcTrafficInfo() override = default;
     MtcTrafficInfo(IN const MtcTrafficInfo&) = delete;
     MtcTrafficInfo& operator=(IN const MtcTrafficInfo&) = delete;
 

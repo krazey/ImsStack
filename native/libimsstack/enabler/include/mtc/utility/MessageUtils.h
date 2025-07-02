@@ -43,7 +43,7 @@ class MessageUtils : public IMessageUtils
 {
 public:
     MessageUtils();
-    virtual ~MessageUtils();
+    virtual ~MessageUtils() override;
     MessageUtils(IN const MessageUtils&) = delete;
     MessageUtils& operator=(IN const MessageUtils&) = delete;
 

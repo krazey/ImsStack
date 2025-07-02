@@ -28,7 +28,7 @@ class IMtcPreconditionListener;
 class MockIMtcPreconditionManager : public IMtcPreconditionManager
 {
 public:
-    ~MockIMtcPreconditionManager() {}
+    ~MockIMtcPreconditionManager() override {}
     MOCK_METHOD(void, CreateQos, (IN ISession* piSession), (override));
     MOCK_METHOD(void, DestroyQos, (IN ISession* piSession), (override));
     MOCK_METHOD(void, SetListener, (IN IMtcPreconditionListener* pListener), (override));

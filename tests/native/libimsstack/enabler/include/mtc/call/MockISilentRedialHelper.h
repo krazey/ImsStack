@@ -24,7 +24,7 @@
 class MockISilentRedialHelper : public ISilentRedialHelper
 {
 public:
-    ~MockISilentRedialHelper() {}
+    ~MockISilentRedialHelper() override {}
 
     MOCK_METHOD(CallReasonInfo, Redial, (IN IMS_SINT32), (override));
     MOCK_METHOD(IMS_UINT32, GetType, (), (override));

@@ -28,7 +28,7 @@ class BlindTransferController : public EctController
 public:
     explicit BlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,
             IN IEctControllerListener& objListener, IN EctFactory& objFactory);
-    virtual ~BlindTransferController();
+    virtual ~BlindTransferController() override;
     BlindTransferController(IN const BlindTransferController&) = delete;
     BlindTransferController& operator=(IN const BlindTransferController&) = delete;
 

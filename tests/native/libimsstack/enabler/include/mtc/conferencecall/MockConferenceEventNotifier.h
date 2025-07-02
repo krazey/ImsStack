@@ -35,7 +35,7 @@ public:
             ConferenceEventNotifier(objCallManager, nConferenceCallKey, objConnectionIdManager)
     {
     }
-    ~MockConferenceEventNotifier() {}
+    ~MockConferenceEventNotifier() override {}
     MOCK_METHOD(void, NotifyMerged,
             (IN ConferenceParticipantList & objParticipantList, IN IMS_BOOL bSubscribed),
             (override));

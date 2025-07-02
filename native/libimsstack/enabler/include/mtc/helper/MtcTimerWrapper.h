@@ -27,7 +27,7 @@ class MtcTimerWrapper : public ITimerListener
 {
 public:
     MtcTimerWrapper();
-    virtual ~MtcTimerWrapper();
+    virtual ~MtcTimerWrapper() override;
     MtcTimerWrapper(IN const MtcTimerWrapper&) = delete;
     MtcTimerWrapper& operator=(IN const MtcTimerWrapper&) = delete;
 

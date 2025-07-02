@@ -30,7 +30,7 @@
 class MockConferenceOperationQueue : public ConferenceOperationQueue
 {
 public:
-    ~MockConferenceOperationQueue() {}
+    ~MockConferenceOperationQueue() override {}
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piTimer), (override));
     MOCK_METHOD(
             void, CreateNPut, (IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation), (override));

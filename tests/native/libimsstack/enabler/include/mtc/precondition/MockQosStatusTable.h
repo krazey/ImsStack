@@ -27,7 +27,7 @@ class IMediaDescriptor;
 class MockQosStatusTable : public QosStatusTable
 {
 public:
-    virtual ~MockQosStatusTable() {}
+    virtual ~MockQosStatusTable() override {}
 
     MOCK_METHOD(ImsList<QosStatusRecord*>, GetRecords, (IN IMS_SINT32 eSdpMediaType),
             (const, override));

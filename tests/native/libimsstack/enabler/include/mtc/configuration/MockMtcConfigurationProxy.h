@@ -30,7 +30,7 @@ public:
             MtcConfigurationProxy()
     {
     }
-    ~MockMtcConfigurationProxy() {}
+    ~MockMtcConfigurationProxy() override {}
 
     MOCK_METHOD(IMS_BOOL, GetBoolean, (IN const IMS_CHAR*), (const, override));
     MOCK_METHOD(IMS_SINT32, GetInt, (IN const IMS_CHAR*), (const, override));

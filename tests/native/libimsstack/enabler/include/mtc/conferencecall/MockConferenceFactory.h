@@ -41,7 +41,7 @@ public:
             ConferenceFactory(objContext)
     {
     }
-    virtual ~MockConferenceFactory(){};
+    virtual ~MockConferenceFactory() override {};
 
     MOCK_METHOD(ConferenceSubscription*, CreateSubscription,
             (IN CallKey nConfCallKey, IN ConferenceParticipantList& objList,

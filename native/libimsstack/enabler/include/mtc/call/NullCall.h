@@ -36,7 +36,7 @@ class NullCall final : public IMtcCall
 {
 public:
     NullCall() {}
-    virtual ~NullCall() {}
+    virtual ~NullCall() override {}
     NullCall(IN const NullCall&) = delete;
     NullCall& operator=(IN const NullCall&) = delete;
 

@@ -51,7 +51,7 @@ public:
             MtcApp(SLOT_ID)
     {
     }
-    virtual ~TestMtcApp() {}
+    virtual ~TestMtcApp() override {}
 
     IMS_SINT32 GetServiceCount() const { return m_lstServices.GetSize(); }
     RttAutoUpgrader* GetRttAutoUpgrader() const { return m_pRttAutoUpgrader.get(); }

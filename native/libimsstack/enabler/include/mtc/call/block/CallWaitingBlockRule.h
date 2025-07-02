@@ -29,7 +29,7 @@ class CallWaitingBlockRule final : public IMtcBlockRule
 {
 public:
     explicit CallWaitingBlockRule(IN IMtcCallContext& objContext);
-    virtual ~CallWaitingBlockRule();
+    virtual ~CallWaitingBlockRule() override;
     CallWaitingBlockRule(IN const CallWaitingBlockRule&) = delete;
     CallWaitingBlockRule& operator=(IN const CallWaitingBlockRule&) = delete;
 

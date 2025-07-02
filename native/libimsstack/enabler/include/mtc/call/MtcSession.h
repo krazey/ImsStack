@@ -45,7 +45,7 @@ class MtcSession final : public IMtcSession
 public:
     explicit MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
             IN CallType eCallType, IN IMessageSender* pMessageSender);
-    virtual ~MtcSession();
+    virtual ~MtcSession() override;
     MtcSession(IN const MtcSession&) = delete;
     MtcSession& operator=(IN const MtcSession&) = delete;
 

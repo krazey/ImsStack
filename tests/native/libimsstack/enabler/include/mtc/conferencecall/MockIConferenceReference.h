@@ -27,7 +27,7 @@ class CallConnectionIdManager;
 class MockIConferenceReference : public IConferenceReference
 {
 public:
-    ~MockIConferenceReference() {}
+    ~MockIConferenceReference() override {}
     MOCK_METHOD(IMS_RESULT, SendInvite,
             (OUT AString& strReferToUri, IN CallConnectionIdManager& objConnectionIdManager),
             (override));

@@ -44,7 +44,7 @@ class MultiEndpointManager final :
 public:
     explicit MultiEndpointManager(
             IN IMtcContext& objContext, IN std::unique_ptr<MultiEndpointFactory> pFactory);
-    virtual ~MultiEndpointManager();
+    virtual ~MultiEndpointManager() override;
     MultiEndpointManager(IN const MultiEndpointManager&) = delete;
     MultiEndpointManager& operator=(IN const MultiEndpointManager&) = delete;
 

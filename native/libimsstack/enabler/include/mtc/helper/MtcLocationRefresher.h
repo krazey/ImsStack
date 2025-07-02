@@ -38,7 +38,7 @@ public:
     };
 
     explicit MtcLocationRefresher(IN ILocationInfo& objLocationInfo);
-    ~MtcLocationRefresher();
+    ~MtcLocationRefresher() override;
     MtcLocationRefresher(IN const MtcLocationRefresher&) = delete;
     MtcLocationRefresher& operator=(IN const MtcLocationRefresher&) = delete;
 

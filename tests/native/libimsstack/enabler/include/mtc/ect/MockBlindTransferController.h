@@ -32,7 +32,7 @@ public:
             BlindTransferController(objContext, nCallKey, objListener, objFactory)
     {
     }
-    ~MockBlindTransferController() {}
+    ~MockBlindTransferController() override {}
 
     MOCK_METHOD(void, Transfer, (IN const AString&), (override));
 };

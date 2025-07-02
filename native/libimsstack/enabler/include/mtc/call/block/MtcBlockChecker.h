@@ -39,7 +39,7 @@ public:
     MtcBlockChecker(
             IN const ImsList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener);
 
-    ~MtcBlockChecker();
+    ~MtcBlockChecker() override;
 
     MtcBlockChecker(IN const MtcBlockChecker&) = delete;
     MtcBlockChecker& operator=(IN const MtcBlockChecker&) = delete;

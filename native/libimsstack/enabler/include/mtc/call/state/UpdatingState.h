@@ -34,7 +34,7 @@ class UpdatingState : public MtcCallState
 {
 public:
     explicit UpdatingState(IN IMtcCallContext& objContext);
-    virtual ~UpdatingState();
+    virtual ~UpdatingState() override;
     UpdatingState(IN const UpdatingState&) = delete;
     UpdatingState& operator=(IN const UpdatingState&) = delete;
 

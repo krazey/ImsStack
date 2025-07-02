@@ -33,7 +33,7 @@ class WfcBlockRule final : public IMtcBlockRule
 {
 public:
     explicit WfcBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~WfcBlockRule() {}
+    virtual ~WfcBlockRule() override {}
     WfcBlockRule(IN const WfcBlockRule&) = delete;
     WfcBlockRule& operator=(IN const WfcBlockRule&) = delete;
 

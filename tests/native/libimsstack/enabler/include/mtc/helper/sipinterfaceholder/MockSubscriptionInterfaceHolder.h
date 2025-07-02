@@ -32,7 +32,7 @@ public:
             SubscriptionInterfaceHolder(objListener)
     {
     }
-    ~MockSubscriptionInterfaceHolder() {}
+    ~MockSubscriptionInterfaceHolder() override {}
     MOCK_METHOD(void, SubscriptionForkedNotify, (IN ISubscription*, IN ISubscription*), (override));
     MOCK_METHOD(void, SubscriptionNotify, (IN ISubscription*, IN IMessage*), (override));
     MOCK_METHOD(void, SubscriptionStarted, (IN ISubscription*), (override));

@@ -28,7 +28,7 @@ class DialogInfoManager final : public IDialogInfoManager
 {
 public:
     DialogInfoManager();
-    virtual ~DialogInfoManager();
+    virtual ~DialogInfoManager() override;
     DialogInfoManager(IN const DialogInfoManager&) = delete;
     DialogInfoManager& operator=(IN const DialogInfoManager&) = delete;
 

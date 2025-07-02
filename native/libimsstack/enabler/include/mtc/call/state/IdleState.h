@@ -40,7 +40,7 @@ class IdleState : public MtcCallState
 {
 public:
     explicit IdleState(IN IMtcCallContext& objContext);
-    virtual ~IdleState();
+    virtual ~IdleState() override;
     IdleState(IN const IdleState&) = delete;
     IdleState& operator=(IN const IdleState&) = delete;
 

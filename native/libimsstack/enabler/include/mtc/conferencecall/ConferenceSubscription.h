@@ -35,7 +35,7 @@ public:
     explicit ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener,
             IN ConferenceFactory& objFactory);
-    virtual ~ConferenceSubscription();
+    virtual ~ConferenceSubscription() override;
     ConferenceSubscription(IN const ConferenceSubscription&) = delete;
     ConferenceSubscription& operator=(IN const ConferenceSubscription&) = delete;
 

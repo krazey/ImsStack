@@ -32,7 +32,7 @@ class ExpandController : public ConferenceController
 public:
     explicit ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,
             IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
-    virtual ~ExpandController();
+    virtual ~ExpandController() override;
     ExpandController(IN const ExpandController&) = delete;
     ExpandController& operator=(IN const ExpandController&) = delete;
 

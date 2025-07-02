@@ -28,7 +28,7 @@ class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServic
 {
 public:
     JniMtcServiceThread();
-    virtual ~JniMtcServiceThread();
+    virtual ~JniMtcServiceThread() override;
 
     void OnServiceChanged(IN IuMtcService::ServiceState eState, IN IMS_SINT32 eReason) override;
     void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,

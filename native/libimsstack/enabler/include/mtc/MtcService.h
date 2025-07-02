@@ -46,7 +46,7 @@ class MtcService :
 {
 public:
     MtcService(IN IMtcContext& objContext, IN ServiceType eType);
-    virtual ~MtcService();
+    virtual ~MtcService() override;
     MtcService(IN const MtcService&) = delete;
     MtcService& operator=(IN const MtcService&) = delete;
 

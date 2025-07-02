@@ -44,7 +44,7 @@ public:
     explicit MtcExtensionSet(
             IN IMtcCallContext& objContext, IN const ImsList<IMtcExtension*>& lstExtensions);
     MtcExtensionSet(IN const MtcExtensionSet& objRhs);
-    virtual ~MtcExtensionSet();
+    virtual ~MtcExtensionSet() override;
     MtcExtensionSet& operator=(IN const MtcExtensionSet& objRhs);
 
     /**

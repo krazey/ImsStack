@@ -27,7 +27,7 @@ class QosTimer : public ITimerListener
 {
 public:
     explicit QosTimer(IN IQosTimerListener* pListener);
-    virtual ~QosTimer();
+    virtual ~QosTimer() override;
 
 private:
     QosTimer(IN const QosTimer& objRHS);

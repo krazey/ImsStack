@@ -27,7 +27,7 @@ class AString;
 class MockIMultiEndpointManager : public IMultiEndpointManager
 {
 public:
-    virtual ~MockIMultiEndpointManager() {}
+    virtual ~MockIMultiEndpointManager() override {}
 
     MOCK_METHOD(IMultiEndpointManager::PullingDialogInfo, GetDialogInfo, (IN IMS_UINT32),
             (const, override));

@@ -56,7 +56,7 @@ class ConferenceController :
 public:
     explicit ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
             IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
-    virtual ~ConferenceController();
+    virtual ~ConferenceController() override;
     ConferenceController(IN const ConferenceController&) = delete;
     ConferenceController& operator=(IN const ConferenceController&) = delete;
 

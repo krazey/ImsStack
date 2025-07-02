@@ -30,7 +30,7 @@ class EctManager : public IEctControllerListener, public IEctManager
 {
 public:
     explicit EctManager(IN IMtcContext& objContext);
-    virtual ~EctManager();
+    virtual ~EctManager() override;
     EctManager(IN const EctManager&) = delete;
     EctManager& operator=(IN const EctManager&) = delete;
 

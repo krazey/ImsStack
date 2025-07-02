@@ -28,7 +28,7 @@ class SsacBlockRule final : public IMtcBlockRule
 {
 public:
     explicit SsacBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~SsacBlockRule();
+    virtual ~SsacBlockRule() override;
     SsacBlockRule(IN const SsacBlockRule&) = delete;
     SsacBlockRule& operator=(IN const SsacBlockRule&) = delete;
 

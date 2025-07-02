@@ -29,7 +29,7 @@ public:
             CurrentLocationDiscoveryController(objContext)
     {
     }
-    ~MockCurrentLocationDiscoveryController() = default;
+    ~MockCurrentLocationDiscoveryController() override = default;
     MOCK_METHOD(
             void, OnCurrentLocationDiscoveryInfoReceived, (IN ISipServerConnection&), (override));
     MOCK_METHOD(void, StartPeriodicLocationDiscovery, (), (override));

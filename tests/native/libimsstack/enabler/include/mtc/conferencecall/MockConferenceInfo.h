@@ -31,7 +31,7 @@ public:
             m_nMaxUserCount(nMaxUserCount)
     {
     }
-    ~MockConferenceDescription() {}
+    ~MockConferenceDescription() override {}
     inline IMS_UINT32 GetMaxUserCount() const override { return m_nMaxUserCount; }
 
 private:
@@ -49,7 +49,7 @@ public:
             m_nStatus(nStatus)
     {
     }
-    ~MockEndPoint() {}
+    ~MockEndPoint() override {}
     inline const AString& GetEntity() const override { return m_strEntity; }
     inline IMS_UINT32 GetState() const override { return m_nState; }
     inline const AString& GetDisplayText() const override { return m_strDisplayText; }
@@ -73,7 +73,7 @@ public:
             m_objEndPoints(objEndPoints)
     {
     }
-    ~MockUser() { m_objEndPoints.Clear(); }
+    ~MockUser() override { m_objEndPoints.Clear(); }
     inline const AString& GetEntity() const override { return m_strEntity; }
     inline IMS_UINT32 GetState() const override { return m_nState; }
     inline const AString& GetDisplayText() const override { return m_strDisplayText; }
@@ -98,7 +98,7 @@ public:
             m_nVersion(nVersion)
     {
     }
-    ~MockConferenceInfo() { m_objUsers.Clear(); }
+    ~MockConferenceInfo() override { m_objUsers.Clear(); }
     inline const ConferenceDescription& GetConferenceDescription() const override
     {
         return m_objDescription;

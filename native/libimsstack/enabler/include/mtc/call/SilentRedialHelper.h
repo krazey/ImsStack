@@ -35,7 +35,7 @@ class SilentRedialHelper :
 {
 public:
     SilentRedialHelper(IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason);
-    virtual ~SilentRedialHelper();
+    virtual ~SilentRedialHelper() override;
     SilentRedialHelper(IN const SilentRedialHelper&) = delete;
     SilentRedialHelper& operator=(IN const SilentRedialHelper&) = delete;
 

@@ -34,7 +34,7 @@ class PassiveTimerHolder final :
 {
 public:
     PassiveTimerHolder();
-    virtual ~PassiveTimerHolder();
+    virtual ~PassiveTimerHolder() override;
     PassiveTimerHolder(IN const PassiveTimerHolder&) = delete;
     PassiveTimerHolder& operator=(IN const PassiveTimerHolder&) = delete;
 

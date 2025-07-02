@@ -32,7 +32,7 @@ public:
             UdpKeepAliveSender(pKeepAliveHelper, objContext)
     {
     }
-    virtual ~MockUdpKeepAliveSender() {}
+    virtual ~MockUdpKeepAliveSender() override {}
 
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer*), (override));
     MOCK_METHOD(void, Start, (), (override));

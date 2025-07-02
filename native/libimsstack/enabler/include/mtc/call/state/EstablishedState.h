@@ -29,7 +29,7 @@ class EstablishedState : public MtcCallState
 {
 public:
     explicit EstablishedState(IN IMtcCallContext& objContext);
-    virtual ~EstablishedState();
+    virtual ~EstablishedState() override;
     EstablishedState(IN const EstablishedState&) = delete;
     EstablishedState& operator=(IN const EstablishedState&) = delete;
 

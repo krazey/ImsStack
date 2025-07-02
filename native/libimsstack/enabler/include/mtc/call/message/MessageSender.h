@@ -32,7 +32,7 @@ class MessageSender final : public IMessageSender
 {
 public:
     explicit MessageSender(IN IMtcCallContext& objContext, IN ISession& objSession);
-    virtual ~MessageSender();
+    virtual ~MessageSender() override;
     MessageSender(IN const MessageSender&) = delete;
     MessageSender& operator=(IN const MessageSender&) = delete;
 

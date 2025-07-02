@@ -28,7 +28,7 @@ class MtcEmergencyServiceManager : public IMtcEmergencyServiceManager
 {
 public:
     explicit MtcEmergencyServiceManager(IN IMtcContext& objContext);
-    virtual ~MtcEmergencyServiceManager();
+    virtual ~MtcEmergencyServiceManager() override;
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 

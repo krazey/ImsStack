@@ -28,7 +28,7 @@ class ProcessingCallBlockRule final : public IMtcBlockRule
 {
 public:
     explicit ProcessingCallBlockRule(IN IMtcCallContext& objContext);
-    virtual ~ProcessingCallBlockRule();
+    virtual ~ProcessingCallBlockRule() override;
     ProcessingCallBlockRule(IN const ProcessingCallBlockRule&) = delete;
     ProcessingCallBlockRule& operator=(IN const ProcessingCallBlockRule&) = delete;
 

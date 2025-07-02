@@ -25,7 +25,7 @@
 class MockIJniMtcServiceThread : public IJniMtcServiceThread
 {
 public:
-    inline virtual ~MockIJniMtcServiceThread() {}
+    inline virtual ~MockIJniMtcServiceThread() override {}
 
     MOCK_METHOD(void, OnServiceChanged, (IN IuMtcService::ServiceState, IN IMS_SINT32), (override));
     MOCK_METHOD(void, OnEmergencyServiceChanged,

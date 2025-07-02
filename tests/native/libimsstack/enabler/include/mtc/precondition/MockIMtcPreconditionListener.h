@@ -27,7 +27,7 @@ enum class QosLossPolicy;
 class MockIMtcPreconditionListener : public IMtcPreconditionListener
 {
 public:
-    ~MockIMtcPreconditionListener() {}
+    ~MockIMtcPreconditionListener() override {}
     MOCK_METHOD(void, QosReserved, (IN ISession * piSession, IN IMS_UINT32 eMediaType), (override));
     MOCK_METHOD(void, QosReserveFailed, (IN ISession * piSession, IN QosLossPolicy eNextAction),
             (override));

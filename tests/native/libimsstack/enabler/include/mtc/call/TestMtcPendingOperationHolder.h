@@ -25,10 +25,10 @@
 class TestMtcPendingOperationHolder : public MtcPendingOperationHolder
 {
 public:
-    virtual ~TestMtcPendingOperationHolder() {}
+    virtual ~TestMtcPendingOperationHolder() override {}
 
     virtual void PushPendingOperation(
-            IN const std::function<IMtcCall::State(IMtcCallState*)>& objPendingOperation)
+            IN const std::function<IMtcCall::State(IMtcCallState*)>& objPendingOperation) override
     {
         objPendingOperation(&objState);
     }

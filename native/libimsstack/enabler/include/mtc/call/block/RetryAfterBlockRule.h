@@ -27,7 +27,7 @@ class RetryAfterBlockRule final : public IMtcBlockRule, public IPassiveTimerList
 {
 public:
     explicit RetryAfterBlockRule(IN IMtcCallContext& objContext);
-    virtual ~RetryAfterBlockRule();
+    virtual ~RetryAfterBlockRule() override;
     RetryAfterBlockRule(IN const RetryAfterBlockRule&) = delete;
     RetryAfterBlockRule& operator=(IN const RetryAfterBlockRule&) = delete;
 

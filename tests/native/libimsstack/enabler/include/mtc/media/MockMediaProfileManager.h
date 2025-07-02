@@ -28,7 +28,7 @@ enum class PemType;
 class MockMtcMediaProfileManager : public MtcMediaProfileManager
 {
 public:
-    ~MockMtcMediaProfileManager() {}
+    ~MockMtcMediaProfileManager() override {}
     MOCK_METHOD(void, CreateMediaProfile,
             (IN const ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile,
                     IN MEDIA_CONTENT_TYPE eMediaContents, IN IMediaSession* piMediaSession),

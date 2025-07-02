@@ -31,7 +31,7 @@ class ReferenceInterfaceHolder : public IReferenceListener, public ITimerListene
 {
 public:
     explicit ReferenceInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    virtual ~ReferenceInterfaceHolder();
+    virtual ~ReferenceInterfaceHolder() override;
     ReferenceInterfaceHolder(IN const ReferenceInterfaceHolder&) = delete;
     ReferenceInterfaceHolder& operator=(IN const ReferenceInterfaceHolder&) = delete;
 

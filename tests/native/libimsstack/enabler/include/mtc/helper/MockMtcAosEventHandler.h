@@ -34,7 +34,7 @@ public:
             MtcAosEventHandler(objService, objConfiguration)
     {
     }
-    ~MockMtcAosEventHandler() {}
+    ~MockMtcAosEventHandler() override {}
 
     MOCK_METHOD(void, AddListener, (IN IMtcAosStateListener*), (override));
     MOCK_METHOD(void, RemoveListener, (IN IMtcAosStateListener*), (override));

@@ -29,7 +29,7 @@ class MockSdpPreconditionHelper : public SdpPreconditionHelper
 {
 public:
     MockSdpPreconditionHelper() {}
-    ~MockSdpPreconditionHelper() {}
+    ~MockSdpPreconditionHelper() override {}
     MOCK_METHOD(void, FormPreconditionSdp,
             (IN ISession * piSession, IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf),
             (override));

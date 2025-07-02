@@ -113,7 +113,7 @@ public:
 
 public:
     explicit ConferenceOperationQueue();
-    virtual ~ConferenceOperationQueue();
+    virtual ~ConferenceOperationQueue() override;
     ConferenceOperationQueue(IN const ConferenceOperationQueue&) = delete;
     ConferenceOperationQueue& operator=(IN const ConferenceOperationQueue&) = delete;
 

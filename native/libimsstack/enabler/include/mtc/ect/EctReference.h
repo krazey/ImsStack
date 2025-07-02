@@ -30,7 +30,7 @@ class EctReference : public IReferenceListener
 public:
     explicit EctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey,
             IN IEctReferenceListener& objListener);
-    virtual ~EctReference();
+    virtual ~EctReference() override;
     EctReference(IN const EctReference&) = delete;
     EctReference& operator=(IN const EctReference&) = delete;
 

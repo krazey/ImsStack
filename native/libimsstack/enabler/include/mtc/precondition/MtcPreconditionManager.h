@@ -88,7 +88,7 @@ class MtcPreconditionManager :
 {
 public:
     explicit MtcPreconditionManager(IN IMtcCallContext& objContext);
-    virtual ~MtcPreconditionManager();
+    virtual ~MtcPreconditionManager() override;
     MtcPreconditionManager(IN const MtcPreconditionManager& objRHS) = delete;
     MtcPreconditionManager& operator=(IN const MtcPreconditionManager& objRHS) = delete;
 

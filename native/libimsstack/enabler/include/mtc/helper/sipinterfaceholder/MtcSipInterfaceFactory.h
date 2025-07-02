@@ -30,7 +30,7 @@ class MtcSipInterfaceFactory final : public IInterfaceHolderListener, public IMt
 {
 public:
     explicit MtcSipInterfaceFactory();
-    virtual ~MtcSipInterfaceFactory();
+    virtual ~MtcSipInterfaceFactory() override;
     MtcSipInterfaceFactory(IN const MtcSipInterfaceFactory&) = delete;
     MtcSipInterfaceFactory& operator=(IN const MtcSipInterfaceFactory&) = delete;
 

@@ -67,7 +67,7 @@ class EpsFallbackTrigger : public ITimerListener
 {
 public:
     explicit EpsFallbackTrigger(IN IMtcCallContext& objContext);
-    virtual ~EpsFallbackTrigger();
+    virtual ~EpsFallbackTrigger() override;
     EpsFallbackTrigger(IN const EpsFallbackTrigger&) = delete;
     EpsFallbackTrigger& operator=(IN const EpsFallbackTrigger&) = delete;
 

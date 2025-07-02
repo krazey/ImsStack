@@ -47,7 +47,7 @@ class OperationAsyncRunner;
 class MockIMtcContext : public IMtcContext
 {
 public:
-    virtual ~MockIMtcContext() {}
+    virtual ~MockIMtcContext() override {}
 
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (), (const, override));

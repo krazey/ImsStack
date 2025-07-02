@@ -24,7 +24,7 @@
 class MockIEctManager : public IEctManager
 {
 public:
-    virtual ~MockIEctManager() {}
+    virtual ~MockIEctManager() override {}
 
     MOCK_METHOD(IMS_RESULT, Transfer, (IN CallKey, IN const AString&), (override));
     MOCK_METHOD(IEctManager::State, GetState, (), (override));

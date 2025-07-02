@@ -55,7 +55,7 @@ struct CallInfo;
 class MockIMtcCallContext : public IMtcCallContext
 {
 public:
-    virtual ~MockIMtcCallContext() {}
+    virtual ~MockIMtcCallContext() override {}
 
     MOCK_METHOD(IMS_UINTP, GetCallKey, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEstablished, (), (const, override));

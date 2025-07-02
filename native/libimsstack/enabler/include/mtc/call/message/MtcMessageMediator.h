@@ -28,7 +28,7 @@ class MtcMessageMediator final : public IMessageMediator
 {
 public:
     explicit MtcMessageMediator(IN IMtcCallContext& objContext);
-    ~MtcMessageMediator();
+    ~MtcMessageMediator() override;
     MtcMessageMediator(IN const MtcMessageMediator&) = delete;
     MtcMessageMediator& operator=(IN const MtcMessageMediator&) = delete;
 

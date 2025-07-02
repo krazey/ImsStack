@@ -33,7 +33,7 @@ struct JniCallInfo;
 class MockIJniMtcCallThread : public IJniMtcCallThread
 {
 public:
-    inline virtual ~MockIJniMtcCallThread() {}
+    inline virtual ~MockIJniMtcCallThread() override {}
 
     MOCK_METHOD(void, OnStarted,
             (IN const JniCallInfo&, IN const MediaInfo&,

@@ -32,7 +32,7 @@ class ServiceBlockRule final : public IMtcBlockRule
 {
 public:
     ServiceBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~ServiceBlockRule();
+    virtual ~ServiceBlockRule() override;
     ServiceBlockRule(IN const ServiceBlockRule&) = delete;
     ServiceBlockRule& operator=(IN const ServiceBlockRule&) = delete;
 

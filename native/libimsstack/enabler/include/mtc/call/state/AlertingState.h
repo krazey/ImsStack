@@ -38,7 +38,7 @@ class AlertingState : public MtcCallState
 {
 public:
     explicit AlertingState(IN IMtcCallContext& objContext);
-    virtual ~AlertingState();
+    virtual ~AlertingState() override;
     AlertingState(IN const AlertingState&) = delete;
     AlertingState& operator=(IN const AlertingState&) = delete;
 

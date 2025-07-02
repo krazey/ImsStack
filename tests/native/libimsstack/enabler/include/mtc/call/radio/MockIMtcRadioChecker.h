@@ -26,7 +26,7 @@
 class MockIMtcRadioChecker : public IMtcRadioChecker
 {
 public:
-    ~MockIMtcRadioChecker() = default;
+    ~MockIMtcRadioChecker() override = default;
 
     MOCK_METHOD(void, AddTrafficCheckerListener, (IN IMtcRadioCheckerListener & objListener),
             (override));
@@ -43,7 +43,7 @@ public:
 class MockIMtcRadioCheckerListener : public IMtcRadioCheckerListener
 {
 public:
-    ~MockIMtcRadioCheckerListener() = default;
+    ~MockIMtcRadioCheckerListener() override = default;
 
     MOCK_METHOD(void, OnConnectionSetupPrepared, (), (override));
     MOCK_METHOD(void, OnConnectionFailed,
@@ -53,7 +53,7 @@ public:
 class MockIMtcRadioConnectionListener : public IMtcRadioConnectionListener
 {
 public:
-    ~MockIMtcRadioConnectionListener() = default;
+    ~MockIMtcRadioConnectionListener() override = default;
 
     MOCK_METHOD(void, OnConnectionFailed,
             (IN TrafficType eTrafficType, IN CallDirection eCallDirection,

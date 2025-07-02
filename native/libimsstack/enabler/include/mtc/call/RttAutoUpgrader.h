@@ -29,7 +29,7 @@ class RttAutoUpgrader final : public IMtcCallStateListener, public IPassiveTimer
 {
 public:
     explicit RttAutoUpgrader(IN IMtcContext& objContext);
-    virtual ~RttAutoUpgrader();
+    virtual ~RttAutoUpgrader() override;
     RttAutoUpgrader(IN const RttAutoUpgrader&) = delete;
     RttAutoUpgrader& operator=(IN const RttAutoUpgrader&) = delete;
 

@@ -27,7 +27,7 @@ enum class QosTimerType;
 class MockIQosTimerListener : public IQosTimerListener
 {
 public:
-    ~MockIQosTimerListener() {}
+    ~MockIQosTimerListener() override {}
     MOCK_METHOD(void, OnTimerExpired, (IN QosTimer * pTimer, IN QosTimerType eType), (override));
 };
 

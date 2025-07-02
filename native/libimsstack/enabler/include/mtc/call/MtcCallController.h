@@ -43,7 +43,7 @@ class MtcCallController final : public IMtcCallController
 {
 public:
     explicit MtcCallController(IN IMtcContext& objContext);
-    virtual ~MtcCallController();
+    virtual ~MtcCallController() override;
     MtcCallController(IN const MtcCallController&) = delete;
     MtcCallController& operator=(IN const MtcCallController&) = delete;
 
