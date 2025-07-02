@@ -322,8 +322,10 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
                 PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId);
 
         IMS_SINT32 nNetworkType = piNetworkWatcher->GetNetworkType();
+        IMS_SINT32 nServiceState = piNetworkWatcher->GetCellularServiceState();
 
-        if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_UNKNOWN)
+        if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_UNKNOWN ||
+                nServiceState != INetworkWatcher::STATE_IN_SERVICE)
         {
             // Timestamp for last known cell identity
             strTimestamp.Replace(':', "%3A");
