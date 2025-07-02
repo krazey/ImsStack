@@ -94,7 +94,8 @@ protected:
     void ProcessAuthenticationFailed() final;
 
     void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) final;
-    void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(IN IMS_UINT32 nRetryAfter);
+    void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+            IN IMS_UINT32 nRetryAfter) override;
     void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
 
     IMS_BOOL ProcessStartFailed_305() final;
