@@ -17,11 +17,11 @@
 #ifndef DIALOG_SUBSCRIPTION_H_
 #define DIALOG_SUBSCRIPTION_H_
 
+#include "AString.h"
 #include "ISubscriptionListener.h"
 #include "ImsTypeDef.h"
 #include "dialogevent/IDialogSubscription.h"
 
-class AString;
 class IMessage;
 class IMtcContext;
 class ISubscription;

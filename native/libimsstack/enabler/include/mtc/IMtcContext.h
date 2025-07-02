@@ -20,7 +20,6 @@
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "helper/MtcTimerWrapper.h"
-#include "helper/OperationAsyncRunner.h"
 #include <functional>
 #include <memory>
 

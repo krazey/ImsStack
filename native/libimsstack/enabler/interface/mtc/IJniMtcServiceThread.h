@@ -22,9 +22,10 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
-#include "JniCallInfo.h"
 #include "MtcDef.h"
 
+struct CallReasonInfo;
+struct JniCallInfo;
 struct JniExternalCall;
 
 class IJniMtcServiceThread : public IJniEnablerThread

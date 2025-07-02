@@ -17,13 +17,12 @@
 #ifndef MOCK_I_DIALOG_INFO_MANAGER_H_
 #define MOCK_I_DIALOG_INFO_MANAGER_H_
 
+#include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/IDialogInfoManager.h"
 #include <gmock/gmock.h>
-
-class AString;
 
 class MockIDialogInfoManager : public IDialogInfoManager
 {
