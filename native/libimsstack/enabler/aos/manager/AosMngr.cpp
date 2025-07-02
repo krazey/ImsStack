@@ -99,7 +99,7 @@ ImsList<IAosHandle*> AosMngr::GetAllAosHandles(
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
         const AString& strId = objProfiles.GetAt(i)->GetId();
-        IAosAppContext* piContext = m_objAppContext.GetValue(strId);
+        const IAosAppContext* piContext = m_objAppContext.GetValue(strId);
 
         if (piContext == IMS_NULL)
         {
