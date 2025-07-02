@@ -21,13 +21,6 @@
 SIP_VOID SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
         const SIP_CHAR* pszFormat, ...)
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-
-    if (pUtil == SIP_NULL)
-    {
-        return;
-    }
-
     SIP_CHAR szTemp[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
 
     va_list args;
@@ -38,17 +31,10 @@ SIP_VOID SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_IN
     SIP_CHAR szFrmtString[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
     SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "%s", szTemp);
 
-    pUtil->GetLogger()->DumpLog(nCategory, pszFilename, nLine, szFrmtString);
+    SipUtil::GetInstance()->GetLogger()->DumpLog(nCategory, pszFilename, nLine, szFrmtString);
 }
 
 SIP_VOID SIP_ASSERT_LOG(const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine)
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-
-    if (pUtil == SIP_NULL)
-    {
-        return;
-    }
-
-    pUtil->GetLogger()->DumpAssertLog(pszCondition, pszModule, nLine);
+    SipUtil::GetInstance()->GetLogger()->DumpAssertLog(pszCondition, pszModule, nLine);
 }

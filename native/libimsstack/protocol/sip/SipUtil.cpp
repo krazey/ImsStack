@@ -20,7 +20,7 @@
 #include "SipUtil.h"
 #include "msg/SipMsgUtil.h"
 
-static SipUtil* gpUtil = SIP_NULL;
+SipUtil* SipUtil::s_pUtil = SIP_NULL;
 
 SipUtil::SipUtil() :
         m_pTxnListener(SIP_NULL)
@@ -94,34 +94,21 @@ ISipTxnListener* SipUtil::GetTxnListener()
     return m_pTxnListener;
 }
 
-SIP_VOID SipUtil_Construct()
+SIP_VOID SipUtil::DestroyInstance()
 {
-    SipUtil* pUtil = gpUtil;
-
-    if (pUtil)
+    if (s_pUtil != SIP_NULL)
     {
-        return;
+        delete s_pUtil;
+        s_pUtil = SIP_NULL;
     }
-
-    pUtil = new SipUtil();
-    gpUtil = pUtil;
 }
 
-SIP_VOID SipUtil_Destruct()
+SipUtil* SipUtil::GetInstance()
 {
-    SipUtil* pUtil = gpUtil;
-
-    if (pUtil == SIP_NULL)
+    if (s_pUtil == SIP_NULL)
     {
-        return;
+        s_pUtil = new SipUtil();
     }
 
-    delete pUtil;
-    gpUtil = SIP_NULL;
-}
-
-SipUtil* SipUtil_GetInstance()
-{
-    SipUtil* pUtil = gpUtil;
-    return pUtil;
+    return s_pUtil;
 }

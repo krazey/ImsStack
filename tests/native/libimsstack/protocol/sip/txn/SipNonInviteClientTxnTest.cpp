@@ -40,7 +40,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        SipUtil_Construct();
+        SipUtil::GetInstance();
 
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -76,7 +76,7 @@ CSeq: 1 REGISTER\r\n\
         {
             pSipMsg->SipDelete();
         }
-        SipUtil_Destruct();
+        SipUtil::DestroyInstance();
     }
 };
 

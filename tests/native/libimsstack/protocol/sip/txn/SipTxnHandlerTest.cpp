@@ -208,7 +208,7 @@ protected:
     virtual void SetUp() override
     {
         bFromRecvTxn = SIP_FALSE;
-        SipUtil_Construct();
+        SipUtil::GetInstance();
 
         pTxnHandler = new SipTxnHandler();
         pSipMsg = new SipMessage();
@@ -284,7 +284,7 @@ CSeq: 1 INVITE\r\n\
             delete pTxnHandler;
         }
 
-        SipUtil_Destruct();
+        SipUtil::DestroyInstance();
     }
 };
 

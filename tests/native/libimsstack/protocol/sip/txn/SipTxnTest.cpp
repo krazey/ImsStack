@@ -120,7 +120,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        SipUtil_Construct();
+        SipUtil::GetInstance();
 
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -155,7 +155,7 @@ CSeq: 1 REGISTER\r\n\
         {
             pSipMsg->SipDelete();
         }
-        SipUtil_Destruct();
+        SipUtil::DestroyInstance();
 
         if (pnTimerId != SIP_NULL)
         {
@@ -620,10 +620,6 @@ TEST_F(SipTxnTest, AbortTxn)
     /* Aborting txn without SipUtil */
     EXPECT_EQ(SIP_TRUE,
             pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_FINAL_RESP_EVT, pTxnFsmData, &nError));
-    SipUtil_Destruct();
-    EXPECT_EQ(SIP_FALSE, pTxn->StartTxnTimer(SipTxn::TIMER_TYPE_INVALID, 1000, &nError));
-    EXPECT_EQ(SIP_FALSE, pTxn->StopTxnTimer());
-    EXPECT_EQ(SIP_FALSE, pTxn->AbortTxn());
 
     delete pSipTranspParam;
     pTxn->RemoveFromTxnPool();

@@ -30,42 +30,13 @@ extern SIP_VOID Sip_Cbk_PostProcessMessageSentByStack(IN SIP_VOID* pSipMsg, IN S
 
 static SipStackManager* gpStackMngr = SIP_NULL;
 
-/******************************************************************************
- * Function name        : SipStackManager
- * Description          : Default Constructor ,
- * Return type          : None
- *
- * Argument             : None
- * Preconditions/
- * Side Effects            : None
- *****************************************************************************/
-SipStackManager::SipStackManager()
-{
-    SipUtil_Construct(); /* Singleton Util Obj, maintained by Util module*/
-}
+SipStackManager::SipStackManager() {}
 
-/******************************************************************************
- * Function name        : SipStackManager
- * Description          : Destructor ,
- * Return type          : None
- *
- * Argument             : None
- * Preconditions/
- * Side Effects            : None
- *****************************************************************************/
 SipStackManager::~SipStackManager()
 {
-    SipUtil_Destruct();
+    SipUtil::DestroyInstance();
 }
-/******************************************************************************
- * Function name        : SipStackManager
- * Description          : Create single instance of stack manager
- * Return type          : None
- *
- * Argument             : None
- * Preconditions/
- * Side Effects            : None
- *****************************************************************************/
+
 SipStackManager* SipStackManager::GetInstance()
 {
     if (gpStackMngr == SIP_NULL)
@@ -75,15 +46,6 @@ SipStackManager* SipStackManager::GetInstance()
     return gpStackMngr;
 }
 
-/******************************************************************************
- * Function name        : SipStackManager
- * Description          : delete instance of stack manager
- * Return type          : None
- *
- * Argument             : None
- * Preconditions/
- * Side Effects            : None
- *****************************************************************************/
 void SipStackManager::Destruct()
 {
     if (gpStackMngr != SIP_NULL)
@@ -93,18 +55,9 @@ void SipStackManager::Destruct()
     }
 }
 
-/******************************************************************************
- * Function name        : GetSipUtil
- * Description          : Get the Instance of SipUtil ,
- * Return type          : SipUtil
- *
- * Argument             : None
- * Preconditions/
- * Side Effects            : None
- *****************************************************************************/
 SipUtil* SipStackManager::GetSipUtil()
 {
-    return SipUtil_GetInstance();
+    return SipUtil::GetInstance();
 }
 
 /*!
@@ -668,8 +621,7 @@ PRIVATE SIP_BOOL SipStackManager::SendToNetwork(
     }
 
     /* Call Sent to Network Callback */
-    SipUtil* pUtil = SipUtil_GetInstance();
-    ISipNetworkUtil* pNetworkUtil = pUtil->GetNetwork();
+    ISipNetworkUtil* pNetworkUtil = SipUtil::GetInstance()->GetNetwork();
     SipTransportBuffer* pTransSipBuffer = pTranspInfo->GetTranspSipBuffer();
     SipTransportParameter* pActualDestParam = pTranspInfo->GetMsgSentTranspParam();
 

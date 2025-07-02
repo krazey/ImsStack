@@ -54,17 +54,11 @@ protected:
 
 TEST_F(SipUtilTest, UtilityTest)
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-    ASSERT_TRUE(pUtil == nullptr);
-
-    SipUtil_Construct();
-
-    pUtil = SipUtil_GetInstance();
+    SipUtil* pUtil = SipUtil::GetInstance();
     ASSERT_TRUE(pUtil != nullptr);
 
     /* Calling again to verify new object is not created */
-    SipUtil_Construct();
-    ASSERT_TRUE(pUtil == SipUtil_GetInstance());
+    ASSERT_TRUE(pUtil == SipUtil::GetInstance());
 
     EXPECT_TRUE(pUtil->GetTimer() != nullptr);
     /* Calling Start & Stop Timer will all null values */
@@ -90,9 +84,7 @@ TEST_F(SipUtilTest, UtilityTest)
     pUtil->RegisterTxnListener(pTxnListener);
     EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
 
-    SipUtil_Destruct();
-    pUtil = SipUtil_GetInstance();
-    ASSERT_TRUE(pUtil == nullptr);
+    SipUtil::DestroyInstance();
 }
 
 }  // namespace android

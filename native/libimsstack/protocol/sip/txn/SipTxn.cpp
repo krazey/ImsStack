@@ -178,14 +178,8 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 */
 SIP_BOOL SipTxn::AbortTxn()
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    ISipTimerUtil* pTimer = pUtil->GetTimer();
-    if (m_pvTimerId != SIP_NULL)
+    ISipTimerUtil* pTimer = SipUtil::GetInstance()->GetTimer();
+    if (m_pvTimerId != SIP_NULL && pTimer != SIP_NULL)
     {
         SipTimeoutData* pTimeoutData =
                 static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
@@ -216,18 +210,7 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
 
     if (nDuration > SIP_ZERO)
     {
-        SipUtil* pUtil = SipUtil_GetInstance();
-
-        if (pUtil == SIP_NULL)
-        {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer:pUtil is NULL ", SIP_ZERO, SIP_ZERO);
-            delete pTimeoutData;
-            return SIP_FALSE;
-        }
-
-        ISipTimerUtil* pTimer = pUtil->GetTimer();
-
+        ISipTimerUtil* pTimer = SipUtil::GetInstance()->GetTimer();
         if (pTimer == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
@@ -268,15 +251,7 @@ SIP_BOOL SipTxn::StopTxnTimer()
         return SIP_TRUE;
     }
 
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODTXN, "SipTxn::StopTxnTimer:pUtil is NULL ", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    ISipTimerUtil* pTimer = pUtil->GetTimer();
+    ISipTimerUtil* pTimer = SipUtil::GetInstance()->GetTimer();
     if (pTimer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -676,14 +651,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     pTxn->SetTimerId(SIP_NULL);
 
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
-    {
-        delete pTimeoutData;
-        pTxn->SipDelete();
-        return;
-    }
-
+    SipUtil* pUtil = SipUtil::GetInstance();
     ISipUserData* pUserData = pTxn->GetUserData();
 
     /*No need to notify txntimeout to listener if the txn is already terminated*/

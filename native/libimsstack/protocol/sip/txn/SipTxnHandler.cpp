@@ -865,14 +865,8 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
 
 PRIVATE SIP_VOID SipTxnHandler::NotifyTxnTermination(IN SipTxn* pTxn)
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
-    {
-        return;
-    }
-
     ISipUserData* pUserData = pTxn->GetUserData();
-    ISipTxnListener* pTxnListener = pUtil->GetTxnListener();
+    ISipTxnListener* pTxnListener = SipUtil::GetInstance()->GetTxnListener();
 
     if (pTxnListener != SIP_NULL)
     {

@@ -26,6 +26,8 @@ class SipUtil
 public:
     SipUtil();
     virtual ~SipUtil();
+    SipUtil(IN const SipUtil&) = delete;
+    SipUtil& operator=(IN const SipUtil&) = delete;
 
     SIP_VOID RegisterNetwork(ISipNetworkUtil* pNwUtil);
     SIP_VOID RegisterTxnListener(ISipTxnListener* pTxnListener);
@@ -34,18 +36,16 @@ public:
     ISipNetworkUtil* GetNetwork();
     ISipTxnListener* GetTxnListener();
 
+    static SipUtil* GetInstance();
+    static SIP_VOID DestroyInstance();
+
 private:
     ISipTimerUtil* m_pTimerUtil;
     ISipLoggerUtil* m_pLoggerUtil;
     ISipNetworkUtil* m_pNetworkUtil;
     ISipTxnListener* m_pTxnListener;
 
-    SipUtil& operator=(IN const SipUtil& objRHS);
-    SipUtil(IN const SipUtil& objRHS);
+    static SipUtil* s_pUtil;
 };
-
-void SipUtil_Construct();
-void SipUtil_Destruct();
-SipUtil* SipUtil_GetInstance();
 
 #endif  //__SIP_UTIL_H__
