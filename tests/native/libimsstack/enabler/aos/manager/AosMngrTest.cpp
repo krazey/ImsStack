@@ -25,7 +25,6 @@ public:
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
-    const IMS_UINT32 m_nServiceType = -1;
 
 protected:
     void SetUp() override { m_pAosMngr = new AosMngr(IMS_SLOT_0); }
