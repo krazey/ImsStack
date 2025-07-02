@@ -43,7 +43,8 @@ public:
 class AosRetryRepositoryTest : public ::testing::Test
 {
 public:
-    AosRetryRepositoryTest()
+    AosRetryRepositoryTest() :
+            m_pAosRetryRepository(IMS_NULL)
     {
         m_piOriginAosNConfig = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosConfig, SLOT_ID);
