@@ -21,13 +21,12 @@ import android.net.Network;
 import android.os.Message;
 
 public interface IApn {
-    public static final int IPCAN_CATEGORY_MOBILE = 0;
-    public static final int IPCAN_CATEGORY_WLAN = 1;
+    int IPCAN_CATEGORY_MOBILE = 0;
+    int IPCAN_CATEGORY_WLAN = 1;
 
-    public static final int HANDOVER_UNKNOWN = 10;
-    public static final int HANDOVER_START = 11;
-    public static final int HANDOVER_SUCCESS = 12;
-    public static final int HANDOVER_FAILURE = 13;
+    int HANDOVER_START = 11;
+    int HANDOVER_SUCCESS = 12;
+    int HANDOVER_FAILURE = 13;
 
     /**
      * Listener interface to receive the change of data network status.
@@ -51,7 +50,6 @@ public interface IApn {
          * Invoked when the state of handover between WWAN and WLAN is changed.
          *
          * @param handoverState The state of handover
-         *                      {@link IApn#HANDOVER_UNKNOWN}
          *                      {@link IApn#HANDOVER_START}
          *                      {@link IApn#HANDOVER_SUCCESS}
          *                      {@link IApn#HANDOVER_FAILURE}
@@ -78,7 +76,7 @@ public interface IApn {
          *                {@link EApnType#INTERNET},
          *                {@link EApnType#EMERGENCY}
          * @param state The data connection state.
-         * @param failCause The data failcause.
+         * @param failCause The data connection failure causes code.
          *                  {@link android.telephony.DataFailCause}
          * @param networkType The network type
          */
@@ -103,62 +101,59 @@ public interface IApn {
     void cleanup();
 
     /**
-     * request apn connection to use target apn.
-     * There are many conditions before requesting to use target apn to connectivity manager
-     * This condition can be different based on operator requirement and apn type
+     * Requests a network that satisfies a set of network capabilities.
      */
     boolean connect();
 
     /**
-     * request apn disconnection to stop use of target apn.
+     * Requests to release a network that was requested through {@link #connect}.
      */
     boolean disconnect();
 
     /**
-     * Return Apn name value of target apn
+     * Returns the name of the APN.
      */
     String getApn();
 
     /**
-     * Return if target apn is connected state or not
+     * Returns whether the network of the APN is in a connected state.
      */
     boolean isConnected();
 
     /**
-     * Return data connection state of target apn
+     * Returns data connection state of the APN.
      */
     int getDataState();
 
     /**
-     * Return Ipcan category of target apn
-     * In default, return value is "IPCAN_CATEGORY_MOBILE"
+     * Returns current IPCAN(IP Connectivity Access Network) category.
+     * Default value is {@link #IPCAN_CATEGORY_MOBILE}
      */
     int getIpcanCategory();
 
     /**
-     * Return Ip version setting of target apn.
+     * Returns the IP version setting for the APN.
      */
     int getIpVersion();
 
     /**
-     * Return slot id of target apn.
+     * Returns the slot id of the APN.
      */
     int getSlotId();
 
     /**
-     * Return Context object that stored in target apn.
-     * Reference of context object delivered to child operator apn classes.
+     * Returns Context object that stored in the APN.
      */
     Context getContext();
 
     /**
-     * Send message object to target Apn.
-     * Apn extends Handler class,so each apn can handle those message
+     * Sends message object to the APN.
+     * Each APN extends the Handler class to process its messages.
      */
     boolean sendMessage(Message msg);
 
     /**
-     * Return cached network of APN
+     * Returns cached network of APN.
      */
     Network getCachedNetwork();
 }

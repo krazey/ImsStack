@@ -23,168 +23,165 @@ public interface IDcNetWatcher extends IDc {
     int REGISTRATION_REJECT_CAUSE_NONE = 0;
 
     /**
-     * Return service is available or not based on
-     * 1) RAT policy configuration
-     * 2) Current RAT information
+     * Returns whether one of the {@link IDcSettings#getImsSupportedRats} is available.
      */
     boolean isRatPolicyAvailable();
 
     /**
-     * Return data service state stored in DcNetWatcher object
+     * Returns service state of the PS domain.
      */
     int getDataServiceState();
 
     /**
-     * Return network type stored in DcNetWatcher object
+     * Returns data network type.
      */
     int getNetworkType();
 
     /**
-     * Return voice network type stored in DcNetWatcher object
+     * Returns voice network type.
      */
     int getVoiceNetworkType();
 
     /**
-     * Return voice service state stored in DcNetWatcher object
+     * Returns voice service state.
      */
     int getVoiceServiceState();
 
     /**
-     * Return MOCNPLMN info stored in DcNetWatcher object
+     * Returns MOCN(multi-operator core network) PLMN information.
      */
     int getMocnPlmnInfo();
 
     /**
-     * Return network registration reject cause stored in DcNetWatcher object
+     * Returns network registration reject cause stored in DcNetWatcher object
      */
     int getNetworkRegistrationRejectCause();
 
     /**
-     * Clear network registration reject cause stored in DcNetWatcher object.
+     * Clears network registration reject cause stored in DcNetWatcher object.
      */
     void clearNetworkRegistrationRejectCause();
 
     /**
-     * Return operator info (numeric type) stored in DcNetWatcher object
+     * Returns current registered operator numeric id.
      */
     String getOperatorNumeric();
 
     /**
-     * Return airplane mode availability stored in DcNetWatcher object
+     * Returns whether airplane mode is enabled.
      */
     boolean isAirplaneMode();
 
     /**
-     * Return if the registration state is
-     * {@code NetworkRegistrationInfo#REGISTRATION_STATE_EMERGENCY}.
+     * Returns whether in an emergency attached state.
      */
     boolean isEmergencyOnly();
 
     /**
-     * Return whether emergency service is supported by the network
+     * Returns whether emergency service is supported by the network
      */
     boolean isEmergencyServiceSupported();
 
     /**
-     * Return current roaming state
-     * (This roaming state could be overridden by the carrier config)
-     * @see CarrierConfigManager#KEY_FORCE_HOME_NETWORK_BOOL
-     * @see CarrierConfigManager#KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
+     * Returns current roaming indicator of phone.
+     * This roaming state could be overridden by the resource overlay or carrier config.
      */
     boolean isRoaming();
 
     /**
-     * Return voice roaming state of device
+     * Returns whether the voice network is roaming.
+     * This roaming state could be overridden by the resource overlay or carrier config.
      */
     boolean isVoiceRoaming();
 
     /**
-     * Return whether mobile data is registered on roaming network
-     * (This value is not affected by any carrier config or resource overlay override)
+     * Returns whether mobile data is registered on roaming network.
+     * This value is not affected by any carrier config or resource overlay override.
      */
     boolean isDataNetworkRoaming();
 
     /**
-     * Return Voice roaming type of device
+     * Returns voice roaming type.
+     * This roaming type could be overridden by the resource overlay or carrier config.
      */
     int getVoiceRoamingType();
 
     /**
-     * Return Data roaming type of device
+     * Returns data roaming type.
+     * This roaming type could be overridden by the resource overlay or carrier config.
      */
     int getDataRoamingType();
 
     /**
-     * Returns whether VoPS is supported that cached in DcNetWatcher object.
+     * Returns whether VoPS is supported that stored in DcNetWatcher object.
      * If {@link IDcSettings#isVopsIgnored} is true it always returns VoPS is supported.
      */
     boolean isVopsSupported();
 
     /**
-     * Return LTE duplex mode stored in ServiceState object
+     * Returns duplex mode for the phone.
      */
     int getLteDuplexMode();
 
     /**
-     * For check mismatch of DATA tech type between ServiceState and TelephonyManager
+     * Stores the network type obtained from the TelephonyManager.
+     * It is used for checking network type mismatch between ServiceState and TelephonyManager.
      */
     void setRatFromTelephonyManager(int nRat);
 
     /**
-     * For check mismatch of Voice tech type between ServiceState and TelephonyManager
+     * Stores the voice network type obtained from the TelephonyManager.
+     * It is used for checking network type mismatch between ServiceState and TelephonyManager.
      */
     void setVoiceRatFromTelephonyManager(int nVoiceRat);
 
     /**
-     * Return current RAT is belong to 1xRTT RAT category
+     * Returns whether the current network type belongs to the 1xRTT category.
      */
     boolean is1xRtt();
 
     /**
-     * Return current RAT is belong to 2G RAT category
+     * Returns whether the current network type belongs to the 2G category.
      */
     boolean is2G();
 
     /**
-     * Return current RAT is belong to 3G RAT category
+     * Returns whether the current network type belongs to the 3G category.
      */
     boolean is3G();
 
     /**
-     * Return current RAT is belong to 4G RAT category
+     * Returns whether the current network type belongs to the 4G category.
      */
     boolean is4G();
 
     /**
-     * Return current RAT is belong to 5G RAT category
+     * Returns whether the current network type belongs to the 5G category.
      */
     boolean is5G();
 
     /**
-     * Return condition if 5G RAT is supported
+     * Returns whether IMS service is supported in the 5G network.
      */
     boolean is5GRequired();
 
     /**
-     * Return current RAT is belong to HRPD RAT category
+     * Returns whether the current network type belongs to the HRPD category.
      */
     boolean isEhrpd();
 
     /**
-     * Return current RAT is belong to EVDO RAT category
+     * Returns whether the current network type belongs to the EVDO category.
      */
     boolean isEvdo();
 
      /**
-      * Return current RAT is belong to 4G Voice RAT category
+      * Returns whether the current voice network type belongs to the 4G category.
       */
     boolean isVoiceRat4G();
 
      /**
-      * Return current RAT is belong to 4G Voice RAT category
+      * Returns whether the current voice network type belongs to 5G category.
       */
     boolean isVoiceRat5G();
 

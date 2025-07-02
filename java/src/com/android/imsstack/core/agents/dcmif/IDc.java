@@ -34,7 +34,7 @@ public interface IDc {
     void init(Context context);
 
     /**
-     * Clean up ojbejct
+     * Clean up object
      */
     void cleanup();
 
