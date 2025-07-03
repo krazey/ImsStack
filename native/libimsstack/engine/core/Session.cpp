@@ -76,7 +76,8 @@ Session::Session(IN Service* pService) :
         m_bSessionUpdateNotificationInProgress(IMS_FALSE),
         m_bImplicitRoutingRequired(IMS_TRUE),
         m_bSessionCanceledOnAccepted(IMS_FALSE),
-        m_nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
+        m_nConfigValue(
+                CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE | CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR),
         m_nCompletedListenerCalls(0),
         m_nTerminationReason(TERMINATION_REASON_UNKNOWN),
         m_strTerminationReasonFromApp(AString::ConstNull()),
@@ -877,6 +878,12 @@ IMS_BOOL Session::IsReliableProvResponseSupported() const
     }
 
     return piSipMsg->IsOptionSupported(Sip::STR_100REL);
+}
+
+PUBLIC
+IMS_BOOL Session::IsSdpOaInPreviewMode() const
+{
+    return (m_pOaState != IMS_NULL) ? m_pOaState->IsInPreviewMode() : IMS_FALSE;
 }
 
 PUBLIC
@@ -2398,6 +2405,12 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
     {
         m_bSdpNonRprAllowed = pSipConfigV->IsSessionSdpNonRprAllowed();
         bSdpVersionCheck = pSipConfigV->IsSessionSdpVersionCheckSupported();
+
+        if (pSipConfigV->ShouldIgnoreSubsequentSdpAnswerInPreviewMode())
+        {
+            SetConfiguration(
+                    GetConfiguration() | CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE);
+        }
     }
 
     m_pOaState = new SdpOaState(bSdpVersionCheck, IMS_TRUE);
@@ -4887,11 +4900,15 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMessage* 
 
     IMS_SINT32 nState = GetState();
     IMS_BOOL bIsCallEstablished = IMS_FALSE;
+    IMS_BOOL bIgnoreSubsequentSdpAnswerInPreviewMode =
+            IsConfigurationSet(CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE) ||
+            !m_pOaState->IsInPreviewMode();
 
     // RFC 6337: Section 3.1.1
     // After the UAC has received the answer in a reliable provisional response to the INVITE,
     //[RFC3261] requires that any SDP in subsequent responses be ignored.
-    if (IsConfigurationSet(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE))
+    if (IsConfigurationSet(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE) &&
+            bIgnoreSubsequentSdpAnswerInPreviewMode)
     {
         if ((piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE) &&
                 piSipMsg->GetMethod().Equals(SipMethod::INVITE))

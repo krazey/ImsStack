@@ -81,6 +81,10 @@ public:
      */
     inline IMS_BOOL IsOfferProgress() const { return m_bOfferProgress; }
     /**
+     * @brief Checks if SDP OA state is in preview mode or not.
+     */
+    inline IMS_BOOL IsInPreviewMode() const { return m_bPreviewMode; }
+    /**
      * @brief Checks if the session is changed or not.
      */
     inline IMS_BOOL IsSessionChanged() const { return m_bStateChanged; }
@@ -110,7 +114,7 @@ private:
     SessionParameter* GetCurrentCapabilities();
     SessionParameter*& GetNewProposalView();
     SessionParameter*& GetNewPeerView();
-    IMS_SINT32 HandleAnswer(IN const SdpParser& objParser);
+    IMS_SINT32 HandleAnswer(IN const SdpParser& objParser, IN IMS_BOOL bUpdateRemoteVersion);
     IMS_SINT32 HandleOffer(IN const SdpParser& objParser);
     void SetCapabilities();
     void SetProposedView(IN SessionParameter* pSessionParam);
@@ -118,6 +122,8 @@ private:
     void SetLastOfferMade(IN SessionParameter* pSessionParam);
     void SetOldState(IN IMS_SINT32 nOldState);
     void SetState(IN IMS_SINT32 nState);
+    void StartPreviewMode();
+    void StopPreviewMode();
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -187,6 +193,13 @@ private:
     IMS_SINT32 m_nOldState;
     // Mode of agent
     IMS_SINT32 m_nMode;
+    // Flag specifying whether the current SDP OA mode is in preview mode or not.
+    // 1) The preview mode is set when non-RPR message with SDP is received and
+    //    kept until the call is completely established.
+    // 2) Depending on the carrier-config, SDP re-negotiation can be performed in preview mode
+    //    when receiving another RPR or non-RPR message, and must operate in non-preview mode
+    //    when receiving an RPR message.
+    IMS_BOOL m_bPreviewMode;
     // Flag to indicate whether the received/sent SDP caused any media state transition or not
     IMS_BOOL m_bStateChanged;
     // Flag to keep track of "glare" condition

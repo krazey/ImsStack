@@ -1213,6 +1213,13 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
                 }
             }
         }
+        else if (IsSdpOaInPreviewMode())
+        {
+            if ((piSipMsg != IMS_NULL) && (piSipMsg->GetSdpBodyPart() != IMS_NULL))
+            {
+                nStatusCode = SipStatusCode::SC_491;
+            }
+        }
     }
 
     if (nStatusCode != SipStatusCode::SC_INVALID)

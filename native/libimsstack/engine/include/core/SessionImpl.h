@@ -126,6 +126,10 @@ private:
     {
         return m_pSession->IsSdpNegotiationAllowedForNonRpr();
     }
+    inline IMS_BOOL IsSdpOaInPreviewMode() const override
+    {
+        return m_pSession->IsSdpOaInPreviewMode();
+    }
     inline IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
             IN const AString& strReasonPhrase = AString::ConstNull()) override
     {

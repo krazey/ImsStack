@@ -86,6 +86,7 @@ public:
     IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const;
     IMS_BOOL IsReliableProvResponseSupported() const;
     inline IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const { return m_bSdpNonRprAllowed; }
+    IMS_BOOL IsSdpOaInPreviewMode() const;
     IMS_RESULT Reject();
     IMS_RESULT Reject(IN IMS_SINT32 nStatusCode);
     IMS_RESULT RejectEx(
@@ -431,7 +432,10 @@ public:
         /// ex. VRBT (Video RingBack Tone) for KR operators
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 1 << 3,
         /// This is to specify whether the 100 Trying response needs to be notified to the enabler.
-        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4
+        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4,
+        /// Specify whether the subsequent SDP answer should be ignored
+        /// when SDP OA state is in preview mode.
+        CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE = 1 << 5
     };
 
     /// Index for the most recent response message

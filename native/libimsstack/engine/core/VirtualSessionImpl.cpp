@@ -481,6 +481,16 @@ PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsSdpNegotiationAllowedForNonRpr() 
     return IMS_FALSE;
 }
 
+PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsSdpOaInPreviewMode() const
+{
+    if (m_piOwnerSession != IMS_NULL)
+    {
+        return m_piOwnerSession->IsSdpOaInPreviewMode();
+    }
+
+    return IMS_FALSE;
+}
+
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RejectEx(
         IN IMS_SINT32 /*nStatusCode*/, IN const AString& /*strReasonPhrase = AString::ConstNull()*/)
 {

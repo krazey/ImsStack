@@ -90,6 +90,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsFinalResponseReceivedForInitialInviteRequest, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReliableProvResponseSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSdpNegotiationAllowedForNonRpr, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSdpOaInPreviewMode, (), (const, override));
     MOCK_METHOD(IMS_RESULT, RejectEx,
             (IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase), (override));
     MOCK_METHOD(IMS_RESULT, RespondToEarlyUpdate,
