@@ -43,6 +43,7 @@ public:
     MOCK_METHOD(NETSERVICE_ENTYPE, GetNetVoiceServiceType, (), (override));
     MOCK_METHOD(NETDOMAIN_ENTYPE, GetNetDomainType, (), (override));
     MOCK_METHOD(IMS_SINT32, GetNetworkType, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetCellularServiceState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRoamingState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetVoiceRoamingType, (), (override));
     MOCK_METHOD(IMS_SINT32, GetDataRoamingType, (), (override));

@@ -694,6 +694,12 @@ IMS_SINT32 System::GetServiceState(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
+IMS_SINT32 System::GetCellularServiceState(IN IMS_SINT32 nSlotId)
+{
+    return GetInt(SystemConstants::GET_CELLULAR_SERVICE_STATE, 0, nSlotId);
+}
+
+PUBLIC
 IMS_SINT32 System::GetVoiceServiceState(IN IMS_SINT32 nSlotId)
 {
     return GetInt(SystemConstants::GET_VOICE_SERVICE_STATE, 0, nSlotId);

@@ -28,7 +28,16 @@ public interface IDcNetWatcher extends IDc {
     boolean isRatPolicyAvailable();
 
     /**
-     * Returns service state of the PS domain.
+     * Returns the service state of the PS domain (cellular only).
+     *
+     * The {@link #getDataServiceState} reads the service state of the current device's data
+     * network (including IWLAN), while this method reads the service state of the current device's
+     * cellular data network.
+     */
+    int getCellularDataServiceState();
+
+    /**
+     * Returns service state of the PS domain (cellular + IWLAN).
      */
     int getDataServiceState();
 

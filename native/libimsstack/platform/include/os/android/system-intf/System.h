@@ -97,6 +97,7 @@ public:
     IMS_SINT32 GetVoiceRoamingType(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetDataRoamingType(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetServiceState(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetCellularServiceState(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetVoiceServiceState(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType, OUT IMS_SINT32& nNetworkType,
             OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId) override;

@@ -471,6 +471,11 @@ PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkType()
     return PlatformContext::GetInstance()->GetSystem()->GetNetworkType(GetSlotId());
 }
 
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetCellularServiceState()
+{
+    return PlatformContext::GetInstance()->GetSystem()->GetCellularServiceState(GetSlotId());
+}
+
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetRoamingState()
 {
     return PlatformContext::GetInstance()->GetSystem()->GetRoamingState(GetSlotId());

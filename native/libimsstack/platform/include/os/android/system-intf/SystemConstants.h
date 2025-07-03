@@ -165,6 +165,7 @@ public:
     static const IMS_UINT32 BIND_SOCKET = CATEGORY_BASE + 427;
     static const IMS_UINT32 IS_IPV6_PREFERRED = CATEGORY_BASE + 428;
     static const IMS_UINT32 GET_NETWORK_REGISTRATION_REJECT_CAUSE = CATEGORY_BASE + 429;
+    static const IMS_UINT32 GET_CELLULAR_SERVICE_STATE = CATEGORY_BASE + 430;
 
     ////
     // WiFi-related information

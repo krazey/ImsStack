@@ -129,6 +129,7 @@ public interface SystemConstants {
     int BIND_SOCKET = CATEGORY_BASE + 427;
     int IS_IPV6_PREFERRED = CATEGORY_BASE + 428;
     int GET_NETWORK_REGISTRATION_REJECT_CAUSE = CATEGORY_BASE + 429;
+    int GET_CELLULAR_SERVICE_STATE = CATEGORY_BASE + 430;
 
     /**
      * WiFi-related information

@@ -396,6 +396,17 @@ public interface SystemCallInterface {
     int getVoiceRoamingType();
 
     /**
+     * Returns the service state of the current cellular data network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    int getCellularDataServiceState();
+
+    /**
      * Returns the service state of the current data network.
      *
      * @return A service state.

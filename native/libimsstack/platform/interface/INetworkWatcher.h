@@ -107,6 +107,18 @@ public:
         RADIOTECH_TYPE_MAX,
     };
 
+    // Same as OsNetworkConstants.h
+    // TODO: Need to consolidate the constant values.
+    enum
+    {
+        STATE_INVALID = -1,
+        STATE_IN_SERVICE = 0,
+        STATE_OUT_OF_SERVICE = 1,
+        STATE_EMERGENCY_ONLY = 2,
+        STATE_POWER_OFF = 3,
+        STATE_MAX,
+    };
+
 public:
     virtual IMS_UINT32 GetNetworkStatus(IN const AString& strProfile) = 0;
     virtual NETRADIO_ENTYPE GetNetRadioTechType(
@@ -121,6 +133,20 @@ public:
 
     // Returns the data network type directly from TelephonyManager.
     virtual IMS_SINT32 GetNetworkType() = 0;
+
+    /**
+     * @brief Returns the cellular data network type.
+     *
+     * The #GetNetServiceType() reads the service state of the current device's data network
+     * (including IWLAN), while this method reads the service state of the current device's
+     * cellular data network.
+     *
+     * @see #STATE_IN_SERVICE
+     * @see #STATE_OUT_OF_SERVICE
+     * @see #STATE_EMERGENCY_ONLY
+     * @see #STATE_POWER_OFF
+     */
+    virtual IMS_SINT32 GetCellularServiceState() = 0;
 
     virtual IMS_SINT32 GetRoamingState() = 0;
 

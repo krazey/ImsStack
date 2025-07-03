@@ -973,6 +973,14 @@ TEST_F(SystemTest, GetServiceState)
     EXPECT_EQ(m_pSystem->GetServiceState(0), 0);
 }
 
+TEST_F(SystemTest, GetCellularServiceState)
+{
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1));
+    EXPECT_EQ(m_pSystem->GetCellularServiceState(0), 0);
+}
+
 TEST_F(SystemTest, GetVoiceServiceState)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))

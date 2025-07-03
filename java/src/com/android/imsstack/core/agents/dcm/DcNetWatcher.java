@@ -105,6 +105,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     private int mVoiceRat = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     private int mVoiceServiceState = ServiceState.STATE_OUT_OF_SERVICE;
     private int mDataServiceState = ServiceState.STATE_OUT_OF_SERVICE;
+    private int mCellularDataServiceState = ServiceState.STATE_OUT_OF_SERVICE;
     private int mLteDuplexMode = ServiceState.DUPLEX_MODE_UNKNOWN;
     private int mNetworkRegistrationState =
             NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
@@ -324,6 +325,11 @@ public class DcNetWatcher implements IDcNetWatcher {
                         + mRat
                         + ", ServiceState : Unavailable");
         return false;
+    }
+
+    @Override
+    public int getCellularDataServiceState() {
+        return mCellularDataServiceState;
     }
 
     // Data service state in ServiceState
@@ -625,7 +631,18 @@ public class DcNetWatcher implements IDcNetWatcher {
         return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
-    private static int getDataRegState(ServiceState ss) {
+    private static int getCellularDataServiceState(ServiceState ss) {
+        final NetworkRegistrationInfo wwanRegInfo =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        int nriState = (wwanRegInfo != null)
+                ? wwanRegInfo.getNetworkRegistrationState()
+                : NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+        return nriStateToServiceState(nriState, ss, wwanRegInfo);
+    }
+
+    private static int getDataServiceState(ServiceState ss) {
         final NetworkRegistrationInfo iwlanRegInfo =
                 ss.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_PS,
@@ -1068,17 +1085,17 @@ public class DcNetWatcher implements IDcNetWatcher {
         /** Invokes when service state is changed. */
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
-            int voiceRegState = serviceState.getState();
+            int voiceServiceState = serviceState.getState();
             int voiceRAT = getAccessNetworkTechnology(serviceState);
-            int dataRegState = getDataRegState(serviceState);
+            int dataServiceState = getDataServiceState(serviceState);
             int dataRAT = getCellularDataRAT();
             String operatorNumeric = serviceState.getOperatorNumeric();
             int voiceRoamingType = getVoiceRoamingType(serviceState);
             int dataRoamingType = getDataRoamingType(serviceState);
 
-            // Phone service state
-            if (mVoiceServiceState != voiceRegState) {
-                mVoiceServiceState = voiceRegState;
+            // Voice service state
+            if (mVoiceServiceState != voiceServiceState) {
+                mVoiceServiceState = voiceServiceState;
                 handleVoiceServiceStateChanged();
             }
 
@@ -1086,15 +1103,16 @@ public class DcNetWatcher implements IDcNetWatcher {
             if (operatorNumeric == null) {
                 mNetworkOperator = "";
             } else if (!mNetworkOperator.equals(operatorNumeric)) {
-                if (dataRegState == ServiceState.STATE_IN_SERVICE) {
+                if (dataServiceState == ServiceState.STATE_IN_SERVICE) {
                     mNetworkOperator = operatorNumeric;
                     handleNetworkOperatorChanged();
                 }
             }
 
             // Data service state
-            if (mDataServiceState != dataRegState) {
-                mDataServiceState = dataRegState;
+            mCellularDataServiceState = getCellularDataServiceState(serviceState);
+            if (mDataServiceState != dataServiceState) {
+                mDataServiceState = dataServiceState;
                 handleDataServiceStateChanged();
             }
 

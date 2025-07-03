@@ -572,6 +572,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
@@ -597,6 +598,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_OUT_OF_SERVICE,
+                mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
@@ -622,6 +625,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_EMERGENCY_ONLY);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_EMERGENCY_ONLY);
         assertEquals(ServiceState.STATE_EMERGENCY_ONLY, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_EMERGENCY_ONLY,
+                mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
@@ -639,6 +644,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_POWER_OFF);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_POWER_OFF);
         assertEquals(ServiceState.STATE_POWER_OFF, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_POWER_OFF, mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test

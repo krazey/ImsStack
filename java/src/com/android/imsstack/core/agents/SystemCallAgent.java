@@ -647,6 +647,23 @@ public final class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
+     * Returns the service state of the current cellular data network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    @Override
+    public int getCellularDataServiceState() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null)
+                ? netWatcher.getCellularDataServiceState()
+                : ServiceState.STATE_OUT_OF_SERVICE;
+    }
+
+    /**
      * Returns the service state of the current data network.
      *
      * @return A service state.

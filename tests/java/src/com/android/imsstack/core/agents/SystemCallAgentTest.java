@@ -758,6 +758,20 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetCellularDataServiceState() {
+        mSystemCallAgent.getCellularDataServiceState();
+
+        verify(mDcNetWatcher).getCellularDataServiceState();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getCellularDataServiceState();
+
+        assertEquals(ServiceState.STATE_OUT_OF_SERVICE, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
     public void testGetDataRoamingType() {
         mSystemCallAgent.getDataRoamingType();
 

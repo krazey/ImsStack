@@ -287,6 +287,36 @@ TEST_F(OsNetworkWatcherTest, GetNetVoiceServiceType)
     EXPECT_EQ(m_pOsNetworkWatcher->GetNetVoiceServiceType(), NW_REPORT_SRV_PWRSAVE);
 }
 
+TEST_F(OsNetworkWatcherTest, GetCellularServiceState)
+{
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_IN_SERVICE));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_IN_SERVICE);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_OUT_OF_SERVICE));
+    EXPECT_EQ(
+            m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_OUT_OF_SERVICE);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_EMERGENCY_ONLY));
+    EXPECT_EQ(
+            m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_EMERGENCY_ONLY);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_POWER_OFF));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_POWER_OFF);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_INVALID));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_INVALID);
+}
+
 TEST_F(OsNetworkWatcherTest, GetRoamingState)
 {
     EXPECT_CALL(m_objMockSystem, GetRoamingState(_)).Times(1).WillOnce(Return(IMS_TRUE));

@@ -49,6 +49,7 @@ public:
      * @see #NETWORK_TYPE_UMTS
      */
     IMS_SINT32 GetNetworkType() override;
+    IMS_SINT32 GetCellularServiceState() override;
     IMS_SINT32 GetRoamingState() override;
     IMS_SINT32 GetVoiceRoamingType() override;
     IMS_SINT32 GetDataRoamingType() override;
