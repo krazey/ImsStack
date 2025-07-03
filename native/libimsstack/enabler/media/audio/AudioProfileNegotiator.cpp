@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <array>
 
 #include "ServiceTrace.h"
@@ -230,8 +231,10 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
     AudioProfile::Payload* pAmr = new AudioProfile::Payload();
     AudioProfile::Payload* pPeerPayload = pPeerProfile->GetPayloadAt(nPayloadIndex);
 
-    if (pAmr == IMS_NULL || pPeerPayload == IMS_NULL)
+    if (pPeerPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAmr(): invalid payload", 0, 0, 0);
+        delete pAmr;
         return IMS_NULL;
     }
 
@@ -287,9 +290,9 @@ AudioProfile::AmrFmtp* AudioProfileNegotiator::NegotiateAmrFmtp(IN AudioProfile*
 
     IMS_TRACE_D("NegotiateAmrFmtp(): payload index[%d]", nLocalPayloadIndex, 0, 0);
 
-    AudioProfile::AmrFmtp* pLocalFmtp =
-            (AudioProfile::AmrFmtp*)pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp();
-    AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
+    auto pLocalFmtp = static_cast<AudioProfile::AmrFmtp*>(
+            pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp());
+    auto pAmrFmtp = new AudioProfile::AmrFmtp(
             *static_cast<AudioProfile::AmrFmtp*>(pPeerPayload->GetFmtp()));
 
     pAmrFmtp->SetModeSetList(nNegoModeSetList);
@@ -324,9 +327,10 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile* pLo
     AudioProfile::Payload* pEvs = new AudioProfile::Payload();
     AudioProfile::Payload* pPeerPayload = pPeerProfile->GetPayloadAt(nPayloadIndex);
 
-    if (pEvs == IMS_NULL || pPeerPayload == IMS_NULL)
+    if (pPeerPayload == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateEvs(): invalid payload", 0, 0, 0);
+        delete pEvs;
         return IMS_NULL;
     }
 
@@ -378,10 +382,10 @@ AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile*
 
     nLocalPayloadIndex = FindPayloadIndexFromProfile(
             pPeerPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pPeerPayload);
-    AudioProfile::EvsFmtp* pLocalFmtp =
-            (AudioProfile::EvsFmtp*)pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp();
-    AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp(
-            *reinterpret_cast<AudioProfile::EvsFmtp*>(pPeerPayload->GetFmtp()));
+    auto pLocalFmtp = static_cast<AudioProfile::EvsFmtp*>(
+            pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp());
+    auto pEvsFmtp = new AudioProfile::EvsFmtp(
+            *static_cast<AudioProfile::EvsFmtp*>(pPeerPayload->GetFmtp()));
     pEvsFmtp->SetBwList(nBandwidthNegoList);
     pEvsFmtp->SetBrList(nBitrateNegoList);
     pEvsFmtp->SetModeSetList(nModeSetNegoList);
@@ -512,8 +516,10 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePcm(IN AudioProfile* pLo
     AudioProfile::Payload* pPcm = new AudioProfile::Payload();
     AudioProfile::Payload* pPeerPayload = pPeerProfile->GetPayloadAt(nPayloadIndex);
 
-    if (pPcm == IMS_NULL || pPeerPayload == IMS_NULL)
+    if (pPeerPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiatePcm(): invalid payload", 0, 0, 0);
+        delete pPcm;
         return IMS_NULL;
     }
 
@@ -710,9 +716,7 @@ void AudioProfileNegotiator::NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal,
         return;
     }
 
-    IMS_BOOL bEnableAnbr = IMS_FALSE;
-    bEnableAnbr = (nSupportAnbrLocal && nSupportAnbrPeer);
-
+    IMS_BOOL bEnableAnbr = (nSupportAnbrLocal && nSupportAnbrPeer);
     pNegotiatedProfile->SetAnbr(bEnableAnbr);
 
     IMS_TRACE_D("NegotiateAnbr(): supported local[%d], peer[%d], nego[%d]", nSupportAnbrLocal,
@@ -762,7 +766,7 @@ IMS_SINT32 AudioProfileNegotiator::NegotiateAs(
     if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
             pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
-        AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pNegotiatedPayload->GetFmtp();
+        auto pAmrFmtp = static_cast<AudioProfile::AmrFmtp*>(pNegotiatedPayload->GetFmtp());
         if (pNegotiatedPayload->GetRtpMap().GetSamplingRate() == 8000)
         {
             nCurrCodec = AUDIO_CODEC_AMR;
@@ -779,7 +783,7 @@ IMS_SINT32 AudioProfileNegotiator::NegotiateAs(
     }
     else if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pNegotiatedPayload->GetFmtp();
+        auto pEvsFmtp = static_cast<AudioProfile::EvsFmtp*>(pNegotiatedPayload->GetFmtp());
         nCurrCodec = AUDIO_CODEC_EVS;
         nModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegotiatedPayload);
         nAs = AudioProfileUtil::ConvertToBandwidthAS(
@@ -906,7 +910,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
 
     IMS_TRACE_D("MakeNegotiatedBandwidth(): Negotiated Profile AS[%d] RS[%d] RR[%d]",
             pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
-            pLocalProfile->GetBandwidthRr());
+            pNegotiatedProfile->GetBandwidthRr());
 
     return IMS_TRUE;
 }
@@ -965,10 +969,9 @@ IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile
 
             if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
             {
-                AudioProfile::EvsFmtp* pCompareFmtp =
-                        (AudioProfile::EvsFmtp*)pComparedPayload->GetFmtp();
-                AudioProfile::EvsFmtp* pReceivedFmtp =
-                        (AudioProfile::EvsFmtp*)pPeerPayload->GetFmtp();
+                auto pCompareFmtp =
+                        static_cast<AudioProfile::EvsFmtp*>(pComparedPayload->GetFmtp());
+                auto pReceivedFmtp = static_cast<AudioProfile::EvsFmtp*>(pPeerPayload->GetFmtp());
                 if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                 {
                     continue;
@@ -1094,9 +1097,8 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
         if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
                 pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
-            AudioProfile::AmrFmtp* pCompareFmtp =
-                    (AudioProfile::AmrFmtp*)pComparedPayload->GetFmtp();
-            AudioProfile::AmrFmtp* pReceivedFmtp = (AudioProfile::AmrFmtp*)pPayload->GetFmtp();
+            auto pCompareFmtp = static_cast<AudioProfile::AmrFmtp*>(pComparedPayload->GetFmtp());
+            auto pReceivedFmtp = static_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
 
             if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
             {
@@ -1696,10 +1698,10 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                 {
                     IMS_UINT32 pnNegoModeSetList = 0;
                     IMS_UINT32 pnNegoDefaultRtpModeSet = 0;
-                    AudioProfile::AmrFmtp* pCompareFmtp =
-                            (AudioProfile::AmrFmtp*)pComparedPayload->GetFmtp();
-                    AudioProfile::AmrFmtp* pReceivedFmtp =
-                            (AudioProfile::AmrFmtp*)pPeerPayload->GetFmtp();
+                    auto pCompareFmtp =
+                            static_cast<AudioProfile::AmrFmtp*>(pComparedPayload->GetFmtp());
+                    auto pReceivedFmtp =
+                            static_cast<AudioProfile::AmrFmtp*>(pPeerPayload->GetFmtp());
 
                     if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                     {
@@ -1766,10 +1768,10 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                     IMS_UINT32 nBandwidthNegoList;
                     IMS_UINT32 nBitrateNegoList;
                     IMS_UINT32 nModeSetNegoList;
-                    AudioProfile::EvsFmtp* pCompareFmtp =
-                            (AudioProfile::EvsFmtp*)pComparedPayload->GetFmtp();
-                    AudioProfile::EvsFmtp* pReceivedFmtp =
-                            (AudioProfile::EvsFmtp*)pPeerPayload->GetFmtp();
+                    auto pCompareFmtp =
+                            static_cast<AudioProfile::EvsFmtp*>(pComparedPayload->GetFmtp());
+                    auto pReceivedFmtp =
+                            static_cast<AudioProfile::EvsFmtp*>(pPeerPayload->GetFmtp());
 
                     if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                     {
@@ -1891,13 +1893,9 @@ IMS_BOOL AudioProfileNegotiator::IsValidEvsBwList(IN IMS_UINT32 nBwList)
             EVS_BW_FB, (EVS_BW_NB | EVS_BW_WB), (EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB),
             (EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB | EVS_BW_FB)};
 
-    for (IMS_UINT32 nValidBw : nValidBwLists)
-    {
-        if (nBwList == nValidBw)
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
+    return std::any_of(nValidBwLists.begin(), nValidBwLists.end(),
+            [nBwList](IMS_UINT32 validBw)
+            {
+                return nBwList == validBw;
+            });
 }

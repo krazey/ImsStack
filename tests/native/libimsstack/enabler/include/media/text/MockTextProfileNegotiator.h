@@ -25,7 +25,7 @@ class MockTextProfileNegotiator : public TextProfileNegotiator
 {
 public:
     MockTextProfileNegotiator() {}
-    ~MockTextProfileNegotiator() {}
+    ~MockTextProfileNegotiator() override {}
     MOCK_METHOD(IMS_BOOL, Negotiate,
             (IN TextProfile * pLocalProfile, IN TextProfile* pPeerProfile,
                     IN IMS_BOOL bIsOfferReceived, OUT TextProfile* pNegotiatedProfile,

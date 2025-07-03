@@ -25,7 +25,7 @@ class MockVideoProfileNegotiator : public VideoProfileNegotiator
 {
 public:
     MockVideoProfileNegotiator() {}
-    ~MockVideoProfileNegotiator() {}
+    ~MockVideoProfileNegotiator() override {}
     MOCK_METHOD(IMS_BOOL, Negotiate,
             (IN VideoProfile * pLocalProfile, IN VideoProfile* pPeerProfile,
                     IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile,

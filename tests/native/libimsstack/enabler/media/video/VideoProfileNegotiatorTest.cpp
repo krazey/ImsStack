@@ -179,7 +179,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateBasicSuccess)
             kPeerPayload);  // Should take peer's pPayload number in offer scenario
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
 
-    VideoProfile::AvcFmtp* pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
     EXPECT_NE(pNegoFmtp, nullptr);
     EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
     EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
@@ -319,8 +319,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    VideoProfile::VideoFmtp* pNegoFmtp =
-            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
 
     EXPECT_EQ(pNegoFmtp->GetLevel(), 30);  // lower nLevel
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
@@ -346,7 +345,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
-    VideoProfile::AvcFmtp* pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
     EXPECT_NE(pNegoFmtp, nullptr);
     // Check that the eResolution was set based on GetAvcMaxResolutionFromLevel or highest local
     // In this case, local VGA (index 0) was the temp pPayload. SetClosestAvc uses nLevel 31 ->
@@ -373,8 +372,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    VideoProfile::VideoFmtp* pNegoFmtp =
-            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
 
     EXPECT_EQ(pNegoFmtp->GetLevel(), 90);  // lower nLevel
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);

@@ -25,7 +25,7 @@ class MockAudioProfileNegotiator : public AudioProfileNegotiator
 {
 public:
     MockAudioProfileNegotiator() {}
-    virtual ~MockAudioProfileNegotiator() {}
+    virtual ~MockAudioProfileNegotiator() override {}
 
     MOCK_METHOD(IMS_BOOL, Negotiate,
             (IN AudioProfile * pLocalProfile, IN AudioProfile* pPeerProfile,

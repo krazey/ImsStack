@@ -53,13 +53,12 @@ PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
     }
 
     IMS_BOOL bPayloadNegotiated = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
-    IMS_BOOL bRet = IMS_FALSE;
+    IMS_BOOL bRet = IMS_TRUE;
 
     if (bPayloadNegotiated)
     {
         NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile);
         NegotiateBandwidth(pLocalProfile, pPeerProfile, -1, pNegotiatedProfile);
-        bRet = IMS_TRUE;
     }
     else
     {
@@ -289,7 +288,7 @@ void TextProfileNegotiator::NegotiateBandwidthForOfferSent(IN TextProfile* pLoca
 
 PRIVATE
 void TextProfileNegotiator::NegotiateRtcpInterval(
-        OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
+        OUT TextProfile* pNegotiatedProfile, IN const MediaConfiguration* pConfig)
 {
     if (pNegotiatedProfile == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -351,9 +350,9 @@ PRIVATE TextProfile::Payload* TextProfileNegotiator::FindT140InProfile(
                     pComparedPayload->GetRtpMap().GetSamplingRate() ==
                             pPayload->GetRtpMap().GetSamplingRate())
             {
-                TextProfile::RedFmtp* pComparedFmtp =
-                        (TextProfile::RedFmtp*)pComparedPayload->GetFmtp();
-                TextProfile::RedFmtp* pReceivedFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
+                auto* pComparedFmtp =
+                        static_cast<TextProfile::RedFmtp*>(pComparedPayload->GetFmtp());
+                auto* pReceivedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
 
                 if (pComparedFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                 {
