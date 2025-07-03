@@ -113,13 +113,13 @@ public:
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
 
 private:
-    void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
+    void UpdateLocalTone(IN ISession* piSession, IN const IMessage* piMessage);
     void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
 
-    IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage);
-    IMS_UINTP GetMediaNegoId(IN ISession* piSession);
-    IMS_UINT32 GetWaitingNetworkToneDuration(IN ISession* piSession, IN IMessage* piMessage);
+    IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN const IMessage* piMessage);
+    IMS_UINTP GetMediaNegoId(IN const ISession* piSession);
+    IMS_UINT32 GetWaitingNetworkToneDuration(IN ISession* piSession, IN const IMessage* piMessage);
 
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);

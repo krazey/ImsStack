@@ -218,7 +218,7 @@ IMS_BOOL MtcSupplementaryService::UpdateGtt(IN IMessage* /*piMessage*/)
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCdivCause(IN IMessage* piMessage)
+IMS_BOOL MtcSupplementaryService::UpdateCdivCause(IN const IMessage* piMessage)
 {
     ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
 
@@ -240,7 +240,7 @@ IMS_BOOL MtcSupplementaryService::UpdateCdivCause(IN IMessage* piMessage)
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCdivHistory(IN IMessage* piMessage)
+IMS_BOOL MtcSupplementaryService::UpdateCdivHistory(IN const IMessage* piMessage)
 {
     ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
 
@@ -262,7 +262,7 @@ IMS_BOOL MtcSupplementaryService::UpdateCdivHistory(IN IMessage* piMessage)
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCw(IN IMessage* piMessage)
+IMS_BOOL MtcSupplementaryService::UpdateCw(IN const IMessage* piMessage)
 {
     if (m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::ALERT_INFO) ==
             IMS_FALSE)
@@ -326,7 +326,7 @@ IMS_BOOL MtcSupplementaryService::UpdateCallingNumberVerification(IN IMessage* p
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMessage)
+IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN const IMessage* piMessage)
 {
     IMS_SINT32 nPriority = CallComposerUtil::GetPriority(*piMessage);
     if (nPriority >= 0)
@@ -362,7 +362,7 @@ IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMess
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateSessionId(IN IMessage* piMessage)
+IMS_BOOL MtcSupplementaryService::UpdateSessionId(IN const IMessage* piMessage)
 {
     AString strSessionId =
             m_objContext.GetMessageUtils().GetHeaderValue(piMessage, ISipHeader::SESSION_ID);
@@ -493,7 +493,7 @@ GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
 }
 
 PRIVATE
-ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN IMessage* piMessage)
+ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN const IMessage* piMessage)
 {
     ImsList<AString> lstHistoryInfos =
             m_objContext.GetMessageUtils().GetHeaders(piMessage, ISipHeader::HISTORY_INFO);

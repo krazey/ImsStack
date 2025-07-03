@@ -193,7 +193,7 @@ protected:
     ISession* GetISession();
 
     void InitMediaSession();
-    IMS_SINT32 HandleReceivedSdp(IN ISession* piSession, IN IMessage* piMessage);
+    IMS_SINT32 HandleReceivedSdp(IN ISession* piSession, IN const IMessage* piMessage);
 
     IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);

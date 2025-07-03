@@ -66,7 +66,7 @@ private:
     IMS_RESULT FormBodyForInfo(
             IN ISipMessage* piSipMessage, IN const AString& strUssdString, IN UssiError eErrorCode);
 
-    UssiData* GetParsedUssiData(IN ISipMessage* piSipMessage) const;
+    UssiData* GetParsedUssiData(IN const ISipMessage* piSipMessage) const;
     void NotifyUssiEvent(
             IN const AString& strUssdString, IN UssiModeType eType, IN UssiError eErrorCode);
 

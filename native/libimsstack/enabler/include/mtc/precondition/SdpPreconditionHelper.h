@@ -52,8 +52,8 @@ private:
             IN IMS_SINT32 eStatusType);
     static void FormConfirmAttribute(IN IMediaDescriptor* piMediaDescriptor,
             IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf);
-    static IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
+    static IMediaDescriptor* GetMediaDescriptor(IN const IMedia* piMedia);
     static IMS_BOOL HasReservedResourceInSdp(
-            IN ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType);
+            IN const ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType);
 };
 #endif

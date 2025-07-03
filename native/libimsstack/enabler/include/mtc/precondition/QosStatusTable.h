@@ -225,8 +225,10 @@ private:
 
     void InitializeDesChecked(IN IMS_SINT32 eSdpMediaType);
 
-    void UpdateCurrentStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
-    void UpdateDesiredStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
+    void UpdateCurrentStatus(
+            IN const IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
+    void UpdateDesiredStatus(
+            IN const IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
 
 private:
     ImsList<QosStatusRecord*> m_lstAudioRecords;

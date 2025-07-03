@@ -58,12 +58,12 @@ private:
     void ReSubscribe();
     void Initialize();
     void SetHeaders();
-    void UpdateConferenceInfo(IN IMessage* piNotify);
+    void UpdateConferenceInfo(IN const IMessage* piNotify);
     void HandleUpdateResult(IN IMS_UINT32 nResult);
     void Notify();
 
     IMS_BOOL OnReceiving403(IN ISubscription* piSubscription);
-    IMS_BOOL OnReceiving423(IN ISubscription* piSubscription);
+    IMS_BOOL OnReceiving423(IN const ISubscription* piSubscription);
 
     void ReleaseISubscription();
 

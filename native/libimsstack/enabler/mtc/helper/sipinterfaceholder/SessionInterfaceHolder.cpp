@@ -189,7 +189,7 @@ void SessionInterfaceHolder::ReleaseISession(IN ISession* piSession, IN IMS_BOOL
 
 PRIVATE
 IMS_BOOL SessionInterfaceHolder::IsReadyToDestroy(
-        IN ISession* piSession, IN IMS_BOOL bSessionTerminatedOrStartFailed)
+        IN const ISession* piSession, IN IMS_BOOL bSessionTerminatedOrStartFailed)
 {
     IMS_TRACE_D("IsReadyToDestroy [%d]", piSession->GetState(), 0, 0);
     if (bSessionTerminatedOrStartFailed)
@@ -203,7 +203,7 @@ IMS_BOOL SessionInterfaceHolder::IsReadyToDestroy(
 }
 
 PRIVATE
-void SessionInterfaceHolder::StartTimer(IN ISession* piSession)
+void SessionInterfaceHolder::StartTimer(IN const ISession* piSession)
 {
     IMS_TRACE_D("StartTimer", 0, 0, 0);
 

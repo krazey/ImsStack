@@ -135,7 +135,7 @@ void SubscriptionInterfaceHolder::ReleaseISubscription(
 }
 
 PRIVATE
-IMS_BOOL SubscriptionInterfaceHolder::IsReadyToDestroy(IN ISubscription* piSubscription)
+IMS_BOOL SubscriptionInterfaceHolder::IsReadyToDestroy(IN const ISubscription* piSubscription)
 {
     IMS_TRACE_D("IsReadyToDestroy [%d]", piSubscription->GetState(), 0, 0);
 

@@ -431,7 +431,7 @@ void SdpPreconditionHelper::FormConfirmAttribute(IN IMediaDescriptor* piMediaDes
 }
 
 PRIVATE
-IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IMedia* piMedia)
+IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN const IMedia* piMedia)
 {
     if (piMedia == IMS_NULL)
     {
@@ -450,7 +450,7 @@ IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IMedia* piMedia)
 
 PRIVATE
 IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
-        IN ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType)
+        IN const ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType)
 {
     if (piSipMessage == IMS_NULL)
     {

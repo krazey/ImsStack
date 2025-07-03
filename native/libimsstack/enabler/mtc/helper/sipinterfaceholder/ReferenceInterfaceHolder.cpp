@@ -125,7 +125,7 @@ void ReferenceInterfaceHolder::ReleaseIReference(
 #endif
 
 PRIVATE
-IMS_BOOL ReferenceInterfaceHolder::IsReadyToDestroy(IN IReference* piReference)
+IMS_BOOL ReferenceInterfaceHolder::IsReadyToDestroy(IN const IReference* piReference)
 {
     IMS_TRACE_D("IsReadyToDestroy [%d]", piReference->GetState(), 0, 0);
 

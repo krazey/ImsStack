@@ -680,7 +680,7 @@ void MtcCallState::InitMediaSession()
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN IMessage* piMessage)
+IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN const IMessage* piMessage)
 {
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {

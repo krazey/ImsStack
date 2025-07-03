@@ -303,7 +303,7 @@ public:
     Dialog(IN const Dialog&) = delete;
     Dialog& operator=(IN const Dialog&) = delete;
 
-    IMS_RESULT Update(IN IElement* piElementDialog);
+    IMS_RESULT Update(IN const IElement* piElementDialog);
 
     inline const State& GetState() const { return m_objState; }
     inline IMS_UINT32 GetDuration() const { return m_nDuration; }

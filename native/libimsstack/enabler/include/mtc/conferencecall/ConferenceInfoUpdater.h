@@ -55,7 +55,8 @@ protected:
     IMS_RESULT UpdateDescription();
     IMS_RESULT UpdateParticipantList();
     IMS_BOOL FindAndUpdate(IN MatchingPolicy ePolicy);
-    IMS_BOOL UpdateParticipant(IN ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex);
+    IMS_BOOL UpdateParticipant(
+            IN const ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex);
     void SetParticipantsMatchingStarted();
     void SetDeletedParticipantToDisconnected();
 
@@ -80,7 +81,7 @@ protected:
             IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
     ImsList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;
     void AddNotMatchedUserList(IN ConferenceInfo::User* pUser);
-    void RemoveFromNotMatchedUserList(IN ConferenceInfo::User* pUser);
+    void RemoveFromNotMatchedUserList(IN const ConferenceInfo::User* pUser);
     IMS_BOOL IsInitialNotifyWithoutUsers() const;
 
     static IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus);

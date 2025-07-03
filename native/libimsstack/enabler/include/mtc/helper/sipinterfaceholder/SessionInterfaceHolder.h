@@ -82,9 +82,9 @@ public:
 
 private:
     static IMS_BOOL IsReadyToDestroy(
-            IN ISession* piSession, IN IMS_BOOL bSessionTerminatedOrStartFailed);
+            IN const ISession* piSession, IN IMS_BOOL bSessionTerminatedOrStartFailed);
 
-    void StartTimer(IN ISession* piSession);
+    void StartTimer(IN const ISession* piSession);
     void StopTimer(IN ITimer* piTimer);
     ITimer* GetTimer(IN const ISession* piSession) const;
 

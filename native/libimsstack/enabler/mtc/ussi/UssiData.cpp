@@ -137,7 +137,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
 }
 
 PRIVATE
-void UssiData::CreateAnyExtension(IN INode* piNode)
+void UssiData::CreateAnyExtension(IN const INode* piNode)
 {
     const INode* piElement = piNode->GetFirstChild();
     AString strName;

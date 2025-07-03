@@ -706,7 +706,7 @@ void MtcPreconditionManager::OnWaitAvailableAfterW2LHandoverTimerExpired(IN QosT
 }
 
 PRIVATE
-void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN QosTimer* pTimer)
+void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN const QosTimer* pTimer)
 {
     ISession* piSession = GetISessionWithTimer(pTimer);
     if (piSession == IMS_NULL)
@@ -733,7 +733,7 @@ void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN QosTimer* p
 }
 
 PRIVATE
-void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pTimer)
+void MtcPreconditionManager::OnForceAvailableTimerExpired(IN const QosTimer* pTimer)
 {
     ISession* piSession = GetISessionWithTimer(pTimer);
     if (piSession == IMS_NULL)
@@ -1281,7 +1281,7 @@ ISession* MtcPreconditionManager::GetISessionWithTimer(IN const QosTimer* pTimer
 }
 
 PRIVATE
-IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN IMedia* piMedia)
+IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN const IMedia* piMedia)
 {
     if (piMedia == IMS_NULL)
     {
@@ -1299,7 +1299,7 @@ IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN IMedia* piMedia)
 }
 
 PRIVATE
-const SdpMedia* MtcPreconditionManager::GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote)
+const SdpMedia* MtcPreconditionManager::GetSdpMedia(IN const IMedia* piMedia, IN IMS_BOOL bRemote)
 {
     const IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
     if (piMediaDescriptor == IMS_NULL)
