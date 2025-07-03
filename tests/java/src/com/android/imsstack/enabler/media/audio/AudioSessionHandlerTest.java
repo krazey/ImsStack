@@ -242,6 +242,32 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
+    public void testCloseAudioSession_timeout() throws Exception {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        // Close session
+        mAudioSessionHandler.onImsMediaAudioMessage(
+                MediaConstants.REQUEST_CLOSE_SESSION, testParcel);
+        processAllMessages();
+
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockAudioSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mAudioSessionHandler.getMediaState());
+
+        // Advance timer to trigger timeout
+        moveTimeForward(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+        processAllMessages();
+
+        // Verify session is cleaned up due to timeout
+        verify(mMockAudioSessionCallbackHandler, times(1)).closeSessionResponse();
+        verify(mMockQosAgent,
+            times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mAudioSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
+
+    @Test
     public void testModifySession() {
         // Modify Session Request
         AudioConfig audioConfig = MediaTestUtils.createAudioConfig();
