@@ -20,7 +20,6 @@
 
     <!-- Aos -->
     <!-- USIM -->
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
