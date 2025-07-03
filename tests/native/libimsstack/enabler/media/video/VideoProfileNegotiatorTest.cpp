@@ -302,6 +302,38 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateLocalPortZero)
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 }
 
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMatchedInMultipleItems)
+{
+    const IMS_SINT32 nLocalPayload1 = kLocalPayload;
+    const IMS_SINT32 nLocalPayload2 = kLocalPayload + 1;
+    // Arrange: Multiple local payloads and single peer payload, the 2nd local payload is matched
+    // with the peer payload.
+    AddAvcPayload(m_pLocalProfile.get(), nLocalPayload1, VIDEO_RESOLUTION_VGA_LS, 30,
+            "42e01e");  // Level 3.0
+    AddAvcPayload(m_pLocalProfile.get(), nLocalPayload2, VIDEO_RESOLUTION_VGA_LS, 12,
+            "42e00C");  // Level 1.2
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 12,
+            "42e00C");  // Level 1.2
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    VideoProfile::VideoFmtp* pNegoFmtp =
+            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+
+    // Check the negotiated level and the index, direction
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 12);
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 1);  // 2nd index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
 {
     // Arrange: Local nLevel is lower than peer's
@@ -321,7 +353,9 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     auto pNegoFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
 
-    EXPECT_EQ(pNegoFmtp->GetLevel(), 30);  // lower nLevel
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 30);                        // lower Level
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
 }
 
@@ -353,6 +387,8 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
     EXPECT_EQ(pNegoFmtp->GetResolution(),
             VIDEO_RESOLUTION_VGA_LS);  // SetClosestAvc logic based on nLevel
     EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
@@ -374,7 +410,9 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     auto pNegoFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
 
-    EXPECT_EQ(pNegoFmtp->GetLevel(), 90);  // lower nLevel
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 90);                        // lower nLevel
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
 }
 
@@ -398,6 +436,8 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAnswerSentBasicSuccess)
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
     // Local pPayload number should NOT be modified in MO case
     EXPECT_EQ(m_pLocalProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kLocalPayload);
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthRemoteOption)
