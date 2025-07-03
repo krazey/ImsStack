@@ -415,10 +415,9 @@ protected:
 
     void TearDown() override
     {
-        m_pAosERegistration->ClearEModeInfo();
-
         if (m_pAosERegistration)
         {
+            m_pAosERegistration->ClearEModeInfo();
             m_pAosERegistration->ClearTimers();
             m_pAosERegistration->StopTimer(TestAosERegistration::TIMER_OFFLINE_RECOVER);
 
