@@ -294,25 +294,25 @@ protected:
     {
         AosProvider::GetInstance()->SetNConfiguration(m_pOriginAosNConfiguration, SLOT_ID);
 
-        m_pAosIpsecHelper->SetIpsec(OLD_IPSEC, IMS_NULL);
-        m_pAosIpsecHelper->SetIpsec(CURR_IPSEC, IMS_NULL);
-        m_pAosIpsecHelper->SetIpsec(NEW_IPSEC, IMS_NULL);
-
-        if (m_pAosOldIpsec)
-        {
-            delete m_pAosOldIpsec;
-        }
-        if (m_pAosCurrIpsec)
-        {
-            delete m_pAosCurrIpsec;
-        }
-        if (m_pAosNewIpsec)
-        {
-            delete m_pAosNewIpsec;
-        }
-
         if (m_pAosIpsecHelper)
         {
+            m_pAosIpsecHelper->SetIpsec(OLD_IPSEC, IMS_NULL);
+            m_pAosIpsecHelper->SetIpsec(CURR_IPSEC, IMS_NULL);
+            m_pAosIpsecHelper->SetIpsec(NEW_IPSEC, IMS_NULL);
+
+            if (m_pAosOldIpsec)
+            {
+                delete m_pAosOldIpsec;
+            }
+            if (m_pAosCurrIpsec)
+            {
+                delete m_pAosCurrIpsec;
+            }
+            if (m_pAosNewIpsec)
+            {
+                delete m_pAosNewIpsec;
+            }
+
             delete m_pAosIpsecHelper;
         }
 
