@@ -41,7 +41,7 @@ public:
             UceXmlDocumentHelperThread(AString("UceXmlDocumentHelperThread"), 0)
     {
     }
-    virtual ~TestUceXmlDocumentHelperThread() {}
+    virtual ~TestUceXmlDocumentHelperThread() override {}
 
     void setThread(IThread* piThread) { m_piThread = piThread; }
     IThread* getThread() { return GetThread(); }

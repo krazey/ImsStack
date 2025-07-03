@@ -33,7 +33,7 @@ public:
             UceSubscribeManager(AString("UceSubscribeManager"), IMS_NULL, AString("UceApp"), 0)
     {
     }
-    virtual ~TestUceSubscribeManager() {}
+    virtual ~TestUceSubscribeManager() override {}
 
     IMS_UINT32 GetListCount() const { return m_objUceSubscribeList.GetSize(); }
 

@@ -45,7 +45,7 @@ public:
             UceOptions(AString("UceOptionsManager"), piCoreService, piCapabilities, 1, IMS_TRUE, 0)
     {
     }
-    virtual ~TestUceOptions() {}
+    virtual ~TestUceOptions() override {}
 
     IMS_UINT32 getKey() const { return m_nKey; }
 

@@ -43,16 +43,16 @@ class UceApp :
 public:
     explicit UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName);
     explicit UceApp(IN const IMS_SINT32 nSlotId, IN IImsAos* piImsAos);
-    virtual ~UceApp();
+    virtual ~UceApp() override;
     /* ------------------------------------------------------------------------------------------
         Methods
     ---------------------------------------------------------------------------------------------
    */
 
 protected:
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
+    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG) override;
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
+    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG) override;
     virtual IImsActivityController* GetController() override;
     virtual IMS_BOOL Control(
             IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam) override;

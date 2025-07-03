@@ -81,7 +81,7 @@ public:
             UcePublishManager(piCoreService, AString("UcePublishManager"), 0)
     {
     }
-    virtual ~TestUcePublishManager() {}
+    virtual ~TestUcePublishManager() override {}
 
     IMS_UINT32 GetState() const { return m_eState; }
 

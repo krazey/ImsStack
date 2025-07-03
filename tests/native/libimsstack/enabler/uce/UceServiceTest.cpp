@@ -51,7 +51,7 @@ public:
             UceService(piCoreService)
     {
     }
-    virtual ~TestUceService() {}
+    virtual ~TestUceService() override {}
 
     void resetManager()
     {

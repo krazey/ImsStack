@@ -72,7 +72,7 @@ public:
             UceSubscribe(piCoreService, AString("AppName"), AString("UceSubscribeManager"), 0, 0)
     {
     }
-    virtual ~TestUceSubscribe() {}
+    virtual ~TestUceSubscribe() override {}
 
     IMS_UINT32 GetKey() const { return m_nKey; }
     void SetKey(IMS_UINT32 key) { m_nKey = key; }

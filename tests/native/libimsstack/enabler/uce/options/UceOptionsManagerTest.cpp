@@ -44,7 +44,7 @@ public:
             UceOptionsManager(AString("UceOptionsManager"), piCoreService, 0)
     {
     }
-    virtual ~TestUceOptionsManager() {}
+    virtual ~TestUceOptionsManager() override {}
 
     void setAosConnected(IMS_BOOL connected) { m_bAoSConnected = connected; }
     IMS_BOOL getAosConnected() { return m_bAoSConnected; }

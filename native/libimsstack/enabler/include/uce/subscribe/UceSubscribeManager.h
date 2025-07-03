@@ -31,7 +31,7 @@ class UceSubscribeManager : public ImsActivityEx
 public:
     explicit UceSubscribeManager(IN const AString& strName, ICoreService* _piCoreService,
             IN const AString& strAppName, IN IMS_SINT32 nSimSlot);
-    virtual ~UceSubscribeManager();
+    virtual ~UceSubscribeManager() override;
     /* ------------------------------------------------------------------------------------------
         Methods
     ---------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ public:
     IMS_BOOL AosDisConnected();
     void ClosedService();  // core service closed
 protected:
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
 private:
     IMS_BOOL RemoveSubscribe(IN UceSubscribe* subscribe);

@@ -65,7 +65,7 @@ public:
             UceApp(0, piImsAos)
     {
     }
-    virtual ~TestUceApp() {}
+    virtual ~TestUceApp() override {}
     IMS_BOOL callPre(IMSMSG objUIMsg) { return OnPreprocess(objUIMsg); }
     IMS_BOOL sendMessage(IMSMSG& objMSG) { return OnMessage(objMSG); }
     IMS_BOOL callPost(IMSMSG objUIMsg) { return OnPostprocess(objUIMsg); }

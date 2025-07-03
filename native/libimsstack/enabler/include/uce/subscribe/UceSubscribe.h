@@ -69,7 +69,7 @@ public:
     explicit UceSubscribe(IN ICoreService* piCoreService, IN const AString& strAppName,
             IN const AString& strManagerName, IN IMS_UINT32 conectedService,
             IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UceSubscribe();
+    virtual ~UceSubscribe() override;
     virtual IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
 
@@ -82,7 +82,7 @@ public:
 protected:
     virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
     // IWatcherListener - start
     virtual void SubscriptionForkedNotify(
             IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription) override;
