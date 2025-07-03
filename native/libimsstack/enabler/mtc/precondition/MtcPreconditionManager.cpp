@@ -263,7 +263,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
     ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         const SdpMedia* pLocalSdp = GetSdpMedia(piMedia, IMS_FALSE);
         if (pLocalSdp == IMS_NULL)
         {
@@ -917,7 +917,7 @@ void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession) 
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         if (piMedia == IMS_NULL)
         {
             continue;

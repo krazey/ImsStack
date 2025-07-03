@@ -24,24 +24,24 @@ class MtcConfigurationProxy;
 class ConferenceConfigurationHelper
 {
 public:
-    static IMS_BOOL IsConferenceSubscriptionRequired(IN MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsConferenceSubscriptionRequired(IN const MtcConfigurationProxy& objProxy);
     // LGU+ doesn't use Refer-sub.
-    static IMS_BOOL IsReferSubscriptionRequired(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsSubscriptionOutDialog(IN MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsReferSubscriptionRequired(IN const MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsSubscriptionOutDialog(IN const MtcConfigurationProxy& objProxy);
 
     // SKT always set it 1.
-    static IMS_BOOL IsPackageVersionCheckRequired(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsSubscriptionFirst(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsSubscriptionNotifyRequiredForRefer(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsPaidPreferred(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsReUseReferToUri(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsReferToExHeaderUsed(IN MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsPackageVersionCheckRequired(IN const MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsSubscriptionFirst(IN const MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsSubscriptionNotifyRequiredForRefer(IN const MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsPaidPreferred(IN const MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsReUseReferToUri(IN const MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsReferToExHeaderUsed(IN const MtcConfigurationProxy& objProxy);
 
-    static IMS_BOOL IsSubscriptionForParticipantRequired(IN MtcConfigurationProxy& objProxy);
+    static IMS_BOOL IsSubscriptionForParticipantRequired(IN const MtcConfigurationProxy& objProxy);
 
     // timer value. (-1) : permanent. (0) : not wait
     static IMS_SINT32 GetWaitTimeNotifyTerminated(IN MtcConfigurationProxy& objProxy);  // 3s
-    static IMS_SINT32 GetReferTypeForInvite(IN MtcConfigurationProxy& objProxy);
+    static IMS_SINT32 GetReferTypeForInvite(IN const MtcConfigurationProxy& objProxy);
 };
 
 #endif

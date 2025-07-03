@@ -317,7 +317,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionCancelDeliveryFailed(IN ISess
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
-    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
 
     m_objContext.GetSession(piSession)->HandleResponse(
@@ -343,7 +343,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateFailed(IN ISe
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pMtcSession = m_objContext.GetSession();
     pMtcSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
@@ -412,7 +412,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDeliveryFailed(IN ISessi
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
@@ -450,7 +450,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     // No SESSION_STATE_UPDATE is considerable for a non-final response case.
-    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_UPDATE, nIndex);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 

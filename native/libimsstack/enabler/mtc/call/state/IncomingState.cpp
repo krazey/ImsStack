@@ -68,7 +68,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
-    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
@@ -108,7 +108,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISe
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
@@ -142,7 +142,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
 {
     StopTimer(TIMER_MT_PRACK_WAIT);
 
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession();
 
     pSession->HandleRequest(RequestType::PRACK, *piMessage);

@@ -32,7 +32,8 @@ PUBLIC
 MultipleDialogHandler::MultipleDialogHandler() {}
 
 PUBLIC
-void MultipleDialogHandler::OnStarted(IN IMtcCallContext& objContext, IN IMtcSession& objMtcSession)
+void MultipleDialogHandler::OnStarted(
+        IN IMtcCallContext& objContext, IN const IMtcSession& objMtcSession)
 {
     const ImsList<IMtcSession*>& objSessions = objContext.GetSessions();
     IMS_TRACE_D("OnStarted size[%d]", objSessions.GetSize(), 0, 0);

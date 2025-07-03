@@ -348,7 +348,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
+    const IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
     if (piMessage == IMS_NULL)
     {
         return GetStateName();
@@ -976,7 +976,7 @@ IMS_BOOL OutgoingState::HasNotRespondedQosConfirmation(IN ISession& objISession)
 }
 
 PRIVATE
-void OutgoingState::OnStarted(IN IMtcSession& objMtcSession)
+void OutgoingState::OnStarted(IN const IMtcSession& objMtcSession)
 {
     MultipleDialogHandler().OnStarted(m_objContext, objMtcSession);
 

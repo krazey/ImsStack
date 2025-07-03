@@ -219,7 +219,7 @@ protected:
             IN const CallReasonInfo& objReason) const;
     const CallReasonInfo GetAudioInactivityReasonOnMediaDataFailed() const;
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
-    void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
+    void StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessage) const;
     static IMS_SINT32 GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult);
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;

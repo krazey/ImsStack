@@ -294,7 +294,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
         for (IMS_SINT32 index = static_cast<IMS_SINT32>(m_objNotMatchedUsers.GetSize()) - 1;
                 index >= 0; index--)
         {
-            ConferenceInfo::User* pNotMatchedUser = m_objNotMatchedUsers.GetAt(index);
+            const ConferenceInfo::User* pNotMatchedUser = m_objNotMatchedUsers.GetAt(index);
             RemoveFromNotMatchedUserList(pNotMatchedUser);
             UpdateParticipant(pNotMatchedUser, -1);
         }

@@ -66,7 +66,7 @@ public:
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
 
     static void ConvertGlobalNumberToLocalNumber(
-            IN MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
+            IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
 
 private:
     ISipHeader* GetHistoryInfoHeader(IN const IMessage* piMessage);

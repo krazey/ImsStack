@@ -47,7 +47,7 @@ PUBLIC GLOBAL AString TemplateFormatter::Format(
     return strResult;
 }
 
-PRIVATE GLOBAL AString TemplateFormatter::GetImei(IN IMtcCallContext& objContext)
+PRIVATE GLOBAL AString TemplateFormatter::GetImei(IN const IMtcCallContext& objContext)
 {
     AString strDeviceId;
     PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
@@ -58,7 +58,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImei(IN IMtcCallContext& objContext
     return strDeviceIdSpareDigit;
 }
 
-PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN IMtcCallContext& objContext)
+PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN const IMtcCallContext& objContext)
 {
     const ISubscriberInfo* pSubscriberInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(objContext.GetSlotId());
@@ -68,7 +68,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN IMtcCallContext& objContext
     return strImsi;
 }
 
-PRIVATE GLOBAL AString TemplateFormatter::GetMacAddress(IN IMtcCallContext& objContext)
+PRIVATE GLOBAL AString TemplateFormatter::GetMacAddress(IN const IMtcCallContext& objContext)
 {
     AString strMacAddress;
 
@@ -128,7 +128,8 @@ PRIVATE GLOBAL AString TemplateFormatter::GetPort(IN IMtcCallContext& objContext
     return strPort;
 }
 
-PRIVATE GLOBAL const AString& TemplateFormatter::GetPublicUserId(IN IMtcCallContext& objContext)
+PRIVATE GLOBAL const AString& TemplateFormatter::GetPublicUserId(
+        IN const IMtcCallContext& objContext)
 {
     const ISubscriberConfig* pConfig = objContext.GetSubscriberConfig();
     if (pConfig == IMS_NULL)
@@ -146,7 +147,8 @@ PRIVATE GLOBAL const AString& TemplateFormatter::GetPublicUserId(IN IMtcCallCont
     return lstPuids.GetElementAt(0);
 }
 
-PRIVATE GLOBAL AString TemplateFormatter::GetWifiCallingAddressId(IN IMtcCallContext& objContext)
+PRIVATE GLOBAL AString TemplateFormatter::GetWifiCallingAddressId(
+        IN const IMtcCallContext& objContext)
 {
     if (IsInUnknownCountry(objContext.GetSlotId()))
     {

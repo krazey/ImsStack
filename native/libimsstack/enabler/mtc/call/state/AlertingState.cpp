@@ -244,7 +244,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionCanceledOnAccepted(
 
 PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
-    IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
+    const IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
 
     UpdateType eUpdateType = pSession->GetOngoingUpdateType();
@@ -287,7 +287,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
 {
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
@@ -312,7 +312,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPrackReceived(IN ISession* pi
 {
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 

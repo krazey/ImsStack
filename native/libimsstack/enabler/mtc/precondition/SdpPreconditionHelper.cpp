@@ -47,7 +47,7 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormPreconditionSdp(
     ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         if (piMedia == IMS_NULL || piMedia->GetState() == IMedia::STATE_DELETED)
         {
             continue;
@@ -92,7 +92,7 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::RemovePreconditionSdp(IN ISession* pi
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         if (piMedia == IMS_NULL || piMedia->GetState() == IMedia::STATE_DELETED)
         {
             continue;
@@ -195,7 +195,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN IS
 
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         if (!piMedia)
         {
             continue;
@@ -235,7 +235,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMessage = IMS_NULL;
+    const ISipMessage* piSipMessage = IMS_NULL;
 
     if (piRequestMessage->GetState() == IMessage::STATE_SENT)
     {

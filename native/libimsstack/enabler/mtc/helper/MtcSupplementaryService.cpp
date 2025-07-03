@@ -477,7 +477,7 @@ void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
 }
 
 GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
-        IN MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber)
+        IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber)
 {
     AString strSet =
             objConfigurationProxy.GetString(ConfigVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING);

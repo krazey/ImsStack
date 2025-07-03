@@ -88,7 +88,7 @@ private:
     CallStateName PerformSilentRedial(
             IN IMS_SINT32 nIntervalInMillis = ISilentRedialHelper::INTERVAL_BY_TYPE);
     IMS_BOOL HasNotRespondedQosConfirmation(IN ISession& objISession) const;
-    void OnStarted(IN IMtcSession& objMtcSession);
+    void OnStarted(IN const IMtcSession& objMtcSession);
     void OnStartFailed(
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
     CallReasonInfo ConvertConnectionFailureToCallReasonInfo(

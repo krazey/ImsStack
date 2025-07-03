@@ -133,7 +133,7 @@ PUBLIC VIRTUAL void QosStatusTable::RemoveUnusedRecords(IN IMS_UINT32 eMediaType
 
 PUBLIC VIRTUAL void QosStatusTable::UpdateStatusTableWithRemoteSdp(IN const IMedia& objMedia)
 {
-    IMediaDescriptor* piMediaDescriptor = IMS_NULL;
+    const IMediaDescriptor* piMediaDescriptor = IMS_NULL;
     if (objMedia.GetUpdateState() == IMedia::UPDATE_MODIFIED)
     {
         piMediaDescriptor = objMedia.GetProposal()->GetMediaDescriptor();
