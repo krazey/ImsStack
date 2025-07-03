@@ -31,11 +31,11 @@ import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.PhoneConstants;
 
 public class MtcEmergencyServiceManager {
 
@@ -106,13 +106,14 @@ public class MtcEmergencyServiceManager {
      * {@link android.content.Intent#ACTION_NETWORK_COUNTRY_CHANGED} intent is received.
      * This ensures that the returned value is the most recently known country ISO,
      * even if the device's radio is temporarily off (e.g., in airplane mode).
+     * If there is no valid country ISO received via ACTION_NETWORK_COUNTRY_CHANGED,
+     * it returns the most recent valid country ISO obtained from ImsPrivateProperties.
      *
      * @return A non-null string representing the cached network country ISO.
      * Returns an empty string if no country ISO has been cached.
      */
     @NonNull
     public String getNetworkCountryIso() {
-        maybeUpdateNetworkCountryIso();
         log("getNetworkCountryIso : " + mLastCountryIso);
         return mLastCountryIso;
     }
@@ -288,28 +289,28 @@ public class MtcEmergencyServiceManager {
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(
-                    TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED)) {
+            if (TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED.equals(intent.getAction())) {
                 String countryIso = intent.getStringExtra(
                         TelephonyManager.EXTRA_NETWORK_COUNTRY);
-                log("ACTION_NETWORK_COUNTRY_CHANGED : " + countryIso);
-                if (TextUtils.isEmpty(countryIso)) {
-                    return;
+                int phoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY, -1);
+                log("ACTION_NETWORK_COUNTRY_CHANGED[" + phoneId + "] : " + countryIso);
+
+                if (!TextUtils.isEmpty(countryIso)) {
+                    ImsPrivateProperties.Persistent.set(
+                            ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO,
+                            countryIso, phoneId);
+                } else {
+                    countryIso = ImsPrivateProperties.Persistent.get(
+                            ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO, phoneId);
+                    log("Network country ISO from ImsPrivateProperties[" + phoneId + "] : "
+                            + countryIso);
+                    if (TextUtils.isEmpty(countryIso)) {
+                        return;
+                    }
                 }
+
                 mLastCountryIso = countryIso;
             }
         }
     };
-
-    private void maybeUpdateNetworkCountryIso() {
-        if (!TextUtils.isEmpty(mLastCountryIso)) {
-            return;
-        }
-        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
-                TelephonyInterface.class, mContext.getSlotId());
-        if (telephony == null) {
-            return;
-        }
-        mLastCountryIso = telephony.getNetworkCountryIso();
-    }
 }
