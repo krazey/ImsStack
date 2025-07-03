@@ -356,11 +356,8 @@ PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
         A_IMS_TRACE_I(REGID, "don't received 401 challenge, so keep current SA", 0, 0, 0);
 
         // delete New SA
-        if (m_pNewIpsec != IMS_NULL)
-        {
-            delete m_pNewIpsec;
-            m_pNewIpsec = IMS_NULL;
-        }
+        delete m_pNewIpsec;
+        m_pNewIpsec = IMS_NULL;
 
         // update lifetime
         m_pCurrIpsec->ManagePolicyLifetime(
