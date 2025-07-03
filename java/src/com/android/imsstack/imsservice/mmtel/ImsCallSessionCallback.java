@@ -856,7 +856,7 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
-                    log("invokeRttMessageReceived :: " + data);
+                    log("invokeRttMessageReceived");
 
                     mListener.callSessionRttMessageReceived(data);
                 } catch (Throwable t) {
