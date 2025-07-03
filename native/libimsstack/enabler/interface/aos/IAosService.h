@@ -432,6 +432,9 @@ enum class AosReasonCode
     /// Registration termination triggered by network.
     NETWORK_TRIGGERED_DEREGISTER = TO_UINT32(AosReasonCodeBase::BASE) + 12,
 
+    // Deregistration due to user actions
+    NORMAL_DEREGISTRATION = TO_UINT32(AosReasonCodeBase::BASE) + 13,
+
     /**
      * @brief : BASE_MODEM(2000) - Errors requiring special action from the modem.
      */

@@ -4153,3 +4153,34 @@ TEST_F(AosApplicationTest, NotifyDeregisteredWhenPlmnBlockDueToSsacBarred)
 
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
 }
+
+TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToSimRemoved)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objMockIAosRegistration, SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION));
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REMOVED);
+}
+
+TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToSimRefresh)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objMockIAosRegistration, SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION));
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REFRESH);
+}
+
+TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToAirplaneMode)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pAosApplication->SetOffReason(AosReason::AIRPLANE_MODE);
+
+    EXPECT_CALL(m_objMockIAosRegistration, SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION));
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+}

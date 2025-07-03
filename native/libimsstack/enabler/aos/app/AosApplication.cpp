@@ -3621,21 +3621,35 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
         if (eCause == AosControlCause::RADIO_SIM_REMOVED ||
                 eCause == AosControlCause::RADIO_SIM_REFRESH)
         {
+            m_piRegistration->SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION);
             if (!IsEmergency())
             {
                 m_bPdnDeactivationRequired = IMS_TRUE;
             }
         }
 
-        IMS_UINT32 nOffReason = GetOffReason();
-        if (eCause == AosControlCause::DATA && nOffReason != AosReason::WIFI_OFF &&
-                nOffReason != AosReason::AIRPLANE_MODE)
+        if (eCause == AosControlCause::DATA)
         {
-            ProcessDisconnectingState(AosReason::DATA_DISCONNECTED);
-        }
-        else
-        {
-            ProcessDisconnectingState(nOffReason);
+            const IMS_UINT32 nOffReason = GetOffReason();
+            IMS_UINT32 nFinalOffReason;
+
+            switch (nOffReason)
+            {
+                case AosReason::AIRPLANE_MODE:
+                    m_piRegistration->SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION);
+                    nFinalOffReason = nOffReason;
+                    break;
+
+                case AosReason::WIFI_OFF:
+                    nFinalOffReason = nOffReason;
+                    break;
+
+                default:
+                    nFinalOffReason = AosReason::DATA_DISCONNECTED;
+                    break;
+            }
+
+            ProcessDisconnectingState(nFinalOffReason);
         }
 
         PostMessage(MSG_REG_STOP, 0, 0);

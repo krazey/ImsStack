@@ -396,6 +396,7 @@ public interface IAosRegistrationListener {
         USIM_AUTHENTICATION_FAILURES(ReasonCode.BASE, 10),
         INTERNAL_ERROR(ReasonCode.BASE, 11),
         NETWORK_TRIGGERED_DEREGISTER(ReasonCode.BASE, 12),
+        NORMAL_DEREGISTRATION(ReasonCode.BASE, 13),
 
         /**
          * BASE_MODEM : 2000 (Errors requiring special action from the modem.)
@@ -644,6 +645,9 @@ public interface IAosRegistrationListener {
                 Map.entry(ReasonCode.USIM_AUTHENTICATION_FAILURES, Pair.create(
                         ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
                         ImsReasonInfo.CODE_NO_VALID_SIM)),
+                Map.entry(ReasonCode.NORMAL_DEREGISTRATION, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                        ExtraReason.CODE_NORMAL_DEREGISTRATION)),
                 Map.entry(ReasonCode.WFC_REG_RESP_500, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR,
                         ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE)),
@@ -708,6 +712,11 @@ public interface IAosRegistrationListener {
      * ExtraReason
      */
     class ExtraReason {
+
+        /**
+         * Used as extra code when IMS termination due to user actions
+         */
+        public static final int CODE_NORMAL_DEREGISTRATION = 1001;
 
         /**
          * Used as extra code when IMS termination due to VoPS not supported

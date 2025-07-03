@@ -22,6 +22,7 @@ class AString;
 class IAosRegistrationListener;
 
 enum class AosRegistrationType;
+enum class AosReasonCode;
 
 /**
  * @brief This class provides the interface for AosRegistration.
@@ -156,6 +157,13 @@ public:
      * @param bReady Indicate whether application state is ready or not.
      */
     virtual void SetAppReady(IN IMS_BOOL bReady) = 0;
+
+    /**
+     * @brief Set the reason code for IMS termination
+     *
+     * @param eReason Indicate the reason of IMS termination
+     */
+    virtual void SetReasonCode(IN AosReasonCode eReason) = 0;
 
     /**
      * @brief Indicate the type and the detailed reason for requesting the operation.
