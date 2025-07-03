@@ -21,7 +21,6 @@
     <!-- Aos -->
     <boolean name="ims.use_reginfo_contact_without_uri_check_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
-    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="false"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
 
     <!-- Media -->
