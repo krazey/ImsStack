@@ -2619,9 +2619,9 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
 
     AStringArray objImpu;
 
-    if (IsFakeRegistration() == IMS_FALSE)
+    if (IsFakeRegistration() == IMS_FALSE && pSubscriber != IMS_NULL)
     {
-        if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming() && pSubscriber != IMS_NULL &&
+        if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming() &&
                 pSubscriber->HasValidTemporaryPublicUserIdForGiba())
         {
             A_IMS_TRACE_D(REGID, "SetAor :: Temporary PUID for GIBA has been set", 0, 0, 0);
@@ -2632,24 +2632,28 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
             objImpu = pSubscriber->GetConfiguredImpus();
         }
     }
-    else if (!GET_N_CONFIG(m_nSlotId)->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported())
+    else if (!GET_N_CONFIG(m_nSlotId)->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() &&
+            pSubscriber != IMS_NULL)
     {
         objImpu = pSubscriber->GetFakeImpus();
     }
     else
     {
         IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
-        if (piRsm == IMS_NULL || piRsm->GetImsRegState() != IMS_REG_ON)
+        const IRegistration* piRegistration = m_piRegManager->GetRegistration(
+                m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
+        if (piRsm == IMS_NULL || piRsm->GetImsRegState() != IMS_REG_ON ||
+                piRegistration == IMS_NULL)
         {
-            objImpu = pSubscriber->GetFakeImpus();
+            if (pSubscriber != IMS_NULL)
+            {
+                objImpu = pSubscriber->GetFakeImpus();
+            }
         }
         else
         {
             A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedUris from normal registration", 0, 0, 0);
-            const IRegistration* piRegistration = m_piRegManager->GetRegistration(
-                    m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
-            objImpu = (piRegistration == IMS_NULL) ? pSubscriber->GetFakeImpus()
-                                                   : piRegistration->GetAssociatedUris();
+            objImpu = piRegistration->GetAssociatedUris();
         }
     }
 
