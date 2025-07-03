@@ -928,7 +928,7 @@ TEST_F(MtcCallTest, GetUpdatingInfoReturnsSameNotNullInstance)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
 
-    UpdatingInfo& objUpdatingInfo = objCall.GetUpdatingInfo();
+    const UpdatingInfo& objUpdatingInfo = objCall.GetUpdatingInfo();
 
     EXPECT_NE(nullptr, &objUpdatingInfo);
     EXPECT_EQ(&objUpdatingInfo, &objCall.GetUpdatingInfo());
@@ -938,7 +938,7 @@ TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
 
-    EpsFallbackTrigger& objEpsFbTrigger = objCall.GetEpsFallbackTrigger();
+    const EpsFallbackTrigger& objEpsFbTrigger = objCall.GetEpsFallbackTrigger();
 
     EXPECT_NE(nullptr, &objEpsFbTrigger);
     EXPECT_EQ(&objEpsFbTrigger, &objCall.GetEpsFallbackTrigger());

@@ -189,7 +189,7 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample1)
     const ImsList<Dialog*>& objDialogs = objDialogInfoManager.GetDialogs();
     EXPECT_TRUE(objDialogs.GetSize() == 2);
 
-    Dialog& objDialog1 = *objDialogs.GetAt(0);
+    const Dialog& objDialog1 = *objDialogs.GetAt(0);
     EXPECT_TRUE(objDialog1.GetState().GetCode() == 0);
     EXPECT_TRUE(objDialog1.GetState().GetEvent() == Dialog::State::EVENT_IDLE);
     EXPECT_TRUE(objDialog1.GetState().GetState() == Dialog::State::STATE_CONFIRMED);
@@ -241,7 +241,7 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample2)
     EXPECT_TRUE(objDialogs.GetSize() == 2);
 
     // dialog1
-    Dialog& objDialog1 = *objDialogs.GetAt(0);
+    const Dialog& objDialog1 = *objDialogs.GetAt(0);
     EXPECT_TRUE(objDialog1.GetState().GetCode() == 0);
     EXPECT_TRUE(objDialog1.GetState().GetEvent() == Dialog::State::EVENT_IDLE);
     EXPECT_TRUE(objDialog1.GetState().GetState() == Dialog::State::STATE_EARLY);
@@ -286,7 +286,7 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample2)
     EXPECT_TRUE(objDialog1.GetRemoteTag().Equals("remotetag1"));
 
     // dialog2
-    Dialog& objDialog2 = *objDialogs.GetAt(1);
+    const Dialog& objDialog2 = *objDialogs.GetAt(1);
     EXPECT_TRUE(objDialog2.GetState().GetCode() == 486);
     EXPECT_TRUE(objDialog2.GetState().GetEvent() == Dialog::State::EVENT_REJECTED);
     EXPECT_TRUE(objDialog2.GetState().GetState() == Dialog::State::STATE_CONFIRMED);

@@ -97,7 +97,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
     IMtcSession* pSession = m_objContext.GetSession();
-    ISession& objSession = pSession->GetISession();
+    const ISession& objSession = pSession->GetISession();
     pSession->SetCallType(eCallType);
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
@@ -177,7 +177,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
     IMtcSession* pSession = m_objContext.GetSession();
-    ISession& objSession = pSession->GetISession();
+    const ISession& objSession = pSession->GetISession();
 
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
     pSession->SetCallType(eCallType);

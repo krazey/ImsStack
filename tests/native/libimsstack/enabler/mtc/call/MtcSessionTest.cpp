@@ -678,7 +678,7 @@ TEST_F(MtcSessionTest, SecondTerminateReturnsFailure)
 TEST_F(MtcSessionTest, GetExtensionSetReturnsMember)
 {
     CreateMtcSession();
-    MtcExtensionSet& objExtensionSet = pMtcSession->GetExtensionSet();
+    const MtcExtensionSet& objExtensionSet = pMtcSession->GetExtensionSet();
     EXPECT_NE(&objExtensionSet, nullptr);
 }
 

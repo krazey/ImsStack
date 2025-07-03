@@ -38,7 +38,7 @@ SessionInterfaceHolder::~SessionInterfaceHolder()
 {
     IMS_TRACE_D("~SessionInterfaceHolder", 0, 0, 0);
 
-    for (auto& sessionRecord : m_objSessionRecords)
+    for (const auto& sessionRecord : m_objSessionRecords)
     {
         if (sessionRecord.second->piSession != IMS_NULL)
         {
@@ -207,7 +207,7 @@ void SessionInterfaceHolder::StartTimer(IN ISession* piSession)
 {
     IMS_TRACE_D("StartTimer", 0, 0, 0);
 
-    for (auto& sessionRecord : m_objSessionRecords)
+    for (const auto& sessionRecord : m_objSessionRecords)
     {
         if (sessionRecord.second->piSession == piSession)
         {
@@ -233,7 +233,7 @@ void SessionInterfaceHolder::StopTimer(IN ITimer* piTimer)
         return;
     }
 
-    for (auto& sessionRecord : m_objSessionRecords)
+    for (const auto& sessionRecord : m_objSessionRecords)
     {
         if (sessionRecord.second->piTimer == piTimer)
         {
@@ -248,7 +248,7 @@ void SessionInterfaceHolder::StopTimer(IN ITimer* piTimer)
 PRIVATE
 ITimer* SessionInterfaceHolder::GetTimer(IN const ISession* piSession) const
 {
-    for (auto& sessionRecord : m_objSessionRecords)
+    for (const auto& sessionRecord : m_objSessionRecords)
     {
         if (sessionRecord.second->piSession == piSession)
         {

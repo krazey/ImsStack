@@ -472,15 +472,18 @@ TEST_F(MtcCallControllerTest, TransferCallsEctManager)
 TEST_F(MtcCallControllerTest, GetRedialHelperCreatesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper =
+            pCallController->GetRedialHelper(objContext, objReason);
     EXPECT_NE(&objRedialHelper, nullptr);
 }
 
 TEST_F(MtcCallControllerTest, GetRedialHelperWithSameReasonDoesNotCreatesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper1 = pCallController->GetRedialHelper(objContext, objReason);
-    ISilentRedialHelper& objRedialHelper2 = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper1 =
+            pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper2 =
+            pCallController->GetRedialHelper(objContext, objReason);
     EXPECT_EQ(&objRedialHelper1, &objRedialHelper2);
 }
 

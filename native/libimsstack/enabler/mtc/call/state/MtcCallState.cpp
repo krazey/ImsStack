@@ -899,7 +899,7 @@ IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessa
     if (eMethod.Equals(SipMethod::PRACK))
     {
         // RFC 6337. Table 1. Case 4, 5
-        IMessage& objPrackMessage = *piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+        const IMessage& objPrackMessage = *piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
         if (objPrackMessage.GetState() == IMessage::STATE_SENT)
         {
             return m_objContext.GetMessageUtils().HasSdp(&objPrackMessage);
@@ -1118,7 +1118,7 @@ IMS_SINT32 MtcCallState::GetCallReasonByNegotiationResult(IN NegotiationResult e
 PROTECTED
 IMS_BOOL MtcCallState::IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const
 {
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
 
     return objPreconditionManager.IsLocalResourceConfirmationRequired(piSession) &&
             objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession);

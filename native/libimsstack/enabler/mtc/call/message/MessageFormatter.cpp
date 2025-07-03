@@ -76,7 +76,7 @@ PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetHeader(
         return;
     }
 
-    MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
     if (objConfig.Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                 MessageUtil::STR_REASON_USER_SESSIONEXPIRED))
     {
@@ -120,7 +120,7 @@ PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetHeader(
 PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetPrivateHeader(
         IN ISipMessage* piOldSipMsg, IN ISipMessage* piNewSipMsg)
 {
-    MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
     if (objConfig.Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                 MessageUtil::STR_P_SKT_BYE_CAUSE))
     {
@@ -577,7 +577,7 @@ void MessageFormatter::SetReasonHeader(IN const AString& strReason)
 PRIVATE
 void MessageFormatter::SetCarrierSpecificHeaders()
 {
-    MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
     if (objConfig.Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                 MessageUtil::STR_P_TTA_VOLTE_INFO))
     {
