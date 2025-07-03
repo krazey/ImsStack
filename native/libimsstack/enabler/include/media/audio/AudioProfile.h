@@ -68,7 +68,7 @@ public:
         {
         }
 
-        virtual ~AudioFmtp() {};
+        virtual ~AudioFmtp() override {};
 
         inline void SetModeSetList(IN const IMS_UINT32 nModeSetList)
         {
@@ -169,7 +169,7 @@ public:
         {
         }
 
-        virtual ~AmrFmtp() {};
+        virtual ~AmrFmtp() override {};
 
         inline void SetOctetAlign(IN const IMS_SINT32 nOctetAlign) { m_nOctetAlign = nOctetAlign; }
         inline IMS_SINT32 GetOctetAlign() { return m_nOctetAlign; }
@@ -250,7 +250,7 @@ public:
         {
         }
 
-        virtual ~EvsFmtp() {};
+        virtual ~EvsFmtp() override {};
 
         inline void SetHfOnly(IN const IMS_UINT32 nHfOnly) { m_nHfOnly = nHfOnly; }
         inline IMS_UINT32 GetHfOnly() { return m_nHfOnly; }
@@ -348,7 +348,7 @@ public:
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
                 m_strEvents(objFmtp.m_strEvents) {};
 
-        virtual ~TelephoneEventFmtp() {};
+        virtual ~TelephoneEventFmtp() override {};
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
@@ -504,17 +504,17 @@ public:
             m_objRtcpXrAttr(RtcpXrAttributes()),
             m_bAnbr(IMS_FALSE) {};
 
-    virtual ~AudioProfile() {};
+    virtual ~AudioProfile() override {};
 
     AudioProfile(IN const AudioProfile& obj) :
-            MediaBaseProfile(obj)
+            MediaBaseProfile(obj),
+            m_nPtime(obj.m_nPtime),
+            m_nMaxPtime(obj.m_nMaxPtime),
+            m_objCandidateAttr(obj.m_objCandidateAttr),
+            m_bSupportRtcpXr(obj.m_bSupportRtcpXr),
+            m_objRtcpXrAttr(obj.m_objRtcpXrAttr),
+            m_bAnbr(obj.m_bAnbr)
     {
-        m_nPtime = obj.m_nPtime;
-        m_nMaxPtime = obj.m_nMaxPtime;
-        m_objCandidateAttr = obj.m_objCandidateAttr;
-        m_bSupportRtcpXr = obj.m_bSupportRtcpXr;
-        m_objRtcpXrAttr = obj.m_objRtcpXrAttr;
-        m_bAnbr = obj.m_bAnbr;
     }
 
     AudioProfile& operator=(IN const AudioProfile& obj)

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +53,7 @@ public:
     class RtpMap
     {
     public:
-        RtpMap(IN const IMS_SINT32 channel = 0) :
+        explicit RtpMap(IN const IMS_SINT32 channel = 0) :
                 m_nPayloadNumber(0),
                 m_strPayloadType(AString::ConstNull()),
                 m_nSamplingRate(0),
@@ -122,7 +122,7 @@ public:
     class BasePayload
     {
     public:
-        BasePayload(IN const IMS_SINT32 channel = 0) :
+        explicit BasePayload(IN const IMS_SINT32 channel = 0) :
                 m_objRtpMap(channel),
                 m_pFmtp(IMS_NULL)
         {
@@ -244,42 +244,39 @@ public:
 
     virtual ~MediaBaseProfile() { DeletePayloads(); }
 
-    MediaBaseProfile(MediaBaseProfile* profile)
+    explicit MediaBaseProfile(const MediaBaseProfile* profile) :
+            m_objIpAddress(profile ? profile->m_objIpAddress : IpAddress::IPv6NONE),
+            m_nDataPort(profile ? profile->m_nDataPort : 0),
+            m_nControlPort(profile ? profile->m_nControlPort : 0),
+            m_strTransportType(profile ? profile->m_strTransportType : "RTP/AVP"),
+            m_nRtcpInterval(profile ? profile->m_nRtcpInterval : 0),
+            m_nBandwidthAs(profile ? profile->m_nBandwidthAs : 0),
+            m_nBandwidthRs(profile ? profile->m_nBandwidthRs : 0),
+            m_nBandwidthRr(profile ? profile->m_nBandwidthRr : 0),
+            m_eDirection(profile ? profile->m_eDirection : MEDIA_DIRECTION_INVALID),
+            m_objCapaNego(profile ? profile->m_objCapaNego : CapaNego()),
+            m_nNegotiatedPayloadIndex(profile ? profile->m_nNegotiatedPayloadIndex : -1)
     {
-        if (profile == nullptr)
+        if (profile != nullptr)
         {
-            return;
+            DeletePayloads();
+            CopyPayloads(profile->m_lstPayload);
         }
-        m_objIpAddress = profile->m_objIpAddress;
-        m_nDataPort = profile->m_nDataPort;
-        m_nControlPort = profile->m_nControlPort;
-        m_strTransportType = profile->m_strTransportType;
-        m_nRtcpInterval = profile->m_nRtcpInterval;
-        m_nBandwidthAs = profile->m_nBandwidthAs;
-        m_nBandwidthRs = profile->m_nBandwidthRs;
-        m_nBandwidthRr = profile->m_nBandwidthRr;
-        m_eDirection = profile->m_eDirection;
-        m_objCapaNego = profile->m_objCapaNego;
-        m_nNegotiatedPayloadIndex = profile->m_nNegotiatedPayloadIndex;
-
-        DeletePayloads();
-        CopyPayloads(profile->m_lstPayload);
     }
 
-    MediaBaseProfile(const MediaBaseProfile& obj)
+    MediaBaseProfile(const MediaBaseProfile& obj) :
+            m_objIpAddress(obj.m_objIpAddress),
+            m_nDataPort(obj.m_nDataPort),
+            m_nControlPort(obj.m_nControlPort),
+            m_strTransportType(obj.m_strTransportType),
+            m_nRtcpInterval(obj.m_nRtcpInterval),
+            m_nBandwidthAs(obj.m_nBandwidthAs),
+            m_nBandwidthRs(obj.m_nBandwidthRs),
+            m_nBandwidthRr(obj.m_nBandwidthRr),
+            m_eDirection(obj.m_eDirection),
+            m_objCapaNego(obj.m_objCapaNego),
+            m_nNegotiatedPayloadIndex(obj.m_nNegotiatedPayloadIndex)
     {
-        m_objIpAddress = obj.m_objIpAddress;
-        m_nDataPort = obj.m_nDataPort;
-        m_nControlPort = obj.m_nControlPort;
-        m_strTransportType = obj.m_strTransportType;
-        m_nRtcpInterval = obj.m_nRtcpInterval;
-        m_nBandwidthAs = obj.m_nBandwidthAs;
-        m_nBandwidthRs = obj.m_nBandwidthRs;
-        m_nBandwidthRr = obj.m_nBandwidthRr;
-        m_eDirection = obj.m_eDirection;
-        m_objCapaNego = obj.m_objCapaNego;
-        m_nNegotiatedPayloadIndex = obj.m_nNegotiatedPayloadIndex;
-
         DeletePayloads();
         CopyPayloads(obj.m_lstPayload);
     }

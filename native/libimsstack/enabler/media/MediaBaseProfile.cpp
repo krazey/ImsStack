@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,8 +47,8 @@ PUBLIC bool MediaBaseProfile::ComparePayloadList(const ImsList<BasePayload*>& pa
 
     for (IMS_UINT32 i = 0; i < m_lstPayload.GetSize(); i++)
     {
-        BasePayload* pPayload1 = m_lstPayload.GetAt(i);
-        BasePayload* pPayload2 = payloadList.GetAt(i);
+        const BasePayload* pPayload1 = m_lstPayload.GetAt(i);
+        const BasePayload* pPayload2 = payloadList.GetAt(i);
 
         if (pPayload1 == IMS_NULL || pPayload2 == IMS_NULL)
         {

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ public:
                 m_nRedLevel(obj.m_nRedLevel),
                 m_nRedPayload(obj.m_nRedPayload) {};
 
-        virtual ~RedFmtp() {};
+        virtual ~RedFmtp() override {};
 
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
@@ -86,7 +86,7 @@ public:
             }
         }
 
-        virtual ~Payload() {}
+        virtual ~Payload() override {}
 
         Payload& operator=(IN const Payload& obj)
         {
@@ -111,9 +111,9 @@ public:
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
             m_bKeepRedLevel(IMS_TRUE) {};
 
-    virtual ~TextProfile() {}
+    virtual ~TextProfile() override {}
 
-    TextProfile(IN TextProfile* profile) :
+    explicit TextProfile(IN TextProfile* profile) :
             MediaBaseProfile(profile)
     {
         if (profile == nullptr)

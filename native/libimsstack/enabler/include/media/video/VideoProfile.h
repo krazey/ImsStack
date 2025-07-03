@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ public:
     class VideoFmtp : public BaseFmtp
     {
     public:
-        explicit VideoFmtp(IN VideoFmtp* pFmtp = IMS_NULL) :
+        explicit VideoFmtp(IN const VideoFmtp* pFmtp = IMS_NULL) :
                 m_eResolution(VIDEO_RESOLUTION_INVALID),
                 m_nBitrate(0),
                 m_nFrameRate(0),
@@ -78,7 +78,7 @@ public:
                 m_bShowPacketizationMode(IMS_FALSE),
                 m_bShowSpropParam(IMS_FALSE) {};
 
-        virtual ~VideoFmtp() {};
+        virtual ~VideoFmtp() override {};
 
         inline void SetResolution(IN const VIDEO_RESOLUTION eResolution)
         {
@@ -130,7 +130,7 @@ public:
     class AvcFmtp : public VideoFmtp
     {
     public:
-        explicit AvcFmtp(IN AvcFmtp* pFmtp = IMS_NULL) :
+        explicit AvcFmtp(IN const AvcFmtp* pFmtp = IMS_NULL) :
                 VideoFmtp(pFmtp),
                 m_strProfileLevelId(AString::ConstNull()),
                 m_bShowProfileLevelId(IMS_FALSE)
@@ -153,7 +153,7 @@ public:
                 m_strProfileLevelId(strProfileLevelId),
                 m_bShowProfileLevelId(IMS_FALSE) {};
 
-        virtual ~AvcFmtp() {};
+        virtual ~AvcFmtp() override {};
 
         inline void SetProfileLevelId(IN const AString strProfileLevelId)
         {
@@ -178,7 +178,7 @@ public:
     class HevcFmtp : public VideoFmtp
     {
     public:
-        explicit HevcFmtp(IN HevcFmtp* pFmtp = IMS_NULL) :
+        explicit HevcFmtp(IN const HevcFmtp* pFmtp = IMS_NULL) :
                 VideoFmtp(pFmtp),
                 m_bShowProfile(IMS_FALSE),
                 m_bShowLevel(IMS_FALSE)
@@ -201,7 +201,7 @@ public:
                 m_bShowProfile(IMS_FALSE),
                 m_bShowLevel(IMS_FALSE) {};
 
-        virtual ~HevcFmtp() {};
+        virtual ~HevcFmtp() override {};
 
         inline void SetShowProfile(IN const IMS_BOOL nShow) { m_bShowProfile = nShow; }
         inline IMS_BOOL IsProfileVisible() { return m_bShowProfile; }
@@ -320,7 +320,7 @@ public:
             CreateVideoFmtp(obj);
         }
 
-        virtual ~Payload() {}
+        virtual ~Payload() override {}
 
         Payload& operator=(IN const Payload& obj)
         {
@@ -373,10 +373,10 @@ public:
         {
             m_bIncludeFrameSize = bIncludeFrameSize;
         }
-        inline IMS_BOOL IsFrameSizeIncluded() { return m_bIncludeFrameSize; }
-        inline void SetImageAttr(IN const AString strImageAttr) { m_strImageAttr = strImageAttr; }
-        inline AString& GetImageAttr() { return m_strImageAttr; }
-        inline void SetRtcpFbAttr(IN const RtcpFbAttributes objRtcpFbAttr)
+        inline IMS_BOOL IsFrameSizeIncluded() const { return m_bIncludeFrameSize; }
+        inline void SetImageAttr(IN const AString& strImageAttr) { m_strImageAttr = strImageAttr; }
+        inline const AString& GetImageAttr() const { return m_strImageAttr; }
+        inline void SetRtcpFbAttr(IN const RtcpFbAttributes& objRtcpFbAttr)
         {
             m_objRtcpFbAttr = objRtcpFbAttr;
         }
@@ -398,7 +398,7 @@ public:
             m_nCvoId(-1),
             m_bSupportCapaNegoForAvpf(IMS_FALSE) {};
 
-    virtual ~VideoProfile() {}
+    virtual ~VideoProfile() override {}
 
     VideoProfile(IN const VideoProfile& obj) :
             MediaBaseProfile(obj)
