@@ -32,6 +32,9 @@
         <item value="0"/> <!-- INVITE -->
     </int-array>
 
+    <!-- Mts -->
+    <int name="imssms.sms_error_code_when_mt_sms_blocked_int" value="415"/>
+
     <!-- Aos -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>

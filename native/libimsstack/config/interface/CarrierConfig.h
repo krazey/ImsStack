@@ -755,6 +755,7 @@ public:
         static const IMS_CHAR KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL[];
         static const IMS_CHAR KEY_SMS_SUPPORT_CONTENT_TRANSFER_ENCODING_HEADER_BOOL[];
         static const IMS_CHAR KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL[];
+        static const IMS_CHAR KEY_SMS_ERROR_CODE_WHEN_MT_SMS_BLOCKED_INT[];
 
         // SMS formats
         enum

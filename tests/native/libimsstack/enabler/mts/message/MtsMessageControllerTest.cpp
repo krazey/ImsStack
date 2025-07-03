@@ -1148,10 +1148,31 @@ TEST_F(MtsMessageControllerTest, ProcessMtSmsWhenMtServiceBlocked)
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_ERROR_CODE_WHEN_MT_SMS_BLOCKED_INT, _))
+            .WillByDefault(Return(SipStatusCode::SC_480));
 
     EXPECT_CALL(objJniMtsAppThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
             .Times(0);
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_480, _)).Times(1);
+    EXPECT_CALL(objMockPageMessage, Destroy()).Times(1);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage, eServiceType);
+}
+
+TEST_F(MtsMessageControllerTest, ProcessMtSmsAndRespondSpecifiedErrorWhenMtServiceBlocked)
+{
+    MtsServiceType eServiceType = MtsServiceType::NORMAL;
+
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_ERROR_CODE_WHEN_MT_SMS_BLOCKED_INT, _))
+            .WillByDefault(Return(SipStatusCode::SC_415));
+
+    EXPECT_CALL(objJniMtsAppThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
+    EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_415, _)).Times(1);
     EXPECT_CALL(objMockPageMessage, Destroy()).Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage, eServiceType);
 }

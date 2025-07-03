@@ -774,4 +774,5 @@
     <boolean name="imssms.sms_in_reply_to_validation_bool" value="true"/>
     <boolean name="imssms.sms_support_content_transfer_encoding_header_bool" value="false"/>
     <boolean name="imssms.sms_evaluate_radio_status_for_3rd_attempt_bool" value="false"/>
+    <int name="imssms.sms_error_code_when_mt_sms_blocked_int" value="480"/>
 </carrier_config>

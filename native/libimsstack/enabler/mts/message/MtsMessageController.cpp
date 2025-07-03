@@ -433,8 +433,12 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
     {
         IMS_TRACE_E(0, "Mts is NOTREADY STATE", 0, 0, 0);
 
-        // 480 Temporarily Unavailable.
-        piPageMessage->Reject(SipStatusCode::SC_480, 0);
+        IMS_SINT32 nErrorCode =
+                ConfigService::GetConfigService()
+                        ->GetCarrierConfig(m_objContext.GetSlotId())
+                        ->GetInt(CarrierConfig::ImsSms::KEY_SMS_ERROR_CODE_WHEN_MT_SMS_BLOCKED_INT,
+                                SipStatusCode::SC_480);
+        piPageMessage->Reject(nErrorCode, 0);
         piPageMessage->Destroy();
         return;
     }
