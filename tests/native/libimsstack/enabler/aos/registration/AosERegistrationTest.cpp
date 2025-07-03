@@ -207,7 +207,8 @@ private:
 class AosERegistrationTest : public ::testing::Test
 {
 public:
-    inline AosERegistrationTest()
+    inline AosERegistrationTest() :
+            m_pAosERegistration(IMS_NULL)
     {
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
