@@ -65,7 +65,7 @@ public:
 
     inline void SetRegType(IN AosRegistrationType eRegType) { m_eRegType = eRegType; }
 
-    inline void SetTemporaryPublicUserId(IN AString& strTempPuid)
+    inline void SetTemporaryPublicUserId(IN const AString& strTempPuid)
     {
         m_strTempPuidForGiba = strTempPuid;
     }
