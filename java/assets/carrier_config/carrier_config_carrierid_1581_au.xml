@@ -67,6 +67,7 @@
         </int-array>
     </pbundle_as_map>
     <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="true"/>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <boolean name="imsemergency.support_anonymous_ecall_action_bool" value="true"/>
     <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>
     <boolean name="imsemergency.silent_retry_emergency_call_with_delay_of_retry_after_bool" value="true"/>

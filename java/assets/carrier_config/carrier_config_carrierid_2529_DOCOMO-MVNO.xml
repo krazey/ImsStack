@@ -26,6 +26,7 @@
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
 
     <!-- Ims General -->
     <boolean name="ims.require_sip_expires_header_in_register_bool" value="true"/>

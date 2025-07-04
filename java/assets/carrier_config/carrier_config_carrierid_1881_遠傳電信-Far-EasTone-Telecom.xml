@@ -23,6 +23,7 @@
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <int name="imswfc.registration_private_header_int" value="2"/>
 
     <!-- Ssc -->

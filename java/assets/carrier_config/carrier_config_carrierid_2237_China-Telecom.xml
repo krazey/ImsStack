@@ -16,6 +16,7 @@
 -->
 <carrier_config>
     <!-- Aos -->
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>

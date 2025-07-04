@@ -26,6 +26,7 @@
         <item value="503"/>
         <item value="504"/>
     </int-array>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
     <!-- Mtc -->

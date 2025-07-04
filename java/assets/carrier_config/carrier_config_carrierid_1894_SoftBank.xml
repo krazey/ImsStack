@@ -41,6 +41,7 @@
             <item value="600"/>
         </int-array>
     </pbundle_as_map>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>

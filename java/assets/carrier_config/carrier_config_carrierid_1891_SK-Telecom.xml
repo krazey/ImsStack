@@ -60,6 +60,7 @@
         </int-array>
     </pbundle_as_map>
     <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
