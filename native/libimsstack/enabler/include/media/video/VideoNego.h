@@ -28,7 +28,7 @@ public:
     explicit VideoNego(IN const IMS_SINT32 nSlotID = IMS_SLOT_0);
     VideoNego(IN const VideoNego& obj);
     VideoNego& operator=(IN const VideoNego& obj);
-    virtual ~VideoNego();
+    virtual ~VideoNego() override;
 
     void DestroyProfiles();
 
@@ -49,11 +49,6 @@ public:
      * @return VIDEO_RESOLUTION
      */
     virtual VIDEO_RESOLUTION GetNegotiatedResolution();
-
-    /**
-     * @brief static cast from MediaConfiguration to VideoConfiguration
-     */
-    VideoConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
 
     /**
      * @brief static cast from MediaBaseProfile to VideoProfile
@@ -96,8 +91,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    VideoProfile::Payload* FindPayloadInProfile(
-            IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
     IMS_BOOL GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType, IN IMS_CHAR* szSprop,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
 

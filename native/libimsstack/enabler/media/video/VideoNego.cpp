@@ -67,7 +67,7 @@ VideoNego& VideoNego::operator=(IN const VideoNego& obj)
     return (*this);
 }
 
-PUBLIC VideoNego::~VideoNego()
+PUBLIC VIRTUAL VideoNego::~VideoNego()
 {
     IMS_TRACE_I("~VideoNego()", 0, 0, 0);
 }
@@ -122,11 +122,6 @@ PUBLIC VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
     }
 
     return VIDEO_RESOLUTION_INVALID;
-}
-
-PUBLIC VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)
-{
-    return (pConfig != IMS_NULL) ? static_cast<VideoConfiguration*>(pConfig) : IMS_NULL;
 }
 
 PUBLIC VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
@@ -252,7 +247,7 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
     // Make new Offer/Answer model, and copy source profile from previous negotiated profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
 
-    MediaSessionConfig* pMediaSessionConfig =
+    const MediaSessionConfig* pMediaSessionConfig =
             MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                     GetSlotId(), m_pEnvironment->eServiceType);
 
@@ -448,238 +443,4 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
 
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     return pNewOaModel->pNegotiatedProfile->GetDirection();
-}
-
-PRIVATE
-VideoProfile::Payload* VideoNego::FindPayloadInProfile(
-        IN VideoProfile* pProfile, IN VideoProfile::Payload* pTargetPayload)
-{
-    if (pProfile == IMS_NULL || pTargetPayload == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    VideoProfile::Payload* pTempPayload = IMS_NULL;  // To keep secondary payload
-
-    if (m_pConfig == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        VideoProfile::Payload* pOriginPayload = pProfile->GetPayloadAt(i);
-
-        if (pOriginPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        if ((pOriginPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
-                    pTargetPayload->GetRtpMap().GetPayloadType())) &&
-                (pOriginPayload->GetRtpMap().GetSamplingRate() ==
-                        pTargetPayload->GetRtpMap().GetSamplingRate()))
-        {
-            if (pOriginPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
-            {
-                VideoProfile::AvcFmtp* pOriginFmtp =
-                        (VideoProfile::AvcFmtp*)pOriginPayload->GetFmtp();
-                VideoProfile::AvcFmtp* pReceivedFmtp =
-                        (VideoProfile::AvcFmtp*)pTargetPayload->GetFmtp();
-                if (pOriginFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
-                {
-                    continue;
-                }
-
-                // same level is adapt first
-                IMS_TRACE_D("FindPayloadInProfile(): profileLevelID[%s]<->profileLevelID[%s]",
-                        pOriginFmtp->GetProfileLevelId().GetStr(),
-                        pReceivedFmtp->GetProfileLevelId().GetStr(), 0);
-
-                if (pOriginFmtp->GetLevel() < pReceivedFmtp->GetLevel())
-                {
-                    IMS_TRACE_D("FindPayloadInProfile(): NOT MATCHED AVC Level[%d]<->[%d]",
-                            pOriginFmtp->GetLevel(), pReceivedFmtp->GetLevel(), 0);
-
-                    if (pTempPayload == IMS_NULL)
-                    {
-                        IMS_TRACE_D("FindPayloadInProfile(): Priority profileLevelID[%d]",
-                                pOriginFmtp->GetProfileLevelId().GetStr(), 0, 0);
-                        pTempPayload = pOriginPayload;
-                    }
-                    continue;
-                }
-
-                if (pReceivedFmtp->GetResolution() == VIDEO_RESOLUTION_NOT_USED)
-                {
-                    VIDEO_RESOLUTION eTempResolution = GetNegotiatedResolution();
-
-                    if (eTempResolution != VIDEO_RESOLUTION_NOT_USED &&
-                            eTempResolution != VIDEO_RESOLUTION_INVALID)
-                    {
-                        IMS_TRACE_D("FindPayloadInProfile(): Far Resolution is not specified[%d]\
-                                -> Temp use Prev. Negotiated Resolution[%d]",
-                                pReceivedFmtp->GetResolution(), eTempResolution, 0);
-
-                        pReceivedFmtp->SetResolution(eTempResolution);
-                    }
-                    else
-                    {
-                        IMS_TRACE_D("FindPayloadInProfile(): Far Resolution is not specified[%d]\
-                                -> Temp use Src Resolution[%d]",
-                                pReceivedFmtp->GetResolution(), pOriginFmtp->GetResolution(), 0);
-
-                        pReceivedFmtp->SetResolution(pOriginFmtp->GetResolution());
-                    }
-                }
-
-                if (pOriginFmtp->GetResolution() != pReceivedFmtp->GetResolution())
-                {
-                    // Keep 1st payload(resolution mismatched) to be used
-                    // when no strictly matched resolution is found
-                    pTempPayload = pOriginPayload;
-
-                    IMS_TRACE_D("FindPayloadInProfile(): NOT MATCHED AVC Resolution[%d]<->[%d]",
-                            pOriginFmtp->GetResolution(), pReceivedFmtp->GetResolution(), 0);
-                    continue;
-                }
-                else if (pOriginFmtp->GetLevel() != pReceivedFmtp->GetLevel())
-                {
-                    pTempPayload = pOriginPayload;
-                    continue;
-                }
-
-                IMS_TRACE_D("FindPayloadInProfile() Found, Profile[%d], Level[%d], Resolution[%d]",
-                        pOriginFmtp->GetProfile(), pOriginFmtp->GetLevel(),
-                        pOriginFmtp->GetResolution());
-
-                return pOriginPayload;
-            }
-            else if (pOriginPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
-            {
-                VideoProfile::HevcFmtp* pOriginFmtp =
-                        (VideoProfile::HevcFmtp*)pOriginPayload->GetFmtp();
-                VideoProfile::HevcFmtp* pReceivedFmtp =
-                        (VideoProfile::HevcFmtp*)pTargetPayload->GetFmtp();
-                if (pOriginFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
-                {
-                    continue;
-                }
-
-                // same level is adapt first
-                IMS_TRACE_D("FindPayloadInProfile(): profileID[%d] <-> profileID[%d]",
-                        pOriginFmtp->GetProfile(), pReceivedFmtp->GetProfile(), 0);
-
-                if (pOriginFmtp->GetLevel() < pReceivedFmtp->GetLevel())
-                {
-                    IMS_TRACE_D("FindPayloadInProfile(): NOT MATCHED HEVC Level [%d]<->[%d]",
-                            pOriginFmtp->GetLevel(), pReceivedFmtp->GetLevel(), 0);
-                }
-
-                if (pReceivedFmtp->GetResolution() == VIDEO_RESOLUTION_NOT_USED)
-                {
-                    VIDEO_RESOLUTION eTempResolution = GetNegotiatedResolution();
-
-                    if (eTempResolution != VIDEO_RESOLUTION_NOT_USED &&
-                            eTempResolution != VIDEO_RESOLUTION_INVALID)
-                    {
-                        IMS_TRACE_D("FindPayloadInProfile(): Far Resolution is not specified[%d]\
-                                -> Temp use Prev. Negotiated Resolution[%d]",
-                                pReceivedFmtp->GetResolution(), eTempResolution, 0);
-
-                        pReceivedFmtp->SetResolution(eTempResolution);
-                    }
-                    else
-                    {
-                        IMS_TRACE_D("FindPayloadInProfile(): Far Resolution is not specified[%d]\
-                                -> Temp use Src Resolution[%d]",
-                                pReceivedFmtp->GetResolution(), pOriginFmtp->GetResolution(), 0);
-
-                        pReceivedFmtp->SetResolution(pOriginFmtp->GetResolution());
-                    }
-                }
-
-                if (pOriginFmtp->GetResolution() != pReceivedFmtp->GetResolution())
-                {
-                    // Keep 1st payload(resolution mismatched) to be used
-                    // when no strictly matched resolution is found
-                    pTempPayload = pOriginPayload;
-
-                    IMS_TRACE_D("FindPayloadInProfile(): NOT MATCHED HEVC Resolution [%d]<->[%d]",
-                            pOriginFmtp->GetResolution(), pReceivedFmtp->GetResolution(), 0);
-                    continue;
-                }
-                else if (pOriginFmtp->GetLevel() != pReceivedFmtp->GetLevel())
-                {
-                    pTempPayload = pOriginPayload;
-                    continue;
-                }
-
-                IMS_TRACE_D("FindPayloadInProfile(): Found, Profile[%d], Level[%d], Resolution[%d]",
-                        pOriginFmtp->GetProfile(), pOriginFmtp->GetLevel(),
-                        pOriginFmtp->GetResolution());
-
-                return pOriginPayload;
-            }
-        }
-    }
-
-    // When there's no perfectly matched payload, use secondary (only resolution is mismatched)
-    if (pTempPayload != IMS_NULL &&
-            pTempPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
-    {
-        VideoProfile::AvcFmtp* pOriginFmtp = (VideoProfile::AvcFmtp*)pTempPayload->GetFmtp();
-        VideoProfile::AvcFmtp* pReceivedFmtp = (VideoProfile::AvcFmtp*)pTargetPayload->GetFmtp();
-        if (pOriginFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
-        {
-            return IMS_NULL;
-        }
-
-        if (pOriginFmtp->GetResolution() != pReceivedFmtp->GetResolution())
-        {
-            IMS_TRACE_D("FindPayloadInProfile(): Accept mismatched Resolution[%d]<->[%d]",
-                    pOriginFmtp->GetResolution(), pReceivedFmtp->GetResolution(), 0);
-
-            if (pOriginFmtp->GetLevel() >= pReceivedFmtp->GetLevel())
-            {
-                pOriginFmtp->SetResolution(pReceivedFmtp->GetResolution());
-            }
-        }
-        else if (pOriginFmtp->GetLevel() != pReceivedFmtp->GetLevel())
-        {
-            IMS_TRACE_D("FindPayloadInProfile(): Accept lower Level[%d]<->[%d]",
-                    pOriginFmtp->GetLevel(), pReceivedFmtp->GetLevel(), 0);
-        }
-
-        return pTempPayload;
-    }
-    if (pTempPayload != IMS_NULL &&
-            pTempPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
-    {
-        VideoProfile::HevcFmtp* pOriginFmtp = (VideoProfile::HevcFmtp*)pTempPayload->GetFmtp();
-        VideoProfile::HevcFmtp* pReceivedFmtp = (VideoProfile::HevcFmtp*)pTargetPayload->GetFmtp();
-        if (pOriginFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
-            return IMS_NULL;
-
-        if (pOriginFmtp->GetResolution() != pReceivedFmtp->GetResolution())
-        {
-            IMS_TRACE_D("FindPayloadInProfile(): Accept mismatched Resolution [%d]<->[%d]",
-                    pOriginFmtp->GetResolution(), pReceivedFmtp->GetResolution(), 0);
-
-            if (pOriginFmtp->GetLevel() >= pReceivedFmtp->GetLevel())
-            {
-                pOriginFmtp->SetResolution(pReceivedFmtp->GetResolution());
-            }
-        }
-        else if (pOriginFmtp->GetLevel() != pReceivedFmtp->GetLevel())
-        {
-            IMS_TRACE_D("FindPayloadInProfile(): Accept lower Level[%d]<->[%d]",
-                    pOriginFmtp->GetLevel(), pReceivedFmtp->GetLevel(), 0);
-        }
-
-        return pTempPayload;
-    }
-
-    IMS_TRACE_E(0, "FindPayloadInProfile(): No matched payload Found", 0, 0, 0);
-    return IMS_NULL;
 }

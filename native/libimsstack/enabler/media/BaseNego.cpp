@@ -53,6 +53,20 @@ BaseNego& BaseNego::operator=(IN const BaseNego& obj)
     {
         ImsSlot::operator=(obj);
         m_eType = obj.m_eType;
+
+        if (m_pBaseProfile != IMS_NULL)
+        {
+            MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
+            delete m_pBaseProfile;
+            m_pBaseProfile = IMS_NULL;
+        }
+
+        if (obj.m_pBaseProfile != IMS_NULL)
+        {
+            m_pBaseProfile =
+                    MediaProfileFactory::GetInstance()->CreateProfile(m_eType, obj.m_pBaseProfile);
+        }
+
         m_pConfig = obj.m_pConfig;
         m_pEnvironment = obj.m_pEnvironment;
         m_pSdpGenerator = obj.m_pSdpGenerator;

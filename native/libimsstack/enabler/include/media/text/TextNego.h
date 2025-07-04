@@ -33,7 +33,7 @@ public:
     explicit TextNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     TextNego(IN const TextNego& objTextNego);
     TextNego& operator=(IN const TextNego& obj);
-    virtual ~TextNego();
+    virtual ~TextNego() override;
 
     /**
      * @brief Check if text codec from SDP is supported
@@ -50,11 +50,6 @@ public:
      * @brief Get the negotiated audio codec
      */
     virtual TEXT_CODEC GetNegotiatedCodec();
-
-    /**
-     * @brief static cast from MediaConfiguration to TextConfiguration
-     */
-    TextConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
 
     /**
      * @brief static cast from MediaBaseProfile to TextProfile

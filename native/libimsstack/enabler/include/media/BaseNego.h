@@ -81,7 +81,7 @@ public:
             IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
     BaseNego(IN const BaseNego& obj);
     BaseNego& operator=(IN const BaseNego& obj);
-    virtual ~BaseNego();
+    virtual ~BaseNego() override;
 
     /**
      * @brief Form the SDP with the current profile based on the state

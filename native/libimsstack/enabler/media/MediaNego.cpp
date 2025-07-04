@@ -318,7 +318,7 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaNego::GetSupportedMediaTypesFromSdp(IN IS
 
     MEDIA_CONTENT_TYPE eSupportedMediaType = MEDIA_TYPE_INVALID;
 
-    ISdpReader* piSdpReader = pSession->GetRemoteMediaCapabilities();
+    const ISdpReader* piSdpReader = pSession->GetRemoteMediaCapabilities();
     if (piSdpReader == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetSupportedMediaTypesFromSdp(): invalid reader", 0, 0, 0);
@@ -689,7 +689,7 @@ IMediaDescriptor* MediaNego::GetMediaDescriptor(IN IMedia* pIMedia)
     if (pIMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
     {
         // After received re-invite
-        IMedia* pIMediaProposal = pIMedia->GetProposal();
+        const IMedia* pIMediaProposal = pIMedia->GetProposal();
 
         if (pIMediaProposal == IMS_NULL)
         {
@@ -776,13 +776,13 @@ void MediaNego::UpdateMediaTypeToNegotiate(IN ISession* pSession)
 
     for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
     {
-        IMediaDescriptor* pDescriptor = GetMediaDescriptor(lstIMedia.GetAt(i));
+        const IMediaDescriptor* pDescriptor = GetMediaDescriptor(lstIMedia.GetAt(i));
         if (pDescriptor == IMS_NULL)
         {
             return;
         }
 
-        SdpMedia* pSDPMedia = const_cast<SdpMedia*>(pDescriptor->GetMediaDescriptionEx());
+        const SdpMedia* pSDPMedia = pDescriptor->GetMediaDescriptionEx();
         if (pSDPMedia != IMS_NULL && pSDPMedia->GetType() == SdpMedia::TYPE_AUDIO &&
                 pSDPMedia->GetPort() != -1)
         {
@@ -855,7 +855,7 @@ void MediaNego::UpdateSessionLevelBandwidth(IN ISession* pSession, IMS_UINT32 nT
         IMS_TRACE_E(0, "UpdateSessionLevelBandwidth(): invalid MediaEnvironment", 0, 0, 0);
     }
 
-    MediaSessionConfig* pMediaSessionConfig =
+    const MediaSessionConfig* pMediaSessionConfig =
             MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                     GetSlotId(), m_pMediaEnvironment->eServiceType);
 
@@ -951,7 +951,7 @@ IMS_BOOL MediaNego::ProcessMediaLine(OUT ISession* pSession, IN MEDIA_CONTENT_TY
 
 PRIVATE
 void MediaNego::UpdateMediaDescriptor(IN ISession* pSession, IN IMediaDescriptor* pDescriptor,
-        IN SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
+        IN const SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
         OUT IMediaDescriptor*& pNegotiatedVideoDescriptor,
         OUT IMediaDescriptor*& pNegotiatedTextDescriptor, OUT IMS_SINT32& nAudioDirection,
         OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection)

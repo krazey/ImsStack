@@ -135,11 +135,6 @@ TEXT_CODEC TextNego::GetNegotiatedCodec(void)
     return TEXT_CODEC_NONE;
 }
 
-PUBLIC TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig)
-{
-    return (pConfig != IMS_NULL) ? static_cast<TextConfiguration*>(pConfig) : IMS_NULL;
-}
-
 PUBLIC TextProfile* TextNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<TextProfile*>(pProfile) : IMS_NULL;
@@ -318,7 +313,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             return IMS_FALSE;
         }
 
-        MediaSessionConfig* pMediaSessionConfig =
+        const MediaSessionConfig* pMediaSessionConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                         GetSlotId(), m_pEnvironment->eServiceType);
 

@@ -46,7 +46,7 @@ public:
     };
 
     explicit MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    ~MediaNego();
+    ~MediaNego() override;
 
     /**
      * @brief Creates MediaNego instance with given parameter
@@ -235,7 +235,7 @@ private:
             OUT IMediaDescriptor*& pDescriptorForAudio, OUT IMediaDescriptor*& pDescriptorForVideo,
             OUT IMediaDescriptor*& pDescriptorForText);
     void UpdateMediaDescriptor(IN ISession* pSession, IN IMediaDescriptor* pDescriptor,
-            IN SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
+            IN const SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
             OUT IMediaDescriptor*& pNegotiatedVideoDescriptor,
             OUT IMediaDescriptor*& pNegotiatedTextDescriptor, OUT IMS_SINT32& nAudioDirection,
             OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection);

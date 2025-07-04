@@ -148,7 +148,7 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
     else if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
         AudioProfile::EvsFmtp* pEvsFmtp =
-                (AudioProfile::EvsFmtp*)PayloadCasting(pNegotiatedPayload)->GetFmtp();
+                static_cast<AudioProfile::EvsFmtp*>(PayloadCasting(pNegotiatedPayload)->GetFmtp());
         if (pEvsFmtp == IMS_NULL)
         {
             return AUDIO_CODEC_BITRATE_INVALID;
@@ -212,7 +212,7 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->GetFmtp();
+        AudioProfile::EvsFmtp* pEvsFmtp = static_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
 
         if (pEvsFmtp == IMS_NULL)
         {
@@ -285,11 +285,6 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
     }
 
     return IMS_FALSE;
-}
-
-PUBLIC AudioConfiguration* AudioNego::ConfigCasting(IN MediaConfiguration* pConfig)
-{
-    return (pConfig != IMS_NULL) ? static_cast<AudioConfiguration*>(pConfig) : IMS_NULL;
 }
 
 PUBLIC AudioProfile* AudioNego::ProfileCasting(IN MediaBaseProfile* pProfile)
@@ -420,7 +415,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             return IMS_FALSE;
         }
 
-        MediaSessionConfig* pMediaSessionConfig =
+        const MediaSessionConfig* pMediaSessionConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                         GetSlotId(), m_pEnvironment->eServiceType);
 

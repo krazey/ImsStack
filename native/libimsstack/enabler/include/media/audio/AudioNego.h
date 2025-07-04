@@ -21,7 +21,6 @@
 #include "audio/AudioDef.h"
 #include "audio/AudioSdpParser.h"
 #include "audio/AudioProfileNegotiator.h"
-#include "config/AudioConfiguration.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=audio line
@@ -33,7 +32,7 @@ public:
     explicit AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     AudioNego(IN const AudioNego& objAudioNego);
     AudioNego& operator=(IN const AudioNego& obj);
-    virtual ~AudioNego();
+    virtual ~AudioNego() override;
 
     /**
      * @brief Check if audio codec from SDP is supported
@@ -60,11 +59,6 @@ public:
      * @brief Get if the telephony-event is negotiated
      */
     virtual IMS_BOOL HasNegotiatedDtmf(void);
-
-    /**
-     * @brief static cast from MediaConfiguration to AudioConfiguration
-     */
-    AudioConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
 
     /**
      * @brief static cast from MediaBaseProfile to AudioProfile
