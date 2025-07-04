@@ -22,7 +22,7 @@ package com.android.imsstack.enabler.media;
 public class MediaConstants {
 
     public static final int IMS_MSG_BASE_MEDIA = 1400;
-    public static final int RESPONSE_WAIT_TIMEOUT = 1000;
+    public static final int RESPONSE_WAIT_TIMEOUT = 1500;
 
     // Requests
     public static final int IMSMEDIA_REQUEST              = IMS_MSG_BASE_MEDIA;
@@ -58,6 +58,7 @@ public class MediaConstants {
     public static final int RESPONSE_ADD_CONFIG           = (IMSMEDIA_RESPONSE + 3);
     public static final int RESPONSE_CONFIRM_CONFIG       = (IMSMEDIA_RESPONSE + 4);
     public static final int RESPONSE_SESSION_CLOSED       = (IMSMEDIA_RESPONSE + 5);
+    public static final int RESPONSE_SESSION_CLOSED_TIMEOUT = (IMSMEDIA_RESPONSE + 6);
 
     // Notifications
     public static final int NOTIFY_FIRST_PACKET           = (IMSMEDIA_RESPONSE + 11);

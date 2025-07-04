@@ -331,6 +331,17 @@ public class AudioSessionHandler extends MediaState {
 
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
                 {
+                    mAudioMessageHandler.removeMessages(
+                            MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT);
+                    handleSessionClosed();
+                }
+                    break;
+
+                case MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT:
+                {
+                    ImsLog.e("onSessionClosed is not received within "
+                            + MediaConstants.RESPONSE_WAIT_TIMEOUT + "ms for SessionId["
+                            + getAudioSessionId() + "]. Forcing cleanup.");
                     handleSessionClosed();
                 }
                     break;
@@ -771,7 +782,9 @@ public class AudioSessionHandler extends MediaState {
         if (mAudioSession != null) {
             mMediaManager.closeSession(mAudioSession);
             setMediaState(MEDIA_STATE_CLOSED);
-
+            mAudioMessageHandler.sendEmptyMessageDelayed(
+                    MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT,
+                    MediaConstants.RESPONSE_WAIT_TIMEOUT);
             mCodecType = UNUSED;
         }
     }
