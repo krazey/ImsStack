@@ -74,7 +74,7 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
 PUBLIC VIRTUAL void MtcCallManager::RemoveCall(IN CallKey nCallKey)
 {
     IMS_SINT32 nIndex = GetFirstIndexByFilter(
-            [nCallKey](MtcCall* pCall)
+            [nCallKey](const MtcCall* pCall)
             {
                 return pCall->GetKey() == nCallKey;
             });
@@ -92,7 +92,7 @@ PUBLIC VIRTUAL void MtcCallManager::RemoveCall(IN CallKey nCallKey)
 PUBLIC VIRTUAL IMtcCall* MtcCallManager::GetCallByCallKey(IN CallKey nCallKey)
 {
     IMS_SINT32 nIndex = GetFirstIndexByFilter(
-            [nCallKey](MtcCall* pCall)
+            [nCallKey](const MtcCall* pCall)
             {
                 return pCall->GetKey() == nCallKey;
             });
@@ -120,7 +120,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCalls()
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey nExcludingCallKey)
 {
     return GetCallsByFilter(
-            [nExcludingCallKey](MtcCall* pCall)
+            [nExcludingCallKey](const MtcCall* pCall)
             {
                 return pCall->GetCallKey() != nExcludingCallKey;
             });
@@ -129,7 +129,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey n
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCallType)
 {
     return GetCallsByFilter(
-            [eCallType](MtcCall* pCall)
+            [eCallType](const MtcCall* pCall)
             {
                 return pCall->GetCallType() == eCallType;
             });
@@ -156,7 +156,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsInConference()
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByState(IN State eState)
 {
     return GetCallsByFilter(
-            [eState](MtcCall* pCall)
+            [eState](const MtcCall* pCall)
             {
                 return pCall->GetState() == eState;
             });

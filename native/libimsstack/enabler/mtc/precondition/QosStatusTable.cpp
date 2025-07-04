@@ -133,7 +133,7 @@ PUBLIC VIRTUAL void QosStatusTable::RemoveUnusedRecords(IN IMS_UINT32 eMediaType
 
 PUBLIC VIRTUAL void QosStatusTable::UpdateStatusTableWithRemoteSdp(IN const IMedia& objMedia)
 {
-    IMediaDescriptor* piMediaDescriptor = IMS_NULL;
+    const IMediaDescriptor* piMediaDescriptor = IMS_NULL;
     if (objMedia.GetUpdateState() == IMedia::UPDATE_MODIFIED)
     {
         piMediaDescriptor = objMedia.GetProposal()->GetMediaDescriptor();
@@ -435,7 +435,7 @@ void QosStatusTable::InitializeDesChecked(IN IMS_SINT32 eSdpMediaType)
 
 PRIVATE
 void QosStatusTable::UpdateCurrentStatus(
-        IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType)
+        IN const IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType)
 {
     const SdpSegmentedPrecondition* pCurr = DYNAMIC_CAST(const SdpSegmentedPrecondition*,
             piMediaDescriptor->GetPrecondition(SdpAttribute::CURR));
@@ -477,7 +477,7 @@ void QosStatusTable::UpdateCurrentStatus(
 
 PRIVATE
 void QosStatusTable::UpdateDesiredStatus(
-        IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType)
+        IN const IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType)
 {
     const SdpSegmentedPrecondition* pDes = DYNAMIC_CAST(
             const SdpSegmentedPrecondition*, piMediaDescriptor->GetPrecondition(SdpAttribute::DES));

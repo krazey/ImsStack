@@ -83,7 +83,7 @@ TEST_F(MtcCallStateMachineTest, RunStateOperationRunsOnInitialState)
 
     MtcCallStateMachine objStateMachine(objContext, eInitialState, std::move(pStateFactory));
     objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
+            [&](const IMtcCallState* pState)
             {
                 EXPECT_EQ(eInitialState, pState->GetStateName());
                 return eInitialState;
@@ -103,7 +103,7 @@ TEST_F(MtcCallStateMachineTest, RunStateOperationRunsOnChangedState)
             });
 
     objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
+            [&](const IMtcCallState* pState)
             {
                 EXPECT_EQ(eChangedState, pState->GetStateName());
                 return eChangedState;

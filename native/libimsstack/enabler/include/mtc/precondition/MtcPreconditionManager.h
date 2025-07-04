@@ -134,8 +134,8 @@ private:
     void StopAllQosTimer(IN ISession* piSession) const;
     void OnWaitAudioDedicatedBearerTimerExpired(IN QosTimer* pTimer);
     void OnWaitAvailableAfterW2LHandoverTimerExpired(IN QosTimer* pTimer);
-    void OnWaitVideoTextAvailableTimerExpired(IN QosTimer* pTimer);
-    void OnForceAvailableTimerExpired(IN QosTimer* pTimer);
+    void OnWaitVideoTextAvailableTimerExpired(IN const QosTimer* pTimer);
+    void OnForceAvailableTimerExpired(IN const QosTimer* pTimer);
     void HandleReservationFailureByTimerExpiration(IN const QosTimer* pTimer);
     void InitializeStatusForUnusedLostQos(IN ISession* piSession) const;
     void CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession);
@@ -165,8 +165,8 @@ private:
     IMS_SINT32 GetQosTime(IN QosTimerType eType) const;
     static IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType);
     ISession* GetISessionWithTimer(IN const QosTimer* pTimer) const;
-    static IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
-    static const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
+    static IMediaDescriptor* GetMediaDescriptor(IN const IMedia* piMedia);
+    static const SdpMedia* GetSdpMedia(IN const IMedia* piMedia, IN IMS_BOOL bRemote);
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
     QosLossPolicy GetActionForQosLoss(IN ISession* piSession) const;
     IMS_BOOL IsConfirmationRequired(IN const ISession& objISession) const;

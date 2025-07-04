@@ -421,7 +421,7 @@ IMS_RESULT UssiController::FormBodyForInfo(
 }
 
 PRIVATE
-UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage) const
+UssiData* UssiController::GetParsedUssiData(IN const ISipMessage* piSipMessage) const
 {
     IMS_TRACE_D("GetParsedUssiData", 0, 0, 0);
     if (!piSipMessage)

@@ -320,7 +320,7 @@ void ConferenceSubscription::SetHeaders()
 }
 
 PRIVATE
-void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
+void ConferenceSubscription::UpdateConferenceInfo(IN const IMessage* piNotify)
 {
     IMS_TRACE_I("UpdateConferenceInfo", 0, 0, 0);
     AString strSubState =
@@ -418,7 +418,7 @@ IMS_BOOL ConferenceSubscription::OnReceiving403(IN ISubscription* piSubscription
 }
 
 PRIVATE
-IMS_BOOL ConferenceSubscription::OnReceiving423(IN ISubscription* piSubscription)
+IMS_BOOL ConferenceSubscription::OnReceiving423(IN const ISubscription* piSubscription)
 {
     IMS_SINT32 nExpires = m_objContext.GetMessageUtils().GetHeaderValueInt(
             piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE),

@@ -62,7 +62,7 @@ public:
     virtual IMS_BOOL Parse(IN const AString& strUssiBody);
 
 private:
-    void CreateAnyExtension(IN INode* piNode);
+    void CreateAnyExtension(IN const INode* piNode);
 
     AnyExtension objAnyExtension;
     AString m_strLanguage;

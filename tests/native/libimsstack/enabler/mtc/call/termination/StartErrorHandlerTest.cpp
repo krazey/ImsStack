@@ -230,12 +230,6 @@ protected:
         return objResult == CallReasonInfo(nCode, nExtraCode);
     }
 
-    IMS_BOOL CheckHandleResult(IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode, IN AString& strExtra)
-    {
-        CallReasonInfo objResult = pHandler->Handle(pMessage);
-        return objResult == CallReasonInfo(nCode, nExtraCode, strExtra);
-    }
-
     IMS_BOOL CheckHandleResult(
             IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode, IN const AString& strExtraMessage)
     {

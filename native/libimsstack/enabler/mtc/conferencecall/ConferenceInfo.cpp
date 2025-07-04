@@ -155,7 +155,7 @@ void ConferenceInfo::CreateConferenceDescription(IN const INode& objNode)
 {
     const IMS_CHAR ELEMENT_MAX_USER_COUNT[] = "maximum-user-count";
 
-    IElement& objElement = DYNAMIC_CAST(IElement&, objNode);
+    const IElement& objElement = DYNAMIC_CAST(IElement&, objNode);
     AString strMaxUserCount;
     if (GetSubElementValue(objElement, ELEMENT_MAX_USER_COUNT, strMaxUserCount).GetLength() > 0)
     {
@@ -170,7 +170,7 @@ void ConferenceInfo::CreateUsers(IN const INode& objNode)
 {
     const IMS_CHAR ELEMENT_USER[] = "user";
 
-    IElement& objElement = DYNAMIC_CAST(IElement&, objNode);
+    const IElement& objElement = DYNAMIC_CAST(IElement&, objNode);
 
     ImsList<IElement*> objUserElements;
     GetSubElements(objElement, ELEMENT_USER, objUserElements);

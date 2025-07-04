@@ -93,7 +93,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
 
     for (IMS_SINT32 i = 0; i < piNodeListEvents->GetLength(); i++)
     {
-        INode* piNodeEvent = piNodeListEvents->Item(i);
+        const INode* piNodeEvent = piNodeListEvents->Item(i);
 
         AString strName = piNodeEvent->GetLocalName();
         if (strName.EqualsIgnoreCase(UssiConstants::ELEMENT_LANGUAGE))
@@ -137,7 +137,7 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
 }
 
 PRIVATE
-void UssiData::CreateAnyExtension(IN INode* piNode)
+void UssiData::CreateAnyExtension(IN const INode* piNode)
 {
     const INode* piElement = piNode->GetFirstChild();
     AString strName;

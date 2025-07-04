@@ -90,7 +90,7 @@ PUBLIC VIRTUAL void LastComeFirstServedHelper::OnCallReceived(IN CallKey nIncomi
 PRIVATE
 IMS_BOOL LastComeFirstServedHelper::IsNormalCall(IN CallKey nKey) const
 {
-    CallInfo& objCallInfo = GetCallContext(nKey).GetCallInfo();
+    const CallInfo& objCallInfo = GetCallContext(nKey).GetCallInfo();
     return (!objCallInfo.IsEmergency() && !objCallInfo.bUssi);
 }
 

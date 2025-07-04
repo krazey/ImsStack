@@ -36,7 +36,7 @@ public:
     MultipleDialogHandler(IN const MultipleDialogHandler&) = delete;
     MultipleDialogHandler& operator=(IN const MultipleDialogHandler&) = delete;
 
-    void OnStarted(IN IMtcCallContext& objContext, IN IMtcSession& objSession);
+    void OnStarted(IN IMtcCallContext& objContext, IN const IMtcSession& objSession);
     void OnSessionForked(IN IMtcCallContext& objContext, IN IMtcSession* piOriginalMtcSession);
     Result OnDialogRequestFailed(IN IMtcCallContext& objContext, IN IMtcSession& objMtcSession);
     Result OnUnavailableDialogCreated(

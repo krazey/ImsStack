@@ -193,7 +193,7 @@ protected:
     ISession* GetISession();
 
     void InitMediaSession();
-    IMS_SINT32 HandleReceivedSdp(IN ISession* piSession, IN IMessage* piMessage);
+    IMS_SINT32 HandleReceivedSdp(IN ISession* piSession, IN const IMessage* piMessage);
 
     IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
@@ -219,7 +219,7 @@ protected:
             IN const CallReasonInfo& objReason) const;
     const CallReasonInfo GetAudioInactivityReasonOnMediaDataFailed() const;
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
-    void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
+    void StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessage) const;
     static IMS_SINT32 GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult);
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;

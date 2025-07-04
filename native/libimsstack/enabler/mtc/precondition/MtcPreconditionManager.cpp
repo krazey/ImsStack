@@ -263,7 +263,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
     ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         const SdpMedia* pLocalSdp = GetSdpMedia(piMedia, IMS_FALSE);
         if (pLocalSdp == IMS_NULL)
         {
@@ -706,7 +706,7 @@ void MtcPreconditionManager::OnWaitAvailableAfterW2LHandoverTimerExpired(IN QosT
 }
 
 PRIVATE
-void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN QosTimer* pTimer)
+void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN const QosTimer* pTimer)
 {
     ISession* piSession = GetISessionWithTimer(pTimer);
     if (piSession == IMS_NULL)
@@ -733,7 +733,7 @@ void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN QosTimer* p
 }
 
 PRIVATE
-void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pTimer)
+void MtcPreconditionManager::OnForceAvailableTimerExpired(IN const QosTimer* pTimer)
 {
     ISession* piSession = GetISessionWithTimer(pTimer);
     if (piSession == IMS_NULL)
@@ -917,7 +917,7 @@ void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession) 
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        IMedia* piMedia = lstMedias.GetAt(index);
+        const IMedia* piMedia = lstMedias.GetAt(index);
         if (piMedia == IMS_NULL)
         {
             continue;
@@ -1281,7 +1281,7 @@ ISession* MtcPreconditionManager::GetISessionWithTimer(IN const QosTimer* pTimer
 }
 
 PRIVATE
-IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN IMedia* piMedia)
+IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN const IMedia* piMedia)
 {
     if (piMedia == IMS_NULL)
     {
@@ -1299,7 +1299,7 @@ IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN IMedia* piMedia)
 }
 
 PRIVATE
-const SdpMedia* MtcPreconditionManager::GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote)
+const SdpMedia* MtcPreconditionManager::GetSdpMedia(IN const IMedia* piMedia, IN IMS_BOOL bRemote)
 {
     const IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
     if (piMediaDescriptor == IMS_NULL)

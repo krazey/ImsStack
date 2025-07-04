@@ -38,8 +38,9 @@ PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUri(IN IMtcContext& objCo
     return Translate(objContext, strNumber, eScheme, objIdentityProxy);
 }
 
-PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUriForDialString(IN IMtcContext& objContext,
-        IN AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy)
+PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUriForDialString(
+        IN const IMtcContext& objContext, IN AString& strNumber,
+        IN const ImsIdentityProxy& objIdentityProxy)
 {
     strNumber = objIdentityProxy.CreateSipUserIdWithDialString(strNumber, objContext.GetSlotId());
     return strNumber;

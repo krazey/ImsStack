@@ -251,7 +251,7 @@ IMS_SLONG DialogInfo::GetIndexOfKeyHasSameId(IN const AString& strDialogId)
 }
 
 PUBLIC
-IMS_RESULT Dialog::Update(IN IElement* piElementDialog)
+IMS_RESULT Dialog::Update(IN const IElement* piElementDialog)
 {
     IMS_TRACE_I("+Update", 0, 0, 0);
 

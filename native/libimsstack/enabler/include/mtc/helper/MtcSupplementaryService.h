@@ -47,16 +47,16 @@ public:
     static IMS_BOOL UpdateCnapEx(IN IMessage* piMessage);
     IMS_BOOL UpdateMmc(IN IMessage* piMessage);
     static IMS_BOOL UpdateGtt(IN IMessage* piMessage);
-    IMS_BOOL UpdateCdivCause(IN IMessage* piMessage);
-    IMS_BOOL UpdateCdivHistory(IN IMessage* piMessage);
-    IMS_BOOL UpdateCw(IN IMessage* piMessage);
+    IMS_BOOL UpdateCdivCause(IN const IMessage* piMessage);
+    IMS_BOOL UpdateCdivHistory(IN const IMessage* piMessage);
+    IMS_BOOL UpdateCw(IN const IMessage* piMessage);
     static IMS_BOOL UpdateVm(IN IMessage* piMessage);
     static IMS_BOOL UpdateAnswerHold(IN IMessage* piMessage);
     IMS_BOOL UpdateMcid(IN IMessage* piMessage);
     static IMS_BOOL UpdateDualNumber(IN IMessage* piMessage);
     IMS_BOOL UpdateCallingNumberVerification(IN IMessage* piMessage);
-    IMS_BOOL UpdateCallComposerElements(IN IMessage* piMessage);
-    IMS_BOOL UpdateSessionId(IN IMessage* piMessage);
+    IMS_BOOL UpdateCallComposerElements(IN const IMessage* piMessage);
+    IMS_BOOL UpdateSessionId(IN const IMessage* piMessage);
     void Delete(IN SuppType eType);
     void DeleteServices();
     const SuppService* Get(IN SuppType eType);
@@ -66,10 +66,10 @@ public:
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
 
     static void ConvertGlobalNumberToLocalNumber(
-            IN MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
+            IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
 
 private:
-    ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
+    ISipHeader* GetHistoryInfoHeader(IN const IMessage* piMessage);
     static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
     static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);

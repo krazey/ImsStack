@@ -121,7 +121,7 @@ void MtcCapabilityQueryHandler::SetHeaderForCapabilityQuery(IN IMessage* piMessa
 
 PRIVATE
 IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(
-        IN ICoreService* piService, IN IMessage* piMessage, IN IMS_UINT32 nFeatures)
+        IN const ICoreService* piService, IN IMessage* piMessage, IN IMS_UINT32 nFeatures)
 {
     // session-level description
     AString strSDP;
@@ -176,7 +176,7 @@ PRIVATE VIRTUAL const AStringArray& MtcCapabilityQueryHandler::GetMediaCapabilit
 
 PRIVATE
 IMS_RESULT MtcCapabilityQueryHandler::SetSessionLevelDescription(
-        IN ICoreService* piService, OUT AString& strDesc)
+        IN const ICoreService* piService, OUT AString& strDesc)
 {
     SdpSessionDescription objSessionDesc;
 

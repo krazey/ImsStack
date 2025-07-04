@@ -87,7 +87,7 @@ private:
             objListeners.Append(pPassiveTimerListener);
         }
 
-        void RemoveListener(IN IPassiveTimerListener* pPassiveTimerListener)
+        void RemoveListener(IN const IPassiveTimerListener* pPassiveTimerListener)
         {
             if (bIsTerminating)
             {

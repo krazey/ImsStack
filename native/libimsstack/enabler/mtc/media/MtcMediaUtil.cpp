@@ -231,7 +231,8 @@ PUBLIC GLOBAL MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceTyp
     return MEDIA_SERVICE_DEFAULT;
 }
 
-PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcService,
+PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
+        IN const IMtcService* piMtcService,
         IN IMS_SINT32 eRadioType /* = INetworkWatcher::RADIOTECH_TYPE_INVALID */)
 {
     if (piMtcService->IsWlanIpCanType())

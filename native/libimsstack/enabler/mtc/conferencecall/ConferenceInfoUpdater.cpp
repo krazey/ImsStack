@@ -294,7 +294,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
         for (IMS_SINT32 index = static_cast<IMS_SINT32>(m_objNotMatchedUsers.GetSize()) - 1;
                 index >= 0; index--)
         {
-            ConferenceInfo::User* pNotMatchedUser = m_objNotMatchedUsers.GetAt(index);
+            const ConferenceInfo::User* pNotMatchedUser = m_objNotMatchedUsers.GetAt(index);
             RemoveFromNotMatchedUserList(pNotMatchedUser);
             UpdateParticipant(pNotMatchedUser, -1);
         }
@@ -312,7 +312,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
 
 PROTECTED
 IMS_BOOL ConferenceInfoUpdater::UpdateParticipant(
-        IN ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex)
+        IN const ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex)
 {
     // update nParticipantIndex-th participant in the list using pUser.
     if (nParticipantIndex >= 0 &&
@@ -854,7 +854,7 @@ void ConferenceInfoUpdater::AddNotMatchedUserList(IN ConferenceInfo::User* pUser
 }
 
 PROTECTED
-void ConferenceInfoUpdater::RemoveFromNotMatchedUserList(IN ConferenceInfo::User* pUser)
+void ConferenceInfoUpdater::RemoveFromNotMatchedUserList(IN const ConferenceInfo::User* pUser)
 {
     for (IMS_UINT32 i = 0; i < m_objNotMatchedUsers.GetSize(); i++)
     {

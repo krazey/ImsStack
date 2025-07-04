@@ -38,13 +38,13 @@ public:
     static AString Format(IN const AString& strFormatString, IN IMtcCallContext& objContext);
 
 private:
-    static AString GetImei(IN IMtcCallContext& objContext);
-    static AString GetImsi(IN IMtcCallContext& objContext);
-    static AString GetMacAddress(IN IMtcCallContext& objContext);
+    static AString GetImei(IN const IMtcCallContext& objContext);
+    static AString GetImsi(IN const IMtcCallContext& objContext);
+    static AString GetMacAddress(IN const IMtcCallContext& objContext);
     static AString GetIpAddress(IN IMtcCallContext& objContext);
     static AString GetPort(IN IMtcCallContext& objContext);
-    static const AString& GetPublicUserId(IN IMtcCallContext& objContext);
-    static AString GetWifiCallingAddressId(IN IMtcCallContext& objContext);
+    static const AString& GetPublicUserId(IN const IMtcCallContext& objContext);
+    static AString GetWifiCallingAddressId(IN const IMtcCallContext& objContext);
 
     static void Replace(IN_OUT AString& strText, IN const AString& strTemplateLiteral,
             IN const std::function<AString()>& objSubstitution);

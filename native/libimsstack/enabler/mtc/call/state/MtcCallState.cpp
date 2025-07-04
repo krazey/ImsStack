@@ -680,7 +680,7 @@ void MtcCallState::InitMediaSession()
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN IMessage* piMessage)
+IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN const IMessage* piMessage)
 {
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
@@ -899,7 +899,7 @@ IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessa
     if (eMethod.Equals(SipMethod::PRACK))
     {
         // RFC 6337. Table 1. Case 4, 5
-        IMessage& objPrackMessage = *piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+        const IMessage& objPrackMessage = *piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
         if (objPrackMessage.GetState() == IMessage::STATE_SENT)
         {
             return m_objContext.GetMessageUtils().HasSdp(&objPrackMessage);
@@ -1081,7 +1081,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
 }
 
 PROTECTED
-void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const
+void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessage) const
 {
     if (!Is18x(objMessage.GetStatusCode()) && objMessage.GetStatusCode() != SipStatusCode::SC_200)
     {
@@ -1118,7 +1118,7 @@ IMS_SINT32 MtcCallState::GetCallReasonByNegotiationResult(IN NegotiationResult e
 PROTECTED
 IMS_BOOL MtcCallState::IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const
 {
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
 
     return objPreconditionManager.IsLocalResourceConfirmationRequired(piSession) &&
             objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession);

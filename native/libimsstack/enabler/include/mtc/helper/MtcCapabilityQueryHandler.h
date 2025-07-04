@@ -47,9 +47,10 @@ public:
 private:
     void SetHeaderForCapabilityQuery(IN IMessage* piMessage);
     IMS_RESULT SetBodyForCapabilityQuery(
-            IN ICoreService* piService, IN IMessage* piMessage, IN IMS_UINT32 nFeatures);
+            IN const ICoreService* piService, IN IMessage* piMessage, IN IMS_UINT32 nFeatures);
     virtual const AStringArray& GetMediaCapability(IN IMS_SINT32 nMediaType) const;
-    static IMS_RESULT SetSessionLevelDescription(IN ICoreService* piService, OUT AString& strDesc);
+    static IMS_RESULT SetSessionLevelDescription(
+            IN const ICoreService* piService, OUT AString& strDesc);
 
     // if EVS is supported by default, this should be removed.
     static AString GetAdjustedCodecList(IN const AStringArray& objAudioCaps);

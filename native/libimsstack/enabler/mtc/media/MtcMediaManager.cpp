@@ -657,7 +657,7 @@ PUBLIC VIRTUAL IMS_UINT32 MtcMediaManager::GetSupportedMediaTypesFromSdp(IN ISes
 }
 
 PRIVATE
-void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage)
+void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN const IMessage* piMessage)
 {
     IMS_TRACE_D("UpdateLocalTone", 0, 0, 0);
     IMS_BOOL bUseLocalTone = IMS_FALSE;
@@ -729,7 +729,8 @@ void MtcMediaManager::SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32
 }
 
 PRIVATE
-IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage)
+IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(
+        IN ISession* piSession, IN const IMessage* piMessage)
 {
     if (m_pProfileManager->IsConfirmed(piSession))
     {
@@ -772,14 +773,14 @@ IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(IN ISession* piSession, IN IMess
 }
 
 PRIVATE
-IMS_UINTP MtcMediaManager::GetMediaNegoId(IN ISession* piSession)
+IMS_UINTP MtcMediaManager::GetMediaNegoId(IN const ISession* piSession)
 {
     return m_pProfileManager->GetNegoId(piSession);
 }
 
 PRIVATE
 IMS_UINT32 MtcMediaManager::GetWaitingNetworkToneDuration(
-        IN ISession* piSession, IN IMessage* piMessage)
+        IN ISession* piSession, IN const IMessage* piMessage)
 {
     if (m_pProfileManager->IsConfirmed(piSession))
     {

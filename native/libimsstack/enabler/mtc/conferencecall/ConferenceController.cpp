@@ -1063,7 +1063,7 @@ void ConferenceController::GetFocusAddress(OUT AString& strAddress) const
         return;
     }
 
-    ISession& objSession = pMtcSession->GetISession();
+    const ISession& objSession = pMtcSession->GetISession();
     const IMessage* piMessage = IMS_NULL;
 
     if (GetConferenceCall()->GetCallContext().GetCallInfo().ePeerType == PeerType::MO)

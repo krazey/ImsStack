@@ -31,7 +31,7 @@ public:
             IN IMS_BOOL bEnforcePaid = IMS_FALSE);
     static AString& GetReferToForInvite(
             OUT AString& strUri, IN IMtcCallContext& objContext, IN const ConfUser* pConfUser);
-    static AString& GetReferToForBye(OUT AString& strUri, IN MtcConfigurationProxy& objConfig,
+    static AString& GetReferToForBye(OUT AString& strUri, IN const MtcConfigurationProxy& objConfig,
             IN const ConfUser* pConfUser, IN const AString& strInvitedUri);
 
 private:

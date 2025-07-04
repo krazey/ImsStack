@@ -78,7 +78,7 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
 }
 
 PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(OUT AString& strUri,
-        IN MtcConfigurationProxy& objConfig, IN const ConfUser* pConfUser,
+        IN const MtcConfigurationProxy& objConfig, IN const ConfUser* pConfUser,
         IN const AString& strInvitedUri)
 {
     AString strUserEntity = pConfUser ? pConfUser->strUserEntity : AString::ConstNull();

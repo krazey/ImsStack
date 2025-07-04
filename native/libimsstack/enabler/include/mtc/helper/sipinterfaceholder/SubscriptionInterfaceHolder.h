@@ -61,7 +61,7 @@ public:
     inline virtual IMS_UINT32 GetSubscriptionCount() const { return m_objISubscriptions.GetSize(); }
 
 private:
-    static IMS_BOOL IsReadyToDestroy(IN ISubscription* piSubscription);
+    static IMS_BOOL IsReadyToDestroy(IN const ISubscription* piSubscription);
 
     void ClearISubscriptions();
 

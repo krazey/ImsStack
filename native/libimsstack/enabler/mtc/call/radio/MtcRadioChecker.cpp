@@ -480,7 +480,7 @@ PRIVATE IMS_BOOL MtcRadioChecker::IsInEpsfbSilentRedial(ImsList<CallKey>& objCal
         {
             continue;
         }
-        EpsFallbackTrigger& objEpsFallbackTrigger =
+        const EpsFallbackTrigger& objEpsFallbackTrigger =
                 pCall->GetCallContext().GetEpsFallbackTrigger();
 
         if (objEpsFallbackTrigger.IsWaitingEpsFallback() ||
