@@ -15,5 +15,11 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <!-- Aos -->
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
+
+    <!-- Mtc -->
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="25000"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
 </carrier_config>

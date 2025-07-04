@@ -18,7 +18,6 @@
     <!-- Aos -->
     <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="ims.keep_reg_retry_timer_on_all_enablers_detached_bool" value="true"/>
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array" num="1">
         <item value="6"/>
@@ -42,6 +41,7 @@
     </int-array>
 
     <!-- MTC -->
+    <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="16">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->

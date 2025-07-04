@@ -15,5 +15,16 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
+
+    <!-- Mtc -->
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
+
+    <!-- Ut/Xcap -->
     <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>

@@ -16,5 +16,6 @@
 -->
 <carrier_config>
     <!-- Ut/Xcap -->
+    <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 </carrier_config>

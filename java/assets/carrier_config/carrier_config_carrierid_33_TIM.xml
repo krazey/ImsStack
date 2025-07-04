@@ -15,9 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <!-- Mts -->
     <int-array name="imssms.sms_fallback_error_codes_int_array" num="2">
         <item value="500"/>

@@ -15,5 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="130000"/>
 </carrier_config>

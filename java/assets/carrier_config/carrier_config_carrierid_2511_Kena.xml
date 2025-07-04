@@ -15,5 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
 </carrier_config>

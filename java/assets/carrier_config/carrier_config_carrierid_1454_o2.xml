@@ -25,6 +25,9 @@
     </int-array>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
+    <!-- Mtc -->
+    <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
+
     <!-- Ut/Xcap -->
     <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="2">
         <item value="27"/>

@@ -15,5 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:conference@factory.ims.movistar.mx</string>
 </carrier_config>

@@ -15,5 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="2"/>
 </carrier_config>

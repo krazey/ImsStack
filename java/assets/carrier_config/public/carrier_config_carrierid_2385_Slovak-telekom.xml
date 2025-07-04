@@ -15,26 +15,27 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
-    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
-
-    <!-- Mtc -->
+    <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">
-            <item value="102"/>
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="126"/>
         </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="1">
-            <item value="104"/>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="100"/>
+            <item value="105"/>
         </int-array>
-        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="97"/>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="98"/>
+            <item value="103"/>
         </int-array>
         <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
             <item value="96"/>
         </int-array>
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="126"/>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="97"/>
         </int-array>
     </pbundle_as_map>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
@@ -43,19 +44,6 @@
                 <item value="0"/>
                 <item value="6"/>
             </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle_as_map name="104">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle_as_map name="102">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
 </carrier_config>

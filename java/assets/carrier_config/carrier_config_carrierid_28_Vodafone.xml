@@ -56,4 +56,12 @@
         <item value="606:2"/>
     </string-array>
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
 </carrier_config>

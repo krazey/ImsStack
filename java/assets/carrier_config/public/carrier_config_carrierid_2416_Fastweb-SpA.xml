@@ -15,5 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="255"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </carrier_config>
