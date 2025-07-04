@@ -362,6 +362,11 @@ TEST_F(AudioControllerTest, testUpdateAccessNetworkSuccess)
 
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(nNegoId2), IMS_TRUE);
+
+    // Set up the session state via UpdateSession
+    m_pController->SetCallSessionState(IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(nNegoId2, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
+
     EXPECT_EQ(m_pController->UpdateAccessNetwork(NEW_ACCESS_NETWORK), IMS_TRUE);
 
     m_pController->CloseSession();
@@ -379,6 +384,10 @@ TEST_F(AudioControllerTest, testUpdateAccessNetworkSuccess)
 
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(nNegoId4), IMS_TRUE);
+
+    // Set up the session state via UpdateSession
+    m_pController->SetCallSessionState(IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(nNegoId4, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
 
     EXPECT_EQ(m_pController->UpdateAccessNetwork(NEW_ACCESS_NETWORK + 1), IMS_TRUE);
 

@@ -451,13 +451,10 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
         {
             bResult = pAudioSession->SetAccessNetwork(accessNetwork);
 
-            if (bResult && pAudioSession->Modify())
+            if (bResult && pAudioSession->GetState() != AudioSession::STATE_IDLE &&
+                    pAudioSession->Modify())
             {
-                pAudioSession->SetMediaQuality(m_eCallState);
-            }
-            else
-            {
-                return IMS_FALSE;
+                bResult = pAudioSession->SetMediaQuality(m_eCallState);
             }
         }
     }
