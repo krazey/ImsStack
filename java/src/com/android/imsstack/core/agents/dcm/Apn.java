@@ -60,8 +60,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
@@ -913,21 +914,9 @@ public abstract class Apn extends Handler implements IApn {
                 return true;
             }
 
-            int nSize = newAddress.length;
-            for (int i = 0; i < nSize; i++) {
-                boolean bIsSame = false;
-                for (String address : newAddress) {
-                    if (cachedAddress[i].equals(address)) {
-                        bIsSame = true;
-                        break;
-                    }
-                }
-
-                if (!bIsSame) {
-                    return true;
-                }
-            }
-            return false;
+            Set<String> cachedSet = new HashSet<>(Arrays.asList(cachedAddress));
+            Set<String> newSet = new HashSet<>(Arrays.asList(newAddress));
+            return !cachedSet.equals(newSet);
         }
 
         protected boolean isPcscfChanged(LinkProperties newLinkProperties) {
@@ -987,16 +976,8 @@ public abstract class Apn extends Handler implements IApn {
                 return null;
             }
 
-            Iterator<LinkAddress> iterator = linkAddresses.iterator();
-            if (iterator == null) {
-                return null;
-            }
-
-            String[] addr = new String[linkAddresses.size()];
-
-            int i = 0;
-            while (iterator.hasNext()) {
-                LinkAddress linkAddress = iterator.next();
+            Set<String> ipAddresses = new HashSet<>();
+            for (LinkAddress linkAddress : linkAddresses) {
                 if (linkAddress == null) {
                     ImsLog.w(mSlotId, "linkAddress is null");
                     continue;
@@ -1015,52 +996,15 @@ public abstract class Apn extends Handler implements IApn {
                     continue;
                 }
 
-                if (netAddress instanceof Inet6Address) {
-                    String ip6Addr = netAddress.getHostAddress();
-                    ImsLog.i(mSlotId, "ip6Address - " + ip6Addr);
-
-                    boolean bSame = false;
-                    for (int j = 0; j < i; j++) {
-                        if (addr[j].equals(ip6Addr)) {
-                            bSame = true;
-                            break;
-                        }
-                    }
-
-                    if (!bSame) {
-                        addr[i] = ip6Addr;
-                        ImsLog.i(mSlotId, "saved ip6Address - [" + i + "]" + addr[i]);
-                        i++;
-                    }
-                }
-
-                if (netAddress instanceof Inet4Address) {
-                    String ip4Addr = netAddress.getHostAddress();
-                    ImsLog.i(mSlotId, "ip4Address - " + ip4Addr);
-
-                    boolean bSame = false;
-                    for (int j = 0; j < i; j++) {
-                        if (addr[j].equals(ip4Addr)) {
-                            bSame = true;
-                            break;
-                        }
-                    }
-
-                    if (!bSame) {
-                        addr[i] = ip4Addr;
-                        ImsLog.i(mSlotId, "saved ip4Address - [" + i + "]" + addr[i]);
-                        i++;
-                    }
+                if (netAddress instanceof Inet4Address || netAddress instanceof Inet6Address) {
+                    String ipAddress = netAddress.getHostAddress();
+                    ipAddresses.add(ipAddress);
+                    String version = (netAddress instanceof Inet6Address) ? "IPv6" : "IPv4";
+                    ImsLog.i(mSlotId, "Saving valid " + version + " address: " + ipAddress);
                 }
             }
 
-            if (linkAddresses.size() != i) {
-                String[] addrToDeliver = new String[i];
-                System.arraycopy(addr, 0, addrToDeliver, 0, i);
-                return addrToDeliver;
-            }
-
-            return addr;
+            return ipAddresses.toArray(new String[0]);
         }
 
         private String[] getPcscfAddress(Collection<InetAddress> inetAddresses) {
@@ -1068,13 +1012,8 @@ public abstract class Apn extends Handler implements IApn {
                 return null;
             }
 
-            String[] addr = new String[inetAddresses.size()];
-            Iterator<InetAddress> iterator = inetAddresses.iterator();
-
-            int i = 0;
-            while (iterator.hasNext()) {
-                InetAddress inetAddress = iterator.next();
-
+            Set<String> pcscfAddresses = new HashSet<>();
+            for (InetAddress inetAddress : inetAddresses) {
                 if (inetAddress == null) {
                     continue;
                 }
@@ -1085,32 +1024,13 @@ public abstract class Apn extends Handler implements IApn {
                     continue;
                 }
 
-                if ((inetAddress instanceof Inet6Address)
-                        || (inetAddress instanceof Inet4Address)) {
+                if (inetAddress instanceof Inet4Address || inetAddress instanceof Inet6Address) {
                     String ipAddress = inetAddress.getHostAddress();
-                    boolean bSame = false;
-
-                    for (int j = 0; j < i; j++) {
-                        if (addr[j].equals(ipAddress)) {
-                            bSame = true;
-                            break;
-                        }
-                    }
-
-                    if (!bSame) {
-                        addr[i] = ipAddress;
-                        i++;
-                    }
+                    pcscfAddresses.add(ipAddress);
                 }
             }
 
-            if (inetAddresses.size() != i) {
-                String[] addrToDeliver = new String[i];
-                System.arraycopy(addr, 0, addrToDeliver, 0, i);
-                return addrToDeliver;
-            }
-
-            return addr;
+            return pcscfAddresses.toArray(new String[0]);
         }
 
         private boolean isIdenticalAddresses(@NonNull LinkProperties left,
