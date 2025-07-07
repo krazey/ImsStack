@@ -35,7 +35,6 @@ public:
     MockIMtcAosConnector objAosConnector;
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
-    ServiceBlockRule* pBlockRule;
 
 protected:
     virtual void SetUp() override
