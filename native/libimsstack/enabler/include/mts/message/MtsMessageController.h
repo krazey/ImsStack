@@ -85,6 +85,7 @@ private:
             IN MtsServiceType eServiceType);
     void AddGeolocationPidf(
             IN IMessage* piMessage, IN IMS_BOOL bEmergencyNumber, IN MtsServiceType eServiceType);
+    IMS_RESULT AddContactHeader(IN IMessage* piMessage, IN MtsServiceType eServiceType);
     IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, OUT AString& strDestination);
     const ByteArray& ProcessReceivedMessage(

@@ -716,9 +716,42 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
         }
     }
 
+    // As per VZW requirement VZ_REQ_E911_7302888, Contact Header needs to be added.
+    // Also, only VZW e911 SMS uses E-PDN.
+    if (eServiceType == MtsServiceType::EMERGENCY)
+    {
+        if (AddContactHeader(piMessage, eServiceType) == IMS_FAILURE)
+        {
+            IMS_TRACE_E(0, "Failed to add the Contact header", 0, 0, 0);
+        }
+    }
+
     AddGeolocationPidf(piMessage, bEmergencyNumber, eServiceType);
 
     return IMS_TRUE;
+}
+
+PRIVATE
+IMS_RESULT MtsMessageController::AddContactHeader(
+        IN IMessage* piMessage, IN MtsServiceType eServiceType)
+{
+    ICoreService* piCoreService = m_objContext.GetService(eServiceType).GetICoreService();
+    if (piCoreService == IMS_NULL || piMessage->GetMessage() == IMS_NULL)
+    {
+        return IMS_FAILURE;
+    }
+
+    ISipHeader* piContactHeader =
+            piCoreService->GetContactHeader(IMS_FALSE, IMS_TRUE, SipMethod::MESSAGE);
+    if (piContactHeader == IMS_NULL)
+    {
+        return IMS_FAILURE;
+    }
+
+    IMS_RESULT result = piMessage->GetMessage()->SetHeader(
+            ISipHeader::CONTACT_NORMAL, piContactHeader->ToStringWithoutName());
+    piContactHeader->Destroy();
+    return result;
 }
 
 PRIVATE
