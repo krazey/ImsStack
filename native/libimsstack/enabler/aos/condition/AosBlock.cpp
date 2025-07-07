@@ -206,9 +206,6 @@ PUBLIC VIRTUAL void AosBlock::ClearAllBlockReasons()
 PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
 {
     AString strLogCom;
-    AString strLogCell;
-    AString strLogWifi;
-
     for (IMS_UINT32 i = BLOCK_START; i <= BLOCK_END; i++)
     {
         if (m_objBlock.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
@@ -219,6 +216,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
+    AString strLogCell;
     for (IMS_UINT32 i = BLOCK_CELLULAR_START; i <= BLOCK_CELLULAR_END; i++)
     {
         if (m_objBlockCellular.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
@@ -229,6 +227,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
+    AString strLogWifi;
     for (IMS_UINT32 i = BLOCK_WIFI_START; i <= BLOCK_WIFI_END; i++)
     {
         if (m_objBlockWifi.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
@@ -239,13 +238,12 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: Common - size (%d), reason (%s)",
-            m_objBlock.GetSize(), strLogCom.GetStr(), 0);
-    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: Cellular - size (%d), reason (%s)",
-            m_objBlockCellular.GetSize(), strLogCell.GetStr(), 0);
-    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: WiFi - size (%d), reason (%s)",
-            m_objBlockWifi.GetSize(), strLogWifi.GetStr(), 0);
+    AString strLog;
+    strLog.Sprintf("PrintBlockReasons :: Common(%d):%s Cellular(%d):%s WiFi(%d):%s",
+            m_objBlock.GetSize(), strLogCom.GetStr(), m_objBlockCellular.GetSize(),
+            strLogCell.GetStr(), m_objBlockWifi.GetSize(), strLogWifi.GetStr());
 
+    A_IMS_TRACE_I(APPPROFILE, "%s", strLog.GetStr(), 0, 0);
     return IMS_TRUE;
 }
 
