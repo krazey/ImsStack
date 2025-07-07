@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,8 @@
 #ifndef MEDIA_RESOURCE_MANAGER_H_
 #define MEDIA_RESOURCE_MANAGER_H_
 
-#include "MediaDef.h"
+#include "ImsList.h"
+#include "IpAddress.h"
 #include "IMediaNetworkConnectionListener.h"
 
 class MediaConfiguration;
@@ -37,7 +38,7 @@ public:
     };  // PDN Type
 
     explicit MediaResourceManager(IN IMS_SINT32 nSlotId = 0);
-    virtual ~MediaResourceManager();
+    virtual ~MediaResourceManager() override;
 
     /**
      * @brief Get the random port number from the configuration which is not redundant with port

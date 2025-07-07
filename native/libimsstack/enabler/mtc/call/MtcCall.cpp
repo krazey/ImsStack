@@ -16,7 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "IIpcan.h"
-#include "IMediaManager.h"
+#include "MediaManager.h"
 #include "IMessage.h"
 #include "INetworkWatcher.h"
 #include "IReference.h"
@@ -75,7 +75,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objPendingOperationHolder(),
         m_pTimer(objContext.CreateTimer()),
         m_objUiNotifier(MtcUiNotifier(*this)),
-        m_objMediaManager(MtcMediaManager(*this, *IMediaManager::GetInstance(GetSlotId()))),
+        m_objMediaManager(MtcMediaManager(*this, *MediaManager::GetInstance(GetSlotId()))),
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(
                 MtcSupplementaryService(*this, objContext.GetConfigurationProxy())),

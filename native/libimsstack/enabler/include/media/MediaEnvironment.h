@@ -29,19 +29,12 @@ public:
     IService* pIService;
 
 public:
-    MediaEnvironment(MEDIA_NETWORK_TYPE eNetwork = MEDIA_NETWORK_NONE,
+    explicit MediaEnvironment(MEDIA_NETWORK_TYPE eNetwork = MEDIA_NETWORK_NONE,
             MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT,
             IService* pService = IMS_NULL) :
             eNetworkType(eNetwork),
             eServiceType(eServiceType),
             pIService(pService) {};
-
-    MediaEnvironment(IN const MediaEnvironment& pEnvironment)
-    {
-        eNetworkType = pEnvironment.eNetworkType;
-        eServiceType = pEnvironment.eServiceType;
-        pIService = pEnvironment.pIService;
-    };
 };
 
 #endif

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "IMediaManager.h"
+#include "MediaManager.h"
 #include "ISipHeader.h"
 #include "MediaDef.h"
 #include "MockICoreService.h"
-#include "MockIMediaManager.h"
 #include "MockIMediaSession.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
+#include "MockMediaManager.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -52,7 +52,7 @@ class TestMtcMediaManager : public MtcMediaManager
 {
 public:
     inline explicit TestMtcMediaManager(
-            IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager) :
+            IN IMtcCallContext& objContext, IN MediaManager& objMediaManager) :
             MtcMediaManager(objContext, objMediaManager)
     {
     }
@@ -88,7 +88,7 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockIMtcSession objMtcSession;
-    MockIMediaManager objMediaManager;
+    MockMediaManager objMediaManager;
     MtcMediaManager* pMediaManager;
     MockIMediaReportEventListener* pListener;
     MockIMediaSession objMediaSession;
