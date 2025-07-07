@@ -41,9 +41,9 @@ import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.internal.telephony.PhoneConstants;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,9 +53,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -73,7 +70,6 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     @Mock private ICallStateTracker mICallStateTracker;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigInterface mMockConfigInterface;
-    @Mock private TelephonyInterface mMockTelephonyInterface;
     @Captor ArgumentCaptor<MtcEmergencyServiceManager.ECallStateListener> mECallStateListenerCaptor;
 
     private MtcEmergencyServiceManager mTestMtcEmergencyServiceManager;
@@ -84,8 +80,6 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         MockitoAnnotations.initMocks(this);
         AppContext.init(mContext);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
-        AgentFactory.getInstance().setAgent(TelephonyInterface.class,
-                mMockTelephonyInterface, SLOT_ID);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         doReturn(mServiceStateTracker).when(mMockContext).getServiceStateTracker();
 
@@ -258,16 +252,16 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testGetNetworkCountryIso() {
-        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("");
-        assertEquals(mTestMtcEmergencyServiceManager.getNetworkCountryIso(), "");
+        Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED);
+        intent.putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "");
+        intent.putExtra(PhoneConstants.PHONE_KEY, 0);
 
-        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("kr");
-        assertEquals(mTestMtcEmergencyServiceManager.getNetworkCountryIso(), "kr");
-
-        Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED)
-                .putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "us");
         mTestMtcEmergencyServiceManager.getBroadcastReceiver().onReceive(mContext, intent);
-        assertEquals(mTestMtcEmergencyServiceManager.getNetworkCountryIso(), "us");
+        assertEquals("", mTestMtcEmergencyServiceManager.getNetworkCountryIso());
+
+        intent.putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "us");
+        mTestMtcEmergencyServiceManager.getBroadcastReceiver().onReceive(mContext, intent);
+        assertEquals("us", mTestMtcEmergencyServiceManager.getNetworkCountryIso());
     }
 
     private void verifyOpenEmergencyService(int nativeObject, int serviceType) {

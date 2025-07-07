@@ -418,6 +418,12 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_PIDF_ADDRESS = "pidf_address";
 
+        /**
+         * Keeps the network country ISO received via the ACTION_NETWORK_COUNTRY_CHANGED intent.
+         * Value : string
+         */
+        public static final String KEY_NETWORK_COUNTRY_ISO = "network_country_iso";
+
         public static final String[] CONFIG_PROPERTIES = {
             KEY_CONFIG_PCSCF_ADDRESS_LIST,
             KEY_CONFIG_IMPI,
