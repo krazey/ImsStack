@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
-import android.telephony.AccessNetworkUtils;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
@@ -495,9 +494,7 @@ public class CellInfoAgent implements CellInfoInterface {
     private static String[] formCellIdentity(CellInfo cellInfo, int slotId) {
         if (cellInfo instanceof CellInfoLte) {
             CellIdentityLte ci = (CellIdentityLte) cellInfo.getCellIdentity();
-            // TODO: need to use the public or system API for this.
-            int band = AccessNetworkUtils.getOperatingBandForEarfcn(ci.getEarfcn());
-            int duplexMode = AccessNetworkUtils.getDuplexModeForEutranBand(band);
+            int duplexMode = DcUtils.getDuplexModeForLte(ci);
             return formCellIdentity(
                     ci.getMccString(),
                     ci.getMncString(),

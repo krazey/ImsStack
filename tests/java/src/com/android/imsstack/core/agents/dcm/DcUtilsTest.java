@@ -453,6 +453,42 @@ public class DcUtilsTest {
         assertEquals("", networks[DcUtils.ANI_INDEX_MODE]);
     }
 
+    @Test
+    @SmallTest
+    public void getDuplexModeForLte_cellInfoIsUnavailable() {
+        CellIdentityLte ci = new CellIdentityLte(0x1111111, 13, 0x2222,
+                CellInfo.UNAVAILABLE, new int[] {}, 0, null, "01",
+                "Test-SIM", "Test", Collections.emptyList(), null);
+
+        int duplexMode = mDcUtils.getDuplexModeForLte(ci);
+
+        assertEquals(ServiceState.DUPLEX_MODE_UNKNOWN, duplexMode);
+    }
+
+    @Test
+    @SmallTest
+    public void getDuplexModeForLte_foundMatchingDuplexMode() {
+        CellIdentityLte ci = new CellIdentityLte(0x1111111, 13, 0x2222, 70596,
+                new int[] {AccessNetworkConstants.EutranBand.BAND_88}, 0, null,
+                "01", "Test-SIM", "Test", Collections.emptyList(), null);
+
+        int duplexMode = mDcUtils.getDuplexModeForLte(ci);
+
+        assertEquals(ServiceState.DUPLEX_MODE_FDD, duplexMode);
+    }
+
+    @Test
+    @SmallTest
+    public void getDuplexModeForLte_notFoundMatchingDuplexMode() {
+        CellIdentityLte ci = new CellIdentityLte(0x1111111, 13, 0x2222, 70700,
+                new int[] {AccessNetworkConstants.EutranBand.BAND_88}, 0, null,
+                "01", "Test-SIM", "Test", Collections.emptyList(), null);
+
+        int duplexMode = mDcUtils.getDuplexModeForLte(ci);
+
+        assertEquals(ServiceState.DUPLEX_MODE_UNKNOWN, duplexMode);
+    }
+
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int networkType) {
         return new NetworkRegistrationInfo.Builder()
                 .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
