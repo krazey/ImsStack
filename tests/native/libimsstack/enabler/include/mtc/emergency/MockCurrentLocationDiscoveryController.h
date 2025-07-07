@@ -25,7 +25,7 @@ class ISipServerConnection;
 class MockCurrentLocationDiscoveryController : public CurrentLocationDiscoveryController
 {
 public:
-    MockCurrentLocationDiscoveryController(IN IMtcCallContext& objContext) :
+    explicit MockCurrentLocationDiscoveryController(IN IMtcCallContext& objContext) :
             CurrentLocationDiscoveryController(objContext)
     {
     }
