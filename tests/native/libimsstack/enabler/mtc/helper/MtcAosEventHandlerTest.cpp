@@ -42,7 +42,6 @@ class MtcAosEventHandlerTest : public ::testing::Test
 public:
     MtcAosEventHandler* pEventHandler;
 
-    MockIMtcContext objContext;
     MockIMtcService objMtcService;
     MockMtcConfigurationProxy* pConfigProxy;
     MockIJniMtcServiceThread objJniThread;

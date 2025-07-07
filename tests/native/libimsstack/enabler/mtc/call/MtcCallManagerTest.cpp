@@ -44,7 +44,6 @@ public:
     MtcCallManager* pCallManager;
     MockIMtcService objService;
     MockIMtcRadioChecker objRadioChecker;
-    MockIMtcSession objMtcSession;
 
 protected:
     virtual void SetUp() override
