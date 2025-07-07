@@ -127,19 +127,25 @@ public class SampleCallTest extends CallTestBase {
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessages("""
-                >INVITE | <100-INVITE | <200-INVITE s-copy d-2000 | >ACK |
-                <BYE-ACK d-5000 | >200
-                """);
+        generator.addMessages(">INVITE | <100-INVITE");
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("200-INVITE")
+                .setSdp("copy")
+                .addConfig(ControlProtocolConstants.CONFIG_DELAY, "1000")
+                .addConfig("evssupported", "false")
+                .build());
+        generator.addMessages(">ACK | <BYE-ACK d-30000 | >200");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
         performRegistration();
 
         mCall.startVoiceCall();
         mCall.expect().initiated();
+        mCall.expectWithin(30000).nothing();
         mCall.expect().terminated(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
         assertEquals(mCall.getState(), ImsCallSessionImplBase.State.TERMINATED);
+        mCall.expectWithin(5000).nothing();
     }
 
     @Test
