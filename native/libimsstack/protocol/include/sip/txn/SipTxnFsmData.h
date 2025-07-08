@@ -16,9 +16,8 @@
 #ifndef __SIP_TXN_FSM_DATA_H__
 #define __SIP_TXN_FSM_DATA_H__
 
-#include "msg/SipMessage.h"
-#include "transport/SipTransportInfo.h"
-#include "txn/SipTxn.h"
+class SipMessage;
+class SipTransportInfo;
 
 class SipTxnFsmData
 {

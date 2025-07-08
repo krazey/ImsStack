@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "SipConfiguration.h"
 #include "msg/SipHeaders.h"
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"

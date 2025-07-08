@@ -20,9 +20,9 @@
 
 #include "SipDatatypes.h"
 #include "msg/SipAddrSpec.h"
-#include "msg/SipParameters.h"
 
 class IParameterComponent;
+class SipParameters;
 
 class SipHeaderBase : public SipRefBase
 {

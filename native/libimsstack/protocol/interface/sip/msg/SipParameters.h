@@ -17,7 +17,6 @@
 #define __SIP_PARAMETERS_H__
 
 #include "AStringBuffer.h"
-#include "SipPercentEncoding.h"
 #include "SipRefBase.h"
 #include "SipVector.h"
 #include "msg/IParameterComponent.h"

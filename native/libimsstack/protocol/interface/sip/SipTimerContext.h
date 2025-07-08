@@ -16,7 +16,9 @@
 #ifndef __SIP_TIMER_CONTEXT_H__
 #define __SIP_TIMER_CONTEXT_H__
 
-#include "txn/SipTxnTimerValues.h"
+#include "SipDatatypes.h"
+
+class SipTxnTimerValues;
 
 class SipTimerContext
 {

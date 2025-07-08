@@ -21,6 +21,7 @@
 #include "transport/SipTransportHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
+#include "txn/SipTxn.h"
 
 SIP_BOOL SipTransportHandler::OnSendTransp(IN const SipMessage* pSipMsg,
         IN const SipTransportParameter* pTranspParam, IN const SIP_CHAR* pSipBuffer,

@@ -16,9 +16,10 @@
 #ifndef __SIP_UTIL_H__
 #define __SIP_UTIL_H__
 
-#include "ISipLoggerUtil.h"
-#include "ISipNetworkUtil.h"
 #include "ISipTransactionCallback.h"
+
+class ISipLoggerUtil;
+class ISipNetworkUtil;
 
 class SipUtil
 {

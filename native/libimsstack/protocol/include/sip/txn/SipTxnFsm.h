@@ -16,8 +16,6 @@
 #ifndef __SIP_TXN_FSM_H__
 #define __SIP_TXN_FSM_H__
 
-#include "txn/SipTxn.h"
-
 /* Invite Client FSM */
 extern SIP_BOOL (
         *gpfSipInvClientTxnFsm[SipTxn::INV_CLI_INVALID_ST + 1][SipTxn::INV_CLI_INVALID_EVT + 1])(

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISipLoggerUtil.h"
 #include "SipDebug.h"
 #include "SipUtil.h"
 #include "platform/SipString.h"

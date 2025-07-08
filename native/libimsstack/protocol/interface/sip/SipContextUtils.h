@@ -16,7 +16,9 @@
 #ifndef __SIP_CONTEXT_UTILS_H__
 #define __SIP_CONTEXT_UTILS_H__
 
-#include "SipTxnContext.h"
+#include "SipDatatypes.h"
+
+class SipTxnContext;
 
 class SipContextUtils
 {

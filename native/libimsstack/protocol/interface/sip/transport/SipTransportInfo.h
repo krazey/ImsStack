@@ -16,7 +16,6 @@
 #ifndef __SIP_TRANSPORT_INFO_H__
 #define __SIP_TRANSPORT_INFO_H__
 
-#include "ISipUserData.h"
 #include "SipDatatypes.h"
 #include "msg/SipMessage.h"
 #include "msg/SipMsgUtil.h"

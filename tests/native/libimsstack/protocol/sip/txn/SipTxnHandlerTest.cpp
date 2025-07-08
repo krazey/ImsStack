@@ -21,7 +21,9 @@
 #include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
+#include "txn/SipTxn.h"
 #include "txn/SipTxnHandler.h"
+#include "txn/SipTxnInfo.h"
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -409,7 +411,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
 
     SipCSeqHeader* pCSeq = static_cast<SipCSeqHeader*>(pRespSipMsg->GetHdrObj(SipHeaderBase::CSEQ));
 
-    if (pCSeq != IMS_NULL)
+    if (pCSeq != SIP_NULL)
     {
         pCSeq->SetMethod("UPDATE");
         pCSeq->SipDelete();

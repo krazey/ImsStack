@@ -16,6 +16,7 @@
 #include "SipDebug.h"
 #include "msg/SipMsgUtil.h"
 #include "msg/SipParameters.h"
+#include "msg/SipPercentEncoding.h"
 #include "platform/SipString.h"
 
 SipNameValue::SipNameValue() :

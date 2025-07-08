@@ -18,9 +18,10 @@
 
 #include "SipDatatypes.h"
 #include "SipRefBase.h"
-#include "msg/SipContentTypeHeader.h"
 #include "msg/SipHeaderList.h"
 
+class SipContentTypeHeader;
+class SipHeaderBase;
 class SipMsgBody;
 
 class SipMIMEHdrs : public SipRefBase
