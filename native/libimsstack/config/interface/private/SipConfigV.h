@@ -37,6 +37,7 @@ private:
         IMS_BOOL bSdpVersionCheckSupported;
         IMS_BOOL bSdpNonRprAllowed;
         IMS_SINT32 nSessionRefreshSdpVersionIncrement;
+        IMS_BOOL bIgnoreSubsequentSdpAnswerInPreviewMode;
 
         inline Session() :
                 bSessionTimerSupported(IMS_TRUE),
@@ -48,7 +49,8 @@ private:
                 bNoRefreshByReInvite(IMS_FALSE),
                 bSdpVersionCheckSupported(IMS_TRUE),
                 bSdpNonRprAllowed(IMS_FALSE),
-                nSessionRefreshSdpVersionIncrement(SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE)
+                nSessionRefreshSdpVersionIncrement(SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE),
+                bIgnoreSubsequentSdpAnswerInPreviewMode(IMS_TRUE)
         {
         }
     };
@@ -116,6 +118,10 @@ public:
     inline IMS_SINT32 GetSessionRefreshSdpVersionIncrement() const
     {
         return m_objSession.nSessionRefreshSdpVersionIncrement;
+    }
+    inline IMS_BOOL ShouldIgnoreSubsequentSdpAnswerInPreviewMode() const
+    {
+        return m_objSession.bIgnoreSubsequentSdpAnswerInPreviewMode;
     }
 
     // "capabilities"
