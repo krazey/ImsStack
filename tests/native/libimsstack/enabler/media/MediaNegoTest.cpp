@@ -954,3 +954,40 @@ TEST_F(MediaNegoTest, testGetMediaDescriptor)
 
     EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(nullptr), nullptr);
 }
+
+TEST_F(MediaNegoTest, testNegotiateSdpWhenPreviewModeAndNegotiated)
+{
+    SetupProfileExpectation();
+    EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
+
+    MediaNego::MediaNegoResult errorReason;
+    IMS_SINT32 nAudioDirection;
+    IMS_SINT32 nVideoDirection;
+    IMS_SINT32 nTextDirection;
+
+    // success case
+    MockIMedia objIMedia;
+    MockIMediaDescriptor objIMediaDescriptor;
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    ImsList<IMedia*> objMediaList;
+    SetUpMedia(objIMedia, objIMediaDescriptor, objSdpMedia, objMediaList);
+
+    ON_CALL(objIMediaDescriptor, GetRemoteAddress()).WillByDefault(Return(m_objRemoteIpAddress));
+    ON_CALL(objIMediaDescriptor, GetRemotePort()).WillByDefault(Return(REMOTE_PORT));
+    ON_CALL(*m_pMockAudioNego, GetRemotePort()).WillByDefault(Return(REMOTE_PORT));
+    ON_CALL(*m_pMockAudioNego, GetLocalPort()).WillByDefault(Return(REMOTE_PORT));
+    ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_AMR));
+    EXPECT_CALL(*m_pMockAudioNego, NegotiateSdp(_, _, _, _))
+            .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_SEND), Return()));
+
+    m_objMediaNego.SetNegoState(STATE_NEGOTIATED);
+    m_objMediaNego.SetPreviewMode(IMS_TRUE);
+    ON_CALL(m_objIsession, IsSdpOaInPreviewMode()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_objMediaNego.NegotiateSdp(
+            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
+    EXPECT_EQ(errorReason, MediaNego::NO_ERROR);
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
+    EXPECT_TRUE(m_objMediaNego.IsPreviewMode());
+}

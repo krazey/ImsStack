@@ -222,6 +222,16 @@ public:
      */
     virtual IMS_BOOL IsForking();
 
+    /**
+     * @brief Check if the SDP negotiation is done in preview mode.
+     */
+    virtual IMS_BOOL IsPreviewMode();
+
+    /**
+     * @brief Set the mode is preview.
+     */
+    virtual void SetPreviewMode(IMS_BOOL bIsPreview);
+
 private:
     ImsList<IMedia*> CreateIMediaListFromSession(
             IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType);
@@ -247,6 +257,7 @@ private:
     std::shared_ptr<MediaEnvironment> m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bForking;
+    IMS_BOOL m_bPreviewMode;
 };
 
 #endif

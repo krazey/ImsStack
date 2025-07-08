@@ -818,6 +818,49 @@ TEST_F(MediaSessionTest, testSendMessageResponseNullParam)
     // because OnResponse handles the null check internally.
 }
 
+// --- SetOptions Tests ---
+
+TEST_F(MediaSessionTest, testSetOptionsSetRtpPort)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO;
+    IMS_SINT32 nPort = 12345;
+
+    EXPECT_CALL(*m_pMockMediaNegoHandler, SetRtpPort(nNegoId, eMediaType, nPort))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pSession->SetOptions(nNegoId, MediaSession::SET_RTP_PORT, eMediaType, nPort);
+}
+
+TEST_F(MediaSessionTest, testSetOptionsSetConfirmedSession)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    IMS_SINT32 nConfirmed = 1;
+
+    // Expect FindMediaNego to be called and return a valid mock
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(nNegoId))
+            .Times(1)
+            .WillOnce(Return(m_pMediaNego));
+
+    // Expect SetPreviewMode to be called on the MediaNego mock
+    EXPECT_CALL(*m_pMediaNego, SetPreviewMode(IMS_FALSE)).Times(1);
+
+    // Expect SetCallSessionState to be called on the controllers
+    EXPECT_CALL(*m_pMockAudioController, SetCallSessionState(nConfirmed)).Times(1);
+    EXPECT_CALL(*m_pMockVideoController, SetCallSessionState(nConfirmed)).Times(1);
+
+    m_pSession->SetOptions(nNegoId, MediaSession::SET_CONFIRMED_SESSION, nConfirmed, 0);
+}
+
+TEST_F(MediaSessionTest, testSetOptionsUnhandled)
+{
+    // No expectations, just ensure it doesn't crash for unhandled options
+    m_pSession->SetOptions(NEGO_ID, MediaSession::SET_DIRECTION, 0, 0);
+    m_pSession->SetOptions(NEGO_ID, MediaSession::SET_CONFERENCE_ENABLE, 0, 0);
+    m_pSession->SetOptions(NEGO_ID, MediaSession::SEND_FAST_VIDEO_UPDATE, 0, 0);
+}
+
 // --- SetMediaPemType Test ---
 TEST_F(MediaSessionTest, testSetMediaPemType)
 {

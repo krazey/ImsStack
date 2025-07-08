@@ -256,6 +256,12 @@ public:
      * @return
      */
     virtual void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType) = 0;
+
+    /**
+     * @brief Check if the SDP negotiation is done in preview mode
+     * @param nNegoId The ID of the MediaNego instance.
+     */
+    virtual IMS_BOOL IsPreviewMode(IMS_UINTP nNegoId) = 0;
 };
 
 #endif
