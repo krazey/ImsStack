@@ -46,4 +46,5 @@
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
     <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="4"/>
+    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="10"/>
 </carrier_config>
