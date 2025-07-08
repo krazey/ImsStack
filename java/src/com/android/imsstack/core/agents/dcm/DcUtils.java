@@ -40,6 +40,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This implements the utility interfaces that are related to the data network.
@@ -250,6 +252,30 @@ public class DcUtils implements IDcUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the duplex mode of EUTRAN.
+     *
+     * <p>See 3GPP 36.101 Table 5.5-1 E-UTRA operating bands for calculation.
+     *
+     * @param ci The cell-identity of EUTRAN.
+     * @return The duplex mode of the given CellIdentity.
+     */
+    public static int getDuplexModeForLte(@NonNull CellIdentityLte ci) {
+        int earfcn = ci.getEarfcn();
+        if (earfcn == CellInfo.UNAVAILABLE) {
+            return ServiceState.DUPLEX_MODE_UNKNOWN;
+        }
+
+        Set<Integer> cellBands = Arrays.stream(ci.getBands()).boxed().collect(Collectors.toSet());
+
+        return Arrays.stream(EutranBandArfcnFrequency.values())
+                .filter(eutranBand -> cellBands.contains(eutranBand.getBand()))
+                .filter(eutranBand -> eutranBand.isEarfcnInRange(earfcn))
+                .findFirst()
+                .map(EutranBandArfcnFrequency::getDuplexMode)
+                .orElse(ServiceState.DUPLEX_MODE_UNKNOWN);
     }
 
     /**
