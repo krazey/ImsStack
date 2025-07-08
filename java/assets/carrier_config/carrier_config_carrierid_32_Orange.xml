@@ -98,8 +98,18 @@
 
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
-    <int name="sms_retry_policy_for_expiry_timer_f_int" value="4"/>
     <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="10"/>
+        <int-array name="imssms.sms_evaluate_radio_status_for_error_codes_int_array" num="9">
+        <item value="403"/>
+        <item value="408"/>
+        <item value="500"/>
+        <item value="501"/>
+        <item value="502"/>
+        <item value="503"/>
+        <item value="504"/>
+        <item value="505"/>
+        <item value="513"/>
+    </int-array>
     <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
         <item value="1"/>
         <item value="8"/>
