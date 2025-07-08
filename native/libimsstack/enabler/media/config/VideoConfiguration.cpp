@@ -113,6 +113,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVt::KEY_VIDEO_LOWEST_BITRATE_BPS_INT, DEFAULT_VIDEO_LOWEST_BITRATE);
     m_bVideoHoldDirectionInactive =
             piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_INACTIVE_HOLD_BOOL, IMS_FALSE);
+
     if (!CreateCodecConfigs(piCc))
     {
         IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
@@ -165,10 +166,11 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
     ImsVector<IMS_SINT32> objHevcPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
 
+    IMS_TRACE_D("CreateCodecConfigs - AvcPayloadTypeSize[%d], HevcPayloadTypeSize[%d]",
+            objAvcPayloadType.GetSize(), objHevcPayloadType.GetSize(), 0);
+
     IMS_BOOL bHevcPriorityOrderEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL, false);
-
-    piCcBundle->ReleaseBundle();
 
     IMS_UINT32 nCodecCnt = 0;
 
@@ -178,6 +180,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         {
             nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
         }
+
         if (objAvcPayloadType.GetSize() > 0)
         {
             nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
@@ -189,6 +192,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         {
             nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
         }
+
         if (objHevcPayloadType.GetSize() > 0)
         {
             nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
@@ -198,6 +202,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
     // to avoid static analysis issue (not used variable and variable scope)
     IMS_TRACE_D("CreateCodecConfigs - NumOfCodec[%d]", nCodecCnt, 0, 0);
 
+    piCcBundle->ReleaseBundle();
     return IMS_TRUE;
 }
 

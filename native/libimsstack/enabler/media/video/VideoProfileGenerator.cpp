@@ -171,13 +171,13 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
     if (pAvcConfig->GetProfileLevelId().GetLength() != 0)
     {
         pAvcFmtp->SetProfileLevelId(pAvcConfig->GetProfileLevelId());
-        pAvcFmtp->SetShowProfileLevelId(IMS_TRUE);
+        pAvcFmtp->SetVisibleProfileLevelId(IMS_TRUE);
     }
 
     if (pAvcConfig->GetIncludeSpropParameterSets())
     {
         pAvcFmtp->SetSpropParam(pbAvc4SpropParameterSets);
-        pAvcFmtp->SetShowSpropParam(IMS_TRUE);
+        pAvcFmtp->SetVisibleSpropParam(IMS_TRUE);
     }
 
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
@@ -208,19 +208,19 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
     if (pHevcConfig->GetHevcProfile() != -1)
     {
         pHevcFmtp->SetProfile(static_cast<VIDEO_PROFILE_HEVC>(pHevcConfig->GetHevcProfile()));
-        pHevcFmtp->SetShowProfile(IMS_TRUE);
+        pHevcFmtp->SetVisibleProfile(IMS_TRUE);
     }
 
     if (pHevcConfig->GetHevcLevel() != -1)
     {
         pHevcFmtp->SetLevel(pHevcConfig->GetHevcLevel());
-        pHevcFmtp->SetShowLevel(IMS_TRUE);
+        pHevcFmtp->SetVisibleLevel(IMS_TRUE);
     }
 
     if (pHevcConfig->GetSpropParameterSets().GetLength() != 0)
     {
         pHevcFmtp->SetSpropParam(pHevcConfig->GetSpropParameterSets());
-        pHevcFmtp->SetShowSpropParam(IMS_TRUE);
+        pHevcFmtp->SetVisibleSpropParam(IMS_TRUE);
     }
 
     VideoProfile::Payload* pHevcPayload = new VideoProfile::Payload();
@@ -249,7 +249,7 @@ PROTECTED void VideoProfileGenerator::SetVideoCodecFmtp(IN CodecVideoConfig* pCo
     if (pCodecConfig->GetPacketizationMode() != -1)
     {
         pFmtp->SetPacketizationMode(pCodecConfig->GetPacketizationMode());
-        pFmtp->SetShowPacketizationMode(IMS_TRUE);
+        pFmtp->SetVisiblePacketizationMode(IMS_TRUE);
     }
 
     IMS_TRACE_D("SetVideoCodecFmtp(): FrameRate[%d], Resolution[%d], Bitrate[%d]",

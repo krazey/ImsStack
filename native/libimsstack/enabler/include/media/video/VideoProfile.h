@@ -43,8 +43,8 @@ public:
                 m_nLevel(0),
                 m_nPacketizationMode(1),
                 m_strSpropParam(AString::ConstNull()),
-                m_bShowPacketizationMode(IMS_FALSE),
-                m_bShowSpropParam(IMS_FALSE)
+                m_bVisiblePacketizationMode(IMS_FALSE),
+                m_bVisibleSpropParam(IMS_FALSE)
         {
             if (pFmtp == IMS_NULL)
             {
@@ -59,8 +59,8 @@ public:
             m_nLevel = pFmtp->m_nLevel;
             m_nPacketizationMode = pFmtp->m_nPacketizationMode;
             m_strSpropParam = pFmtp->m_strSpropParam;
-            m_bShowPacketizationMode = pFmtp->m_bShowPacketizationMode;
-            m_bShowSpropParam = pFmtp->m_bShowSpropParam;
+            m_bVisiblePacketizationMode = pFmtp->m_bVisiblePacketizationMode;
+            m_bVisibleSpropParam = pFmtp->m_bVisibleSpropParam;
         };
 
         VideoFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_SINT32 nBitrate,
@@ -75,8 +75,8 @@ public:
                 m_nLevel(nLevel),
                 m_nPacketizationMode(nPacketization),
                 m_strSpropParam(strSprop),
-                m_bShowPacketizationMode(IMS_FALSE),
-                m_bShowSpropParam(IMS_FALSE) {};
+                m_bVisiblePacketizationMode(IMS_FALSE),
+                m_bVisibleSpropParam(IMS_FALSE) {};
 
         virtual ~VideoFmtp() override {};
 
@@ -102,13 +102,16 @@ public:
         inline IMS_SINT32 GetPacketizationMode() { return m_nPacketizationMode; }
         inline void SetSpropParam(IN const AString strSprop) { m_strSpropParam = strSprop; }
         inline AString& GetSpropParam() { return m_strSpropParam; }
-        inline void SetShowPacketizationMode(IN const IMS_BOOL nShow)
+        inline void SetVisiblePacketizationMode(IN const IMS_BOOL nVisible)
         {
-            m_bShowPacketizationMode = nShow;
+            m_bVisiblePacketizationMode = nVisible;
         }
-        inline IMS_BOOL IsPacketizationModeVisible() { return m_bShowPacketizationMode; }
-        inline void SetShowSpropParam(IN const IMS_BOOL nShow) { m_bShowSpropParam = nShow; }
-        inline IMS_BOOL IsSpropParamVisible() { return m_bShowSpropParam; }
+        inline IMS_BOOL IsPacketizationModeVisible() { return m_bVisiblePacketizationMode; }
+        inline void SetVisibleSpropParam(IN const IMS_BOOL nVisible)
+        {
+            m_bVisibleSpropParam = nVisible;
+        }
+        inline IMS_BOOL IsSpropParamVisible() { return m_bVisibleSpropParam; }
 
     private:
         VIDEO_RESOLUTION m_eResolution;
@@ -119,8 +122,8 @@ public:
         IMS_UINT32 m_nLevel;
         IMS_SINT32 m_nPacketizationMode;
         AString m_strSpropParam;
-        IMS_BOOL m_bShowPacketizationMode;
-        IMS_BOOL m_bShowSpropParam;
+        IMS_BOOL m_bVisiblePacketizationMode;
+        IMS_BOOL m_bVisibleSpropParam;
     };
 
     /**
@@ -133,14 +136,14 @@ public:
         explicit AvcFmtp(IN const AvcFmtp* pFmtp = IMS_NULL) :
                 VideoFmtp(pFmtp),
                 m_strProfileLevelId(AString::ConstNull()),
-                m_bShowProfileLevelId(IMS_FALSE)
+                m_bVisibleProfileLevelId(IMS_FALSE)
         {
             if (pFmtp == IMS_NULL)
             {
                 return;
             }
             m_strProfileLevelId = pFmtp->m_strProfileLevelId;
-            m_bShowProfileLevelId = pFmtp->m_bShowProfileLevelId;
+            m_bVisibleProfileLevelId = pFmtp->m_bVisibleProfileLevelId;
         };
 
         AvcFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_UINT32 nBitrate,
@@ -151,7 +154,7 @@ public:
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
                 m_strProfileLevelId(strProfileLevelId),
-                m_bShowProfileLevelId(IMS_FALSE) {};
+                m_bVisibleProfileLevelId(IMS_FALSE) {};
 
         virtual ~AvcFmtp() override {};
 
@@ -160,15 +163,15 @@ public:
             m_strProfileLevelId = strProfileLevelId;
         }
         inline AString& GetProfileLevelId() { return m_strProfileLevelId; }
-        inline void SetShowProfileLevelId(IN const IMS_BOOL nShow)
+        inline void SetVisibleProfileLevelId(IN const IMS_BOOL nVisible)
         {
-            m_bShowProfileLevelId = nShow;
+            m_bVisibleProfileLevelId = nVisible;
         }
-        inline IMS_BOOL IsProfileLevelIdVisible() { return m_bShowProfileLevelId; }
+        inline IMS_BOOL IsProfileLevelIdVisible() { return m_bVisibleProfileLevelId; }
 
     private:
         AString m_strProfileLevelId;
-        IMS_BOOL m_bShowProfileLevelId;
+        IMS_BOOL m_bVisibleProfileLevelId;
     };
 
     /**
@@ -180,16 +183,16 @@ public:
     public:
         explicit HevcFmtp(IN const HevcFmtp* pFmtp = IMS_NULL) :
                 VideoFmtp(pFmtp),
-                m_bShowProfile(IMS_FALSE),
-                m_bShowLevel(IMS_FALSE)
+                m_bVisibleProfile(IMS_FALSE),
+                m_bVisibleLevel(IMS_FALSE)
         {
             if (pFmtp == IMS_NULL)
             {
                 return;
             }
 
-            m_bShowProfile = pFmtp->m_bShowProfile;
-            m_bShowLevel = pFmtp->m_bShowLevel;
+            m_bVisibleProfile = pFmtp->m_bVisibleProfile;
+            m_bVisibleLevel = pFmtp->m_bVisibleLevel;
         };
 
         HevcFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_UINT32 nBitrate,
@@ -198,19 +201,19 @@ public:
                 IN const IMS_UINT32 nPacketization, IN const AString strSprop) :
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
-                m_bShowProfile(IMS_FALSE),
-                m_bShowLevel(IMS_FALSE) {};
+                m_bVisibleProfile(IMS_FALSE),
+                m_bVisibleLevel(IMS_FALSE) {};
 
         virtual ~HevcFmtp() override {};
 
-        inline void SetShowProfile(IN const IMS_BOOL nShow) { m_bShowProfile = nShow; }
-        inline IMS_BOOL IsProfileVisible() { return m_bShowProfile; }
-        inline void SetShowLevel(IN const IMS_BOOL nShow) { m_bShowLevel = nShow; }
-        inline IMS_BOOL IsLevelVisible() { return m_bShowLevel; }
+        inline void SetVisibleProfile(IN const IMS_BOOL nVisible) { m_bVisibleProfile = nVisible; }
+        inline IMS_BOOL IsProfileVisible() { return m_bVisibleProfile; }
+        inline void SetVisibleLevel(IN const IMS_BOOL nVisible) { m_bVisibleLevel = nVisible; }
+        inline IMS_BOOL IsLevelVisible() { return m_bVisibleLevel; }
 
     private:
-        IMS_BOOL m_bShowProfile;
-        IMS_BOOL m_bShowLevel;
+        IMS_BOOL m_bVisibleProfile;
+        IMS_BOOL m_bVisibleLevel;
     };
 
 public:

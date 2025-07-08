@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +52,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - Invalid params", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -63,7 +63,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
 
     if (piCcBundle == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piCcBundle is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - Hevc codec is invalid", 0, 0, 0);
+
         return IMS_FALSE;
     }
 
@@ -73,40 +74,51 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
 
     if (piCcSubBundle == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piCcSubBundle is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - Hevc SubBundle[%d] is invalid", m_nPayloadType, 0, 0);
         piCcBundle->ReleaseBundle();
+
         return IMS_FALSE;
+        // TODO : b/427907588
+        // For Hevc codec, it is not clear whether a default codec is generated, so it is
+        // currently processed as a codec generation failure.
+        // CreateDefaultHevcCodec();
     }
-
-    ImsVector<IMS_SINT32> objVideoCodecAttributeResolution = piCcSubBundle->GetIntArray(
-            CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
-    if (!objVideoCodecAttributeResolution.IsEmpty())
+    else
     {
-        m_nResolutionWidth = objVideoCodecAttributeResolution.GetAt(0);
-        if (objVideoCodecAttributeResolution.GetSize() > 1)
+        ImsVector<IMS_SINT32> objVideoCodecAttributeResolution = piCcSubBundle->GetIntArray(
+                CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
+        if (!objVideoCodecAttributeResolution.IsEmpty())
         {
-            m_nResolutionHeight = objVideoCodecAttributeResolution.GetAt(1);
+            m_nResolutionWidth = objVideoCodecAttributeResolution.GetAt(0);
+            if (objVideoCodecAttributeResolution.GetSize() > 1)
+            {
+                m_nResolutionHeight = objVideoCodecAttributeResolution.GetAt(1);
+            }
         }
+        else
+        {
+            m_nResolutionWidth = DEFAULT_HEVC_RESOLUTION_WIDTH;
+            m_nResolutionHeight = DEFAULT_HEVC_RESOLUTION_HEIGHT;
+            IMS_TRACE_D("Create - Default Hevc Resolution width[%d], height[%d]",
+                    m_nResolutionWidth, m_nResolutionHeight, 0);
+        }
+
+        m_nFramerate = piCcSubBundle->GetInt(
+                CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
+                DEFAULT_HEVC_FRAMERATE);
+        m_nPacketizationMode = piCcSubBundle->GetInt(
+                CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
+                DEFAULT_PACKETIZATION_MODE);
+        m_strSpropParameterSets = piCcSubBundle->GetString(
+                CarrierConfig::ImsVt::KEY_HEVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
+        m_nHevcProfile = piCcSubBundle->GetInt(
+                CarrierConfig::ImsVt::KEY_HEVC_PROFILE_INT, DEFAULT_HEVC_PROFILE);
+        m_nHevcLevel =
+                piCcSubBundle->GetInt(CarrierConfig::ImsVt::KEY_HEVC_LEVEL_INT, DEFAULT_HEVC_LEVEL);
+
+        piCcSubBundle->ReleaseBundle();
+        piCcBundle->ReleaseBundle();
     }
-
-    m_nFramerate = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT, DEFAULT_HEVC_FRAMERATE);
-
-    m_nPacketizationMode = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
-            DEFAULT_PACKETIZATION_MODE);
-
-    m_strSpropParameterSets = piCcSubBundle->GetString(
-            CarrierConfig::ImsVt::KEY_HEVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
-
-    m_nHevcProfile =
-            piCcSubBundle->GetInt(CarrierConfig::ImsVt::KEY_HEVC_PROFILE_INT, DEFAULT_HEVC_PROFILE);
-
-    m_nHevcLevel =
-            piCcSubBundle->GetInt(CarrierConfig::ImsVt::KEY_HEVC_LEVEL_INT, DEFAULT_HEVC_LEVEL);
-
-    piCcSubBundle->ReleaseBundle();
-    piCcBundle->ReleaseBundle();
 
     return IMS_TRUE;
 }
@@ -128,4 +140,17 @@ PUBLIC
 IMS_SINT32 CodecHevcConfig::GetHevcLevel() const
 {
     return m_nHevcLevel;
+}
+
+PUBLIC VIRTUAL void CodecHevcConfig::CreateDefaultHevcCodec()
+{
+    IMS_TRACE_D("CreateDefaultHevcCodec: codec[%d], payloadTypeNumber[%d]", m_nCodec,
+            m_nPayloadType, 0);
+
+    m_nResolutionWidth = DEFAULT_HEVC_RESOLUTION_WIDTH;
+    m_nResolutionHeight = DEFAULT_HEVC_RESOLUTION_HEIGHT;
+    m_nFramerate = DEFAULT_HEVC_FRAMERATE;
+    m_nPacketizationMode = DEFAULT_PACKETIZATION_MODE;
+    m_nHevcProfile = DEFAULT_HEVC_PROFILE;
+    m_nHevcLevel = DEFAULT_HEVC_LEVEL;
 }

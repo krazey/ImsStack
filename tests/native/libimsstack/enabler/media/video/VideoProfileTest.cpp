@@ -140,7 +140,7 @@ TEST_F(VideoProfileTest, testVideoFmtpShowPacketizationMode)
     VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
     EXPECT_EQ(pFmtp->IsPacketizationModeVisible(), IMS_FALSE);
 
-    pFmtp->SetShowPacketizationMode(VIDEO_FMTP_SHOW_PACKETIZATION_MODE);
+    pFmtp->SetVisiblePacketizationMode(VIDEO_FMTP_SHOW_PACKETIZATION_MODE);
     EXPECT_EQ(pFmtp->IsPacketizationModeVisible(), VIDEO_FMTP_SHOW_PACKETIZATION_MODE);
 
     delete pFmtp;
@@ -151,7 +151,7 @@ TEST_F(VideoProfileTest, testVideoFmtpShowSpropParam)
     VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
     EXPECT_EQ(pFmtp->IsSpropParamVisible(), IMS_FALSE);
 
-    pFmtp->SetShowSpropParam(VIDEO_FMTP_SHOW_SPROP);
+    pFmtp->SetVisibleSpropParam(VIDEO_FMTP_SHOW_SPROP);
     EXPECT_EQ(pFmtp->IsSpropParamVisible(), VIDEO_FMTP_SHOW_SPROP);
 
     delete pFmtp;
@@ -222,7 +222,7 @@ TEST_F(VideoProfileTest, testAvcFmtpShowProfileLevelId)
     VideoProfile::AvcFmtp* pFmtp = new VideoProfile::AvcFmtp();
     EXPECT_EQ(pFmtp->IsProfileLevelIdVisible(), IMS_FALSE);
 
-    pFmtp->SetShowProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+    pFmtp->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
     EXPECT_EQ(pFmtp->IsProfileLevelIdVisible(), AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
     delete pFmtp;
@@ -248,7 +248,7 @@ TEST_F(VideoProfileTest, testAvcFmtpCreation)
     EXPECT_EQ(pFmtp1->GetProfileLevelId(), AVC_FMTP_PROFILE_LEVEL_ID);
     EXPECT_EQ(pFmtp1->IsProfileLevelIdVisible(), IMS_FALSE);
 
-    pFmtp1->SetShowProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+    pFmtp1->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
     VideoProfile::AvcFmtp* pFmtp2 = new VideoProfile::AvcFmtp(pFmtp1);
 
@@ -264,7 +264,7 @@ TEST_F(VideoProfileTest, testHevcFmtpShowProfile)
     VideoProfile::HevcFmtp* pFmtp = new VideoProfile::HevcFmtp();
     EXPECT_EQ(pFmtp->IsProfileVisible(), IMS_FALSE);
 
-    pFmtp->SetShowProfile(HEVC_FMTP_SHOW_PROFILE);
+    pFmtp->SetVisibleProfile(HEVC_FMTP_SHOW_PROFILE);
     EXPECT_EQ(pFmtp->IsProfileVisible(), HEVC_FMTP_SHOW_PROFILE);
 
     delete pFmtp;
@@ -275,7 +275,7 @@ TEST_F(VideoProfileTest, testHevcFmtpShowLevel)
     VideoProfile::HevcFmtp* pFmtp = new VideoProfile::HevcFmtp();
     EXPECT_EQ(pFmtp->IsLevelVisible(), IMS_FALSE);
 
-    pFmtp->SetShowLevel(HEVC_FMTP_SHOW_LEVEL);
+    pFmtp->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
     EXPECT_EQ(pFmtp->IsLevelVisible(), HEVC_FMTP_SHOW_LEVEL);
 
     delete pFmtp;
@@ -299,8 +299,8 @@ TEST_F(VideoProfileTest, testHevcFmtpCreation)
     EXPECT_EQ(pFmtp1->IsProfileVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp1->IsLevelVisible(), IMS_FALSE);
 
-    pFmtp1->SetShowProfile(HEVC_FMTP_SHOW_PROFILE);
-    pFmtp1->SetShowLevel(HEVC_FMTP_SHOW_LEVEL);
+    pFmtp1->SetVisibleProfile(HEVC_FMTP_SHOW_PROFILE);
+    pFmtp1->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
 
     VideoProfile::HevcFmtp* pFmtp2 = new VideoProfile::HevcFmtp(pFmtp1);
 
@@ -531,7 +531,7 @@ TEST_F(VideoProfileTest, testVideoPayloadCreationForAvcFmtp)
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
     static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())
-            ->SetShowProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+            ->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
     EXPECT_EQ(static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())->IsProfileLevelIdVisible(),
             AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
@@ -555,7 +555,8 @@ TEST_F(VideoProfileTest, testVideoPayloadCreationForHevcFmtp)
     VideoProfile::Payload* pPayload3 = new VideoProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->SetShowLevel(HEVC_FMTP_SHOW_LEVEL);
+    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())
+            ->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
     EXPECT_EQ(static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->IsLevelVisible(),
             HEVC_FMTP_SHOW_LEVEL);
 
@@ -609,7 +610,7 @@ TEST_F(VideoProfileTest, testVideoPayloadAssignForAvcFmtp)
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
     static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())
-            ->SetShowProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+            ->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
     EXPECT_EQ(static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())->IsProfileLevelIdVisible(),
             AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
@@ -635,7 +636,8 @@ TEST_F(VideoProfileTest, testVideoPayloadAssignForHevcFmtp)
     *pPayload3 = *pPayload1;
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->SetShowLevel(HEVC_FMTP_SHOW_LEVEL);
+    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())
+            ->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
     EXPECT_EQ(static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->IsLevelVisible(),
             HEVC_FMTP_SHOW_LEVEL);
 
