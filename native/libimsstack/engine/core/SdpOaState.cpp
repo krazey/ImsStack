@@ -327,6 +327,7 @@ SdpOaState::SdpOaState(IN IMS_BOOL bSdpVersionCheck /*= IMS_TRUE*/,
         m_nState(STATE_IDLE),
         m_nOldState(STATE_IDLE),
         m_nMode(MODE_IDLE),
+        m_bPreviewMode(IMS_FALSE),
         m_bStateChanged(IMS_FALSE),
         m_bOfferProgress(IMS_FALSE),
         m_bProvisionalRespWithSdp(IMS_FALSE),
@@ -346,6 +347,7 @@ SdpOaState::SdpOaState(IN const SdpOaState& other) :
         m_nState(other.m_nState),
         m_nOldState(other.m_nOldState),
         m_nMode(other.m_nMode),
+        m_bPreviewMode(other.m_bPreviewMode),
         m_bStateChanged(other.m_bStateChanged),
         m_bOfferProgress(other.m_bOfferProgress),
         m_bProvisionalRespWithSdp(other.m_bProvisionalRespWithSdp),
@@ -972,7 +974,8 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
                 m_pProposalView = IMS_NULL;
             }
 
-            IMS_SINT32 nResult = HandleAnswer(objParser);
+            IMS_SINT32 nResult =
+                    HandleAnswer(objParser, m_nMode == MODE_OFFERER || IsInPreviewMode());
 
             if (m_nMode == MODE_OFFERER)
             {
@@ -1007,10 +1010,28 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
                         }
                     }
                 }
+                else
+                {
+                    if (m_nOldState == STATE_OFFER_SENT && !piSipMsg->IsMessageRpr())
+                    {
+                        StartPreviewMode();
+                    }
+                }
 
                 if (pPrevLastOfferMade != IMS_NULL)
                 {
                     delete pPrevLastOfferMade;
+                }
+            }
+            else if (IsInPreviewMode() && nResult != SdpOfferAnswer::RESULT_NOT_DONE &&
+                    nResult != SdpOfferAnswer::RESULT_FAILURE &&
+                    nResult != SdpOfferAnswer::RESULT_NOT_FOUND)
+            {
+                if (piSipMsg->GetMethod().Equals(SipMethod::INVITE) &&
+                        (piSipMsg->IsMessageRpr() ||
+                                SipStatusCode::IsFinalSuccess(piSipMsg->GetStatusCode())))
+                {
+                    StopPreviewMode();
                 }
             }
 
@@ -1170,13 +1191,12 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
             if (nOldState == STATE_ESTABLISHED)
             {
                 // Consider as the device received the changed offer only if RPR is received
-                // if (bProvisionalRespWithSdp == IMS_TRUE)
-                if ((m_bProvisionalRespWithSdp == IMS_TRUE) && (bIsRpr != IMS_TRUE))
+                if (m_bProvisionalRespWithSdp && !bIsRpr && !IsInPreviewMode())
                 {
                     // We don't have to revert the flag here.
                     // This is because there could be still more RPR's coming
                     // and all those should also be ignored.
-                    IMS_TRACE_D("SDP Offer/Answer :: Provisional response with SDP"
+                    IMS_TRACE_D("SDP Offer/Answer: Ignore non-RPR message with SDP"
                                 " on ESTABLISHED state",
                             0, 0, 0);
                     return IMS_TRUE;
@@ -1243,7 +1263,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
 
     if (nTrigger == TRIGGER_PROVISIONAL_RESP)
     {
-        if (bAllowOaForNonRpr)
+        if (bAllowOaForNonRpr || IsInPreviewMode())
         {
             IMS_TRACE_D("SDP Offer/Answer :: non-RPR is allowed", 0, 0, 0);
         }
@@ -1286,6 +1306,8 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
         }
     }
 
+    IMS_BOOL bNeedToChangeOldState = IMS_FALSE;
+
     // Now, invoke the state transition table
     if (nMessageFlow == MESSAGE_SENT)
     {
@@ -1302,7 +1324,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
         if (GetState() != nOldState)
         {
             m_bStateChanged = IMS_TRUE;
-
+            bNeedToChangeOldState = IMS_TRUE;
             IMS_TRACE_D("SDP Offer/Answer :: SENT - STATE CHANGED", 0, 0, 0);
         }
 
@@ -1328,25 +1350,45 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
             return IMS_FALSE;
         }
 
-        if (objMethod.Equals(SipMethod::UPDATE) && (nTrigger == TRIGGER_SUCCESS_RESP) &&
-                (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
+        if (objMethod.Equals(SipMethod::UPDATE) && nUpdateState == STATE_OFFER_CHANGE_RECEIVED)
         {
-            IMS_TRACE_I("SDP Offer/Answer :: Ignored; Stray SDP answer...", 0, 0, 0);
-            return IMS_TRUE;
+            if (nTrigger == TRIGGER_SUCCESS_RESP)
+            {
+                IMS_TRACE_I("SDP Offer/Answer: Ignored - stray SDP answer", 0, 0, 0);
+                return IMS_TRUE;
+            }
+            else if (IsInPreviewMode())
+            {
+                // SessionEx handles the incoming early UPDATE request with 491.
+                IMS_TRACE_I("SDP Offer/Answer: Ignored - preview state", 0, 0, 0);
+                return IMS_TRUE;
+            }
         }
 
-        SetState(nUpdateState);
-
-        if ((GetState() != nOldState) && (bMessageWithSdp == IMS_TRUE))
+        if (IsInPreviewMode() && nUpdateState == STATE_OFFER_CHANGE_RECEIVED &&
+                (nTrigger == TRIGGER_RPR || nTrigger == TRIGGER_PROVISIONAL_RESP ||
+                        nTrigger == TRIGGER_SUCCESS_RESP))
         {
+            IMS_TRACE_I("SDP Offer/Answer: RECEIVED ON PREVIEW - STATE CHANGED (trigger=%d)",
+                    nTrigger, 0, 0);
             m_bStateChanged = IMS_TRUE;
-
-            IMS_TRACE_D("SDP Offer/Answer :: RECEIVED - STATE CHANGED", 0, 0, 0);
         }
-
-        if ((nUpdateState == STATE_OFFER_RECEIVED) || (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
+        else
         {
-            m_nMode = MODE_ANSWERER;
+            SetState(nUpdateState);
+
+            if ((GetState() != nOldState) && (bMessageWithSdp == IMS_TRUE))
+            {
+                m_bStateChanged = IMS_TRUE;
+                bNeedToChangeOldState = IMS_TRUE;
+                IMS_TRACE_D("SDP Offer/Answer :: RECEIVED - STATE CHANGED", 0, 0, 0);
+            }
+
+            if ((nUpdateState == STATE_OFFER_RECEIVED) ||
+                    (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
+            {
+                m_nMode = MODE_ANSWERER;
+            }
         }
     }
 
@@ -1363,7 +1405,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
     }
 
     // OA_STATE_ROLLBACK_FOR_MALFORMED_SDP
-    if (m_bStateChanged)
+    if (bNeedToChangeOldState)
     {
         SetOldState(nOldState);
     }
@@ -1382,13 +1424,29 @@ void SdpOaState::UpdateStateOnTransactionCompleted(
 {
     (void)nMessageFlow;
 
-    if (piSipMsg->GetMethod().Equals(SipMethod::INVITE) &&
-            SipStatusCode::IsFinal(piSipMsg->GetStatusCode()))
+    if (!piSipMsg->GetMethod().Equals(SipMethod::INVITE))
+    {
+        return;
+    }
+
+    if (SipStatusCode::IsFinal(piSipMsg->GetStatusCode()))
     {
         if (m_bProvisionalRespWithSdp)
         {
             m_bProvisionalRespWithSdp = IMS_FALSE;
             IMS_TRACE_D("SDP Offer/Answer :: ProvisionalRespWithSdp will be reset", 0, 0, 0);
+        }
+
+        if (piSipMsg->GetSdpBodyPart() != IMS_NULL)
+        {
+            StopPreviewMode();
+        }
+    }
+    else if (piSipMsg->IsMessageRpr())
+    {
+        if (piSipMsg->GetSdpBodyPart() != IMS_NULL)
+        {
+            StopPreviewMode();
         }
     }
 }
@@ -1525,7 +1583,7 @@ SessionParameter*& SdpOaState::GetNewPeerView()
  * @brief Handles the SDP answer from the SDP message.
  */
 PUBLIC
-IMS_SINT32 SdpOaState::HandleAnswer(IN const SdpParser& objParser)
+IMS_SINT32 SdpOaState::HandleAnswer(IN const SdpParser& objParser, IN IMS_BOOL bUpdateRemoteVersion)
 {
     SessionParameter* pAnswer = new SessionParameter();
 
@@ -1545,7 +1603,7 @@ IMS_SINT32 SdpOaState::HandleAnswer(IN const SdpParser& objParser)
     }
 
     // Update the remote session version from the origin field
-    if ((m_nMode == MODE_OFFERER) && (m_pLastOfferMade != IMS_NULL))
+    if (bUpdateRemoteVersion && m_pLastOfferMade != IMS_NULL)
     {
         m_pLastOfferMade->UpdateRemoteVersion(
                 pAnswer->GetSessionParameter().GetOrigin().GetSessionVersion());
@@ -1816,6 +1874,26 @@ void SdpOaState::SetState(IN IMS_SINT32 nState)
     IMS_TRACE_I("SDP Offer/Answer :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
+}
+
+PRIVATE
+void SdpOaState::StartPreviewMode()
+{
+    if (!m_bPreviewMode)
+    {
+        m_bPreviewMode = IMS_TRUE;
+        IMS_TRACE_I("SDP Offer/Answer: Preview mode started", 0, 0, 0);
+    }
+}
+
+PRIVATE
+void SdpOaState::StopPreviewMode()
+{
+    if (m_bPreviewMode)
+    {
+        m_bPreviewMode = IMS_FALSE;
+        IMS_TRACE_I("SDP Offer/Answer: Preview mode stopped", 0, 0, 0);
+    }
 }
 
 PRIVATE GLOBAL const IMS_CHAR* SdpOaState::StateToString(IN IMS_SINT32 nState)

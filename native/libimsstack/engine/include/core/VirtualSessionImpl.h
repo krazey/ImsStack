@@ -81,6 +81,7 @@ private:
     IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const override;
     IMS_BOOL IsReliableProvResponseSupported() const override;
     IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const override;
+    IMS_BOOL IsSdpOaInPreviewMode() const override;
     IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
             IN const AString& strReasonPhrase = AString::ConstNull()) override;
     IMS_RESULT RespondToEarlyUpdate(

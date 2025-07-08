@@ -384,6 +384,14 @@ public:
     virtual IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const = 0;
 
     /**
+     * @brief Checks if SDP OA state is in preview mode or not.
+     *
+     * @return If SDP OA state is in preview mode, returns IMS_TRUE.
+     *         Otherwise, returns IMS_FALSE.
+     */
+    virtual IMS_BOOL IsSdpOaInPreviewMode() const = 0;
+
+    /**
      * @brief This method can be used a reject a session invitation or a session update depending
      *        on the context with a specific SIP status code.
      *
@@ -813,7 +821,10 @@ public:
         /// ex. VRBT (Video RingBack Tone) for KR operators
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 1 << 3,
         /// This is to specify whether the 100 Trying response needs to be notified to the enabler.
-        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4
+        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4,
+        /// Specify whether the subsequent SDP answer should be ignored
+        /// when SDP OA state is in preview mode.
+        CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE = 1 << 5
     };
 
     /// Index for the most recent response message
