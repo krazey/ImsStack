@@ -656,6 +656,11 @@ PUBLIC VIRTUAL IMS_UINT32 MtcMediaManager::GetSupportedMediaTypesFromSdp(IN ISes
             m_piMediaSession->GetSupportedMediaTypesFromSdp(GetMediaNegoId(piSession), piSession));
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsPreviewMode(IN ISession* piSession) const
+{
+    return m_piMediaSession->IsPreviewMode(GetMediaNegoId(piSession));
+}
+
 PRIVATE
 void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN const IMessage* piMessage)
 {
@@ -773,7 +778,7 @@ IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(
 }
 
 PRIVATE
-IMS_UINTP MtcMediaManager::GetMediaNegoId(IN const ISession* piSession)
+IMS_UINTP MtcMediaManager::GetMediaNegoId(IN const ISession* piSession) const
 {
     return m_pProfileManager->GetNegoId(piSession);
 }

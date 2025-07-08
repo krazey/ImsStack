@@ -775,11 +775,6 @@ void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
 PROTECTED
 IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const
 {
-    if (IsPreviewOfAnswer(piSession, piMessage))
-    {
-        return IMS_TRUE;
-    }
-
     NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
     if (eState != NegotiationState::STATE_NEGOTIATED)
     {
@@ -790,16 +785,14 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
     {
         if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
         {
-            IMS_SINT32 nConfig = piSession->GetConfiguration();
-            if ((nConfig & ISession::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE) !=
-                    ISession::CONFIG_NONE)
+            if (m_objContext.GetMediaManager().IsPreviewMode(piSession))
             {
-                IMS_TRACE_I("IsNeedToIgnore - Ignore a subsequent OFFER in a response", 0, 0, 0);
-                return IMS_TRUE;
+                IMS_TRACE_D("IsNeedToIgnore - Handle a subsequent answer on preview mode", 0, 0, 0);
+                return IMS_FALSE;
             }
-
-            IMS_TRACE_I("IsNeedToIgnore - Handle a subsequent OFFER in a response", 0, 0, 0);
-            return IMS_FALSE;
+            // RFC 6337. 3.1.1.INVITE Request with SDP, UAC behavior 2.
+            IMS_TRACE_I("IsNeedToIgnore - Ignore a subsequent answer in a response", 0, 0, 0);
+            return IMS_TRUE;
         }
     }
 
@@ -841,37 +834,11 @@ IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage)
-{
-    if (piSession->IsSdpNegotiationAllowedForNonRpr())
-    {
-        return IMS_FALSE;
-    }
-
-    if (piMessage->GetMethod().Equals(SipMethod::INVITE) == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (SipStatusCode::IsProvisional(piMessage->GetStatusCode()) == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (piMessage->GetMessage()->IsMessageRpr())
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_I("IsPreviewOfAnswer it's a preview. wait the real Answer", 0, 0, 0);
-    return IMS_TRUE;
-}
-
-PROTECTED
 IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const
 {
     if (m_objContext.GetMediaManager().GetNegotiationState(piSession) !=
-            NegotiationState::STATE_OFFER_SENT)
+                    NegotiationState::STATE_OFFER_SENT &&
+            !m_objContext.GetMediaManager().IsPreviewMode(piSession))
     {
         return IMS_FALSE;
     }
