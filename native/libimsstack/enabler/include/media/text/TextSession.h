@@ -38,7 +38,7 @@ public:
     };
 
     explicit TextSession(IN IMS_SINT32 nSlotId = 0);
-    virtual ~TextSession();
+    virtual ~TextSession() override;
 
     /**
      * @brief Set the TextConfig for the ImsMedia from the src/dest/negotiated profiles

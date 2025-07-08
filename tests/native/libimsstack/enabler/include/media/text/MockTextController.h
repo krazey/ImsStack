@@ -28,7 +28,7 @@ class MockTextController : public TextController
 {
 public:
     MockTextController() {}
-    virtual ~MockTextController() {}
+    virtual ~MockTextController() override {}
 
     MOCK_METHOD(IMS_BOOL, CreateSession,
             (IMediaSessionListener * pListener, TextConfiguration* pConfig), (override));

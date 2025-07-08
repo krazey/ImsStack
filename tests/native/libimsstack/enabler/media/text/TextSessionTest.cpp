@@ -83,7 +83,6 @@ TEST_F(TextSessionTest, testUpdateMediaQualityThreshold)
     MockTextConfiguration objMockConfiguration(MEDIA_TYPE_TEXT);
     m_pSession->SetConfiguration(&objMockConfiguration);
 
-    const IMS_SINT32 BIT_RATE = 100000;
     const IMS_SINT32 INACTIVITY_TIME_MS = 100000;
 
     ON_CALL(objMockConfiguration, GetRtpInactivityTimerMillis())

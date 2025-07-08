@@ -119,7 +119,7 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
 
         if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            TextProfile::RedFmtp* pFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
+            auto pFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
 
             if (pFmtp == IMS_NULL)
             {

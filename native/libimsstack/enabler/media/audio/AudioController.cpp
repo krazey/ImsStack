@@ -42,13 +42,6 @@ AudioController::~AudioController()
     {
         delete m_pAudioConfig;
     }
-
-    if (m_eMediaState != AudioSession::STATE_NONE)
-    {
-        CloseSession();
-    }
-
-    ClearSession();
 }
 
 PUBLIC

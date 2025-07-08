@@ -28,7 +28,7 @@ class MockVideoController : public VideoController
 {
 public:
     MockVideoController() {}
-    virtual ~MockVideoController() {}
+    virtual ~MockVideoController() override {}
 
     MOCK_METHOD(void, SetCallSessionState, (IN IMS_BOOL bConfirmed), (override));
     MOCK_METHOD(IMS_BOOL, SendMessage, (IN IMS_SINT32 nMsg, IN IMS_UINTP pParam), (override));

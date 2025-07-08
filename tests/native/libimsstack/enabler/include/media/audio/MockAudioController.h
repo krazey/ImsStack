@@ -28,7 +28,7 @@ class MockAudioController : public AudioController
 {
 public:
     MockAudioController() {}
-    virtual ~MockAudioController() {}
+    virtual ~MockAudioController() override {}
 
     MOCK_METHOD(void, SetCallSessionState, (IN IMS_BOOL bConfirmed), (override));
     MOCK_METHOD(IMS_BOOL, SendDtmf, (IN IMS_CHAR cDtmfCode), (override));

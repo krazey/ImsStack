@@ -51,7 +51,7 @@ public:
     static const IMS_SINT32 CAMERA_ID_NONE = -1;
 
     explicit VideoSession(IN IMS_SINT32 nSlotId = 0);
-    virtual ~VideoSession();
+    virtual ~VideoSession() override;
 
     /**
      * @brief Set the VideoConfig for the ImsMedia from src/dest/negotiated profile.
