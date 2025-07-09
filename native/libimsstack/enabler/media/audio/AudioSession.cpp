@@ -286,8 +286,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
         if (pLocalPayload != IMS_NULL && pLocalPayload->GetFmtp() != IMS_NULL)
         {
-            bLocalDtx = (IMS_BOOL)(((AudioProfile::AudioFmtp*)pLocalPayload->GetFmtp())
-                            ->IsDtxEnabled());
+            bLocalDtx =
+                    static_cast<AudioProfile::AudioFmtp*>(pLocalPayload->GetFmtp())->IsDtxEnabled();
             IMS_TRACE_D("UpdateRtpConfig() - local Dtx[%d]", bLocalDtx, 0, 0);
         }
     }
@@ -766,7 +766,7 @@ IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT
     {
         case CodecType_ANBR::CODEC_AMR:
         case CodecType_ANBR::CODEC_AMR_WB:
-            if (nBitRate >= 0 && nBitRate <= 12)
+            if (nBitRate <= 12)
             {
                 nConvertedCodecMode = 10;
             }
@@ -781,7 +781,7 @@ IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT
             // TODO: need to add for EVS 24.4kbps
             break;
         case CodecType_ANBR::CODEC_EVS:
-            if (nBitRate >= 0 && nBitRate <= 5900)
+            if (nBitRate <= 5900)
             {
                 nConvertedCodecMode = 9;  // 5.9kbps
             }

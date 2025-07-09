@@ -27,6 +27,7 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0),
         m_piMediaSessionListener(IMS_NULL),
+        m_eServiceType(MEDIA_SERVICE_NONE),
         m_pRtpConfig(IMS_NULL),
         m_ePrevDirection(MEDIA_DIRECTION_INVALID),
         m_nState(0)

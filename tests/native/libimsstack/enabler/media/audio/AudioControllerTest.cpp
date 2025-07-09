@@ -38,7 +38,7 @@ public:
     {
     }
 
-    virtual ~FakeAudioController() {}
+    virtual ~FakeAudioController() override {}
 
     IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig) override
     {

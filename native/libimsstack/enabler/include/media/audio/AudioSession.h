@@ -68,7 +68,7 @@ public:
     };
 
     explicit AudioSession(IN IMS_SINT32 nSlotId = 0);
-    virtual ~AudioSession();
+    virtual ~AudioSession() override;
 
     /**
      * Implementation of the ITimerListener interfaces.
