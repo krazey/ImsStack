@@ -20,7 +20,10 @@
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/WfcBlockRule.h"
 #include "helper/MockIPassiveTimerHolder.h"
@@ -41,6 +44,9 @@ public:
     SsacInfo objSsacInfo;
     MockIMtcCallContext objContext;
     MockIMtcBlockRuleCheckListener objListener;
+    MockIMtcCallManager objCallManager;
+
+    ImsList<IMtcCall*> lstOtherCalls;
 
 protected:
     virtual void SetUp() override
@@ -52,6 +58,7 @@ protected:
         ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objContext, GetPassiveTimerHolder())
                 .WillByDefault(ReturnRef(objPassiveTimerHolder));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
 
         ON_CALL(objImsRadioService.GetMockImsRadio(), GetSsacInfo())
                 .WillByDefault(ReturnRef(objSsacInfo));
@@ -60,6 +67,29 @@ protected:
     virtual void TearDown() override
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
+
+        for (IMS_UINT32 nIndex = 0; nIndex < lstOtherCalls.GetSize(); nIndex++)
+        {
+            delete lstOtherCalls.GetAt(nIndex);
+        }
+        lstOtherCalls.Clear();
+    }
+
+    MockIMtcCall* CreateMockIMtcCall(CallType eCallType)
+    {
+        MockIMtcCall* pCall = new MockIMtcCall();
+
+        ON_CALL(*pCall, GetCallType).WillByDefault(Return(eCallType));
+
+        return pCall;
+    }
+
+    void AssertResultForCallType(IN const CallType eCallType, IN const Result& objExpectedResult)
+    {
+        Result objResult = WfcBlockRule(objContext, eCallType).Check(objListener);
+
+        EXPECT_EQ(objExpectedResult.eStatus, objResult.eStatus);
+        EXPECT_EQ(objExpectedResult.objReason, objResult.objReason);
     }
 };
 
@@ -76,9 +106,9 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfNotRegisteredOnWifi)
             .WillByDefault(Return(IMS_TRUE));
     objSsacInfo.nBarringFactorForVoice = 0;
 
-    Result objResult = WfcBlockRule(objContext, CallType::VOIP).Check(objListener);
-
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
 TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfWfcAvailable)
@@ -93,9 +123,9 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfWfcAvailable)
             .WillByDefault(Return(IMS_TRUE));
     objSsacInfo.nBarringFactorForVoice = 0;
 
-    Result objResult = WfcBlockRule(objContext, CallType::VOIP).Check(objListener);
-
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
 TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfVoiceCallsAreAvailableOnCellular)
@@ -110,9 +140,9 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfVoiceCallsAreAvailableOnCellular
             .WillByDefault(Return(IMS_FALSE));
     objSsacInfo.nBarringFactorForVoice = 100;
 
-    Result objResult = WfcBlockRule(objContext, CallType::VOIP).Check(objListener);
-
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
 TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedForVideoCalls)
@@ -127,9 +157,34 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedForVideoCalls)
             .WillByDefault(Return(IMS_TRUE));
     objSsacInfo.nBarringFactorForVoice = 0;
 
-    Result objResult = WfcBlockRule(objContext, CallType::VT).Check(objListener);
+    lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
+}
+
+TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVideoCallsIfAlreadyHasVideoCall)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
+            .WillByDefault(Return(IMS_WFC_OFF));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
+            .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
+    ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
+            .WillByDefault(Return(IMS_TRUE));
+    objSsacInfo.nBarringFactorForVoice = 0;
+
+    lstOtherCalls.Append(CreateMockIMtcCall(CallType::VT));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
+
+    AssertResultForCallType(CallType::VT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::VIDEO_RTT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
 }
 
 TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableByVops)
@@ -144,10 +199,15 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableByVops)
             .WillByDefault(Return(IMS_FALSE));
     objSsacInfo.nBarringFactorForVoice = 100;
 
-    Result objResult = WfcBlockRule(objContext, CallType::VOIP).Check(objListener);
-
-    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF), objResult.objReason);
+    AssertResultForCallType(CallType::VOIP,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::RTT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::UNKNOWN,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
 }
 
 TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacP00)
@@ -162,10 +222,15 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacP00)
             .WillByDefault(Return(IMS_FALSE));
     objSsacInfo.nBarringFactorForVoice = 0;
 
-    Result objResult = WfcBlockRule(objContext, CallType::VOIP).Check(objListener);
-
-    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF), objResult.objReason);
+    AssertResultForCallType(CallType::VOIP,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::RTT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::UNKNOWN,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
 }
 
 TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacTimer)
@@ -180,8 +245,13 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacTime
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
             .WillByDefault(Return(IMS_TRUE));
 
-    Result objResult = WfcBlockRule(objContext, CallType::VOIP).Check(objListener);
-
-    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF), objResult.objReason);
+    AssertResultForCallType(CallType::VOIP,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::RTT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::UNKNOWN,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
 }
