@@ -511,6 +511,7 @@ public class DcApnTest {
         String[] inet4Addrs = {"1.1.1.1"};
         LinkProperties linkProperties = new LinkProperties();
         linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(inet4Addrs[0]));
+        linkProperties.addLinkAddress(new LinkAddress("1.1.1.2/8"));
 
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV6V4.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
@@ -524,8 +525,25 @@ public class DcApnTest {
     public void testGetPcscfAddress_SuccessIpv6() throws Exception {
         String[] inet6Addrs = {"2001::1"};
         LinkProperties linkProperties = new LinkProperties();
-        linkProperties.addPcscfServer((Inet6Address) InetAddresses.parseNumericAddress(
-                inet6Addrs[0]));
+        linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(inet6Addrs[0]));
+        linkProperties.addLinkAddress(new LinkAddress("2001::2/63"));
+
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManagerProxy.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        assertEquals(inet6Addrs, mDcApn.getPcscfAddress(EApnType.IMS.getType(), 0));
+    }
+
+    @Test
+    public void testGetPcscfAddress_NoLinkAddressCorrespondingToIpVersion() throws Exception {
+        String[] inet4Addrs = {"1.1.1.1"};
+        String[] inet6Addrs = {"2001::1"};
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(inet4Addrs[0]));
+        linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(inet6Addrs[0]));
+        linkProperties.addLinkAddress(new LinkAddress("2001::2/63"));
 
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);

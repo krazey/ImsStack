@@ -542,6 +542,13 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
             return IMS_TRUE;
         }
     }
+    else if (GetChangedPcscfs(objNewPcscfs, IpAddress::UNKNOWN))
+    {
+        UpdatePcscfs(objNewPcscfs, GetPcscfPort());
+        m_nChangedType = TYPE_CHANGED_DIFFERENT;
+        SetFirstPcscfIndex();
+        return IMS_TRUE;
+    }
     else
     {
         return IMS_FALSE;
@@ -588,7 +595,7 @@ IMS_BOOL AosPcscf::GetChangedPcscfs(OUT AStringArray& objPcscfs, IN IMS_SINT32 n
                 continue;
             }
 
-            if (objIpa.GetVersion() != nIpVersion)
+            if (objIpa.GetVersion() != nIpVersion && IpAddress::UNKNOWN != nIpVersion)
             {
                 continue;
             }

@@ -983,6 +983,9 @@ TEST_F(OsNetworkConnectionTest, DispatchServiceMessage)
 
     EXPECT_EQ(INetworkConnection::STATE_CONNECTED, pINetworkConnection->GetState());
 
+    EXPECT_CALL(m_objSystem, GetLocalAddress(_, -1, _))
+            .Times(1)
+            .WillRepeatedly(Return(AString::ConstNull()));
     EXPECT_CALL(m_objMockINetworkConnectionListener, NetworkConnection_OnPcscfChanged(_)).Times(1);
     EXPECT_CALL(m_objMockINetworkConnectionRefListener, NetworkConnection_OnPcscfChanged(_))
             .Times(1);
