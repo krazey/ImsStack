@@ -31,8 +31,6 @@ using ::testing::ReturnRef;
 class LocationBlockRuleTest : public ::testing::Test
 {
 public:
-    inline explicit LocationBlockRuleTest() {}
-
     MockIMtcCallContext objContext;
     CallInfo objCallInfo;
     MockIMtcBlockRuleCheckListener objListener;

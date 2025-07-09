@@ -33,7 +33,8 @@ TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(
         IN IMtcCallContext& objContext, IN const ISipConfig* pSipConfig) :
         m_objContext(objContext),
         m_pSipConfig(pSipConfig),
-        m_objConfiguration(objContext.GetConfigurationProxy())
+        m_objConfiguration(objContext.GetConfigurationProxy()),
+        m_bUpdated(IMS_FALSE)
 {
     IMS_TRACE_I("+TransactionTimerUpdateHelper", 0, 0, 0);
 }

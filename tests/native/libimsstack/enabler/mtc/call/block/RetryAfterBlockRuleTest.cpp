@@ -35,8 +35,6 @@ using ::testing::ReturnRef;
 class RetryAfterBlockRuleTest : public ::testing::Test
 {
 public:
-    inline explicit RetryAfterBlockRuleTest() {}
-
     MockIMtcCallContext objContext;
     MockIMtcCallManager objCallManager;
     CallInfo objCallInfo;
