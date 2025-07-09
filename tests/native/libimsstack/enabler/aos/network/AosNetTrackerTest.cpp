@@ -63,7 +63,7 @@ class TestAosNetTracker : public AosNetTracker
 public:
     DECLARE_USING(AosNetTracker)
 
-    explicit inline TestAosNetTracker(IN IAosAppContext* piAppContext) :
+    explicit inline TestAosNetTracker(IN const IAosAppContext* piAppContext) :
             AosNetTracker(piAppContext)
     {
     }
