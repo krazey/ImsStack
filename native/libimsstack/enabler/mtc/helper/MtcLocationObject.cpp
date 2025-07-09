@@ -37,6 +37,7 @@
 #include "TextParser.h"
 #include "call/IMtcCallContext.h"
 #include "call/ParticipantInfo.h"
+#include "call/message/TemplateFormatter.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationResolver.h"
 #include "helper/MtcAosConnector.h"
@@ -54,6 +55,7 @@ LOCAL const IMS_CHAR GEOLOCATION_ROUTING_NO[] = "no";
 LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_RENDER[] = "render";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_HANDLING_OPTIONAL[] = "handling=optional";
+LOCAL const IMS_CHAR ANONYMOUS_DOMAIN[] = "anonymous.invalid";
 
 LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN EmergencyType eEmergencyType, IN IMS_BOOL bWifi)
 {
@@ -157,7 +159,7 @@ void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
         return;
     }
 
-    const AString strCid = CreateCid(*m_objContext.GetSubscriberConfig());
+    const AString strCid = CreateCid();
 
     objMessage.AddHeader(SipHeaderName::GEOLOCATION, GetGeolocationHeader(strCid));
     objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING,
@@ -230,10 +232,19 @@ ByteArray MtcLocationObject::CreateCallComposerLocationBody(
 }
 
 PRIVATE
-AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const
+AString MtcLocationObject::CreateCid() const
 {
-    return m_objContext.GetMessageUtils().GenerateContentId(
-            objSubscriberConfig.GetHomeDomainName());
+    AString strCid =
+            TemplateFormatter::Format(m_objContext.GetConfigurationProxy().GetString(
+                                              ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING),
+                    m_objContext);
+    IMS_SINT32 nIndexAt = strCid.GetIndexOf(TextParser::CHAR_AT);
+    if (nIndexAt < 1 || ((nIndexAt + 1) == strCid.GetLength()))
+    {
+        return m_objContext.GetMessageUtils().GenerateContentId(ANONYMOUS_DOMAIN);
+    }
+
+    return strCid;
 }
 
 PRIVATE

@@ -58,7 +58,7 @@ public:
             IN const AString& strLatitude, IN const AString& strLongitude) const;
 
 private:
-    AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const;
+    AString CreateCid() const;
     AString CreatePersonId() const;
 
     IMS_SINT32 GetInformationLevel() const;

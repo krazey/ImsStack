@@ -994,6 +994,9 @@ const IMS_CHAR
                 KEY_IMS_VOICE_PREFIX "restart_dedicated_bearer_wait_timer_by_eps_fallback_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL[] =
         KEY_IMS_VOICE_PREFIX "restart_ringing_timer_by_sending_180_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING[] =
+        KEY_IMS_VOICE_PREFIX "content_id_for_geolocation_string";
+
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";
