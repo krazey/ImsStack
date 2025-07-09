@@ -51,8 +51,10 @@ public interface IRegistrationNotifier {
      * @param networkType the radio access technology.
      * @param reason the disconnected reason.
      * @param message the disconnected message.
+     * @param dataFailCause the data fail cause. See {@link android.telephony.DataFailCause}.
      */
-    void notifyDeregistered(int regType, int networkType, ReasonCode reason, String message);
+    void notifyDeregistered(int regType, int networkType, ReasonCode reason, String message,
+            int dataFailCause);
 
     /**
      * Notify the framework that the handover from the current radio technology

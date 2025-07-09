@@ -18,9 +18,12 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
 
+import android.telephony.DataFailCause;
+import android.telephony.ims.ImsReasonInfo;
 import android.testing.AndroidTestingRunner;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCodeMap;
 
 import org.junit.After;
@@ -57,13 +60,26 @@ public class ImsRegistrationImplTest extends ImsStackTest {
         List<Integer> expectedExtraCodes = new ArrayList<>();
 
         ReasonCodeMap.getReasonMap().forEach((key, pair) -> {
-            codes.add(mImsRegistrationImpl.getReasonInfo(key, null).getCode());
-            extraCodes.add(mImsRegistrationImpl.getReasonInfo(key, null).getExtraCode());
+            codes.add(mImsRegistrationImpl.getReasonInfo(key, null,
+                    DataFailCause.NONE).getCode());
+            extraCodes.add(mImsRegistrationImpl.getReasonInfo(key, null,
+                    DataFailCause.NONE).getExtraCode());
 
             expectedCodes.add(pair.first);
             expectedExtraCodes.add(pair.second);
         });
         assertEquals(codes, expectedCodes);
         assertEquals(extraCodes, expectedExtraCodes);
+    }
+
+    @Test
+    public void getReasonInfoForDataDisconnected() {
+        int code = mImsRegistrationImpl.getReasonInfo(ReasonCode.DATA_DISCONNECTED, null,
+                DataFailCause.LOST_CONNECTION).getCode();
+        int extraCode = mImsRegistrationImpl.getReasonInfo(ReasonCode.DATA_DISCONNECTED, null,
+                DataFailCause.LOST_CONNECTION).getExtraCode();
+
+        assertEquals(ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE, code);
+        assertEquals(DataFailCause.LOST_CONNECTION, extraCode);
     }
 }

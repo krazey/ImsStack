@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
+import android.telephony.DataFailCause;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
@@ -242,7 +243,8 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyDeRegistered() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR, null);
+                IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR, null,
+                DataFailCause.NONE);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -267,7 +269,7 @@ public class ImsRegistrationTrackerTest {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode
-                        .WFC_SUB_RESP_403, null);
+                        .WFC_SUB_RESP_403, null, DataFailCause.NONE);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -291,7 +293,8 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyDeRegistered_WithPLMNError() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.PLMN_BLOCK, null);
+                IAosRegistrationListener.ReasonCode.PLMN_BLOCK, null,
+                DataFailCause.NONE);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -315,7 +318,8 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyDeRegistered_WithTimeoutError() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.REG_RESP_NETWORK_TIMEOUT, null);
+                IAosRegistrationListener.ReasonCode.REG_RESP_NETWORK_TIMEOUT, null,
+                DataFailCause.NONE);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());

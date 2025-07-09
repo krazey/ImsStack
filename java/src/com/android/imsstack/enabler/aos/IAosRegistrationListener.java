@@ -58,9 +58,12 @@ public interface IAosRegistrationListener {
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param reason associated with why registration was disconnected. See {@link ReasonCode}.
      * @param message associated with why registration was disconnected.
+     * @param dataFailCause associated with the data fail cause of PDN disconnection. See
+     *           {@link android.telephony.DataFailCause}.
      */
     void notifyDeregistered(
-            int regType, NetworkType networkType, ReasonCode reason, String message);
+            int regType, NetworkType networkType, ReasonCode reason, String message,
+            int dataFailCause);
 
     /**
      * Notify the application that the device is disconnecting from the IMS network.
@@ -410,23 +413,9 @@ public interface IAosRegistrationListener {
 
         /**
          * BASE_DATA : 3000 (Errors due to data failures.)
-         * The reasons below are for mapping the ImsReasonInfo ExtraCode by the data failure causes.
          */
-        DATA_NOT_MATCHED(ReasonCode.BASE_DATA, 0),
-        DATA_UNSPECIFIED(ReasonCode.BASE_DATA, 1),
-        DATA_LOCAL_NETWORK_NO_SERVICE(ReasonCode.BASE_DATA, 2),
-        DATA_LOCAL_SERVICE_UNAVAILABLE(ReasonCode.BASE_DATA, 3),
-        DATA_EPDG_TUNNEL_ESTABLISH_FAILURE(ReasonCode.BASE_DATA, 4),
-        DATA_WIFI_LOST(ReasonCode.BASE_DATA, 5),
-        DATA_RADIO_OFF(ReasonCode.BASE_DATA, 6),
-        DATA_NO_VALID_SIM(ReasonCode.BASE_DATA, 7),
-        DATA_RADIO_INTERNAL_ERROR(ReasonCode.BASE_DATA, 8),
-        DATA_RADIO_LINK_LOST(ReasonCode.BASE_DATA, 9),
-        DATA_RADIO_RELEASE_NORMAL(ReasonCode.BASE_DATA, 10),
-        DATA_RADIO_RELEASE_ABNORMAL(ReasonCode.BASE_DATA, 11),
-        DATA_NETWORK_DETACH(ReasonCode.BASE_DATA, 12),
-        DATA_OEM_CAUSE_4(ReasonCode.BASE_DATA, 13),
-        DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE(ReasonCode.BASE_DATA, 14),
+        DATA_DISCONNECTED(ReasonCode.BASE_DATA, 0),
+        DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE(ReasonCode.BASE_DATA, 1),
 
         /**
          * BASE_RESP_4XX : 14000 (Errors due to registration response 4XX.)
@@ -585,45 +574,6 @@ public interface IAosRegistrationListener {
      */
     class ReasonCodeMap {
         private static final Map<ReasonCode, Pair<Integer, Integer>> REASON_MAP = Map.ofEntries(
-                Map.entry(ReasonCode.DATA_NOT_MATCHED, Pair.create(
-                        ImsReasonInfo.CODE_REGISTRATION_ERROR, 65535)),
-                Map.entry(ReasonCode.DATA_UNSPECIFIED, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_UNSPECIFIED)),
-                Map.entry(ReasonCode.DATA_LOCAL_NETWORK_NO_SERVICE, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE)),
-                Map.entry(ReasonCode.DATA_LOCAL_SERVICE_UNAVAILABLE, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE)),
-                Map.entry(ReasonCode.DATA_EPDG_TUNNEL_ESTABLISH_FAILURE, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE)),
-                Map.entry(ReasonCode.DATA_WIFI_LOST, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE, ImsReasonInfo.CODE_WIFI_LOST)),
-                Map.entry(ReasonCode.DATA_RADIO_OFF, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE, ImsReasonInfo.CODE_RADIO_OFF)),
-                Map.entry(ReasonCode.DATA_NO_VALID_SIM, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_NO_VALID_SIM)),
-                Map.entry(ReasonCode.DATA_RADIO_INTERNAL_ERROR, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR)),
-                Map.entry(ReasonCode.DATA_RADIO_LINK_LOST, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_RADIO_LINK_LOST)),
-                Map.entry(ReasonCode.DATA_RADIO_RELEASE_NORMAL, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_RADIO_RELEASE_NORMAL)),
-                Map.entry(ReasonCode.DATA_RADIO_RELEASE_ABNORMAL, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_RADIO_RELEASE_ABNORMAL)),
-                Map.entry(ReasonCode.DATA_NETWORK_DETACH, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_NETWORK_DETACH)),
-                Map.entry(ReasonCode.DATA_OEM_CAUSE_4, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
-                        ImsReasonInfo.CODE_OEM_CAUSE_4)),
                 Map.entry(ReasonCode.REG_RESP_403, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
                 Map.entry(ReasonCode.WFC_REG_RESP_403, Pair.create(
@@ -681,13 +631,17 @@ public interface IAosRegistrationListener {
         }
 
         /**
-         * Returns the pair of {@code ImsReasonInfo} based on Reasoncode.
+         * Returns the pair of {@code ImsReasonInfo} based on Reasoncode and dataFailCause.
          * The pair is consist of code and extraCode of {@code ImsReasonInfo}
          *
          * @param key ReasonCode
+         * @param dataFailCause int
          * @return The pair of {@code ImsReasonInfo}
          */
-        public static Pair<Integer, Integer> getImsReasonPair(ReasonCode key) {
+        public static Pair<Integer, Integer> getImsReasonPair(ReasonCode key, int dataFailCause) {
+            if (key == ReasonCode.DATA_DISCONNECTED) {
+                return Pair.create(ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE, dataFailCause);
+            }
             return REASON_MAP.getOrDefault(key, Pair.create(ImsReasonInfo.CODE_REGISTRATION_ERROR,
                     ImsReasonInfo.CODE_UNSPECIFIED));
         }

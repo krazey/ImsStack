@@ -122,7 +122,7 @@ public class ImsRegistrationTracker {
 
     public void dispose() {
         mRegTracker.notifyDeregistered(RegistrationType.NORMAL, mRegTracker.getNetworkType(),
-                ReasonCode.UNSPECIFIED, null);
+                ReasonCode.UNSPECIFIED, null, 0);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mCapabilities.clear();
@@ -781,12 +781,13 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, ReasonCode reason, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message,
+                int dataFailCause) {
             logi("ImsRegistrationTracker notifyDeregistered - type=" + regType + ", network="
                     + networkType.toString() + ", reason =" + reason.toString()
-                    + ", message =" + message);
+                    + ", message =" + message + ", dataFailCause =" + dataFailCause);
             int radioTech = convertToTelephonyNetworkType(networkType);
-            mRegImpl.notifyDeregistered(regType, radioTech, reason, message);
+            mRegImpl.notifyDeregistered(regType, radioTech, reason, message, dataFailCause);
 
             if (regType == RegistrationType.NORMAL) {
                 boolean networkTypeChanged = updateNetworkType(NetworkType.NONE);
