@@ -28,8 +28,8 @@ public:
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
     virtual IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
-    virtual IMS_BOOL NotifyDeregistered(
-            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) = 0;
+    virtual IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nDataFailureReason) = 0;
     virtual IMS_BOOL NotifyDeregistering(IN IMS_SINT32 nRegType) = 0;
     virtual IMS_BOOL NotifyTechnologyChangeFailed(
             IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) = 0;

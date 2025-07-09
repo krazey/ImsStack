@@ -1058,7 +1058,7 @@ TEST_F(AosServiceTest, NotifyRegistering)
 TEST_F(AosServiceTest, NotifyDeregistered)
 {
     EXPECT_TRUE(m_pAosService->NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL,
-            AosNetworkType::LTE, AosReasonCode::UNSPECIFIED));
+            AosNetworkType::LTE, AosReasonCode::UNSPECIFIED, 0));
 }
 
 TEST_F(AosServiceTest, NotifyDeregistering)

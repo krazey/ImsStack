@@ -4120,7 +4120,7 @@ TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFo
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _, _)).Times(0);
 
     m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
 }
@@ -4131,7 +4131,7 @@ TEST_F(AosRegistrationTest,
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _, _)).Times(0);
 
     m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
 }
@@ -6858,7 +6858,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForEmergencyTypeWhenRegistra
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_EMERGENCY, _, _));
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_EMERGENCY, _, _, _));
 
     // WHEN
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
@@ -6875,7 +6875,7 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(
-            m_objMockIAosService, NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_FAKE, _, _));
+            m_objMockIAosService, NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_FAKE, _, _, _));
 
     // WHEN
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
@@ -6890,7 +6890,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForFakeTypeWhenRegistrationT
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(
-            m_objMockIAosService, NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_FAKE, _, _));
+            m_objMockIAosService, NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_FAKE, _, _, _));
 
     // WHEN
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
@@ -7141,7 +7141,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForUnpredictableFailure)
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(
-                    IAosRegistration::IMS_REG_TYPE_NORMAL, _, AosReasonCode::INTERNAL_ERROR));
+                    IAosRegistration::IMS_REG_TYPE_NORMAL, _, AosReasonCode::INTERNAL_ERROR, _));
 
     // WHEN
     m_pAosRegistration->ProcessUnpredictableFailure();
@@ -7157,7 +7157,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegRequired)
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
-                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER, _));
 
     // WHEN
     m_pAosRegistration->Subscription_Request(
@@ -7175,7 +7175,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegRequiredWithNextPcs
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
-                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER, _));
 
     // WHEN
     m_pAosRegistration->Subscription_Request(
@@ -7194,7 +7194,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegRequiredWithScscfRe
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
-                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER, _));
 
     // WHEN
     m_pAosRegistration->Subscription_Request(
@@ -7212,7 +7212,7 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegTerminated)
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
-                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER, _));
 
     // WHEN
     m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE);
@@ -7226,4 +7226,21 @@ TEST_F(AosRegistrationTest, SetAndGetReasonCode)
 {
     m_pAosRegistration->SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION);
     EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::NORMAL_DEREGISTRATION);
+}
+
+TEST_F(AosRegistrationTest, ReportDataDisconnectedForPdnDisconnection)
+{
+    IMS_SINT32 nDataFailureReason = 1;
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
+                    AosReasonCode::DATA_DISCONNECTED, nDataFailureReason));
+
+    // WHEN
+    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(nDataFailureReason);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+
+    // THEN: The GIVEN condition should be met.
 }

@@ -31,8 +31,8 @@ public:
     IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
 
-    IMS_BOOL NotifyDeregistered(
-            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
+    IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
 
     IMS_BOOL NotifyDeregistering(IN IMS_SINT32 nRegType) override;
 

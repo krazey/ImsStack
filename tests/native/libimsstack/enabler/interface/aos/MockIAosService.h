@@ -90,7 +90,8 @@ public:
                     IN const ImsList<AString>& objFeatureTags),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyDeregistered,
-            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason),
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason,
+                    IN IMS_SINT32 nDataFailureReason),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyDeregistering, (IN IMS_SINT32 nRegType), (override));
     MOCK_METHOD(IMS_BOOL, NotifyTechnologyChangeFailed,
