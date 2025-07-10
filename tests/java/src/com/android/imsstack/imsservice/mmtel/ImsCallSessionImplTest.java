@@ -1336,6 +1336,52 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallUpdateReceivedForUpgradeToVideoWithSyncVideoCapaDynamically() {
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+
+        mMockCallInfo.videoCapable = true;
+        mMockCallInfo.callType = IUMtcCall.CALLTYPE_VT;
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+        mImsCallSession.getCallListenerProxy().onCallUpdateReceived(
+                    mMockMtcCall, mMockCallInfo, mMockMediaInfo, mockSuppInfo);
+
+        verify(mMockImsCallSessionCallback).invokeUpdated(
+                any(ImsCallSessionImplBase.class), any(ImsCallProfile.class));
+        verify(mVideoCallSession, never()).receiveSessionModifyRequest(
+                ImsVideoCallSession.MODIFICATION_CALL_TYPE, mMockMediaInfo);
+
+        processAllFutureMessages();
+
+        verify(mVideoCallSession).receiveSessionModifyRequest(
+                ImsVideoCallSession.MODIFICATION_CALL_TYPE, mMockMediaInfo);
+    }
+
+    @Test
+    public void testOnCallUpdateReceivedForUpgradeToVideoWithVideoCapa() {
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+        mImsCallSession.getCallProfile().setCallExtraBoolean(
+                ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, true);
+        mMockCallInfo.videoCapable = true;
+        mMockCallInfo.callType = IUMtcCall.CALLTYPE_VT;
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+        mImsCallSession.getCallListenerProxy().onCallUpdateReceived(
+                    mMockMtcCall, mMockCallInfo, mMockMediaInfo, mockSuppInfo);
+
+        verify(mMockImsCallSessionCallback, never()).invokeUpdated(
+                any(ImsCallSessionImplBase.class), any(ImsCallProfile.class));
+        verify(mVideoCallSession).receiveSessionModifyRequest(
+                ImsVideoCallSession.MODIFICATION_CALL_TYPE, mMockMediaInfo);
+    }
+
+    @Test
     public void testOnCallRatChanged() {
         mImsCallProfile = new ImsCallProfile(
                 ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
