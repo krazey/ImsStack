@@ -26,12 +26,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
 import android.os.PersistableBundle;
@@ -57,14 +59,25 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class ConfigAgentTest {
+    private static final int TEST_CARRIER_ID = 1;
+    private static final String TEST_ICCID = "1234";
+    private static final String CACHED_CONFIG_FILE =
+            "carrier_config_slot0_" + TEST_ICCID + "_" + TEST_CARRIER_ID + ".xml";
+
+    @Mock private FileInputStream mFileIs;
+    @Mock private FileOutputStream mFileOs;
     @Mock private ConfigInterface.Listener mListener;
 
+    private Context mContext;
     private XmlResourceParser mCarrierConfigOverrideParser;
     private TestableLooper mTestableLooper;
     private TestAppContext mTestAppContext;
@@ -77,11 +90,17 @@ public class ConfigAgentTest {
         mTestableLooper = TestableLooper.get(this);
         mTestAppContext = new TestAppContext(new ContextFixture().getTestDouble());
         mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
+        mContext = mTestAppContext.getContext();
 
         mCarrierConfigOverrideParser = InstrumentationRegistry.getInstrumentation().getContext()
                 .getResources().getXml(R.xml.carrier_config_override);
-        when(mTestAppContext.getContext().getResources().getXml(eq(R.xml.carrier_config_override)))
+        when(mContext.getResources().getXml(eq(R.xml.carrier_config_override)))
                 .thenReturn(mCarrierConfigOverrideParser);
+        doReturn(mFileIs).when(mContext).openFileInput(any());
+        doReturn(mFileOs).when(mContext).openFileOutput(any(), anyInt());
+        doReturn(true).when(mContext).deleteFile(any());
+        doReturn(new String[] { CACHED_CONFIG_FILE }).when(mContext).fileList();
+        when(mContext.getAssets().list(any())).thenReturn(new String[0]);
 
         mConfigAgent = new ConfigAgent(SLOT0);
     }
@@ -98,6 +117,10 @@ public class ConfigAgentTest {
         mTestAppContext.tearDown();
         mTestAppContext = null;
         mTestableLooper = null;
+        mContext = null;
+        mListener = null;
+        mFileOs = null;
+        mFileIs = null;
     }
 
     @Test
@@ -152,7 +175,7 @@ public class ConfigAgentTest {
     @Test
     @SmallTest
     public void testGetCarrierConfigWhenUpdateCarrierConfig() {
-        mConfigAgent.init(mTestAppContext.getContext());
+        mConfigAgent.init(mContext);
 
         SimCarrierId scid = new SimCarrierId.Builder().build();
         mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
@@ -217,14 +240,14 @@ public class ConfigAgentTest {
         // CarrierConfig has public IMS keys and the hidden key
         PersistableBundle carrierConfigBundle = buildCarrierConfigBundleWithPublicKeys();
         addHiddenKeyToBundle(carrierConfigBundle);
-        injectCarrierConfigBundlesToSystem(carrierConfigBundle);
+        setUpCarrierConfig(carrierConfigBundle);
 
         // Asset has private keys
         ConfigAgent spyConfigAgent = spy(mConfigAgent);
         doReturn(buildAssetConfigBundle()).when(spyConfigAgent).readCarrierConfig(anyInt(), any());
 
         // Test updateCarrierConfig()
-        spyConfigAgent.init(mTestAppContext.getContext());
+        spyConfigAgent.init(mContext);
         SimCarrierId scid = new SimCarrierId.Builder().build();
         spyConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
 
@@ -240,8 +263,8 @@ public class ConfigAgentTest {
     @Test
     @SmallTest
     public void testUpdateCarrierConfigWithParentChildRelationship() throws IOException {
-        AssetManager am = mTestAppContext.getContext().getAssets();
-        mConfigAgent.init(mTestAppContext.getContext());
+        AssetManager am = mContext.getAssets();
+        mConfigAgent.init(mContext);
 
         final String[] testConfigFiles = new String[] {
                 "carrier_config_carrierid_20000_Test1.xml",
@@ -296,10 +319,99 @@ public class ConfigAgentTest {
         assertEquals(valueString, cc.getString(keyString));
     }
 
-    private void injectCarrierConfigBundlesToSystem(PersistableBundle bundleWithImsKeys) {
+    @Test
+    @SmallTest
+    public void testSaveCachedConfigWhenConfigEnabled() throws FileNotFoundException {
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(
+                CarrierConfig.KEY_IMS_USE_CONFIG_OF_LAST_INSERTED_SIM_WHEN_NO_SIM_BOOL, true);
+        setUpCarrierConfig(config);
+        mConfigAgent.init(mContext);
+
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(TEST_CARRIER_ID)
+                .setSpecificCarrierId(TEST_CARRIER_ID)
+                .setIccId(TEST_ICCID)
+                .setSimState(SimCarrierId.SIM_LOADED)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        // Delete config file
+        verify(mContext).deleteFile(eq(CACHED_CONFIG_FILE));
+        // Save config file.
+        verify(mContext).openFileOutput(eq(CACHED_CONFIG_FILE), anyInt());
+    }
+
+    @Test
+    @SmallTest
+    public void testSaveCachedConfigWhenConfigDisabled() throws FileNotFoundException {
+        mConfigAgent.init(mContext);
+
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(TEST_CARRIER_ID)
+                .setSpecificCarrierId(TEST_CARRIER_ID)
+                .setIccId(TEST_ICCID)
+                .setSimState(SimCarrierId.SIM_LOADED)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        // Delete config file
+        verify(mContext).deleteFile(eq(CACHED_CONFIG_FILE));
+        verify(mContext, never()).openFileOutput(eq(CACHED_CONFIG_FILE), anyInt());
+    }
+
+    @Test
+    @SmallTest
+    public void testReadCachedConfigOnSimAbsent() throws FileNotFoundException {
+        mConfigAgent.init(mContext);
+
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setSimState(SimCarrierId.SIM_ABSENT)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        // Read config file.
+        verify(mContext).openFileInput(eq(CACHED_CONFIG_FILE));
+    }
+
+    @Test
+    @SmallTest
+    public void testReadCachedConfigOnSimLocked() throws FileNotFoundException {
+        mConfigAgent.init(mContext);
+
+        // Same ICCID.
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setIccId(TEST_ICCID)
+                .setSimState(SimCarrierId.SIM_LOCKED)
+                .build();
+
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        // Read config file.
+        verify(mContext).openFileInput(eq(CACHED_CONFIG_FILE));
+    }
+
+    @Test
+    @SmallTest
+    public void testReadCachedConfigOnSimLockedAndDifferentIccId() throws FileNotFoundException {
+        mConfigAgent.init(mContext);
+
+        // Different ICCID
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setIccId(TEST_ICCID + "5")
+                .setSimState(SimCarrierId.SIM_LOCKED)
+                .build();
+
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        // No interactions.
+        verify(mContext, never()).openFileInput(eq(CACHED_CONFIG_FILE));
+    }
+
+    private void setUpCarrierConfig(PersistableBundle config) {
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        doReturn(bundleWithImsKeys).when(ccmp).getConfigForSubId(anyInt(), any());
+        doReturn(config).when(ccmp).getConfigForSubId(anyInt(), any());
     }
 
     private void processAllMessages() {

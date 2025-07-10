@@ -118,6 +118,7 @@ public class ConfigAgent implements ConfigInterface {
         pw.increaseIndent();
         pw.println("configLoaded=" + mConfigLoaded);
         pw.println("carrierId=" + (mCarrierId != null ? mCarrierId : "unknown"));
+        pw.println("cachedConfig=" + getFileNameForLogging(getCachedConfigFile(mSlotId)));
         pw.println();
         dumpCarrierConfig(pw, "CarrierInternalConfig", mCarrierInternalConfig);
         dumpCarrierConfig(pw, "CarrierPublicConfig", mCarrierPublicConfig);
@@ -295,9 +296,25 @@ public class ConfigAgent implements ConfigInterface {
         // Loads override configs in the hidden key of CarrierConfigManager
         overrideHiddenConfigs(subId, config);
 
+        // test-carrier-config
+        PersistableBundle testConfig = readTestConfig();
+
+        if (id.isSimLoaded()) {
+            deleteCachedConfigFile(mSlotId);
+
+            if (shouldUseCachedConfigWhenNoSim(config)
+                    || shouldUseCachedConfigWhenNoSim(testConfig)) {
+                saveCachedConfigToXml(id, config);
+            }
+        } else {
+            tempConfig = readCachedConfigFromXml(id);
+            mCarrierInternalOverrideConfig.putAll(tempConfig);
+            config.putAll(tempConfig);
+        }
+
         ImsLog.d(this, mSlotId, "updateCarrierConfig: " + config.toString());
 
-        overrideTestConfigs(config);
+        overrideTestConfigs(config, testConfig);
 
         mCarrierConfig.setConfig(config, mSlotId);
 
@@ -327,7 +344,7 @@ public class ConfigAgent implements ConfigInterface {
         config.putAll(configsInHiddenKey);
     }
 
-    private void overrideTestConfigs(PersistableBundle config) {
+    private void overrideTestConfigs(PersistableBundle config, PersistableBundle testConfig) {
         ImsLog.i(this, mSlotId, "overrideTestConfigs...");
 
         boolean usePredefinedUaString = ImsPrivateProperties.Persistent.getBoolean(
@@ -342,9 +359,6 @@ public class ConfigAgent implements ConfigInterface {
                 config.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, uaString);
             }
         }
-
-        // test-carrier-config
-        PersistableBundle testConfig = readTestConfig();
 
         if (!testConfig.isEmpty()) {
             PersistableBundle newTestConfig = testConfig.deepCopy();
@@ -610,6 +624,106 @@ public class ConfigAgent implements ConfigInterface {
         String[] keys = b.keySet().toArray(new String[0]);
         Arrays.sort(keys);
         return keys;
+    }
+
+    private static boolean shouldUseCachedConfigWhenNoSim(PersistableBundle config) {
+        return config.getBoolean(
+                CarrierConfig.KEY_IMS_USE_CONFIG_OF_LAST_INSERTED_SIM_WHEN_NO_SIM_BOOL);
+    }
+
+    private PersistableBundle readCachedConfigFromXml(SimCarrierId id) {
+        String fileName = getCachedConfigFile(mSlotId);
+
+        if (fileName == null) {
+            ImsLog.d(this, mSlotId, "No cached config");
+            return PersistableBundle.EMPTY;
+        }
+
+        if (id.isSimLocked() && !fileName.contains(id.getIccId())) {
+            ImsLog.d(this, mSlotId, "No cached config on SIM LOCKED");
+            return PersistableBundle.EMPTY;
+        }
+
+        ImsLog.d(this, mSlotId, "readCachecConfig: " + getFileNameForLogging(fileName));
+
+        try (InputStream is = AppContext.getInstance().openFileInput(fileName)) {
+            return PersistableBundle.readFromStream(is);
+        } catch (Exception e) {
+            ImsLog.d(this, mSlotId, "No cached config: " + e.toString());
+        }
+        return PersistableBundle.EMPTY;
+    }
+
+    private void saveCachedConfigToXml(SimCarrierId id, PersistableBundle config) {
+        String fileName = getFileNameForCachedConfig(mSlotId,
+                id.getSpecificCarrierId(), id.getMcc() + id.getMnc(), id.getIccId());
+
+        try (OutputStream os = AppContext.getInstance().openFileOutput(
+                fileName, Context.MODE_APPEND)) {
+            config.writeToStream(os);
+            ImsLog.d(this, mSlotId, "saveCachecConfig: " + getFileNameForLogging(fileName));
+        } catch (IOException e) {
+            ImsLog.w(this, mSlotId, e.toString());
+            deleteCachedConfigFile(mSlotId);
+        }
+    }
+
+    private static String getCachedConfigFile(int slotId) {
+        final String fileNamePrefix = getFileNamePrefixForCachedConfig(slotId);
+        final String[] fileList = AppContext.getInstance().fileList();
+        for (final String fileName : fileList) {
+            if (fileName.startsWith(fileNamePrefix)) {
+                return fileName;
+            }
+        }
+        return null;
+    }
+
+    private static void deleteCachedConfigFile(int slotId) {
+        final String fileNamePrefix = getFileNamePrefixForCachedConfig(slotId);
+        final String[] fileList = AppContext.getInstance().fileList();
+        for (final String fileName : fileList) {
+            if (fileName.startsWith(fileNamePrefix)) {
+                ImsLog.d(slotId, "deleteCachedConfig: " + getFileNameForLogging(fileName));
+                AppContext.getInstance().deleteFile(fileName);
+            }
+        }
+    }
+
+    /** Builds a canonical file name for a cached config file. */
+    private static String getFileNameForCachedConfig(
+            int slotId, int cid, String mccmnc, String iccId) {
+        return getFileNamePrefixForCachedConfig(slotId) + "_" + iccId + "_"
+                + (cid != SimCarrierId.UNKNOWN_ID ? cid : mccmnc) + ".xml";
+    }
+
+    private static String getFileNamePrefixForCachedConfig(int slotId) {
+        return "carrier_config_slot" + slotId;
+    }
+
+    private static String getFileNameForLogging(String fileName) {
+        if (!TextUtils.isEmpty(fileName)) {
+            String[] tokens = fileName.split("_");
+            if (tokens != null && tokens.length > 2) {
+                String iccid = tokens[tokens.length - 2];
+                return getFileNameForLogging(fileName, iccid);
+            }
+            return fileName;
+        }
+        return fileName;
+    }
+
+    /** Masks most part of ICCID in the file name for logging on user build. */
+    private static String getFileNameForLogging(String fileName, String iccId) {
+        if (ImsLog.isDebuggable()) {
+            return fileName;
+        }
+        String name = fileName;
+        int length = (iccId != null) ? iccId.length() : 0;
+        if (length > 5 && fileName != null) {
+            name = fileName.replace(iccId.substring(5), "***************");
+        }
+        return name;
     }
 
     private final class IntentReceiver extends BroadcastReceiver {

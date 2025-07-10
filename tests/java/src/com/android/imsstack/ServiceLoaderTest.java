@@ -92,6 +92,7 @@ public class ServiceLoaderTest {
                 .getResources().getXml(R.xml.carrier_config_override);
         when(mTestAppContext.getContext().getResources().getXml(eq(R.xml.carrier_config_override)))
                 .thenReturn(mCarrierConfigOverrideParser);
+        doReturn(new String[0]).when(mTestAppContext.getContext()).fileList();
 
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mSettingsProxy);
