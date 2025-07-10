@@ -34,7 +34,7 @@ public:
      * @brief Destroy the codec telephone cvent config
      *
      */
-    virtual ~CodecTelephoneEventConfig();
+    virtual ~CodecTelephoneEventConfig() override;
     /**
      * @brief Create codec using the configuration
      *

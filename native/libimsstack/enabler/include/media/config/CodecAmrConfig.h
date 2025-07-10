@@ -33,7 +33,7 @@ public:
      * @brief Destroy the codec amr config object
      *
      */
-    virtual ~CodecAmrConfig();
+    virtual ~CodecAmrConfig() override;
     /**
      * @brief Create codec using the configuration
      *

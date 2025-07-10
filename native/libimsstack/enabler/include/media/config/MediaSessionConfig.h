@@ -36,7 +36,7 @@ public:
      */
     explicit MediaSessionConfig(
             IN IMS_SINT32 nSlotId = 0, IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
-    virtual ~MediaSessionConfig();
+    virtual ~MediaSessionConfig() override;
 
     /**
      * @brief Create codec using the configuration.

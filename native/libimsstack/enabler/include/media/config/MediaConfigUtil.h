@@ -32,7 +32,7 @@ public:
      */
     static inline AudioConfiguration* GetAudioConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
     {
-        MediaSessionConfig* pConfig =
+        const MediaSessionConfig* pConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, type);
         if (pConfig == IMS_NULL)
         {
@@ -51,7 +51,7 @@ public:
      */
     static inline VideoConfiguration* GetVideoConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
     {
-        MediaSessionConfig* pConfig =
+        const MediaSessionConfig* pConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, type);
         if (pConfig == IMS_NULL)
         {
@@ -70,7 +70,7 @@ public:
      */
     static inline TextConfiguration* GetTextConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
     {
-        MediaSessionConfig* pConfig =
+        const MediaSessionConfig* pConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, type);
         if (pConfig == IMS_NULL)
         {

@@ -33,7 +33,7 @@ public:
      * @brief Destroy the codec pcm config
      *
      */
-    virtual ~CodecPcmConfig();
+    virtual ~CodecPcmConfig() override;
     /**
      * @brief Create codec using the configuration
      *

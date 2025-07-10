@@ -110,7 +110,7 @@ public:
      * @brief Destroy the codec evs config
      *
      */
-    virtual ~CodecEvsConfig();
+    virtual ~CodecEvsConfig() override;
     /**
      * @brief Create codec using the configuration
      *
