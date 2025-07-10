@@ -62,7 +62,11 @@ class EmergencyMessageFormatterTest : public ::testing::Test
 {
 public:
     EmergencyMessageFormatterTest() :
-            objParticipantInfo(objContext)
+            pFormatter(IMS_NULL),
+            objParticipantInfo(objContext),
+            pConfigurationProxy(IMS_NULL),
+            pSupplementaryService(IMS_NULL),
+            pFeatureCaps(IMS_NULL)
     {
     }
 
