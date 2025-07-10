@@ -22,7 +22,7 @@
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
 
-class IMtcContext;
+class IMtcCallContext;
 class ISubscriberInfo;
 class ImsIdentityProxy;
 struct CallInfo;
@@ -34,27 +34,21 @@ using Scheme = NormalDialingPlan::Scheme;
 class MtcDialingPlan : public IMtcDialingPlan
 {
 public:
-    explicit MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo);
+    MtcDialingPlan();
     virtual ~MtcDialingPlan() override;
     MtcDialingPlan(IN const MtcDialingPlan&) = delete;
     MtcDialingPlan& operator=(IN const MtcDialingPlan&) = delete;
 
 public:
-    AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
+    AString GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
             IN Scheme eScheme = Scheme::UNKNOWN) override;
 
 private:
     static IMS_BOOL IsUriForm(IN const AString& strNumber);
-    AString GetConferenceFactoryUri() const;
-    AString GetMcc() const;
-    AString GetMnc(IN IMS_UINT32 nLength) const;
+    AString GetConferenceFactoryUri(IN IMtcCallContext& objContext) const;
 
 protected:
     ImsIdentityProxy* m_pIdentityProxy;
-
-private:
-    IMtcContext& m_objContext;
-    ISubscriberInfo& m_objSubscriberInfo;
 };
 
 #endif

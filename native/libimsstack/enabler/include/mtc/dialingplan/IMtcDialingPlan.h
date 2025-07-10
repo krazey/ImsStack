@@ -29,15 +29,14 @@ public:
     virtual ~IMtcDialingPlan() {}
 
     /**
-     * @brief returns a translated sip/tel To-Uri
+     * @brief returns a translated sip/tel To URI
      *
      * @param strNumber the number a user dialed.
-     * @param objCallInfo the CallInfo of the call which contains the information of
-     *         emergency/ussi characteristic.
-     * @param eScheme the uri scheme for the translation.
-     * @return the translated sip/tel Uri.
+     * @param objContext call context which provides the information needed to combine the To URI
+     * @param eScheme the URI scheme for the translation.
+     * @return the translated sip/tel URI.
      */
-    virtual AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
+    virtual AString GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
             IN Scheme eScheme = Scheme::UNKNOWN) = 0;
 };
 

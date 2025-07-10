@@ -52,7 +52,7 @@
     </int-array>
     <int name="imsvoice.ringing_timer_millis_int" value="45000"/>
     <int name="imsvoice.ringback_timer_millis_int" value="180000"/>
-    <string name="imsvoice.conference_factory_uri_string">sip:n-way_voice@[DOMAIN]</string>
+    <string name="imsvoice.conference_factory_uri_string">sip:n-way_voice@#HOME_DOMAIN#</string>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <int name="imsvoice.mo_call_request_timeout_millis_int" value="-1"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="true"/>

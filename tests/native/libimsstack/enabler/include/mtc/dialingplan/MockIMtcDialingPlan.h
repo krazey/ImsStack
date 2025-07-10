@@ -30,7 +30,7 @@ class MockIMtcDialingPlan : public IMtcDialingPlan
 {
 public:
     MOCK_METHOD(AString, GetToUri,
-            (IN const AString& strNumber, IN const CallInfo& objCallInfo, IN Scheme eScheme),
+            (IN const AString& strNumber, IN IMtcCallContext& objContext, IN Scheme eScheme),
             (override));
 };
 

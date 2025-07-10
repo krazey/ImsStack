@@ -58,8 +58,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objConfigurationProxy(MtcConfigurationProxy()),
         m_objOperationAsyncRunnerManager(nSlotId),
         m_lstServices(ImsList<IMtcService*>()),
-        m_objDialingPlan(MtcDialingPlan(
-                *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
+        m_objDialingPlan(MtcDialingPlan()),
         m_objCallManager(MtcCallManager(*this)),
         m_objCallController(MtcCallController(*this)),
         m_objCallStateProxy(CallStateProxy(m_objCallManager)),

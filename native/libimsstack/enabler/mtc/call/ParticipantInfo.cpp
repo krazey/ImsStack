@@ -149,8 +149,7 @@ void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
         eScheme = Scheme::UNKNOWN;
     }
 
-    m_strRemoteUri =
-            m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo(), eScheme);
+    m_strRemoteUri = m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext, eScheme);
     IMS_TRACE_D("UpdateFromRemoteNumber : URI[%s]", m_strRemoteUri.GetStr(), 0, 0);
 }
 

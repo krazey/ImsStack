@@ -204,7 +204,14 @@ AString EctReference::GetReferToUri(IN IMtcCall* piTransferTargetCall)
 PRIVATE
 AString EctReference::GetReferToUri(IN const AString& strTransferTarget) const
 {
-    return m_objContext.GetDialingPlan().GetToUri(strTransferTarget, CallInfo(), Scheme::SIP);
+    IMtcCall* piTransfereeCall = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
+    if (piTransfereeCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
+    {
+        return strTransferTarget;
+    }
+
+    return m_objContext.GetDialingPlan().GetToUri(
+            strTransferTarget, piTransfereeCall->GetCallContext(), Scheme::SIP);
 }
 
 PRIVATE

@@ -227,4 +227,64 @@ TEST_F(TemplateFormatterTest, FormatWithUniqueId)
     ASSERT_FALSE(TemplateFormatter::Format("<#UNIQUE_ID#>", objContext).GetLength() < 12);
 }
 
+TEST_F(TemplateFormatterTest, FormatWithMcc)
+{
+    const AString strMcc3("123");
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMcc(_))
+            .WillByDefault(Invoke(
+                    [strMcc3](AString& strMcc)
+                    {
+                        strMcc = strMcc3;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_STREQ("<123>", TemplateFormatter::Format("<#MCC#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithMnc)
+{
+    const AString strMnc3("056");
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMnc(_))
+            .WillByDefault(Invoke(
+                    [strMnc3](AString& strMnc)
+                    {
+                        strMnc = strMnc3;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_STREQ("<056>", TemplateFormatter::Format("<#MNC#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithMnc3)
+{
+    const AString strMnc2("56");
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMnc(_))
+            .WillByDefault(Invoke(
+                    [strMnc2](AString& strMnc)
+                    {
+                        strMnc = strMnc2;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_STREQ("<056>", TemplateFormatter::Format("<#MNC#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithMnc2)
+{
+    const AString strMnc2("56");
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMnc(_))
+            .WillByDefault(Invoke(
+                    [strMnc2](AString& strMnc)
+                    {
+                        strMnc = strMnc2;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_STREQ("<56>", TemplateFormatter::Format("<#MNC2#>", objContext).GetStr());
+}
+
 }  // namespace android

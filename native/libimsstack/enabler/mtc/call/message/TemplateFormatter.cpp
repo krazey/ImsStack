@@ -48,6 +48,9 @@ PUBLIC GLOBAL AString TemplateFormatter::Format(
     Replace(strResult, "#MSISDN#", [&]() { return GetMsisdn(objContext); });
     Replace(strResult, "#HOME_DOMAIN#", [&]() { return GetHomeDomain(objContext); });
     Replace(strResult, "#UNIQUE_ID#", [&]() { return GetUniqueId(); });
+    Replace(strResult, "#MNC#", [&]() { return GetMnc(objContext, 3); });
+    Replace(strResult, "#MNC2#", [&]() { return GetMnc(objContext, 2); });
+    Replace(strResult, "#MCC#", [&]() { return GetMcc(objContext); });
     // clang-format on
     return strResult;
 }
@@ -208,6 +211,31 @@ PRIVATE GLOBAL AString TemplateFormatter::GetUniqueId()
     AString strUniqueId;
     strUniqueId.Sprintf("%05x%05x", nMicroSeconds, nRandom);
     return strUniqueId;
+}
+
+PRIVATE GLOBAL AString TemplateFormatter::GetMcc(IN const IMtcCallContext& objContext)
+{
+    const ISubscriberInfo* pSubscriberInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(objContext.GetSlotId());
+
+    AString strMcc;
+    pSubscriberInfo->GetSimMcc(strMcc);
+    return strMcc;
+}
+
+PRIVATE GLOBAL AString TemplateFormatter::GetMnc(
+        IN const IMtcCallContext& objContext, IN IMS_UINT32 nLength)
+{
+    const ISubscriberInfo* pSubscriberInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(objContext.GetSlotId());
+
+    AString strMnc;
+    pSubscriberInfo->GetSimMnc(strMnc);
+    if (nLength == 3 && strMnc.GetLength() == 2)
+    {
+        strMnc.Prepend("0");
+    }
+    return strMnc;
 }
 
 PRIVATE GLOBAL void TemplateFormatter::Replace(IN_OUT AString& strText,

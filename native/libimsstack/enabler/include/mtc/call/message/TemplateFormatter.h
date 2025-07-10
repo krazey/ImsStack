@@ -48,6 +48,8 @@ private:
     static AString GetMsisdn(IN const IMtcCallContext& objContext);
     static AString GetHomeDomain(IN const IMtcCallContext& objContext);
     static AString GetUniqueId();
+    static AString GetMcc(IN const IMtcCallContext& objContext);
+    static AString GetMnc(IN const IMtcCallContext& objContext, IN IMS_UINT32 nLength);
 
     static void Replace(IN_OUT AString& strText, IN const AString& strTemplateLiteral,
             IN const std::function<AString()>& objSubstitution);

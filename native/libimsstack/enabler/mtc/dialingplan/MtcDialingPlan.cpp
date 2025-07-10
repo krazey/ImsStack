@@ -28,6 +28,8 @@
 #include "Sip.h"
 #include "SipAddress.h"
 #include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
+#include "call/message/TemplateFormatter.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/ImsIdentityProxy.h"
@@ -37,10 +39,8 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcDialingPlan::MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo) :
-        m_pIdentityProxy(new ImsIdentityProxy()),
-        m_objContext(objContext),
-        m_objSubscriberInfo(objSubscriberInfo)
+MtcDialingPlan::MtcDialingPlan() :
+        m_pIdentityProxy(new ImsIdentityProxy())
 {
     IMS_TRACE_I("+MtcDialingPlan", 0, 0, 0);
 }
@@ -53,7 +53,7 @@ MtcDialingPlan::~MtcDialingPlan()
 }
 
 PUBLIC
-AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
+AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
         IN Scheme eScheme /* = Scheme::Unknown*/)
 {
     AString strUri = strNumber;
@@ -64,18 +64,18 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
         return strUri;
     }
 
-    if (objCallInfo.bConference)
+    if (objContext.GetCallInfo().bConference)
     {
-        return GetConferenceFactoryUri();
+        return GetConferenceFactoryUri(objContext);
     }
 
-    if (objCallInfo.bUssi)
+    if (objContext.GetCallInfo().bUssi)
     {
         return NormalDialingPlan::GetTranslatedUriForDialString(
-                m_objContext, strUri, *m_pIdentityProxy);
+                objContext, strUri, *m_pIdentityProxy);
     }
 
-    return NormalDialingPlan::GetTranslatedUri(m_objContext, strUri, eScheme, *m_pIdentityProxy);
+    return NormalDialingPlan::GetTranslatedUri(objContext, strUri, eScheme, *m_pIdentityProxy);
 }
 
 PRIVATE
@@ -95,32 +95,19 @@ IMS_BOOL MtcDialingPlan::IsUriForm(IN const AString& strNumber)
 }
 
 PRIVATE
-AString MtcDialingPlan::GetConferenceFactoryUri() const
+AString MtcDialingPlan::GetConferenceFactoryUri(IN IMtcCallContext& objContext) const
 {
-    AString strUri = m_objContext.GetConfigurationProxy().GetString(
+    AString strUri = objContext.GetConfigurationProxy().GetString(
             ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING);
 
     IMS_TRACE_D("GetConferenceFactoryUri uri from config[%s]", strUri.GetStr(), 0, 0);
 
     if (strUri.GetLength() <= 0)
     {
-        strUri = "sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org";
+        strUri = "sip:mmtel@conf-factory.ims.mnc#MNC#.mcc#MCC#.3gppnetwork.org";
     }
 
-    if (strUri.Contains("[MNC") || strUri.Contains("[MCC"))
-    {
-        IMS_TRACE_D("GetConferenceFactoryUri MNC/MCC converting", 0, 0, 0);
-        strUri = strUri.Replace("[MCC]", GetMcc())
-                         .Replace("[MNC]", GetMnc(3))
-                         .Replace("[MNC2]", GetMnc(2));
-    }
-
-    if (strUri.Contains("[DOMAIN"))
-    {
-        IMS_TRACE_D("GetConferenceFactoryUri DOMAIN converting", 0, 0, 0);
-        strUri = strUri.Replace(
-                "[DOMAIN]", m_pIdentityProxy->GetHomeDomainName(m_objContext.GetSlotId()));
-    }
+    strUri = TemplateFormatter::Format(strUri, objContext);
 
     if (IsUriForm(strUri) == IMS_FALSE)
     {
@@ -129,24 +116,4 @@ AString MtcDialingPlan::GetConferenceFactoryUri() const
 
     IMS_TRACE_I("GetConferenceFactoryUri [%s]", strUri.GetStr(), 0, 0);
     return strUri;
-}
-
-PRIVATE
-AString MtcDialingPlan::GetMcc() const
-{
-    AString strMcc;
-    m_objSubscriberInfo.GetSimMcc(strMcc);
-    return strMcc;
-}
-
-PRIVATE
-AString MtcDialingPlan::GetMnc(IN IMS_UINT32 nLength) const
-{
-    AString strMnc;
-    m_objSubscriberInfo.GetSimMnc(strMnc);
-    if (nLength == 3 && strMnc.GetLength() == 2)
-    {
-        strMnc.Prepend("0");
-    }
-    return strMnc;
 }

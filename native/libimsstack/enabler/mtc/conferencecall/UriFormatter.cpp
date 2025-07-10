@@ -156,16 +156,14 @@ PRIVATE GLOBAL void UriFormatter::ConvertToValidSipUri(
             strUserPart = strLHS;
         }
 
-        strUri = objContext.GetDialingPlan().GetToUri(
-                strUserPart, objContext.GetCallInfo(), Scheme::SIP);
+        strUri = objContext.GetDialingPlan().GetToUri(strUserPart, objContext, Scheme::SIP);
     }
     // if objSipAddress has only numbers, create SIP URI via dialing plan
     else if (!objSipAddress.IsSchemeSip() && !objSipAddress.IsSchemeSips())
     {
         if (strUri.GetLength() > 0)
         {
-            strUri = objContext.GetDialingPlan().GetToUri(
-                    strUri, objContext.GetCallInfo(), Scheme::SIP);
+            strUri = objContext.GetDialingPlan().GetToUri(strUri, objContext, Scheme::SIP);
         }
         else
         {
