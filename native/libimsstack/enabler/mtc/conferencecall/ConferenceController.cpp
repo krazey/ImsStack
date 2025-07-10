@@ -754,9 +754,9 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfU
         for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
         {
             ConfUser* pConfUser = objUsers.GetAt(i);
-            AString strReferInviteUri =
+            AString strReferInviteUriForUser =
                     (pConfUser != IMS_NULL) ? pConfUser->strTarget : AString::ConstNull();
-            m_pParticipantList->SetReferInviteUri(strReferInviteUri, pConfUser);
+            m_pParticipantList->SetReferInviteUri(strReferInviteUriForUser, pConfUser);
         }
 
         if (nResult == IMS_FAILURE)
