@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "UceApp.h"
+#include "IIpcan.h"
 #include "IUce.h"
 #include "MockIJniEnabler.h"
 #include "MockIUceJniThread.h"
@@ -69,6 +70,7 @@ public:
     IMS_BOOL callPre(IMSMSG objUIMsg) { return OnPreprocess(objUIMsg); }
     IMS_BOOL sendMessage(IMSMSG& objMSG) { return OnMessage(objMSG); }
     IMS_BOOL callPost(IMSMSG objUIMsg) { return OnPostprocess(objUIMsg); }
+    IImsActivityController* getController() { return GetController(); }
     IMS_BOOL callControl() { return Control(0, 0, IMS_NULL); }
     void notifyNetworkStatus(INetworkWatcher* piNetWatcherInfo)
     {
@@ -100,7 +102,7 @@ public:
     void aosDisConnected() { ImsAos_Disconnected(0, 0); }
     void aosSuspend() { ImsAos_Suspended(0); }
     void aosResume() { ImsAos_Resumed(); }
-    void aosMonitorConnected() { ImsAosMonitor_Connected(0, 0); }
+    void aosMonitorConnected(IN IMS_UINT32 nIpcan) { ImsAosMonitor_Connected(0, nIpcan); }
     void registrationCheck() { ImsRegistrationCheck(); }
     IMS_UINT32 getService(IMS_UINT32 features) { return GetRegisteredService(features); }
     IMS_BOOL sendPublishCmd() { return SendPublishCmd(0, 0, 0, "", ""); }
@@ -125,12 +127,13 @@ public:
         pUceApp = IMS_NULL;
     }
     TestTimerService objTimerService;
-    MockITimer& objTimer;
     TestUceApp* pUceApp;
-    MockIJniEnabler objMockJniEnabler;
-    MockIUceJniThread objMockIUceJniThread;
     MockIImsAos objMockIImsAos;
     MockIImsAosInfo objMockIImsAosInfo;
+    MockIJniEnabler objMockJniEnabler;
+    MockINetworkWatcher objMockINetworkWatcher;
+    MockITimer& objTimer;
+    MockIUceJniThread objMockIUceJniThread;
 
 protected:
     virtual void SetUp() override
@@ -142,12 +145,15 @@ protected:
         JniEnablerConnector::GetInstance().SetJniEnabler(0, EnablerType::UCE, &objMockJniEnabler);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_TIMER, &objTimerService);
+        pUceApp->setNetworkWatcher(&objMockINetworkWatcher);
     }
 
     virtual void TearDown() override
     {
         if (pUceApp)
         {
+            pUceApp->clearTimer();
+            pUceApp->setNetworkWatcher(IMS_NULL);
             delete pUceApp;
         }
         JniEnablerConnector::GetInstance().SetJniEnabler(0, EnablerType::UCE, IMS_NULL);
@@ -202,46 +208,120 @@ TEST_F(UceAppTest, CallPost)
     EXPECT_TRUE(pUceApp->callPost(objMsg));
 }
 
+TEST_F(UceAppTest, GetControllerReturnsUceApp)
+{
+    EXPECT_EQ(pUceApp->getController(), pUceApp);
+}
+
 TEST_F(UceAppTest, CallControl)
 {
     IMS_TRACE_D("CallControl", 0, 0, 0);
     EXPECT_FALSE(pUceApp->callControl());
 }
 
-TEST_F(UceAppTest, NotifyNetworkStatus)
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedTo2G)
 {
-    IMS_TRACE_D("NotifyNetworkStatus", 0, 0, 0);
-    MockINetworkWatcher objMockINetworkWatcher;
     ON_CALL(objMockINetworkWatcher, GetNetworkType())
-            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_UMTS));
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_GPRS));
 
-    pUceApp->setNetworkWatcher(&objMockINetworkWatcher);
     pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
-    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_UTRAN);
-    pUceApp->setNetworkWatcher(IMS_NULL);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_GERAN);
 }
 
-TEST_F(UceAppTest, NotifyNetworkStatusWithNoMatched)
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedTo3G)
 {
-    IMS_TRACE_D("NotifyNetworkStatusWithNoMatched", 0, 0, 0);
-    MockINetworkWatcher objMockINetworkWatcher;
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_HSPA));
+
     pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_UTRAN);
+}
+
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedToVoiceNotSupportedLte)
+{
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+    ON_CALL(objMockINetworkWatcher, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+
+    pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_LTE_NO_VOPS);
+}
+
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedToVoiceSupportedLte)
+{
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+    ON_CALL(objMockINetworkWatcher, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+
+    pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_LTE);
+}
+
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedToVoiceNotSupportedNr)
+{
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_NR));
+    ON_CALL(objMockINetworkWatcher, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+
+    pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_NR_NO_VOPS);
+}
+
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedToVoiceSupportedNr)
+{
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_NR));
+    ON_CALL(objMockINetworkWatcher, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+
+    pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_NR);
+}
+
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedToInvalidType)
+{
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_INVALID));
+
+    pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_INVALID);
+}
+
+TEST_F(UceAppTest, NotifyNetworkStatusWhenNetworkTypeIsChangedToNotSupportedType)
+{
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_CDMA));
+
+    pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
+
+    EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_INVALID);
+}
+
+TEST_F(UceAppTest, ShouldNotHandleNetworkStatusChangeOfNotMatchedWatcher)
+{
+    MockINetworkWatcher objOtherWatcher;
+
+    pUceApp->notifyNetworkStatus(&objOtherWatcher);
+
     EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_INVALID);
 }
 
 TEST_F(UceAppTest, TimerExpired)
 {
-    MockINetworkWatcher objMockINetworkWatcher;
     ON_CALL(objMockINetworkWatcher, GetNetworkType())
             .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_EHRPD));
 
     EXPECT_CALL(objTimer, KillTimer).Times(1);
     EXPECT_CALL(objMockIUceJniThread, NotifyNetworkChanged(_)).Times(1);
 
-    pUceApp->setNetworkWatcher(&objMockINetworkWatcher);
     pUceApp->setTimer(&objTimer);
     pUceApp->expiredTimer(&objTimer);
-    pUceApp->setNetworkWatcher(IMS_NULL);
 }
 
 TEST_F(UceAppTest, StopTimer)
@@ -333,26 +413,47 @@ TEST_F(UceAppTest, AoSResume)
     EXPECT_EQ(pUceApp->getAoSState(), TestUceApp::AOS_RESUMED);
 }
 
-TEST_F(UceAppTest, AoSMonitorConnected)
+TEST_F(UceAppTest, ShouldNotifyRegisteredWhenConnectedWhileInNotConnectedStatus)
 {
-    IMS_TRACE_D("AoSMonitorConnected", 0, 0, 0);
-    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegistered(_, _)).Times(1);
-    pUceApp->aosMonitorConnected();
+    ON_CALL(objMockINetworkWatcher, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_GPRS));
+    ON_CALL(objMockIImsAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
 
-    pUceApp->setAoSState(TestUceApp::AOS_CONNECTED);
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegistered(_, eUCE_RAT_GERAN)).Times(1);
 
-    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegiRefreshed(_)).Times(1);
-    UceService* pUceService = new UceService(IMS_NULL);
-    pUceApp->setUceService(pUceService);
-    pUceApp->aosMonitorConnected();
+    pUceApp->aosMonitorConnected(IIpcan::CATEGORY_MOBILE);
 }
 
-TEST_F(UceAppTest, AoSMonitorConnectedWithNullJniThread)
+TEST_F(UceAppTest, ShouldNotifyRefreshedWhenConnectedWhileInConnectedStatus)
 {
-    IMS_TRACE_D("AoSMonitorConnectedWithNullJniThread", 0, 0, 0);
+    pUceApp->setAoSState(TestUceApp::AOS_CONNECTED);
+    UceService* pUceService = new UceService(IMS_NULL);
+    pUceApp->setUceService(pUceService);
+    ON_CALL(objMockIImsAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegiRefreshed(eUCE_RAT_WIFI)).Times(1);
+
+    pUceApp->aosMonitorConnected(IIpcan::CATEGORY_WLAN);
+}
+
+TEST_F(UceAppTest, CanNotNotifyWhenConnectedWithNullJniThread)
+{
     ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(nullptr));
+    ON_CALL(objMockIImsAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(objMockIUceJniThread, NotifyImsRegistered(_, _)).Times(0);
-    pUceApp->aosMonitorConnected();
+
+    pUceApp->aosMonitorConnected(IIpcan::CATEGORY_WLAN);
+}
+
+TEST_F(UceAppTest, CanNotHandleRegistrationCheckIfJniThreadIsNull)
+{
+    ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsDeregistered()).Times(0);
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegistered(_, _)).Times(0);
+
+    pUceApp->registrationCheck();
 }
 
 TEST_F(UceAppTest, RegistrationCheck)
