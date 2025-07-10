@@ -2447,7 +2447,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 
         case CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK:
             PerformRatBlockActions(IMS_TRUE);
-            NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
+            NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
             return;
 
         default:

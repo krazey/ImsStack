@@ -2771,7 +2771,8 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeR
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK));
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, AosReasonCode::PLMN_BLOCK)).Times(1);
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyDeregistered(_, _, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
 
     // WHEN
     m_pAosApplication->ProcessPdnDisconnect();
