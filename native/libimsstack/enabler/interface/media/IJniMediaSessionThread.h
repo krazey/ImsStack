@@ -23,7 +23,7 @@
 class IJniMediaSessionThread : public IJniEnablerThread
 {
 public:
-    virtual ~IJniMediaSessionThread() {}
+    virtual ~IJniMediaSessionThread() override = default;
 
     /**
      * @brief Called to request open session to each media session

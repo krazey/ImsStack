@@ -102,7 +102,7 @@ AString MediaManager::GetThreadName(IN IMS_SINT32 nSlotId)
 PUBLIC
 MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
 {
-    MediaSessionNode* pSessionNode = FindSessionNode(nCallKey);
+    const MediaSessionNode* pSessionNode = FindSessionNode(nCallKey);
 
     if (pSessionNode == IMS_NULL)
     {
@@ -171,7 +171,7 @@ PUBLIC VIRTUAL void MediaManager::DestroySession(IN const IMediaSession* piSessi
 PUBLIC
 MediaSession* MediaManager::GetSession(IN IMS_SINTP nCallKey)
 {
-    MediaSessionNode* pSessionNode = FindSessionNode(nCallKey);
+    const MediaSessionNode* pSessionNode = FindSessionNode(nCallKey);
 
     if (pSessionNode == IMS_NULL)
     {

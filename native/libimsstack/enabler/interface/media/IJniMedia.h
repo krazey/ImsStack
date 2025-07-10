@@ -327,7 +327,7 @@ public:
             ImsMediaMsgConfigParam(eType),
             m_objLocalAddress(IpAddress::IPv6NONE),
             m_nLocalPort(0) {};
-    virtual ~ImsMediaMsgOpenConfigParam() {}
+    virtual ~ImsMediaMsgOpenConfigParam() override {}
 
 public:
     IpAddress m_objLocalAddress;
@@ -367,7 +367,7 @@ public:
             MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO, RtpConfig* config = IMS_NULL) :
             ImsMediaResponseParamBase(eType),
             m_pConfig(config) {};
-    virtual ~ImsMediaResponseConfigParam() { delete m_pConfig; }
+    virtual ~ImsMediaResponseConfigParam() override { delete m_pConfig; }
 
 public:
     RtpConfig* m_pConfig;
