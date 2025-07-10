@@ -253,13 +253,13 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     @Test
     public void testGetNetworkCountryIso() {
         Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED);
-        intent.putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "");
+        intent.putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "us");
         intent.putExtra(PhoneConstants.PHONE_KEY, 0);
 
         mTestMtcEmergencyServiceManager.getBroadcastReceiver().onReceive(mContext, intent);
-        assertEquals("", mTestMtcEmergencyServiceManager.getNetworkCountryIso());
+        assertEquals("us", mTestMtcEmergencyServiceManager.getNetworkCountryIso());
 
-        intent.putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "us");
+        intent.putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "");
         mTestMtcEmergencyServiceManager.getBroadcastReceiver().onReceive(mContext, intent);
         assertEquals("us", mTestMtcEmergencyServiceManager.getNetworkCountryIso());
     }
