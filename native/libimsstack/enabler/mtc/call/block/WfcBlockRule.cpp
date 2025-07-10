@@ -38,19 +38,41 @@ WfcBlockRule::WfcBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType
 PUBLIC VIRTUAL WfcBlockRule::Result WfcBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (!m_objContext.GetService().IsWlanIpCanType() || IsWfcOn())
+    if (!m_objContext.GetService().IsWlanIpCanType() || IsWfcOn() ||
+            IsVoiceCallAvailableInCellular())
     {
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (m_eCallType == CallType::VOIP && !IsVoiceCallAvailableInCellular())
+    if (!IsVideoCall(m_eCallType))
     {
-        IMS_TRACE_D("WFC voice call is unavailable", 0, 0, 0);
+        IMS_TRACE_D("Wi-Fi voice call is unavailable", 0, 0, 0);
+        return Result(Result::Status::BLOCKED,
+                CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF));
+    }
+
+    if (HasVideoCall())
+    {
+        IMS_TRACE_D("Already have a Wi-Fi video call", 0, 0, 0);
         return Result(Result::Status::BLOCKED,
                 CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF));
     }
 
     return Result(Result::Status::UNBLOCKED);
+}
+
+PRIVATE IMS_BOOL WfcBlockRule::HasVideoCall() const
+{
+    const ImsList<IMtcCall*>& lstCalls = m_objContext.GetOtherCalls();
+    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+    {
+        if (IsVideoCall(lstCalls.GetAt(nIndex)->GetCallType()))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -79,4 +101,10 @@ IMS_BOOL WfcBlockRule::IsWfcOn() const
 {
     return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) ==
             IMS_WFC_ON;
+}
+
+PRIVATE
+IMS_BOOL WfcBlockRule::IsVideoCall(IN CallType eCallType) const
+{
+    return eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT;
 }

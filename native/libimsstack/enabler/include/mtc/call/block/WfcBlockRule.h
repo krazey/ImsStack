@@ -45,10 +45,12 @@ private:
 
     CallType m_eCallType;
 
+    IMS_BOOL HasVideoCall() const;
     IMS_BOOL IsVoiceCallAvailableInCellular() const;
     IMS_BOOL IsVopsAvailable() const;
     IMS_BOOL IsVoiceBlockedBySsac() const;
     IMS_BOOL IsWfcOn() const;
+    IMS_BOOL IsVideoCall(IN CallType eCallType) const;
 };
 
 #endif
