@@ -17,7 +17,6 @@
 <carrier_config>
     <!-- Ims General -->
     <int name="ims.sip_timer_100_trying_millis_int" value="0"/>
-    <boolean name="ims.require_sip_expires_header_in_register_bool" value="true"/>
     <!-- Aos -->
     <boolean name="ims.use_reginfo_contact_without_uri_check_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
