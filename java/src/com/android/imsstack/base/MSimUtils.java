@@ -101,6 +101,11 @@ public final class MSimUtils {
         return getSubscriptionManagerProxy().getSubscriptionId(phoneId);
     }
 
+    /** Returns the default voice subscription id. */
+    public static int getDefaultVoiceSubId() {
+        return getSubscriptionManagerProxy().getDefaultVoiceSubscriptionId();
+    }
+
     /** Checks whether SIM card is present or not. */
     public static boolean hasIccCard(int slotId) {
         TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(getSubId(slotId));

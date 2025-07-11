@@ -45,6 +45,11 @@ public class SubscriptionManagerProxyImpl implements SubscriptionManagerProxy {
     }
 
     @Override
+    public int getDefaultVoiceSubscriptionId() {
+        return TestConstants.SUB_ID_1;
+    }
+
+    @Override
     public int getDefaultDataSubscriptionId() {
         return TestConstants.SUB_ID_1;
     }
