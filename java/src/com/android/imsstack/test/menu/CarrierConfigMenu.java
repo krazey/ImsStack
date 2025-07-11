@@ -32,7 +32,6 @@ import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.imsstack.R;
-import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
@@ -299,7 +298,12 @@ public class CarrierConfigMenu extends AppCompatActivity {
         storeTestConfig();
 
         if (isConfigChanged) {
-            ServiceLoader.notifyCarrierConfigChanged(mSlotId);
+            ConfigInterface config = AgentFactory.getInstance().getAgent(
+                    ConfigInterface.class, mSlotId);
+
+            if (config != null) {
+                config.notifyCarrierConfigChangedForNative();
+            }
         }
     }
 

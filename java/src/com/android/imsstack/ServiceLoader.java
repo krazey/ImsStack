@@ -32,7 +32,6 @@ import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.NativeCommands;
-import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
@@ -169,21 +168,6 @@ public class ServiceLoader {
             SimCarrierId id = CarrierInfo.getCarrierIdFromSim(slotId);
 
             ca.updateCarrierConfig(subId, id);
-
-            notifyCarrierConfigChanged(slotId);
-        }
-    }
-
-    /**
-     * Notifies the carrier configuration change to the native layer.
-     *
-     * @param slotId The slot-id to be notified.
-     */
-    public static void notifyCarrierConfigChanged(int slotId) {
-        ISystem system = SystemInterface.getInstance().getSystem(slotId);
-
-        if (system != null) {
-            system.notifyConfigurationChanged(0);
         }
     }
 }
