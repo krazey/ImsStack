@@ -45,18 +45,30 @@ const IMS_UINT32 REMOTE_PORT = 40000;
 const IMS_UINT32 NEGO_ID = 1234567;
 const IMS_UINT32 NEGO_ID_2 = 7654321;
 
+class MockMediaSession : public MediaSession
+{
+public:
+    MockMediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServiceType,
+            IService* pIService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
+            MediaSession(eNetwork, eServiceType, pIService, nCallKey, nSlotId)
+    {
+    }
+    MOCK_METHOD(IMS_BOOL, MediaSession_SendMsgToMediaManager,
+            (IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam), (override));
+};
+
 class MediaSessionTest : public ::testing::Test
 {
 public:
-    MediaSessionTest()
+    MediaSessionTest() :
+            m_pMediaNego(std::make_shared<MockMediaNego>(0)),
+            m_nNegoId(NEGO_ID)
     {
-        m_pMediaNego = std::make_shared<MockMediaNego>(0);
-        m_nNegoId = NEGO_ID;
     }
-    ~MediaSessionTest() {}
+    ~MediaSessionTest() override {}
 
-    MediaSession* m_pSession;
-    MockISession* m_pIsession;
+    std::unique_ptr<MockMediaSession> m_pSession;
+    std::unique_ptr<MockISession> m_pIsession;
     MockICoreService m_objMockICoreService;
     MockIMediaSessionClientListener m_objMockClientListener;
     IpAddress m_objLocalIpAddress;
@@ -71,42 +83,6 @@ public:
     std::shared_ptr<MockAudioNego> m_pMockAudioNegoInstance;
     std::shared_ptr<MockVideoNego> m_pMockVideoNegoInstance;
 
-    // Helper to simulate successful negotiation and opening for a media type
-    void SimulateNegotiateAndOpen(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE typeToOpen)
-    {
-        IMS_SINT32 nAudioDir = MEDIA_DIRECTION_INACTIVE;
-        IMS_SINT32 nVideoDir = MEDIA_DIRECTION_INACTIVE;
-        IMS_SINT32 nTextDir = MEDIA_DIRECTION_INACTIVE;
-        MediaNego::MediaNegoResult errorReason = MediaNego::NO_ERROR;
-
-        EXPECT_CALL(*m_pMockMediaNegoHandler,
-                NegotiateSdp(nNegoId, m_pIsession, _, _, _, An<MediaNego::MediaNegoResult&>()))
-                .WillOnce(Return(IMS_TRUE));
-        EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(nNegoId))
-                .WillRepeatedly(Return(m_pMediaNego));  // Ensure nego is found
-        EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
-                .WillOnce(Return(typeToOpen));
-
-        if (typeToOpen & MEDIA_TYPE_AUDIO)
-        {
-            EXPECT_CALL(*m_pMockAudioController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
-            EXPECT_CALL(*m_pMockAudioController, OpenSession(nNegoId)).WillOnce(Return(IMS_TRUE));
-        }
-        if (typeToOpen & MEDIA_TYPE_VIDEO)
-        {
-            EXPECT_CALL(*m_pMockVideoController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
-            EXPECT_CALL(*m_pMockVideoController, OpenSession()).WillOnce(Return(IMS_TRUE));
-        }
-        if (typeToOpen & MEDIA_TYPE_TEXT)
-        {
-            EXPECT_CALL(*m_pMockTextController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
-            EXPECT_CALL(*m_pMockTextController, OpenSession()).WillOnce(Return(IMS_TRUE));
-        }
-
-        EXPECT_TRUE(m_pSession->NegotiateSdp(
-                nNegoId, m_pIsession, &nAudioDir, &nVideoDir, &nTextDir, errorReason));
-    }
-
 protected:
     virtual void SetUp() override
     {
@@ -114,7 +90,7 @@ protected:
         m_objRemoteIpAddress = IpAddress(REMOTE_IP);
         ON_CALL(m_objMockICoreService, GetIpAddress())
                 .WillByDefault(ReturnRef(m_objLocalIpAddress));
-        m_pSession = new MediaSession(
+        m_pSession = std::make_unique<MockMediaSession>(
                 MEDIA_NETWORK_LTE, MEDIA_SERVICE_DEFAULT, &m_objMockICoreService, 1, 0);
         m_pSession->SetMtcListener(&m_objMockClientListener);
 
@@ -123,7 +99,7 @@ protected:
         m_pEnvironment->eServiceType = MEDIA_SERVICE_DEFAULT;
         m_pEnvironment->eNetworkType = MEDIA_NETWORK_LTE;
 
-        m_pIsession = new MockISession();
+        m_pIsession = std::make_unique<MockISession>();
         m_pMockMediaNegoHandler =
                 std::make_shared<MockMediaNegoHandler>(0, m_pEnvironment, IMS_NULL);
         m_pMockAudioController = std::make_shared<MockAudioController>();
@@ -156,11 +132,44 @@ protected:
         ON_CALL(*m_pMockVideoController, CloseSession()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(*m_pMockTextController, CloseSession()).WillByDefault(Return(IMS_TRUE));
     }
+    virtual void TearDown() override {}
 
-    virtual void TearDown() override
+private:
+    // Helper to simulate successful negotiation and opening for a media type
+    void SimulateNegotiateAndOpen(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE typeToOpen)
     {
-        delete m_pSession;
-        delete m_pIsession;
+        IMS_SINT32 nAudioDir = MEDIA_DIRECTION_INACTIVE;
+        IMS_SINT32 nVideoDir = MEDIA_DIRECTION_INACTIVE;
+        IMS_SINT32 nTextDir = MEDIA_DIRECTION_INACTIVE;
+        MediaNego::MediaNegoResult errorReason = MediaNego::NO_ERROR;
+
+        EXPECT_CALL(*m_pMockMediaNegoHandler,
+                NegotiateSdp(
+                        nNegoId, m_pIsession.get(), _, _, _, An<MediaNego::MediaNegoResult&>()))
+                .WillOnce(Return(IMS_TRUE));
+        EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(nNegoId))
+                .WillRepeatedly(Return(m_pMediaNego));  // Ensure nego is found
+        EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
+                .WillOnce(Return(typeToOpen));
+
+        if (typeToOpen & MEDIA_TYPE_AUDIO)
+        {
+            EXPECT_CALL(*m_pMockAudioController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
+            EXPECT_CALL(*m_pMockAudioController, OpenSession(nNegoId)).WillOnce(Return(IMS_TRUE));
+        }
+        if (typeToOpen & MEDIA_TYPE_VIDEO)
+        {
+            EXPECT_CALL(*m_pMockVideoController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
+            EXPECT_CALL(*m_pMockVideoController, OpenSession()).WillOnce(Return(IMS_TRUE));
+        }
+        if (typeToOpen & MEDIA_TYPE_TEXT)
+        {
+            EXPECT_CALL(*m_pMockTextController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
+            EXPECT_CALL(*m_pMockTextController, OpenSession()).WillOnce(Return(IMS_TRUE));
+        }
+
+        EXPECT_TRUE(m_pSession->NegotiateSdp(
+                nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
     }
 };
 
@@ -227,7 +236,7 @@ TEST_F(MediaSessionTest, testGetSupportedMediaTypesFromSdp)
     ON_CALL(*m_pMockMediaNegoHandler, GetSupportedMediaTypesFromSdp(_, _))
             .WillByDefault(Return(MEDIA_TYPE_AUDIO));
 
-    EXPECT_EQ(m_pSession->GetSupportedMediaTypesFromSdp(0, m_pIsession), MEDIA_TYPE_AUDIO);
+    EXPECT_EQ(m_pSession->GetSupportedMediaTypesFromSdp(0, m_pIsession.get()), MEDIA_TYPE_AUDIO);
 }
 
 // --- Negotiation Tests ---
@@ -243,13 +252,13 @@ TEST_F(MediaSessionTest, testFormSdpSuccess)
 
     // Expect the call to be delegated to the handler
     EXPECT_CALL(*m_pMockMediaNegoHandler,
-            FormSdp(nNegoId, m_pIsession, eType, nAudioDir, nVideoDir, nTextDir, bReoffer))
+            FormSdp(nNegoId, m_pIsession.get(), eType, nAudioDir, nVideoDir, nTextDir, bReoffer))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
     // Call the method under test
     EXPECT_TRUE(m_pSession->FormSdp(
-            nNegoId, m_pIsession, eType, nAudioDir, nVideoDir, nTextDir, bReoffer));
+            nNegoId, m_pIsession.get(), eType, nAudioDir, nVideoDir, nTextDir, bReoffer));
 }
 
 TEST_F(MediaSessionTest, testFormSdpFailure)
@@ -263,13 +272,13 @@ TEST_F(MediaSessionTest, testFormSdpFailure)
 
     // Expect the call to be delegated, but the handler returns false
     EXPECT_CALL(*m_pMockMediaNegoHandler,
-            FormSdp(nNegoId, m_pIsession, eType, nAudioDir, nVideoDir, nTextDir, bReoffer))
+            FormSdp(nNegoId, m_pIsession.get(), eType, nAudioDir, nVideoDir, nTextDir, bReoffer))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
 
     // Call the method under test
     EXPECT_FALSE(m_pSession->FormSdp(
-            nNegoId, m_pIsession, eType, nAudioDir, nVideoDir, nTextDir, bReoffer));
+            nNegoId, m_pIsession.get(), eType, nAudioDir, nVideoDir, nTextDir, bReoffer));
 }
 
 TEST_F(MediaSessionTest, testNegotiateSdpSuccess)
@@ -283,8 +292,8 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccess)
 
     // Expect the negotiation call to the handler
     EXPECT_CALL(*m_pMockMediaNegoHandler,
-            NegotiateSdp(
-                    nNegoId, m_pIsession, _, _, _, ::testing::An<MediaNego::MediaNegoResult&>()))
+            NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _,
+                    ::testing::An<MediaNego::MediaNegoResult&>()))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));  // Simulate successful negotiation
 
@@ -303,7 +312,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccess)
     EXPECT_CALL(*m_pMockTextController, OpenSession()).Times(0);
 
     EXPECT_TRUE(m_pSession->NegotiateSdp(
-            nNegoId, m_pIsession, &nAudioDir, &nVideoDir, &nTextDir, errorReason));
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
 }
 
 TEST_F(MediaSessionTest, testNegotiateSdpFailure)
@@ -316,8 +325,8 @@ TEST_F(MediaSessionTest, testNegotiateSdpFailure)
 
     // Expect the negotiation call to the handler
     EXPECT_CALL(*m_pMockMediaNegoHandler,
-            NegotiateSdp(
-                    nNegoId, m_pIsession, _, _, _, ::testing::An<MediaNego::MediaNegoResult&>()))
+            NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _,
+                    ::testing::An<MediaNego::MediaNegoResult&>()))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));  // Simulate failed negotiation
 
@@ -335,7 +344,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpFailure)
 
     // Call the method under test
     EXPECT_FALSE(m_pSession->NegotiateSdp(
-            nNegoId, m_pIsession, &nAudioDir, &nVideoDir, &nTextDir, errorReason));
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
 }
 
 TEST_F(MediaSessionTest, testNegotiateSdpSuccessButNegoNotFound)
@@ -348,8 +357,8 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccessButNegoNotFound)
 
     // Expect the negotiation call to the handler
     EXPECT_CALL(*m_pMockMediaNegoHandler,
-            NegotiateSdp(
-                    nNegoId, m_pIsession, _, _, _, ::testing::An<MediaNego::MediaNegoResult&>()))
+            NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _,
+                    ::testing::An<MediaNego::MediaNegoResult&>()))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));  // Simulate successful negotiation
 
@@ -368,7 +377,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccessButNegoNotFound)
 
     // Call the method under test
     EXPECT_FALSE(m_pSession->NegotiateSdp(
-            nNegoId, m_pIsession, &nAudioDir, &nVideoDir, &nTextDir, errorReason));
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
 }
 
 TEST_F(MediaSessionTest, testNegotiateSdpSuccessOpenTextOnly)
@@ -381,7 +390,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccessOpenTextOnly)
     MEDIA_CONTENT_TYPE negotiatedType = MEDIA_TYPE_TEXT;
 
     EXPECT_CALL(*m_pMockMediaNegoHandler,
-            NegotiateSdp(nNegoId, m_pIsession, _, _, _, An<MediaNego::MediaNegoResult&>()))
+            NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _, An<MediaNego::MediaNegoResult&>()))
             .Times(1)
             .WillOnce(DoAll(SetArgPointee<4>(MEDIA_DIRECTION_SEND_RECEIVE),
                     Return(IMS_TRUE)));  // Simulate direction update
@@ -401,7 +410,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccessOpenTextOnly)
     EXPECT_CALL(*m_pMockTextController, OpenSession()).Times(1).WillOnce(Return(IMS_TRUE));
 
     EXPECT_TRUE(m_pSession->NegotiateSdp(
-            nNegoId, m_pIsession, &nAudioDir, &nVideoDir, &nTextDir, errorReason));
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
     // Verify direction was updated
     EXPECT_EQ(nTextDir, MEDIA_DIRECTION_SEND_RECEIVE);
 }
@@ -594,6 +603,59 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackText)
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(nNegoId), IMS_TRUE);
+}
+
+TEST_F(MediaSessionTest, testRequestQosWhenAlreadyAcquiredNotifiesAsync)
+{
+    IMS_UINTP nNegoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
+    ASSERT_NE(nNegoId, 0);
+
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO))
+            .WillRepeatedly(Return(REMOTE_PORT));
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedRemoteAddress(nNegoId, MEDIA_TYPE_AUDIO))
+            .WillRepeatedly(ReturnRef(m_objRemoteIpAddress));
+
+    EXPECT_CALL(*m_pSession, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_EQ(m_pSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
+
+    // Simulate receiving the QoS success notification.
+    EXPECT_CALL(
+            m_objMockClientListener, MediaSession_NotifyQos(nNegoId, IMS_TRUE, MEDIA_TYPE_AUDIO))
+            .Times(1);
+
+    ImsMediaMsgQosParam objParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
+    objParam.m_bResult = IMS_TRUE;
+
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(&objParam)),
+            IMS_TRUE);
+
+    // Act: Call RequestQos again. This should enter the 'if (pQosParams->m_bResult)' block.
+    EXPECT_EQ(m_pSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
+
+    EXPECT_EQ(m_pSession->DestroyProfile(nNegoId), IMS_TRUE);
+}
+
+TEST_F(MediaSessionTest, testRequestQosWhenPendingResendsRequest)
+{
+    IMS_UINTP nNegoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
+    ASSERT_NE(nNegoId, 0);
+
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO))
+            .WillRepeatedly(Return(REMOTE_PORT));
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedRemoteAddress(nNegoId, MEDIA_TYPE_AUDIO))
+            .WillRepeatedly(ReturnRef(m_objRemoteIpAddress));
+
+    // Expect two calls to send the REQUEST_QOS message to the manager.
+    EXPECT_CALL(*m_pSession, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS, _))
+            .Times(2)
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    // Act: First call adds the request. Second call finds the pending request and re-sends.
+    EXPECT_EQ(m_pSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
+    EXPECT_EQ(m_pSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
 }
 
 // --- Event Tests ---
