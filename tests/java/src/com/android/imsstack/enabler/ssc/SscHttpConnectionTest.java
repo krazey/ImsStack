@@ -252,7 +252,13 @@ public class SscHttpConnectionTest {
     @Test
     public void sendRequest_setExtraHeadersWithBody() throws Exception {
         String identity = "\"" + mXui + "\"";
-        String xmlBody = "This is XML body";
+        String xmlBody = "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-réply\">"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>";
+
         when(mMockConnection.getOutputStream()).thenReturn(mMockOutputStream);
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
                 .thenReturn("ImsClient");
@@ -267,7 +273,7 @@ public class SscHttpConnectionTest {
         verify(mMockConnection).setRequestProperty("Content-Type", "application/xcap-el+xml");
         verify(mMockConnection).setRequestProperty("Accept-Charset", "utf-8");
         verify(mMockConnection).setRequestProperty("Content-Length",
-                Integer.toString(xmlBody.length()));
+                Integer.toString(xmlBody.getBytes().length));
     }
 
     @Test
@@ -314,7 +320,7 @@ public class SscHttpConnectionTest {
         String xml = "<xcap-error />";
 
         when(mMockConnection.getResponseCode()).thenReturn(SscConstant.HTTP_CONFLICT);
-        when(mMockConnection.getContentLength()).thenReturn(xml.length());
+        when(mMockConnection.getContentLength()).thenReturn(xml.getBytes().length);
         when(mMockConnection.getErrorStream()).thenReturn(createInputStream(xml));
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
@@ -369,7 +375,7 @@ public class SscHttpConnectionTest {
         mSscHttpConnection.mDoc = createDocumentFromString(xml);
         when(mMockConnection.getResponseCode()).thenReturn(SscConstant.HTTP_OK);
         when(mMockConnection.getInputStream()).thenReturn(null);
-        when(mMockConnection.getContentLength()).thenReturn(xml.length());
+        when(mMockConnection.getContentLength()).thenReturn(xml.getBytes().length);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
                 mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
@@ -385,7 +391,7 @@ public class SscHttpConnectionTest {
         String xml = "<simservs />";
         mSscHttpConnection.mDoc = createDocumentFromString(xml);
         when(mMockConnection.getResponseCode()).thenReturn(SscConstant.HTTP_OK);
-        when(mMockConnection.getContentLength()).thenReturn(xml.length());
+        when(mMockConnection.getContentLength()).thenReturn(xml.getBytes().length);
         when(mMockConnection.getInputStream()).thenReturn(inputStream);
         doThrow(new IOException()).when(inputStream).close();
 
@@ -401,7 +407,7 @@ public class SscHttpConnectionTest {
     public void sendRequest_ioexceptionDuringDisplayingResponseMessage() throws Exception {
         String xml = "<simservs />";
         when(mMockConnection.getResponseCode()).thenReturn(SscConstant.HTTP_OK);
-        when(mMockConnection.getContentLength()).thenReturn(xml.length());
+        when(mMockConnection.getContentLength()).thenReturn(xml.getBytes().length);
         when(mMockConnection.getInputStream()).thenReturn(createInputStream(xml));
         doThrow(new IOException()).when(mMockConnection).getResponseMessage();
 
@@ -431,7 +437,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getResponseCode()).thenReturn(SscConstant.HTTP_OK);
         when(mMockConnection.getHeaderField("ETag")).thenReturn(eTag);
         when(mMockConnection.getHeaderField("Authentication-Info")).thenReturn(authenticationInfo);
-        when(mMockConnection.getContentLength()).thenReturn(xml.length());
+        when(mMockConnection.getContentLength()).thenReturn(xml.getBytes().length);
         when(mMockConnection.getInputStream()).thenReturn(createInputStream(xml));
         when(mMockConnection.getRequestProperties()).thenReturn(properties);
         when(mMockConnection.getHeaderFieldKey(0)).thenReturn("ETag");
