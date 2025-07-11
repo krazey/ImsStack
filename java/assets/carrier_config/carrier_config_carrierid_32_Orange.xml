@@ -99,18 +99,18 @@
 
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
-    <int name="sms_retry_policy_for_expiry_timer_f_int" value="4"/>
-
-    <!-- Ut/Xcap -->
-    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
-    </int-array>
-    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="1">
-        <item value="0"/>
-    </int-array>
-    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="1">
+    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="10"/>
+        <int-array name="imssms.sms_evaluate_radio_status_for_error_codes_int_array" num="9">
         <item value="403"/>
+        <item value="408"/>
+        <item value="500"/>
+        <item value="501"/>
+        <item value="502"/>
+        <item value="503"/>
+        <item value="504"/>
+        <item value="505"/>
+        <item value="513"/>
     </int-array>
-    <int name="imsss.ut_temporary_block_timer_min_int" value="240"/>
     <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
         <item value="1"/>
         <item value="8"/>
@@ -138,4 +138,15 @@
     </int-array>
     <int-array name="imssms.sms_rp_cause_values_to_retry_over_ims_int_array" num="0">
     </int-array>
+
+    <!-- Ut/Xcap -->
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
+    </int-array>
+    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <int name="imsss.ut_temporary_block_timer_min_int" value="240"/>
 </carrier_config>

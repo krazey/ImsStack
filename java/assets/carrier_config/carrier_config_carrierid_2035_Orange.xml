@@ -30,4 +30,7 @@
         <item value="0"/>
         <item value="5"/>
     </int-array>
+
+    <!-- Mts -->
+    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="10"/>
 </carrier_config>
