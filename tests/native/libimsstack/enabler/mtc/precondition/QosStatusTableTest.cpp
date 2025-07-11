@@ -153,58 +153,6 @@ TEST_F(QosStatusTableTest, InitializeRecordsNotSetInitialValueOfInvalidMediaType
     EXPECT_TRUE(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).IsEmpty());
 }
 
-TEST_F(QosStatusTableTest, ClearRecordsClearsRecordsOfAudio)
-{
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
-
-    pQosStatusTable->ClearRecords(SdpMedia::TYPE_AUDIO);
-
-    EXPECT_TRUE(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).IsEmpty());
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).IsEmpty());
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).IsEmpty());
-}
-
-TEST_F(QosStatusTableTest, ClearRecordsClearsRecordsOfVideo)
-{
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
-
-    pQosStatusTable->ClearRecords(SdpMedia::TYPE_VIDEO);
-
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).IsEmpty());
-    EXPECT_TRUE(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).IsEmpty());
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).IsEmpty());
-}
-
-TEST_F(QosStatusTableTest, ClearRecordsClearsRecordsOfText)
-{
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
-
-    pQosStatusTable->ClearRecords(SdpMedia::TYPE_TEXT);
-
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).IsEmpty());
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).IsEmpty());
-    EXPECT_TRUE(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).IsEmpty());
-}
-
-TEST_F(QosStatusTableTest, ClearRecordsNotClearRecordsOfInvalidMediaType)
-{
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
-    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
-
-    pQosStatusTable->ClearRecords(SdpMedia::TYPE_INVALID);
-
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).IsEmpty());
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).IsEmpty());
-    EXPECT_FALSE(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).IsEmpty());
-}
-
 TEST_F(QosStatusTableTest, RemoveUnusedRecordsRemovesOtherThanAudioRecords)
 {
     pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);

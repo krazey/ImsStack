@@ -57,21 +57,6 @@ PUBLIC VIRTUAL ImsList<QosStatusRecord*> QosStatusTable::GetRecords(
     }
 }
 
-PUBLIC VIRTUAL void QosStatusTable::ClearRecords(IN IMS_SINT32 eSdpMediaType)
-{
-    ImsList<QosStatusRecord*>* pRecords = GetRecordsRef(eSdpMediaType);
-    if (pRecords == IMS_NULL)
-    {
-        return;
-    }
-
-    for (IMS_UINT32 index = 0; index < pRecords->GetSize(); index++)
-    {
-        delete pRecords->GetAt(index);
-    }
-    pRecords->Clear();
-}
-
 PUBLIC VIRTUAL void QosStatusTable::InitializeRecords(IN IMS_SINT32 eSdpMediaType)
 {
     IMS_TRACE_D("InitializeStatusRecord : [%s]", QosStringUtils::ConvertSdpMediaType(eSdpMediaType),
@@ -376,6 +361,22 @@ PUBLIC VIRTUAL void QosStatusTable::SetLocalResourceConfirmed(
 
     QosStatusRecord* pRecord = lstRecords.GetAt(0);
     pRecord->bLocalResourceConfirmed = bConfirmed;
+}
+
+PRIVATE
+void QosStatusTable::ClearRecords(IN IMS_SINT32 eSdpMediaType)
+{
+    ImsList<QosStatusRecord*>* pRecords = GetRecordsRef(eSdpMediaType);
+    if (pRecords == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 index = 0; index < pRecords->GetSize(); index++)
+    {
+        delete pRecords->GetAt(index);
+    }
+    pRecords->Clear();
 }
 
 PRIVATE

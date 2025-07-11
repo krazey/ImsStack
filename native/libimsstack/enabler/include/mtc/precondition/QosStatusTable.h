@@ -154,13 +154,6 @@ public:
     virtual ImsList<QosStatusRecord*> GetRecords(IN IMS_SINT32 eSdpMediaType) const;
 
     /**
-     * @brief Clears the records that match the given media.
-     *
-     * @param eSdpMediaType TYPE_AUDIO, TYPE_VIDEO, TYPE_TEXT of SdpMedia.h
-     */
-    virtual void ClearRecords(IN IMS_SINT32 eSdpMediaType);
-
-    /**
      * @brief Clears current records and sets initial records of the given media.
      *
      * | Status | Status Type | Direction tag | Strength tag |
@@ -206,6 +199,13 @@ public:
     virtual void SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed);
 
 private:
+    /**
+     * @brief Clears the records that match the given media.
+     *
+     * @param eSdpMediaType TYPE_AUDIO, TYPE_VIDEO, TYPE_TEXT of SdpMedia.h
+     */
+    void ClearRecords(IN IMS_SINT32 eSdpMediaType);
+
     /**
      * @brief Gets the records that match the given parameter.
      *
