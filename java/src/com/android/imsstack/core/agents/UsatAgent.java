@@ -164,6 +164,13 @@ public class UsatAgent extends Handler implements UsatInterface {
     }
 
     @Override
+    public boolean isUiccImsAccessEnabled() {
+        byte[] ist = mSim.getIsimServiceTable();
+        return isServiceAvailable(ist, Usat.ISIM_SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS)
+                || isServiceAvailable(Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS);
+    }
+
+    @Override
     public Usat.CallControlCommand createCallControlCommand(
             @Usat.CallControlType int ccType, String dialedString, int networkType,
             @Usat.MediaType int mediaType, Usat.Listener listener) {

@@ -41,6 +41,15 @@ public interface UsatInterface {
     boolean isServiceAvailable(@Usat.ServiceType int serviceType);
 
     /**
+     * Checks if the "support of UICC access to IMS" is available in the USIM or ISIM service table.
+     * 95th bit in USIM service table and 10th bit in ISIM service table indicates this service.
+     * Please refer to the 3GPP TS 31.102 and TS 31.103.
+     *
+     * @return true if the support of UICC access to IMS is enabled or false otherwise.
+     */
+    boolean isUiccImsAccessEnabled();
+
+    /**
      * Creates a USAT command for call control.
      *
      * @param ccType The call control type. Valid values are

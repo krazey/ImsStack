@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -145,6 +146,7 @@ public final class SimAgent implements SimInterface {
     private final List<String> mIsimImpu = new ArrayList<>();
     private final Set<Sim.IsimListener> mIsimListeners = new CopyOnWriteArraySet<>();
     private final List<String> mIsimPcscf = new ArrayList<>();
+    private Set<String> mUiccIari = new HashSet<>();
     private IsimLoadedState mIsimLoadedState;
     private NativeStateInterface.Listener mNativeStateListener;
 
@@ -314,6 +316,11 @@ public final class SimAgent implements SimInterface {
     @Override
     public @NonNull List<String> getIsimPcscf() {
         return mIsimPcscf;
+    }
+
+    @Override
+    public @NonNull Set<String> getUiccIari() {
+        return mUiccIari;
     }
 
     @Override
@@ -559,6 +566,7 @@ public final class SimAgent implements SimInterface {
         mIsimDomain = null;
         mIsimImpu.clear();
         mIsimPcscf.clear();
+        mUiccIari.clear();
     }
 
     private boolean isMandatoryIsimRecordsLoaded() {
@@ -605,11 +613,22 @@ public final class SimAgent implements SimInterface {
                 mIsimPcscf.addAll(pcscfs);
             }
 
+            mUiccIari.clear();
+            if (mUsatAgent.isUiccImsAccessEnabled()) {
+                try {
+                    Set<String> iaris = tmp.requestUiccIari();
+                    mUiccIari.addAll(iaris);
+                } catch (RuntimeException e) {
+                    logw(this, "Reading IARI failed: " + e.toString());
+                }
+            }
+
             logi(this, "IsimRecords: ist=" + ImsUtils.bytesToHexString(mIsimIst)
                     + ", impi=" + ImsLog.hiddenString(mIsimImpi)
                     + ", domain=" + ImsLog.hiddenString(mIsimDomain)
                     + ", impu=" + ImsLog.hiddenString(mIsimImpu.toArray(new String[0]))
-                    + ", pcscf=" + ImsLog.hiddenString(mIsimPcscf.toArray(new String[0])));
+                    + ", pcscf=" + ImsLog.hiddenString(mIsimPcscf.toArray(new String[0]))
+                    + ", iari=" + ImsLog.hiddenString(mUiccIari.toArray(new String[0])));
         }
     }
 

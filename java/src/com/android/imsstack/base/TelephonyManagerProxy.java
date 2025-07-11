@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -303,6 +304,13 @@ public interface TelephonyManagerProxy {
      *         empty list if EF_PCSCF is not available.
      */
     List<String> getImsPcscfAddresses();
+
+    /**
+     * Returns the IMS Application Reference Identifier(IARI) that were loaded from the UICC.
+     *
+     * @return Set of IARI or empty set if not present or not loaded.
+     */
+    Set<String> requestUiccIari();
 
     /**
      * Returns the response of authentication for the default subscription.

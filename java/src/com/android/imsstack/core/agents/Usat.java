@@ -47,6 +47,11 @@ public interface Usat {
     /** Registration event download : There is no bit assigned to UST */
     int SERVICE_REGISTRATION_EVENT_DOWNLOAD = 200;
 
+    // These services are defined as the position of service available field in ISIM (one-based),
+    // but converted to the zero-based value here.
+    /* Support of UICC access to IMS: 10th bit in IST */
+    int ISIM_SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS = 9;
+
     @IntDef(value = {
         SERVICE_CALL_CONTROL,
         SERVICE_MO_SMS_CONTROL,
