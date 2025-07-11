@@ -1307,6 +1307,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "restart_dedicated_bearer_wait_timer_by_eps_fallback_bool";
         public static final String KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL =
                 KEY_PREFIX + "restart_ringing_timer_by_sending_180_bool";
+        public static final String KEY_CONTENT_ID_FOR_GEOLOCATION_STRING =
+                KEY_PREFIX + "content_id_for_geolocation_string";
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "audio_rtp_port_range_int_array";

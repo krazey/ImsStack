@@ -45,6 +45,9 @@ private:
     static AString GetPort(IN IMtcCallContext& objContext);
     static const AString& GetPublicUserId(IN const IMtcCallContext& objContext);
     static AString GetWifiCallingAddressId(IN const IMtcCallContext& objContext);
+    static AString GetMsisdn(IN const IMtcCallContext& objContext);
+    static AString GetHomeDomain(IN const IMtcCallContext& objContext);
+    static AString GetUniqueId();
 
     static void Replace(IN_OUT AString& strText, IN const AString& strTemplateLiteral,
             IN const std::function<AString()>& objSubstitution);

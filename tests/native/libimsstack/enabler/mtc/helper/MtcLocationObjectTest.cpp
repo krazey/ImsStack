@@ -512,6 +512,8 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeo
 {
     const AString strCid = "c-i-d";
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
@@ -537,6 +539,8 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolo
 {
     const AString strCid = "c-i-d";
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;

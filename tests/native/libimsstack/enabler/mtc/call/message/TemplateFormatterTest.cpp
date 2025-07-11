@@ -200,4 +200,31 @@ TEST_F(TemplateFormatterTest, FormatWithAidAndNoCountry)
             "<0000:0000:0000:0000>", TemplateFormatter::Format("<#AID#>", objContext).GetStr());
 }
 
+TEST_F(TemplateFormatterTest, FormatWithMsisdn)
+{
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetPhoneNumber(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strMsisdn)
+                    {
+                        strMsisdn = "12345678901";
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_STREQ("<12345678901>", TemplateFormatter::Format("<#MSISDN#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithHomeDomain)
+{
+    AString strHomeDomain = "ims.mnc0.mcc0.3gppnetwork.org";
+    ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(strHomeDomain));
+
+    EXPECT_STREQ("<ims.mnc0.mcc0.3gppnetwork.org>",
+            TemplateFormatter::Format("<#HOME_DOMAIN#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithUniqueId)
+{
+    ASSERT_FALSE(TemplateFormatter::Format("<#UNIQUE_ID#>", objContext).GetLength() < 12);
+}
+
 }  // namespace android

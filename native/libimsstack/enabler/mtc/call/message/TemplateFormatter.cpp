@@ -21,6 +21,7 @@
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServicePhoneInfo.h"
+#include "ServiceSystemTime.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/TemplateFormatter.h"
 #include "device/OsLocationInfo.h"
@@ -43,6 +44,10 @@ PUBLIC GLOBAL AString TemplateFormatter::Format(
     Replace(strResult, "#PORT#", [&]() { return GetPort(objContext); });
     Replace(strResult, "#PUID#", [&]() { return GetPublicUserId(objContext); });
     Replace(strResult, "#AID#", [&]() { return GetWifiCallingAddressId(objContext); });
+    Replace(strResult, "#PUID#", [&]() { return GetPublicUserId(objContext); });
+    Replace(strResult, "#MSISDN#", [&]() { return GetMsisdn(objContext); });
+    Replace(strResult, "#HOME_DOMAIN#", [&]() { return GetHomeDomain(objContext); });
+    Replace(strResult, "#UNIQUE_ID#", [&]() { return GetUniqueId(); });
     // clang-format on
     return strResult;
 }
@@ -167,6 +172,42 @@ PRIVATE GLOBAL AString TemplateFormatter::GetWifiCallingAddressId(
     }
 
     return strAid;
+}
+
+PRIVATE GLOBAL AString TemplateFormatter::GetMsisdn(IN const IMtcCallContext& objContext)
+{
+    const ISubscriberInfo* pInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(objContext.GetSlotId());
+    if (pInfo == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "No subscriber", 0, 0, 0);
+        return AString::ConstEmpty();
+    }
+
+    AString strMsisdn;
+    pInfo->GetPhoneNumber(strMsisdn);
+    return strMsisdn;
+}
+
+PRIVATE GLOBAL AString TemplateFormatter::GetHomeDomain(IN const IMtcCallContext& objContext)
+{
+    const ISubscriberConfig* pConfig = objContext.GetSubscriberConfig();
+    if (pConfig == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "No subscriber", 0, 0, 0);
+        return AString::ConstEmpty();
+    }
+
+    return pConfig->GetHomeDomainName();
+}
+
+PRIVATE GLOBAL AString TemplateFormatter::GetUniqueId()
+{
+    const IMS_UINT32 nRandom = IMS_SYS_GetSRandom0();
+    const IMS_UINT32 nMicroSeconds = IMS_SYS_GetTimeInMicroSeconds();
+    AString strUniqueId;
+    strUniqueId.Sprintf("%05x%05x", nMicroSeconds, nRandom);
+    return strUniqueId;
 }
 
 PRIVATE GLOBAL void TemplateFormatter::Replace(IN_OUT AString& strText,

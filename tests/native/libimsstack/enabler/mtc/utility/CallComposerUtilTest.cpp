@@ -22,6 +22,7 @@
 #include "MtcDef.h"
 #include "SipHeaderName.h"
 #include "call/MockIMtcCallContext.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "utility/CallComposerUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -42,6 +43,7 @@ public:
     MockIMtcCallContext objContext;
     MockISubscriberConfig objSubscriberConfig;
     MockIMessageUtils objMessageUtils;
+    MockMtcConfigurationProxy objConfigurationProxy;
 
 protected:
     void SetUp() override
@@ -49,6 +51,7 @@ protected:
         ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
         ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
         ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(HOME_DOMAIN));
         ON_CALL(objSubscriberConfig, GetPrivateUserId).WillByDefault(ReturnRef(PRIVATE_USER_ID));
@@ -209,6 +212,8 @@ TEST_F(CallComposerUtilTest, SetLocationDoesNotSetLocationIfLatitudeOrLongitudeI
 TEST_F(CallComposerUtilTest, SetLocationSetsLocation)
 {
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(CID));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
 
     const ByteArray objContent = ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
