@@ -17,9 +17,11 @@
 package com.android.imsstack.enabler.media;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -185,23 +187,47 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
+    public void testRequestIgnoredWhenClosing() throws Exception {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.setDataPosition(0);
+        mTextSessionHandler.setRtpSocket(mRtpSocketPair);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        // Close session
+        mTextSessionHandler.onImsMediaTextMessage(
+                MediaConstants.REQUEST_CLOSE_SESSION, testParcel);
+        processAllMessages();
+
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mTextSessionHandler.getMediaState());
+
+        // Try to modify session, should be discarded
+        TextConfig textConfig = MediaTestUtils.createTextConfig();
+        Parcel testParcel2 = Parcel.obtain();
+        textConfig.writeToParcel(testParcel2, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel2.setDataPosition(0);
+        mTextSessionHandler.onImsMediaTextMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel2);
+        processAllMessages();
+
+        // Verify modifySession was not called
+        verify(mMockTextSession, never()).modifySession(any());
+        testParcel.recycle();
+        testParcel2.recycle();
+    }
+
+    @Test
     public void testModifySession() {
         // Modify Session Request
         TextConfig textConfig = MediaTestUtils.createTextConfig();
         Parcel testParcel = Parcel.obtain();
-        testParcel.writeInt(MediaConstants.REQUEST_MODIFY_SESSION);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         textConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
         mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-
-        testParcel.setDataPosition(0);
-        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
-        mMediaListener.onMediaMessage(testParcel);
+        mTextSessionHandler.onImsMediaTextMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel);
         processAllMessages();
         verify(mMockTextSession, times(1)).modifySession(eq(textConfig));
+        assertEquals(MediaState.MEDIA_STATE_LIVE, mTextSessionHandler.getMediaState());
 
         // Modify Session Response - SUCCESS
         mTextSessionCallback.onModifySessionResponse(textConfig, RESULT_SUCCESS);

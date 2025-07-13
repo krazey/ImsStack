@@ -144,13 +144,6 @@ public class VideoSessionHandler extends MediaState {
         return mDisplaySurfaceSet;
     }
 
-    private boolean isWaitRequired(int requestType) {
-        return (requestType != MediaConstants.REQUEST_OPEN_SESSION
-                && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS
-                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
-    }
-
     /** Video session message Handler */
     class VideoMessageHandler extends Handler {
 
@@ -162,10 +155,16 @@ public class VideoSessionHandler extends MediaState {
         public void handleMessage(Message msg) {
             ImsLog.d("messageType = " + msg.what);
 
+            if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
+                ImsLog.w("Session=" + getVideoSessionId() + " is closing, discard request: "
+                        + msg.what);
+                return;
+            }
+
             // Till open session response is received, handling other commands has to wait
             try {
                 synchronized (mLock) {
-                    if (mVideoSession == null && isWaitRequired(msg.what)) {
+                    if (mVideoSession == null && MediaSessionUtils.isWaitRequired(msg.what)) {
                         ImsLog.d(Thread.currentThread().getName()
                                 + " is waiting for Video openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);

@@ -115,13 +115,6 @@ public class TextSessionHandler extends MediaState {
         return mTextMessageHandler;
     }
 
-    private boolean isWaitRequired(int requestType) {
-        return (requestType != MediaConstants.REQUEST_OPEN_SESSION
-                && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS
-                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
-    }
-
     /** Text session message Handler */
     class TextMessageHandler extends Handler {
 
@@ -133,10 +126,16 @@ public class TextSessionHandler extends MediaState {
         public void handleMessage(Message msg) {
             ImsLog.d("messageType = " + msg.what);
 
+            if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
+                ImsLog.w("Session=" + getTextSessionId() + " is closing, discard request: "
+                        + msg.what);
+                return;
+            }
+
             // Till open session response is received, handling other commands has to wait
             try {
                 synchronized (mLock) {
-                    if (mTextSession == null && isWaitRequired(msg.what)) {
+                    if (mTextSession == null && MediaSessionUtils.isWaitRequired(msg.what)) {
                         ImsLog.d(Thread.currentThread().getName()
                                 + " is waiting for Text openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);

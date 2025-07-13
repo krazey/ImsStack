@@ -268,23 +268,48 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
+    public void testRequestIgnoredWhenClosing() throws Exception {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        // Close session
+        mAudioSessionHandler.onImsMediaAudioMessage(
+                MediaConstants.REQUEST_CLOSE_SESSION, testParcel);
+        processAllMessages();
+
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockAudioSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mAudioSessionHandler.getMediaState());
+
+        // Try to modify session, should be discarded
+        AudioConfig audioConfig = MediaTestUtils.createAudioConfig();
+        Parcel testParcel2 = Parcel.obtain();
+        audioConfig.writeToParcel(testParcel2, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel2.setDataPosition(0);
+        mAudioSessionHandler.onImsMediaAudioMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel2);
+        processAllMessages();
+
+        // Verify modifySession was not called
+        verify(mMockAudioSession, never()).modifySession(any());
+        testParcel.recycle();
+        testParcel2.recycle();
+    }
+
+    @Test
     public void testModifySession() {
         // Modify Session Request
         AudioConfig audioConfig = MediaTestUtils.createAudioConfig();
         Parcel testParcel = Parcel.obtain();
-        testParcel.writeInt(MediaConstants.REQUEST_MODIFY_SESSION);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
         mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
-        mMediaListener.onMediaMessage(testParcel);
+        mAudioSessionHandler.onImsMediaAudioMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel);
         processAllMessages();
 
-        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
-        testParcel.setDataPosition(0);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
         verify(mMockAudioSession, times(1)).modifySession(eq(audioConfig));
+        assertEquals(MediaState.MEDIA_STATE_LIVE, mAudioSessionHandler.getMediaState());
 
         // Modify Session Response - SUCCESS
         mAudioSessionCallback.onModifySessionResponse(audioConfig, RESULT_SUCCESS);

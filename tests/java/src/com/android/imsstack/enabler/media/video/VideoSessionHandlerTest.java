@@ -241,23 +241,47 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
+    public void testRequestIgnoredWhenClosing() throws Exception {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.setDataPosition(0);
+        mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        // Close session
+        mVideoSessionHandler.onImsMediaVideoMessage(
+                MediaConstants.REQUEST_CLOSE_SESSION, testParcel);
+        processAllMessages();
+
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockVideoSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mVideoSessionHandler.getMediaState());
+
+        // Try to modify session, should be discarded
+        VideoConfig videoConfig = MediaTestUtils.createVideoConfig();
+        Parcel testParcel2 = Parcel.obtain();
+        videoConfig.writeToParcel(testParcel2, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel2.setDataPosition(0);
+        mVideoSessionHandler.onImsMediaVideoMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel2);
+        processAllMessages();
+
+        // Verify modifySession was not called
+        verify(mMockVideoSession, never()).modifySession(any());
+        testParcel.recycle();
+        testParcel2.recycle();
+    }
+
+    @Test
     public void testModifySession() {
         // Modify Session Request
         VideoConfig videoConfig = MediaTestUtils.createVideoConfig();
         Parcel testParcel = Parcel.obtain();
-        testParcel.writeInt(MediaConstants.REQUEST_MODIFY_SESSION);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         videoConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
         mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-
-        testParcel.setDataPosition(0);
-        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
-        mMediaListener.onMediaMessage(testParcel);
+        mVideoSessionHandler.onImsMediaVideoMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel);
         processAllMessages();
         verify(mMockVideoSession, times(1)).modifySession(eq(videoConfig));
+        assertEquals(MediaState.MEDIA_STATE_LIVE, mVideoSessionHandler.getMediaState());
 
         // Modify Session Response - SUCCESS
         mVideoSessionCallback.onModifySessionResponse(videoConfig, RESULT_SUCCESS);

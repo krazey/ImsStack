@@ -204,13 +204,6 @@ public class AudioSessionHandler extends MediaState {
         return mAudioQosAgent;
     }
 
-    private boolean isWaitRequired(int requestType) {
-        return (requestType != MediaConstants.REQUEST_OPEN_SESSION
-                && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS
-                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
-    }
-
     /** Audio session message Handler */
     @SuppressWarnings({"unchecked", "WaitNotInLoop"})
     class AudioMessageHandler extends Handler {
@@ -223,10 +216,16 @@ public class AudioSessionHandler extends MediaState {
         public void handleMessage(Message msg) {
             ImsLog.d("messageType = " + msg.what);
 
+            if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
+                ImsLog.w("Session=" + getAudioSessionId() + " is closing, discard request: "
+                        + msg.what);
+                return;
+            }
+
             // Till open session response is received, handling other commands has to wait
             try {
                 synchronized (mLock) {
-                    if (mAudioSession == null && isWaitRequired(msg.what)) {
+                    if (mAudioSession == null && MediaSessionUtils.isWaitRequired(msg.what)) {
                         ImsLog.d(Thread.currentThread().getName()
                                 + " is waiting for Audio openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
