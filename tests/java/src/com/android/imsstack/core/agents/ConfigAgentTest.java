@@ -16,16 +16,25 @@
 package com.android.imsstack.core.agents;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_2;
+import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_CONFIG_IMPI;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -33,9 +42,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
@@ -46,15 +60,20 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.R;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.SystemInterface;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -64,6 +83,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -73,14 +93,40 @@ public class ConfigAgentTest {
     private static final String CACHED_CONFIG_FILE =
             "carrier_config_slot0_" + TEST_ICCID + "_" + TEST_CARRIER_ID + ".xml";
 
+    private static final String KEY_TEST_BOOL = "ims.test_bool";
+    private static final String KEY_TEST_INT = "ims.test_int";
+    private static final String KEY_TEST_LONG = "ims.test_long";
+    private static final String KEY_TEST_DOUBLE = "ims.test_double";
+    private static final String KEY_TEST_STRING = "ims.test_string";
+    private static final String KEY_TEST_INT_ARRAY = "ims.test_int_array";
+    private static final String KEY_TEST_LONG_ARRAY = "ims.test_long_array";
+    private static final String KEY_TEST_DOUBLE_ARRAY = "ims.test_double_array";
+    private static final String KEY_TEST_STRING_ARRAY = "ims.test_string_array";
+    private static final String KEY_TEST_FLOAT = "ims.test_float";
+
+    private static final boolean VALUE_TEST_BOOL = true;
+    private static final int VALUE_TEST_INT = 10;
+    private static final long VALUE_TEST_LONG = 100L;
+    private static final double VALUE_TEST_DOUBLE = 1000.0;
+    private static final String VALUE_TEST_STRING = "test";
+    private static final int[] VALUE_TEST_INT_ARRAY = new int[] { 10, 20 };
+    private static final long[] VALUE_TEST_LONG_ARRAY = new long[] { 100L, 200L };
+    private static final double[] VALUE_TEST_DOUBLE_ARRAY = new double[] { 1000.0, 2000.0 };
+    private static final String[] VALUE_TEST_STRING_ARRAY = new String[] { "test", "config test" };
+    private static final float VALUE_TEST_FLOAT = 3.14f;
+    private static final String VALUE_CONFIG_IMPI = "impi";
+
     @Mock private FileInputStream mFileIs;
     @Mock private FileOutputStream mFileOs;
     @Mock private ConfigInterface.Listener mListener;
+    @Mock private SystemInterface mSystemInterface;
+    @Mock private ISystem mSystem;
 
     private Context mContext;
     private XmlResourceParser mCarrierConfigOverrideParser;
     private TestableLooper mTestableLooper;
     private TestAppContext mTestAppContext;
+    private SubscriptionManagerProxy mSubscriptionManagerProxy;
     private ConfigAgent mConfigAgent;
 
     @Before
@@ -91,6 +137,8 @@ public class ConfigAgentTest {
         mTestAppContext = new TestAppContext(new ContextFixture().getTestDouble());
         mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
         mContext = mTestAppContext.getContext();
+        mSubscriptionManagerProxy =
+                mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
 
         mCarrierConfigOverrideParser = InstrumentationRegistry.getInstrumentation().getContext()
                 .getResources().getXml(R.xml.carrier_config_override);
@@ -101,6 +149,9 @@ public class ConfigAgentTest {
         doReturn(true).when(mContext).deleteFile(any());
         doReturn(new String[] { CACHED_CONFIG_FILE }).when(mContext).fileList();
         when(mContext.getAssets().list(any())).thenReturn(new String[0]);
+        SystemInterface.setSystemInterface(mSystemInterface);
+        when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
+        when(mSubscriptionManagerProxy.getDefaultVoiceSubscriptionId()).thenReturn(SUB_ID_1);
 
         mConfigAgent = new ConfigAgent(SLOT0);
     }
@@ -118,9 +169,6 @@ public class ConfigAgentTest {
         mTestAppContext = null;
         mTestableLooper = null;
         mContext = null;
-        mListener = null;
-        mFileOs = null;
-        mFileIs = null;
     }
 
     @Test
@@ -408,10 +456,260 @@ public class ConfigAgentTest {
         verify(mContext, never()).openFileInput(eq(CACHED_CONFIG_FILE));
     }
 
+    @Test
+    @SmallTest
+    public void testConfigCommandWhenCarrierConfigNotLoadedOrUserBuild() {
+        mConfigAgent.init(mContext);
+
+        BroadcastReceiver br = getBroadcastReceiver();
+
+        Intent intent = mock(Intent.class);
+        br.onReceive(mContext, intent);
+
+        verify(intent, never()).getAction();
+    }
+
+    @Test
+    @SmallTest
+    public void testConfigCommandWhenSlotNotMatched() {
+        BroadcastReceiver br = setUpConfigCommand();
+        BroadcastReceiver spyBr = spy(br);
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_GET_CONFIG);
+
+        // When the slot is different.
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT1);
+
+        br.onReceive(mContext, intent);
+
+        verify(spyBr, never()).setResultCode(anyInt());
+
+        // When the default voice subscription id is set to different slot.
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(mSubscriptionManagerProxy.getDefaultVoiceSubscriptionId()).thenReturn(SUB_ID_2);
+
+        br.onReceive(mContext, intent);
+
+        verify(spyBr, never()).setResultCode(anyInt());
+    }
+
+    @Test
+    @SmallTest
+    public void testConfigCommandWhenNoSim() {
+        BroadcastReceiver br = setUpConfigCommand();
+
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_GET_CONFIG);
+        when(mSubscriptionManagerProxy.getSubscriptionId(eq(SLOT0)))
+                .thenReturn(MSimUtils.INVALID_SUB_ID);
+
+        br.onReceive(mContext, intent);
+
+        // Default slot id is used.
+        assertEquals(ConfigAgent.RESULT_OK, br.getResultCode());
+    }
+
+    @Test
+    @SmallTest
+    public void testConfigCommandSetConfig() {
+        BroadcastReceiver receiver = setUpConfigCommand();
+
+        testSetConfig(receiver);
+    }
+
+    @Test
+    @SmallTest
+    public void testConfigCommandGetConfig() {
+        BroadcastReceiver receiver = setUpConfigCommand();
+
+        testSetConfig(receiver);
+
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_GET_CONFIG);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getBooleanExtra(eq(ConfigAgent.KEY_COMMITTABLE), anyBoolean()))
+                .thenReturn(false);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        // "config_keys" is not specified.
+        assertNull(receiver.getResultData());
+
+        SharedPreferences sharedPref = mock(SharedPreferences.class);
+        doReturn(sharedPref).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(VALUE_CONFIG_IMPI).when(sharedPref).getString(eq(KEY_CONFIG_IMPI), anyString());
+        when(intent.getStringArrayExtra(eq(ConfigAgent.KEY_CONFIG_KEYS)))
+                .thenReturn(
+                        new String[] {
+                            KEY_TEST_BOOL,
+                            KEY_TEST_INT,
+                            KEY_TEST_LONG,
+                            KEY_TEST_DOUBLE,
+                            KEY_TEST_STRING,
+                            KEY_TEST_INT_ARRAY,
+                            KEY_TEST_LONG_ARRAY,
+                            KEY_TEST_DOUBLE_ARRAY,
+                            KEY_TEST_STRING_ARRAY,
+                            KEY_CONFIG_IMPI
+                        });
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+
+        String resultData = receiver.getResultData();
+        assertNotNull(resultData);
+        assertTrue(resultData.contains(KEY_TEST_BOOL));
+        assertTrue(resultData.contains(KEY_TEST_INT));
+        assertTrue(resultData.contains(KEY_TEST_LONG));
+        assertTrue(resultData.contains(KEY_TEST_DOUBLE));
+        assertTrue(resultData.contains(KEY_TEST_STRING));
+        assertTrue(resultData.contains(KEY_TEST_INT_ARRAY));
+        assertTrue(resultData.contains(KEY_TEST_LONG_ARRAY));
+        assertTrue(resultData.contains(KEY_TEST_DOUBLE_ARRAY));
+        assertTrue(resultData.contains(KEY_TEST_STRING_ARRAY));
+        assertTrue(resultData.contains(KEY_CONFIG_IMPI));
+    }
+
+    @Test
+    @SmallTest
+    public void testConfigCommandClearConfig() {
+        BroadcastReceiver receiver = setUpConfigCommand();
+
+        testSetConfig(receiver);
+
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_CLEAR_CONFIG);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getBooleanExtra(eq(ConfigAgent.KEY_COMMITTABLE), anyBoolean()))
+                .thenReturn(true);
+
+        // Clear the specified configs.
+        when(intent.getStringArrayExtra(eq(ConfigAgent.KEY_CONFIG_KEYS)))
+                .thenReturn(
+                        new String[] {
+                            KEY_TEST_BOOL,
+                            KEY_TEST_INT,
+                        });
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_COMMITTABLE_OK, receiver.getResultCode());
+
+        PersistableBundle config = mConfigAgent.getCarrierConfig().getConfig();
+        assertFalse(config.containsKey(KEY_TEST_BOOL));
+        assertFalse(config.containsKey(KEY_TEST_INT));
+        assertTrue(config.containsKey(KEY_TEST_LONG));
+        assertTrue(config.containsKey(KEY_TEST_DOUBLE));
+        assertTrue(config.containsKey(KEY_TEST_STRING));
+        assertTrue(config.containsKey(KEY_TEST_INT_ARRAY));
+        assertTrue(config.containsKey(KEY_TEST_LONG_ARRAY));
+        assertTrue(config.containsKey(KEY_TEST_DOUBLE_ARRAY));
+        assertTrue(config.containsKey(KEY_TEST_STRING_ARRAY));
+
+        // Clear all configs.
+        when(intent.getStringArrayExtra(eq(ConfigAgent.KEY_CONFIG_KEYS)))
+                .thenReturn(null);
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_COMMITTABLE_OK, receiver.getResultCode());
+
+        config = mConfigAgent.getCarrierConfig().getConfig();
+        assertFalse(config.containsKey(KEY_TEST_BOOL));
+        assertFalse(config.containsKey(KEY_TEST_INT));
+        assertFalse(config.containsKey(KEY_TEST_LONG));
+        assertFalse(config.containsKey(KEY_TEST_DOUBLE));
+        assertFalse(config.containsKey(KEY_TEST_STRING));
+        assertFalse(config.containsKey(KEY_TEST_INT_ARRAY));
+        assertFalse(config.containsKey(KEY_TEST_LONG_ARRAY));
+        assertFalse(config.containsKey(KEY_TEST_DOUBLE_ARRAY));
+        assertFalse(config.containsKey(KEY_TEST_STRING_ARRAY));
+    }
+
     private void setUpCarrierConfig(PersistableBundle config) {
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
         doReturn(config).when(ccmp).getConfigForSubId(anyInt(), any());
+    }
+
+    private BroadcastReceiver setUpConfigCommand() {
+        mConfigAgent.init(mContext);
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(TEST_CARRIER_ID)
+                .setSpecificCarrierId(TEST_CARRIER_ID)
+                .setIccId(TEST_ICCID)
+                .setSimState(SimCarrierId.SIM_LOADED)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+        return getBroadcastReceiver();
+    }
+
+    private BroadcastReceiver getBroadcastReceiver() {
+        ArgumentCaptor<BroadcastReceiver> receiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mTestAppContext.getBroadcastReceiverProxy())
+                .registerReceiver(receiverCaptor.capture(), any(IntentFilter.class));
+        BroadcastReceiver br = receiverCaptor.getValue();
+        br.setPendingResult(new BroadcastReceiver.PendingResult(
+                /* resultCode */ 0,
+                /* resultData*/ null,
+                /* resultExtras */ null,
+                /* type */ 0,
+                /* ordered */ true,
+                /* sticky */ false,
+                /* token */ null,
+                /* userId */ 0,
+                /* flags */ 0));
+        return br;
+    }
+
+    private void testSetConfig(BroadcastReceiver receiver) {
+        Bundle extras = new Bundle();
+        extras.putBoolean(KEY_TEST_BOOL, VALUE_TEST_BOOL);
+        extras.putInt(KEY_TEST_INT, VALUE_TEST_INT);
+        extras.putLong(KEY_TEST_LONG, VALUE_TEST_LONG);
+        extras.putDouble(KEY_TEST_DOUBLE, VALUE_TEST_DOUBLE);
+        extras.putString(KEY_TEST_STRING, VALUE_TEST_STRING);
+        extras.putIntArray(KEY_TEST_INT_ARRAY, VALUE_TEST_INT_ARRAY);
+        extras.putLongArray(KEY_TEST_LONG_ARRAY, VALUE_TEST_LONG_ARRAY);
+        extras.putDoubleArray(KEY_TEST_DOUBLE_ARRAY, VALUE_TEST_DOUBLE_ARRAY);
+        extras.putStringArray(KEY_TEST_STRING_ARRAY, VALUE_TEST_STRING_ARRAY);
+        extras.putFloat(KEY_TEST_FLOAT, VALUE_TEST_FLOAT);
+        extras.putString(KEY_CONFIG_IMPI, VALUE_CONFIG_IMPI);
+
+        SharedPreferences sharedPref = mock(SharedPreferences.class);
+        SharedPreferences.Editor spEditor = mock(SharedPreferences.Editor.class);
+        doReturn(sharedPref).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(spEditor).when(sharedPref).edit();
+
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_SET_CONFIG);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getBooleanExtra(eq(ConfigAgent.KEY_COMMITTABLE), anyBoolean()))
+                .thenReturn(true);
+        when(intent.getExtras()).thenReturn(extras);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_COMMITTABLE_OK, receiver.getResultCode());
+        assertNotNull(receiver.getResultData());
+        // unknown key: ims.test_float
+        assertTrue(receiver.getResultData().contains(KEY_TEST_FLOAT));
+        verify(spEditor).putString(eq(KEY_CONFIG_IMPI), eq(VALUE_CONFIG_IMPI));
+
+        PersistableBundle config = mConfigAgent.getCarrierConfig().getConfig();
+        assertEquals(VALUE_TEST_BOOL, config.getBoolean(KEY_TEST_BOOL));
+        assertEquals(VALUE_TEST_INT, config.getInt(KEY_TEST_INT));
+        assertEquals(VALUE_TEST_LONG, config.getLong(KEY_TEST_LONG));
+        assertEquals(0, Double.compare(VALUE_TEST_DOUBLE, config.getDouble(KEY_TEST_DOUBLE)));
+        assertEquals(VALUE_TEST_STRING, config.getString(KEY_TEST_STRING));
+        assertTrue(Arrays.equals(VALUE_TEST_INT_ARRAY, config.getIntArray(KEY_TEST_INT_ARRAY)));
+        assertTrue(Arrays.equals(VALUE_TEST_LONG_ARRAY, config.getLongArray(KEY_TEST_LONG_ARRAY)));
+        assertTrue(Arrays.equals(
+                VALUE_TEST_DOUBLE_ARRAY, config.getDoubleArray(KEY_TEST_DOUBLE_ARRAY)));
+        assertTrue(Arrays.equals(
+                VALUE_TEST_STRING_ARRAY, config.getStringArray(KEY_TEST_STRING_ARRAY)));
     }
 
     private void processAllMessages() {
