@@ -106,7 +106,6 @@ TEST_F(DialogSubscriptionTest, SubscribeInvokesSubscribeEvenIfIMessageIsNull)
             .WillByDefault(Return(&objISubscription));
     EXPECT_CALL(objISubscription, SetListener(&objSubscription));
     EXPECT_CALL(objISubscription, Subscribe);
-    MockIMessage objMessage;
     ON_CALL(objISubscription, GetNextRequest).WillByDefault(Return(nullptr));
     objSubscription.Subscribe();
 }

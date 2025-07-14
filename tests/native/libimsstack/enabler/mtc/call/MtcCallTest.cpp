@@ -1101,7 +1101,6 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfISessionReturnsNull)
 {
     const SipMethod eAnyMethod = SipMethod::INVITE;
 
-    MockISipClientConnection objClientConnection;
     MockISession objSession;
     EXPECT_CALL(objSession, CreateTransaction(IsEqualSipMethod(eAnyMethod)))
             .Times(1)

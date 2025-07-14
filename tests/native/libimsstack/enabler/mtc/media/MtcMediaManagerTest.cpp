@@ -1019,6 +1019,7 @@ TEST_F(MtcMediaManagerTest, GetNegotiatedDirectionReturnsValueFromMediaSession)
             MEDIA_DIRECTION_RECEIVE, MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND_RECEIVE};
     //clang-format on
 
+    // cppcheck-suppress knownEmptyContainer
     for (MEDIA_DIRECTION eDirection : objDirections)
     {
         EXPECT_CALL(objMediaSession, GetNegotiatedDirection(NEGO_ID, eContentType))
