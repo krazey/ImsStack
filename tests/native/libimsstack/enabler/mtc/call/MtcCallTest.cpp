@@ -1145,9 +1145,8 @@ TEST_F(MtcCallTest, RemoveSessionRemovesMatchingSession)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    const IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
+    objCall.CreateSession(&objSession1);
     IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
-
     objCall.RemoveSession(*piMtcSession2);
 
     EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
@@ -1160,9 +1159,8 @@ TEST_F(MtcCallTest, RemoveAllSessionsRemovesAllSessions)
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    const IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
-    const IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
-
+    objCall.CreateSession(&objSession1);
+    objCall.CreateSession(&objSession2);
     objCall.RemoveAllSessions();
 
     EXPECT_EQ(nullptr, objCall.GetSession(&objSession1));

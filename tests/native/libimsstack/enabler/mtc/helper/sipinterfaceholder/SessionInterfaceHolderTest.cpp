@@ -235,8 +235,7 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithSessionStartFailedDestroysSe
     {
         EXPECT_CALL(objMockISession, Destroy()).Times(1);
 
-        const ISession* piSession =
-                pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
+        pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
 
         ON_CALL(objMockISession, GetState).WillByDefault(Return(state));
         pHolder->ReleaseISession(&objMockISession, IMS_FALSE, IMS_TRUE);
@@ -251,8 +250,7 @@ TEST_F(SessionInterfaceHolderTest,
     MockICoreService objMockICoreService;
     ON_CALL(objMockICoreService, CreateSession(_, _)).WillByDefault(Return(&objMockISession));
 
-    const ISession* piSession =
-            pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
+    pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
 
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     ON_CALL(objMockISession, GetState).WillByDefault(Return(ISession::STATE_TERMINATING));

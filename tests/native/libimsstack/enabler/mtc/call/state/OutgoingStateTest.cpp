@@ -1379,8 +1379,6 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendProgressing)
     ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, IsLocalTone).WillByDefault(Return(IMS_TRUE));
-    MediaInfo objMediaInfo;
-    objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendProgressing());
 

@@ -738,7 +738,6 @@ TEST_F(MtcServiceTest, ProcessTestCommandChangesRatType)
     EXPECT_CALL(*pNetworkWatcher, UpdateMobileRat(eRatTypeNr)).Times(1);
     pNormalMtcService->ProcessTestCommand(2 /* TestCommand::RAT_CHANGED */, eRatTypeNr, 0);
 
-    const IMS_UINT32 nReason = ImsAosReason::NONE;
     EXPECT_CALL(*pNetworkWatcher, UpdateMobileRat(eRatTypeLte)).Times(1);
     pNormalMtcService->ProcessTestCommand(2 /* TestCommand::RAT_CHANGED */, eRatTypeLte, 0);
 

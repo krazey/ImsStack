@@ -1001,7 +1001,7 @@ TEST_F(ConferenceControllerTest,
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 
     MockIConferenceSubscriptionListener objSubsListener;
-    const MockConferenceSubscription* pSubscription = CreateSubscription(objSubsListener);
+    CreateSubscription(objSubsListener);
     // Sets GetFocusAddress() not to have exception.
     ON_CALL(objMockCallContext, GetSession()).WillByDefault(ReturnNull());
 
