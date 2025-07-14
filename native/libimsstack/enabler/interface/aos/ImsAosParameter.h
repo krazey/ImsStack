@@ -21,7 +21,10 @@
 /**
  * @brief This class provides the type for IImsAos#Control()
  *
- * The API using this class is below. \n
+ * Warning: The order of these enum values must not be changed.
+ *          Some modules rely on the hardcoded integer values of these enums.
+ *
+ * The API using this class is below.
  *     - IImsAos#Control(IN IMS_UINT32 nType)
  */
 class ImsAosControl
@@ -47,8 +50,6 @@ public:
 
         /// The emergency registration is skipped and next PCSCF is used.
         E_REGISTER_FAKE_WITH_NEXT_PCSCF,
-        /// The emergency registration is skipped and current PCSCF is used.
-        E_REGISTER_FAKE_WITH_SAME_PCSCF,
 
         /// The initial registration is attempted with next PCSCF.
         PCSCF_NEXT,
@@ -78,7 +79,10 @@ public:
         TRIGGER_FULL_NETWORK_REGISTRATION,
 
         /// Current plmn is blocked with timeout
-        PLMN_BLOCK_WITH_TIMEOUT
+        PLMN_BLOCK_WITH_TIMEOUT,
+
+        /// The emergency registration is skipped and current PCSCF is used.
+        E_REGISTER_FAKE_WITH_SAME_PCSCF
     };
 };
 
