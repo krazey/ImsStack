@@ -38,6 +38,7 @@ class CallTypeBlockRuleTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
     ImsList<IMtcCall*> lstCalls;

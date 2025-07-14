@@ -26,6 +26,7 @@ namespace android
 class MtcContextRepositoryTest : public ::testing::Test
 {
 public:
+    // cppcheck-suppress unusedStructMember
     MockIMtcContext objContext;
 
 protected:

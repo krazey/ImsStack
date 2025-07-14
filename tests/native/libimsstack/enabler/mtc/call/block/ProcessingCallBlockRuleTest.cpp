@@ -36,6 +36,7 @@ public:
     CallInfo objCallInfo;
     CallInfo objEmergencyCallInfo;
 
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     ImsList<IMtcCall*> lstOtherCalls;
     ProcessingCallBlockRule* pBlockRule;

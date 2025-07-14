@@ -33,6 +33,7 @@ public:
     MockIMtcService objService;
     MockIMtcCallContext objContext;
     MockIMtcAosConnector objAosConnector;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
 

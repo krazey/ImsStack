@@ -50,6 +50,7 @@ public:
     ConferenceOperationQueue* pOperationQueue;
     TestTimerService* pTimerService;
     MockITimer& objTimer;
+    // cppcheck-suppress unusedStructMember
     MockIConferenceOperationQueueListener objListener;
 
 protected:

@@ -40,7 +40,9 @@ class SessionInterfaceHolderTest : public ::testing::Test
 {
 public:
     SessionInterfaceHolder* pHolder;
+    // cppcheck-suppress unusedStructMember
     MockIInterfaceHolderListener objListener;
+    // cppcheck-suppress unusedStructMember
     MockISession objMockISession;
     TestTimerService objTimerService;
     MockITimer objMockITimer;

@@ -33,6 +33,7 @@ class LocationBlockRuleTest : public ::testing::Test
 public:
     MockIMtcCallContext objContext;
     CallInfo objCallInfo;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     MockMtcConfigurationProxy objConfigurationProxy;
     MockILocationInfo objLocationInfo;

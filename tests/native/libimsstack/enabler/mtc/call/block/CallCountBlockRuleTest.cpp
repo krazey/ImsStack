@@ -34,6 +34,7 @@ class CallCountBlockRuleTest : public ::testing::Test
 public:
     MockIMtcCallContext objContext;
     MockIMtcCallManager objCallManager;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
     MockMtcConfigurationProxy* pConfigurationProxy;

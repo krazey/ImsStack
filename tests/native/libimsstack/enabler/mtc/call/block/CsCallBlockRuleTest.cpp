@@ -33,6 +33,7 @@ class CsCallBlockRuleTest : public ::testing::Test
 public:
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallContext objContext;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
 

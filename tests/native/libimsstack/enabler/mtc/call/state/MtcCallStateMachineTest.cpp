@@ -43,6 +43,7 @@ public:
 class MtcCallStateMachineTest : public ::testing::Test
 {
 public:
+    // cppcheck-suppress unusedStructMember
     MockIMtcCallContext objContext;
     std::unique_ptr<IMtcCallStateFactory> pStateFactory;
 

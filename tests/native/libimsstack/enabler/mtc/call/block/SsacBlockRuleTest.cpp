@@ -41,6 +41,7 @@ public:
     TestImsRadioService objImsRadioService;
     TestSystemTimeService objSystemTimeService;
     MockIMtcService objService;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objBlockRuleCheckListener;
     SsacInfo objSsacInfo;
     MockISsacTimerHandler objSsacTimerHandler;

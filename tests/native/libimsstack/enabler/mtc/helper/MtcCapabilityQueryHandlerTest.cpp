@@ -55,9 +55,13 @@ class MtcCapabilityQueryHandlerTest : public ::testing::Test
 public:
     MockIMtcContext objMockContext;
     MockMtcConfigurationProxy* pConfigurationProxy;
+    // cppcheck-suppress unusedStructMember
     MockICoreService objMockCoreService;
+    // cppcheck-suppress unusedStructMember
     MockIMessage objMockMessage;
+    // cppcheck-suppress unusedStructMember
     MockICapabilities objMockCapabilities;
+    // cppcheck-suppress unusedStructMember
     MockIMessageBodyPart objMockIMessageBodyPart;
     MockICoreServiceConfig objMockICoreServiceConfig;
     MockIMediaConfig objMockIMediaConfig;

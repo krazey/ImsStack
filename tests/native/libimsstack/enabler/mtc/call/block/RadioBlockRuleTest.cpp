@@ -43,6 +43,7 @@ public:
     MockIMtcRadioChecker objMockIMtcRadioChecker;
     CallInfo objCallInfo;
     MockIMtcService objMtcService;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener BlockRuleCheckListener;
 
     RadioBlockRule* pRadioBlockRule;

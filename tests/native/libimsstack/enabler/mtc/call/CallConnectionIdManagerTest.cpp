@@ -42,6 +42,7 @@ public:
 
     MockIMtcContext objContext;
     MockICallStateProxy objCallStateProxy;
+    // cppcheck-suppress unusedStructMember
     MockIConferenceController objConferenceController;
 
 protected:

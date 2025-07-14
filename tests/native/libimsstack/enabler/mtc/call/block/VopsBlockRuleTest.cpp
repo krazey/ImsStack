@@ -34,6 +34,7 @@ public:
     MockIMtcService objService;
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallContext objContext;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     VopsBlockRule* pBlockRule;
 

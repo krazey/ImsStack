@@ -51,6 +51,7 @@ public:
     MockIMtcContext objContext;
     MockIMtcImsEventReceiver objEventReceiver;
     MockIMtcMediaManager objMediaManager;
+    // cppcheck-suppress unusedStructMember
     MockIMtcSession objMtcCallSession;
     MockIPassiveTimerHolder objPassiveTimer;
     MockMtcConfigurationProxy objConfigurationProxy;
