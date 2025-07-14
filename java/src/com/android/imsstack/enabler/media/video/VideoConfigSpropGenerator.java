@@ -22,7 +22,6 @@ import android.telephony.CarrierConfigManager.ImsVt;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.VideoConfig;
 
-import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -169,7 +168,7 @@ public class VideoConfigSpropGenerator {
                             ImsLog.i(mSlotId, "Updated CarrierConfig with sprop values");
 
                             // 4. Notify carrier config change
-                            ServiceLoader.notifyCarrierConfigChanged(mSlotId);
+                            configInterface.notifyCarrierConfigChangedForNative();
 
                             mImsMediaManager.release();
                             mImsMediaManager = null;

@@ -51,7 +51,6 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsProxy;
-import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 
 import org.junit.After;
@@ -68,7 +67,6 @@ public class ServiceLoaderTest {
     @Mock private SharedPreferences mSp;
     @Mock private SettingsProxy mSettingsProxy;
     @Mock private JniIms mJniIms;
-    @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
 
     private XmlResourceParser mCarrierConfigOverrideParser;
@@ -109,7 +107,6 @@ public class ServiceLoaderTest {
 
         JniImsProxy.setJniIms(mJniIms);
         ImsStackRegistry.setImsServiceState(SLOT0, false);
-        when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         SystemInterface.setSystemInterface(mSystemInterface);
 
         mServiceLoader = new ServiceLoader();
@@ -186,13 +183,11 @@ public class ServiceLoaderTest {
         ServiceLoader.updateCarrierConfig(SLOT0);
 
         verify(configAgent).updateCarrierConfig(eq(SUB_ID_1), any(SimCarrierId.class));
-        verify(mSystem).notifyConfigurationChanged(anyInt());
 
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         ServiceLoader.updateCarrierConfig(SLOT0);
 
         verifyNoMoreInteractions(configAgent);
-        verifyNoMoreInteractions(mSystem);
     }
 
     private void setUpSharedPreferences(Context context) {
