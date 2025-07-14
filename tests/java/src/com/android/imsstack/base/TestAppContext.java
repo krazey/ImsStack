@@ -163,6 +163,8 @@ public class TestAppContext {
             when(mSubscriptionManagerProxy.getSlotIndex(SUB_ID_2)).thenReturn(SLOT1);
             when(mSubscriptionManagerProxy.getSubscriptionId(SLOT0)).thenReturn(SUB_ID_1);
             when(mSubscriptionManagerProxy.getSubscriptionId(SLOT1)).thenReturn(SUB_ID_2);
+            when(mSubscriptionManagerProxy.getDefaultVoiceSubscriptionId())
+                    .thenReturn(MSimUtils.DEFAULT_SUB_ID);
             when(mSubscriptionManagerProxy.getDefaultDataSubscriptionId())
                     .thenReturn(MSimUtils.DEFAULT_SUB_ID);
             when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any()))

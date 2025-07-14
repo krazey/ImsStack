@@ -167,6 +167,11 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         }
 
         @Override
+        public int getDefaultVoiceSubscriptionId() {
+            return SubscriptionManager.getDefaultVoiceSubscriptionId();
+        }
+
+        @Override
         public int getDefaultDataSubscriptionId() {
             return SubscriptionManager.getDefaultDataSubscriptionId();
         }

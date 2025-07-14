@@ -159,6 +159,15 @@ public interface SystemServiceProxy {
         boolean isValidSubscriptionId(int subId);
 
         /**
+         * Returns the system's default voice subscription id.
+         *
+         * On a data only device or on error, will return INVALID_SUBSCRIPTION_ID.
+         *
+         * @return the default voice subscription Id.
+         */
+        int getDefaultVoiceSubscriptionId();
+
+        /**
          * Returns the system's default data subscription id.
          *
          * On a voice only device or on error, will return INVALID_SUBSCRIPTION_ID.

@@ -267,6 +267,9 @@ public class SystemServiceProxyImplTest {
                         .startMocking();
 
         try {
+            smp.getDefaultVoiceSubscriptionId();
+            ExtendedMockito.verify(() -> SubscriptionManager.getDefaultVoiceSubscriptionId());
+
             smp.getDefaultDataSubscriptionId();
             ExtendedMockito.verify(() -> SubscriptionManager.getDefaultDataSubscriptionId());
 
