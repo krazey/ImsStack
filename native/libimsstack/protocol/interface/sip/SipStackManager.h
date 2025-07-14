@@ -18,13 +18,13 @@
 
 #include "SipDatatypes.h"
 
-class SipMessage;
-class SipTxnKey;
 class ISipNetworkUtil;
-class ISipTxnListener;
+class ISipTransactionCallback;
 class ISipUserData;
+class SipMessage;
 class SipTransportInfo;
 class SipTransportParameter;
+class SipTxnKey;
 
 class SipStackManager
 {
@@ -44,7 +44,7 @@ public:
     SIP_BOOL OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey* pTxnKey, SIP_UINT16* pnError);
     SIP_BOOL TerminateTxn(SipTxnKey* pTxnKey);
     SIP_VOID RegisterNetwork(ISipNetworkUtil* pNetworkUtil);
-    SIP_VOID RegisterTransactionListener(ISipTxnListener* pTxnListener);
+    SIP_VOID RegisterTransactionCallback(IN ISipTransactionCallback* pCallback);
 
 private:
     PRIVATE SIP_BOOL SendToNetwork(IN SipTransportInfo* pTranspInfo, IN ISipUserData* pUserData);

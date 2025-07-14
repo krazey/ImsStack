@@ -16,15 +16,18 @@
 #include <gtest/gtest.h>
 
 #include "ISipNetworkUtil.h"
-#include "ISipTimerUtil.h"
-#include "ISipTxnListener.h"
-#include "SipStackCallback.h"
 #include "SipStackError.h"
 #include "SipStackManager.h"
 #include "SipTxnContext.h"
 #include "SipUtil.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
+#include "txn/include/MockISipTransactionCallback.h"
+
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
 
 SipTxn* pTxn = SIP_NULL;
 
@@ -42,84 +45,88 @@ public:
     }
 };
 
-class SipTestTxnListener : public ISipTxnListener
-{
-public:
-    SipTestTxnListener() {}
-    virtual ~SipTestTxnListener() {}
-
-    SIP_BOOL TxnTimeout(ISipUserData*, IMS_SINT32) override { return SIP_TRUE; }
-
-    SIP_BOOL TxnTerminated(ISipUserData*) override { return SIP_TRUE; }
-};
-
 SIP_BOOL SipTestNetworkUtil::bSendStatus = SIP_TRUE;
 
 namespace android
 {
-SIP_BOOL FetchTransactionStub(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTxn)
-{
-    if (pTxn == SIP_NULL)
-    {
-        if (*ppvTxn != SIP_NULL)
-        {
-            pTxn = static_cast<SipTxn*>(*ppvTxn);
-            return SIP_TRUE;
-        }
-        return SIP_FALSE;
-    }
-
-    SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
-
-    if (SipPf_Strcmp(pTxnKey->GetMethod(), "ACK") == 0)
-    {
-        return SIP_FALSE;
-    }
-
-    *ppvTxn = static_cast<SIP_VOID*>(pTxn);
-
-    return SIP_TRUE;
-}
-
-SIP_BOOL StartTimerStub(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**)
-{
-    return SIP_TRUE;
-}
-
-SIP_BOOL ReleaseTransactionStub(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTxn)
-{
-    *ppvTxn = static_cast<SIP_VOID*>(pTxn);
-    pTxn = SIP_NULL;
-    return SIP_TRUE;
-}
-
-SIP_VOID* CreateAckRequestStub(SIP_VOID*, ISipUserData*)
-{
-    return SIP_NULL;
-}
-
-SIP_VOID PreprocessMessageStub(SIP_VOID*, ISipUserData*) {}
-
-SIP_VOID PostprocessMessageStub(IN SIP_VOID*, IN SIP_CHAR*, IN SIP_UINT32, IN ISipUserData*) {}
-
-SIP_VOID DisplayTxnKeyStub(IN SIP_VOID*) {}
-
-SIP_BOOL StopTimerStub(IN SIP_VOID*, OUT SIP_VOID**)
-{
-    return SIP_TRUE;
-}
-
-SIP_VOID OnTimerExpiredStub(IN ISipUserData*, IN SIP_INT32) {}
 
 class SipStackManagerTest : public ::testing::Test
 {
 public:
     SipTxnKey* pTxnKey;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
+    static constexpr SIP_INT32 TIMER_ID = 1;
 
 protected:
-    virtual void SetUp() override { pTxnKey = SIP_NULL; }
+    virtual void SetUp() override
+    {
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
 
-    virtual void TearDown() override {}
+        ON_CALL(*pMockISipTransactionCallback, StartTimer(_, _, _))
+                .WillByDefault(Return(static_cast<void*>(const_cast<SIP_INT32*>(&TIMER_ID))));
+
+        ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+                .WillByDefault(Invoke(
+                        [](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                        {
+                            if (pTxn == SIP_NULL)
+                            {
+                                if (pOutTxn != SIP_NULL)
+                                {
+                                    pTxn = pOutTxn;
+                                    return SIP_TRUE;
+                                }
+                                return SIP_FALSE;
+                            }
+
+                            if (SipPf_Strcmp(pTxnKey->GetMethod(), "ACK") == 0)
+                            {
+                                return SIP_FALSE;
+                            }
+
+                            pOutTxn = pTxn;
+                            return SIP_TRUE;
+                        }));
+
+        ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+                .WillByDefault(Invoke(
+                        [](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                        {
+                            if (pTxn == SIP_NULL)
+                            {
+                                if (pOutTxn != SIP_NULL)
+                                {
+                                    pTxn = pOutTxn;
+                                    return SIP_TRUE;
+                                }
+                                return SIP_FALSE;
+                            }
+
+                            pOutTxn = pTxn;
+                            return SIP_TRUE;
+                        }));
+
+        ON_CALL(*pMockISipTransactionCallback, ReleaseTransaction(_, _, _, _))
+                .WillByDefault(Invoke(
+                        [](Unused, Unused, Unused, SipTxn*& pOutTxn)
+                        {
+                            pOutTxn = pTxn;
+                            pTxn = SIP_NULL;
+                            return SIP_TRUE;
+                        }));
+
+        pTxn = SIP_NULL;
+        pTxnKey = SIP_NULL;
+    }
+
+    virtual void TearDown() override
+    {
+        if (pMockISipTransactionCallback != SIP_NULL)
+        {
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
+        }
+    }
 };
 
 TEST_F(SipStackManagerTest, SendRecvMessage)
@@ -128,22 +135,7 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     ASSERT_TRUE(pSipStackManager != nullptr);
 
     pSipStackManager->RegisterNetwork(new SipTestNetworkUtil());
-    pSipStackManager->RegisterTransactionListener(new SipTestTxnListener());
-
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTransactionStub,
-            &ReleaseTransactionStub,
-            &StartTimerStub,
-            &StopTimerStub,
-            &OnTimerExpiredStub,
-            &CreateAckRequestStub,
-            &PreprocessMessageStub,
-            &PostprocessMessageStub,
-            &DisplayTxnKeyStub,
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    pSipStackManager->RegisterTransactionCallback(pMockISipTransactionCallback);
 
     SipTransportParameter objTransportParam;
     objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
@@ -651,22 +643,7 @@ TEST_F(SipStackManagerTest, RecvResponseMessage)
     ASSERT_TRUE(pSipStackManager != nullptr);
 
     pSipStackManager->RegisterNetwork(new SipTestNetworkUtil());
-    pSipStackManager->RegisterTransactionListener(new SipTestTxnListener());
-
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTransactionStub,
-            &ReleaseTransactionStub,
-            &StartTimerStub,
-            &StopTimerStub,
-            &OnTimerExpiredStub,
-            &CreateAckRequestStub,
-            &PreprocessMessageStub,
-            &PostprocessMessageStub,
-            &DisplayTxnKeyStub,
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    pSipStackManager->RegisterTransactionCallback(pMockISipTransactionCallback);
 
     SipTransportParameter objTransportParam;
     objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
@@ -890,22 +867,7 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     EXPECT_EQ(SIP_FALSE, pSipStackManager->OnRecvTanspError(0, pTxnKey, &nError));
 
     pSipStackManager->RegisterNetwork(new SipTestNetworkUtil());
-    pSipStackManager->RegisterTransactionListener(new SipTestTxnListener());
-
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTransactionStub,
-            &ReleaseTransactionStub,
-            &StartTimerStub,
-            &StopTimerStub,
-            &OnTimerExpiredStub,
-            &CreateAckRequestStub,
-            &PreprocessMessageStub,
-            &PostprocessMessageStub,
-            &DisplayTxnKeyStub,
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    pSipStackManager->RegisterTransactionCallback(pMockISipTransactionCallback);
 
     SipTransportParameter objTransportParam;
     objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);

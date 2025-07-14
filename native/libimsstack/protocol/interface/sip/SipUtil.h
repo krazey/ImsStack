@@ -18,8 +18,7 @@
 
 #include "ISipLoggerUtil.h"
 #include "ISipNetworkUtil.h"
-#include "ISipTimerUtil.h"
-#include "ISipTxnListener.h"
+#include "ISipTransactionCallback.h"
 
 class SipUtil
 {
@@ -30,23 +29,24 @@ public:
     SipUtil& operator=(IN const SipUtil&) = delete;
 
     SIP_VOID SetNetwork(ISipNetworkUtil* pNetworkUtil);
-    SIP_VOID SetTransactionListener(ISipTxnListener* pTxnListener);
-    inline ISipTimerUtil* GetTimer() const { return m_pTimerUtil; }
+    inline SIP_VOID SetTransactionCallback(ISipTransactionCallback* pCallback)
+    {
+        m_pCallback = pCallback;
+    }
 
     inline ISipLoggerUtil* GetLogger() const { return m_pLoggerUtil; }
 
     inline ISipNetworkUtil* GetNetwork() const { return m_pNetworkUtil; }
 
-    inline ISipTxnListener* GetTransactionListener() const { return m_pTxnListener; }
+    inline ISipTransactionCallback* GetTransactionCallback() const { return m_pCallback; }
 
     static SipUtil* GetInstance();
     static SIP_VOID DestroyInstance();
 
 private:
-    ISipTimerUtil* m_pTimerUtil;
     ISipLoggerUtil* m_pLoggerUtil;
     ISipNetworkUtil* m_pNetworkUtil;
-    ISipTxnListener* m_pTxnListener;
+    ISipTransactionCallback* m_pCallback;
 
     static SipUtil* s_pUtil;
 };

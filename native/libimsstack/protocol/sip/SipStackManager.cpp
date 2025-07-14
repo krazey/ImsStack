@@ -23,11 +23,6 @@
 #include "txn/SipTxn.h"
 #include "txn/SipTxnHandler.h"
 
-extern SIP_VOID Sip_Cbk_PreProcessMessageSentByStack(
-        IN SIP_VOID* pSipMsg, IN ISipUserData* pUserData);
-extern SIP_VOID Sip_Cbk_PostProcessMessageSentByStack(IN SIP_VOID* pSipMsg, IN SIP_CHAR* pBuffer,
-        IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData);
-
 static SipStackManager* gpStackMngr = SIP_NULL;
 
 SipStackManager::SipStackManager() {}
@@ -392,9 +387,14 @@ stack user must process this request and can decide whether to ignore or not
             return SIP_TRUE;
         }
 
-        // Notify SIP message sent by stack to the application for a proper handling
-        Sip_Cbk_PreProcessMessageSentByStack(
-                reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg), objTxnInfo.m_pUserData);
+        ISipTransactionCallback* piCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+        if (piCallback != SIP_NULL)
+        {
+            // Notify SIP message sent by stack to the application for a proper handling
+            piCallback->PreProcessMessageSentByStack(
+                    objTxnInfo.m_pSendSipMsg, objTxnInfo.m_pUserData);
+        }
 
         /* BSP_TODO:
            In case of 100 Trying, Txn Obj may not have user date, better to use user passed data
@@ -409,10 +409,13 @@ stack user must process this request and can decide whether to ignore or not
 
         SipTransportBuffer* pTransBuffer = pTranspInfo->GetTranspSipBuffer();
 
-        Sip_Cbk_PostProcessMessageSentByStack(reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg),
-                (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBuffer() : SIP_NULL,
-                (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBufferLen() : 0,
-                objTxnInfo.m_pUserData);
+        if (piCallback != SIP_NULL)
+        {
+            piCallback->PostProcessMessageSentByStack(objTxnInfo.m_pSendSipMsg,
+                    (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBuffer() : SIP_NULL,
+                    (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBufferLen() : 0,
+                    objTxnInfo.m_pUserData);
+        }
 
         /*Update Txn details for last message send to network */
         /* BSP_TODO: it's overwriting the existing transpInfo... is it correct way to do
@@ -510,9 +513,9 @@ SIP_VOID SipStackManager::RegisterNetwork(ISipNetworkUtil* pNetworkUtil)
     SipUtil::GetInstance()->SetNetwork(pNetworkUtil);
 }
 
-SIP_VOID SipStackManager::RegisterTransactionListener(ISipTxnListener* pTxnListener)
+SIP_VOID SipStackManager::RegisterTransactionCallback(ISipTransactionCallback* pCallback)
 {
-    SipUtil::GetInstance()->SetTransactionListener(pTxnListener);
+    SipUtil::GetInstance()->SetTransactionCallback(pCallback);
 }
 
 PRIVATE SIP_BOOL SipStackManager::SendToNetwork(

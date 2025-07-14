@@ -16,37 +16,24 @@
 #include "SipDatatypes.h"
 #include "SipDefLoggerUtil.h"
 #include "SipDefNetworkUtil.h"
-#include "SipDefTimerUtil.h"
 #include "SipUtil.h"
 #include "msg/SipMsgUtil.h"
 
 SipUtil* SipUtil::s_pUtil = SIP_NULL;
 
 SipUtil::SipUtil() :
-        m_pTxnListener(SIP_NULL)
+        m_pLoggerUtil(new SipDefLoggerUtil()),
+        m_pNetworkUtil(new SipDefNetworkUtil()),
+        m_pCallback(SIP_NULL)
 {
-    /* Create Default In-Build Services */
-    m_pLoggerUtil = new SipDefLoggerUtil();
-    m_pTimerUtil = new SipDefTimerUtil();
-    m_pNetworkUtil = new SipDefNetworkUtil();
     SipMsgUtil::Init();
 }
 
 SipUtil::~SipUtil()
 {
-    if (m_pTxnListener != SIP_NULL)
-    {
-        delete m_pTxnListener;
-    }
-
     if (m_pNetworkUtil != SIP_NULL)
     {
         delete m_pNetworkUtil;
-    }
-
-    if (m_pTimerUtil != SIP_NULL)
-    {
-        delete m_pTimerUtil;
     }
 
     if (m_pLoggerUtil != SIP_NULL)
@@ -63,16 +50,6 @@ SIP_VOID SipUtil::SetNetwork(ISipNetworkUtil* pNetworkUtil)
     }
 
     m_pNetworkUtil = pNetworkUtil;
-}
-
-SIP_VOID SipUtil::SetTransactionListener(ISipTxnListener* pTxnListener)
-{
-    if (m_pTxnListener != SIP_NULL)
-    {
-        delete m_pTxnListener;
-    }
-
-    m_pTxnListener = pTxnListener;
 }
 
 SIP_VOID SipUtil::DestroyInstance()
