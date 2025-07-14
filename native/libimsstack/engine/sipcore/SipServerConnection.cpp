@@ -66,13 +66,6 @@ PUBLIC VIRTUAL void SipServerConnection::Close()
     {
         m_pStState->Abort();
     }
-    else if ((m_nState == STATE_COMPLETED) && m_pMessage != IMS_NULL &&
-            m_pMessage->GetMethod().Equals(SipMethod::INVITE) &&
-            SipStatusCode::IsFinalSuccess(m_pMessage->GetStatusCode()))
-    {
-        // Terminate INVITE server transaction promptly
-        m_pStState->Terminate();
-    }
 
     // Grab the server connection until the response is not completely sent to the network,
     // the transmission failed, or the timer is expired.
