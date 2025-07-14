@@ -28,7 +28,7 @@ class TextSdpGenerator : public MediaSdpGenerator
 {
 public:
     TextSdpGenerator();
-    virtual ~TextSdpGenerator();
+    virtual ~TextSdpGenerator() override;
 
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;

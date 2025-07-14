@@ -81,8 +81,6 @@ void VideoSdpGenerator::GeneratePayload(
         AString strPayloadNum = AString::ConstNull();
         AString strFmtp = AString::ConstNull();
 
-        VIDEO_RESOLUTION eResolution;
-
         VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
@@ -180,7 +178,7 @@ PROTECTED IMS_BOOL VideoSdpGenerator::GenerateFmtp(
 
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
     {
-        VideoProfile::AvcFmtp* pAvcFmtp = (VideoProfile::AvcFmtp*)pPayload->GetFmtp();
+        auto pAvcFmtp = static_cast<VideoProfile::AvcFmtp*>(pPayload->GetFmtp());
 
         if (pAvcFmtp == IMS_NULL)
         {
@@ -192,7 +190,7 @@ PROTECTED IMS_BOOL VideoSdpGenerator::GenerateFmtp(
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
-        VideoProfile::HevcFmtp* pHevcFmtp = (VideoProfile::HevcFmtp*)pPayload->GetFmtp();
+        auto pHevcFmtp = static_cast<VideoProfile::HevcFmtp*>(pPayload->GetFmtp());
 
         if (pHevcFmtp == IMS_NULL)
         {

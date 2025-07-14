@@ -28,7 +28,7 @@ class AudioSdpGenerator : public MediaSdpGenerator
 {
 public:
     AudioSdpGenerator();
-    virtual ~AudioSdpGenerator();
+    virtual ~AudioSdpGenerator() override;
 
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;

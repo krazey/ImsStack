@@ -107,7 +107,7 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
             pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
     {
-        AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pPayload->GetFmtp();
+        auto pAmrFmtp = static_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
         if (pAmrFmtp == IMS_NULL)
         {
             return IMS_FALSE;
@@ -117,8 +117,7 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
     {
-        AudioProfile::TelephoneEventFmtp* pTeFmtp =
-                (AudioProfile::TelephoneEventFmtp*)pPayload->GetFmtp();
+        auto pTeFmtp = static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload->GetFmtp());
         if (pTeFmtp == IMS_NULL)
         {
             return IMS_FALSE;
@@ -128,7 +127,7 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->GetFmtp();
+        auto pEvsFmtp = static_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
         if (pEvsFmtp == IMS_NULL)
         {
             return IMS_FALSE;

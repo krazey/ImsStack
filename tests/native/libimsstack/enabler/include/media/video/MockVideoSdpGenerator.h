@@ -25,7 +25,7 @@ class MockVideoSdpGenerator : public VideoSdpGenerator
 {
 public:
     MockVideoSdpGenerator() {}
-    virtual ~MockVideoSdpGenerator() {}
+    virtual ~MockVideoSdpGenerator() override {}
     MOCK_METHOD(IMS_BOOL, Generate,
             (OUT ISessionDescriptor * pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
                     IN MediaBaseProfile* pBaseProfile),

@@ -163,7 +163,7 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
 
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
     {
-        TextProfile::RedFmtp* pRedFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
+        auto pRedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
 
         if (pRedFmtp == IMS_NULL)
         {

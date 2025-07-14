@@ -25,7 +25,7 @@ class MockTextSdpGenerator : public TextSdpGenerator
 {
 public:
     MockTextSdpGenerator() {}
-    virtual ~MockTextSdpGenerator() {}
+    virtual ~MockTextSdpGenerator() override {}
     MOCK_METHOD(IMS_BOOL, Generate,
             (OUT ISessionDescriptor * pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
                     IN MediaBaseProfile* pBaseProfile),

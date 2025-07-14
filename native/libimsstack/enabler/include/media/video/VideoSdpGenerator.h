@@ -30,7 +30,7 @@ class VideoSdpGenerator : public MediaSdpGenerator
 {
 public:
     VideoSdpGenerator();
-    virtual ~VideoSdpGenerator();
+    virtual ~VideoSdpGenerator() override;
 
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;

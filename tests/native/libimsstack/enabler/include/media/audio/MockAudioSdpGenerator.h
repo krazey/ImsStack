@@ -25,7 +25,7 @@ class MockAudioSdpGenerator : public AudioSdpGenerator
 {
 public:
     MockAudioSdpGenerator() {}
-    virtual ~MockAudioSdpGenerator() {}
+    virtual ~MockAudioSdpGenerator() override {}
     MOCK_METHOD(IMS_BOOL, Generate,
             (OUT ISessionDescriptor * pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
                     IN MediaBaseProfile* pBaseProfile),
