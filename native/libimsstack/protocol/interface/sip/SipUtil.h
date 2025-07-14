@@ -29,12 +29,15 @@ public:
     SipUtil(IN const SipUtil&) = delete;
     SipUtil& operator=(IN const SipUtil&) = delete;
 
-    SIP_VOID RegisterNetwork(ISipNetworkUtil* pNwUtil);
-    SIP_VOID RegisterTxnListener(ISipTxnListener* pTxnListener);
-    ISipTimerUtil* GetTimer();
-    ISipLoggerUtil* GetLogger();
-    ISipNetworkUtil* GetNetwork();
-    ISipTxnListener* GetTxnListener();
+    SIP_VOID SetNetwork(ISipNetworkUtil* pNetworkUtil);
+    SIP_VOID SetTransactionListener(ISipTxnListener* pTxnListener);
+    inline ISipTimerUtil* GetTimer() const { return m_pTimerUtil; }
+
+    inline ISipLoggerUtil* GetLogger() const { return m_pLoggerUtil; }
+
+    inline ISipNetworkUtil* GetNetwork() const { return m_pNetworkUtil; }
+
+    inline ISipTxnListener* GetTransactionListener() const { return m_pTxnListener; }
 
     static SipUtil* GetInstance();
     static SIP_VOID DestroyInstance();

@@ -18,6 +18,8 @@
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
 
+#include "ISipNetworkUtil.h"
+#include "ISipTxnListener.h"
 #include "SipConfigProxy.h"
 #include "SipHeader.h"
 #include "SipHeaderName.h"
@@ -26,7 +28,6 @@
 #include "SipMessageBuffer.h"
 #include "SipStack.h"
 #include "SipClientTransactionState.h"
-#include "SipUtil.h"
 #include "SipUtils.h"
 #include "msg/SipMsgUtil.h"
 #include "txn/SipTimeoutData.h"
@@ -218,8 +219,8 @@ GLOBAL void Initialize()
 
     if (pStackMngr != IMS_NULL)
     {
-        pStackMngr->GetSipUtil()->RegisterNetwork(new SipNetworkUtil());
-        pStackMngr->GetSipUtil()->RegisterTxnListener(new SipTxnListenerProxy());
+        pStackMngr->RegisterNetwork(new SipNetworkUtil());
+        pStackMngr->RegisterTransactionListener(new SipTxnListenerProxy());
     }
 
     // Register SIP transaction layer's callback functions

@@ -120,8 +120,8 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     SipStackManager* pSipStackManager = SipStackManager::GetInstance();
     ASSERT_TRUE(pSipStackManager != nullptr);
 
-    pSipStackManager->GetSipUtil()->RegisterNetwork(new SipTestNetworkUtil());
-    pSipStackManager->GetSipUtil()->RegisterTxnListener(new SipTestTxnListener());
+    pSipStackManager->RegisterNetwork(new SipTestNetworkUtil());
+    pSipStackManager->RegisterTransactionListener(new SipTestTxnListener());
 
     // clang-format off
     SipStackCallbacks stCallbacks = {
@@ -643,8 +643,8 @@ TEST_F(SipStackManagerTest, RecvResponseMessage)
     SipStackManager* pSipStackManager = SipStackManager::GetInstance();
     ASSERT_TRUE(pSipStackManager != nullptr);
 
-    pSipStackManager->GetSipUtil()->RegisterNetwork(new SipTestNetworkUtil());
-    pSipStackManager->GetSipUtil()->RegisterTxnListener(new SipTestTxnListener());
+    pSipStackManager->RegisterNetwork(new SipTestNetworkUtil());
+    pSipStackManager->RegisterTransactionListener(new SipTestTxnListener());
 
     // clang-format off
     SipStackCallbacks stCallbacks = {
@@ -882,8 +882,8 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
 
     EXPECT_EQ(SIP_FALSE, pSipStackManager->OnRecvTanspError(0, pTxnKey, &nError));
 
-    pSipStackManager->GetSipUtil()->RegisterNetwork(new SipTestNetworkUtil());
-    pSipStackManager->GetSipUtil()->RegisterTxnListener(new SipTestTxnListener());
+    pSipStackManager->RegisterNetwork(new SipTestNetworkUtil());
+    pSipStackManager->RegisterTransactionListener(new SipTestTxnListener());
 
     // clang-format off
     SipStackCallbacks stCallbacks = {

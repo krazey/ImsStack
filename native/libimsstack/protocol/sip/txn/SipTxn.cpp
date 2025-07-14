@@ -656,7 +656,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     /*No need to notify txntimeout to listener if the txn is already terminated*/
     /* Notify user is txn is terminated */
-    ISipTxnListener* pTxnListener = pUtil->GetTxnListener();
+    ISipTxnListener* pTxnListener = pUtil->GetTransactionListener();
 
     SIP_INT32 eTimerType = SipTxn::TIMER_TYPE_INVALID;
     if (pTxn->IsTxnTerminated() == SIP_TRUE)

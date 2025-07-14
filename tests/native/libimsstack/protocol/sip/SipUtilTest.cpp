@@ -68,21 +68,21 @@ TEST_F(SipUtilTest, UtilityTest)
 
     EXPECT_TRUE(pUtil->GetLogger() != nullptr);
     EXPECT_TRUE(pUtil->GetNetwork() != nullptr);
-    EXPECT_TRUE(pUtil->GetTxnListener() == nullptr);
+    EXPECT_TRUE(pUtil->GetTransactionListener() == nullptr);
 
     ISipNetworkUtil* pNetworkUtil = new SipDefNetworkUtil();
-    pUtil->RegisterNetwork(pNetworkUtil);
+    pUtil->SetNetwork(pNetworkUtil);
     EXPECT_TRUE(pNetworkUtil == pUtil->GetNetwork());
 
     ISipTxnListener* pTxnListener = new SipTransactionListener();
-    pUtil->RegisterTxnListener(pTxnListener);
-    EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
+    pUtil->SetTransactionListener(pTxnListener);
+    EXPECT_TRUE(pTxnListener == pUtil->GetTransactionListener());
 
-    /* Calling RegisterTxnListener again to verify first time set txn listener
+    /* Calling SetTransactionListener again to verify first time set txn listener
     is deleted and then set second time set txn listener */
     pTxnListener = new SipTransactionListener();
-    pUtil->RegisterTxnListener(pTxnListener);
-    EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
+    pUtil->SetTransactionListener(pTxnListener);
+    EXPECT_TRUE(pTxnListener == pUtil->GetTransactionListener());
 
     SipUtil::DestroyInstance();
 }

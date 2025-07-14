@@ -55,36 +55,6 @@ void SipStackManager::Destruct()
     }
 }
 
-SipUtil* SipStackManager::GetSipUtil()
-{
-    return SipUtil::GetInstance();
-}
-
-/*!
- * @brief This API is called by stack user to send SIP message(request/response) to other end.
- *    This function handle transaction, transport and issue callback for sending sip message to
- * network
- *
- * @param[in,out] pSipMsg        : SIP message object used for forming raw SIP message
- * @param[in]     pTranspParam   : For Request message it contains transport information where
- *    request to be send. For response, remote transport information is fetched from the Via header
- * @param[in]     pUserData        : For request message, it contains user data which will be
- *    returned in the SendToNetwork call back.
- * @param[out]     ppTxnKey        : For request message, new key will be formed and return to
- *    user with this parameter. For response message it contains NULL
- * @param[out]     pnError         : Appropriate error code as defined in SipEn_ErrorTypes in
- *    case of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- * Re-transmission of 2XX for INVITE is handled by stack user. @XX and successful ACK for INVITE
- * is not handled by the transaction and is directly passed to transport layer for encoding and
- * sending to network.
- *
- */
 SIP_BOOL SipStackManager::SendMsg(SipMessage* pSipMsg, IN_OUT SipTransportParameter* pTranspParam,
         IN ISipUserData* pUserData, IN const SIP_CHAR* pSipBuffer, IN SIP_UINT32 nSipBufferLen,
         IN SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
@@ -214,33 +184,6 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
     return SIP_TRUE;
 }
 
-/*!
- * @brief This API is called by stack user when SIP message is received and successfully parsed.
- *    This function handle transport, transaction and return transport status.
- *
- * @param[in] pSipMsg        : SIP message object
- * @param[in] pTranspParam   : Transport information from where SIP message is received
- * @param[out] peTranspStatus   : Transport status based on message validity, type and txn state
- * @param[out] ppTxnKey    : For new transaction it return txn key else NULL
- * @param[in] pUserData    : User data as passed by the user, store this data for new txn,
- * for existing txn, data from txn obj is used.
- * @param[out]     pnError        : Appropriate error code as defined in SipEn_ErrorTypes in case
- * of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- * 2XX and successful ACK for which INVITE transaction is not existing is valid message and shall be
- * handled by stack user. These messages are not handled by the transaction and is directly passed
- * to user. This function check the validity of incoming message and identify re-transmission, stray
- * message. Re-transmission is handled by this function and any stray and unexpected messages are
- * ignored and function return failure in such cases. Caller shall take action if function
- * return Transport Status as SipTxn::STATUS_NEW_REQ_RECVD or SipTxn::STATUS_VALID_MESSAGE. For all
- * other status caller no need to take any action.
- *
- */
 SIP_BOOL SipStackManager::OnRecvMessage(IN SipMessage* pSipMsg,
         IN SipTransportParameter* pTranspParam, IN ISipUserData* pUserData,
         OUT SIP_INT32* peTxnStatus, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
@@ -530,20 +473,6 @@ stack user must process this request and can decide whether to ignore or not
     return SIP_TRUE;
 }
 
-/*!
- * @brief This API is called by stack user on any transport error
- *
- * @param[in]     eTranspError  : Type of transport error occurred
- * @param[in]     pTxnKey    : transaction for which transport error has occurred
- * @param[out]    pnError      : Appropriate error code as defined in SipEn_ErrorTypes in case
- * of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- */
 SIP_BOOL SipStackManager::OnRecvTanspError(
         IN SIP_INT32 eTranspError, IN SipTxnKey* pTxnKey, OUT SIP_UINT16* pnError)
 {
@@ -574,19 +503,6 @@ SIP_BOOL SipStackManager::OnRecvTanspError(
     return objTxnHandler.OnRecvTranspError((SIP_INT32)(*pnError), pTxnKey, pnError);
 }
 
-/*!
- * @brief This API is called by stack user in order to terminated the existing transaction, this
- *    fxn is used when transaction key is available with the user
- *
- * @param[in]     pTxnKey    : Key for the transaction that needs to be terminated
- * @param[out]    pnError        : Appropriate error code as defined in SipEn_ErrorTypes in
- * case of failure
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- */
 SIP_BOOL SipStackManager::TerminateTxn(SipTxnKey* pTxnKey)
 {
     SipTxnHandler objTxnHandler;
@@ -594,21 +510,16 @@ SIP_BOOL SipStackManager::TerminateTxn(SipTxnKey* pTxnKey)
     return objTxnHandler.TerminateTxn(pTxnKey);
 }
 
-/*!
- * @brief This API is invoked by the stack while sending SIP message to the network
- *
- * @param[in]     pTranspInfo : Contains Raw SIP message with transport details
- * @param[in]     pUserData : User Data as provide by the user
- * @param[in]     pTxnKey   : Key for the transaction to which the SIP message belongs
- * @param[out]     pnError      : Appropriate error code as defined in SipEn_ErrorTypes in case
- * of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- */
+SIP_VOID SipStackManager::RegisterNetwork(ISipNetworkUtil* pNetworkUtil)
+{
+    SipUtil::GetInstance()->SetNetwork(pNetworkUtil);
+}
+
+SIP_VOID SipStackManager::RegisterTransactionListener(ISipTxnListener* pTxnListener)
+{
+    SipUtil::GetInstance()->SetTransactionListener(pTxnListener);
+}
+
 PRIVATE SIP_BOOL SipStackManager::SendToNetwork(
         IN SipTransportInfo* pTranspInfo, IN ISipUserData* pUserData)
 {
