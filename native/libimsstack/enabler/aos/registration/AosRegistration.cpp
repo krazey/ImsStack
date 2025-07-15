@@ -932,20 +932,6 @@ IMS_BOOL AosRegistration::IsRegTrying() const
 }
 
 PROTECTED
-IMS_BOOL AosRegistration::IsNetworkBindingSupported(IN IAosHandle* /* piHandle */)
-{
-    /* TODO_CONFIG : implement with different solution
-    if (m_pUtil->IsFeatureOn(piHandle->GetServiceType(),
-            m_piContext->GetConfig()->GetNetworkRegBindingSupportedServices()))
-    {
-        return IMS_TRUE;
-    }
-    */
-
-    return IMS_FALSE;
-}
-
-PROTECTED
 IMS_BOOL AosRegistration::IsCallStateRequired() const
 {
     return (m_eRegType == AosRegistrationType::EMERGENCY ||
@@ -1919,8 +1905,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartRegBinding()
             piHandle->SetRegBinded(IMS_FALSE);
         }
 
-        piHandle->SetNetworkRegBinded(IMS_TRUE);
-
         strLog.Append("[");
         strLog.Append(piHandle->GetAppId().GetStr());
         strLog.Append("]");
@@ -1989,15 +1973,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateRegBinding()
         {
             if (piHandle->GetRequestType() == IAosHandle::ATTACH)
             {
-                if (IsNetworkBindingSupported(piHandle) && !piHandle->IsNetworkRegBinded())
-                {
-                    A_IMS_TRACE_I(REGID,
-                            "UpdateRegBinding :: service(%d) is not binded "
-                            "by network",
-                            piHandle->GetServiceType(), 0, 0);
-                    continue;
-                }
-
                 m_piRegistration->CreateBinding(piHandle->GetAppId(), piHandle->GetServiceId());
                 m_piRegContact->AddService(piHandle->GetAppId(), piHandle->GetServiceId());
 
@@ -2028,126 +2003,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateRegBinding()
     }
 
     return bChanged;
-}
-
-PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateNetworkRegBinding()
-{
-    return IMS_FALSE;
-    // TODO : update the capabilities based on network ones
-#if 0
-    if (m_piContext->GetConfig()->GetNetworkRegBindingSupportedServices()
-            == ImsAosService::NONE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_piRegContact == IMS_NULL)
-    {
-        A_IMS_TRACE_I(REGID, "UpdateNetworkRegBinding :: reg is null", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
-    IMS_BOOL bChanged = IMS_FALSE;
-
-    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
-    {
-        IAosHandle* piHandle = objHandles.GetValueAt(i);
-
-        if (!IsNetworkBindingSupported(piHandle))
-        {
-            continue;
-        }
-
-        if (piHandle->IsRegBinded())
-        {
-            if (piHandle->GetRequestType() == IAosHandle::ATTACH)
-            {
-                if (m_piRegContact->IsServiceRegistered(
-                        piHandle->GetAppId(), piHandle->GetServiceId()))
-                {
-                    continue;
-                }
-
-                m_piRegContact->RemoveService(piHandle->GetAppId(), piHandle->GetServiceId());
-                m_piRegistration->DestroyBinding(piHandle->GetAppId(), piHandle->GetServiceId());
-
-                piHandle->SetRegBinded(IMS_FALSE);
-                piHandle->SetNetworkRegBinded(IMS_FALSE);
-                RemoveFeatureTag(piHandle);
-                bChanged = IMS_TRUE;
-                A_IMS_TRACE_I(REGID,
-                        "UpdateNetworkRegBinding :: service (%d) is not binded by network",
-                        piHandle->GetServiceType(), 0, 0);
-            }
-        }
-    }
-
-    if (bChanged)
-    {
-        UpdateFinalAddFeatureTag();
-        m_piRegContact->RecalculateCallerCapabilities();
-    }
-
-    return bChanged;
-#endif
-}
-
-PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateNetworkRegFeatureBinding()
-{
-    return IMS_FALSE;
-
-#if 0  // TODO : update impl.
-    if (m_piContext->GetConfig()->GetNetworkRegFeatureBindingSupportedServices()
-            == ImsAosService::NONE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_piRegContact == IMS_NULL)
-    {
-        A_IMS_TRACE_I(REGID, "UpdateNetworkRegFeatureBinding :: reg is null", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
-    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
-    {
-        IAosHandle* piHandle = objHandles.GetValueAt(i);
-
-        if (!IsNetworkFeatureBindingSupported(piHandle))
-        {
-            continue;
-        }
-
-        if (piHandle->IsRegBinded())
-        {
-            if (piHandle->GetRequestType() == IAosHandle::ATTACH)
-            {
-                AosFeatureTagList& objBindedList = piHandle->GetBindedFeatureTagList();
-                for (IMS_UINT32 nAt = 0; nAt < objBindedList.GetSize(); ++nAt)
-                {
-                    AosFeatureTag* pFeature = objBindedList.GetAt(nAt);
-
-                    if ((pFeature->GetType() != 0) && (pFeature->GetName().GetLength() > 0))
-                    {
-                        if (m_piRegContact->IsFeatureRegistered(
-                                pFeature->GetName(), pFeature->GetValue()))
-                        {
-                            A_IMS_TRACE_D(REGID, "UpdateNetworkRegFeatureBinding :: (%d) %s = %s",
-                                    pFeature->GetType(), pFeature->GetName().GetStr(),
-                                    pFeature->GetValue().GetStr());
-
-                            m_nNetworkBindingFeatures |= pFeature->GetType();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return IMS_TRUE;
-#endif
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::Register(IN IMS_SINT32 nMinExpireValue)
@@ -2586,14 +2441,6 @@ PROTECTED VIRTUAL void AosRegistration::UpdateFinalAddFeatureTag()
             AosFeatureTagList& objBindedList = piHandle->GetBindedFeatureTagList();
             if (objBindedList.GetSize() > 0)
             {
-                if (IsNetworkBindingSupported(piHandle) && !piHandle->IsNetworkRegBinded())
-                {
-                    A_IMS_TRACE_I(REGID,
-                            "UpdateFinalAddFeatureTag :: service (%d) is not binded by network",
-                            piHandle->GetServiceType(), 0, 0);
-                    continue;
-                }
-
                 for (IMS_UINT32 nAt = 0; nAt < objBindedList.GetSize(); ++nAt)
                 {
                     AosFeatureTag* pFeature = objBindedList.GetAt(nAt);
@@ -5556,10 +5403,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
 
     CreateSubscription();
 
-    UpdateNetworkRegBinding();
-
-    UpdateNetworkRegFeatureBinding();
-
     ReportStateChanged(RESULT_SUCCESS);
 
     CheckPending();
@@ -5656,10 +5499,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     }
 
     UpdateCallingNumberVerification();
-
-    UpdateNetworkRegBinding();
-
-    UpdateNetworkRegFeatureBinding();
 
     ReportStateChanged(RESULT_SUCCESS);
 

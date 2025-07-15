@@ -76,9 +76,6 @@ public:
     IMS_BOOL IsRegBinded() override;
     void SetRegBinded(IN IMS_BOOL bBind) override;
 
-    IMS_BOOL IsNetworkRegBinded() override;
-    void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind) override;
-
     IMS_BOOL IsRegFeatureTagRequired() override;
     IMS_BOOL IsRegToNextPcscfRequested() override;
 
@@ -312,8 +309,6 @@ protected:
     IMS_UINT32 m_nReqType;
     // m_bBind indicates whether the service is added in registration or not
     IMS_BOOL m_bBind;
-    // m_bNetworkBind indicates whether the service is kept or removed in registration or not
-    IMS_BOOL m_bNetworkBind;
     // m_bRegFeatureTagRequired indicates whether the feature tag is required or not
     IMS_BOOL m_bRegFeatureTagRequired;
 

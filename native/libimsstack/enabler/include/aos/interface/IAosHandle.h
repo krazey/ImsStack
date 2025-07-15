@@ -50,14 +50,6 @@ public:
     virtual IMS_BOOL IsRegBinded() = 0;
     virtual void SetRegBinded(IN IMS_BOOL bBind) = 0;
 
-    // bNetworkBind is set from AoSRegistration
-    /*
-        if bNetworkBind is true, this service is kept in Registration
-        if bNetworkBind is false, this service is removed in Registration
-    */
-    virtual IMS_BOOL IsNetworkRegBinded() = 0;
-    virtual void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind) = 0;
-
     virtual IMS_BOOL IsRegFeatureTagRequired() = 0;
     virtual IMS_BOOL IsRegToNextPcscfRequested() = 0;
 
