@@ -370,6 +370,31 @@ TEST_F(EmergencyMessageFormatterTest, FormStartMessageAddsPeiHeaderWithImei)
     EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageAddsPeiHeaderWithImeiAsAddrRefId)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+
+    AString strPei = "IEEE-802.11b;i-wlan-node-id=#IMEIASADDRREFID#";
+    ON_CALL(*pConfigurationProxy,
+            GetString(ConfigEmergency::KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING))
+            .WillByDefault(Return(strPei));
+
+    ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
+            .WillByDefault(Invoke(
+                    [](Unused, OUT AString& strImei)
+                    {
+                        strImei = "123456789012345";
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage,
+                    AString("IEEE-802.11b;i-wlan-node-id=1234:5678:9012:3450"), ISipHeader::UNKNOWN,
+                    HEADER_P_EMERGENCY_INFO));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
 TEST_F(EmergencyMessageFormatterTest, FormStartMessageAddsPeiHeaderWithMacAddress)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
