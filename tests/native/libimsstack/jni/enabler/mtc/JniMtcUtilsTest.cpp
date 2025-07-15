@@ -115,7 +115,7 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadSuppServices)
     objAnySuppService1.nValue = 1;
     objAnySuppService1.bValue = IMS_TRUE;
 
-    SuppType eAnyType2 = SuppType::VRBT;
+    SuppType eAnyType2 = SuppType::CALL_PULL;
     SuppService objAnySuppService2;
     objAnySuppService2.strValue = "anyValue2";
     objAnySuppService2.nValue = 2;

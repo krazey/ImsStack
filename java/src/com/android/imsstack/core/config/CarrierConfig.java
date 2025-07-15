@@ -1214,10 +1214,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_registration_recovery_for_failure_of_session_refresh_bool";
         public static final String KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY =
                 KEY_PREFIX + "policy_for_call_maintaining_on_registration_suspended_int_array";
-        public static final String KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL =
-                KEY_PREFIX + "use_mcid_supplementary_service_bool";
-        public static final String KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL =
-                KEY_PREFIX + "use_mmc_supplementary_service_bool";
         public static final String KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL =
                 KEY_PREFIX + "use_lte_preferred_status_for_service_capability_bool";
         public static final String KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL =

@@ -931,13 +931,9 @@ public class ImsCallUtils {
 
     public static void updateCallProfileFromSuppInfo(ICallContext context,
             ImsCallProfile profile, final SuppInfo si) {
-        // FIXME: need to improve to handle MMC field for U+
-        boolean mmcPresent = false;
 
         for (SuppInfo.SuppService ss : si.objSuppService) {
-            if (ss.type == SuppInfo.TYPE_MMC) {
-                mmcPresent = true;
-            } else if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
+            if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
                 String key = getCallExtraNameForBoolean(context, ss.type);
 
                 if (key != null) {
@@ -1028,15 +1024,6 @@ public class ImsCallUtils {
     }
 
     private static String getCallExtraNameForBoolean(ICallContext context, int suppInfo) {
-        switch (suppInfo) {
-        case SuppInfo.TYPE_MMC:
-            // no-op
-            break;
-        default:
-            // no-op
-            break;
-        }
-
         return ImsSuppInfoUtils.getCallExtraNameForBoolean(context, suppInfo);
     }
 

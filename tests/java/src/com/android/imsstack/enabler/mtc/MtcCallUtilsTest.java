@@ -252,7 +252,6 @@ public class MtcCallUtilsTest {
     @Test
     public void testIsLocalHoldToneEnforced() {
         SuppInfo suppInfo = new SuppInfo();
-        suppInfo.addService_bool(SuppInfo.TYPE_VM, true);
 
         assertFalse(MtcCallUtils.isLocalHoldToneEnforced(suppInfo));
 
@@ -277,7 +276,7 @@ public class MtcCallUtilsTest {
     public void testisSuppInfoBoolean() {
         MtcCall call = Mockito.mock(MtcCall.class);
 
-        assertFalse(MtcCallUtils.isSuppInfoBoolean(SuppInfo.TYPE_DUALNUMBER));
+        assertFalse(MtcCallUtils.isSuppInfoBoolean(SuppInfo.TYPE_GEOLOCATION));
         assertTrue(MtcCallUtils.isSuppInfoBoolean(SuppInfo.TYPE_ENFORCE_LT));
     }
 
@@ -285,7 +284,7 @@ public class MtcCallUtilsTest {
     public void isSuppInfoInt() {
         MtcCall call = Mockito.mock(MtcCall.class);
 
-        assertFalse(MtcCallUtils.isSuppInfoInt(SuppInfo.TYPE_DUALNUMBER));
+        assertFalse(MtcCallUtils.isSuppInfoInt(SuppInfo.TYPE_ENFORCE_LT));
         assertTrue(MtcCallUtils.isSuppInfoInt(SuppInfo.TYPE_CALLING_NUM_VERIFICATION));
     }
 
@@ -294,7 +293,7 @@ public class MtcCallUtilsTest {
         MtcCall call = Mockito.mock(MtcCall.class);
 
         assertFalse(MtcCallUtils.isSuppInfoString(SuppInfo.TYPE_GEOLOCATION));
-        assertTrue(MtcCallUtils.isSuppInfoString(SuppInfo.TYPE_DUALNUMBER));
+        assertTrue(MtcCallUtils.isSuppInfoString(SuppInfo.TYPE_CNAP));
     }
 
     @Test

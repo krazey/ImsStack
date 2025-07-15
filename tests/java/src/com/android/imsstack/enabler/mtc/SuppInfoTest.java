@@ -55,10 +55,6 @@ public class SuppInfoTest {
         dest.writeString("test");
         dest.writeInt(0);
         dest.writeInt(0);
-        dest.writeInt(SuppInfo.TYPE_GTT);
-        dest.writeString("");
-        dest.writeInt(0);
-        dest.writeInt(1);
         dest.setDataPosition(0);
 
         SuppInfo suppInfo2 = new SuppInfo(dest);
@@ -74,6 +70,5 @@ public class SuppInfoTest {
         assertEquals(3, copiedSuppInfo.getServiceSize());
         assertTrue(copiedSuppInfo.isService(SuppInfo.TYPE_CALLERID));
         assertTrue(copiedSuppInfo.isService(SuppInfo.TYPE_CNAP));
-        assertTrue(copiedSuppInfo.isService(SuppInfo.TYPE_GTT));
     }
 }

@@ -2473,13 +2473,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     // MTC_CONFERENCE_WRAPPER }
 
     static {
-        SuppInfoUtils.addKey(SuppInfo.TYPE_MMC, EXTRA_MMC);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_MMC, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_GTT, EXTRA_GTT);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_GTT, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_VM, EXTRA_VMS);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_VM, SuppInfoUtils.TYPE_BOOLEAN);
-
         SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_CAUSE, EXTRA_CDIV_CAUSE);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_CAUSE, SuppInfoUtils.TYPE_INT);
 
@@ -2490,12 +2483,9 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         // The below things are not managed for extra call information
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CW, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_ANSWERHOLD, SuppInfoUtils.TYPE_BOOLEAN);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_ENFORCE_LT, SuppInfoUtils.TYPE_BOOLEAN);
 
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLERID, SuppInfoUtils.TYPE_INT);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLING_NUM_VERIFICATION, SuppInfoUtils.TYPE_INT);
-
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_DUALNUMBER, SuppInfoUtils.TYPE_STRING);
     }
 }

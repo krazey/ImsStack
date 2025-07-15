@@ -1184,10 +1184,6 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX
         "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "use_mcid_supplementary_service_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "use_mmc_supplementary_service_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[] =
         KEY_IMS_VOICE_PREFIX "use_lte_preferred_status_for_service_capability_bool";
 const IMS_CHAR

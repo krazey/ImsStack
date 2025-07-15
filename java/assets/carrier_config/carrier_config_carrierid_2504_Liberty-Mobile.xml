@@ -179,8 +179,6 @@
     </int-array>
     <int-array name="imsemergency.policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array" num="0">
     </int-array>
-    <boolean name="imsvoice.use_mcid_supplementary_service_bool" value="false"/>
-    <boolean name="imsvoice.use_mmc_supplementary_service_bool" value="false"/>
     <boolean name="imsvoice.use_lte_preferred_status_for_service_capability_bool" value="false"/>
     <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
     <boolean name="imsvoice.ignore_180_after_183_response_bool" value="false"/>
