@@ -236,7 +236,6 @@
 
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="0"/>
-    <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
     <int-array name="imssms.sms_geolocation_pidf_in_sip_message_support_int_array" num="1">
         <item value="4"/> <!-- EMERGENCY_CELLULAR-->
     </int-array>

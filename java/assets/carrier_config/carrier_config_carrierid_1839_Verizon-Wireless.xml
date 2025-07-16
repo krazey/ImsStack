@@ -330,7 +330,6 @@
     <boolean name="imssms.sms_use_dialed_number_for_request_uri_bool" value="true"/>
     <boolean name="imssms.sms_allow_imsi_based_sip_uri_bool" value="true"/>
     <int name="imssms.sms_reg_policy_for_503_response_int" value="5"/>
-    <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
     <boolean name="imssms.sms_evaluate_radio_status_for_3rd_attempt_bool" value="true"/>
 
     <!-- Uce -->

@@ -332,6 +332,5 @@
         <item value="2"/> <!-- EMERGENCY_WIFI -->
         <item value="4"/> <!-- EMERGENCY_CELLULAR-->
     </int-array>
-    <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
 </carrier_config>
