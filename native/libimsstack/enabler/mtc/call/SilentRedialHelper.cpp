@@ -88,9 +88,7 @@ PUBLIC VIRTUAL CallReasonInfo SilentRedialHelper::Redial(IN IMS_SINT32 nInterval
     if (IsRedialAvailable() == IMS_FALSE)
     {
         IMtcSession* pSession = m_objContext.GetSession();
-        IMS_ASSERT(pSession != IMS_NULL);
-
-        return HandleFailure(*pSession);
+        return pSession ? HandleFailure(*pSession) : CallReasonInfo(CODE_NONE);
     }
 
     ReleaseCallResources();
