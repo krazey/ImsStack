@@ -42,7 +42,7 @@ UdpKeepAliveSender::UdpKeepAliveSender(
 
 PUBLIC VIRTUAL UdpKeepAliveSender::~UdpKeepAliveSender()
 {
-    Stop();
+    StopTimer();
 
     m_pKeepAliveHelper->Destroy();
 }

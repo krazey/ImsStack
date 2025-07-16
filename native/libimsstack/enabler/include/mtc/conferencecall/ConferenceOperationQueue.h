@@ -150,6 +150,7 @@ public:
     virtual void Clear();
 
 private:
+    void ClearInternal();
     void Put(IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation);
     void RemoveActiveOperation();
     IMS_BOOL IsSameOperation(IN IMS_UINT32 nOperationType, IN const ConfUser* pConfUser) const;

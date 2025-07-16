@@ -49,11 +49,12 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
         m_pListener(IMS_NULL),
         m_objContext(objContext),
         m_pSdpPreconditionHelper(new SdpPreconditionHelper()),
-        m_bOnWlan(objContext.GetService().IsWlanIpCanType())
+        m_bOnWlan(objContext.GetService().IsWlanIpCanType()),
+        m_ePreviousRatType(m_objContext.GetService().GetMobileRatType()),
+        m_eCurrentRatType(m_ePreviousRatType)
 {
     IMS_TRACE_D("+MtcPreconditionManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(this);
-    InitializeMobileRatInformation();
 }
 
 PUBLIC VIRTUAL MtcPreconditionManager::~MtcPreconditionManager()
