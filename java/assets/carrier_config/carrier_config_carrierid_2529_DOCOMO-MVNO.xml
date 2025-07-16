@@ -29,7 +29,6 @@
     <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
 
     <!-- Ims General -->
-    <boolean name="ims.require_sip_expires_header_in_register_bool" value="true"/>
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
     <int name="ims.sip_timer_100_trying_millis_int" value="0"/>
 
