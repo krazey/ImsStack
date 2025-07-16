@@ -217,6 +217,7 @@ TEST_F(CallStateProxyTest, UpdateTotalCallStateChecksPeerTypeIfIdleState)
     EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::OUTGOING));
     pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
 
+    // cppcheck-suppress redundantAssignment
     objCallInfo.ePeerType = PeerType::MT;
     EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::INCOMING));
     pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
