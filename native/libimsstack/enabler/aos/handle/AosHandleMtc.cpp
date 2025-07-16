@@ -1341,7 +1341,9 @@ PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_VopsStateChanged(
     A_IMS_TRACE_I(APPPROFILE, "ServicePhone_VopsStateChanged :: nState(%d), strPlmn(%s)", nState,
             strPlmn.GetStr(), 0);
 
-    if (m_nVopsState != nState || !m_strVopsPlmn.Equals(strPlmn))
+    if (m_nVopsState != nState || !m_strVopsPlmn.Equals(strPlmn) ||
+            (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED &&
+                    nState == IMS_VOICE_OVER_PS_SUPPORTED))
     {
         ProcessVopsStateChanged(nState, strPlmn);
     }

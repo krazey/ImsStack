@@ -3472,6 +3472,22 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_VOPS));
 }
 
+TEST_F(AosHandleMtcTest,
+        ShouldUpdateHoldingVopsStateWhenVopsIsChangedToTrueIfHoldingVopsStateIsFalse)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+    m_pAosHandleMtc->SetHoldingVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    m_pAosHandleMtc->SetVopsPlmn(AString("123456"));
+
+    // WHEN
+    m_pAosHandleMtc->ServicePhone_VopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, AString("123456"));
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+}
+
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test2)
 {
     // Test2: call idle, no unavailalble policy, network=LTE
