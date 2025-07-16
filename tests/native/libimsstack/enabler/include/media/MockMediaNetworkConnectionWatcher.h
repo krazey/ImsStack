@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,15 @@
 #define MOCK_MEDIA_NETWORK_CONNECTION_WATCHER_H_
 
 #include <gmock/gmock.h>
+
 #include "MediaNetworkConnectionWatcher.h"
 
 class MockMediaNetworkConnectionWatcher : public MediaNetworkConnectionWatcher
 {
 public:
     explicit MockMediaNetworkConnectionWatcher(IN const IpAddress& objIpAddress) :
-            MediaNetworkConnectionWatcher(objIpAddress){};
-    virtual ~MockMediaNetworkConnectionWatcher() {}
+            MediaNetworkConnectionWatcher(objIpAddress) {};
+    virtual ~MockMediaNetworkConnectionWatcher() override {}
     MOCK_METHOD(void, SetListener, (IN IMediaNetworkConnectionListener * piListener), (override));
     MOCK_METHOD(void, NetworkConnection_OnConnected, (IN INetworkConnection * pNetConnection),
             (override));

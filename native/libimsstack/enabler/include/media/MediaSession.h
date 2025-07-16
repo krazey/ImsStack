@@ -41,7 +41,7 @@ public:
      */
     explicit MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServiceType,
             IService* pIService, IN IMS_SINTP nCallKey = 0, IN IMS_UINT32 nSlotId = 0);
-    virtual ~MediaSession();
+    virtual ~MediaSession() override;
 
     /**
      * @brief Get the current connected network type
@@ -123,7 +123,7 @@ protected:
             MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_INVALID,
             MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
-    virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
+    IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
     void SetMediaQuality(IN AudioSession* pAudioSession);
     IMS_BOOL OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     IMS_BOOL OnResponse(IN IMS_UINTP pParam);
@@ -138,7 +138,6 @@ protected:
     void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType);
 
 private:
-    IpAddress GetAndroidIP();
     IMS_BOOL HandleNotifyMediaInactivity(IN IMS_UINTP nParam);
     IMS_BOOL IsInactivityTimerExpired(IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue);
     void CreateMediaSessions(IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eType);

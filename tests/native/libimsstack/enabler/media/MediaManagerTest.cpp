@@ -66,7 +66,7 @@ public:
     {
     }
 
-    virtual ~FakeMediaManager() {}
+    virtual ~FakeMediaManager() override {}
 
     void FakeClearMediaSessionNode() { ClearMediaSessionNode(); }
 
@@ -164,7 +164,7 @@ public:
 
     MockIMediaSession* GetFakeSession(IN IMS_SINTP nCallKey)
     {
-        FakeMediaSessionNode* pSessionNode = FindFakeSessionNode(nCallKey);
+        const FakeMediaSessionNode* pSessionNode = FindFakeSessionNode(nCallKey);
 
         if (pSessionNode == IMS_NULL)
         {
@@ -618,8 +618,10 @@ TEST_F(MediaManagerTest, testFindSessionNode)
     IMediaSession* pIMediaSession2 = m_pMediaManager->CreateSession(
             MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_2);
 
-    FakeMediaManager::MediaSessionNode* pSessionNode1 = m_pMediaManager->FakeGetSessionNode(0);
-    FakeMediaManager::MediaSessionNode* pSessionNode2 = m_pMediaManager->FakeGetSessionNode(1);
+    const FakeMediaManager::MediaSessionNode* pSessionNode1 =
+            m_pMediaManager->FakeGetSessionNode(0);
+    const FakeMediaManager::MediaSessionNode* pSessionNode2 =
+            m_pMediaManager->FakeGetSessionNode(1);
 
     EXPECT_EQ(m_pMediaManager->FakeFindSessionNode(CALL_KEY_1), pSessionNode1);
     EXPECT_EQ(m_pMediaManager->FakeFindSessionNode(CALL_KEY_2), pSessionNode2);

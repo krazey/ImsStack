@@ -30,12 +30,12 @@
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaProfileManager.h"
 
-class IMediaManager;
+class MediaManager;
 
 class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
 public:
-    explicit MtcMediaManager(IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager);
+    explicit MtcMediaManager(IN IMtcCallContext& objContext, IN MediaManager& objMediaManager);
     virtual ~MtcMediaManager() override;
     MtcMediaManager(IN const MtcMediaManager&) = delete;
     MtcMediaManager& operator=(IN const MtcMediaManager&) = delete;
@@ -125,7 +125,7 @@ private:
     void SetDirectionToActiveFromInactive(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
 
 protected:
-    IMediaManager& m_objMediaManager;
+    MediaManager& m_objMediaManager;
     IMediaReportEventListener* m_pMediaReportListener;
     IMediaQosEventListener* m_pQosListener;
     MtcMediaProfileManager* m_pProfileManager;

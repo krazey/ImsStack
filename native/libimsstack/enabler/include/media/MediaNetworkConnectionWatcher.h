@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ public:
     };
 
     explicit MediaNetworkConnectionWatcher(IN const IpAddress& objIpAddress);
-    virtual ~MediaNetworkConnectionWatcher();
+    virtual ~MediaNetworkConnectionWatcher() override;
     virtual void SetListener(IN IMediaNetworkConnectionListener* piListener);
     /* INetworkConnectionListener Interface Impl */
     virtual void NetworkConnection_OnConnected(IN INetworkConnection* pNetConnection) override;

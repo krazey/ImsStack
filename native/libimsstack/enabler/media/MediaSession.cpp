@@ -364,7 +364,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
 PROTECTED
 IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
 {
-    ImsMediaMsgParam* pMediaMsgParam = reinterpret_cast<ImsMediaMsgParam*>(pParam);
+    const ImsMediaMsgParam* pMediaMsgParam = reinterpret_cast<ImsMediaMsgParam*>(pParam);
 
     if (pMediaMsgParam == IMS_NULL || m_pAudioController == IMS_NULL ||
             m_pVideoController == IMS_NULL || m_pTextController == IMS_NULL)
@@ -728,7 +728,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_NotifyToClient(IMS_UINT32 
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
+PROTECTED IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
 {
     IMS_TRACE_D("CreateMediaConfig()", 0, 0, 0);
     MediaSessionConfigFactory::GetInstance()->CreateMediaSessionConfig(m_nSlotId, eServiceType);
@@ -867,7 +867,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             IMS_TRACE_I("OnNotify() - media Inactivity timer", 0, 0, 0);
             return HandleNotifyMediaInactivity(nParam);
         }
-        break;
         case IJniMedia::NOTIFY_PACKET_LOSS:
         case IJniMedia::NOTIFY_JITTER:
             /** TODO: add implementation */
@@ -877,7 +876,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             break;
         case IJniMedia::NOTIFY_QOS_INFO:
         {
-            ImsMediaMsgQosParam* pParam = reinterpret_cast<ImsMediaMsgQosParam*>(nParam);
+            const ImsMediaMsgQosParam* pParam = reinterpret_cast<ImsMediaMsgQosParam*>(nParam);
 
             if (pParam != IMS_NULL)
             {
@@ -908,7 +907,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
         break;
         case IJniMedia::NOTIFY_VIDEO_BITRATE:
         {
-            ImsMediaVideoParam* pParam = reinterpret_cast<ImsMediaVideoParam*>(nParam);
+            const ImsMediaVideoParam* pParam = reinterpret_cast<ImsMediaVideoParam*>(nParam);
 
             if (pParam != IMS_NULL)
             {
@@ -932,7 +931,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 PROTECTED
 IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
 {
-    ImsMediaMsgDtmfParam* pParam = reinterpret_cast<ImsMediaMsgDtmfParam*>(nParam);
+    const ImsMediaMsgDtmfParam* pParam = reinterpret_cast<ImsMediaMsgDtmfParam*>(nParam);
 
     if (pParam != IMS_NULL)
     {
@@ -946,7 +945,8 @@ IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
 PROTECTED
 IMS_BOOL MediaSession::OnNotifyAnbrReceived(IN IMS_UINTP nParam)
 {
-    ImsMediaMsgAnbrReceivedParam* pParam = reinterpret_cast<ImsMediaMsgAnbrReceivedParam*>(nParam);
+    const ImsMediaMsgAnbrReceivedParam* pParam =
+            reinterpret_cast<ImsMediaMsgAnbrReceivedParam*>(nParam);
 
     if (pParam != IMS_NULL)
     {
@@ -979,20 +979,9 @@ void MediaSession::ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eT
 }
 
 PRIVATE
-IpAddress MediaSession::GetAndroidIP()
-{
-    if (m_pEnvironment != IMS_NULL && m_pEnvironment->pIService != IMS_NULL)
-    {
-        return m_pEnvironment->pIService->GetIpAddress();
-    }
-
-    return IpAddress();
-}
-
-PRIVATE
 IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
 {
-    ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(nParam);
+    const ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(nParam);
 
     if (pTempParam != IMS_NULL)
     {
@@ -1065,7 +1054,7 @@ IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
         }
         else
         {
-            ImsMediaNotifyInactivityParam* pParam =
+            const ImsMediaNotifyInactivityParam* pParam =
                     reinterpret_cast<ImsMediaNotifyInactivityParam*>(nParam);
             m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, pParam->m_eMediaType,
                     pParam->m_eMediaProtocolType == RTP ? MEDIA_PROTOCOL_RTP : MEDIA_PROTOCOL_RTCP);

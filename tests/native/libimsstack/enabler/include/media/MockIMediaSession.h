@@ -25,7 +25,7 @@ class MockIMediaSession : public IMediaSession
 {
 public:
     MockIMediaSession() {}
-    virtual ~MockIMediaSession() {}
+    virtual ~MockIMediaSession() override {}
     MOCK_METHOD(
             void, SetMtcListener, (IN IMediaSessionClientListener * pISessionListener), (override));
     MOCK_METHOD(IMS_UINTP, CreateProfile, (IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType),

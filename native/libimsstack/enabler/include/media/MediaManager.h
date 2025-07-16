@@ -17,7 +17,6 @@
 #ifndef MEDIA_MANAGER_H_
 #define MEDIA_MANAGER_H_
 
-#include "IMediaManager.h"
 #include "IJniMedia.h"
 #include "IJniMediaManager.h"
 #include "ImsActivityEx.h"
@@ -28,8 +27,9 @@
 class IMediaSession;
 class MediaMsgHandler;
 class MediaSession;
+class IService;
 
-class MediaManager : public ImsActivityEx, public IJniMediaManager, public IMediaManager
+class MediaManager : public ImsActivityEx, public IJniMediaManager
 {
 public:
     class MediaSessionNode
@@ -53,24 +53,56 @@ public:
     };
 
 public:
+    /**
+     * @brief Gets the singleton instance of the MediaManager for a specific slot.
+     *
+     * @param nSlotId The UICC slot ID.
+     * @return MediaManager* A pointer to the MediaManager instance.
+     */
     static MediaManager* GetInstance(IN IMS_SINT32 nSlotId = 0);
+
+    /**
+     * @brief Gets the thread name for the MediaManager of a specific slot.
+     *
+     * @param nSlotId The UICC slot ID.
+     * @return AString The thread name.
+     */
     static AString GetThreadName(IN IMS_SINT32 nSlotId);
+
+    /**
+     * @brief Gets the message handler for a specific call session.
+     *
+     * @param nCallKey The key to identify the call session.
+     * @return MediaMsgHandler* A pointer to the message handler, or IMS_NULL if not found.
+     */
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
 
-    // TODO: temp inline. move to cpp
+    /**
+     * @brief Notifies that the JNI enabler has been set.
+     * @see IJniMediaManager::NotifyJniEnablerSet
+     */
     inline void NotifyJniEnablerSet() override {}
+
+    /**
+     * @brief Sends a message to a specific call session.
+     * @see IJniMediaManager::SendMessage
+     * @param nMsg The message identifier.
+     * @param nCallKey The key to identify the call session.
+     * @param pParam Additional message parameters.
+     * @return IMS_BOOL IMS_TRUE on success, IMS_FALSE on failure.
+     */
     virtual IMS_BOOL SendMessage(
             IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
 
-    IMediaSession* CreateSession(IN MEDIA_NETWORK_TYPE eNetwork, IN MEDIA_SERVICE_TYPE eServiceType,
-            IN IService* pService, IN IMS_SINTP nCallKey) override;
+    virtual IMediaSession* CreateSession(IN MEDIA_NETWORK_TYPE eNetwork,
+            IN MEDIA_SERVICE_TYPE eServiceType, IN IService* pService, IN IMS_SINTP nCallKey);
 
     /**
      * @brief Destroys the MediaSession instance
      *
      * @param pSession The instance to destroy
      */
-    void DestroySession(IN const IMediaSession* piSession) override;
+    virtual void DestroySession(IN const IMediaSession* piSession);
 
     /**
      * @brief Gets MediaSession instance
@@ -103,7 +135,7 @@ protected:
     static const IMS_UINT32 TIME_WAIT_MEDIA_RESPONSE = 5000;
 
     MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId);
-    virtual ~MediaManager();
+    virtual ~MediaManager() override;
     MediaManager(IN const MediaManager& obj);
     MediaManager& operator=(IN const MediaManager& obj);
     void ClearMediaSessionNode();

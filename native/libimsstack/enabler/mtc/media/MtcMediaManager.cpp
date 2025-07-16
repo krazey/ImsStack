@@ -17,7 +17,7 @@
 #include "CallReasonInfo.h"
 #include "ICoreService.h"
 #include "ISipHeader.h"
-#include "IMediaManager.h"
+#include "MediaManager.h"
 #include "MediaDef.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
@@ -41,8 +41,7 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcMediaManager::MtcMediaManager(
-        IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager) :
+MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext, IN MediaManager& objMediaManager) :
         m_objMediaManager(objMediaManager),
         m_pMediaReportListener(IMS_NULL),
         m_pQosListener(IMS_NULL),
