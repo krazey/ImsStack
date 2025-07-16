@@ -424,6 +424,14 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_NETWORK_COUNTRY_ISO = "network_country_iso";
 
+        /**
+         * Keeps the network country ISO from the last received ACTION_NETWORK_COUNTRY_CHANGED
+         * intent, updated regardless of the triggering SIM.
+         * Value : string
+         */
+        public static final String KEY_OVERALL_LAST_NETWORK_COUNTRY_ISO =
+                "overall_last_network_country_iso";
+
         public static final String[] CONFIG_PROPERTIES = {
             KEY_CONFIG_PCSCF_ADDRESS_LIST,
             KEY_CONFIG_IMPI,
