@@ -22,6 +22,7 @@
 #include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include <algorithm>
 #include <unordered_map>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -74,16 +75,16 @@ PUBLIC VIRTUAL void SessionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTime
 {
     IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
 
-    for (auto pRecord = m_objSessionRecords.begin(); pRecord != m_objSessionRecords.end();
-            ++pRecord)
+    auto pRecord = std::find_if(m_objSessionRecords.begin(), m_objSessionRecords.end(),
+            [&piTimer](const std::pair<CallKey, SessionRecord*>& record)
+            {
+                return record.second->piTimer == piTimer;
+            });
+    if (pRecord != m_objSessionRecords.end())
     {
-        if (pRecord->second->piTimer == piTimer)
-        {
-            ISession* piSession = pRecord->second->piSession;
-            StopTimer(piTimer);
-            ReleaseISession(piSession, IMS_TRUE, IMS_FALSE);
-            break;
-        }
+        ISession* piSession = pRecord->second->piSession;
+        StopTimer(piTimer);
+        ReleaseISession(piSession, IMS_TRUE, IMS_FALSE);
     }
 }
 
@@ -233,27 +234,27 @@ void SessionInterfaceHolder::StopTimer(IN ITimer* piTimer)
         return;
     }
 
-    for (const auto& sessionRecord : m_objSessionRecords)
+    auto pRecord = std::find_if(m_objSessionRecords.begin(), m_objSessionRecords.end(),
+            [&piTimer](const std::pair<const CallKey, SessionRecord*>& record)
+            {
+                return record.second->piTimer == piTimer;
+            });
+    if (pRecord != m_objSessionRecords.end())
     {
-        if (sessionRecord.second->piTimer == piTimer)
-        {
-            sessionRecord.second->piTimer->KillTimer();
-            TimerService::GetTimerService()->DestroyTimer(piTimer);
-            sessionRecord.second->piTimer = IMS_NULL;
-            break;
-        }
+        pRecord->second->piTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(piTimer);
+        pRecord->second->piTimer = IMS_NULL;
     }
 }
 
 PRIVATE
 ITimer* SessionInterfaceHolder::GetTimer(IN const ISession* piSession) const
 {
-    for (const auto& sessionRecord : m_objSessionRecords)
-    {
-        if (sessionRecord.second->piSession == piSession)
-        {
-            return sessionRecord.second->piTimer;
-        }
-    }
-    return IMS_NULL;
+    auto pRecord = std::find_if(m_objSessionRecords.begin(), m_objSessionRecords.end(),
+            [&piSession](const std::pair<const CallKey, SessionRecord*>& record)
+            {
+                return record.second->piSession == piSession;
+            });
+
+    return (pRecord != m_objSessionRecords.end()) ? pRecord->second->piTimer : IMS_NULL;
 }

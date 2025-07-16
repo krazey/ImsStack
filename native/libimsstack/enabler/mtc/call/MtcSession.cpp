@@ -572,14 +572,13 @@ CallType MtcSession::GetCallTypeByRegisteredFeature()
 PRIVATE
 CallType MtcSession::MayGetFirstCallType()
 {
-    for (const auto& callType : m_objCallTypeHistory)
-    {
-        if (callType != CallType::UNKNOWN)
-        {
-            return callType;
-        }
-    }
-    return CallType::VOIP;
+    auto pCallType = std::find_if(m_objCallTypeHistory.begin(), m_objCallTypeHistory.end(),
+            [](CallType callType)
+            {
+                return callType != CallType::UNKNOWN;
+            });
+
+    return (pCallType != m_objCallTypeHistory.end()) ? *pCallType : CallType::VOIP;
 }
 
 PRIVATE
@@ -587,15 +586,13 @@ CallType MtcSession::GetCallTypeByHistory()
 {
     std::vector<CallType> objCallTypesInPriority{
             CallType::VIDEO_RTT, CallType::VT, CallType::RTT, CallType::VOIP};
-    for (CallType eType : objCallTypesInPriority)
-    {
-        if (IsInHistory(eType))
-        {
-            return eType;
-        }
-    }
+    auto pCallType = std::find_if(objCallTypesInPriority.begin(), objCallTypesInPriority.end(),
+            [this](CallType eType)
+            {
+                return IsInHistory(eType);
+            });
 
-    return CallType::UNKNOWN;
+    return (pCallType != objCallTypesInPriority.end()) ? *pCallType : CallType::UNKNOWN;
 }
 
 PRIVATE

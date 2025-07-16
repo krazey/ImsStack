@@ -39,6 +39,8 @@
 #include "precondition/SdpPreconditionHelper.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
+#include <algorithm>
+#include <numeric>
 #include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -207,18 +209,16 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
 
     // IsPreconditionSupported() guarantees that it's not null
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-
-    IMS_BOOL bResult = IMS_FALSE;
     CallType eCallType = m_objContext.GetSession()->GetCallType();
-    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
-    {
-        if (!pStatusTable->IsLocalResourceConfirmed(GetSdpMediaType(eMediaType)) &&
-                IsLocalResourceReservedByMediaType(piSession, eMediaType))
-        {
-            bResult = IMS_TRUE;
-            break;
-        }
-    }
+    std::vector<IMS_UINT32> objMediaTypeList =
+            MtcMediaUtil::GetMediaTypeListFromCallType(eCallType);
+
+    IMS_BOOL bResult = std::any_of(objMediaTypeList.begin(), objMediaTypeList.end(),
+            [this, piSession, pStatusTable](IMS_UINT32 eMediaType)
+            {
+                return !pStatusTable->IsLocalResourceConfirmed(GetSdpMediaType(eMediaType)) &&
+                        IsLocalResourceReservedByMediaType(piSession, eMediaType);
+            });
 
     IMS_TRACE_D("IsLocalResourceConfirmationRequired (%s)", _TRACE_B_(bResult), 0, 0);
     return bResult;
@@ -720,15 +720,20 @@ void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN const QosTi
         return HandleReservationFailureByTimerExpiration(pTimer);
     }
 
-    IMS_UINT32 eReservedMediaTypes = MEDIATYPE_NONE;
     CallType eCallType = m_objContext.GetSession()->GetCallType();
-    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
-    {
-        if (GetQosStatus(piSession, eMediaType) == QosStatus::AVAILABLE)
-        {
-            eReservedMediaTypes |= eMediaType;
-        }
-    }
+    std::vector<IMS_UINT32> objMediaTypeList =
+            MtcMediaUtil::GetMediaTypeListFromCallType(eCallType);
+
+    IMS_UINT32 eReservedMediaTypes = std::accumulate(objMediaTypeList.begin(),
+            objMediaTypeList.end(), static_cast<IMS_UINT32>(MEDIATYPE_NONE),
+            [this, piSession](IMS_UINT32 eCurrentMediaTypes, IMS_UINT32 eMediaType)
+            {
+                if (GetQosStatus(piSession, eMediaType) == QosStatus::AVAILABLE)
+                {
+                    return eCurrentMediaTypes | eMediaType;
+                }
+                return eCurrentMediaTypes;
+            });
 
     NotifyQosStatusToListener(piSession, IMS_TRUE, eReservedMediaTypes);
 }
