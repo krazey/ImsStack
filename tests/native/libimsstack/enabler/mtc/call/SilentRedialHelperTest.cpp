@@ -399,6 +399,21 @@ TEST_F(SilentRedialHelperTest, RedialReturnsFailureIfMaxDurationExpires)
             pRedialHelper->Redial(ISilentRedialHelper::INTERVAL_BY_TYPE));
 }
 
+TEST_F(SilentRedialHelperTest, RedialIfSessionIsNull)
+{
+    IMS_UINT32 nMaxCount = 0;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .WillByDefault(Return(MAX_DURATION));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .WillByDefault(Return(nMaxCount));
+    const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+
+    EXPECT_CALL(objContext, GetSession()).WillOnce(Return(IMS_NULL));
+    EXPECT_EQ(CallReasonInfo(CODE_NONE),
+            pRedialHelper->Redial(ISilentRedialHelper::INTERVAL_BY_TYPE));
+}
+
 TEST_F(SilentRedialHelperTest, HandleFailureTriggersInitialRegistrationByConfig)
 {
     ON_CALL(*pConfigurationProxy,

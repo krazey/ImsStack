@@ -674,6 +674,16 @@ TEST_F(OutgoingStateTest, OnRatChangedPerformsSilentRedialIfWaitingEpsFallback)
                     INetworkWatcher::RADIOTECH_TYPE_NR, INetworkWatcher::RADIOTECH_TYPE_LTE));
 }
 
+TEST_F(OutgoingStateTest, OnRatChangedPerformsSilentRedialWhenSilentRedialHelperDoesNotExist)
+{
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
+    EXPECT_EQ(CallStateName::IDLE,
+            pOutgoingState->OnRatChanged(
+                    INetworkWatcher::RADIOTECH_TYPE_NR, INetworkWatcher::RADIOTECH_TYPE_LTE));
+}
+
 TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
 {
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));

@@ -937,7 +937,11 @@ CallStateName OutgoingState::PerformSilentRedial(
         IN IMS_SINT32 nIntervalInMillis /* = INTERVAL_BY_TYPE*/)
 {
     IMS_TRACE_D("PerformSilentRedial with interval[%d]", nIntervalInMillis, 0, 0);
-    IMS_ASSERT(m_pSilentRedialHelper);
+    if (!m_pSilentRedialHelper)
+    {
+        return CallStateName::IDLE;
+    }
+
     CallReasonInfo objResult = m_pSilentRedialHelper->Redial(nIntervalInMillis);
     if (objResult.nCode != CODE_NONE)
     {
