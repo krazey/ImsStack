@@ -31,7 +31,7 @@ public:
     ImsCarrierConfig& operator=(IN const ImsCarrierConfig&) = delete;
 
 protected:
-    inline virtual ~ImsCarrierConfig() {}
+    ~ImsCarrierConfig() override = default;
 
 public:
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;

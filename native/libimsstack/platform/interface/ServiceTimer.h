@@ -31,7 +31,7 @@ public:
     TimerService& operator=(IN const TimerService&) = delete;
 
 protected:
-    virtual ~TimerService();
+    ~TimerService() override;
 
 public:
     virtual ITimer* CreateTimer();

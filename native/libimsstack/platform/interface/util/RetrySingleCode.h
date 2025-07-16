@@ -36,7 +36,7 @@ public:
             m_nCode(other.m_nCode)
     {
     }
-    inline virtual ~RetrySingleCode() {}
+    ~RetrySingleCode() override = default;
 
 public:
     inline RetrySingleCode& operator=(IN const RetrySingleCode& other)

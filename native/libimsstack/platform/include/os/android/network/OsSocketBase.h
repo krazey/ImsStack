@@ -28,7 +28,7 @@ public:
             m_bSocketConnected(IMS_FALSE)
     {
     }
-    inline virtual ~OsSocketBase() {}
+    ~OsSocketBase() override = default;
 
 public:
     // ISocket class

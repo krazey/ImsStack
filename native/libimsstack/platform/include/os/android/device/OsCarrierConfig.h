@@ -27,7 +27,7 @@ class OsCarrierConfig : public ImsCarrierConfig, public ISystemListener
 {
 public:
     explicit OsCarrierConfig(IN IMS_SINT32 nSlotId);
-    virtual ~OsCarrierConfig();
+    ~OsCarrierConfig() override;
 
     OsCarrierConfig(IN const OsCarrierConfig&) = delete;
     OsCarrierConfig& operator=(IN const OsCarrierConfig&) = delete;

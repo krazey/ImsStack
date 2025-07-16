@@ -481,7 +481,7 @@ class OsSocketThread : public IThreadImpListener
 {
 public:
     explicit OsSocketThread(IN OsSocketService* pService);
-    virtual ~OsSocketThread();
+    ~OsSocketThread() override;
 
     OsSocketThread(IN const OsSocketThread&) = delete;
     OsSocketThread& operator=(IN const OsSocketThread&) = delete;

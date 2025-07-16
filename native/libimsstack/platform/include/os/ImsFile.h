@@ -21,8 +21,8 @@
 class ImsFile : public IFile
 {
 public:
-    inline ImsFile() {}
-    inline virtual ~ImsFile() {}
+    ImsFile() = default;
+    ~ImsFile() override = default;
 };
 
 #endif

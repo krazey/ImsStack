@@ -34,7 +34,7 @@ public:
     NetworkService& operator=(IN const NetworkService&) = delete;
 
 protected:
-    virtual ~NetworkService();
+    ~NetworkService() override;
 
 public:
     virtual INetworkConnection* CreateConnection(

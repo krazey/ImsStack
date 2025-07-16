@@ -27,7 +27,7 @@ class System : public ISystem
 {
 private:
     System();
-    virtual ~System();
+    ~System() override;
 
     System(IN const System&) = delete;
     System& operator=(IN const System&) = delete;

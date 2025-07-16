@@ -25,7 +25,7 @@ public:
             m_nSlotId(IMS_SLOT_ANY)
     {
     }
-    inline virtual ~ImsThread() {}
+    ~ImsThread() override = default;
 
 public:
     // IThread class

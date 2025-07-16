@@ -28,7 +28,7 @@ public:
     }
 
 protected:
-    inline virtual ~ImsUsim() {}
+    ~ImsUsim() override = default;
 
 public:
     inline virtual void Destroy() { delete this; }

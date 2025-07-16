@@ -30,7 +30,7 @@ public:
             ImsVector<T>(other)
     {
     }
-    inline virtual ~ImsQueue() {}
+    ~ImsQueue() override = default;
 
 public:
     inline ImsQueue<T>& operator=(IN const ImsQueue<T>& other)

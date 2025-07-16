@@ -29,7 +29,7 @@ public:
     TraceService& operator=(IN const TraceService&) = delete;
 
 protected:
-    virtual ~TraceService();
+    ~TraceService() override;
 
 public:
     const ImsTraceTag& GetTraceTag(IN IMS_SINT32 nTag) const;

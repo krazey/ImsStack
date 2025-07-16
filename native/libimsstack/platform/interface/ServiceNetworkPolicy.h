@@ -77,7 +77,7 @@ public:
     NetworkServicePolicy& operator=(IN const NetworkServicePolicy&) = delete;
 
 protected:
-    virtual ~NetworkServicePolicy();
+    ~NetworkServicePolicy() override;
 
 public:
     virtual IMS_BOOL AddPolicy(

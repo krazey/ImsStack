@@ -30,7 +30,7 @@ public:
     ConfigService& operator=(IN const ConfigService&) = delete;
 
 protected:
-    virtual ~ConfigService();
+    ~ConfigService() override;
 
 public:
     virtual ICarrierConfig* GetCarrierConfig(IN IMS_SINT32 nSlotId);

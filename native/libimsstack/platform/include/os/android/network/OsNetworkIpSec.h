@@ -27,7 +27,7 @@ class OsNetworkIpSec : public INetworkIpSec
 {
 public:
     explicit OsNetworkIpSec(IN IMS_SINT32 nSlotId);
-    virtual ~OsNetworkIpSec();
+    ~OsNetworkIpSec() override;
 
     OsNetworkIpSec(IN const OsNetworkIpSec&) = delete;
     OsNetworkIpSec& operator=(IN const OsNetworkIpSec&) = delete;

@@ -24,7 +24,7 @@ class OsFile final : public ImsFile
 {
 public:
     OsFile();
-    virtual ~OsFile();
+    ~OsFile() override;
 
     OsFile(IN const OsFile&) = delete;
     OsFile& operator=(IN const OsFile&) = delete;
@@ -45,8 +45,8 @@ private:
 class OsFileUtil : public IFileUtil
 {
 public:
-    OsFileUtil() {}
-    virtual ~OsFileUtil() {}
+    OsFileUtil() = default;
+    ~OsFileUtil() override = default;
 
 public:
     IMS_BOOL ChangeMode(IN const AString& strFileName, IN IMS_SINT32 nMode) const override;

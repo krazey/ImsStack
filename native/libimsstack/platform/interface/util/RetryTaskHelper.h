@@ -28,7 +28,7 @@ class RetryTaskHelper : public IRetryCmdListener, public IRetryTimerListener
 {
 public:
     explicit RetryTaskHelper(IN IMS_BOOL bTimerOnCmdCompleted = IMS_FALSE);
-    virtual ~RetryTaskHelper();
+    ~RetryTaskHelper() override;
 
     RetryTaskHelper(IN const RetryTaskHelper&) = delete;
     RetryTaskHelper& operator=(IN const RetryTaskHelper&) = delete;

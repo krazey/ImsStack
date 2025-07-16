@@ -29,7 +29,7 @@ public:
     SystemTimeService& operator=(IN const SystemTimeService&) = delete;
 
 protected:
-    virtual ~SystemTimeService();
+    ~SystemTimeService() override;
 
 public:
     virtual ISystemTime* GetSystemTime();

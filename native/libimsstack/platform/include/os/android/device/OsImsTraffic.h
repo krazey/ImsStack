@@ -167,7 +167,7 @@ class OsImsTraffic : public IImsTraffic, public IImsTrafficTimerListener
 {
 public:
     explicit OsImsTraffic();
-    virtual ~OsImsTraffic();
+    ~OsImsTraffic() override;
 
     OsImsTraffic(IN const OsImsTraffic&) = delete;
     OsImsTraffic& operator=(IN const OsImsTraffic&) = delete;

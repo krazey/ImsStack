@@ -26,7 +26,7 @@ class OsThread : public ImsThread
 {
 public:
     OsThread();
-    virtual ~OsThread();
+    ~OsThread() override;
 
     OsThread(IN const OsThread&) = delete;
     OsThread& operator=(IN const OsThread&) = delete;

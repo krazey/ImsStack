@@ -22,7 +22,7 @@ class OsTimer final : public ImsTimer
 {
 public:
     OsTimer();
-    virtual ~OsTimer();
+    ~OsTimer() override;
 
     OsTimer(IN const OsTimer&) = delete;
     OsTimer& operator=(IN const OsTimer&) = delete;

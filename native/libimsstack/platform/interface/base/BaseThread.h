@@ -22,7 +22,7 @@ class BaseThread : public IRunnable
 {
 public:
     BaseThread();
-    virtual ~BaseThread();
+    ~BaseThread() override;
 
     BaseThread(IN const BaseThread&) = delete;
     BaseThread& operator=(IN const BaseThread&) = delete;

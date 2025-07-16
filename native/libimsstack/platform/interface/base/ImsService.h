@@ -26,7 +26,7 @@ class ImsService : public ImsActivity, public ImsStateObject
 
 public:
     explicit ImsService(IN const AString& strName);
-    inline virtual ~ImsService() {}
+    ~ImsService() override = default;
 
 protected:
     inline IImsActivityController* GetController() override { return IMS_NULL; }

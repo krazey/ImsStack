@@ -21,8 +21,8 @@
 class OsFactory : public IOsFactory
 {
 public:
-    inline OsFactory() {}
-    inline virtual ~OsFactory() {}
+    OsFactory() = default;
+    ~OsFactory() override = default;
 
 public:
     OsFactory(IN const OsFactory&) = delete;

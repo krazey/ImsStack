@@ -24,7 +24,7 @@ class OsSubscriberInfo : public ImsSlot, public ISubscriberInfo
 {
 public:
     explicit OsSubscriberInfo(IN IMS_SINT32 nSlotId);
-    virtual ~OsSubscriberInfo();
+    ~OsSubscriberInfo() override;
 
     OsSubscriberInfo(IN const OsSubscriberInfo&) = delete;
     OsSubscriberInfo& operator=(IN const OsSubscriberInfo&) = delete;

@@ -23,7 +23,7 @@ class ImsApp : public ImsActivity
 {
 public:
     explicit ImsApp(IN const AString& strName);
-    virtual ~ImsApp();
+    ~ImsApp() override;
 
     ImsApp(IN const ImsApp&) = delete;
     ImsApp& operator=(IN const ImsApp&) = delete;

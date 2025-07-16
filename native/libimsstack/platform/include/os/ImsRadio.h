@@ -26,7 +26,7 @@ public:
             ImsSlot(nSlotId)
     {
     }
-    inline virtual ~ImsRadio() {}
+    ~ImsRadio() override = default;
 
 public:
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;

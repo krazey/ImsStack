@@ -73,7 +73,7 @@ public:
     AsyncExecutor(IN IListener* piListener, IN IMS_BOOL bAutoDestroy);
     AsyncExecutor(IN IThread* piOwnerThread, IN IMS_BOOL bAutoDestroy);
     AsyncExecutor(IN IThread* piOwnerThread, IN IListener* piListener, IN IMS_BOOL bAutoDestroy);
-    virtual ~AsyncExecutor();
+    ~AsyncExecutor() override;
 
     AsyncExecutor(IN const AsyncExecutor&) = delete;
     AsyncExecutor& operator=(IN const AsyncExecutor&) = delete;

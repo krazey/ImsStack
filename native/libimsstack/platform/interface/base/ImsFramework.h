@@ -25,7 +25,7 @@ class ImsFramework : public ImsAppThread
 {
 public:
     ImsFramework();
-    virtual ~ImsFramework();
+    ~ImsFramework() override;
 
     ImsFramework(IN const ImsFramework&) = delete;
     ImsFramework& operator=(IN const ImsFramework&) = delete;

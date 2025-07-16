@@ -25,7 +25,7 @@ class ImsStateMachine : public ImsStateObject
 
 public:
     explicit ImsStateMachine(IN IMS_UINT32 nState = IMS_INVALID_STATE);
-    inline virtual ~ImsStateMachine() {}
+    ~ImsStateMachine() override = default;
 
     ImsStateMachine(IN const ImsStateMachine&) = delete;
     ImsStateMachine& operator=(IN const ImsStateMachine&) = delete;

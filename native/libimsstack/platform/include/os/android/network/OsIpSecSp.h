@@ -25,7 +25,7 @@ class OsIpSecSp : public IIpSecSp
 {
 public:
     OsIpSecSp();
-    virtual ~OsIpSecSp();
+    ~OsIpSecSp() override;
 
     OsIpSecSp(IN const OsIpSecSp&) = delete;
     OsIpSecSp& operator=(IN const OsIpSecSp&) = delete;

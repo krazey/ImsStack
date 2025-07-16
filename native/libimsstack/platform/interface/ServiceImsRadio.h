@@ -31,7 +31,7 @@ public:
     ImsRadioService& operator=(IN const ImsRadioService&) = delete;
 
 protected:
-    virtual ~ImsRadioService();
+    ~ImsRadioService() override;
 
 public:
     virtual IImsRadio* GetImsRadio(IN IMS_SINT32 nSlotId);

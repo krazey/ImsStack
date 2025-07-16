@@ -30,7 +30,7 @@ public:
     ThreadService& operator=(IN const ThreadService&) = delete;
 
 protected:
-    virtual ~ThreadService();
+    ~ThreadService() override;
 
 public:
     virtual IThread* CreateThread(IN const AString& strName, IN IMS_SINT32 nSlotId);
