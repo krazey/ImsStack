@@ -72,6 +72,7 @@ class AosKeepAliveTest : public ::testing::Test
 public:
     TestAosKeepAlive* m_pAosKeepAlive;
     MockISipKeepAliveHelper m_objMockSipKeepAliveHelper;
+    // cppcheck-suppress unusedStructMember
     MockIAosKeepAliveListener m_objMockIAosKeepAliveListener;
 
 protected:

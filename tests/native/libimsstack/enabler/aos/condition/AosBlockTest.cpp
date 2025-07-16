@@ -65,12 +65,18 @@ public:
 
     NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
 
+    // cppcheck-suppress unusedStructMember
     MockIAosBlockListener m_objMockIAosBlockListener1;
+    // cppcheck-suppress unusedStructMember
     MockIAosBlockListener m_objMockIAosBlockListener2;
+    // cppcheck-suppress unusedStructMember
     MockIAosBlockListener m_objMockIAosBlockListener3;
 
+    // cppcheck-suppress unusedStructMember
     MockIAosBlockSilentListener m_objMockIAosBlockSilentListener1;
+    // cppcheck-suppress unusedStructMember
     MockIAosBlockSilentListener m_objMockIAosBlockSilentListener2;
+    // cppcheck-suppress unusedStructMember
     MockIAosBlockSilentListener m_objMockIAosBlockSilentListener3;
 
 protected:

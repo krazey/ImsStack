@@ -119,6 +119,7 @@ public:
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosConnection m_objMockIAosConnection;
     MockIAosNConfiguration m_objMockIAosNConfiguration;
+    // cppcheck-suppress unusedStructMember
     MockIAosPcscfListener objMockIAosPcscfListener;
     MockIAosRegistration objMockIAosRegistration;
     MockIAosSubscriber m_objMockIAosSubscriber;

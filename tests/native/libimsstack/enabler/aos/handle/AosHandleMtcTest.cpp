@@ -206,9 +206,11 @@ public:
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
     MockIAosConnection m_objMockIAosConnection;
+    // cppcheck-suppress unusedStructMember
     MockIAosHandle m_objMockIAosHandle;
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockIAosRegistration m_objMockIAosRegistration;
+    // cppcheck-suppress unusedStructMember
     MockIImsAosListener m_objMockIImsAosListener;
 
     IAosNConfiguration* m_piAosNConfiguration;

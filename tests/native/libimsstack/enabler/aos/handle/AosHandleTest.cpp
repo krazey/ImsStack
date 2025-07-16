@@ -303,6 +303,7 @@ public:
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
     MockIAosNetTracker m_objMockIAosNetTracker;
+    // cppcheck-suppress unusedStructMember
     MockIImsAosListener m_objMockIImsAosListener;
     MockIAosConnection m_objMockIAosConnection;
     MockIWifiWatcher m_objMockIWifiWatcher;

@@ -86,6 +86,7 @@ class AosTransactionTest : public ::testing::Test
 public:
     TestAosTransaction* m_pAosTransaction;
 
+    // cppcheck-suppress unusedStructMember
     MockIAosTransactionListener m_objMockIAosTransactionListener;
     MockIImsRadio m_objMockIImsRadio;
 

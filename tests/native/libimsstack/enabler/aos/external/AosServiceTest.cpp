@@ -77,8 +77,11 @@ class AosServiceTest : public ::testing::Test
 public:
     TestAosService* m_pAosService;
 
+    // cppcheck-suppress unusedStructMember
     MockIAosEmergencyListener m_objMockIAosEmergencyListener1;
+    // cppcheck-suppress unusedStructMember
     MockIAosEmergencyListener m_objMockIAosEmergencyListener2;
+    // cppcheck-suppress unusedStructMember
     MockIAosEmergencyListener m_objMockIAosEmergencyListener3;
 
 protected:

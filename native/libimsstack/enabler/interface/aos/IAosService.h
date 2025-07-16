@@ -365,6 +365,7 @@ public:
      *
      * @note {@link BASE_CONVERSION_FACTOR} is the factor used to determine base groups.
      */
+    // cppcheck-suppress unusedFunction
     inline IMS_BOOL IsInBase(IN AosReasonCodeBase eBase) const
     {
         constexpr unsigned int BASE_CONVERSION_FACTOR = 1000;
