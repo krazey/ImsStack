@@ -44,16 +44,9 @@ public:
     IMS_BOOL UpdateIncomingServices(IN IMessage* piMessage);
     IMS_BOOL UpdateCallerId(IN IMessage* piMessage);
     IMS_BOOL UpdateCnap(IN IMessage* piMessage);
-    static IMS_BOOL UpdateCnapEx(IN IMessage* piMessage);
-    IMS_BOOL UpdateMmc(IN IMessage* piMessage);
-    static IMS_BOOL UpdateGtt(IN IMessage* piMessage);
     IMS_BOOL UpdateCdivCause(IN const IMessage* piMessage);
     IMS_BOOL UpdateCdivHistory(IN const IMessage* piMessage);
     IMS_BOOL UpdateCw(IN const IMessage* piMessage);
-    static IMS_BOOL UpdateVm(IN IMessage* piMessage);
-    static IMS_BOOL UpdateAnswerHold(IN IMessage* piMessage);
-    IMS_BOOL UpdateMcid(IN IMessage* piMessage);
-    static IMS_BOOL UpdateDualNumber(IN IMessage* piMessage);
     IMS_BOOL UpdateCallingNumberVerification(IN IMessage* piMessage);
     IMS_BOOL UpdateCallComposerElements(IN const IMessage* piMessage);
     IMS_BOOL UpdateSessionId(IN const IMessage* piMessage);

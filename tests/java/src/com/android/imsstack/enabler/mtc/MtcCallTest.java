@@ -242,10 +242,6 @@ public class MtcCallTest extends ImsStackTest {
         parcel.writeString("test");
         parcel.writeInt(0);
         parcel.writeInt(0);
-        parcel.writeInt(SuppInfo.TYPE_GTT);
-        parcel.writeString("");
-        parcel.writeInt(0);
-        parcel.writeInt(1);
     }
 
     public void sendMessageToJniListener(int command, int send) {

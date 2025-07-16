@@ -124,16 +124,9 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
 
     bUpdate |= UpdateCallerId(piMessage);
     bUpdate |= UpdateCnap(piMessage);
-    bUpdate |= UpdateCnapEx(piMessage);
-    bUpdate |= UpdateMmc(piMessage);
-    bUpdate |= UpdateGtt(piMessage);
     bUpdate |= UpdateCdivCause(piMessage);
     bUpdate |= UpdateCdivHistory(piMessage);
     bUpdate |= UpdateCw(piMessage);
-    bUpdate |= UpdateVm(piMessage);
-    bUpdate |= UpdateAnswerHold(piMessage);
-    bUpdate |= UpdateMcid(piMessage);
-    bUpdate |= UpdateDualNumber(piMessage);
     bUpdate |= UpdateCallingNumberVerification(piMessage);
     bUpdate |= UpdateCallComposerElements(piMessage);
     bUpdate |= UpdateSessionId(piMessage);
@@ -193,31 +186,6 @@ IMS_BOOL MtcSupplementaryService::UpdateCnap(IN IMessage* piMessage)
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCnapEx(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateMmc(IN IMessage* /*piMessage*/)
-{
-    IMS_BOOL bUseMMC =
-            m_objConfigurationProxy.GetBoolean(ConfigVoice::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL);
-
-    if (bUseMMC)
-    {
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateGtt(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCdivCause(IN const IMessage* piMessage)
 {
     ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
@@ -273,37 +241,6 @@ IMS_BOOL MtcSupplementaryService::UpdateCw(IN const IMessage* piMessage)
     Add(SuppType::CW, IMS_TRUE);
 
     return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateVm(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateAnswerHold(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateMcid(IN IMessage* /*piMessage*/)
-{
-    IMS_BOOL bUseMCID = m_objConfigurationProxy.GetBoolean(
-            ConfigVoice::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL);
-
-    if (bUseMCID)
-    {
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateDualNumber(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
 }
 
 PUBLIC

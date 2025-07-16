@@ -836,20 +836,17 @@ public class ImsCallUtilsTest {
         ImsCallProfile profile = new ImsCallProfile();
         profile.mCallType = ImsCallProfile.CALL_TYPE_VOICE;
         SuppInfo suppInfo = new SuppInfo();
-        SuppInfo suppInfo2 = new SuppInfo(suppInfo);
+        SuppInfo suppInfo2 = new SuppInfo();
         CallInfo ci = new CallInfo();
         ci.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
         ci.isConf = true;
         ci.videoCapable = true;
         ci.confSub = true;
         ci.rttCapable = true;
-        suppInfo2.addService_bool(SuppInfo.TYPE_MMC, true);
         ImsCallUtils.updateCallProfileOnSessionProgressing(mContext, profile, ci, suppInfo2);
         Assert.assertEquals(ImsCallProfile.CALL_TYPE_VOICE, profile.getCallType());
 
         ci.callType = IUMtcCall.CALLTYPE_VT;
-        suppInfo.addService(SuppInfo.TYPE_VRBT, false, SuppInfo.TIP_IDENTITY,
-                "Testing Demo,sip:+12345678902");
         ImsCallUtils.updateCallProfileOnSessionProgressing(mContext, profile, ci, suppInfo);
         assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.getCallType());
     }
