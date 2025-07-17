@@ -225,6 +225,10 @@ private:
     {
         return m_pSession->IsSessionCanceledOnAccepted();
     }
+    inline void AbortEarlyUpdateTransaction() override
+    {
+        return m_pSession->AbortEarlyUpdateTransaction();
+    }
 
     // IOnSessionListener interface
     void OnSession_Alerting(IN Session* pSession) override;

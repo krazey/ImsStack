@@ -131,6 +131,7 @@ public:
     MOCK_METHOD(void, SetReasonHeaderSetter, (IN IReasonHeaderSetter * piSetter), (override));
     MOCK_METHOD(ISdpReader*, GetRemoteMediaCapabilities, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSessionCanceledOnAccepted, (), (const, override));
+    MOCK_METHOD(void, AbortEarlyUpdateTransaction, (), (override));
 };
 
 #endif

@@ -41,6 +41,7 @@ public:
             IN const AString& strReason = AString::ConstNull(), IN IMS_BOOL bSdp = IMS_TRUE,
             IN IMS_SINT32 nFlags = 0);
     IMS_RESULT UpdateEarlyMedia();
+    void AbortEarlyUpdateTransaction();
     inline void SetExListener(IN IOnSessionExListener* piListener) { m_piListener = piListener; }
 
 protected:
