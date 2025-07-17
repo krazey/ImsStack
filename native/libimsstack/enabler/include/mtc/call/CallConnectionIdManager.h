@@ -59,10 +59,10 @@ private:
     struct CallKeyConnection
     {
     public:
-        inline explicit CallKeyConnection(IN CallKey nKey_, IN IMS_UINT32 nConnectionId_)
+        inline explicit CallKeyConnection(IN CallKey nKey_, IN IMS_UINT32 nConnectionId_) :
+                nKey(nKey_),
+                nConnectionId(nConnectionId_)
         {
-            nKey = nKey_;
-            nConnectionId = nConnectionId_;
         }
         inline ~CallKeyConnection() {}
         CallKeyConnection(IN const CallKeyConnection&) = delete;
