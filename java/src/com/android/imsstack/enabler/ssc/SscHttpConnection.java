@@ -119,7 +119,7 @@ public class SscHttpConnection implements ISscHttpConnection {
 
             int bodyLength = 0;
             if (!TextUtils.isEmpty(body)) {
-                bodyLength = body.length();
+                bodyLength = body.getBytes().length;
             }
 
             setExtraHeaders(connectionUrl, xui, bodyLength);
