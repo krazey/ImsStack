@@ -2388,6 +2388,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTerminating()
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 {
+    if (m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
+            m_nOffReason == AosReason::POWER_OFF)
+    {
+        m_pConnector->Stop();
+        return;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->IsCallEndAndPdnReactivationByRegTerminated())
     {
         if (IsImsCall())

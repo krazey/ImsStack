@@ -2675,6 +2675,40 @@ TEST_F(AosApplicationTest, RegTerminating)
     EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_CONNECTING);
 }
 
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotBlockPlmnWhenImsServiceDisabled)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+            .WillOnce(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated()).Times(0);
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    // WHEN
+    m_pAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotBlockPlmnWhenPowerOff)
+{
+    // GIVEN
+    m_pAosApplication->SetOffReason(AosReason::POWER_OFF);
+
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated()).Times(0);
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    // WHEN
+    m_pAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldSetStateWithNotReadyWhenIsImsCall)
 {
     // GIVEN
