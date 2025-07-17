@@ -561,14 +561,6 @@ TEST_F(AosHandleTest, SetRegBinded_IsRegBinded)
     EXPECT_FALSE(m_pAosHandle->IsRegBinded());
 }
 
-TEST_F(AosHandleTest, SetNetworkRegBinded_IsNetworkRegBinded)
-{
-    m_pAosHandle->SetNetworkRegBinded(IMS_TRUE);
-    EXPECT_TRUE(m_pAosHandle->IsNetworkRegBinded());
-    m_pAosHandle->SetNetworkRegBinded(IMS_FALSE);
-    EXPECT_FALSE(m_pAosHandle->IsNetworkRegBinded());
-}
-
 TEST_F(AosHandleTest, IsRegFeatureTagRequired_Test)
 {
     IMS_BOOL bRegFeatureTagRequired = m_pAosHandle->IsRegFeatureTagRequired();

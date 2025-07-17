@@ -38,8 +38,6 @@ public:
     MOCK_METHOD(void, SetRequestType, (IN IMS_SINT32 nReqType), (override));
     MOCK_METHOD(IMS_BOOL, IsRegBinded, (), (override));
     MOCK_METHOD(void, SetRegBinded, (IN IMS_BOOL bBind), (override));
-    MOCK_METHOD(IMS_BOOL, IsNetworkRegBinded, (), (override));
-    MOCK_METHOD(void, SetNetworkRegBinded, (IN IMS_BOOL bNetworkBind), (override));
     MOCK_METHOD(IMS_BOOL, IsRegFeatureTagRequired, (), (override));
     MOCK_METHOD(IMS_BOOL, IsRegToNextPcscfRequested, (), (override));
     MOCK_METHOD(AosFeatureTagList&, GetFeatureTagList, (), (override));

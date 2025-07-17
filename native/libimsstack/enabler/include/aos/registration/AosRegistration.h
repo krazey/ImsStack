@@ -135,7 +135,6 @@ protected:
     IMS_BOOL IsReconnectingServerSocketErrorAllowed() const;
     IMS_BOOL IsRegTypeEqual(IN AosRegistrationType eType) const;
     IMS_BOOL IsRegTrying() const;
-    IMS_BOOL IsNetworkBindingSupported(IN IAosHandle* piHandle);
     IMS_BOOL IsCallStateRequired() const;
     IMS_BOOL IsValidCallType(IN IMS_UINT32 nType) const;
     IMS_BOOL IsRadioWaiting() const;
@@ -203,8 +202,6 @@ protected:
 
     virtual IMS_BOOL StartRegBinding();
     virtual IMS_BOOL UpdateRegBinding();
-    virtual IMS_BOOL UpdateNetworkRegBinding();
-    virtual IMS_BOOL UpdateNetworkRegFeatureBinding();
 
     virtual IMS_BOOL Register(IN IMS_SINT32 nMinExpireValue);
     virtual IMS_BOOL SendRegister(
