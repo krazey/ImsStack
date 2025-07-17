@@ -41,6 +41,7 @@ PUBLIC GLOBAL AString TemplateFormatter::Format(
     // clang-format off
     Replace(strResult, "#IMEI#", [&]() { return GetImei(objContext); });
     Replace(strResult, "#IMEIWITHHYPHEN#", [&]() { return GetImeiWithHyphen(objContext); });
+    Replace(strResult, "#IMEIASADDRREFID#", [&]() { return GetImeiAsAddressRefId(objContext); });
     Replace(strResult, "#IMSI#", [&]() { return GetImsi(objContext); });
     Replace(strResult, "#MAC#", [&]() { return GetMacAddress(objContext); });
     Replace(strResult, "#IP#", [&]() { return GetIpAddress(objContext); });
@@ -78,6 +79,30 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImeiWithHyphen(IN const IMtcCallCon
 {
     AString strImei = GetImei(objContext);
     return strImei.Insert(IMEI_INSERT_INDEX_1, '-').Insert(IMEI_INSERT_INDEX_2, '-');
+}
+
+/**
+* This function formats value of IMEI adding a padding of “0”
+* to a 16 digit MAC address.
+* For example:
+* IMEI: 123456789012345
+* address-ref-id: 1234:5678:9012:3450
+*/
+PRIVATE GLOBAL AString TemplateFormatter::GetImeiAsAddressRefId(IN const IMtcCallContext& objContext)
+{
+    AString strDeviceId;
+    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
+            objContext.GetSlotId(), strDeviceId);
+
+    AString strImeiAsAddrRefId;
+    strImeiAsAddrRefId.Sprintf("%-15.15s0", strDeviceId.GetStr()).Replace(' ', '0');
+
+    for (IMS_UINT8 i = 4; i < strImeiAsAddrRefId.GetLength(); i += 5)
+    {
+        strImeiAsAddrRefId.Insert(i, TextParser::CHAR_COLON);
+    }
+
+    return strImeiAsAddrRefId;
 }
 
 PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN const IMtcCallContext& objContext)

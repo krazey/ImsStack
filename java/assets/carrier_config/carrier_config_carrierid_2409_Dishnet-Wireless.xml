@@ -15,5 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <string name="imsemergency.p_emergency_info_header_in_invite_string">WSS-Wi-Fi-KEY;generic-key=#IMEI#</string>
+    <string name="imsemergency.p_emergency_info_header_in_invite_string">WSS-WIFI-KEY;generic-key=#IMEI#</string>
 </carrier_config>

@@ -87,6 +87,8 @@ TEST_F(TemplateFormatterTest, FormatWithImei)
     EXPECT_STREQ("<123456789012340>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
     EXPECT_STREQ("<12345678-901234-0>",
             TemplateFormatter::Format("<#IMEIWITHHYPHEN#>", objContext).GetStr());
+    EXPECT_STREQ("<1234:5678:9012:3450>",
+            TemplateFormatter::Format("<#IMEIASADDRREFID#>", objContext).GetStr());
 
     ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
             .WillByDefault(Invoke(
@@ -98,6 +100,8 @@ TEST_F(TemplateFormatterTest, FormatWithImei)
     EXPECT_STREQ("<123456789000000>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
     EXPECT_STREQ("<12345678-900000-0>",
             TemplateFormatter::Format("<#IMEIWITHHYPHEN#>", objContext).GetStr());
+    EXPECT_STREQ("<1234:5678:9000:0000>",
+            TemplateFormatter::Format("<#IMEIASADDRREFID#>", objContext).GetStr());
 
     ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
             .WillByDefault(Invoke(
@@ -109,6 +113,8 @@ TEST_F(TemplateFormatterTest, FormatWithImei)
     EXPECT_STREQ("<000000000000000>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
     EXPECT_STREQ("<00000000-000000-0>",
             TemplateFormatter::Format("<#IMEIWITHHYPHEN#>", objContext).GetStr());
+    EXPECT_STREQ("<0000:0000:0000:0000>",
+            TemplateFormatter::Format("<#IMEIASADDRREFID#>", objContext).GetStr());
 }
 
 TEST_F(TemplateFormatterTest, FormatWithImsi)

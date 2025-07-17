@@ -15,5 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <string name="imsemergency.p_emergency_info_header_in_invite_string">i-wlan-node-id=#MAC#</string>
+    <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b;i-wlan-node-id=#IMEIASADDRREFID#</string>
 </carrier_config>
