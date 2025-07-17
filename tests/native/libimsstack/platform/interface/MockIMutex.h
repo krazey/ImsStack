@@ -23,8 +23,8 @@
 class MockIMutex : public IMutex
 {
 public:
-    inline MockIMutex() {}
-    inline virtual ~MockIMutex() {}
+    MockIMutex() = default;
+    ~MockIMutex() override = default;
 
     MOCK_METHOD(void, Lock, (), (override));
     MOCK_METHOD(void, Unlock, (), (override));

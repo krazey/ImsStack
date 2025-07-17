@@ -32,7 +32,7 @@ public:
             ImsSocket()
     {
     }
-    inline ~TestImsSocket() {}
+    ~TestImsSocket() override = default;
 
 public:
     IMS_SINT32 GetSocketId() const override { return 0; }

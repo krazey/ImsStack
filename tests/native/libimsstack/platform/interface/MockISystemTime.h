@@ -23,8 +23,8 @@
 class MockISystemTime : public ISystemTime
 {
 public:
-    inline MockISystemTime() {}
-    inline virtual ~MockISystemTime() {}
+    MockISystemTime() = default;
+    ~MockISystemTime() override = default;
 
     MOCK_METHOD(ImsDate, GetDate, (), (const, override));
     MOCK_METHOD(void, GetDate,

@@ -23,8 +23,8 @@
 class MockIDeviceInfo : public IDeviceInfo
 {
 public:
-    inline MockIDeviceInfo() {}
-    inline virtual ~MockIDeviceInfo() {}
+    MockIDeviceInfo() = default;
+    ~MockIDeviceInfo() override = default;
 
     MOCK_METHOD(IMS_BOOL, GetDeviceId, (IN IMS_SINT32 nSlotId, OUT AString& strDeviceId),
             (const, override));

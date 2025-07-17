@@ -23,8 +23,8 @@
 class MockIIsim : public IIsim
 {
 public:
-    inline MockIIsim() {}
-    inline virtual ~MockIIsim() {}
+    MockIIsim() = default;
+    ~MockIIsim() override = default;
 
     MOCK_METHOD(IDigestAka*, CreateDigestAka, (), (override));
     MOCK_METHOD(AString, GetHomeDomainName, (), (const, override));

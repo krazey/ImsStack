@@ -24,7 +24,7 @@ class MockISystemUtil : public ISystemUtil
 {
 public:
     MockISystemUtil() = default;
-    virtual ~MockISystemUtil() = default;
+    ~MockISystemUtil() override = default;
 
     MOCK_METHOD(void, GetUuid,
             (IN IMS_SINT32 nVersion, OUT AString& strUuid, IN const AString& strName), (override));

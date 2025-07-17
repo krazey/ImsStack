@@ -23,8 +23,8 @@
 class MockIPowerInfoListener : public IPowerInfoListener
 {
 public:
-    inline MockIPowerInfoListener() {}
-    inline virtual ~MockIPowerInfoListener() {}
+    MockIPowerInfoListener() = default;
+    ~MockIPowerInfoListener() override = default;
 
     MOCK_METHOD(void, PowerInfo_NotifyPowerLevel, (IN IPowerInfo * piPowerInfo), (override));
 };
@@ -32,8 +32,8 @@ public:
 class MockIPowerInfo : public IPowerInfo
 {
 public:
-    inline MockIPowerInfo() {}
-    inline virtual ~MockIPowerInfo() {}
+    MockIPowerInfo() = default;
+    ~MockIPowerInfo() override = default;
 
     MOCK_METHOD(POWERLEVEL_ENTYPE, GetPowerLevel, (), (override));
 };

@@ -23,8 +23,8 @@
 class MockIEventReceiverListener : public IEventReceiverListener
 {
 public:
-    inline MockIEventReceiverListener() {}
-    inline virtual ~MockIEventReceiverListener() {}
+    MockIEventReceiverListener() = default;
+    ~MockIEventReceiverListener() override = default;
 
     MOCK_METHOD(IMS_BOOL, EventReceiver_NotifyEvent,
             (IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam), (override));

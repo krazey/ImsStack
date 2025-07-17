@@ -26,8 +26,8 @@ class IImsRadioTrafficPriorityListener;
 class MockIImsRadio : public IImsRadio
 {
 public:
-    inline MockIImsRadio() = default;
-    inline ~MockIImsRadio() = default;
+    MockIImsRadio() = default;
+    ~MockIImsRadio() override = default;
 
     MOCK_METHOD(IMS_BOOL, IsImsTrafficAllowed, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, StartImsTraffic,

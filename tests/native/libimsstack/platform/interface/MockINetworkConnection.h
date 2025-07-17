@@ -27,8 +27,8 @@
 class MockINetworkConnection : public INetworkConnection
 {
 public:
-    inline MockINetworkConnection() {}
-    inline virtual ~MockINetworkConnection() {}
+    MockINetworkConnection() = default;
+    ~MockINetworkConnection() override = default;
 
     MOCK_METHOD(RESULT_ENTYPE, Activate, (IN IMS_BOOL bEnableApn), (override));
     MOCK_METHOD(RESULT_ENTYPE, Deactivate, (IN IMS_BOOL bDisableApn), (override));

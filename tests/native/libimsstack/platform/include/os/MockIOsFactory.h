@@ -51,8 +51,8 @@
 class MockIOsFactory : public IOsFactory
 {
 public:
-    inline MockIOsFactory() {}
-    inline virtual ~MockIOsFactory() {}
+    MockIOsFactory() = default;
+    ~MockIOsFactory() override = default;
 
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(ImsTrace*, CreateTrace, (), (override));

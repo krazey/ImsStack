@@ -34,7 +34,7 @@ public:
     {
         SetState(STATE_NOTREADY);
     }
-    inline ~TestImsService() {}
+    ~TestImsService() override = default;
 
     inline IMS_BOOL StateNotReady_OnMessage(IN ImsMessage& objMsg)
     {

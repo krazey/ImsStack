@@ -26,8 +26,8 @@ class ITimerListener;
 class MockITimer : public ITimer
 {
 public:
-    inline MockITimer() {}
-    inline virtual ~MockITimer() {}
+    MockITimer() = default;
+    ~MockITimer() override = default;
 
     MOCK_METHOD(IMS_BOOL, Equals, (IN const ITimer*), (const, override));
     MOCK_METHOD(IMS_UINTP, SetTimer, (IN IMS_UINT32, IN ITimerListener*), (override));
@@ -37,8 +37,8 @@ public:
 class MockITimerListener : public ITimerListener
 {
 public:
-    inline MockITimerListener() {}
-    inline virtual ~MockITimerListener() {}
+    MockITimerListener() = default;
+    ~MockITimerListener() override = default;
 
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer*), (override));
 };
