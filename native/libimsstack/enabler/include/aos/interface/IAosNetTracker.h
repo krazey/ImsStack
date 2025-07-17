@@ -41,6 +41,7 @@ public:
     virtual IMS_UINT32 GetMobileNetworkRegistrationRejectCause() = 0;
     virtual IMS_SINT32 GetMobileVoiceServiceState() = 0;
     virtual IMS_UINT32 GetMobileVoiceNetworkType() = 0;
+    virtual IMS_SINT32 GetMobileServiceState() = 0;
     /*
         the network type of serive in network
         return : mobile or WLAN

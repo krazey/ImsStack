@@ -121,6 +121,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piModeTimer(IMS_NULL),
         m_piTransactionTimer(IMS_NULL),
         m_piInternalErrorTimer(IMS_NULL),
+        m_piWaitEmergencyNetworkTimer(IMS_NULL),
         m_nAuthChallengeCount(0),
         m_nAuthFailureCount(0),
         m_nAuthIpsecCount(0),
@@ -5786,6 +5787,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessInternalErrorTimerExpired()
     }
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessWaitEmergencyNetworkTimerExpired()
+{
+    StopTimer(TIMER_WAIT_EMERGENCY_NETWORK);
+}
+
 PROTECTED VIRTUAL void AosRegistration::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
     ITimer** ppiTimer = IMS_NULL;
@@ -5818,6 +5824,10 @@ PROTECTED VIRTUAL void AosRegistration::StartTimer(IN IMS_UINT32 nType, IN IMS_U
 
         case TIMER_INTERNAL_ERROR:
             ppiTimer = &m_piInternalErrorTimer;
+            break;
+
+        case TIMER_WAIT_EMERGENCY_NETWORK:
+            ppiTimer = &m_piWaitEmergencyNetworkTimer;
             break;
 
         default:
@@ -5870,6 +5880,10 @@ PROTECTED VIRTUAL void AosRegistration::StopTimer(IN IMS_UINT32 nType)
 
         case TIMER_INTERNAL_ERROR:
             ppiTimer = &m_piInternalErrorTimer;
+            break;
+
+        case TIMER_WAIT_EMERGENCY_NETWORK:
+            ppiTimer = &m_piWaitEmergencyNetworkTimer;
             break;
 
         default:
@@ -5931,6 +5945,11 @@ PROTECTED VIRTUAL void AosRegistration::ClearTimers()
     {
         StopTimer(TIMER_INTERNAL_ERROR);
     }
+
+    if (m_piWaitEmergencyNetworkTimer != IMS_NULL)
+    {
+        StopTimer(TIMER_WAIT_EMERGENCY_NETWORK);
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::Timer_TimerExpired(IN ITimer* piTimer)
@@ -5980,6 +5999,11 @@ PROTECTED VIRTUAL void AosRegistration::Timer_TimerExpired(IN ITimer* piTimer)
     {
         ProcessInternalErrorTimerExpired();
         return;
+    }
+
+    if (piTimer == m_piWaitEmergencyNetworkTimer)
+    {
+        ProcessWaitEmergencyNetworkTimerExpired();
     }
 }
 

@@ -398,6 +398,15 @@ TEST_F(AosNetTrackerTest, GetMobileVoiceNetworkType)
     EXPECT_EQ(m_pAosNetTracker->GetMobileVoiceNetworkType(), NW_REPORT_RADIO_LTE);
 }
 
+TEST_F(AosNetTrackerTest, ReturnOutOfServiceWhenGetMobileServiceState)
+{
+    ON_CALL(m_objMockINetworkWatcher, GetCellularServiceState())
+            .WillByDefault(Return(MockINetworkWatcher::STATE_OUT_OF_SERVICE));
+    m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
+
+    EXPECT_EQ(m_pAosNetTracker->GetMobileServiceState(), INetworkWatcher::STATE_OUT_OF_SERVICE);
+}
+
 TEST_F(AosNetTrackerTest, GetNetworkType)
 {
     EXPECT_EQ(m_pAosNetTracker->GetNetworkType(), NW_REPORT_RADIO_NOSRV);

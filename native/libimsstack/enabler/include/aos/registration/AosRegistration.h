@@ -362,6 +362,7 @@ protected:
     virtual void ProcessModeTimerExpired();
     virtual void ProcessTransactionTimerExpired();
     virtual void ProcessInternalErrorTimerExpired();
+    virtual void ProcessWaitEmergencyNetworkTimerExpired();
 
     virtual void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     virtual void StopTimer(IN IMS_UINT32 nType);
@@ -472,7 +473,8 @@ public:
         TIMER_DEREG_TRAFFIC,
         TIMER_MODE,
         TIMER_TRANSACTION,
-        TIMER_INTERNAL_ERROR
+        TIMER_INTERNAL_ERROR,
+        TIMER_WAIT_EMERGENCY_NETWORK
     };
 
     enum
@@ -593,6 +595,8 @@ protected:
     ITimer* m_piTransactionTimer;
     /// this is used when internal error happened(e.g socket error)
     ITimer* m_piInternalErrorTimer;
+    /// this is used to wait for updates to the emergency network.
+    ITimer* m_piWaitEmergencyNetworkTimer;
 
     /// authentication failure counter
     IMS_UINT32 m_nAuthChallengeCount;
@@ -642,6 +646,7 @@ protected:
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec.
     static const IMS_UINT32 CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME = 16;  // 16 Sec.
     static const IMS_UINT32 DEREGISTRATION_TRAFFIC_MAX_TIME = 3;              // 3 Sec.
+    static const IMS_UINT32 EMERGENCY_NETWORK_WAIT_TIME = 1;                  // 1 Sec.
     static const IMS_UINT32 RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT = 10;
     static const IMS_UINT32 AUTHENTICATION_RETRY_MAX_COUNT = 6;
     static const IMS_UINT32 DEFAULT_SIP_THRESHOLD_SIZE = 200;
