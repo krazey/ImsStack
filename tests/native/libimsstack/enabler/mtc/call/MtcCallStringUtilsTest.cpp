@@ -300,6 +300,7 @@ TEST_F(MtcCallStringUtilsTest, ConvertFailureReason)
     nFailureReason = IImsRadio::REASON_INTERNAL_ERROR;
     EXPECT_STREQ(MtcCallStringUtils::ConvertFailureReason(nFailureReason), "Internal error");
 
+    // cppcheck-suppress duplicateExpression
     nFailureReason = IImsRadio::REASON_ACCESS_DENIED - 1;
     EXPECT_STREQ(MtcCallStringUtils::ConvertFailureReason(nFailureReason), "OUT_OF_RANGE");
 
