@@ -88,12 +88,12 @@ public:
         m_eCurrentRatType = eRatType;
     }
 
-    inline QosInfo* GetInfo(IN ISession* piSession) const
+    inline QosInfo* GetQosInfoPublic(IN ISession* piSession) const
     {
         return MtcPreconditionManager::GetQosInfo(piSession);
     }
 
-    inline IMS_BOOL IsEpsFallback() const { return MtcPreconditionManager::IsEpsFallback(); }
+    inline IMS_BOOL IsEpsFallbackPublic() const { return MtcPreconditionManager::IsEpsFallback(); }
 };
 
 class MtcPreconditionManagerTest : public ::testing::Test
@@ -225,7 +225,7 @@ TEST_F(MtcPreconditionManagerTest, CreateQosInfoForTheFirstTime)
 {
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     pPreconditionManager->CreateQos(&objISession);
-    EXPECT_NE(pPreconditionManager->GetInfo(&objISession), nullptr);
+    EXPECT_NE(pPreconditionManager->GetQosInfoPublic(&objISession), nullptr);
 }
 
 TEST_F(MtcPreconditionManagerTest, DoNotCreateQosInfoIfAlreadyCreated)
@@ -233,11 +233,11 @@ TEST_F(MtcPreconditionManagerTest, DoNotCreateQosInfoIfAlreadyCreated)
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
 
     pPreconditionManager->CreateQos(&objISession);
-    const QosInfo* pInfo = pPreconditionManager->GetInfo(&objISession);
+    const QosInfo* pInfo = pPreconditionManager->GetQosInfoPublic(&objISession);
     EXPECT_NE(pInfo, nullptr);
 
     pPreconditionManager->CreateQos(&objISession);
-    EXPECT_EQ(pInfo, pPreconditionManager->GetInfo(&objISession));
+    EXPECT_EQ(pInfo, pPreconditionManager->GetQosInfoPublic(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest, DestroyQos)
@@ -246,10 +246,10 @@ TEST_F(MtcPreconditionManagerTest, DestroyQos)
 
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     pPreconditionManager->CreateQos(&objISession);
-    EXPECT_NE(pPreconditionManager->GetInfo(&objISession), nullptr);
+    EXPECT_NE(pPreconditionManager->GetQosInfoPublic(&objISession), nullptr);
 
     pPreconditionManager->DestroyQos(&objISession);
-    EXPECT_EQ(pPreconditionManager->GetInfo(&objISession), nullptr);
+    EXPECT_EQ(pPreconditionManager->GetQosInfoPublic(&objISession), nullptr);
 }
 
 TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalReturnsFalseInCaseOfUssi)
@@ -1422,7 +1422,7 @@ TEST_F(MtcPreconditionManagerTest, OnRatChangedUpdatesMobileRatType)
 
     pPreconditionManager->OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 
-    EXPECT_TRUE(pPreconditionManager->IsEpsFallback());
+    EXPECT_TRUE(pPreconditionManager->IsEpsFallbackPublic());
 }
 
 TEST_F(MtcPreconditionManagerTest, OnRatChangedIfHandoversToWlanFromMobile)
