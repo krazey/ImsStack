@@ -190,6 +190,7 @@ public:
     MockISubscriberInfo m_objMockISubscriberInfo;
     MockIConfigurable m_objMockIConfigurable;
     MockIAosService m_objMockIAosService;
+    // cppcheck-suppress unusedStructMember
     MockIAosNConfiguration m_objMockIAosNConfiguration;
 
     AStringArray m_objValidPuids;

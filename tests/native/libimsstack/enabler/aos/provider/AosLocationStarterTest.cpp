@@ -78,7 +78,9 @@ public:
     TestPhoneInfoService m_objPhoneInfoService;
 
 protected:
+    // cppcheck-suppress unusedStructMember
     static const IMS_SINT32 OPERATION_ADD = 0;
+    // cppcheck-suppress unusedStructMember
     static const IMS_SINT32 OPERATION_REMOVE = 1;
 
 protected:

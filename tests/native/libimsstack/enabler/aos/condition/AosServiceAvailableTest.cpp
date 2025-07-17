@@ -132,10 +132,15 @@ public:
     NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
     NiceMock<MockIAosBlock> m_objMockIAosBlock;
 
+    // cppcheck-suppress unusedStructMember
     MockIAosServiceAvailableListener m_objListener1;
+    // cppcheck-suppress unusedStructMember
     MockIAosServiceAvailableListener m_objListener2;
+    // cppcheck-suppress unusedStructMember
     MockIAosServiceAvailableListener m_objListener3;
+    // cppcheck-suppress unusedStructMember
     MockIAosServiceAvailableListener m_objListener4;
+    // cppcheck-suppress unusedStructMember
     MockIAosServiceAvailableListener m_objListener5;
 
 protected:

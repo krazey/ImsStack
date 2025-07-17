@@ -551,6 +551,7 @@ public:
     MockIAosRegistrationListener m_objMockIAosRegistrationListener;
     MockIAosRetryRepository m_objMockIAosRetryRepository;
     MockIAosTransaction m_objMockIAosTransaction;
+    // cppcheck-suppress unusedStructMember
     MockIRegSubscription m_objMockIRegSubscription;
     MockIThread m_objMockThread;
     MockITimer m_objMockITimer;

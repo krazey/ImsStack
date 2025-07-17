@@ -52,6 +52,7 @@ class AosDnsQueryTest : public ::testing::Test
 {
 public:
     TestAosDnsQuery* m_pAosDnsQuery;
+    // cppcheck-suppress unusedStructMember
     MockINetworkConnection m_objMockINetworkConnection;
 
 protected:
