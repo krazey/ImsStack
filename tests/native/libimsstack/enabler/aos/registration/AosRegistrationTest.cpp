@@ -2101,14 +2101,31 @@ TEST_F(AosRegistrationTest, ShouldNotSetTcpCriterionLengthIfDynamicIsNotPreferre
     m_pAosRegistration->SetTcpCriterionLength();
 }
 
-TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfWfcAndIpv6)
+TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfEpdgAndIpv6)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
             .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP));
     ON_CALL(m_objMockIAosConnection, GetMtu()).WillByDefault(Return(1500));
     ON_CALL(m_objMockIAosNConfiguration, GetSipMessageThresholdForTransportChange())
             .WillByDefault(Return(200));
-    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, GetSipProfile()).WillByDefault(Return(m_pSipProfile.Get()));
+    m_pAosRegistration->GetRegistration()->SetSipProfile(m_pSipProfile.Get());
+    m_pAosRegistration->SetIpAddress(IpAddress::IPv6LOOPBACK);
+
+    m_pAosRegistration->SetTcpCriterionLength();
+
+    EXPECT_EQ(m_pSipProfile->GetTcpCriterionLength(), 1080);
+}
+
+TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfEpdgAndIpv6WhenMtuIsZero)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
+            .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP));
+    ON_CALL(m_objMockIAosConnection, GetMtu()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetSipMessageThresholdForTransportChange())
+            .WillByDefault(Return(200));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegistration, GetSipProfile()).WillByDefault(Return(m_pSipProfile.Get()));
     m_pAosRegistration->GetRegistration()->SetSipProfile(m_pSipProfile.Get());
     m_pAosRegistration->SetIpAddress(IpAddress::IPv6LOOPBACK);
@@ -2126,7 +2143,6 @@ TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfMtuIsZeroAndIpv4)
     ON_CALL(m_objMockIAosNConfiguration, GetSipMessageThresholdForTransportChange())
             .WillByDefault(Return(200));
     ON_CALL(m_objMockIAosNConfiguration, GetIpv4MtuSize()).WillByDefault(Return(0));
-    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegistration, GetSipProfile()).WillByDefault(Return(m_pSipProfile.Get()));
     m_pAosRegistration->GetRegistration()->SetSipProfile(m_pSipProfile.Get());
     m_pAosRegistration->SetIpAddress(IpAddress::LOOPBACK);
