@@ -536,26 +536,17 @@ void MtsService::InitMtsServiceState()
 }
 
 PRIVATE
-IMS_UINT32 MtsService::ConvertToAccessNetworkType(IN IMS_SINT32 nReportedNetwork)
+IMS_UINT32 MtsService::GetCurrentAccessNetworkType() const
 {
-    IMS_UINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
-    if (m_piImsAos != IMS_NULL)
-    {
-        nReportedIpcan = m_piImsAos->GetAosInfo()->GetIpcanType();
-    }
-    else
-    {
-        IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
-    }
-
     IMS_UINT32 nResult;
-    if (nReportedIpcan == IIpcan::CATEGORY_WLAN)
+
+    if (IsWlan())
     {
         nResult = IImsRadio::ACCESS_NETWORK_TYPE_IWLAN;
     }
     else
     {
-        switch (nReportedNetwork)
+        switch (m_objContext.GetNetworkTracker().GetNetworkType())
         {
             case INetworkWatcher::RADIOTECH_TYPE_HSPA:
             case INetworkWatcher::RADIOTECH_TYPE_HSPAP:
@@ -577,9 +568,7 @@ IMS_UINT32 MtsService::ConvertToAccessNetworkType(IN IMS_SINT32 nReportedNetwork
         }
     }
 
-    IMS_TRACE_I("ConvertToAccessNetworkType : Network[%s], Ipcan[%s], AccessNetwork[%s]",
-            PS_RadioTechType(nReportedNetwork), PS_Ipcan(nReportedIpcan),
-            PS_AccessNetworkType(nResult));
+    IMS_TRACE_I("GetCurrentAccessNetworkType : Result[%s]", PS_AccessNetworkType(nResult), 0, 0);
 
     return nResult;
 }
@@ -632,10 +621,8 @@ MtsTrafficStartResult MtsService::StartMtTraffic()
         IMS_TRACE_I("StartMtTraffic : StartImsTraffic[%s][%s]",
                 PS_TrafficType(piMtTraffic->GetTrafficType()),
                 PS_TrafficDirection(piMtTraffic->GetDirection()), 0);
-        IMS_UINT32 nAccessNetworkType =
-                ConvertToAccessNetworkType(m_objContext.GetNetworkTracker().GetNetworkType());
         m_piImsRadio->StartImsTraffic(
-                nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MT, piMtTraffic);
+                nTrafficType, GetCurrentAccessNetworkType(), IImsRadio::DIRECTION_MT, piMtTraffic);
     }
 
     piMtTraffic->StartRadioGuardTimer();
@@ -665,9 +652,8 @@ MtsTrafficStartResult MtsService::StartMoTrafficIfNeeded()
         IMS_UINT32 nDirection = piMoTraffic->GetDirection();
         IMS_TRACE_I("StartMoTrafficIfNeeded : StartImsTraffic[%s][%s]",
                 PS_TrafficType(nTrafficType), PS_TrafficDirection(nDirection), 0);
-        IMS_UINT32 nAccessNetworkType =
-                ConvertToAccessNetworkType(m_objContext.GetNetworkTracker().GetNetworkType());
-        m_piImsRadio->StartImsTraffic(nTrafficType, nAccessNetworkType, nDirection, piMoTraffic);
+        m_piImsRadio->StartImsTraffic(
+                nTrafficType, GetCurrentAccessNetworkType(), nDirection, piMoTraffic);
         return MtsTrafficStartResult::TRAFFIC_AWAITING_SETUP;
     }
     else
