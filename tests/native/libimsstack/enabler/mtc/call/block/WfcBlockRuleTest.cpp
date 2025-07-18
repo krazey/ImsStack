@@ -43,7 +43,6 @@ public:
     TestImsRadioService objImsRadioService;
     SsacInfo objSsacInfo;
     MockIMtcCallContext objContext;
-    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     MockIMtcCallManager objCallManager;
 
