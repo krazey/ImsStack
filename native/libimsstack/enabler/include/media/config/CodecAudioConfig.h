@@ -32,7 +32,7 @@ public:
     /**
      * @brief Destroy the codec audio config object
      */
-    virtual ~CodecAudioConfig();
+    virtual ~CodecAudioConfig() override;
     /**
      * @brief Create codec using the configuration
      *

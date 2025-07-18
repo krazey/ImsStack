@@ -400,7 +400,7 @@ public:
             return (*this);
         }
 
-        virtual ~Payload() {}
+        virtual ~Payload() override {}
 
         inline void CreateAudioFmtp(IN const Payload& obj)
         {

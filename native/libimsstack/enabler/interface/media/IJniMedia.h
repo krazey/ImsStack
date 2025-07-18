@@ -288,7 +288,7 @@ public:
     explicit ImsMediaMsgParam(MEDIA_CONTENT_TYPE eType, const IMS_SINT32 value = -1) :
             ImsMediaMsgParamBase(eType),
             m_nValue(value) {};
-    virtual ~ImsMediaMsgParam() {}
+    virtual ~ImsMediaMsgParam() override {}
 
 public:
     IMS_SINT32 m_nValue;
@@ -301,7 +301,7 @@ public:
             ImsMediaMsgParamBase(eType),
             m_bRtpInactivityFwkTimer(IMS_FALSE),
             m_objMediaQualityThreshold(MediaQualityThreshold()) {};
-    virtual ~ImsMediaMsgSetMediaQualityParam() {}
+    virtual ~ImsMediaMsgSetMediaQualityParam() override {}
 
 public:
     IMS_BOOL m_bRtpInactivityFwkTimer;
@@ -314,7 +314,7 @@ public:
     explicit ImsMediaMsgConfigParam(MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_pConfig(IMS_NULL) {};
-    virtual ~ImsMediaMsgConfigParam() { delete m_pConfig; }
+    virtual ~ImsMediaMsgConfigParam() override { delete m_pConfig; }
 
 public:
     RtpConfig* m_pConfig;
@@ -341,7 +341,7 @@ public:
             ImsMediaMsgParamBase(MEDIA_TYPE_AUDIO),
             m_dtmfCode(-1),
             m_nDuration(0) {};
-    virtual ~ImsMediaMsgDtmfParam() {}
+    virtual ~ImsMediaMsgDtmfParam() override {}
 
 public:
     IMS_CHAR m_dtmfCode;
@@ -354,7 +354,7 @@ public:
     explicit ImsMediaResponseParamBase(MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) :
             ImsMediaMsgParamBase(eType),
             m_eResult(RtpError::NO_ERROR) {};
-    virtual ~ImsMediaResponseParamBase() {}
+    virtual ~ImsMediaResponseParamBase() override {}
 
 public:
     IMS_SINT32 m_eResult;
@@ -385,7 +385,7 @@ public:
             m_bResult(IMS_FALSE)
     {
     }
-    virtual ~ImsMediaMsgQosParam() {}
+    virtual ~ImsMediaMsgQosParam() override {}
 
     bool operator==(const ImsMediaMsgQosParam& param)
     {
@@ -403,10 +403,10 @@ public:
 class ImsMediaNotifyInactivityParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaNotifyInactivityParam(MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) :
+    explicit ImsMediaNotifyInactivityParam(MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) :
             ImsMediaMsgParamBase(eType),
             m_eMediaProtocolType(RTP) {};
-    virtual ~ImsMediaNotifyInactivityParam() {}
+    virtual ~ImsMediaNotifyInactivityParam() override {}
 
 public:
     ProtocolType m_eMediaProtocolType;
@@ -419,7 +419,7 @@ public:
             ImsMediaMsgParamBase(eType),
             m_nRtpInactivityTimerMillis(-1),
             m_nRtcpInactivityTimerMillis(-1) {};
-    virtual ~ImsMediaNotifyQualityStatusParam() {}
+    virtual ~ImsMediaNotifyQualityStatusParam() override {}
 
 public:
     IMS_SINT32 m_nRtpInactivityTimerMillis;
@@ -431,7 +431,7 @@ class ImsMediaNotifyPacketParam : public ImsMediaResponseParamBase
 public:
     ImsMediaNotifyPacketParam() :
             m_nResponse(-1) {};
-    virtual ~ImsMediaNotifyPacketParam() {}
+    virtual ~ImsMediaNotifyPacketParam() override {}
 
 public:
     IMS_SINT32 m_nResponse;
@@ -443,7 +443,7 @@ public:
     explicit ImsMediaMsgAnbrNegotiationParam(MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) :
             ImsMediaResponseParamBase(eType),
             m_bAnbrNegotiationType(IMS_FALSE) {};
-    virtual ~ImsMediaMsgAnbrNegotiationParam() {}
+    virtual ~ImsMediaMsgAnbrNegotiationParam() override {}
 
 public:
     IMS_BOOL m_bAnbrNegotiationType;
@@ -457,7 +457,7 @@ public:
             m_nAnbrMediaType(-1),
             m_nAnbrDirection(-1),
             m_nAnbrBitrate(-1) {};
-    virtual ~ImsMediaMsgAnbrReceivedParam() {}
+    virtual ~ImsMediaMsgAnbrReceivedParam() override {}
 
 public:
     IMS_SINT32 m_nAnbrMediaType;
@@ -471,7 +471,7 @@ public:
     explicit ImsMediaVideoParam(IMS_SINT32 value = -1) :
             ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
             nValue(value) {};
-    virtual ~ImsMediaVideoParam() {}
+    virtual ~ImsMediaVideoParam() override {}
 
 public:
     IMS_SINT32 nValue;
@@ -484,7 +484,7 @@ public:
             ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
             nWidth(value1),
             nHeight(value2) {};
-    virtual ~ImsMediaVideoResolutionParam() {}
+    virtual ~ImsMediaVideoResolutionParam() override {}
 
 public:
     IMS_SINT32 nWidth;

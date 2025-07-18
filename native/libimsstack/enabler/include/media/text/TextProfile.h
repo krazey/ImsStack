@@ -113,7 +113,7 @@ public:
 
     virtual ~TextProfile() override {}
 
-    explicit TextProfile(IN TextProfile* profile) :
+    explicit TextProfile(IN const TextProfile* profile) :
             MediaBaseProfile(profile)
     {
         if (profile == nullptr)
