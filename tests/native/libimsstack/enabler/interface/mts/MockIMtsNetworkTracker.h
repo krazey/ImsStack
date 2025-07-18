@@ -25,6 +25,7 @@ class MockIMtsNetworkTracker : public IMtsNetworkTracker
 public:
     virtual ~MockIMtsNetworkTracker() {}
 
+    MOCK_METHOD(IMS_SINT32, GetCellularServiceState, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetLteAttachState, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetNetworkType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsInRoamingState, (), (const, override));

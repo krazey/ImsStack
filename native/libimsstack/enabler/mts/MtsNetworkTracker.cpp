@@ -72,6 +72,16 @@ PUBLIC VIRTUAL void MtsNetworkTracker::Event_NotifyEvent(
     }
 }
 
+PUBLIC VIRTUAL IMS_SINT32 MtsNetworkTracker::GetCellularServiceState() const
+{
+    if (m_piNetWatcherInfo != IMS_NULL)
+    {
+        return m_piNetWatcherInfo->GetCellularServiceState();
+    }
+
+    return INetworkWatcher::STATE_INVALID;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 MtsNetworkTracker::GetNetworkType() const
 {
     if (m_piNetWatcherInfo != IMS_NULL)

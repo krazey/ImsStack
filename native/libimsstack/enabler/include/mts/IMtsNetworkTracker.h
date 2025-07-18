@@ -25,6 +25,17 @@ public:
     virtual ~IMtsNetworkTracker() {}
 
     /**
+     * @brief Gets the service state of the current device's cellular data network.
+     *
+     * @return The cellular data network type:
+     * - {@code STATE_IN_SERVICE}: Properly connected to the network and able to communicate.
+     * - {@code STATE_OUT_OF_SERVICE}: Out of network service area or unable to use service.
+     * - {@code STATE_EMERGENCY_ONLY}: Can only make emergency calls, but no regular service.
+     * - {@code STATE_POWER_OFF}: Modem is powered off, preventing network service usage.
+     */
+    virtual IMS_SINT32 GetCellularServiceState() const = 0;
+
+    /**
      * @brief Gets the current LTE network attach state.
      *
      * @return The current LTE network attach state. One of the following is returned:

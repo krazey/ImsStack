@@ -63,7 +63,7 @@ PUBLIC
 IMS_SINT32 MtsErrorHandler::Handle(
         IN const IMtsService& objMtsService, IN IMtsMessage* piMtsMessage)
 {
-    IMS_SINT32 nResult;
+    IMS_SINT32 nResult = MO_INVALID;
     ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
             CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
     ImsVector<IMS_SINT32> objFallbackErrorCodes = m_piCarrierConfig->GetIntArray(
@@ -96,6 +96,13 @@ IMS_SINT32 MtsErrorHandler::Handle(
 
     IMessage* piMessage =
             piMtsMessage->GetPageMessage()->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
+    // ORG Requirements - IMS_SMSIP_40, IMS_SMSIP_43, IMS_SMSIP_540, IMS_SMSIP_543
+    nResult = EvaluateNetworkStatusForErrorCode(objMtsService, piMessage);
+    if (nResult != MO_INVALID)
+    {
+        return nResult;
+    }
+
     if (piMessage != IMS_NULL)
     {
         // A status code should only be present in either 'imssms.sms_generic_error_codes_int_array'
@@ -401,4 +408,31 @@ IMS_BOOL MtsErrorHandler::NeedToCheckRadioStatusForRetry(IN IMS_UINT32 nRetryCou
                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL,
                    IMS_FALSE) &&
             (nRetryCount >= 1);
+}
+
+PRIVATE
+IMS_SINT32 MtsErrorHandler::EvaluateNetworkStatusForErrorCode(
+        IN const IMtsService& objMtsService, IN const IMessage* piMessage) const
+{
+    ImsVector<IMS_SINT32> objEvaluateNetworkErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY);
+
+    if (piMessage == IMS_NULL || !objEvaluateNetworkErrorCodes.Contains(piMessage->GetStatusCode()))
+    {
+        return MO_INVALID;
+    }
+
+    if (!objMtsService.IsWlan())
+    {
+        return MO_ERROR_FALLBACK;
+    }
+
+    IMS_BOOL bDataRoaming = m_objContext.GetNetworkTracker().IsInRoamingState();
+    IMS_SINT32 nCellularState = m_objContext.GetNetworkTracker().GetCellularServiceState();
+    if (bDataRoaming || (nCellularState != INetworkWatcher::STATE_IN_SERVICE))
+    {
+        return MO_ERROR_GENERIC;
+    }
+
+    return MO_ERROR_FALLBACK;
 }
