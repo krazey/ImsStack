@@ -30,7 +30,7 @@ public:
     UtilService& operator=(IN const UtilService&) = delete;
 
 protected:
-    virtual ~UtilService();
+    ~UtilService() override;
 
 public:
     virtual IImsPrivateProperty* GetPrivateProperty();

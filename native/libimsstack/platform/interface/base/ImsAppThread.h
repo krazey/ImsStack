@@ -43,7 +43,7 @@ private:
 
 public:
     ImsAppThread();
-    inline virtual ~ImsAppThread() {}
+    ~ImsAppThread() override = default;
 
     ImsAppThread(IN const ImsAppThread&) = delete;
     ImsAppThread& operator=(IN const ImsAppThread&) = delete;

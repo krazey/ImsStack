@@ -23,7 +23,7 @@ class OsIpcan : public IIpcan
 {
 public:
     OsIpcan();
-    virtual ~OsIpcan();
+    ~OsIpcan() override;
 
     OsIpcan(IN const OsIpcan&) = delete;
     OsIpcan& operator=(IN const OsIpcan&) = delete;

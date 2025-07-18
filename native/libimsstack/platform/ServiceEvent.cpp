@@ -32,7 +32,7 @@ class EventActivity : public ImsActivity
 {
 public:
     EventActivity(IN IMS_SINT32 nEvent, IN IEventListener* piListener);
-    virtual ~EventActivity();
+    ~EventActivity() override;
 
     EventActivity(IN const EventActivity&) = delete;
     EventActivity& operator=(IN const EventActivity&) = delete;
@@ -106,7 +106,7 @@ class EventHolder : public IEventReceiverListener
 {
 public:
     explicit EventHolder(IN IMS_SINT32 nSlotId);
-    virtual ~EventHolder();
+    ~EventHolder() override;
 
     EventHolder(IN const EventHolder&) = delete;
     EventHolder& operator=(IN const EventHolder&) = delete;

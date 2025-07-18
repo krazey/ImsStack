@@ -23,7 +23,7 @@ class ImsTrace : public ITrace
 {
 public:
     ImsTrace();
-    virtual ~ImsTrace() = default;
+    ~ImsTrace() override = default;
 
     ImsTrace(IN const ImsTrace&) = delete;
     ImsTrace& operator=(IN const ImsTrace&) = delete;

@@ -34,14 +34,14 @@ public:
             ImsTraceNode(pszTag)
     {
     }
-    virtual ~OsTraceNode() = default;
+    ~OsTraceNode() override = default;
 
 public:
     inline IMS_BOOL IsWritable() const { return (GetLength() <= MAX_TRACE_SIZE); }
 
 protected:
-    inline virtual IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
-            IN const IMS_CHAR* pszFormat, IN va_list args)
+    inline IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
+            IN const IMS_CHAR* pszFormat, IN va_list args) override
     {
         return vsnprintf(pszBuffer, nBuffSize, pszFormat, args);
     }

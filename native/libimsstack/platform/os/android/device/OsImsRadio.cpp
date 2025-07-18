@@ -56,7 +56,7 @@ public:
             m_nWaitTimeMillis(0)
     {
     }
-    inline virtual ~ConnectionFailedParam() {}
+    ~ConnectionFailedParam() override = default;
 
     IMS_UINT32 m_nId;
     IMS_UINT32 m_nFailureReason;
@@ -72,7 +72,7 @@ public:
             m_nId(0)
     {
     }
-    inline virtual ~ConnectionSetupPreparedParam() {}
+    ~ConnectionSetupPreparedParam() override = default;
 
     IMS_UINT32 m_nId;
 };
@@ -88,7 +88,7 @@ public:
             m_nBarringTimeSecForVideo(0)
     {
     }
-    inline virtual ~SsacInfoParam() {}
+    ~SsacInfoParam() override = default;
 
     IMS_SINT32 m_nBarringFactorForVoice;
     IMS_SINT32 m_nBarringTimeSecForVoice;
@@ -104,7 +104,7 @@ public:
             m_bIsSupported(IMS_FALSE)
     {
     }
-    inline virtual ~SccsInfoParam() {}
+    ~SccsInfoParam() override = default;
 
     IMS_BOOL m_bIsSupported;
 };

@@ -27,7 +27,7 @@ public:
             m_piListener(IMS_NULL)
     {
     }
-    inline virtual ~ImsTimer() {}
+    ~ImsTimer() override = default;
 
 public:
     inline IThread* GetOwner() const { return m_piOwner; }

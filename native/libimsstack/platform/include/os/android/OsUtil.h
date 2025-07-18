@@ -24,7 +24,7 @@ class OsUtil : public ISystemUtil, public ISystemProperty, public IZLib
 {
 public:
     OsUtil();
-    ~OsUtil();
+    ~OsUtil() override;
 
     OsUtil(IN const OsUtil&) = delete;
     OsUtil& operator=(IN const OsUtil&) = delete;

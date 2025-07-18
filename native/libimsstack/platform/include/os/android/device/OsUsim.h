@@ -27,7 +27,7 @@ class OsUsimDigestAka : public IDigestAka
 {
 public:
     explicit OsUsimDigestAka(IN ImsUsim* pUsim);
-    virtual ~OsUsimDigestAka();
+    ~OsUsimDigestAka() override;
 
     OsUsimDigestAka(IN const OsUsimDigestAka&) = delete;
     OsUsimDigestAka& operator=(IN const OsUsimDigestAka&) = delete;
@@ -51,7 +51,7 @@ class OsUsim : public ImsUsim, public ISystemListener
 {
 public:
     explicit OsUsim(IN IMS_SINT32 nSlotId);
-    virtual ~OsUsim();
+    ~OsUsim() override;
 
     OsUsim(IN const OsUsim&) = delete;
     OsUsim& operator=(IN const OsUsim&) = delete;

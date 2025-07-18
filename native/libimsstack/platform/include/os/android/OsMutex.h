@@ -24,7 +24,7 @@ class OsMutex : public ImsMutex
 {
 public:
     explicit OsMutex(IN IMS_SINT32 nType = ATTRIBUTE_RECURSIVE);
-    virtual ~OsMutex();
+    ~OsMutex() override;
 
     OsMutex(IN const OsMutex&) = delete;
     OsMutex& operator=(IN const OsMutex&) = delete;

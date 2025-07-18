@@ -25,7 +25,7 @@ class RetryTimer : public ITimerListener
 {
 public:
     explicit RetryTimer(IN IMS_BOOL bRepeatable = IMS_FALSE);
-    virtual ~RetryTimer();
+    ~RetryTimer() override;
 
 public:
     // Add a time interval; in milli-seconds

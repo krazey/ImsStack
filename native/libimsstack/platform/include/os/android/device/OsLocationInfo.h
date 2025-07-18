@@ -34,7 +34,7 @@ class OsLocationInfo :
 {
 public:
     explicit OsLocationInfo(IN IMS_SINT32 nSlotId);
-    virtual ~OsLocationInfo();
+    ~OsLocationInfo() override;
 
     OsLocationInfo(IN const OsLocationInfo&) = delete;
     OsLocationInfo& operator=(IN const OsLocationInfo&) = delete;

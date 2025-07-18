@@ -51,7 +51,7 @@ class OsImsRadio : public ImsRadio, public IImsTrafficListener, public ISystemLi
 {
 public:
     explicit OsImsRadio(IN IMS_SINT32 nSlotId);
-    virtual ~OsImsRadio();
+    ~OsImsRadio() override;
 
     OsImsRadio(IN const OsImsRadio&) = delete;
     OsImsRadio& operator=(IN const OsImsRadio&) = delete;

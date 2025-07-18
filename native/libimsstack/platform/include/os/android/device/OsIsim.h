@@ -29,7 +29,7 @@ class OsIsimDigestAka : public IDigestAka
 {
 public:
     explicit OsIsimDigestAka(IN ImsIsim* pIsim);
-    virtual ~OsIsimDigestAka();
+    ~OsIsimDigestAka() override;
 
     OsIsimDigestAka(IN const OsIsimDigestAka&) = delete;
     OsIsimDigestAka& operator=(IN const OsIsimDigestAka&) = delete;
@@ -53,7 +53,7 @@ class OsIsim : public ImsIsim, public ISystemListener
 {
 public:
     explicit OsIsim(IN IMS_SINT32 nSlotId);
-    virtual ~OsIsim();
+    ~OsIsim() override;
 
     OsIsim(IN const OsIsim&) = delete;
     OsIsim& operator=(IN const OsIsim&) = delete;

@@ -29,7 +29,7 @@ class LocationProperties : public ILocationProperties
 {
 public:
     LocationProperties();
-    virtual ~LocationProperties() = default;
+    ~LocationProperties() override = default;
 
     inline const AString& GetLatitude() const override { return m_strLatitude; }
     inline const AString& GetLongitude() const override { return m_strLongitude; }
@@ -108,7 +108,7 @@ public:
             m_piListener(piListener)
     {
     }
-    ~LocationUpdateRequest() = default;
+    ~LocationUpdateRequest() override = default;
 
 public:
     inline IMS_SINT32 GetId() const { return m_nId; }
@@ -133,7 +133,7 @@ public:
             AsyncExecutor(piListener, IMS_FALSE)
     {
     }
-    ~LocationUpdateCompletedHandler() = default;
+    ~LocationUpdateCompletedHandler() override = default;
 
 public:
     inline void OnExecute(IN IMS_UINTP /*nParam1*/, IN IMS_UINTP nParam2) override

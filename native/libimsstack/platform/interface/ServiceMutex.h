@@ -28,7 +28,7 @@ public:
     MutexService& operator=(IN const MutexService&) = delete;
 
 protected:
-    virtual ~MutexService();
+    ~MutexService() override;
 
 public:
     virtual IMutex* CreateMutex(IN const AString& strName = AString::ConstNull());

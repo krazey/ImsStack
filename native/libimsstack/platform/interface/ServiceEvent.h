@@ -31,7 +31,7 @@ public:
     EventService& operator=(IN const EventService&) = delete;
 
 protected:
-    virtual ~EventService();
+    ~EventService() override;
 
 public:
     virtual void AddListener(

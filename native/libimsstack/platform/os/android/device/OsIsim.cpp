@@ -58,7 +58,7 @@ public:
             m_nState(0)
     {
     }
-    inline virtual ~OsIsimStateParam() {}
+    ~OsIsimStateParam() override = default;
 
 public:
     enum
@@ -85,7 +85,7 @@ public:
             m_nOwner(0)
     {
     }
-    inline virtual ~OsIsimAuthResponseParam() {}
+    ~OsIsimAuthResponseParam() override = default;
 
     OsIsimAuthResponseParam(IN const OsIsimAuthResponseParam&) = delete;
     OsIsimAuthResponseParam& operator=(IN const OsIsimAuthResponseParam&) = delete;

@@ -25,7 +25,7 @@ class OsIpSecSa : public IIpSecSa
 {
 public:
     OsIpSecSa();
-    virtual ~OsIpSecSa();
+    ~OsIpSecSa() override;
 
     OsIpSecSa(IN const OsIpSecSa&) = delete;
     OsIpSecSa& operator=(IN const OsIpSecSa&) = delete;

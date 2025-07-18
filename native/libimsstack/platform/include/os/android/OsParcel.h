@@ -23,8 +23,8 @@
 class OsParcel : public ImsParcel
 {
 public:
-    inline OsParcel() {}
-    inline virtual ~OsParcel() {}
+    OsParcel() = default;
+    ~OsParcel() override = default;
 
     OsParcel(IN const OsParcel&) = delete;
     OsParcel& operator=(IN const OsParcel&) = delete;

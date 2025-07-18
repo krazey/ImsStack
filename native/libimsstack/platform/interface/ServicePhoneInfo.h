@@ -37,7 +37,7 @@ public:
     PhoneInfoService& operator=(IN const PhoneInfoService&) = delete;
 
 protected:
-    virtual ~PhoneInfoService();
+    ~PhoneInfoService() override;
 
 public:
     virtual IDeviceInfo* GetDeviceInfo();

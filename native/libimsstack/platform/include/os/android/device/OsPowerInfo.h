@@ -26,7 +26,7 @@ class OsPowerInfo : public IPowerInfo, public ISystemListener
 {
 public:
     OsPowerInfo();
-    virtual ~OsPowerInfo();
+    ~OsPowerInfo() override;
 
     OsPowerInfo(IN const OsPowerInfo&) = delete;
     OsPowerInfo& operator=(IN const OsPowerInfo&) = delete;

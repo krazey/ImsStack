@@ -27,7 +27,7 @@ class OsTimerService : public ISystemListener
 {
 public:
     OsTimerService();
-    virtual ~OsTimerService();
+    ~OsTimerService() override;
 
     OsTimerService(IN const OsTimerService&) = delete;
     OsTimerService& operator=(IN const OsTimerService&) = delete;

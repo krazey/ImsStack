@@ -26,7 +26,7 @@ class OsTrace : public ImsTrace
 {
 public:
     OsTrace();
-    virtual ~OsTrace();
+    ~OsTrace() override;
 
     OsTrace(IN const OsTrace&) = delete;
     OsTrace& operator=(IN const OsTrace&) = delete;

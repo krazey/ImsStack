@@ -25,7 +25,7 @@ class OsSelectFdSet : public ImsFdSet
 public:
     OsSelectFdSet();
     OsSelectFdSet(IN const OsSelectFdSet& other);
-    virtual ~OsSelectFdSet();
+    ~OsSelectFdSet() override;
 
 public:
     OsSelectFdSet& operator=(IN const OsSelectFdSet& other);

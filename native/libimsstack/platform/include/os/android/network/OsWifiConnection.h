@@ -27,7 +27,7 @@ class OsWifiConnection : public ImsNetworkConnection, public ISystemListener
 {
 public:
     OsWifiConnection();
-    virtual ~OsWifiConnection();
+    ~OsWifiConnection() override;
 
     OsWifiConnection(IN const OsWifiConnection&) = delete;
     OsWifiConnection& operator=(IN const OsWifiConnection&) = delete;

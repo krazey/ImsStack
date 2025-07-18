@@ -26,7 +26,7 @@ public:
             ImsActivity(strName)
     {
     }
-    inline virtual ~ImsActivityEx() {}
+    ~ImsActivityEx() override = default;
 
     ImsActivityEx(IN const ImsActivityEx&) = delete;
     ImsActivityEx& operator=(IN const ImsActivityEx&) = delete;

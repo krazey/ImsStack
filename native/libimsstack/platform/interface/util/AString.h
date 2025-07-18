@@ -312,7 +312,7 @@ class WCharPtr : public RcObject
 public:
     explicit WCharPtr(IN const AString& str);
     WCharPtr(IN const WCharPtr& other);
-    virtual ~WCharPtr();
+    ~WCharPtr() override;
 
 public:
     WCharPtr& operator=(IN const WCharPtr& other);

@@ -56,7 +56,7 @@ public:
             m_objResponse(ByteArray::ConstNull())
     {
     }
-    inline virtual ~OsUsimAuthResponseParam() {}
+    ~OsUsimAuthResponseParam() override = default;
 
 public:
     IMS_SINTP m_nOwner;

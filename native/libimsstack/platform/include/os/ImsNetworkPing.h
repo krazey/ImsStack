@@ -24,7 +24,7 @@ class ImsNetworkPing : public INetworkPing, public ITimerListener, public ISocke
 {
 public:
     ImsNetworkPing();
-    virtual ~ImsNetworkPing();
+    ~ImsNetworkPing() override;
 
     ImsNetworkPing(IN const ImsNetworkPing&) = delete;
     ImsNetworkPing& operator=(IN const ImsNetworkPing&) = delete;

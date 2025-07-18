@@ -35,7 +35,7 @@ public:
             m_hConnection(0)
     {
     }
-    inline virtual ~ImsSocket() {}
+    ~ImsSocket() override = default;
 
 public:
     virtual void Destroy() = 0;

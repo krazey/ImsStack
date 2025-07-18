@@ -24,7 +24,7 @@ class OsNetworkWatcher : public ImsSlot, public INetworkWatcher, public ISystemL
 {
 public:
     explicit OsNetworkWatcher(IN IMS_SINT32 nSlotId);
-    virtual ~OsNetworkWatcher();
+    ~OsNetworkWatcher() override;
 
     OsNetworkWatcher(IN const OsNetworkWatcher&) = delete;
     OsNetworkWatcher& operator=(IN const OsNetworkWatcher&) = delete;

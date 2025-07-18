@@ -25,7 +25,7 @@ class OsSocket : public OsSocketBase
 {
 public:
     OsSocket();
-    virtual ~OsSocket();
+    ~OsSocket() override;
 
     OsSocket(IN const OsSocket&) = delete;
     OsSocket& operator=(IN const OsSocket&) = delete;
