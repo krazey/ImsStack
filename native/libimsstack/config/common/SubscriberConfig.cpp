@@ -1564,9 +1564,33 @@ PRIVATE
 void SubscriberConfig::UpdateHomeDomainName(
         IN ImsSubscriberInfo* pSubsInfo, IN const AString& strHomeDomainName)
 {
-    pSubsInfo->m_strHomeDomainName = strHomeDomainName;
-    pSubsInfo->m_strScscfAddress = pSubsInfo->m_strHomeDomainName;
-    pSubsInfo->m_objCredential.SetRealm(pSubsInfo->m_strHomeDomainName);
+    AString strFinalHdn = strHomeDomainName;
+
+    if (strHomeDomainName.Equals("0"))
+    {
+        // The "0" string indicates an invalid home domain name and is treated as empty.
+        strFinalHdn = AString::ConstNull();
+
+        for (IMS_SINT32 i = 0; i < pSubsInfo->m_objPublicUserIds.GetCount(); ++i)
+        {
+            const AString& strImpu = pSubsInfo->m_objPublicUserIds.GetElementAt(i);
+            IMS_SINT32 nIndex = strImpu.GetIndexOf('@');
+
+            if (nIndex != AString::NPOS)
+            {
+                strFinalHdn = strImpu.GetSubStr(nIndex + 1).Trim();
+
+                if (strFinalHdn.GetLength() > 0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    pSubsInfo->m_strHomeDomainName = strFinalHdn;
+    pSubsInfo->m_strScscfAddress = strFinalHdn;
+    pSubsInfo->m_objCredential.SetRealm(strFinalHdn);
 }
 
 PRIVATE

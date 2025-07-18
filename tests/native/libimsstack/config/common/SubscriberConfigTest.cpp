@@ -360,6 +360,44 @@ TEST_F(SubscriberConfigTest, OnIsimLoaded)
     VerifySubscriberInfo();
 }
 
+TEST_F(SubscriberConfigTest, OnIsimLoadedWithZeroHomeDomainName)
+{
+    MockIIsim& objIsim = m_objPhoneInfoService.GetMockIsim();
+    ON_CALL(objIsim, GetImpi()).WillByDefault(Return(m_strImpi));
+    ON_CALL(objIsim, GetImpu()).WillByDefault(Return(m_objImpu));
+    ON_CALL(objIsim, GetHomeDomainName()).WillByDefault(Return("0"));
+    ON_CALL(objIsim, GetPcscf()).WillByDefault(Return(m_objPcscfs));
+
+    IMS_BOOL bResult = m_pSubscriberConfig->Init();
+    ASSERT_TRUE(bResult);
+
+    StartSubscriberConfig();
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_LOADED);
+
+    VerifySubscriberInfo();
+}
+
+TEST_F(SubscriberConfigTest, OnIsimLoadedWithZeroHdnAndDomainlessImpus)
+{
+    AStringArray objDomainlessImpu;
+    objDomainlessImpu.AddElement("tel:1111");
+    objDomainlessImpu.AddElement("tel:2222");
+
+    MockIIsim& objIsim = m_objPhoneInfoService.GetMockIsim();
+    ON_CALL(objIsim, GetImpu()).WillByDefault(Return(objDomainlessImpu));
+    ON_CALL(objIsim, GetHomeDomainName()).WillByDefault(Return("0"));
+
+    IMS_BOOL bResult = m_pSubscriberConfig->Init();
+    ASSERT_TRUE(bResult);
+
+    StartSubscriberConfig();
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_LOADED);
+
+    EXPECT_EQ(m_pSubscriberConfig->GetCredential().GetRealm(), AString::ConstNull());
+    EXPECT_EQ(m_pSubscriberConfig->GetHomeDomainName(), AString::ConstNull());
+    EXPECT_EQ(m_pSubscriberConfig->GetScscfAddress(), AString::ConstNull());
+}
+
 TEST_F(SubscriberConfigTest, OnIsimRefreshed)
 {
     VerifyIsimInit();
