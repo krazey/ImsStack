@@ -15,6 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Ssc -->
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
+
     <!-- MTC -->
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
