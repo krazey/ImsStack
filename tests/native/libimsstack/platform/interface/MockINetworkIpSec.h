@@ -26,8 +26,8 @@
 class MockINetworkIpSec : public INetworkIpSec
 {
 public:
-    inline MockINetworkIpSec() {}
-    inline virtual ~MockINetworkIpSec() {}
+    MockINetworkIpSec() = default;
+    ~MockINetworkIpSec() override = default;
 
     MOCK_METHOD(IIpSecPolicy*, CreatePolicy, (), (override));
     MOCK_METHOD(void, DestroyPolicy, (IN IIpSecPolicy * piPolicy), (override));

@@ -23,8 +23,8 @@
 class MockICallInfo : public ICallInfo
 {
 public:
-    inline MockICallInfo() {}
-    inline virtual ~MockICallInfo() {}
+    MockICallInfo() = default;
+    ~MockICallInfo() override = default;
 
     MOCK_METHOD(IMS_BOOL, IsEmergencyNumber, (IN const AString& strNumber), (const, override));
     MOCK_METHOD(IMS_UINT32, GetTtyMode, (), (const, override));

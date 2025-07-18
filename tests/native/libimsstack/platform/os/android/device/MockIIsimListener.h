@@ -23,8 +23,8 @@
 class MockIIsimListener : public IIsimListener
 {
 public:
-    inline MockIIsimListener() = default;
-    inline ~MockIIsimListener() = default;
+    MockIIsimListener() = default;
+    ~MockIIsimListener() override = default;
 
     MOCK_METHOD(void, Isim_OnStateChanged, (IN IMS_SINT32 nState), (override));
 };

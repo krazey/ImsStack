@@ -24,7 +24,7 @@ class MockAsyncExecutorIListener : public AsyncExecutor::IListener
 {
 public:
     MockAsyncExecutorIListener() = default;
-    virtual ~MockAsyncExecutorIListener() = default;
+    ~MockAsyncExecutorIListener() override = default;
 
     MOCK_METHOD(void, AsyncExecutor_OnExecuteCompleted, (IN AsyncExecutor * pExecutor), (override));
 };

@@ -33,7 +33,7 @@ public:
             ImsFramework()
     {
     }
-    inline ~TestImsFramework() {}
+    ~TestImsFramework() override = default;
 
     IMS_BOOL TestInitialize() { return Initialize(); }
     void TestUninitialize() { Uninitialize(); }

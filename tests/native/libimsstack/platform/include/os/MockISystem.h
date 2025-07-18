@@ -27,8 +27,8 @@
 class MockISystem : public ISystem
 {
 public:
-    inline MockISystem() {}
-    inline virtual ~MockISystem() {}
+    MockISystem() = default;
+    ~MockISystem() override = default;
 
     MOCK_METHOD(void, Destroy, (), (override));
     // Add & remove the listener to receive the system events

@@ -41,7 +41,7 @@ public:
             m_bServiceMsgDispatched(IMS_FALSE)
     {
     }
-    inline ~TestOsSocket() {}
+    ~TestOsSocket() override = default;
 
 public:
     IMS_SINT32 GetSocketId() const override { return 1; }
@@ -154,7 +154,7 @@ public:
             m_bServiceMsgDispatched(IMS_FALSE)
     {
     }
-    inline ~TestOsNetworkConnection() {}
+    ~TestOsNetworkConnection() override = default;
 
 public:
     RESULT_ENTYPE Activate(IN IMS_BOOL /*bEnableApn = IMS_FALSE*/) override { return RESULT_DONE; }

@@ -24,8 +24,8 @@ class RetryTaskHelper;
 class MockIRetryTaskHelperListener : public IRetryTaskHelperListener
 {
 public:
-    inline MockIRetryTaskHelperListener() {}
-    inline virtual ~MockIRetryTaskHelperListener() {}
+    MockIRetryTaskHelperListener() = default;
+    ~MockIRetryTaskHelperListener() override = default;
 
     MOCK_METHOD(void, RetryTaskHelper_OnCompleted,
             (IN RetryTaskHelper * pTaskHelper, IN RetryCmd* pCmd, IN IMS_SINT32 nCode), (override));

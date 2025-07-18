@@ -23,8 +23,8 @@
 class MockIMessageCallback : public ImsMessage::IMessageCallback
 {
 public:
-    inline MockIMessageCallback() {}
-    inline virtual ~MockIMessageCallback() {}
+    MockIMessageCallback() = default;
+    ~MockIMessageCallback() override = default;
 
     MOCK_METHOD(void, MessageCallback_OnMessage, (IN ImsMessage & objMsg), (override));
 };

@@ -23,8 +23,8 @@
 class MockIIpcan : public IIpcan
 {
 public:
-    inline MockIIpcan() {}
-    inline virtual ~MockIIpcan() {}
+    MockIIpcan() = default;
+    ~MockIIpcan() override = default;
 
     MOCK_METHOD(void, GetAccessInfo, (IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& objAni),
             (override));

@@ -23,8 +23,8 @@
 class MockISocket : public ISocket
 {
 public:
-    inline MockISocket() {}
-    inline virtual ~MockISocket() {}
+    MockISocket() = default;
+    ~MockISocket() override = default;
 
     MOCK_METHOD(IMS_SINT32, GetSocketId, (), (const, override));
     MOCK_METHOD(SOCKET_ENTYPE, GetSocketType, (), (const, override));
@@ -66,8 +66,8 @@ public:
 class MockISocketListener : public ISocketListener
 {
 public:
-    inline MockISocketListener() {}
-    inline virtual ~MockISocketListener() {}
+    MockISocketListener() = default;
+    ~MockISocketListener() override = default;
 
     MOCK_METHOD(void, Socket_OnDataReceived, (IN ISocket * piSocket), (override));
     MOCK_METHOD(void, Socket_OnSendEnabled, (IN ISocket * piSocket), (override));

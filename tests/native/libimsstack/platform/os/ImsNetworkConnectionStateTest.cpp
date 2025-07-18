@@ -56,16 +56,16 @@ public:
             m_objIpAddr(objIpAddr)
     {
     }
-    inline ~TestImsNetworkConnection() {}
+    ~TestImsNetworkConnection() override = default;
 
 public:
-    inline IMS_BOOL Create(IN const AString& /*strNetProfile*/)
+    inline IMS_BOOL Create(IN const AString& /*strNetProfile*/) override
     {
         m_nConnectionHandle = ImsNetworkConnectionState::GetInstance()->GetAndIncrementHandle(
                 m_bMobileConnection);
         return IMS_TRUE;
     }
-    inline IMS_BOOL Create(IN IMS_SINT32 /*nApnType*/)
+    inline IMS_BOOL Create(IN IMS_SINT32 /*nApnType*/) override
     {
         m_nConnectionHandle = ImsNetworkConnectionState::GetInstance()->GetAndIncrementHandle(
                 m_bMobileConnection);

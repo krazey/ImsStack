@@ -24,7 +24,7 @@ class MockAsyncExecutorIExecutor : public AsyncExecutor::IExecutor
 {
 public:
     MockAsyncExecutorIExecutor() = default;
-    virtual ~MockAsyncExecutorIExecutor() = default;
+    ~MockAsyncExecutorIExecutor() override = default;
 
     MOCK_METHOD(void, AsyncExecutor_OnExecute,
             (IN AsyncExecutor * pExecutor, IN IMS_UINTP nParam1, IN IMS_UINTP nParam2), (override));

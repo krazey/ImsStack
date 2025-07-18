@@ -23,8 +23,8 @@
 class MockIUsim : public IUsim
 {
 public:
-    inline MockIUsim() {}
-    inline virtual ~MockIUsim() {}
+    MockIUsim() = default;
+    ~MockIUsim() override = default;
 
     MOCK_METHOD(IDigestAka*, CreateDigestAka, (), (override));
 };

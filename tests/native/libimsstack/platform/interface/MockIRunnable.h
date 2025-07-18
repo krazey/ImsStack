@@ -23,8 +23,8 @@
 class MockIRunnable : public IRunnable
 {
 public:
-    inline MockIRunnable() {}
-    inline virtual ~MockIRunnable() {}
+    MockIRunnable() = default;
+    ~MockIRunnable() override = default;
 
     MOCK_METHOD(IMS_BOOL, Runnable_Run, (IN ImsMessage & objMsg), (override));
 };

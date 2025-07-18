@@ -26,8 +26,8 @@ class IImsTrafficListener;
 class MockIImsTraffic : public IImsTraffic
 {
 public:
-    inline MockIImsTraffic() = default;
-    inline ~MockIImsTraffic() = default;
+    MockIImsTraffic() = default;
+    ~MockIImsTraffic() override = default;
 
     MOCK_METHOD(void, Disable, (IN IMS_SINT32), (override));
     MOCK_METHOD(IMS_BOOL, IsAllowed, (IN IMS_SINT32, IN IMS_UINT32), (override));

@@ -51,7 +51,7 @@ public:
             AsyncExecutor(piOwnerThread, piListener, bAutoDestroy)
     {
     }
-    ~TestAsyncExecutor() = default;
+    ~TestAsyncExecutor() override = default;
 
 public:
     inline IMS_SINT32 GetExecuteMessage() const { return MSG_EXECUTE; }

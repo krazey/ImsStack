@@ -32,8 +32,8 @@ namespace android
 class TestImsMutex : public ImsMutex
 {
 public:
-    inline TestImsMutex() {}
-    inline virtual ~TestImsMutex() {}
+    TestImsMutex() = default;
+    ~TestImsMutex() override = default;
 
 public:
     void Lock() override {}
@@ -48,7 +48,7 @@ public:
     {
     }
 
-    inline ~TestImsTimer() {}
+    ~TestImsTimer() override = default;
 
 public:
     IMS_BOOL Equals(IN const ITimer* /*piTimer*/) const override { return IMS_TRUE; }

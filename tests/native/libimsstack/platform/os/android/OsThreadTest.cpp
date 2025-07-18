@@ -40,7 +40,7 @@ public:
             m_bJoinThread(IMS_FALSE)
     {
     }
-    inline ~TestOsThread() {}
+    ~TestOsThread() override = default;
 
     inline IMS_BOOL IsJoinThreadCalled() { return m_bJoinThread; }
     inline void SetThreadId(IMS_ULONG nThreadId) { m_nThreadId = nThreadId; }

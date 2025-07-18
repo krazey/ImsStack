@@ -46,7 +46,7 @@ public:
                         });
     }
 
-    inline virtual ~MockISubscriberInfo() {}
+    ~MockISubscriberInfo() override = default;
 
     MOCK_METHOD(IMS_BOOL, GetPhoneNumber, (OUT AString & strPhoneNumber), (const, override));
     MOCK_METHOD(IMS_BOOL, GetSimMcc, (OUT AString & strMcc), (const, override));
