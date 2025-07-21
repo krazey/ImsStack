@@ -19,6 +19,35 @@
     <!-- MTC -->
     <int name="imsvoice.mo_call_request_timeout_millis_int" value="3000"/>
 
+    <!-- MTS -->
+    <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
+        <item value="1"/>
+        <item value="8"/>
+        <item value="10"/>
+        <item value="11"/>
+        <item value="21"/>
+        <item value="27"/>
+        <item value="28"/>
+        <item value="29"/>
+        <item value="30"/>
+        <item value="38"/>
+        <item value="41"/>
+        <item value="42"/>
+        <item value="47"/>
+        <item value="50"/>
+        <item value="69"/>
+        <item value="81"/>
+        <item value="95"/>
+        <item value="96"/>
+        <item value="97"/>
+        <item value="98"/>
+        <item value="99"/>
+        <item value="111"/>
+        <item value="127"/>
+    </int-array>
+    <int-array name="imssms.sms_rp_cause_values_to_retry_over_ims_int_array" num="0">
+    </int-array>
+
     <!-- Media -->
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
