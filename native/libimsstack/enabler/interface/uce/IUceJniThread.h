@@ -24,8 +24,6 @@ class IUceTerminatedReason;
 class IUceJniThread : public IJniEnablerThread
 {
 public:
-    virtual ~IUceJniThread() {}
-
     /**
      * Notify the application that the device is disconnected to the IMS network.
      */

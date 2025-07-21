@@ -23,8 +23,6 @@ class AString;
 class IUceJni : public INativeEnabler
 {
 public:
-    virtual ~IUceJni(){};
-
     /**
      * UCE(Java) -> UCeApp(Native)
      */
