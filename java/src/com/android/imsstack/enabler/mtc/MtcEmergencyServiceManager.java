@@ -32,6 +32,9 @@ import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,7 +53,6 @@ public class MtcEmergencyServiceManager {
     private final ICallStateTracker mCallStateTracker;
     private int mEmergencyType;
     private boolean mIsStopEmergencyServiceRequired;
-    private String mLastCountryIso = "";
 
     public MtcEmergencyServiceManager(IBaseContext context, ICallStateTracker callStateTracker) {
         mContext = context;
@@ -108,14 +110,51 @@ public class MtcEmergencyServiceManager {
      * even if the device's radio is temporarily off (e.g., in airplane mode).
      * If there is no valid country ISO received via ACTION_NETWORK_COUNTRY_CHANGED,
      * it returns the most recent valid country ISO obtained from ImsPrivateProperties.
+     * For devices with multiple phone IDs, this method prioritizes returning the last known valid
+     * country ISO for its own phone ID.
+     * If that is not valid, it then returns the most recently recognized country ISO from any
+     * other phone ID.
      *
      * @return A non-null string representing the cached network country ISO.
      * Returns an empty string if no country ISO has been cached.
      */
     @NonNull
     public String getNetworkCountryIso() {
-        log("getNetworkCountryIso : " + mLastCountryIso);
-        return mLastCountryIso;
+        String countryIsoFromProperties = ImsPrivateProperties.Persistent.get(
+                ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO, mContext.getPhoneId());
+        String countryIsoFromTelephony = "";
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mContext.getSlotId());
+        if (telephony != null) {
+            countryIsoFromTelephony = telephony.getNetworkCountryIso();
+        }
+
+        if (!TextUtils.isEmpty(countryIsoFromTelephony)) {
+            if (!countryIsoFromTelephony.equals(countryIsoFromProperties)) {
+                updatePersistentProperty(ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO,
+                        countryIsoFromTelephony, mContext.getSlotId());
+            }
+            log("Country ISO from telephony : " + countryIsoFromTelephony);
+            return countryIsoFromTelephony;
+        }
+
+        if (!TextUtils.isEmpty(countryIsoFromProperties)) {
+            log("Country ISO from KEY_NETWORK_COUNTRY_ISO : " + countryIsoFromProperties);
+            return countryIsoFromProperties;
+        }
+
+        countryIsoFromProperties = ImsPrivateProperties.Persistent.get(
+                ImsPrivateProperties.Persistent.KEY_OVERALL_LAST_NETWORK_COUNTRY_ISO,
+                MSimUtils.DEFAULT_PHONE_ID);
+
+        if (!TextUtils.isEmpty(countryIsoFromProperties)) {
+            log("Country ISO from KEY_OVERALL_LAST_NETWORK_COUNTRY_ISO : "
+                    + countryIsoFromProperties);
+            return countryIsoFromProperties;
+        }
+
+        log("No valid country ISO");
+        return "";
     }
 
     /**
@@ -232,6 +271,10 @@ public class MtcEmergencyServiceManager {
         mCallStateTracker.removeListener(mECallStateListener);
     }
 
+    private static void updatePersistentProperty(String key, String value, int slotId) {
+        ImsPrivateProperties.Persistent.set(key, value, slotId);
+    }
+
     private static void log(String s) {
         ImsLog.d("[GII-MTC] " + s);
     }
@@ -293,23 +336,16 @@ public class MtcEmergencyServiceManager {
                 String countryIso = intent.getStringExtra(
                         TelephonyManager.EXTRA_NETWORK_COUNTRY);
                 int phoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY, -1);
-                log("ACTION_NETWORK_COUNTRY_CHANGED[" + phoneId + "] : " + countryIso);
+                log("ACTION_NETWORK_COUNTRY_CHANGED [" + phoneId + "] : " + countryIso);
 
-                if (!TextUtils.isEmpty(countryIso)) {
-                    ImsPrivateProperties.Persistent.set(
-                            ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO,
-                            countryIso, phoneId);
-                } else {
-                    countryIso = ImsPrivateProperties.Persistent.get(
-                            ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO, phoneId);
-                    log("Network country ISO from ImsPrivateProperties[" + phoneId + "] : "
-                            + countryIso);
-                    if (TextUtils.isEmpty(countryIso)) {
-                        return;
-                    }
+                if (TextUtils.isEmpty(countryIso)) {
+                    return;
                 }
-
-                mLastCountryIso = countryIso;
+                updatePersistentProperty(ImsPrivateProperties.Persistent.KEY_NETWORK_COUNTRY_ISO,
+                        countryIso, phoneId);
+                updatePersistentProperty(
+                        ImsPrivateProperties.Persistent.KEY_OVERALL_LAST_NETWORK_COUNTRY_ISO,
+                        countryIso, MSimUtils.DEFAULT_PHONE_ID);
             }
         }
     };
