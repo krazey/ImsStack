@@ -362,15 +362,15 @@ IMS_BOOL VideoProfileNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPa
     IMS_TRACE_D("NegotiateAvc(): Local Profile[%d] <-> Peer Profile[%d]", pLocalFmtp->GetProfile(),
             pPeerFmtp->GetProfile(), 0);
 
-    // same level is adapt first, reject higher level
-    if (pLocalFmtp->GetLevel() < pPeerFmtp->GetLevel())
+    // reject unmatched profile or reject higher level
+    if (pLocalFmtp->GetProfile() != pPeerFmtp->GetProfile() ||
+            pLocalFmtp->GetLevel() < pPeerFmtp->GetLevel())
     {
-        IMS_TRACE_D("NegotiateAvc(): NOT MATCHED AVC Level", 0, 0, 0);
-
         if (*pTempPayload == IMS_NULL)
         {
-            IMS_TRACE_D("NegotiateAvc(): Accept Highest Temp Src profileLevelID[%s]",
-                    pLocalFmtp->GetProfileLevelId().GetStr(), 0, 0);
+            IMS_TRACE_D("NegotiateAvc(): Accept temporary payload[%d], profileLevelID[%s]",
+                    pLocalPayload->GetRtpMap().GetPayloadNumber(),
+                    pLocalFmtp->GetProfileLevelId().GetStr(), 0);
             *pTempPayload = pLocalPayload;
             *pMatchedPeerPayload = pPeerPayload;
         }

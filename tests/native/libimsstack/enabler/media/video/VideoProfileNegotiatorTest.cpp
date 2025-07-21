@@ -302,6 +302,41 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateLocalPortZero)
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 }
 
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)
+{
+    const AString kTargetAvcProfileID = "42C01F";
+    // Arrange: Add compatible payloads
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 15, "640C1F");
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 15,
+            kTargetAvcProfileID);
+    AddAvcPayload(m_pPeerProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 15,
+            kTargetAvcProfileID);
+
+    // Act: Perform negotiation (Offer received scenario)
+    // Pass the mock config object using .get()
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE /* bIsOfferReceived */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_NE(m_pNegotiatedProfile->GetDataPort(), 0);  // Port should be non-zero
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(),
+            MEDIA_DIRECTION_SEND_RECEIVE);  // Example expected direction
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(),
+            kLocalPayload + 1);  // Should take peer's pPayload number in offer scenario
+    EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
+
+    auto pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    EXPECT_NE(pNegoFmtp, nullptr);
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 15);
+    EXPECT_EQ(pNegoFmtp->GetProfileLevelId(), kTargetAvcProfileID);
+}
+
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMatchedInMultipleItems)
 {
     const IMS_SINT32 nLocalPayload1 = kLocalPayload;
