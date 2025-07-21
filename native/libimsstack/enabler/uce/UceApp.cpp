@@ -719,7 +719,7 @@ void UceApp::SendRegistrationRecoveryRequestToAos(IN IMS_UINT32 nAosControlType)
 PRIVATE
 IUceJniThread* UceApp::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::UCE);
     if (piJniEnabler == IMS_NULL)
     {

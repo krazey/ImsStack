@@ -68,7 +68,7 @@ AString UceConfig::GetAStringValue(IN KEY_UCE_STRING eKey, IN IMS_SINT32 nSimSlo
         return strRet;
     }
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     switch (eKey)
     {
         case KEY_RLS_URI:
@@ -88,7 +88,7 @@ IMS_UINT32 UceConfig::GetIntValue(IN KEY_UCE_INT eKey, IN IMS_SINT32 nSimSlot)
         return nRet;
     }
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     switch (eKey)
     {
         case KEY_EXPIRE_VALUE_PUBLISH:
@@ -132,7 +132,7 @@ IMS_BOOL UceConfig::GetBoolValue(IN KEY_UCE_BOOL eKey, IN IMS_SINT32 nSimSlot)
         return bRet;
     }
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     switch (eKey)
     {
         case KEY_SUBSCRIBE_INDEPENDENT_OF_PUBLISH:
@@ -182,7 +182,7 @@ IMS_UINT32 UceConfig::GetPublishRetryType(IN IMS_SINT32 nResponseCode, IN IMS_SI
     }
     IMS_TRACE_D("GetPublishRetryType:simSlot[%d], respoonseCode[%d]", nSimSlot, nResponseCode, 0);
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     ImsVector<IMS_SINT32> temporary = objUceAssetItems->m_objImmediatelyRetryPublishResponse;
     if (!temporary.IsEmpty())
     {
@@ -231,7 +231,7 @@ IMS_BOOL UceConfig::IsImsRegistrationRequired(
     {
         return IMS_FALSE;
     }
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
 
     ImsVector<IMS_SINT32> temporary;
     if (isPublish)

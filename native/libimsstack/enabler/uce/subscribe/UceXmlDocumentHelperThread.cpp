@@ -162,7 +162,7 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
             return eResult;
         }
         AString strRootName(AString::ConstNull());
-        IElement* piRootElement = piDocument->GetDocumentElement();
+        const IElement* piRootElement = piDocument->GetDocumentElement();
         if (piRootElement == IMS_NULL)
         {
             m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
@@ -512,7 +512,7 @@ IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
     /* Parse RLMI List */
     for (IMS_UINT32 i = 0; i < piNodeList->GetLength(); i++)
     {
-        IElement* piElement = IMS_NULL;
+        const IElement* piElement = IMS_NULL;
         AString strURI(AString::ConstNull());
         INodeList* piChildrenNodeList = IMS_NULL;
         // <resource ...>
@@ -537,7 +537,7 @@ IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
             INode* piChildNode = piChildrenNodeList->Item(j);
             if (piChildNode->GetNodeType() == INode::ELEMENT_NODE)
             {
-                IElement* piChildElement = DYNAMIC_CAST(IElement*, piChildNode);
+                const IElement* piChildElement = DYNAMIC_CAST(IElement*, piChildNode);
                 AString temp;
                 // <resource uri=...>
                 //    <instance id=... state=... cid=.../>

@@ -564,7 +564,7 @@ void UcePublishManager::PublicationRefreshCompleted(IN IPublication* piPublicati
         return;
     }
     IMS_SINT32 nResponseCode = 0;
-    ISipMessage* piSIPMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piSIPMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piSIPMessage != IMS_NULL)
     {
         nResponseCode = piSIPMessage->GetStatusCode();
@@ -757,7 +757,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Published(IN IMSMSG& objMsg)
     else
     {
         GetEtagAndExpireValue(piMessage);
-        IPublishResponseData* pResponseData = GetPublishResponseData(piMessage);
+        const IPublishResponseData* pResponseData = GetPublishResponseData(piMessage);
         SendPublishResponseInd(m_nKey, pResponseData->m_nResponseCode, pResponseData->m_strReason,
                 pResponseData->m_nReasonCause, pResponseData->m_strReasonText, m_strEtag);
     }
@@ -829,7 +829,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
         return IMS_TRUE;
     }
 
-    IPublishResponseData* pResponseData = GetPublishResponseData(piMessage);
+    const IPublishResponseData* pResponseData = GetPublishResponseData(piMessage);
 
     if (m_bEnablePIDFCompression == IMS_TRUE)
     {
@@ -1056,7 +1056,7 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg)
     }
     else
     {
-        IPublishResponseData* pResponseData = GetPublishResponseData(piMessage);
+        const IPublishResponseData* pResponseData = GetPublishResponseData(piMessage);
         nResponseCode = pResponseData->m_nResponseCode;
         SendPublishResponseInd(m_nKey, pResponseData->m_nResponseCode, pResponseData->m_strReason,
                 pResponseData->m_nReasonCause, pResponseData->m_strReasonText, m_strEtag);
@@ -1259,7 +1259,7 @@ ISipMessage* UcePublishManager::GetISIPMessage(IMS_BOOL bRequireResponseMessage)
 {
     if (m_piPublication != IMS_NULL)
     {
-        IMessage* piMessage = IMS_NULL;
+        const IMessage* piMessage = IMS_NULL;
         if (bRequireResponseMessage == GET_MESSAGE_FROM_RESPONSE)
         {
             piMessage = m_piPublication->GetPreviousResponse(IMessage::PUBLICATION_PUBLISH);
@@ -1659,7 +1659,7 @@ IMS_BOOL UcePublishManager::ProcessRetryAfterHeader()
         IMS_TRACE_I("ProcessRetryAfterHeader:m_piPublication is null.", 0, 0, 0);
         return IMS_FALSE;
     }
-    ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("ProcessRetryAfterHeader:ISipMessage is null.", 0, 0, 0);
@@ -1696,7 +1696,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     StopTimer(TIMER_ALL);
     m_strEtag = AString::ConstNull();
 
-    ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("Process403Scenario: ISipMessage is null", 0, 0, 0);
@@ -1750,7 +1750,7 @@ IMS_BOOL UcePublishManager::Process423Scenario(IMS_BOOL bIsRefresh)
     IMS_TRACE_I("Process423Scenario", 0, 0, 0);
     StopTimer(TIMER_ALL);
 
-    ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("Process423Scenario: ISipMessage is null", 0, 0, 0);
@@ -2120,7 +2120,7 @@ const IMS_CHAR* UcePublishManager::StateToString(IMS_UINT32 _eState)
 PRIVATE
 IUceJniThread* UcePublishManager::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
     if (piJniEnabler == IMS_NULL)
     {
