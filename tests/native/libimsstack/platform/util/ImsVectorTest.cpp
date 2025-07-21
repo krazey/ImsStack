@@ -329,7 +329,7 @@ TEST_F(ImsVectorTest, Remove)
 
     EXPECT_TRUE(objPointerVector.Remove(&strDog));
     EXPECT_EQ(1, objPointerVector.GetSize());
-    AString* pstrCat = objPointerVector.GetAt(0);
+    const AString* pstrCat = objPointerVector.GetAt(0);
     EXPECT_EQ(strCat, *pstrCat);
     EXPECT_TRUE(objPointerVector.Remove(&strCat));
     EXPECT_EQ(0, objPointerVector.GetSize());

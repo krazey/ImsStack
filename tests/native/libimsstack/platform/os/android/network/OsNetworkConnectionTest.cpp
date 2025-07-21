@@ -719,7 +719,7 @@ TEST_F(OsNetworkConnectionTest, GetPcscfAddress)
 TEST_F(OsNetworkConnectionTest, IsePDGEnabled)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     ActivateConnection(objOsNetworkConnection, IIpcan::CATEGORY_WLAN);
 
@@ -729,7 +729,7 @@ TEST_F(OsNetworkConnectionTest, IsePDGEnabled)
 TEST_F(OsNetworkConnectionTest, IsIpv6Preferred)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     EXPECT_CALL(m_objSystem, IsIpv6Preferred(_, _)).WillOnce(Return(IMS_TRUE));
 
@@ -739,7 +739,7 @@ TEST_F(OsNetworkConnectionTest, IsIpv6Preferred)
 TEST_F(OsNetworkConnectionTest, IsMobileDataEnabled)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     EXPECT_CALL(m_objSystem, IsMobileDataEnabled(_)).WillOnce(Return(IMS_TRUE));
 
@@ -749,7 +749,7 @@ TEST_F(OsNetworkConnectionTest, IsMobileDataEnabled)
 TEST_F(OsNetworkConnectionTest, GetMtu)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     EXPECT_CALL(m_objSystem, GetMtu(_, _)).WillOnce(Return(1200));
 
@@ -823,7 +823,7 @@ TEST_F(OsNetworkConnectionTest, Create_ApnType)
 TEST_F(OsNetworkConnectionTest, Equals)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    ImsNetworkConnection* pImsNetworkConnection = &objOsNetworkConnection;
+    const ImsNetworkConnection* pImsNetworkConnection = &objOsNetworkConnection;
     IpAddress onjIpv4Address(m_strLocalIpv4Addr);
     IpAddress onjIpv6Address(m_strLocalIpv6Addr);
 

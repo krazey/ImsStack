@@ -60,7 +60,7 @@ void TimerService::DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread 
 
     for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
     {
-        ITimer* piExTimer = m_objTimers.GetAt(i);
+        const ITimer* piExTimer = m_objTimers.GetAt(i);
 
         if (piExTimer == IMS_NULL)
         {

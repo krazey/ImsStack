@@ -188,7 +188,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_ConnectionHandle)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(HANDLE_MOBILE_MAX + 1) == IMS_NULL);
 
     // valid handle - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(objTestImsNetworkConnection1.GetHandle());
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_ONE, objTestImsNetworkConnection1.GetApnType());
@@ -221,7 +221,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_IpAddress)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(IPADDRESS_THREE) == IMS_NULL);
 
     // valid IpAddress - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(IPADDRESS_ONE);
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_ONE, objTestImsNetworkConnection1.GetApnType());
@@ -262,7 +262,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_Profile_Slot)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(PROFILE_TWO, IMS_SLOT_1) == IMS_NULL);
 
     // valid handle - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(PROFILE_TWO, IMS_SLOT_0);
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_TWO, pImsNetworkConnection->GetApnType());
@@ -312,7 +312,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_ApnType_Slot)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(PROFILE_TWO, IMS_SLOT_1) == IMS_NULL);
 
     // valid handle - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(APN_TYPE_TWO, IMS_SLOT_0);
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_TWO, pImsNetworkConnection->GetApnType());

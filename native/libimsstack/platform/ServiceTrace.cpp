@@ -101,7 +101,7 @@ const ImsTraceTag& TraceService::GetTraceTag(IN IMS_SINT32 nTag) const
 PUBLIC
 IMS_UINT32 TraceService::GetOption() const
 {
-    ImsTrace* pTrace = m_pPrivate->GetTrace();
+    const ImsTrace* pTrace = m_pPrivate->GetTrace();
 
     if (pTrace == IMS_NULL)
     {

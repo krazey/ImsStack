@@ -319,7 +319,8 @@ TEST_F(ServiceNetworkTest, CreateConnection_ProfileName)
 
     EXPECT_TRUE(m_pNetworkService->CreateConnection(PROFILE_NAME, 0) == IMS_NULL);
 
-    INetworkConnection* pINetworkConnection = m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
+    const INetworkConnection* pINetworkConnection =
+            m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
     EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
 
     // OsFactory CreateNetworkConnection should not be called again.
@@ -336,7 +337,8 @@ TEST_F(ServiceNetworkTest, CreateConnection_ApnType)
 
     EXPECT_TRUE(m_pNetworkService->CreateConnection(PROFILE_NAME, 0) == IMS_NULL);
 
-    INetworkConnection* pINetworkConnection = m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
+    const INetworkConnection* pINetworkConnection =
+            m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
     EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
 
     // OsFactory CreateNetworkConnection should not be called again.
@@ -350,7 +352,8 @@ TEST_F(ServiceNetworkTest, FindConnection_ApnType)
             .Times(1)
             .WillOnce(Return(m_pTestOsNetworkConnection));
 
-    INetworkConnection* pINetworkConnection = m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
+    const INetworkConnection* pINetworkConnection =
+            m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
     EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
 
     pINetworkConnection = m_pNetworkService->FindConnection(APN_TYPE, 0);
@@ -364,7 +367,8 @@ TEST_F(ServiceNetworkTest, FindConnection_IpAddress)
             .Times(1)
             .WillOnce(Return(m_pTestOsNetworkConnection));
 
-    INetworkConnection* pINetworkConnection = m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
+    const INetworkConnection* pINetworkConnection =
+            m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
     EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
 
     pINetworkConnection = m_pNetworkService->FindConnection(IPADDRESS);
@@ -384,7 +388,7 @@ TEST_F(ServiceNetworkTest, CreateSocket_Connection)
     EXPECT_TRUE(m_pNetworkService->CreateSocket(IMS_NULL) == IMS_NULL);
     EXPECT_TRUE(m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection) == IMS_NULL);
 
-    ISocket* pISocket = m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection);
+    const ISocket* pISocket = m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection);
 
     EXPECT_TRUE(pISocket != IMS_NULL);
 }
@@ -411,7 +415,7 @@ TEST_F(ServiceNetworkTest, CreateSocket_ProfileName)
     EXPECT_TRUE(m_pNetworkService->CreateSocket(IMS_NULL) == IMS_NULL);
     EXPECT_TRUE(m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection) == IMS_NULL);
 
-    ISocket* pISocket = m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection);
+    const ISocket* pISocket = m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection);
 
     EXPECT_TRUE(pISocket != IMS_NULL);
 }
@@ -430,7 +434,7 @@ TEST_F(ServiceNetworkTest, CreateSslSocket_Connection)
     EXPECT_TRUE(m_pNetworkService->CreateSslSocket(
                         m_pTestOsNetworkConnection, &objSslCertificate) == IMS_NULL);
 
-    ISocket* pISocket =
+    const ISocket* pISocket =
             m_pNetworkService->CreateSslSocket(m_pTestOsNetworkConnection, &objSslCertificate);
 
     EXPECT_TRUE(pISocket != IMS_NULL);
@@ -462,7 +466,7 @@ TEST_F(ServiceNetworkTest, CreateSslSocket_ProfileName)
     EXPECT_TRUE(m_pNetworkService->CreateSslSocket(
                         m_pTestOsNetworkConnection, &objSslCertificate) == IMS_NULL);
 
-    ISocket* pISocket =
+    const ISocket* pISocket =
             m_pNetworkService->CreateSslSocket(m_pTestOsNetworkConnection, &objSslCertificate);
 
     EXPECT_TRUE(pISocket != IMS_NULL);
@@ -513,7 +517,7 @@ TEST_F(ServiceNetworkTest, DispatchServiceMessage)
 
     EXPECT_CALL(m_objOsFactory, CreateSocket()).Times(1).WillOnce(Return(&objTestOsSocket));
 
-    ISocket* pISocket = m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection);
+    const ISocket* pISocket = m_pNetworkService->CreateSocket(m_pTestOsNetworkConnection);
     EXPECT_TRUE(pISocket != IMS_NULL);
 
     ImsSocketState* pSocketState = ImsSocketState::GetInstance();

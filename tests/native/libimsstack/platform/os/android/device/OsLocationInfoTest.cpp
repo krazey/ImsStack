@@ -158,7 +158,7 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
 
     // 2. Get default network country from GetNetworkCountryIso() if country not present in
     // location information received from GetLastKnownLocation()
-    ILocationProperties* piLocationProperties = objOsLocationInfo.GetLocationProperties();
+    const ILocationProperties* piLocationProperties = objOsLocationInfo.GetLocationProperties();
 
     EXPECT_TRUE(piLocationProperties != nullptr);
 

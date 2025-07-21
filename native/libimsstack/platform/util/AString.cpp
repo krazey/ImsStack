@@ -1726,7 +1726,7 @@ AString& AString::Replace(IN const IMS_CHAR cOld, IN const IMS_CHAR cNew)
     if (m_pData->nSize != 0)
     {
         IMS_CHAR* p = GetStr();
-        IMS_CHAR* pEnd = p + m_pData->nSize;
+        const IMS_CHAR* pEnd = p + m_pData->nSize;
 
         while (p != pEnd)
         {

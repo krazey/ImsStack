@@ -58,7 +58,7 @@ PUBLIC VIRTUAL void OsSystemTime::GetDate(OUT IMS_SINT32& nYear, OUT IMS_SINT32&
     struct tm stTm = STRUCT_TM_INIT;
 
     time(&now);
-    struct tm* pstTm = localtime_r(&now, &stTm);
+    const struct tm* pstTm = localtime_r(&now, &stTm);
 
     if (pstTm != IMS_NULL)
     {
@@ -94,7 +94,7 @@ PUBLIC VIRTUAL void OsSystemTime::GetLocalTime(
     struct tm stTm = STRUCT_TM_INIT;
 
     time(&now);
-    struct tm* pstTm = localtime_r(&now, &stTm);
+    const struct tm* pstTm = localtime_r(&now, &stTm);
 
     if (pstTm != IMS_NULL)
     {
@@ -111,7 +111,7 @@ PUBLIC VIRTUAL ImsGmTime OsSystemTime::GetGmTime() const
     struct tm stTm = STRUCT_TM_INIT;
 
     time(&now);
-    struct tm* pstTm = gmtime_r(&now, &stTm);
+    const struct tm* pstTm = gmtime_r(&now, &stTm);
 
     if (pstTm == IMS_NULL)
     {
@@ -136,7 +136,7 @@ PUBLIC VIRTUAL void OsSystemTime::GetGmTime(OUT IMS_SINT32& nYear, OUT IMS_SINT3
     struct tm stTm = STRUCT_TM_INIT;
 
     time(&now);
-    struct tm* pstTm = gmtime_r(&now, &stTm);
+    const struct tm* pstTm = gmtime_r(&now, &stTm);
 
     if (pstTm == IMS_NULL)
     {

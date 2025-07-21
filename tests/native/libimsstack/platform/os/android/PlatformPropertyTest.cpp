@@ -34,7 +34,7 @@ protected:
 
 TEST_F(PlatformPropertyTest, Initialize)
 {
-    PlatformContext* pDefaultPlaformContext = PlatformContext::GetInstance();
+    const PlatformContext* pDefaultPlaformContext = PlatformContext::GetInstance();
     EXPECT_NE(pDefaultPlaformContext, nullptr);
 
     EXPECT_EQ(PlatformProperty::Initialize(), IMS_TRUE);

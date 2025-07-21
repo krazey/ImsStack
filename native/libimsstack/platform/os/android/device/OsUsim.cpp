@@ -308,7 +308,7 @@ void OsUsim::DestroyDigestAka(IN OsUsimDigestAka* pDigestAka)
 
     for (IMS_UINT32 i = 0; i < m_objDigestAkas.GetSize(); ++i)
     {
-        OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
+        const OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
 
         if (pDigestAka == pTmp)
         {
@@ -404,7 +404,7 @@ IMS_BOOL OsUsim::IsDigestAkaPresent(IN const OsUsimDigestAka* pDigestAka)
 
     for (IMS_UINT32 i = 0; i < m_objDigestAkas.GetSize(); ++i)
     {
-        OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
+        const OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
 
         if (pDigestAka == pTmp)
         {

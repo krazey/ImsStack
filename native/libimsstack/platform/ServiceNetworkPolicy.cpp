@@ -333,7 +333,7 @@ PUBLIC
 const NetworkPolicy* NetworkServicePolicy::GetPolicy(
         IN const AString& strName, IN IMS_SINT32 nSlotId) const
 {
-    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    const NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetPolicy(strName);
 }
 
@@ -341,7 +341,7 @@ PUBLIC
 const NetworkPolicy* NetworkServicePolicy::GetPolicy(
         IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) const
 {
-    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    const NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetPolicy(nApnType);
 }
 

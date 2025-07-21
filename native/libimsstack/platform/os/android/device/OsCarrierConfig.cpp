@@ -368,7 +368,7 @@ PUBLIC VIRTUAL void OsCarrierConfig::AddListener(IN ICarrierConfigListener* piLi
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ICarrierConfigListener* piTmpListener = m_objListeners.GetAt(i);
+        const ICarrierConfigListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piListener == piTmpListener)
         {
@@ -383,7 +383,7 @@ PUBLIC VIRTUAL void OsCarrierConfig::RemoveListener(IN ICarrierConfigListener* p
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ICarrierConfigListener* piTmpListener = m_objListeners.GetAt(i);
+        const ICarrierConfigListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piListener == piTmpListener)
         {

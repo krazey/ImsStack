@@ -194,19 +194,19 @@ TEST_F(OsFactoryTest, CreateSslSocket)
 
 TEST_F(OsFactoryTest, GetSystemUtil)
 {
-    ISystemUtil* pSystemUtil = m_pOsFactory->GetSystemUtil();
+    const ISystemUtil* pSystemUtil = m_pOsFactory->GetSystemUtil();
     ASSERT_TRUE(pSystemUtil != nullptr);
 }
 
 TEST_F(OsFactoryTest, GetSystemProperty)
 {
-    ISystemProperty* pSystemProperty = m_pOsFactory->GetSystemProperty();
+    const ISystemProperty* pSystemProperty = m_pOsFactory->GetSystemProperty();
     ASSERT_TRUE(pSystemProperty != nullptr);
 }
 
 TEST_F(OsFactoryTest, GetZLib)
 {
-    IZLib* pZlib = m_pOsFactory->GetZLib();
+    const IZLib* pZlib = m_pOsFactory->GetZLib();
     ASSERT_TRUE(pZlib != nullptr);
 }
 
