@@ -107,7 +107,7 @@ PROTECTED VIRTUAL IMS_BOOL BaseThread::Runnable_Run(IN ImsMessage& objMsg)
 }
 
 PROTECTED
-IMS_BOOL BaseThread::IsThreadMessage(IN ImsMessage& objMsg) const
+IMS_BOOL BaseThread::IsThreadMessage(IN const ImsMessage& objMsg) const
 {
     const IMS_CHAR* pszTargetName = objMsg.GetTargetName();
 

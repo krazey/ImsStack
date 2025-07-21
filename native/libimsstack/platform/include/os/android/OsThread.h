@@ -95,7 +95,7 @@ private:
     inline IMS_BOOL IsSignaled() const { return m_bSignalFlag; }
 
     IMS_SINT32 RemoveMessages(IN_OUT ImsVector<ImsMessage>& objMsgQueue,
-            IN IMS_SINT32 nStartingIndex, IN ImsMessage::IMessageCallback* piCallback,
+            IN IMS_SINT32 nStartingIndex, IN const ImsMessage::IMessageCallback* piCallback,
             OUT ImsList<ImsMessage>* pImsMsgs);
 
 private:

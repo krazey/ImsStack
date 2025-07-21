@@ -342,7 +342,7 @@ INetworkIpSec* NetworkService::GetIpSec(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-void NetworkService::DispatchServiceMessage(IN ImsMessage& objMsg)
+void NetworkService::DispatchServiceMessage(IN const ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {

@@ -469,7 +469,7 @@ PROTECTED GLOBAL IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
 
 PRIVATE
 IMS_SINT32 OsThread::RemoveMessages(IN_OUT ImsVector<ImsMessage>& objMsgQueue,
-        IN IMS_SINT32 nStartingIndex, IN ImsMessage::IMessageCallback* piCallback,
+        IN IMS_SINT32 nStartingIndex, IN const ImsMessage::IMessageCallback* piCallback,
         OUT ImsList<ImsMessage>* pImsMsgs)
 {
     IMS_SINT32 nRemovedMsgCount = 0;

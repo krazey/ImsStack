@@ -33,7 +33,7 @@ public:
     OsTimerService& operator=(IN const OsTimerService&) = delete;
 
 public:
-    void KillTimer(IN OsTimer* pTimer);
+    void KillTimer(IN const OsTimer* pTimer);
     IMS_BOOL SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer);
 
     static void CleanUp();
