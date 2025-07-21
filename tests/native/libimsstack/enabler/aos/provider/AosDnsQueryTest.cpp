@@ -52,8 +52,6 @@ class AosDnsQueryTest : public ::testing::Test
 {
 public:
     TestAosDnsQuery* m_pAosDnsQuery;
-    // cppcheck-suppress unusedStructMember
-    MockINetworkConnection m_objMockINetworkConnection;
 
 protected:
     void SetUp() override
@@ -381,9 +379,10 @@ TEST_F(AosDnsQueryTest, TerminateDnsQueryPrivateReturnFalseWhenNullThread)
 TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQueryFail)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(-1));
+    MockINetworkConnection objMockINetworkConnection;
+    EXPECT_CALL(objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(-1));
 
-    m_pAosDnsQuery->SetConnection(&m_objMockINetworkConnection);
+    m_pAosDnsQuery->SetConnection(&objMockINetworkConnection);
 
     EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
     EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
@@ -398,9 +397,10 @@ TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQueryFail)
 TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccess)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
+    MockINetworkConnection objMockINetworkConnection;
+    EXPECT_CALL(objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
 
-    m_pAosDnsQuery->SetConnection(&m_objMockINetworkConnection);
+    m_pAosDnsQuery->SetConnection(&objMockINetworkConnection);
 
     EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
     EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
@@ -415,9 +415,10 @@ TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccess)
 TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccessWithSignal)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
+    MockINetworkConnection objMockINetworkConnection;
+    EXPECT_CALL(objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
 
-    m_pAosDnsQuery->SetConnection(&m_objMockINetworkConnection);
+    m_pAosDnsQuery->SetConnection(&objMockINetworkConnection);
     m_pAosDnsQuery->SetSignaled(IMS_TRUE);
 
     EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
