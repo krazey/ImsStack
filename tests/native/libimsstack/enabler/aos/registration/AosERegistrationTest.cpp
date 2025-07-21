@@ -427,25 +427,27 @@ protected:
     }
 };
 
-TEST_F(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode)
+TEST_F(AosERegistrationTest, ReportFailureWhenStartWithFakeModeForEmergencySms)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).Times(0);
+    ON_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosERegistration->SetImsCall(IMS_FALSE);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetECall(IMS_FALSE);
+    m_pAosERegistration->GetEModeInfo()->SetESms(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
 
     m_pAosERegistration->Start();
 
-    EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
-    EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
-    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
-    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
-TEST_F(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetFakeMode)
+TEST_F(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
-            .WillByDefault(
-                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).Times(0);
 
     m_pAosERegistration->Start();
@@ -1756,6 +1758,15 @@ TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegNotTried)
     EXPECT_FALSE(m_pAosERegistration->IsRefreshRequiredByCbm());
 }
 
+TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyRegistrationSkipIsConfigured)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP));
+
+    EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
+}
+
 TEST_F(AosERegistrationTest, FakeModeConditionIfSubscriberIncompleted)
 {
     // GIVEN
@@ -1764,6 +1775,18 @@ TEST_F(AosERegistrationTest, FakeModeConditionIfSubscriberIncompleted)
 
     // WHEN & THEN
     EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
+}
+
+TEST_F(AosERegistrationTest, NormalModeConditionIfEmergencyLteAttachForEmergencySms)
+{
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
+    m_pAosERegistration->SetImsCall(IMS_FALSE);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetECall(IMS_FALSE);
+    m_pAosERegistration->GetEModeInfo()->SetESms(IMS_TRUE);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeModeCondition());
 }
 
 TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyLteAttach)

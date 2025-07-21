@@ -69,11 +69,13 @@ PUBLIC VIRTUAL void AosERegistration::Start()
     A_IMS_TRACE_I(
             REGID, "Start :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
-    IMS_UINT32 nScheme = GetPreferredRegScheme();
-
-    if (IsFakeModeCondition() ||
-            (nScheme == CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP))
+    if (IsFakeModeCondition())
     {
+        if (IsERegRequestedByOnlySms())
+        {
+            ProcessUnpredictableFailure();
+            return;
+        }
         SetMode(MODE_FAKE);
         SetFakeReg(IMS_TRUE);
     }
@@ -944,6 +946,13 @@ PROTECTED IMS_BOOL AosERegistration::IsRefreshRequiredByCbm()
 
 PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
 {
+    IMS_UINT32 nScheme = GetPreferredRegScheme();
+    if (nScheme == CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP)
+    {
+        A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: EREG preferred scheme is SKIP", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
     if (m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
     {
         A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: subscriber is incompleted", 0, 0, 0);
@@ -954,6 +963,13 @@ PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
             m_piContext->GetNetTracker()->IsEmergencyAttach())
     {
         A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: emergency attach", 0, 0, 0);
+        // Emergency SMS is supported when inserting valid UICC.
+        // When receiving PCO 5, the UE will recognize self activation UICC. It's invalid UICC.
+        if (IsERegRequestedByOnlySms())
+        {
+            return IMS_FALSE;
+        }
+
         if (GET_N_CONFIG(m_nSlotId)->IsSupportERegWhenEAttachWithValidSim())
         {
             IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
