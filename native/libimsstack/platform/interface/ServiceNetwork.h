@@ -90,7 +90,7 @@ public:
     virtual IIpcan* GetIpcan();
     virtual INetworkIpSec* GetIpSec(IN IMS_SINT32 nSlotId);
 
-    void DispatchServiceMessage(IN ImsMessage& objMsg);
+    void DispatchServiceMessage(IN const ImsMessage& objMsg);
 
     static NetworkService* GetNetworkService();
 

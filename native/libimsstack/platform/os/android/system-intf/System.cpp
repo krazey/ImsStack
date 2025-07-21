@@ -1773,7 +1773,7 @@ void System::AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT
 
 PRIVATE
 void System::RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
-        IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
+        IN const ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
     if ((nCategories & nCategory) == nCategory)
     {

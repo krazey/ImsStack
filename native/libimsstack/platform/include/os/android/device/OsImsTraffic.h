@@ -222,7 +222,7 @@ private:
 
         inline ~TrafficListeners() { objListeners.Clear(); }
 
-        inline IMS_BOOL operator==(IN IThread* piThread) { return piThread == piOwnerThread; }
+        inline IMS_BOOL operator==(IN const IThread* piThread) { return piThread == piOwnerThread; }
 
     public:
         IThread* piOwnerThread;

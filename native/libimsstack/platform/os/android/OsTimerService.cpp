@@ -104,7 +104,7 @@ PUBLIC VIRTUAL OsTimerService::~OsTimerService()
 }
 
 PUBLIC
-void OsTimerService::KillTimer(IN OsTimer* pTimer)
+void OsTimerService::KillTimer(IN const OsTimer* pTimer)
 {
     if (pTimer == IMS_NULL)
     {

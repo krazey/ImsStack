@@ -222,7 +222,7 @@ void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthResponseParam
 }
 
 LOCAL
-void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
+void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN const OsIsimStateParam* pParam)
 {
     OsIsim* pIsim = osIsim_GetInstance(nSlotId);
     IMS_SINT32 nState = pIsim->GetState();

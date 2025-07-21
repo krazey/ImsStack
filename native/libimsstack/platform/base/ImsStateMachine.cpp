@@ -23,6 +23,7 @@ ImsStateMachine::ImsStateMachine(IN IMS_UINT32 nState) :
 {
 }
 
+// cppcheck-suppress constParameterReference
 PUBLIC
 IMS_BOOL ImsStateMachine::OnStateMessage(IN ImsMessage& objMsg)
 {

@@ -216,7 +216,7 @@ private:
     void AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
             IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
     void RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
-            IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
+            IN const ISystemListener* piListener, IN IMS_SINT32 nSlotId);
 
     void NotifyNetworkCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);

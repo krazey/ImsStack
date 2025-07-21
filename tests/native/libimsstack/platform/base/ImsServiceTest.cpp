@@ -36,6 +36,7 @@ public:
     }
     ~TestImsService() override = default;
 
+    // cppcheck-suppress constParameterCallback
     inline IMS_BOOL StateNotReady_OnMessage(IN ImsMessage& objMsg)
     {
         if (objMsg.GetName() == MSG1)
@@ -45,6 +46,7 @@ public:
         return IMS_TRUE;
     }
 
+    // cppcheck-suppress constParameterCallback
     inline IMS_BOOL StateReady_OnMessage(IN ImsMessage& objMsg)
     {
         if (objMsg.GetName() == MSG2)
