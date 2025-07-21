@@ -437,6 +437,7 @@ void AosApplication::SetDataFailureReason(IN IMS_SINT32 nDataFailureReason)
 {
     m_nDataFailureReason = nDataFailureReason;
 }
+
 PROTECTED
 void AosApplication::ResetBlock(IN BLOCK_REASON nReason)
 {
@@ -461,7 +462,7 @@ void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
         piService->NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL,
                 (eReason == AosReasonCode::CLEAR_RAT_BLOCKS) ? AosNetworkType::NONE
                                                              : GetNetworkTypeForImsRegState(),
-                eReason);
+                eReason, 0);
     }
 }
 

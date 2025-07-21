@@ -610,7 +610,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                         && isIkeAuthFailureNotificationRequired()) {
                     mHandler.post(() -> onDeregistered(
                             getRegistrationNetworkType(networkType),
-                            ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE));
+                            ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE,
+                            failCause));
                 }
                 updateDataFailureReason(failCause);
             }
@@ -814,7 +815,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void onDeregistered(NetworkType networkType, ReasonCode reason) {
+    private void onDeregistered(NetworkType networkType, ReasonCode reason, int dataFailCause) {
         if (mRegState == IAosRegistrationListener.RegistrationState.DEREGISTERED
                 && reason == ReasonCode.UNSPECIFIED) {
             return;
@@ -840,14 +841,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyDeregistered(RegistrationType.NORMAL, networkType, reason,
-                    getErrorMessage(reason));
+                    getErrorMessage(reason), dataFailCause);
         }
     }
 
     private void onDeregisteredForEmergency(
-            int regType, NetworkType networkType, ReasonCode reason) {
+            int regType, NetworkType networkType, ReasonCode reason, int dataFailCause) {
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
-            l.notifyDeregistered(regType, networkType, reason, getErrorMessage(reason));
+            l.notifyDeregistered(regType, networkType, reason, getErrorMessage(reason),
+                    dataFailCause);
         }
     }
 
@@ -938,14 +940,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void updateDeregistered(int regType, NetworkType networkType, ReasonCode reason) {
+    private void updateDeregistered(int regType, NetworkType networkType, ReasonCode reason,
+            int dataFailCause) {
         ImsLog.d(mSlotId, "updateDeregistered :: regType(" + regType + "), networkType("
-                + networkType.toString() + "), reason(" + reason.toString() + ")");
+                + networkType.toString() + "), reason(" + reason.toString() + "), dataFailCause("
+                + dataFailCause + ")");
 
         if (regType == RegistrationType.EMERGENCY || regType == RegistrationType.FAKE) {
-            mHandler.post(() -> onDeregisteredForEmergency(regType, networkType, reason));
+            mHandler.post(
+                    () -> onDeregisteredForEmergency(regType, networkType, reason, dataFailCause));
         } else {
-            mHandler.post(() -> onDeregistered(networkType, reason));
+            mHandler.post(() -> onDeregistered(networkType, reason, dataFailCause));
         }
     }
 
@@ -1145,8 +1150,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     int regType = parcel.readInt();
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
+                    int dataFailCause = parcel.readInt();
 
-                    updateDeregistered(regType, NetworkType.of(networkType), ReasonCode.of(reason));
+                    updateDeregistered(regType, NetworkType.of(networkType), ReasonCode.of(reason),
+                            dataFailCause);
                 }
                 case IIAosService.N2J_NOTIFY_DEREGISTERING -> {
                     int regType = parcel.readInt();

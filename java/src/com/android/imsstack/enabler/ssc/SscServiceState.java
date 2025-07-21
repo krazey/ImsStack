@@ -779,7 +779,8 @@ public class SscServiceState {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, ReasonCode reason, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message,
+                int dataFailCause) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }

@@ -83,8 +83,8 @@ IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_S
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyDeregistered(
-        IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
+IMS_BOOL JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+        IN IMS_SINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
     IMS_TRACE_D("NotifyDeregistered", 0, 0, 0);
 
@@ -93,6 +93,7 @@ IMS_BOOL JniAosServiceThread::NotifyDeregistered(
     objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nReason);
+    objParcel.writeInt32(nDataFailureReason);
 
     return SendData2Java(objParcel);
 }

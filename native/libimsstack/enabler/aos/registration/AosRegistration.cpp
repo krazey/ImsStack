@@ -134,7 +134,8 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_eImsRegNetwork(AosNetworkType::NONE),
         m_eImsReasonCode(AosReasonCode::UNSPECIFIED),
         m_nPdnReactivateWaitTime(RETRY_DEFAULT_WAIT_TIME),
-        m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
+        m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE),
+        m_nDataFailureReason(0)
 {
     // Init Object
     m_pUtil = AosUtil::GetInstance();
@@ -1183,10 +1184,11 @@ void AosRegistration::NotifyDeregistered()
     IMS_SINT32 nImsRegType = GetImsRegType();
     if (piService != IMS_NULL && nImsRegType != IAosRegistration::IMS_REG_TYPE_INVALID)
     {
-        A_IMS_TRACE_D(REGID, "NotifyDeregistered :: RegType(%d), ImsReasonCode(%d)", nImsRegType,
-                m_eImsReasonCode, 0);
-        piService->NotifyDeregistered(
-                nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode);
+        A_IMS_TRACE_D(REGID,
+                "NotifyDeregistered :: RegType(%d), ImsReasonCode(%d), DataFailureReason(%d)",
+                nImsRegType, m_eImsReasonCode, m_nDataFailureReason);
+        piService->NotifyDeregistered(nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode,
+                m_nDataFailureReason);
     }
 }
 
@@ -1355,8 +1357,9 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     {
         if (m_nImsRegState == IMS_REG_STATE_DEREGISTERED)
         {
-            piService->NotifyDeregistered(nImsRegType, m_eImsRegNetwork, eReason);
-            m_eImsReasonCode = AosReasonCode::UNSPECIFIED;
+            piService->NotifyDeregistered(
+                    nImsRegType, m_eImsRegNetwork, eReason, m_nDataFailureReason);
+            ClearReasonCode();
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)
         {
@@ -3121,6 +3124,12 @@ PROTECTED VIRTUAL void AosRegistration::ClearIpsecBlock()
 {
     ClearAuthIpsecCount();
     m_nIpsecBlockReason = 0;
+}
+
+PROTECTED VIRTUAL void AosRegistration::ClearReasonCode()
+{
+    m_eImsReasonCode = AosReasonCode::UNSPECIFIED;
+    m_nDataFailureReason = 0;
 }
 
 PROTECTED VIRTUAL void AosRegistration::CloseUnsecureTcpSocket()
@@ -6586,15 +6595,15 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
 }
 
 PROTECTED VIRTUAL void AosRegistration::RegistrationControl_UpdateDataFailureReason(
-        IN IMS_SINT32 /* nReason */)
+        IN IMS_SINT32 nReason)
 {
-    if (m_eRegType != AosRegistrationType::NORMAL)
+    if (m_eRegType != AosRegistrationType::NORMAL || m_eImsReasonCode != AosReasonCode::UNSPECIFIED)
     {
         return;
     }
 
-    // TODO(b/383031808): Report dataFailCause as mExtraCode directly when deregistered due to PDN
-    // disconnection
+    m_eImsReasonCode = AosReasonCode::DATA_DISCONNECTED;
+    m_nDataFailureReason = nReason;
 }
 
 PRIVATE

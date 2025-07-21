@@ -88,24 +88,25 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
 
     @Override
     public void notifyDeregistered(
-            int regType, int networkType, ReasonCode reason, String message) {
+            int regType, int networkType, ReasonCode reason, String message, int dataFailCause) {
         logi("notifyDeregistered: [" + RegistrationType.toString(regType) + "]");
 
         if (regType == RegistrationType.NORMAL) {
-            onDeregistered(getReasonInfo(reason, message), getSuggestedAction(reason),
+            onDeregistered(getReasonInfo(reason, message, dataFailCause),
+                    getSuggestedAction(reason),
                     networkType);
             return;
         }
 
         ImsRegistrationAttributes.Builder attrBuilder =
                 new ImsRegistrationAttributes.Builder(networkType)
-                .setFlagRegistrationTypeEmergency();
+                        .setFlagRegistrationTypeEmergency();
 
         if (regType == RegistrationType.FAKE) {
             attrBuilder.setFlagVirtualRegistrationForEmergencyCall();
         }
 
-        onDeregistered(getReasonInfo(reason, message),
+        onDeregistered(getReasonInfo(reason, message, dataFailCause),
                 RegistrationManager.SUGGESTED_ACTION_NONE, attrBuilder.build());
     }
 
@@ -115,17 +116,20 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
         logi("notifyTechnologyChangeFailed: [" + RegistrationType.toString(regType) + "]");
 
         if (regType == RegistrationType.NORMAL) {
-            onTechnologyChangeFailed(networkType, getReasonInfo(reason, message));
+            onTechnologyChangeFailed(networkType,
+                    getReasonInfo(reason, message, android.telephony.DataFailCause.NONE));
             return;
         }
 
         if (regType == RegistrationType.EMERGENCY) {
             ImsRegistrationAttributes regAttributes =
                     new ImsRegistrationAttributes.Builder(networkType)
-                    .setFlagRegistrationTypeEmergency()
-                    .build();
+                            .setFlagRegistrationTypeEmergency()
+                            .build();
 
-            onTechnologyChangeFailed(getReasonInfo(reason, message), regAttributes);
+            onTechnologyChangeFailed(
+                    getReasonInfo(reason, message, android.telephony.DataFailCause.NONE),
+                    regAttributes);
         }
     }
 
@@ -134,8 +138,8 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @VisibleForTesting
-    protected ImsReasonInfo getReasonInfo(ReasonCode reason, String message) {
-        Pair<Integer, Integer> pair = ReasonCodeMap.getImsReasonPair(reason);
+    protected ImsReasonInfo getReasonInfo(ReasonCode reason, String message, int dataFailCause) {
+        Pair<Integer, Integer> pair = ReasonCodeMap.getImsReasonPair(reason, dataFailCause);
 
         return new ImsReasonInfo(pair.first, pair.second,
                 (message != null && !message.trim().isEmpty()) ? message : null);

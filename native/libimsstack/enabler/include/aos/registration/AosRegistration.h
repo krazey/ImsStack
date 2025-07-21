@@ -262,6 +262,7 @@ protected:
     virtual void ClearNetworkBindingFeatures();
     virtual void ClearIpsecBlock();
     virtual void CloseUnsecureTcpSocket();
+    virtual void ClearReasonCode();
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
@@ -633,6 +634,9 @@ protected:
 
     /// Wait time before reconnecting pdn (sec)
     IMS_UINT32 m_nPdnReactivateWaitTime;
+
+    /// Data failure reason for PDN disconnection
+    IMS_SINT32 m_nDataFailureReason;
 
     AString m_strTag;
 

@@ -1014,7 +1014,8 @@ public class SscServiceStateTest {
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
         mSscServiceState.mRegiStateListener.notifyDeregistered(
-                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
+                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
+                android.telephony.DataFailCause.NONE);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1032,7 +1033,8 @@ public class SscServiceStateTest {
         mSscServiceState.mRegiStateListener.mImsRegistrationState = true;
 
         mSscServiceState.mRegiStateListener.notifyDeregistered(
-                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
+                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
+                android.telephony.DataFailCause.NONE);
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
