@@ -572,14 +572,14 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     CallType eCallType = m_objContext.GetCallInfo().eInitialCallType;
 
     ImsList<IMtcBlockRule*> lstRules;
+    lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
+    lstRules.Append(new LocationBlockRule(m_objContext));
+    lstRules.Append(new RetryAfterBlockRule(m_objContext));
     lstRules.Append(new ServiceBlockRule(m_objContext, eCallType));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new SsacBlockRule(m_objContext, eCallType));
-    lstRules.Append(new RetryAfterBlockRule(m_objContext));
-    lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
-    lstRules.Append(new LocationBlockRule(m_objContext));
     return lstRules;
 }
 
