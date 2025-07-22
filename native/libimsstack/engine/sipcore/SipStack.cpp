@@ -4226,6 +4226,7 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType)
             "Timer_I >> ACK retransmit",
             "Timer_J >> non-INVITE server",
             "Timer_K >> non-INVITE client",
+            "Timer_L >> absorb retransmit INVITE & ACK receipt",
             "Timer_M >> 2XX-INVITE retransmission or forked",
             "Timer_OTHER",
             "Timer_INVALID"
@@ -4292,6 +4293,10 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
 
         nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_G;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_G, nT1);
+
+        // Timer-L is set based on T1 due to no configuration definition.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_L;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_L, nT1 * 64);
 
         // Timer-M is set based on T1 due to no configuration definition.
         nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_M;

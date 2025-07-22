@@ -211,11 +211,11 @@ TEST_F(SipInviteServerTxnTest, ProceedingState)
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]
                               [SipTxn::INV_SER_SEND_FAILURE_RESP_EVT](pTxn, pTxnFsmData, &nError));
-    /* Calling once timer to make startTimer for Timer H success */
+    /* Calling once timer to make startTimer for Timer L success */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST][SipTxn::INV_SER_SEND_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
-    /* Calling again timer to make startTimer for Timer H fail */
+    /* Calling again timer to make startTimer for Timer L fail */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST][SipTxn::INV_SER_SEND_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -256,6 +256,59 @@ TEST_F(SipInviteServerTxnTest, ProceedingState)
     delete pSipUserData;
     pTxnKey->SipDelete();
     pTxn->SipDelete();
+}
+
+TEST_F(SipInviteServerTxnTest, AcceptedState)
+{
+    SIP_UINT16 nError = 0;
+    ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
+    SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+
+    pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
+    pTxn->UpdateTranspInfo(pTranspInfo);
+    pTxn->SetTxnState(SipTxn::INV_SER_ACCEPTED_ST);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_RECV_INV_REQ_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_IGNORE_REQ);
+    EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_SEND_2XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
+    EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
+
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_RECV_ACK_REQ_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
+    EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_TRANSP_ERROR_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_ERROR_ON_SEND);
+    EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_TERMINATED_ST);
+
+    pTxnKey->SipDelete();
+    pTxn->SipDelete();
+    delete pTxnFsmData;
+    delete pSipUserData;
+    delete pSipTranspParam;
 }
 
 TEST_F(SipInviteServerTxnTest, CompletedState)

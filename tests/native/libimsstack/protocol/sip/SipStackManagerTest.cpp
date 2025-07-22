@@ -57,7 +57,7 @@ SIP_BOOL SipTestNetworkUtil::bSendStatus = SIP_TRUE;
 
 namespace android
 {
-SIP_BOOL FetchTransactionStub(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTxn)
+SIP_BOOL FetchTransactionStub(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTxn)
 {
     if (pTxn == SIP_NULL)
     {
@@ -66,6 +66,13 @@ SIP_BOOL FetchTransactionStub(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTx
             pTxn = static_cast<SipTxn*>(*ppvTxn);
             return SIP_TRUE;
         }
+        return SIP_FALSE;
+    }
+
+    SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
+
+    if (SipPf_Strcmp(pTxnKey->GetMethod(), "ACK") == 0)
+    {
         return SIP_FALSE;
     }
 
@@ -276,7 +283,7 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pAckSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
-    EXPECT_EQ(SipTxn::STATUS_RETRANSMISSION, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_IGNORE_REQ, eTxnStatus);
 
     pAckSipMessage->SipDelete();
 
@@ -391,11 +398,11 @@ Content-Length: 0\r\n\
 
     pRespSipMessage->SipDelete();
 
-    /* Received retransmitted INVITE in completed state - retransmission message, success */
+    /* Received retransmitted INVITE in accepted state - ignore message, success */
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(
                     pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
-    EXPECT_EQ(SipTxn::STATUS_RETRANSMISSION, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_IGNORE_REQ, eTxnStatus);
     pMessage->SipDelete();
     /* Invite server check for send receive - End */
 
@@ -420,7 +427,7 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pAckSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
-    EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_NEW_REQ_RECVD, eTxnStatus);
 
     pAckSipMessage->SipDelete();
 

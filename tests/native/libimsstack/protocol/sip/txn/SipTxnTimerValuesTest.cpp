@@ -48,8 +48,9 @@ TEST_F(SipTxnTimerValuesTest, SetGetAndUpdate)
     pTxnTimers->SetTimerValue(SipTxn::TIMER_I, 11);
     pTxnTimers->SetTimerValue(SipTxn::TIMER_J, 12);
     pTxnTimers->SetTimerValue(SipTxn::TIMER_K, 13);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_L, 14);
 
-    pTxnTimers->SetTimerValue(SipTxn::TIMER_TYPE_INVALID, 14);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_TYPE_INVALID, 15);
 
     SIP_UINT32 nTxnTimerOptions = 0;
 
@@ -62,7 +63,7 @@ TEST_F(SipTxnTimerValuesTest, SetGetAndUpdate)
     /* no timers set in timer options, fail */
     EXPECT_EQ(SIP_FALSE, pCopyTxnTimers->UpdateSipTimers(nTxnTimerOptions, pTxnTimers));
 
-    nTxnTimerOptions = 0x1FFF;  // SipTxnTimerValues::TV_ALL
+    nTxnTimerOptions = 0x3FFF;  // SipTxnTimerValues::TV_ALL
 
     /* txn timer passed along with timer options, success */
     EXPECT_EQ(SIP_TRUE, pCopyTxnTimers->UpdateSipTimers(nTxnTimerOptions, pTxnTimers));
@@ -82,6 +83,7 @@ TEST_F(SipTxnTimerValuesTest, SetGetAndUpdate)
     EXPECT_EQ(11, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_I));
     EXPECT_EQ(12, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_J));
     EXPECT_EQ(13, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_K));
+    EXPECT_EQ(14, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_L));
 
     EXPECT_EQ(0, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_TYPE_INVALID));
 

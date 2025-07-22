@@ -41,6 +41,7 @@ SipConfiguration::SipConfiguration()
     m_nTimerI_T4 = m_nT4;
     m_nTimerJ_T3 = 64 * m_nT1;
     m_nTimerK_T4 = m_nT4;
+    m_nTimerL = 64 * m_nT1;
     m_nTimerM = 64 * m_nT1;
 }
 
