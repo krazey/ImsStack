@@ -121,14 +121,14 @@ IMS_BOOL UceOptionsManager::ReceivedOptions(
         return IMS_FALSE;
     }
 
-    IMessage* piMessage = piCapabilities->GetPreviousRequest(IMessage::CAPABILITIES_QUERY);
+    const IMessage* piMessage = piCapabilities->GetPreviousRequest(IMessage::CAPABILITIES_QUERY);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("ReceivedOptions:IMessage is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    ISipMessage* piSIPMessage = piMessage->GetMessage();
+    const ISipMessage* piSIPMessage = piMessage->GetMessage();
     if (piSIPMessage == IMS_NULL)
     {
         IMS_TRACE_I("ReceivedOptions:ISipMessage is null", 0, 0, 0);
@@ -236,7 +236,7 @@ void UceOptionsManager::SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT3
 
 IUceJniThread* UceOptionsManager::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
     if (piJniEnabler == IMS_NULL)
     {

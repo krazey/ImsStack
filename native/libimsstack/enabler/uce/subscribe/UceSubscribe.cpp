@@ -453,7 +453,7 @@ IMS_BOOL UceSubscribe::OnMessage(IN IMSMSG& objMsg)
     UceNonCapabilityUsers* pNonCapabilities =
             reinterpret_cast<UceNonCapabilityUsers*>(objMsg.nWparam);
 
-    UcePidfXmls* pPidfXmls = reinterpret_cast<UcePidfXmls*>(objMsg.nLparam);
+    const UcePidfXmls* pPidfXmls = reinterpret_cast<UcePidfXmls*>(objMsg.nLparam);
 
     if (pPidfXmls != IMS_NULL)
     {
@@ -518,7 +518,7 @@ void UceSubscribe::SubscriptionStartFailed(IN ISubscription* piSubscription)
         IMS_TRACE_I("SubscriptionStartFailed:Not matched", 0, 0, 0);
         return;
     }
-    IMessage* piMessage = IMS_NULL;
+    const IMessage* piMessage = IMS_NULL;
     if (m_eQueryType == QUERY_CAPABILITY_TYPE_SINGLE)
     {
         piMessage = piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_POLL);
@@ -536,7 +536,7 @@ void UceSubscribe::SubscriptionStartFailed(IN ISubscription* piSubscription)
         return;
     }
 
-    ISipMessage* piSipMessage = piMessage->GetMessage();
+    const ISipMessage* piSipMessage = piMessage->GetMessage();
     if (piSipMessage == IMS_NULL)
     {
         IMS_TRACE_I("SubscriptionStartFailed:IMessage or ISipMessage is null", 0, 0, 0);
@@ -737,7 +737,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_SubscribeFailed(IN IMSMSG& objMsg)
     IMS_TRACE_I("StateSUBSCRIBING_SubscribeFailed - reason [%d]", nErrorResponse, 0, 0);
     StopWaitingNotifyMessageTimer();
     StopRetryAfterTimer();
-    IMessage* piMessage = IMS_NULL;
+    const IMessage* piMessage = IMS_NULL;
     if (m_eQueryType == QUERY_CAPABILITY_TYPE_LIST)
     {
         piMessage = m_piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE);
@@ -933,7 +933,7 @@ void UceSubscribe::SetState(IMS_UINT32 _eState)
 PRIVATE
 IUceJniThread* UceSubscribe::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
     if (piJniEnabler == IMS_NULL)
     {
@@ -1264,7 +1264,7 @@ ISipMessage* UceSubscribe::GetISIPMessage()
         return IMS_NULL;
     }
 
-    IMessage* piMessage = m_piSubscription->GetNextRequest();
+    const IMessage* piMessage = m_piSubscription->GetNextRequest();
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("GetISIPMessage:Getting a IMessage failed", 0, 0, 0);
@@ -1450,7 +1450,7 @@ IMS_BOOL UceSubscribe::HandleNotifyInd(IN ISipMessage* piSIPMessage)
         ImsList<AString> pidfXmls = ImsList<AString>();
         for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
         {
-            ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+            const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
             pidfXmls.Append(piBodyPart->GetContent().ToString());
         }
         if (pidfXmls.IsEmpty())
@@ -1470,7 +1470,7 @@ IMS_BOOL UceSubscribe::HandleNotifyInd(IN ISipMessage* piSIPMessage)
     IMS_TRACE_D("HandleNotifyInd:objBodyParts.GetSize() [%d]", objBodyParts.GetSize(), 0, 0);
     for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
         ByteArray objContent = piBodyPart->GetContent();
         IMS_TRACE_D("HandleNotifyInd:XML data [%s]", objContent.ToString().GetStr(), 0, 0);
         AString strContentId = piBodyPart->GetHeader(ISipMessageBodyPart::CONTENT_ID);
