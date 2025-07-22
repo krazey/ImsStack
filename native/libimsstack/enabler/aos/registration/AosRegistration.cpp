@@ -134,8 +134,8 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_eImsRegNetwork(AosNetworkType::NONE),
         m_eImsReasonCode(AosReasonCode::UNSPECIFIED),
         m_nPdnReactivateWaitTime(RETRY_DEFAULT_WAIT_TIME),
-        m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE),
-        m_nDataFailureReason(0)
+        m_nDataFailureReason(0),
+        m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
 {
     // Init Object
     m_pUtil = AosUtil::GetInstance();
