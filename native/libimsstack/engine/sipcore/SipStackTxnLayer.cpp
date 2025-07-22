@@ -158,7 +158,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IM
 
     if ((nTimerType == SipTxn::TIMER_D) || (nTimerType == SipTxn::TIMER_I) ||
             (nTimerType == SipTxn::TIMER_J) || (nTimerType == SipTxn::TIMER_K) ||
-            (nTimerType == SipTxn::TIMER_M))
+            (nTimerType == SipTxn::TIMER_L) || (nTimerType == SipTxn::TIMER_M))
     {
         // CSM moving from "Completed"/"Accepted" to "Terminated".
         // This is a normal case and ignore these cases.
