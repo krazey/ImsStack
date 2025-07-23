@@ -15,6 +15,10 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- ims. -->
+    <int name="ims.sip_timer_b_millis_int" value="32000"/>
+    <int name="ims.sip_timer_f_millis_int" value="32000"/>
+
     <!-- Aos -->
     <int name="imsemergency.emergency_registration_timer_millis_int" value="20000"/>
 </carrier_config>
