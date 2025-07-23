@@ -88,7 +88,6 @@ private:
     IMS_BOOL HasActiveCalls() const;
     AString GetPathHeader() const;
     AString GetServiceRouteHeader() const;
-    AString GetSupported() const;
     void SetTimerForImsCallBlocking(IN IMS_SINT32 nRetryAfterInMillis) const;
 
     typedef CallReasonInfo (StartErrorHandler::*ActionFunc)(IN const IMessage&) const;

@@ -305,6 +305,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
     const AString strSomeId("someId");
     const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
     const AString strLocalUri("localUri");
+    const AString strRemoteUri("remoteUri");
 
     MockDialog objDialogMatched;
     ImsMap<AString, AString> objParamMap;
@@ -313,6 +314,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
 
     objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
     objDialogMatched.SetLocalUri(strLocalUri, objTarget);
+    objDialogMatched.SetRemoteUri(strRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -335,6 +337,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
     const AString strSomeId("someId");
     const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
     const AString strLocalUri("localUri");
+    const AString strRemoteUri("remoteUri");
 
     MockDialog objDialogMatched;
     ImsMap<AString, AString> objParamMap;
@@ -343,6 +346,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
 
     objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
     objDialogMatched.SetLocalUri(strLocalUri, objTarget);
+    objDialogMatched.SetRemoteUri(strRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);

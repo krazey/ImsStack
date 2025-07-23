@@ -70,18 +70,6 @@ protected:
 
     virtual void TearDown() override { delete pCallController; }
 
-    ImsList<IMtcCall*> CreateCallList(std::initializer_list<IMtcCall*> lstCalls)
-    {
-        ImsList<IMtcCall*> lstOut;
-
-        for (IMtcCall* pCall : lstCalls)
-        {
-            lstOut.Append(pCall);
-        }
-
-        return lstOut;
-    }
-
     MockIMtcCall* CreateMockIMtcCall(CallKey nKey)
     {
         MockIMtcCall* pCall = new MockIMtcCall();
