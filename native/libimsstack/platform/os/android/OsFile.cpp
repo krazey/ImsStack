@@ -174,7 +174,7 @@ PUBLIC VIRTUAL IMS_UINT32 OsFile::GetSize() const
 
         nSize = ftell(m_pFileP->m_pFile);
 
-        fsetpos(m_pFileP->m_pFile, (const fpos_t*)&nCurPos);
+        fsetpos(m_pFileP->m_pFile, static_cast<const fpos_t*>(&nCurPos));
     }
 
     return nSize;

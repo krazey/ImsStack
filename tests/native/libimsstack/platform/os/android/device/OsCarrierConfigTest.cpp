@@ -103,7 +103,7 @@ TEST_F(OsCarrierConfigTest, DispatchServiceMessage)
 
                         objPersistableBundle.putBoolean(String16(KEY_VALUE_BOOL), bBooleanValue);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -137,7 +137,7 @@ TEST_F(OsCarrierConfigTest, LoadConfig)
 
                         objPersistableBundle.putBoolean(String16(KEY_VALUE_BOOL), bBooleanValue);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -168,7 +168,7 @@ TEST_F(OsCarrierConfigTest, GetBoolean)
 
                         objPersistableBundle.putBoolean(String16(KEY_VALUE_BOOL), bBooleanValue);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -199,7 +199,7 @@ TEST_F(OsCarrierConfigTest, GetInt)
 
                         objPersistableBundle.putInt(String16(KEY_VALUE_INT), nIntegerValue);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -230,7 +230,7 @@ TEST_F(OsCarrierConfigTest, GetLong)
 
                         objPersistableBundle.putLong(String16(KEY_VALUE_LONG), lLongValue);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -262,7 +262,7 @@ TEST_F(OsCarrierConfigTest, GetString)
                         objPersistableBundle.putString(
                                 String16(KEY_VALUE_STRING), String16(strStringValue));
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -294,7 +294,7 @@ TEST_F(OsCarrierConfigTest, GetBooleanArray)
                         objPersistableBundle.putBooleanVector(
                                 String16(KEY_VALUE_BOOL_ARRAY), arrBoolArray);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -332,7 +332,7 @@ TEST_F(OsCarrierConfigTest, GetIntArray)
                         objPersistableBundle.putIntVector(
                                 String16(KEY_VALUE_INT_ARRAY), arrIntArray);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -370,7 +370,7 @@ TEST_F(OsCarrierConfigTest, GetLongArray)
                         objPersistableBundle.putLongVector(
                                 String16(KEY_VALUE_LONG_ARRAY), arrLongArray);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -411,7 +411,7 @@ TEST_F(OsCarrierConfigTest, GetStringArray)
                         objPersistableBundle.putStringVector(
                                 String16(KEY_VALUE_STRING_ARRAY), arrStringArray);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 
@@ -457,7 +457,7 @@ TEST_F(OsCarrierConfigTest, GetBundle)
                         objPersistableBundle.putPersistableBundle(
                                 String16(KEY_VALUE_BUNDLE), objPersistableBundleValue);
 
-                        OsParcel& objOsConfig = (OsParcel&)objConfig;
+                        OsParcel& objOsConfig = static_cast<OsParcel&>(objConfig);
                         objPersistableBundle.writeToParcel(&objOsConfig.GetParcel());
                         objOsConfig.GetParcel().setDataPosition(0);
 

@@ -77,8 +77,8 @@ void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT
         IMS_CHAR acIpv4[32] = {
                 0,
         };
-        const IMS_CHAR* pszIpv4 = inet_ntop(
-                AF_INET, (const void*)&(pstAddr4->sin_addr.s_addr), acIpv4, sizeof(acIpv4));
+        const IMS_CHAR* pszIpv4 = inet_ntop(AF_INET,
+                static_cast<const void*>(&(pstAddr4->sin_addr.s_addr)), acIpv4, sizeof(acIpv4));
 
         nPort = ntohs(pstAddr4->sin_port);
         objIpAddr.Parse(pszIpv4);
@@ -94,8 +94,8 @@ void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT
         IMS_CHAR acIpv6[64] = {
                 0,
         };
-        const IMS_CHAR* pszIpv6 = inet_ntop(
-                AF_INET6, (const void*)&(pstAddr6->sin6_addr.s6_addr), acIpv6, sizeof(acIpv6));
+        const IMS_CHAR* pszIpv6 = inet_ntop(AF_INET6,
+                static_cast<const void*>(&(pstAddr6->sin6_addr.s6_addr)), acIpv6, sizeof(acIpv6));
 
         nPort = ntohs(pstAddr6->sin6_port);
         objIpAddr.Parse(pszIpv6);
@@ -186,15 +186,15 @@ PUBLIC VIRTUAL OsSocket::~OsSocket()
 
 PUBLIC VIRTUAL IMS_SINT32 OsSocket::GetLastError() const
 {
-    IMS_SINT32 nErrorCode = 0;
-    socklen_t nSize = sizeof(nErrorCode);
-
     if (m_hSocket == INVALID_SOCKET)
     {
         return 0;
     }
 
-    if (getsockopt(m_hSocket, SOL_SOCKET, SO_ERROR, (void*)&nErrorCode, &nSize) == 0)
+    IMS_SINT32 nErrorCode = 0;
+    socklen_t nSize = sizeof(nErrorCode);
+
+    if (getsockopt(m_hSocket, SOL_SOCKET, SO_ERROR, static_cast<void*>(&nErrorCode), &nSize) == 0)
     {
         if (nErrorCode != 0)
         {
@@ -326,9 +326,10 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
             stSockAddr.sin_addr.s_addr = htonl(objIpAddr.ToIPv4Address());
         }
 
-        stSockAddr.sin_port = htons((u_short)nPort);
+        stSockAddr.sin_port = htons(static_cast<u_short>(nPort));
 
-        if (bind(hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)) < 0)
+        if (bind(hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                    sizeof(stSockAddr)) < 0)
         {
             IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)", errno,
                     strerror(errno), 0);
@@ -344,7 +345,7 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
         memset(&stSockAddr, 0x00, sizeof(stSockAddr));
 
         stSockAddr.sin6_family = AF_INET6;
-        stSockAddr.sin6_port = htons((u_short)nPort);
+        stSockAddr.sin6_port = htons(static_cast<u_short>(nPort));
 
         if (inet_pton(AF_INET6, objIpAddr.ToString().GetStr(),
                     static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
@@ -354,7 +355,8 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
             return IMS_FALSE;
         }
 
-        if (bind(hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)) < 0)
+        if (bind(hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                    sizeof(stSockAddr)) < 0)
         {
             IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)", errno,
                     strerror(errno), 0);
@@ -647,7 +649,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
             stSockAddr.sin_addr.s_addr = htonl(objSocketAddress.ToIPv4Address());
         }
 
-        stSockAddr.sin_port = htons((u_short)nSocketPort);
+        stSockAddr.sin_port = htons(static_cast<u_short>(nSocketPort));
 
         // Linux auto configuration takes the several seconds when the local IP address is changed.
         // So, waiting for the auto configuration completion during 3 seconds.
@@ -656,8 +658,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
 
             do
             {
-                nBindResult =
-                        bind(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                nBindResult = bind(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                        sizeof(stSockAddr));
 
                 if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_BIND_FAILED)
                 {
@@ -691,7 +693,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
         memset(&stSockAddr, 0x00, sizeof(stSockAddr));
 
         stSockAddr.sin6_family = AF_INET6;
-        stSockAddr.sin6_port = htons((u_short)nSocketPort);
+        stSockAddr.sin6_port = htons(static_cast<u_short>(nSocketPort));
 
         // 4 Why the specified IPv6 address can't bind the socket ??
         if (inet_pton(AF_INET6, objSocketAddress.ToString().GetStr(),
@@ -710,8 +712,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
 
             do
             {
-                nBindResult =
-                        bind(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                nBindResult = bind(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                        sizeof(stSockAddr));
 
                 if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_BIND_FAILED)
                 {
@@ -822,10 +824,10 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
             }
         }
 
-        stSockAddr.sin_port = htons((u_short)nHostPort);
+        stSockAddr.sin_port = htons(static_cast<u_short>(nHostPort));
 
-        nConnectResult =
-                connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+        nConnectResult = connect(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                sizeof(stSockAddr));
 
         if (nConnectResult == SOCKET_ERROR)
         {
@@ -835,7 +837,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
             if ((nError == ECONNREFUSED) || (nError == ENETUNREACH) || (nError == ETIMEDOUT))
             {
                 if (SOCKET_ERROR !=
-                        connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)))
+                        connect(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                                sizeof(stSockAddr)))
                 {
                     SetSocketConnected(IMS_TRUE);
                     // __LINUX_SOCKET_EVENT__ {
@@ -851,8 +854,9 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
 
                     do
                     {
-                        nConnectResult = connect(
-                                m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                        nConnectResult = connect(m_hSocket,
+                                reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                                sizeof(stSockAddr));
 
                         if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED)
                         {
@@ -915,7 +919,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
         memset(&stSockAddr, 0x00, sizeof(stSockAddr));
 
         stSockAddr.sin6_family = AF_INET6;
-        stSockAddr.sin6_port = htons((u_short)nHostPort);
+        stSockAddr.sin6_port = htons(static_cast<u_short>(nHostPort));
 
         if (inet_pton(AF_INET6, objHostAddress.ToString().GetStr(),
                     static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
@@ -924,8 +928,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
             return RESULT_ERROR;
         }
 
-        nConnectResult =
-                connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+        nConnectResult = connect(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                sizeof(stSockAddr));
 
         if (nConnectResult == SOCKET_ERROR)
         {
@@ -935,7 +939,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
             if ((nError == ECONNREFUSED) || (nError == ENETUNREACH) || (nError == ETIMEDOUT))
             {
                 if (SOCKET_ERROR !=
-                        connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)))
+                        connect(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                                sizeof(stSockAddr)))
                 {
                     SetSocketConnected(IMS_TRUE);
                     // __LINUX_SOCKET_EVENT__ {
@@ -951,8 +956,9 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
 
                     do
                     {
-                        nConnectResult = connect(
-                                m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                        nConnectResult = connect(m_hSocket,
+                                reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                                sizeof(stSockAddr));
 
                         if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED)
                         {
@@ -1237,15 +1243,13 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS
     {
         nSockAddrLen = sizeof(stAddr4);
         memset(&stAddr4, 0x00, nSockAddrLen);
-
-        pstSockAddr = (struct sockaddr*)&stAddr4;
+        pstSockAddr = reinterpret_cast<struct sockaddr*>(&stAddr4);
     }
     else
     {
         nSockAddrLen = sizeof(stAddr6);
         memset(&stAddr6, 0x00, nSockAddrLen);
-
-        pstSockAddr = (struct sockaddr*)&stAddr6;
+        pstSockAddr = reinterpret_cast<struct sockaddr*>(&stAddr6);
     }
 
     IMS_SINT32 nReadBytes = recvfrom(
@@ -1356,10 +1360,10 @@ RETRY_SENDTO:
             }
         }
 
-        stSockAddr.sin_port = htons((u_short)nHostPort);
+        stSockAddr.sin_port = htons(static_cast<u_short>(nHostPort));
 
         nWrittenBytes = sendto(m_hSocket, static_cast<const void*>(pBuffer), nBuffLen, 0,
-                (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                reinterpret_cast<const struct sockaddr*>(&stSockAddr), sizeof(stSockAddr));
     }
     // IPv6 address format
     else
@@ -1374,7 +1378,7 @@ RETRY_SENDTO:
         memset(&stSockAddr, 0x00, sizeof(stSockAddr));
 
         stSockAddr.sin6_family = AF_INET6;
-        stSockAddr.sin6_port = htons((u_short)nHostPort);
+        stSockAddr.sin6_port = htons(static_cast<u_short>(nHostPort));
 
         if (inet_pton(AF_INET6, objHostAddress.ToString().GetStr(),
                     static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
@@ -1384,7 +1388,7 @@ RETRY_SENDTO:
         }
 
         nWrittenBytes = sendto(m_hSocket, static_cast<const void*>(pBuffer), nBuffLen, 0,
-                (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                reinterpret_cast<const struct sockaddr*>(&stSockAddr), sizeof(stSockAddr));
     }
 
     if (nWrittenBytes == SOCKET_ERROR)
@@ -1486,15 +1490,13 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetPeerName(
     {
         nSockAddrLen = sizeof(stAddr4);
         memset(&stAddr4, 0x00, nSockAddrLen);
-
-        pstSockAddr = (struct sockaddr*)&stAddr4;
+        pstSockAddr = reinterpret_cast<struct sockaddr*>(&stAddr4);
     }
     else
     {
         nSockAddrLen = sizeof(stAddr6);
         memset(&stAddr6, 0x00, nSockAddrLen);
-
-        pstSockAddr = (struct sockaddr*)&stAddr6;
+        pstSockAddr = reinterpret_cast<struct sockaddr*>(&stAddr6);
     }
 
     if (getpeername(m_hSocket, pstSockAddr, &nSockAddrLen) == SOCKET_ERROR)
@@ -1537,15 +1539,13 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetSockName(
     {
         nSockAddrLen = sizeof(stAddr4);
         memset(&stAddr4, 0x00, nSockAddrLen);
-
-        pstSockAddr = (struct sockaddr*)&stAddr4;
+        pstSockAddr = reinterpret_cast<struct sockaddr*>(&stAddr4);
     }
     else
     {
         nSockAddrLen = sizeof(stAddr6);
         memset(&stAddr6, 0x00, nSockAddrLen);
-
-        pstSockAddr = (struct sockaddr*)&stAddr6;
+        pstSockAddr = reinterpret_cast<struct sockaddr*>(&stAddr6);
     }
 
     if (getsockname(m_hSocket, pstSockAddr, &nSockAddrLen) == SOCKET_ERROR)
@@ -1561,7 +1561,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetSockName(
 
 PROTECTED VIRTUAL IMS_BOOL OsSocket::Equals(IN const ISocket* piSocket)
 {
-    const OsSocket* pSocket = DYNAMIC_CAST(const OsSocket*, piSocket);
+    const OsSocket* pSocket = static_cast<const OsSocket*>(piSocket);
 
     if (pSocket == IMS_NULL)
     {
@@ -1592,14 +1592,16 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
         case OPT_IP_QOS:
             if (m_eAddressFamily == ADDRESS_FAMILY_INET)
             {
-                if (getsockopt(m_hSocket, SOL_IP, IP_TOS, (void*)&nOptVal, &nOptSize) < 0)
+                if (getsockopt(m_hSocket, SOL_IP, IP_TOS, static_cast<void*>(&nOptVal), &nOptSize) <
+                        0)
                 {
                     return (-1);
                 }
             }
             else
             {
-                if (getsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS, (void*)&nOptVal, &nOptSize) < 0)
+                if (getsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS, static_cast<void*>(&nOptVal),
+                            &nOptSize) < 0)
                 {
                     return (-1);
                 }
@@ -1610,7 +1612,8 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
             //    The number of unacknowledged probes to send before considering
             //    the connection dead and notifying the application layer
         case OPT_TCP_KEEPCNT:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
@@ -1621,7 +1624,8 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
             //    considered data) and the first keepalive probe; after the connection
             //    is marked to need keepalive, this counter is not used any further
         case OPT_TCP_KEEPIDLE:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
@@ -1631,35 +1635,40 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
             //    The interval between subsequential keepalive probes, regardless of
             //    what the connection has exchanged in the meantime
         case OPT_TCP_KEEPINTVL:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_TCP_MAXSEG:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_KEEPALIVE:
-            if (getsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_RCVBUF:
-            if (getsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_SNDBUF:
-            if (getsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF, (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF, static_cast<void*>(&nOptVal),
+                        &nOptSize) < 0)
             {
                 return (-1);
             }
@@ -1686,7 +1695,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
         case OPT_IP_QOS:
             if (m_eAddressFamily == ADDRESS_FAMILY_INET)
             {
-                if (setsockopt(m_hSocket, SOL_IP, IP_TOS, (const void*)&nOptionValue,
+                if (setsockopt(m_hSocket, SOL_IP, IP_TOS, static_cast<const void*>(&nOptionValue),
                             sizeof(nOptionValue)) < 0)
                 {
                     return IMS_FALSE;
@@ -1694,8 +1703,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             }
             else
             {
-                if (setsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS, (const void*)&nOptionValue,
-                            sizeof(nOptionValue)) < 0)
+                if (setsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS,
+                            static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
                 {
                     return IMS_FALSE;
                 }
@@ -1708,7 +1717,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             //    The number of unacknowledged probes to send before considering
             //    the connection dead and notifying the application layer
         case OPT_TCP_KEEPCNT:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT, (const void*)&nOptionValue,
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT, static_cast<const void*>(&nOptionValue),
                         sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
@@ -1722,8 +1731,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             //    considered data) and the first keepalive probe; after the connection
             //    is marked to need keepalive, this counter is not used any further
         case OPT_TCP_KEEPIDLE:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE, (const void*)&nOptionValue,
-                        sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE,
+                        static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1735,8 +1744,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             //    The interval between subsequential keepalive probes, regardless of
             //    what the connection has exchanged in the meantime
         case OPT_TCP_KEEPINTVL:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL, (const void*)&nOptionValue,
-                        sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL,
+                        static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1745,7 +1754,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             break;
 
         case OPT_TCP_MAXSEG:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG, (const void*)&nOptionValue,
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG, static_cast<const void*>(&nOptionValue),
                         sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
@@ -1755,8 +1764,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             break;
 
         case OPT_RCVBUF:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF, (const void*)&nOptionValue,
-                        sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF,
+                        static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1765,8 +1774,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             break;
 
         case OPT_SNDBUF:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF, (const void*)&nOptionValue,
-                        sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF,
+                        static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1775,8 +1784,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             break;
 
         case OPT_REUSEADDR:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, (const void*)&nOptionValue,
-                        sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR,
+                        static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1791,7 +1800,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             stLinger.l_onoff = (nOptionValue >= 0) ? 1 : 0;
             stLinger.l_linger = (nOptionValue < 0) ? 0 : nOptionValue;  // seconds
 
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_LINGER, (const void*)&stLinger,
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_LINGER, static_cast<const void*>(&stLinger),
                         sizeof(stLinger)) < 0)
             {
                 return IMS_FALSE;
@@ -1803,8 +1812,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
         break;
 
         case OPT_KEEPALIVE:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE, (const void*)&nOptionValue,
-                        sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE,
+                        static_cast<const void*>(&nOptionValue), sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1813,7 +1822,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
             break;
 
         case OPT_UDP_ENCAP:
-            if (setsockopt(m_hSocket, SOL_UDP, UDP_ENCAP, (const void*)&nOptionValue,
+            if (setsockopt(m_hSocket, SOL_UDP, UDP_ENCAP, static_cast<const void*>(&nOptionValue),
                         sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;

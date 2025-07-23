@@ -341,7 +341,7 @@ public:
     }
     inline ByRef(IN const ByRef&) = delete;
     inline ByRef& operator=(IN const ByRef&) = delete;
-    inline operator T&() const { return ((T&)mValue); }
+    inline operator T&() const { return const_cast<T&>(mValue); }
 
 private:
     T mValue;
