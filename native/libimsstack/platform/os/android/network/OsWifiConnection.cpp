@@ -344,7 +344,7 @@ PRIVATE VIRTUAL void OsWifiConnection::AddReferenceListener(
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        const INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -365,7 +365,7 @@ PRIVATE VIRTUAL void OsWifiConnection::RemoveReferenceListener(
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        const INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {

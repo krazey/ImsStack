@@ -122,7 +122,7 @@ void osSocket_SetNetworkForSocket(
     }
 
     ImsNetworkConnectionState* pState = ImsNetworkConnectionState::GetInstance();
-    ImsNetworkConnection* pNc = pState->LookupHandle(hConnection);
+    const ImsNetworkConnection* pNc = pState->LookupHandle(hConnection);
 
     if (pNc == IMS_NULL)
     {
@@ -1943,7 +1943,7 @@ PROTECTED VIRTUAL void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN
             // Checks if the owner thread is same or not...
 
             // FIX_SOCKET_SYNC_ISSUE
-            IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+            const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
             if (piThread != m_piOwnerThread)
             {

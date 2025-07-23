@@ -65,7 +65,7 @@ TEST_F(OsIpSecPolicyTest, GetId)
 
 TEST_F(OsIpSecPolicyTest, CreateSp)
 {
-    IIpSecSp* pIpSecSp = m_pObjOsIpSecPolicy->CreateSp();
+    const IIpSecSp* pIpSecSp = m_pObjOsIpSecPolicy->CreateSp();
     ASSERT_TRUE(pIpSecSp != nullptr);
 }
 
@@ -84,7 +84,7 @@ TEST_F(OsIpSecPolicyTest, DestroySp)
 
 TEST_F(OsIpSecPolicyTest, CreateSa)
 {
-    IIpSecSa* pIpSecSa = m_pObjOsIpSecPolicy->CreateSa();
+    const IIpSecSa* pIpSecSa = m_pObjOsIpSecPolicy->CreateSa();
     ASSERT_TRUE(pIpSecSa != nullptr);
 }
 
@@ -135,7 +135,7 @@ TEST_F(OsIpSecPolicyTest, ManageLifetime)
 
 TEST_F(OsIpSecPolicyTest, DestroyAllSas)
 {
-    IIpSecSa* pIpSecSa = m_pObjOsIpSecPolicy->CreateSa();
+    const IIpSecSa* pIpSecSa = m_pObjOsIpSecPolicy->CreateSa();
     ASSERT_TRUE(pIpSecSa != nullptr);
 
     pIpSecSa = nullptr;
@@ -145,7 +145,7 @@ TEST_F(OsIpSecPolicyTest, DestroyAllSas)
     const ImsList<OsIpSecSa*>& objAssociationList = m_pObjOsIpSecPolicy->GetSAs();
     EXPECT_EQ(2, objAssociationList.GetSize());
 
-    IIpSecSp* pIpSecSp = m_pObjOsIpSecPolicy->CreateSp();
+    const IIpSecSp* pIpSecSp = m_pObjOsIpSecPolicy->CreateSp();
     ASSERT_TRUE(pIpSecSp != nullptr);
 
     pIpSecSp = nullptr;
@@ -181,7 +181,7 @@ TEST_F(OsIpSecPolicyTest, FindSp)
 
     EXPECT_TRUE(nullptr == m_pObjOsIpSecPolicy->FindSp(20));
 
-    OsIpSecSp* pOsIpSecSp = m_pObjOsIpSecPolicy->FindSp(21);
+    const OsIpSecSp* pOsIpSecSp = m_pObjOsIpSecPolicy->FindSp(21);
     ASSERT_TRUE(pOsIpSecSp != nullptr);
     EXPECT_EQ(21, pOsIpSecSp->GetSpi());
 }
@@ -210,7 +210,7 @@ TEST_F(OsIpSecPolicyTest, FindSa)
 
     EXPECT_TRUE(nullptr == m_pObjOsIpSecPolicy->FindSa(20));
 
-    OsIpSecSa* pOsIpSecSa = m_pObjOsIpSecPolicy->FindSa(21);
+    const OsIpSecSa* pOsIpSecSa = m_pObjOsIpSecPolicy->FindSa(21);
     ASSERT_TRUE(pOsIpSecSa != nullptr);
     EXPECT_EQ(21, pOsIpSecSa->GetSpi());
 }

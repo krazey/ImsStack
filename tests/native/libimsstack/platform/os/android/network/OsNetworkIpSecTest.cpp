@@ -107,7 +107,7 @@ TEST_F(OsNetworkIpSecTest, CreatePolicy)
 {
     OsNetworkIpSec objOsNetworkIpSec(IMS_SLOT_0);
 
-    IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
+    const IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 }
 
@@ -133,7 +133,7 @@ TEST_F(OsNetworkIpSecTest, DestroyAllPolicies)
 {
     OsNetworkIpSec objOsNetworkIpSec(IMS_SLOT_0);
 
-    IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
+    const IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 
     IMS_SINT32 nId1 = pIpSecPolicy->GetId();
@@ -167,10 +167,10 @@ TEST_F(OsNetworkIpSecTest, AddPolicy)
     IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 
-    IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
+    const IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
     ASSERT_TRUE(pIpSecSp != nullptr);
 
-    IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
+    const IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
     ASSERT_TRUE(pIpSecSa != nullptr);
 
     EXPECT_CALL(m_objSystem, AddIpSecSaParameter(_, _)).Times(1).WillRepeatedly(Return(1));
@@ -188,10 +188,10 @@ TEST_F(OsNetworkIpSecTest, DeletePolicy)
     IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 
-    IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
+    const IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
     ASSERT_TRUE(pIpSecSp != nullptr);
 
-    IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
+    const IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
     ASSERT_TRUE(pIpSecSa != nullptr);
 
     EXPECT_CALL(m_objSystem, AddIpSecSaParameter(_, _)).Times(1).WillRepeatedly(Return(1));

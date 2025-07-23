@@ -181,7 +181,7 @@ TEST_F(ImsSocketStateTest, AttachAndDetachHandle)
 
     pImsSocketState->AttachHandle(hSocket, pSocket);
 
-    ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
+    const ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
     ASSERT_TRUE(pImsSocket != nullptr);
 
     EXPECT_EQ(pImsSocket->GetNetworkConnection(), pSocket->GetNetworkConnection());
@@ -225,7 +225,7 @@ TEST_F(ImsSocketStateTest, DetachAll)
 
     pImsSocketState->AttachHandle(hSocket, pSocket);
 
-    ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
+    const ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
     ASSERT_TRUE(pImsSocket != nullptr);
 
     EXPECT_EQ(pImsSocket->GetNetworkConnection(), pSocket->GetNetworkConnection());

@@ -59,7 +59,7 @@ void ImsApp::DetachService(IN const ImsService* pService)
 
     for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); i++)
     {
-        ImsService* pTempService = m_objServices.GetAt(i);
+        const ImsService* pTempService = m_objServices.GetAt(i);
 
         if (pTempService == pService)
         {

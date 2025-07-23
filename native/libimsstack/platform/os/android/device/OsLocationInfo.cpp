@@ -360,7 +360,7 @@ PUBLIC VIRTUAL const AString& OsLocationInfo::GetLastKnownCountry() const
 PRIVATE
 AString OsLocationInfo::GetCountryIso(IN IMS_BOOL bFromUicc /*= IMS_FALSE*/) const
 {
-    ISubscriberInfo* piSubsInfo =
+    const ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId());
     AString strCountry;
 

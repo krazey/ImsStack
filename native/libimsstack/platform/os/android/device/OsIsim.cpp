@@ -330,7 +330,7 @@ PUBLIC VIRTUAL void OsIsimDigestAka::Destroy()
 
 PUBLIC VIRTUAL IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 {
-    OsIsim* pIsim = osIsim_GetInstance(m_pIsim->GetSlotId());
+    const OsIsim* pIsim = osIsim_GetInstance(m_pIsim->GetSlotId());
 
     if (OsUtil::GetInstance()->IsDebugMode())
     {
@@ -493,7 +493,7 @@ PUBLIC VIRTUAL void OsIsim::AddListener(IN IIsimListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IIsimListener* piTmpListener = m_objIsimListeners.GetAt(i);
+        const IIsimListener* piTmpListener = m_objIsimListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -513,7 +513,7 @@ PUBLIC VIRTUAL void OsIsim::RemoveListener(IN IIsimListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IIsimListener* piTmpListener = m_objIsimListeners.GetAt(i);
+        const IIsimListener* piTmpListener = m_objIsimListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -639,7 +639,7 @@ void OsIsim::DestroyDigestAka(IN OsIsimDigestAka* pDigestAka)
 
     for (IMS_UINT32 i = 0; i < m_objDigestAkas.GetSize(); ++i)
     {
-        OsIsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
+        const OsIsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
 
         if (pDigestAka == pTmp)
         {
@@ -663,7 +663,7 @@ IMS_BOOL OsIsim::IsDigestAkaPresent(IN const OsIsimDigestAka* pDigestAka)
 
     for (IMS_UINT32 i = 0; i < m_objDigestAkas.GetSize(); ++i)
     {
-        OsIsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
+        const OsIsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
 
         if (pDigestAka == pTmp)
         {

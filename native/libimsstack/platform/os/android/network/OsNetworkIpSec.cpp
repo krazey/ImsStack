@@ -352,7 +352,7 @@ IMS_SINT32 OsNetworkIpSec::GetAvailableId()
         return nNewId;
     }
 
-    IIpSecPolicy* piPolicy = GetPolicy(nNewId);
+    const IIpSecPolicy* piPolicy = GetPolicy(nNewId);
 
     while (piPolicy != IMS_NULL)
     {

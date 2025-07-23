@@ -105,7 +105,7 @@ TEST_F(PhoneInfoServiceTest, GetPowerInfo)
 TEST_F(PhoneInfoServiceTest, GetIsim)
 {
     EXPECT_CALL(m_objMockSystem, AddListener(_, _, _)).Times(1);
-    IIsim* pIsim = m_pPhoneInfoService->GetIsim(IMS_SLOT_0);
+    const IIsim* pIsim = m_pPhoneInfoService->GetIsim(IMS_SLOT_0);
     ASSERT_NE(pIsim, nullptr);
 }
 

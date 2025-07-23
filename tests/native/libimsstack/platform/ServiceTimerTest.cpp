@@ -124,7 +124,7 @@ TEST_F(TimerServiceTest, CreateTimer)
 
     EXPECT_CALL(m_objMockIOsFactory, CreateTimer()).Times(1).WillOnce(Return(m_pTestImsTimer));
 
-    ImsTimer* pImsTimer = static_cast<ImsTimer*>(pTimerService->CreateTimer());
+    const ImsTimer* pImsTimer = static_cast<ImsTimer*>(pTimerService->CreateTimer());
 
     ASSERT_TRUE(pImsTimer != IMS_NULL);
 
@@ -154,7 +154,7 @@ TEST_F(TimerServiceTest, DispatchServiceMessage)
 
     EXPECT_CALL(m_objMockIOsFactory, CreateTimer()).Times(1).WillOnce(Return(m_pTestImsTimer));
 
-    ITimer* pITimer = pTimerService->CreateTimer();
+    const ITimer* pITimer = pTimerService->CreateTimer();
 
     ASSERT_TRUE(pITimer != IMS_NULL);
 

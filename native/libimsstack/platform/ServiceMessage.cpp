@@ -65,7 +65,7 @@ PUBLIC GLOBAL IMS_BOOL MessageService::PostMessageThread(
         return IMS_FALSE;
     }
 
-    ThreadService* pThreadService = ThreadService::GetThreadService();
+    const ThreadService* pThreadService = ThreadService::GetThreadService();
     IMS_BOOL bResult = IMS_FALSE;
 
     pThreadService->LockThreadPool();

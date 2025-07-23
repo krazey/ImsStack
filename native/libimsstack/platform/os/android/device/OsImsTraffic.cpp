@@ -268,7 +268,7 @@ PUBLIC VIRTUAL void OsImsTraffic::AddListener(IN IImsTrafficListener* piListener
         return;
     }
 
-    IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+    const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
     for (IMS_UINT32 i = 0; i < m_objThreadListeners.GetSize(); i++)
     {
@@ -296,7 +296,7 @@ PUBLIC VIRTUAL void OsImsTraffic::RemoveListener(IN IImsTrafficListener* piListe
         return;
     }
 
-    IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+    const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
     for (IMS_UINT32 i = 0; i < m_objThreadListeners.GetSize(); i++)
     {
@@ -311,7 +311,8 @@ PUBLIC VIRTUAL void OsImsTraffic::RemoveListener(IN IImsTrafficListener* piListe
         {
             for (IMS_UINT32 j = 0; j < pTrfficListeners->objListeners.GetSize(); j++)
             {
-                IImsTrafficListener* piTrafficListener = pTrfficListeners->objListeners.GetAt(j);
+                const IImsTrafficListener* piTrafficListener =
+                        pTrfficListeners->objListeners.GetAt(j);
 
                 if (piListener == piTrafficListener)
                 {
@@ -335,7 +336,7 @@ PUBLIC VIRTUAL void OsImsTraffic::ImsTrafficTimer_Expired(
 PUBLIC VIRTUAL void OsImsTraffic::DispatchServiceMessage(
         IN IMS_UINTP /* nWparam */, IN IMS_UINTP /* nLparam */)
 {
-    IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+    const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
     for (IMS_UINT32 i = 0; i < m_objThreadListeners.GetSize(); i++)
     {
@@ -370,8 +371,8 @@ PRIVATE IMS_SINT32 OsImsTraffic::GetTopPrioritizedSlot()
 
     for (IMS_SINT32 i = 1; i < m_objTraffics.GetSize(); i++)
     {
-        Traffic* pTopSlotTraffic = m_objTraffics.GetValue(nTopSlot);
-        Traffic* pTraffic = m_objTraffics.GetValue(i);
+        const Traffic* pTopSlotTraffic = m_objTraffics.GetValue(nTopSlot);
+        const Traffic* pTraffic = m_objTraffics.GetValue(i);
 
         if (pTopSlotTraffic == IMS_NULL || pTraffic == IMS_NULL)
         {
@@ -411,7 +412,7 @@ PRIVATE IMS_BOOL OsImsTraffic::HasHighPriorityInOtherSlot(
             continue;
         }
 
-        Traffic* pTraffic = m_objTraffics.GetValue(i);
+        const Traffic* pTraffic = m_objTraffics.GetValue(i);
 
         if (pTraffic == IMS_NULL)
         {
@@ -436,7 +437,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsEmergency(IN IMS_SINT32 nSlotId) const
 {
     LockGuard objLock(m_piLock);
 
-    Traffic* pTraffic = GetTraffic(nSlotId);
+    const Traffic* pTraffic = GetTraffic(nSlotId);
     if (pTraffic == IMS_NULL)
     {
         return IMS_FALSE;
@@ -456,7 +457,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsEmergencyInOtherSlot(IN IMS_SINT32 nSlotId) con
             continue;
         }
 
-        Traffic* pTraffic = m_objTraffics.GetValue(i);
+        const Traffic* pTraffic = m_objTraffics.GetValue(i);
 
         if (pTraffic == IMS_NULL)
         {
@@ -476,7 +477,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsEnabled(IN IMS_SINT32 nSlotId) const
 {
     LockGuard objLock(m_piLock);
 
-    Traffic* pTraffic = GetTraffic(nSlotId);
+    const Traffic* pTraffic = GetTraffic(nSlotId);
     if (pTraffic == IMS_NULL)
     {
         return IMS_FALSE;
@@ -491,7 +492,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsIdle() const
 
     for (IMS_UINT32 i = 0; i < m_objTraffics.GetSize(); i++)
     {
-        Traffic* pTraffic = m_objTraffics.GetValue(i);
+        const Traffic* pTraffic = m_objTraffics.GetValue(i);
 
         if (pTraffic == IMS_NULL)
         {
@@ -510,7 +511,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsIdle() const
 PRIVATE IMS_BOOL OsImsTraffic::IsSimultaneousCallingSupported(IN IMS_SINT32 nSlotId) const
 {
     LockGuard objLock(m_piLock);
-    Traffic* pTraffic = GetTraffic(nSlotId);
+    const Traffic* pTraffic = GetTraffic(nSlotId);
 
     if (pTraffic == IMS_NULL)
     {
@@ -523,7 +524,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsSimultaneousCallingSupported(IN IMS_SINT32 nSlo
 PRIVATE IMS_BOOL OsImsTraffic::IsWlan(IN IMS_SINT32 nSlotId) const
 {
     LockGuard objLock(m_piLock);
-    Traffic* pTraffic = GetTraffic(nSlotId);
+    const Traffic* pTraffic = GetTraffic(nSlotId);
 
     if (pTraffic == IMS_NULL)
     {
@@ -547,7 +548,7 @@ PRIVATE IMS_BOOL OsImsTraffic::IsWlanInOtherSlot(IN IMS_SINT32 nSlotId) const
             continue;
         }
 
-        Traffic* pTraffic = m_objTraffics.GetValue(i);
+        const Traffic* pTraffic = m_objTraffics.GetValue(i);
 
         if (pTraffic == IMS_NULL)
         {
@@ -569,7 +570,7 @@ PRIVATE void OsImsTraffic::PostMessage()
 
     for (IMS_UINT32 i = 0; i < m_objTraffics.GetSize(); i++)
     {
-        Traffic* pTraffic = m_objTraffics.GetValue(i);
+        const Traffic* pTraffic = m_objTraffics.GetValue(i);
 
         if (pTraffic == IMS_NULL)
         {

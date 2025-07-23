@@ -251,7 +251,7 @@ TEST_F(ImsListTest, Remove)
 
     EXPECT_TRUE(objPointerList.Remove(&strDog));
     EXPECT_EQ(1, objPointerList.GetSize());
-    AString* pstrCat = objPointerList.GetAt(0);
+    const AString* pstrCat = objPointerList.GetAt(0);
     EXPECT_EQ(strCat, *pstrCat);
     EXPECT_TRUE(objPointerList.Remove(&strCat));
     EXPECT_EQ(0, objPointerList.GetSize());
