@@ -919,8 +919,7 @@ CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& o
             const IMS_SINT32 nRetryAfter = objReason.strExtraMessage.ToInt32();
             if (nRetryAfter < 0)
             {
-                CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
-                OnStartFailed(objReason);
+                OnStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
                 return CallStateName::TERMINATING;
             }
             return PerformSilentRedial(nRetryAfter == 0 ? DEFAULT_RETRY_AFTER : nRetryAfter);
