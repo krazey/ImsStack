@@ -15,184 +15,21 @@
  */
 #include <gtest/gtest.h>
 
-#include "SipStackCallback.h"
 #include "SipTxnContext.h"
 #include "SipUtil.h"
+#include "include/MockISipTransactionCallback.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxnHandler.h"
 
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
+
 namespace android
 {
-
-SIP_BOOL bFromRecvTxn;
-SipVector<SipTxn*> objTxnList;
-SIP_BOOL Mock_FetchTransaction(
-        SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
-{
-    if ((pvTxnKey == SIP_NULL) || (ppvTxn == SIP_NULL))
-    {
-        return SIP_FALSE;
-    }
-
-    if (nOption == SipTxn::OPT_CREATE)
-    {
-        if (SipPf_Strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)
-        {
-            return SIP_FALSE;
-        }
-        if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
-        {
-            objTxnList.Add((SipTxn*)*ppvTxn);
-        }
-        return SIP_TRUE;
-    }
-    else
-    {
-        SIP_UINT16 nError;
-
-        SIP_INT32 eMsgType = (static_cast<SipTxnKey*>(pvTxnKey))->GetMsgType();
-        switch (eMsgType)
-        {
-            case SipMessage::REQ_TYPE:
-            {
-                if (SipPf_Strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "CANCEL") == 0)
-                {
-                    return SIP_TRUE;
-                }
-
-                if (SipPf_Strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "UPDATE") == 0)
-                {
-                    SipMessage* pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INVITE_SERVER, static_cast<SipTxnKey*>(pvTxnKey),
-                            pTempSipMsg, SIP_NULL, &nError);
-                    pTempSipMsg->SipDelete();
-                    return SIP_TRUE;
-                }
-                SIP_UINT32 nSize = objTxnList.GetSize();
-
-                for (SIP_UINT32 i = 0; i < nSize; i++)
-                {
-                    SipTxn* pTxn = objTxnList.GetAt(i);
-
-                    if (pTxn != SIP_NULL)
-                    {
-                        if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) ==
-                                SIP_MATCHES)
-                        {
-                            if (ppvTxn != SIP_NULL)
-                            {
-                                *ppvTxn = pTxn;
-                                return SIP_TRUE;
-                            }
-                        }
-                    }
-                }
-                return SIP_FALSE;
-            }
-            case SipMessage::TYPE_INVALID:
-                (static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(SIP_NULL);
-                (static_cast<SipTxnKey*>(pvTxnKey))->CompareKeysForRPR(SIP_NULL);
-                return SIP_FALSE;
-            case SipMessage::RESP_TYPE:
-            {
-                if ((((static_cast<SipTxnKey*>(pvTxnKey)))->GetResponseCode() == 202) ||
-                        ((static_cast<SipTxnKey*>(pvTxnKey)))->GetResponseCode() == 603)
-                {
-                    return SIP_FALSE;
-                }
-                else if (((static_cast<SipTxnKey*>(pvTxnKey)))->GetResponseCode() == 420)
-                {
-                    return SIP_TRUE;
-                }
-                SipMessage* pTempSipMsg;
-                if (bFromRecvTxn == SIP_TRUE)
-                {
-                    pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INVITE_CLIENT, static_cast<SipTxnKey*>(pvTxnKey),
-                            pTempSipMsg, SIP_NULL, &nError);
-                    SipTxn* pTempTxn = (SipTxn*)*ppvTxn;
-                    pTempTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
-                    pTempSipMsg->SipDelete();
-                    objTxnList.Add((SipTxn*)*ppvTxn);
-                    return SIP_TRUE;
-                }
-
-                SIP_UINT32 nSize = objTxnList.GetSize();
-
-                for (SIP_UINT32 i = 0; i < nSize; i++)
-                {
-                    SipTxn* pTxn = objTxnList.GetAt(i);
-
-                    if (pTxn != SIP_NULL)
-                    {
-                        if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) ==
-                                SIP_MATCHES)
-                        {
-                            if (ppvTxn != SIP_NULL)
-                            {
-                                if (((static_cast<SipTxnKey*>(pvTxnKey)))->GetResponseCode() == 480)
-                                {
-                                    pTxn->SetTxnState(SipTxn::INV_SER_IDLE_ST);
-                                }
-                                *ppvTxn = pTxn;
-                                return SIP_TRUE;
-                            }
-                        }
-                    }
-                }
-                pTempSipMsg = new SipMessage();
-                *ppvTxn = new SipTxn(SipTxn::INVITE_SERVER, static_cast<SipTxnKey*>(pvTxnKey),
-                        pTempSipMsg, SIP_NULL, &nError);
-                SipTxn* pTempTxn = (SipTxn*)*ppvTxn;
-                pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
-                pTempSipMsg->SipDelete();
-                objTxnList.Add((SipTxn*)*ppvTxn);
-                return SIP_TRUE;
-            }
-            default:
-                return SIP_TRUE;
-        }
-    }
-}
-
-SIP_BOOL Mock_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID* pvData, SIP_VOID**)
-{
-    SipTimeoutData* pTimeoutData = reinterpret_cast<SipTimeoutData*>(pvData);
-    delete pTimeoutData;
-    return SIP_TRUE;
-}
-
-SIP_BOOL Mock_ReleaseTransaction(
-        SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey, SIP_VOID** ppvTxn)
-{
-    if (((static_cast<SipTxnKey*>(pvTxnKey))->GetMsgType() == SipMessage::TYPE_INVALID))
-    {
-        return SIP_FALSE;
-    }
-    SIP_UINT32 nSize = objTxnList.GetSize();
-
-    for (SIP_UINT32 i = 0; i < nSize; i++)
-    {
-        SipTxn* pTxn = objTxnList.GetAt(i);
-
-        if (pTxn != SIP_NULL)
-        {
-            if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
-            {
-                objTxnList.RemoveAt(i);
-                if (ppvTxn != SIP_NULL)
-                {
-                    *ppvTxn = pTxn;
-                    *ppvOutTxnKey = pvTxnKey;
-                    return SIP_TRUE;
-                }
-            }
-        }
-    }
-    return SIP_TRUE;
-}
 
 class SipTxnHandlerTest : public ::testing::Test
 {
@@ -203,12 +40,78 @@ public:
     SipMessage* pRespSipMsg = SIP_NULL;
     SipTxnHandler* pTxnHandler = SIP_NULL;
     SipTxnContext* pSipTxnContext = SIP_NULL;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
+    SipVector<SipTxn*> objTxnList;
+    static constexpr SIP_INT32 TIMER_ID = 1;
 
 protected:
     virtual void SetUp() override
     {
-        bFromRecvTxn = SIP_FALSE;
-        SipUtil::GetInstance();
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
+        SipUtil::GetInstance()->SetTransactionCallback(pMockISipTransactionCallback);
+
+        ON_CALL(*pMockISipTransactionCallback, StartTimer(_, _, _))
+                .WillByDefault(Return(static_cast<void*>(const_cast<SIP_INT32*>(&TIMER_ID))));
+
+        ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+                .WillByDefault(Invoke(
+                        [&](IN SipTxnKey* pTxnKey, IN SIP_INT32 nOption, OUT SipTxn*& pOutTxn)
+                        {
+                            if (nOption == SipTxn::OPT_CREATE)
+                            {
+                                if (pOutTxn != SIP_NULL)
+                                {
+                                    objTxnList.Add(pOutTxn);
+                                }
+                                return SIP_TRUE;
+                            }
+                            else
+                            {
+                                SIP_UINT32 nSize = objTxnList.GetSize();
+                                for (SIP_UINT32 i = 0; i < nSize; i++)
+                                {
+                                    SipTxn* pTxn = objTxnList.GetAt(i);
+                                    if (pTxn != SIP_NULL)
+                                    {
+                                        if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                        {
+                                            pOutTxn = pTxn;
+                                            return SIP_TRUE;
+                                        }
+                                    }
+                                }
+                                return SIP_FALSE;
+                            }
+                        }));
+
+        ON_CALL(*pMockISipTransactionCallback, ReleaseTransaction(_, _, _, _))
+                .WillByDefault(Invoke(
+                        [&](SipTxnKey* pTxnKey, Unused, SipTxnKey*& pOutTxnKey, SipTxn*& pOutTxn)
+                        {
+                            if (pTxnKey->GetMsgType() == SipMessage::TYPE_INVALID)
+                            {
+                                return SIP_FALSE;
+                            }
+
+                            for (SIP_UINT32 i = 0; i < objTxnList.GetSize(); i++)
+                            {
+                                SipTxn* pTxn = objTxnList.GetAt(i);
+                                if (pTxn != SIP_NULL)
+                                {
+                                    if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                    {
+                                        objTxnList.RemoveAt(i);
+                                        if (pOutTxn != SIP_NULL)
+                                        {
+                                            pOutTxn = pTxn;
+                                            pOutTxnKey = pTxnKey;
+                                            return SIP_TRUE;
+                                        }
+                                    }
+                                }
+                            }
+                            return SIP_TRUE;
+                        }));
 
         pTxnHandler = new SipTxnHandler();
         pSipMsg = new SipMessage();
@@ -241,20 +144,6 @@ CSeq: 1 INVITE\r\n\
 
         pSipTranspParam =
                 new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
-
-        static const SipStackCallbacks stTestCallbacks = {
-                &Mock_FetchTransaction,
-                &Mock_ReleaseTransaction,
-                &Mock_StartTimer,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-        };
-
-        SipStackCallback_SetCallbacks(stTestCallbacks);
     }
 
     virtual void TearDown() override
@@ -283,7 +172,11 @@ CSeq: 1 INVITE\r\n\
         {
             delete pTxnHandler;
         }
-
+        if (pMockISipTransactionCallback != SIP_NULL)
+        {
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
+        }
         SipUtil::DestroyInstance();
     }
 };
@@ -329,6 +222,9 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_NonInvite)
             pTxnHandler->OnSendTxn(
                     pSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
     EXPECT_EQ(SIP_TRUE, pTxnHandler->DeleteTxn(pTxnKey));
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     pReqLine = pSipMsg->GetReqLine();
     ASSERT_TRUE(pReqLine != nullptr);
@@ -379,6 +275,34 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
     SipTxnInfo* pTxnInfo = new SipTxnInfo();
     SIP_UINT16 nError = 0;
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        SipMessage* pTempSipMsg = new SipMessage();
+                        pOutTxn = new SipTxn(
+                                SipTxn::INVITE_SERVER, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                        SipTxn* pTempTxn = pOutTxn;
+                        pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
+                        objTxnList.Add(pTempTxn);
+                        pTempSipMsg->SipDelete();
+                        return SIP_TRUE;
+                    }));
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        SipMessage* pTempSipMsg = new SipMessage();
+                        pOutTxn = new SipTxn(
+                                SipTxn::INVITE_SERVER, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                        SipTxn* pTempTxn = pOutTxn;
+                        pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
+                        objTxnList.Add(pTempTxn);
+                        pTempSipMsg->SipDelete();
+                        return SIP_TRUE;
+                    }));
+
     EXPECT_EQ(SIP_TRUE,
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
@@ -420,6 +344,29 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
     pStatusLine->SetStatusCode("603");
     pStatusLine->SipDelete();
 
+    pStatusLine = pRespSipMsg->GetStatusLine();
+    ASSERT_TRUE(pStatusLine != nullptr);
+    pStatusLine->SetStatusCode("406");
+    pStatusLine->SipDelete();
+
+    EXPECT_EQ(SIP_TRUE,
+            pTxnHandler->OnSendTxn(
+                    pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
+
+    pStatusLine = pRespSipMsg->GetStatusLine();
+    ASSERT_TRUE(pStatusLine != nullptr);
+    pStatusLine->SetStatusCode("406");
+    pStatusLine->SipDelete();
+
+    EXPECT_EQ(SIP_TRUE,
+            pTxnHandler->OnSendTxn(
+                    pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
+
     EXPECT_EQ(SIP_FALSE,
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
@@ -429,9 +376,32 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
     pStatusLine->SetStatusCode("480");
     pStatusLine->SipDelete();
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        for (SIP_UINT32 i = 0; i < objTxnList.GetSize(); i++)
+                        {
+                            SipTxn* pTxn = objTxnList.GetAt(i);
+                            if (pTxn != SIP_NULL)
+                            {
+                                if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                {
+                                    pTxn->SetTxnState(SipTxn::INV_SER_IDLE_ST);
+                                    pOutTxn = pTxn;
+                                    return SIP_TRUE;
+                                }
+                            }
+                        }
+                        return SIP_TRUE;
+                    }));
+
     SipTxnKey* pInvTxnKey = new SipTxnKey(pSipMsg, &nError);
     EXPECT_EQ(
             SIP_TRUE, pTxnHandler->OnRecvTxn(pSipMsg, pInvTxnKey, pSipUserData, pTxnInfo, &nError));
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_FALSE));
     EXPECT_EQ(SIP_FALSE,
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
@@ -445,15 +415,6 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
         pCSeq->SipDelete();
     }
 
-    pStatusLine = pRespSipMsg->GetStatusLine();
-    ASSERT_TRUE(pStatusLine != nullptr);
-    pStatusLine->SetStatusCode("406");
-    pStatusLine->SipDelete();
-
-    EXPECT_EQ(SIP_TRUE,
-            pTxnHandler->OnSendTxn(
-                    pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
-    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTxnInfo;
 }
 
@@ -650,6 +611,9 @@ CSeq: 1 INVITE\r\n\
     pReqLine->SetMethod("CANCEL");
     pReqLine->SipDelete();
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
+
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTxn(pSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
     pTxnKey->SipDelete();
@@ -658,6 +622,9 @@ CSeq: 1 INVITE\r\n\
     ASSERT_TRUE(pReqLine != nullptr);
     pReqLine->SetMethod("BYE");
     pReqLine->SipDelete();
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTxn(pSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
@@ -669,7 +636,20 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Response)
 {
     SipTxnInfo* pTxnInfo = new SipTxnInfo();
     SIP_UINT16 nError;
-    bFromRecvTxn = SIP_TRUE;
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        SipMessage* pTempSipMsg = new SipMessage();
+                        pOutTxn = new SipTxn(
+                                SipTxn::INVITE_CLIENT, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                        SipTxn* pTempTxn = pOutTxn;
+                        pTempTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
+                        pTempSipMsg->SipDelete();
+                        objTxnList.Add(pOutTxn);
+                        return SIP_TRUE;
+                    }));
 
     SipTxnKey* pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE,
@@ -677,6 +657,19 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Response)
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTxnInfo;
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        SipMessage* pTempSipMsg = new SipMessage();
+                        pOutTxn = new SipTxn(
+                                SipTxn::INVITE_SERVER, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                        SipTxn* pTempTxn = pOutTxn;
+                        pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
+                        objTxnList.Add(pTempTxn);
+                        pTempSipMsg->SipDelete();
+                        return SIP_TRUE;
+                    }));
     pTxnInfo = new SipTxnInfo();
     SipMessage* pNonInvSipMsg = new SipMessage();
     pNonInvSipMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -765,21 +758,6 @@ TEST_F(SipTxnHandlerTest, OnRecvTranspError)
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
     pTxnKey->SipDelete();
 
-    /* Calling with valid SipTxnKey by creating with resp msg*/
-    pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
-    EXPECT_EQ(SIP_TRUE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
-
-    SipStatusLine* pStatusLine = pRespSipMsg->GetStatusLine();
-    ASSERT_TRUE(pStatusLine != nullptr);
-    pStatusLine->SetStatusCode("420");
-    pStatusLine->SipDelete();
-
-    /* Creating txnKey with 420 response message so that in Mock_FetchTransaction return
-    true but txn is not passed. Inorder to test if txn is null OnRecvTranspError will be failed */
-    pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
-    EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
-    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-
     /* Calling with valid SipTxnKey by creating with INVITE req message
     first calling send txn to add txn to list.
     then called OnRecvTranspError so fetch will return valid txn */
@@ -810,6 +788,24 @@ CSeq: 1 REGISTER\r\n\
 
     EXPECT_EQ(SIP_TRUE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        SipMessage* pTempSipMsg = new SipMessage();
+                        pOutTxn = new SipTxn(
+                                SipTxn::INVITE_SERVER, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                        SipTxn* pTempTxn = pOutTxn;
+                        pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
+                        objTxnList.Add(pTempTxn);
+                        pTempSipMsg->SipDelete();
+                        return SIP_TRUE;
+                    }));
+
+    /* Calling with valid SipTxnKey by creating with resp msg*/
+    pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
+
     /* Calling with valid SipTxnKey by creating with NON INVITE req message
     first calling recv txn to add txn to list.
     then called OnRecvTranspError so fetch will return valid txn */
@@ -818,6 +814,21 @@ CSeq: 1 REGISTER\r\n\
             pTxnHandler->OnRecvTxn(pNonInvSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
     EXPECT_EQ(SIP_TRUE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
+
+    SipStatusLine* pStatusLine = pRespSipMsg->GetStatusLine();
+    ASSERT_TRUE(pStatusLine != nullptr);
+    pStatusLine->SetStatusCode("420");
+    pStatusLine->SipDelete();
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
+
+    /* Creating txnKey with 420 response message so that in Mock_FetchTransaction return
+    true but txn is not passed. Inorder to test if txn is null OnRecvTranspError will be failed */
+    pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
+    EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
+    pTxnKey->SipDelete();
+
     delete pTxnInfo;
     pNonInvSipMsg->SipDelete();
 }
@@ -974,6 +985,19 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     pStatusLine->SipDelete();
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        SipMessage* pTempSipMsg = new SipMessage();
+                        pOutTxn = new SipTxn(
+                                SipTxn::INVITE_SERVER, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                        SipTxn* pTempTxn = pOutTxn;
+                        pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
+                        objTxnList.Add(pTempTxn);
+                        pTempSipMsg->SipDelete();
+                        return SIP_TRUE;
+                    }));
     /* Calling with valid SipTxnKey by creating with 200 response message
     first calling recv txn to add txn to list.
     then called UpdateTxnDetails so fetch will return valid txn */
@@ -987,6 +1011,9 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     ASSERT_TRUE(pStatusLine != nullptr);
     pStatusLine->SetStatusCode("420");
     pStatusLine->SipDelete();
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     /* Calling with 420 response message so that in Mock_FetchTransaction return
     true but txn is not passed. Inorder to test if txn is null Update will be failed */

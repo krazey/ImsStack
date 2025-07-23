@@ -15,10 +15,9 @@
  */
 
 #include "SipDebug.h"
+#include "SipUtil.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
-
-extern SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey);
 
 static SipVector<SipTxnKey*> s_txnKeyList;
 
@@ -156,7 +155,13 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
 
         if (IsTxnKeyMatched(pUserTxnkey, pStoredTxnKey) == SIP_TRUE)
         {
-            Sip_Cbk_DisplayTxnKey(static_cast<SIP_VOID*>(pStoredTxnKey));
+            ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+            if (pCallback != SIP_NULL)
+            {
+                pCallback->DisplayTxnKey(pStoredTxnKey);
+            }
+
             pStoredTxnKey->SipDelete();
             s_txnKeyList.RemoveAt(nIndex - SIP_ONE);
             // Check again if further elements matches for the same txn key.

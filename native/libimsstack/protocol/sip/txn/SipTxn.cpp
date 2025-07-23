@@ -178,11 +178,11 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 */
 SIP_BOOL SipTxn::AbortTxn()
 {
-    ISipTimerUtil* pTimer = SipUtil::GetInstance()->GetTimer();
-    if (m_pvTimerId != SIP_NULL && pTimer != SIP_NULL)
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    if (m_pvTimerId != SIP_NULL && pCallback != SIP_NULL)
     {
-        SipTimeoutData* pTimeoutData =
-                static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
+        SipTimeoutData* pTimeoutData = SIP_NULL;
+        pCallback->StopTimer(m_pvTimerId, pTimeoutData);
         m_pvTimerId = SIP_NULL;
 
         if (pTimeoutData != SIP_NULL)
@@ -210,8 +210,8 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
 
     if (nDuration > SIP_ZERO)
     {
-        ISipTimerUtil* pTimer = SipUtil::GetInstance()->GetTimer();
-        if (pTimer == SIP_NULL)
+        ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+        if (pCallback == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer:pTimer is NULL ", SIP_ZERO, SIP_ZERO);
@@ -219,8 +219,8 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
             return SIP_FALSE;
         }
 
-        if (pTimer->StartTimer(&m_pvTimerId, nDuration, SIP_FALSE, CbkTxnTimeout, pTimeoutData) ==
-                SIP_FALSE)
+        m_pvTimerId = pCallback->StartTimer(nDuration, CbkTxnTimeout, pTimeoutData);
+        if (m_pvTimerId == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "StartTxnTimer: StartTimer Failed", SIP_ZERO, SIP_ZERO);
@@ -251,8 +251,8 @@ SIP_BOOL SipTxn::StopTxnTimer()
         return SIP_TRUE;
     }
 
-    ISipTimerUtil* pTimer = SipUtil::GetInstance()->GetTimer();
-    if (pTimer == SIP_NULL)
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    if (pCallback == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "SipTxn::StopTxnTimer:pTimer is NULL ", SIP_ZERO, SIP_ZERO);
@@ -260,7 +260,7 @@ SIP_BOOL SipTxn::StopTxnTimer()
     }
 
     SipTimeoutData* pTimeoutData = SIP_NULL;
-    pTimeoutData = static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
+    pCallback->StopTimer(m_pvTimerId, pTimeoutData);
     m_pvTimerId = SIP_NULL;
     delete pTimeoutData;
 
@@ -614,8 +614,14 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     SipTxnKey* pTxnKey = pTimeoutData->GetTxnKey();
     SipTxn* pTxn = SIP_NULL;
-    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
-            SipTxn::OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
+    SipUtil* pUtil = SipUtil::GetInstance();
+    ISipTransactionCallback* pCallback = pUtil->GetTransactionCallback();
+    SIP_BOOL bTxnExist = SIP_FALSE;
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->FetchTransaction(pTxnKey, SipTxn::OPT_FETCH, pTxn);
+    }
 
     if (bTxnExist == SIP_YES)
     {
@@ -651,19 +657,15 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     pTxn->SetTimerId(SIP_NULL);
 
-    SipUtil* pUtil = SipUtil::GetInstance();
     ISipUserData* pUserData = pTxn->GetUserData();
-
     /*No need to notify txntimeout to listener if the txn is already terminated*/
     /* Notify user is txn is terminated */
-    ISipTxnListener* pTxnListener = pUtil->GetTransactionListener();
-
     SIP_INT32 eTimerType = SipTxn::TIMER_TYPE_INVALID;
     if (pTxn->IsTxnTerminated() == SIP_TRUE)
     {
-        if (pTxnListener != SIP_NULL)
+        if (pCallback != SIP_NULL)
         {
-            pTxnListener->TxnTimeout(pUserData, (SIP_INT32)eTimerType);
+            pCallback->NotifyTimerExpired(pUserData, (SIP_INT32)eTimerType);
         }
 
         SipTxn_RemoveFromTxnPool(pTxnKey);
@@ -806,9 +808,9 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "***CbkTxnTimeout: %s***",
                 (bTxnTerminated == SIP_TRUE) ? "TxnTerminated" : "RprTxnTerminated", SIP_ZERO);
 
-        if (pTxnListener != SIP_NULL)
+        if (pCallback != SIP_NULL)
         {
-            pTxnListener->TxnTimeout(pUserData, (SIP_INT32)eTimerType);
+            pCallback->NotifyTimerExpired(pUserData, (SIP_INT32)eTimerType);
         }
 
         if (bTxnTerminated == SIP_TRUE)
@@ -854,10 +856,15 @@ SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey)
 {
     SipTxn* pTempTxn = SIP_NULL;
     SipTxnKey* pTempTxnKey = SIP_NULL;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    SIP_BOOL bStatus = SIP_FALSE;
 
-    if (Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), SipTxn::OPT_REMOVE,
-                reinterpret_cast<SIP_VOID**>(&pTempTxnKey),
-                reinterpret_cast<SIP_VOID**>(&pTempTxn)) == SIP_FALSE)
+    if (pCallback != SIP_NULL)
+    {
+        bStatus = pCallback->ReleaseTransaction(pTxnKey, SipTxn::OPT_REMOVE, pTempTxnKey, pTempTxn);
+    }
+
+    if (bStatus == SIP_FALSE)
     {
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "SipTxn_RemoveFromTxnPool:\n", SIP_ZERO, SIP_ZERO);
         return;

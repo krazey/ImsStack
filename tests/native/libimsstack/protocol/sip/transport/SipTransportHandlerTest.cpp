@@ -15,34 +15,20 @@
  */
 #include <gtest/gtest.h>
 
-#include "SipStackCallback.h"
+#include "SipUtil.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
+#include "../txn/include/MockISipTransactionCallback.h"
+
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
 
 namespace android
 {
 
 SipTxn* pTxn = SIP_NULL;
-
-SIP_BOOL FetchTxn_Fail(SIP_VOID* /*pvTxnKey*/, SIP_INT32 /*nOption*/, SIP_VOID** /*ppvOutTxnKey*/,
-        SIP_VOID** ppvTxn)
-{
-    *ppvTxn = SIP_NULL;
-    return SIP_TRUE;
-}
-
-SIP_BOOL FetchTxn_NotExists(SIP_VOID* /*pvTxnKey*/, SIP_INT32 /*nOption*/,
-        SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** /*ppvTxn*/)
-{
-    return SIP_FALSE;
-}
-
-SIP_BOOL FetchTxn_Exists(SIP_VOID* /*pvTxnKey*/, SIP_INT32 /*nOption*/, SIP_VOID** /*ppvOutTxnKey*/,
-        SIP_VOID** ppvTxn)
-{
-    *ppvTxn = pTxn;
-    return SIP_TRUE;
-}
 
 class SipTransportHandlerTest : public ::testing::Test
 {
@@ -52,6 +38,7 @@ public:
     SipTxnKey* pTxnKey;
     SipTransportHandler* pTranspHandler;
     SipTransportParameter* pTranspParam;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
 
 protected:
     virtual void SetUp() override
@@ -63,9 +50,19 @@ protected:
         pTxnKey = SIP_NULL;
         pTranspHandler = SIP_NULL;
         pTranspParam = SIP_NULL;
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
+        SipUtil::GetInstance()->SetTransactionCallback(pMockISipTransactionCallback);
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        if (pMockISipTransactionCallback != SIP_NULL)
+        {
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
+        }
+        SipUtil::DestroyInstance();
+    }
 
     /* This utility is used only for receive message */
     void FillTransportParameters(const SIP_CHAR* pMsg)
@@ -194,21 +191,8 @@ Content-Length: 0\r\n\
 
     FillTransportParameters(pMsg);
 
-    /* Fecth txn wrong, fail */
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTxn_Fail,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     SIP_UINT16 nError = 0;
     SIP_INT32 nTxnStatus = 0;
@@ -220,20 +204,8 @@ Content-Length: 0\r\n\
                     pMessage, pTranspParam, &nTxnStatus, &bTxnExist, &pNewTxnKey, &nError));
 
     /* Txn not exists - INVITE Request which is new request, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     EXPECT_EQ(SIP_TRUE,
             pTranspHandler->OnRecvTransp(
@@ -241,20 +213,13 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SipTxn::STATUS_NEW_REQ_RECVD, nTxnStatus);
 
     /* Txn exists - INVITE Request which is valid, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -280,20 +245,13 @@ Content-Length: 0\r\n\
     FillTransportParameters(pMsg);
 
     /* Txn exists - NON-INVITE, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -319,20 +277,8 @@ Content-Length: 0\r\n\
     FillTransportParameters(pMsg);
 
     /* Txn not exists - NON-INVITE Response, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -358,20 +304,13 @@ Content-Length: 0\r\n\
     FillTransportParameters(pMsg);
 
     /* Txn exists - INVITE Response which is valid, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -414,60 +353,29 @@ Content-Length: 0\r\n\
     ASSERT_TRUE(pTranspHandler != nullptr);
 
     /* Fecth txn wrong, fail */
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTxn_Fail,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     EXPECT_EQ(SIP_FALSE,
             pTranspHandler->OnRecvTanspError(
                     0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
 
     /* Txn not exists, fail */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     EXPECT_EQ(SIP_FALSE,
             pTranspHandler->OnRecvTanspError(
                     0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
 
     /* Txn exists */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
@@ -562,20 +470,13 @@ Content-Length: 0\r\n\
     pTranspHandler = new SipTransportHandler();
     ASSERT_TRUE(pTranspHandler != nullptr);
 
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
@@ -624,20 +525,8 @@ Content-Length: 0\r\n\
     pTranspHandler = new SipTransportHandler();
     ASSERT_TRUE(pTranspHandler != nullptr);
 
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
@@ -692,56 +581,25 @@ Content-Length: 0\r\n\
     ASSERT_TRUE(pTranspHandler != nullptr);
 
     /* Fecth txn wrong, fail */
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTxn_Fail,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     EXPECT_EQ(SIP_FALSE, pTranspHandler->IsInviteTxnPresentForAckTxn(pTxnKey));
 
     /* Txn not exists, fail */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     EXPECT_EQ(SIP_FALSE, pTranspHandler->IsInviteTxnPresentForAckTxn(pTxnKey));
 
     /* Txn exists */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);

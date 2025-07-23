@@ -390,9 +390,13 @@ SIP_BOOL SipTxnHandler::TerminateTxn(SipTxnKey* pTxnKey)
 
     SipTxn* pTxn = SIP_NULL;
     SipTxnKey* pOutTxnKey = SIP_NULL;
-    SIP_BOOL bTxnExist =
-            Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), SipTxn::OPT_REMOVE,
-                    reinterpret_cast<SIP_VOID**>(&pOutTxnKey), reinterpret_cast<SIP_VOID**>(&pTxn));
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->ReleaseTransaction(pTxnKey, SipTxn::OPT_REMOVE, pOutTxnKey, pTxn);
+    }
 
     if (bTxnExist == SIP_FALSE)
     {
@@ -438,9 +442,13 @@ SIP_BOOL SipTxnHandler::DeleteTxn(SipTxnKey* pTxnKey)
 
     SipTxn* pTxn = SIP_NULL;
     SipTxnKey* pOutTxnKey = SIP_NULL;
-    SIP_BOOL bTxnExist =
-            Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), SipTxn::OPT_REMOVE,
-                    reinterpret_cast<SIP_VOID**>(&pOutTxnKey), reinterpret_cast<SIP_VOID**>(&pTxn));
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->ReleaseTransaction(pTxnKey, SipTxn::OPT_REMOVE, pOutTxnKey, pTxn);
+    }
 
     if (bTxnExist == SIP_FALSE)
     {
@@ -567,8 +575,13 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
 PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(
         SipTxnKey* pTxnKey, SipTxn** ppTxn, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
-            SipTxn::OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->FetchTransaction(pTxnKey, SipTxn::OPT_FETCH, *ppTxn);
+    }
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
@@ -586,9 +599,13 @@ PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(
 PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppTxn,
         SipTxnKey** ppOutTxnKey, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist =
-            Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), SipTxn::OPT_FETCH,
-                    reinterpret_cast<SIP_VOID**>(ppOutTxnKey), reinterpret_cast<SIP_VOID**>(ppTxn));
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->FetchTransaction(pTxnKey, SipTxn::OPT_FETCH, *ppOutTxnKey, *ppTxn);
+    }
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
@@ -866,11 +883,11 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
 PRIVATE SIP_VOID SipTxnHandler::NotifyTxnTermination(IN SipTxn* pTxn)
 {
     ISipUserData* pUserData = pTxn->GetUserData();
-    ISipTxnListener* pTxnListener = SipUtil::GetInstance()->GetTransactionListener();
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
 
-    if (pTxnListener != SIP_NULL)
+    if (pCallback != SIP_NULL)
     {
-        pTxnListener->TxnTerminated(pUserData);
+        pCallback->NotifyTransactionTerminated(pUserData);
     }
 }
 

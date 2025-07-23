@@ -15,8 +15,8 @@
  */
 #include <gtest/gtest.h>
 
-#include "SipStackCallback.h"
 #include "SipUtil.h"
+#include "include/MockISipTransactionCallback.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
@@ -25,11 +25,10 @@
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnUtil.h"
 
-extern SIP_BOOL MockFsm_FetchTransaction(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID**);
-extern SIP_BOOL MockFsm_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**);
-extern SIP_BOOL MockFsm_ReleaseTransaction(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID**);
-extern SIP_VOID* MockFsm_CreateAckRequest(SIP_VOID*, ISipUserData*);
-extern SIP_VOID MockFsm_ResetTimerCount();
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
 
 namespace android
 {
@@ -39,11 +38,32 @@ class SipInviteClientTxnTest : public ::testing::Test
 public:
     SipMessage* pSipMsg = SIP_NULL;
     SipMessage* pRespSipMsg = SIP_NULL;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
+    SIP_BOOL bNextReturn = SIP_FALSE;
+    static constexpr SIP_INT32 TIMER_ID = 1;
 
 protected:
     virtual void SetUp() override
     {
-        SipUtil::GetInstance();
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
+        SipUtil::GetInstance()->SetTransactionCallback(pMockISipTransactionCallback);
+
+        ON_CALL(*pMockISipTransactionCallback, StartTimer(_, _, _))
+                .WillByDefault(Invoke(
+                        [&](Unused, Unused, Unused)
+                        {
+                            SIP_VOID* pCurrentReturn = bNextReturn
+                                    ? static_cast<void*>(const_cast<SIP_INT32*>(&TIMER_ID))
+                                    : SIP_NULL;
+                            bNextReturn = (bNextReturn == SIP_TRUE) ? SIP_FALSE : SIP_TRUE;
+                            return pCurrentReturn;
+                        }));
+
+        ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+                .WillByDefault(Return(SIP_TRUE));
+
+        ON_CALL(*pMockISipTransactionCallback, ReleaseTransaction(_, _, _, _))
+                .WillByDefault(Return(SIP_TRUE));
 
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -74,21 +94,6 @@ CSeq: 1 INVITE\r\n\
 
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespRSeqHdr));
         pRespRSeqHdr->SipDelete();
-
-        static const SipStackCallbacks stTestCallbacks = {
-                &MockFsm_FetchTransaction,
-                &MockFsm_ReleaseTransaction,
-                &MockFsm_StartTimer,
-                SIP_NULL,
-                SIP_NULL,
-                &MockFsm_CreateAckRequest,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-        };
-
-        SipStackCallback_SetCallbacks(stTestCallbacks);
-        MockFsm_ResetTimerCount();
     }
 
     virtual void TearDown() override
@@ -100,6 +105,11 @@ CSeq: 1 INVITE\r\n\
         if (pRespSipMsg != SIP_NULL)
         {
             pRespSipMsg->SipDelete();
+        }
+        if (pMockISipTransactionCallback != SIP_NULL)
+        {
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
         }
         SipUtil::DestroyInstance();
     }
@@ -156,6 +166,9 @@ TEST_F(SipInviteClientTxnTest, IdleState)
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     /* Calling with BYE msg so that fetch msg returns fail */
     EXPECT_EQ(SIP_FALSE,

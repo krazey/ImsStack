@@ -15,9 +15,9 @@
  */
 #include <gtest/gtest.h>
 
-#include "SipStackCallback.h"
 #include "SipUtil.h"
 #include "SipVector.h"
+#include "include/MockISipTransactionCallback.h"
 #include "include/MockSipTransaction.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
@@ -26,101 +26,89 @@
 #include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
 
-SipVector<MockSipTransaction*> objTxnList;
-static SIP_INT32* pnTimerId = SIP_NULL;
-
-SIP_BOOL MockTxn_FetchTransaction(
-        SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
-{
-    if (pvTxnKey == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-    SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
-    if (nOption == SipTxn::OPT_CREATE)
-    {
-        if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
-        {
-            MockSipTransaction* pMockTxn =
-                    new MockSipTransaction(pTxnKey, reinterpret_cast<SipTxn*>(*ppvTxn));
-            objTxnList.Add(pMockTxn);
-        }
-        return SIP_TRUE;
-    }
-
-    SIP_UINT32 nSize = objTxnList.GetSize();
-
-    for (SIP_UINT32 i = 0; i < nSize; i++)
-    {
-        MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
-        SipTxn* pTxn = pMockTxn->GetTxn();
-
-        if (pTxn != SIP_NULL)
-        {
-            if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
-            {
-                *ppvTxn = pTxn;
-                return SIP_TRUE;
-            }
-        }
-    }
-    return SIP_FALSE;
-}
-
-SIP_BOOL MockTxn_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID** ppvHandle)
-{
-    if (pnTimerId == SIP_NULL)
-    {
-        pnTimerId = new SIP_INT32[16];
-    }
-    *ppvHandle = pnTimerId;
-    return SIP_TRUE;
-}
-
-SIP_BOOL MockTxn_ReleaseTransaction(
-        SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey, SIP_VOID** ppvTxn)
-{
-    SIP_UINT32 nSize = objTxnList.GetSize();
-
-    for (SIP_UINT32 i = 0; i < nSize; i++)
-    {
-        MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
-        SipTxn* pTxn = pMockTxn->GetTxn();
-
-        if (pTxn != SIP_NULL)
-        {
-            if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
-            {
-                if (ppvOutTxnKey != IMS_NULL)
-                {
-                    (*ppvOutTxnKey) = pMockTxn->GetKey();
-                }
-                if (ppvTxn != IMS_NULL)
-                {
-                    (*ppvTxn) = pTxn;
-                }
-                delete pMockTxn;
-                objTxnList.RemoveAt(i);
-                return SIP_TRUE;
-            }
-        }
-    }
-
-    return SIP_FALSE;
-}
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
 
 namespace android
 {
+
+SipVector<MockSipTransaction*> objTxnList;
 
 class SipTxnTest : public ::testing::Test
 {
 public:
     SipMessage* pSipMsg = SIP_NULL;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
+    static constexpr SIP_INT32 TIMER_ID = 1;
 
 protected:
     virtual void SetUp() override
     {
-        SipUtil::GetInstance();
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
+        SipUtil::GetInstance()->SetTransactionCallback(pMockISipTransactionCallback);
+
+        ON_CALL(*pMockISipTransactionCallback, StartTimer(_, _, _))
+                .WillByDefault(Return(static_cast<void*>(const_cast<SIP_INT32*>(&TIMER_ID))));
+
+        ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+                .WillByDefault(Invoke(
+                        [](IN SipTxnKey* pTxnKey, IN SIP_INT32 nOption, OUT SipTxn*& pOutTxn)
+                        {
+                            if (nOption == SipTxn::OPT_CREATE)
+                            {
+                                MockSipTransaction* pMockTxn =
+                                        new MockSipTransaction(pTxnKey, pOutTxn);
+                                objTxnList.Add(pMockTxn);
+                                return SIP_TRUE;
+                            }
+                            else
+                            {
+                                SIP_UINT32 nSize = objTxnList.GetSize();
+
+                                for (SIP_UINT32 i = 0; i < nSize; i++)
+                                {
+                                    MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
+                                    SipTxn* pTxn = pMockTxn->GetTxn();
+
+                                    if (pTxn != SIP_NULL)
+                                    {
+                                        if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                        {
+                                            pOutTxn = pTxn;
+                                            return SIP_TRUE;
+                                        }
+                                    }
+                                }
+                                return SIP_FALSE;
+                            }
+                        }));
+
+        ON_CALL(*pMockISipTransactionCallback, ReleaseTransaction(_, _, _, _))
+                .WillByDefault(Invoke(
+                        [](SipTxnKey* pTxnKey, SIP_INT32, SipTxnKey*& pOutTxnKey, SipTxn*& pOutTxn)
+                        {
+                            for (SIP_UINT32 i = 0; i < objTxnList.GetSize(); i++)
+                            {
+                                MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
+                                SipTxn* pTxn = pMockTxn->GetTxn();
+
+                                if (pTxn != SIP_NULL)
+                                {
+                                    if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                    {
+                                        pOutTxnKey = pMockTxn->GetKey();
+                                        pOutTxn = pTxn;
+
+                                        delete pMockTxn;
+                                        objTxnList.RemoveAt(i);
+                                        return SIP_TRUE;
+                                    }
+                                }
+                            }
+                            return SIP_TRUE;
+                        }));
 
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -133,20 +121,6 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 \r\n";
         EXPECT_EQ(SIP_TRUE, pSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
-
-        static const SipStackCallbacks stTestCallbacks = {
-                &MockTxn_FetchTransaction,
-                &MockTxn_ReleaseTransaction,
-                &MockTxn_StartTimer,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-        };
-
-        SipStackCallback_SetCallbacks(stTestCallbacks);
     }
 
     virtual void TearDown() override
@@ -155,13 +129,12 @@ CSeq: 1 REGISTER\r\n\
         {
             pSipMsg->SipDelete();
         }
-        SipUtil::DestroyInstance();
-
-        if (pnTimerId != SIP_NULL)
+        if (pMockISipTransactionCallback != SIP_NULL)
         {
-            delete pnTimerId;
-            pnTimerId = SIP_NULL;
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
         }
+        SipUtil::DestroyInstance();
     }
 };
 
