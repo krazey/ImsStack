@@ -21,11 +21,16 @@ import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_2;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.telephony.BarringInfo;
+import android.telephony.BarringInfo.BarringServiceInfo;
+import android.telephony.CellIdentityNr;
 import android.telephony.TelephonyCallback;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -54,6 +59,8 @@ public class ImsRadioAgentTest {
     @Mock private ImsTrafficInterface mMockImsTrafficInterface;
     @Mock private ISystem mMockISystem;
     @Mock private SystemInterface mMockSystemInterface;
+    @Mock private BarringInfo mMockBarringInfo;
+    @Mock private CellIdentityNr mMockCellIdentityNr;
 
     private TestableLooper mTestableLooper;
     private TestAppContext mTestAppContext;
@@ -139,5 +146,16 @@ public class ImsRadioAgentTest {
         ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
         verify(mTelephonyManagerProxy).registerTelephonyCallback(any(), captor.capture());
         return (TelephonyCallback.SimultaneousCellularCallingSupportListener) captor.getValue();
+    }
+
+    @Test
+    @SmallTest
+    public void ignoresSsacUpdateWhenCellTypeIsNr() {
+        when(mMockBarringInfo.getCellIdentity()).thenReturn(mMockCellIdentityNr);
+
+        mImsRadioAgent.handleBarringInfo(mMockBarringInfo);
+
+        verify(mMockISystem, never()).notifySsacInfo(
+                anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
     }
 }
