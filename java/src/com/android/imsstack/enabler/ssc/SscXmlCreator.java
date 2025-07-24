@@ -26,9 +26,14 @@ import com.android.internal.annotations.VisibleForTesting;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.LinkedHashMap;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 public class SscXmlCreator {
     private final LinkedHashMap<ESsType, IXmlCreator> mXmlCreatorTable;
@@ -111,6 +116,7 @@ public class SscXmlCreator {
 
         if (state == SscConstant.STATUS_ENABLE && ruleDeactivatedList.getLength() > 0) {
             Element ruleDeactivatedElement = (Element) ruleDeactivatedList.item(0);
+            removeEmptyTextNode(conditionElement);
             conditionElement.removeChild(ruleDeactivatedElement);
         } else if (state == SscConstant.STATUS_DISABLE && ruleDeactivatedList.getLength() == 0) {
             Element ruleDeactivatedElement = doc.createElement(deactivationTag);
@@ -118,6 +124,23 @@ public class SscXmlCreator {
         }
 
         return ruleElement;
+    }
+
+    private static void removeEmptyTextNode(Element element) {
+        try {
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            NodeList emptyTextNodes = (NodeList) xpath.evaluate(
+                    "./text()[normalize-space(.)='']", element, XPathConstants.NODESET);
+
+            for (int i = emptyTextNodes.getLength() - 1; i >= 0; i--) {
+                Node nodeToRemove = emptyTextNodes.item(i);
+                nodeToRemove.getParentNode().removeChild(nodeToRemove);
+            }
+
+        } catch (Exception e) {
+            ImsLog.e("Failed to evaluate XPath expression while cleaning element "
+                    + element.getTagName());
+        }
     }
 
     /**
@@ -258,6 +281,7 @@ public class SscXmlCreator {
             Element defaultBehaviourElement = getElementByTagName(oirServiceElement, dbTag);
             if (defaultBehaviourElement != null) {
                 if (defaultBehaviour == null) {
+                    removeEmptyTextNode(oirServiceElement);
                     defaultBehaviourElement.getParentNode().removeChild(defaultBehaviourElement);
                 } else {
                     defaultBehaviourElement.setTextContent(defaultBehaviour);
