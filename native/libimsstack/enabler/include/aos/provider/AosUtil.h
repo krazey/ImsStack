@@ -78,6 +78,10 @@ public:
     IMS_BOOL IsElementExistInList(
             IN const ImsList<IMS_UINT32>& objElements, IN const ImsList<IMS_UINT32>& objTarget);
 
+    // Check whether a SIP error code is existed in the list.
+    IMS_BOOL IsErrorCodeExisted(
+            IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
+
     // Misc
     IMS_UINT32 Pow(IN IMS_UINT32 nArg1, IN IMS_UINT32 nArg2);
     IMS_UINT32 CalculateUpperBoundTime(

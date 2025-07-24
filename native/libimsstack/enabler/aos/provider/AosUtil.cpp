@@ -18,6 +18,7 @@
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "ServicePhoneInfo.h"
+#include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfigurable.h"
 #include "IConfiguration.h"
@@ -26,6 +27,7 @@
 #include "IRegistration.h"
 #include "ISipRtConfigHelper.h"
 #include "SipFactory.h"
+#include "SipStatusCode.h"
 #include "Ims3gpp.h"
 #include "TextParser.h"
 #include "Sip.h"
@@ -515,6 +517,39 @@ IMS_BOOL AosUtil::IsElementExistInList(
         {
             IMS_UINT32 nTarget = objTarget.GetAt(nListAt);
             if (nElement == nTarget)
+            {
+                return IMS_TRUE;
+            }
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC
+IMS_BOOL AosUtil::IsErrorCodeExisted(
+        IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const
+{
+    // Excluding codes expressed as negative values
+    if (nCode > 0 && objErrorCode.Contains(-nCode))
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < objErrorCode.GetSize(); i++)
+    {
+        // Checking code match
+        IMS_SINT32 nErrorCode = objErrorCode.GetAt(i);
+        if (nCode == nErrorCode)
+        {
+            return IMS_TRUE;
+        }
+
+        // Checking wild card and group codes match
+        if (SipStatusCode::IsFinalFailure(nCode))
+        {
+            if (nErrorCode == CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP ||
+                    nErrorCode == (nCode / 100))
             {
                 return IMS_TRUE;
             }
