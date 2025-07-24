@@ -20,6 +20,7 @@
 #include "../../../engine/interface/registration/MockIRegistration.h"
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 
+#include "CarrierConfig.h"
 #include "ImsList.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
@@ -27,6 +28,7 @@
 #include "msg/SipMessage.h"
 #include "msg/SipMsgUtil.h"
 #include "SipMessageBodyPart.h"
+#include "SipStatusCode.h"
 #include "interface/IAosBlock.h"
 #include "provider/AosUtil.h"
 
@@ -688,6 +690,81 @@ TEST_F(AosUtilTest, ExpectFalseWhenLeftListIsNotExistInRightList)
     m_pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, objCompareReasons);
 
     EXPECT_FALSE(m_pAosUtil->IsElementExistInList(objCompareReasons, objReasons));
+}
+
+TEST_F(AosUtilTest, ReturnTrueIfTheErrorCodeIsExistedInTheList)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrorCodesList;
+    objErrorCodesList.Add(0);
+    objErrorCodesList.Add(300);
+    objErrorCodesList.Add(400);
+    objErrorCodesList.Add(500);
+    objErrorCodesList.Add(504);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosUtil->IsErrorCodeExisted(objErrorCodesList, SipStatusCode::SC_504));
+}
+
+TEST_F(AosUtilTest, ReturnTrueIfWildCardForAllErrorCodesIsExistedInTheList)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrorCodesList;
+    objErrorCodesList.Add(CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosUtil->IsErrorCodeExisted(objErrorCodesList, SipStatusCode::SC_504));
+}
+
+TEST_F(AosUtilTest, ReturnTrueIfTheGroupErrorCodeIsExistedInTheList)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrorCodesList;
+    objErrorCodesList.Add(0);
+    objErrorCodesList.Add(300);
+    objErrorCodesList.Add(400);
+    objErrorCodesList.Add(CarrierConfig::Ims::REG_ERROR_CODE_5XX);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosUtil->IsErrorCodeExisted(objErrorCodesList, SipStatusCode::SC_504));
+}
+
+TEST_F(AosUtilTest, ReturnFalseIfTheErrorCodeIsNotExistedInTheList)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrorCodesList;
+    objErrorCodesList.Add(0);
+    objErrorCodesList.Add(300);
+    objErrorCodesList.Add(400);
+    objErrorCodesList.Add(500);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosUtil->IsErrorCodeExisted(objErrorCodesList, SipStatusCode::SC_504));
+}
+
+TEST_F(AosUtilTest, ReturnFalseIfTheNegativeForTheErrorCodeIsExistedInTheListWithGroupErrorCode)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrorCodesList;
+    objErrorCodesList.Add(0);
+    objErrorCodesList.Add(300);
+    objErrorCodesList.Add(400);
+    objErrorCodesList.Add(CarrierConfig::Ims::REG_ERROR_CODE_5XX);
+    objErrorCodesList.Add(-504);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosUtil->IsErrorCodeExisted(objErrorCodesList, SipStatusCode::SC_504));
+}
+
+TEST_F(AosUtilTest, ReturnFalseIfTheNegativeForTheErrorCodeIsExistedInTheListWithWildCard)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrorCodesList;
+    objErrorCodesList.Add(CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP);
+    objErrorCodesList.Add(-504);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosUtil->IsErrorCodeExisted(objErrorCodesList, SipStatusCode::SC_504));
 }
 
 TEST_F(AosUtilTest, ReturnTrueWhenCheckingSupportedNetworkType)

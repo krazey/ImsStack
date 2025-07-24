@@ -426,7 +426,8 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_420()
 
 PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_423()
 {
-    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetERegErrCodeNotSupportedCommonPolicy(),
+    if (m_pUtil->IsErrorCodeExisted(
+                GET_N_CONFIG(m_nSlotId)->GetERegErrCodeNotSupportedCommonPolicy(),
                 SipStatusCode::SC_423))
     {
         ProcessDefaultFlowRecovery_Start();

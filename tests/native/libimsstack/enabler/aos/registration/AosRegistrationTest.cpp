@@ -4650,6 +4650,20 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenStartFailedWithOtherResponse)
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
 }
 
+TEST_F(AosRegistrationTest,
+        NotTriggerPcscfSelectionWhenStartFailedWithExcludedStatusCodeForPcscfDiscovery)
+{
+    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    objRegErrCodeForPcscfDiscovery.Add(5);
+    objRegErrCodeForPcscfDiscovery.Add(-504);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
+
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessStandardPcscfSelection"), 0);
+}
+
 TEST_F(AosRegistrationTest, TriggerPendingPlmnBlockIfCallExistWhenUpdateFailedInRoaming)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);

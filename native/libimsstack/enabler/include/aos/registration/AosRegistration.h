@@ -140,8 +140,6 @@ protected:
     IMS_BOOL IsRadioWaiting() const;
     IMS_BOOL IsTrafficPriorityBlocked() const;
     IMS_BOOL IsReregFailureReportOnIpcanChangeRequired() const;
-    IMS_BOOL IsErrorCodeExisted(
-            IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
     IMS_BOOL IsRegForbiddenInWifi();
     IMS_BOOL IsConnectionFailureForOfflineRecovery(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode) const;

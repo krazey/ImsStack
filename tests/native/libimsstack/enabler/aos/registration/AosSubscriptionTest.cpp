@@ -693,6 +693,21 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredWithNextPcscfIsNotRe
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(408, IMS_FALSE));
 }
 
+TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredWithNextPcscfIsMatchedNegetive)
+{
+    // GIVEN
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    objErrRegRequiredWithNextPcscf.Add(5);
+    objErrRegRequiredWithNextPcscf.Add(-504);
+
+    ON_CALL(m_objMockIAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(504, IMS_TRUE));
+}
+
 TEST_F(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsReached)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
