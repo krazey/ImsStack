@@ -20,6 +20,7 @@
 #include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "JniCallInfo.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcUiNotifier.h"
 #include <functional>
@@ -66,10 +67,14 @@ public:
 
 private:
     IJniMtcCallThread* GetCallThread() const;
+    IMS_BOOL ShouldNotifyProgressing(
+            IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) const;
 
     IMtcCallContext& m_objContext;
     std::function<void()> m_objBlockedNotification;
     CallReasonInfo m_objStartFailedReason;
+    MediaInfo m_objLastDispatchedMediaInfo;
+    JniCallInfo m_objLastDispatchedJniCallInfo;
 };
 
 #endif

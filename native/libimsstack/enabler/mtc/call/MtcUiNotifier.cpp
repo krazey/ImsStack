@@ -23,6 +23,7 @@
 #include "ImsTypeDef.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
+#include "JniCallInfo.h"
 #include "JniEnablerConnector.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
@@ -40,7 +41,9 @@ PUBLIC
 MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_objBlockedNotification(IMS_NULL),
-        m_objStartFailedReason(CODE_UNSPECIFIED)
+        m_objStartFailedReason(CODE_UNSPECIFIED),
+        m_objLastDispatchedMediaInfo(),
+        m_objLastDispatchedJniCallInfo()
 {
 }
 
@@ -177,8 +180,19 @@ void MtcUiNotifier::SendProgressing()
     {
         objRefinedMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     }
+    JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
 
-    piThread->OnProgressing(m_objContext.CreateJniCallInfo(), objRefinedMediaInfo,
+    // TODO: b/436398906 -Need to add logic to compare SuppServices
+    if (!ShouldNotifyProgressing(objJniCallInfo, objRefinedMediaInfo))
+    {
+        IMS_TRACE_I("skip SendProgressing - parameters are same", 0, 0, 0);
+        return;
+    }
+
+    m_objLastDispatchedMediaInfo = objRefinedMediaInfo;
+    m_objLastDispatchedJniCallInfo = objJniCallInfo;
+
+    piThread->OnProgressing(m_objLastDispatchedJniCallInfo, m_objLastDispatchedMediaInfo,
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -481,4 +495,13 @@ IJniMtcCallThread* MtcUiNotifier::GetCallThread() const
     }
 
     return reinterpret_cast<IJniMtcCallThread*>(piJniMtcCall->GetJniThread());
+}
+
+PRIVATE
+IMS_BOOL MtcUiNotifier::ShouldNotifyProgressing(
+        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) const
+{
+    // TODO: b/436398906 -Need to add logic to compare SuppServices
+    return objCallInfo != m_objLastDispatchedJniCallInfo ||
+            objMediaInfo != m_objLastDispatchedMediaInfo;
 }

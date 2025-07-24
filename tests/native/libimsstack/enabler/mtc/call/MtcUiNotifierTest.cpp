@@ -206,6 +206,7 @@ TEST_F(MtcUiNotifierTest, SendInitiating)
 
 TEST_F(MtcUiNotifierTest, SendProgressing)
 {
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
     EXPECT_CALL(objMockCallThread, OnProgressing(_, objMediaInfo, _)).Times(1);
     pNotifier->SendProgressing();
 
@@ -216,6 +217,18 @@ TEST_F(MtcUiNotifierTest, SendProgressing)
     pNotifier->SendProgressing();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(0);
+    pNotifier->SendProgressing();
+}
+
+TEST_F(MtcUiNotifierTest, SendProgressingSkipOnProgressingWhenParametersAreSame)
+{
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objJniCallInfo.bConferenceEnabled = IMS_TRUE;
+    ON_CALL(objContext, CreateJniCallInfo).WillByDefault(Return(objJniCallInfo));
+
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(1);
+    pNotifier->SendProgressing();
     EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(0);
     pNotifier->SendProgressing();
 }
