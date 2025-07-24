@@ -1657,6 +1657,7 @@ public:
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to perform
      *        initial registration.
+     *        Negative value elements are used for exclusion purposes.
      *
      *        This function relates to GetRetryCountSubErrorRegRequired()
      *
@@ -1679,6 +1680,7 @@ public:
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to perform
      *        initial registration with next pcscf.
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
      * @see {@code ims.sub_err_code_for_init_reg_with_next_pcscf_int_array}
@@ -1688,6 +1690,7 @@ public:
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to terminate
      *        its subscription.
+     *        Negative value elements are used for exclusion purposes.
      *
      *        This function relates to GetRetryCountSubErrorSubTerminated()
      *
@@ -1722,6 +1725,7 @@ public:
     /**
      * @brief Get error response information against SUBSCRIBE msg in Wifi that is condition to
      *        perform initial registration.
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
      * @see {@code imswfc.vowifi_sub_err_code_for_init_reg_int_array}
@@ -1836,6 +1840,7 @@ public:
      *        when the calculated retry number reaches.
      *        - Possible wildcard values except for error codes are,
      *        CarrierConfig::Ims::REG_ERROR_CODE_TIMER_F, etc
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code list
      * @see {@code ims.extra_reg_err_code_int_array}
@@ -1844,6 +1849,7 @@ public:
 
     /**
      * @brief Indicate the error codes for reregistration
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code list
      * @see {@code ims.extra_reg_err_code_for_update_int_array}
@@ -1860,6 +1866,7 @@ public:
 
     /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code list
      * @see {@code ims.rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array}
@@ -1893,6 +1900,7 @@ public:
 
     /**
      * @brief Indicate the list of error codes to attempt initial registration without ipsec.
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code list
      * @see {@code ims.reg_retry_err_code_without_ipsec_int_array}
@@ -1917,6 +1925,7 @@ public:
     /**
      * @brief Indicate the list of the error response with time value containing Retry-After header
      *        for registration retry.
+     *        Negative value elements are used for exclusion purposes.
      *
      *        This function relates to IsRegErrCodeWithRetryAfterTimeOnlyDefined()
      *
@@ -1928,6 +1937,7 @@ public:
     /**
      * @brief Indicate the list of the error response with time value containing Retry-After header
      *        for reregistration retry.
+     *        Negative value elements are used for exclusion purposes.
      *
      *        This function relates to IsRegErrCodeWithRetryAfterTimeOnlyDefined()
      *
@@ -1939,6 +1949,8 @@ public:
     /**
      * @brief Indicate the error codes of the registration followed by PCSCF discovery
      *        when PCSCF is unavailable.
+     *        Negative value elements are used for exclusion purposes.
+     *
      * @return vector error code
      * @see {@code ims.reg_err_code_for_pcscf_discovery_int_array}
      */
@@ -1947,6 +1959,7 @@ public:
     /**
      * @brief Indicate the list of error codes that result in terminating the IMS call
      *        when reregistration fails.
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code
      * @see {@code ims.rereg_err_code_for_call_end_int_array}
@@ -1956,6 +1969,8 @@ public:
     /**
      * @brief Indicate the error codes of the reregistration followed by initial registration
      *        with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
+     *        Negative value elements are used for exclusion purposes.
+     *
      * @return vector error code
      * @see {@code ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array}
      */
@@ -1963,6 +1978,7 @@ public:
 
     /**
      * @brief Indicate the error codes of the reregistration followed by IMS PDN reactivation
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code
      * @see {@code ims.rereg_err_code_for_ims_pdn_reactivation_int_array}
@@ -1985,6 +2001,7 @@ public:
     /**
      * @brief Indicate the error codes of emergency registration which does not supported the common
      *        policy. The UE follows default retry logic when receiving the code on this list.
+     *        Negative value elements are used for exclusion purposes.
      *
      * @return vector error code
      * @see {@code imsemergency.ereg_err_code_not_supported_common_policy_int_array}

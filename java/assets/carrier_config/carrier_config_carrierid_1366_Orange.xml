@@ -21,17 +21,20 @@
     <boolean name="ims.pdn_reconnect_on_all_pcscfs_unavailable_bool" value="true"/>
     <int name="ims.pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int" value="120"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="2">
+    <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="3">
         <item value="0"/>
         <item value="5"/>
+        <item value="-504"/>
     </int-array>
-    <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="2">
+    <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="3">
         <item value="0"/>
         <item value="5"/>
+        <item value="-504"/>
     </int-array>
-    <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="2">
+    <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="3">
         <item value="0"/>
         <item value="5"/>
+        <item value="-504"/>
     </int-array>
     <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
 
