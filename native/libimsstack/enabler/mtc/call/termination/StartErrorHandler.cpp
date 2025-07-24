@@ -718,13 +718,6 @@ AString StartErrorHandler::GetServiceRouteHeader() const
 }
 
 PRIVATE
-AString StartErrorHandler::GetSupported() const
-{
-    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
-    return pAosConnector ? pAosConnector->GetSupportedHeaderValue() : AString::ConstNull();
-}
-
-PRIVATE
 void StartErrorHandler::SetTimerForImsCallBlocking(IN IMS_SINT32 nRetryAfterInMillis) const
 {
     if (nRetryAfterInMillis > 0)
