@@ -775,6 +775,19 @@ TEST_F(AosPcscfTest, UpdatePcscfsIfCurrentPcscfNotExistWhenCheckAndProcessChange
     EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfIndex(), 0);
 }
 
+TEST_F(AosPcscfTest, UpdatePcscfsIfIpVersionIsChangedWhenCheckAndProcessChangeFromPco)
+{
+    PreparePcscfPreset();
+    AString strNewPcscfs = "2001::1";
+    AStringArray objNewPcscfs = strNewPcscfs.Split(',');
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(_)).WillByDefault(ReturnRef(objNewPcscfs));
+
+    m_pAosPcscf->CheckAndProcessChangeFromPco();
+
+    EXPECT_EQ(m_pAosPcscf->GetChangedType(), IAosPcscf::TYPE_CHANGED_DIFFERENT);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfIndex(), 0);
+}
+
 TEST_F(AosPcscfTest, GetChangedPcscfsReturnsFalseIfNewPcscfListIsEmpty)
 {
     AStringArray objEmptyArray;

@@ -1110,6 +1110,8 @@ void OsNetworkConnection::NotifyPcscfChanged()
         return;
     }
 
+    CacheLocalAddress();
+
     if (m_piConnectionListener != IMS_NULL)
     {
         m_piConnectionListener->NetworkConnection_OnPcscfChanged(this);

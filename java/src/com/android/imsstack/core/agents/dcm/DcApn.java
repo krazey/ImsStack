@@ -367,14 +367,6 @@ public class DcApn implements IDcApn {
 
     @Override
     public String[] getPcscfAddress(int apnType, int ipVersion) {
-        if (ipVersion == 0) {
-            // Configuration-based ip selection
-            ipVersion = getIpVersion(apnType);
-        }
-
-        ImsLog.i(mSlotId, "P-CSCF address(PCO) :: apnType="
-                + EApnType.getApnSettingTypeFromType(apnType) + ", ipVersion=" + ipVersion);
-
         LinkProperties linkProperties = getLinkProperties(apnType);
         if (linkProperties == null) {
             ImsLog.w(mSlotId, "LinkProperties is null, apnType = " + apnType);
@@ -387,13 +379,35 @@ public class DcApn implements IDcApn {
             return null;
         }
 
-        String[] validAddresses = getValidPcscf(pcscfAddresses, ipVersion);
+        int preferredIpVersion = ipVersion;
+        if (ipVersion == 0) {
+            // Configuration-based ip selection
+            ipVersion = getIpVersion(apnType);
+            if (ipVersion == EIpVersion.IPV4V6.getInt() || ipVersion == EIpVersion.IPV4.getInt()) {
+                preferredIpVersion = EIpVersion.IPV4.getInt();
+            } else {
+                preferredIpVersion = EIpVersion.IPV6.getInt();
+            }
+        }
 
-        if (validAddresses == null || validAddresses.length == 0) {
+        ImsLog.i(mSlotId, "P-CSCF address::apnType=" + EApnType.getApnSettingTypeFromType(apnType)
+                + ", ipVersion=" + ipVersion + ", preferred ipVersion=" + preferredIpVersion);
+
+        String[] validAddresses = getValidPcscf(pcscfAddresses, preferredIpVersion);
+        Collection<LinkAddress> linkAddresses = linkProperties.getLinkAddresses();
+        String ipAddress = getIpAddress(linkAddresses, preferredIpVersion);
+
+        if (validAddresses == null || validAddresses.length == 0 || ipAddress == null) {
             if (ipVersion == EIpVersion.IPV4V6.getInt()) {
-                validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV6.getInt());
+                String ipv6LinkAddress = getIpAddress(linkAddresses, EIpVersion.IPV6.getInt());
+                if (ipv6LinkAddress != null) {
+                    validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV6.getInt());
+                }
             } else if (ipVersion == EIpVersion.IPV6V4.getInt()) {
-                validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV4.getInt());
+                String ipv4LinkAddress = getIpAddress(linkAddresses, EIpVersion.IPV4.getInt());
+                if (ipv4LinkAddress != null) {
+                    validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV4.getInt());
+                }
             }
         }
 
