@@ -1598,6 +1598,22 @@ TEST_F(MtcPreconditionManagerTest, OnRatChangedIfHandoversToWlanFromMobile)
     pPreconditionManager->OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
+TEST_F(MtcPreconditionManagerTest, OnRatChangedIfHandoversToWlanFromMobileSetsLocalResourceAvailable)
+{
+    SetUpMockQosInfo();
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objTimer, StopQosTimer(QosTimerType::GUARD_AFTER_LOST)).Times(1);
+    EXPECT_CALL(objTimer, StopQosTimer(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
+
+    pPreconditionManager->OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_IWLAN);
+}
+
 TEST_F(MtcPreconditionManagerTest, OnRatChangedIfHandoversToMobileFromWlan)
 {
     SetUpMockQosInfo();

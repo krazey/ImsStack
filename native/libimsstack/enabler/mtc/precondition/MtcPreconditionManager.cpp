@@ -426,9 +426,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
                 StopQosTimer(piSession, QosTimerType::GUARD_AFTER_LOST);
                 StopQosTimer(piSession, QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE);
 
-                CallType eCallType = m_objContext.GetSession()->GetCallType();
                 NotifyQosStatusToListener(
-                        piSession, IMS_TRUE, MtcMediaUtil::GetMediaTypesFromCallType(eCallType));
+                        piSession, IMS_TRUE, SetLocalResourceAvailable(piSession));
             }
         }
     }
