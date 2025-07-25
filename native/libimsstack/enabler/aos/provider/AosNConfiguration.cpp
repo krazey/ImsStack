@@ -309,7 +309,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsSupported() const
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsOverNrEnabled() const
 {
-    for (int i = 0; i < m_objCarrierConfig.objCarrierNrAvailabilities.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objCarrierNrAvailabilities.GetSize(); i++)
     {
         if (m_objCarrierConfig.objCarrierNrAvailabilities.GetAt(i) ==
                 CarrierConfig::Ims::CARRIER_NR_AVAILABILITY_SA)
@@ -1143,19 +1143,19 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached,
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached, 0);
         IMS_UINT32 nSize = m_objExtraRegErr.objExtraRegErrCode.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objExtraRegErr.objExtraRegErrCode.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RegErrCode(%d), ", nValue, 0, 0);
         }
         nSize = m_objExtraRegErr.objExtraReregErrCode.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objExtraRegErr.objExtraReregErrCode.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "ReregErrCode(%d), ", nValue, 0, 0);
         }
         nSize = m_objExtraRegErr.objExtraRegErrWaitTimeSec.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objExtraRegErr.objExtraRegErrWaitTimeSec.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "ExtraWaitTimeSec(%d), ", nValue, 0, 0);
@@ -1181,13 +1181,13 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 "WTFIROTS(%d)",
                 m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState, 0, 0);
         IMS_UINT32 nSize = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "EFIROTS(%d), ", nValue, 0, 0);
         }
         nSize = m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue =
                     m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState.GetAt(i);
@@ -1197,7 +1197,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         ImsVector<IMS_SINT32>& objNotifyEvents =
                 m_objNotifyTerminated.objEventForInitRegOnTerminatedState;
         m_nEventForInitRegOnTerminatedState = 0;
-        for (int i = 0; i < objNotifyEvents.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < objNotifyEvents.GetSize(); i++)
         {
             m_nEventForInitRegOnTerminatedState |= 0x1 << (objNotifyEvents.GetAt(i) - 1);
         }
@@ -1205,7 +1205,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         ImsVector<IMS_SINT32>& objEventToFollow =
                 m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState;
         m_nEventToFollowWtForInitRegOnTerminatedState = 0;
-        for (int i = 0; i < objEventToFollow.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < objEventToFollow.GetSize(); i++)
         {
             m_nEventToFollowWtForInitRegOnTerminatedState |= 0x1 << (objEventToFollow.GetAt(i) - 1);
         }
@@ -1248,13 +1248,13 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         A_IMS_TRACE_D(LOGTAG, "KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE :: RECWRATOD(%d)",
                 m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined, 0, 0);
         IMS_UINT32 nSize = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RECWRAT(%d), ", nValue, 0, 0);
         }
         nSize = m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RRECWRAT(%d), ", nValue, 0, 0);
@@ -1277,13 +1277,13 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         A_IMS_TRACE_D(LOGTAG, "KEY_REG_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d)",
                 m_objRegRetryInterval.bUseRegRetryIntervalForSub, 0, 0);
         IMS_UINT32 nSize = m_objRegRetryInterval.objRegRetryRandomUpperValueSec.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objRegRetryInterval.objRegRetryRandomUpperValueSec.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RRRUVS(%d), ", nValue, 0, 0);
         }
         nSize = m_objRegRetryInterval.objRegRetryIntervalSec.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objRegRetryInterval.objRegRetryIntervalSec.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RRIS(%d), ", nValue, 0, 0);
@@ -1306,7 +1306,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 "SERMCWIR(%d)",
                 m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt, 0, 0);
         IMS_UINT32 nSize = m_objSubErrCodeForInitReg.objSubErrCodeForInitReg.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objSubErrCodeForInitReg.objSubErrCodeForInitReg.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "SECWIR(%d), ", nValue, 0, 0);
@@ -1327,7 +1327,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         A_IMS_TRACE_D(LOGTAG, "KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE :: STECRM(%d)",
                 m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt, 0, 0);
         IMS_UINT32 nSize = m_objSubErrCodeForTerminated.objSubErrCodeForTerminated.GetSize();
-        for (int i = 0; i < nSize; i++)
+        for (IMS_UINT32 i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objSubErrCodeForTerminated.objSubErrCodeForTerminated.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "STECFRE(%d), ", nValue, 0, 0);
@@ -1716,7 +1716,7 @@ void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
 
     m_objCarrierConfig.objIpsecAuthenticationAlgorithms.Clear();
 
-    for (int i = 0; i < objAuthAlgo.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objAuthAlgo.GetSize(); i++)
     {
         m_objCarrierConfig.objIpsecAuthenticationAlgorithms.Push(objAuthAlgo.GetAt(i));
     }
@@ -1726,7 +1726,7 @@ void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
 
     m_objCarrierConfig.objIpsecEncryptionAlgorithms.Clear();
 
-    for (int i = 0; i < objEncryAlgo.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objEncryAlgo.GetSize(); i++)
     {
         if (objEncryAlgo.GetAt(i) == CarrierConfig::Ims::IPSEC_ENCRYPTION_ALGORITHM_AES_CBC)
         {

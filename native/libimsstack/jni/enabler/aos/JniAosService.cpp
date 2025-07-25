@@ -303,7 +303,7 @@ void JniAosService::NotifyCapabilitiesChanged(IN const Parcel& objParcel)
     ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
 
     IMS_SINT32 nSize = objParcel.readInt32();
-    for (int i = 0; i < nSize; ++i)
+    for (IMS_SINT32 i = 0; i < nSize; ++i)
     {
         objCapabilities.Add(objParcel.readInt32(), objParcel.readInt32());
     }

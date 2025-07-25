@@ -92,7 +92,7 @@ void AosHandleMts::InitializeSupportedRats()
 
     m_nSupportedRats = NW_REPORT_RADIO_INVALID;
 
-    for (int i = 0; i < objRats.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objRats.GetSize(); i++)
     {
         if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)
         {

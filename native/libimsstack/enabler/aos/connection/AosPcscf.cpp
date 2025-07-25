@@ -460,7 +460,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryDefaultPolicy() ==
             CarrierConfig::Ims::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF)
     {
-        for (int nAt = 0; nAt <= m_nCurrentPcscfIndex; nAt++)
+        for (IMS_UINT32 nAt = 0; nAt <= m_nCurrentPcscfIndex; nAt++)
         {
             Pcscf* pPcscf = m_objPcscfList.GetAt(nAt);
             if (pPcscf != IMS_NULL && pPcscf->IsAvailable())
@@ -586,7 +586,7 @@ IMS_BOOL AosPcscf::GetChangedPcscfs(OUT AStringArray& objPcscfs, IN IMS_SINT32 n
     {
         IpAddress objIpa;
 
-        for (int nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
+        for (IMS_SINT32 nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
         {
             const AString& strCurrPcscf = objNewPcscfs.GetElementAt(nAt);
 
@@ -761,7 +761,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
     {
         IpAddress objIpa;
 
-        for (int nAt = 0; nAt < objCurrPcscfs.GetCount(); nAt++)
+        for (IMS_SINT32 nAt = 0; nAt < objCurrPcscfs.GetCount(); nAt++)
         {
             const AString& strCurrPcscf = objCurrPcscfs.GetElementAt(nAt);
 
@@ -1208,7 +1208,7 @@ void AosPcscf::ProcessReorder(
     IpAddress objIpa(strCurrentPcscf);
 
     IMS_SINT32 nCurrentIndex = 0;
-    for (int nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
+    for (IMS_SINT32 nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
     {
         const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
         IpAddress objIpaCurr(strCurr);
@@ -1221,13 +1221,13 @@ void AosPcscf::ProcessReorder(
         }
     }
 
-    for (int nAt = nCurrentIndex + 1; nAt < objNewPcscfs.GetCount(); ++nAt)
+    for (IMS_SINT32 nAt = nCurrentIndex + 1; nAt < objNewPcscfs.GetCount(); ++nAt)
     {
         const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
         objUpdatePcscfs.AddElement(strCurr);
     }
 
-    for (int nAt = 0; nAt < nCurrentIndex; ++nAt)
+    for (IMS_SINT32 nAt = 0; nAt < nCurrentIndex; ++nAt)
     {
         const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
         objUpdatePcscfs.AddElement(strCurr);
@@ -1241,7 +1241,7 @@ void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPor
 {
     ClearPcscfList();
 
-    for (int nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
+    for (IMS_SINT32 nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
     {
         IpAddress objIpa(objPcscfs.GetElementAt(nAt));
         if (!IsSamePcscf(objIpa, nPort))

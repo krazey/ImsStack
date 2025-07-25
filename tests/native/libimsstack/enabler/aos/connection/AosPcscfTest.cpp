@@ -167,7 +167,7 @@ protected:
     {
         AString strPcscfs = "0.0.0.1, 0.0.0.2, 0.0.0.3";
         m_objPcscfAddressPreset = strPcscfs.Split(',');
-        for (int i = 0; i < m_objPcscfAddressPreset.GetCount(); i++)
+        for (IMS_SINT32 i = 0; i < m_objPcscfAddressPreset.GetCount(); i++)
         {
             m_objPcscfPortPreset.Append(5060 + i);
             m_pAosPcscf->AddPcscf(
@@ -178,7 +178,7 @@ protected:
     void PrepareConfiguredPcscfs(IN AString strAddresses)
     {
         AStringArray objPcscfAddress = strAddresses.Split(',');
-        for (int i = 0; i < objPcscfAddress.GetCount(); i++)
+        for (IMS_SINT32 i = 0; i < objPcscfAddress.GetCount(); i++)
         {
             ServerAddress* pSa = new ServerAddress(objPcscfAddress.GetElementAt(i), 0);
             m_objConfiguredPcscfs.Add(pSa);
@@ -187,7 +187,7 @@ protected:
 
     void ClearConfiguredPcscfs()
     {
-        for (int i = 0; i < m_objConfiguredPcscfs.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objConfiguredPcscfs.GetSize(); i++)
         {
             ServerAddress* pSa = m_objConfiguredPcscfs.GetAt(i);
             if (pSa)
