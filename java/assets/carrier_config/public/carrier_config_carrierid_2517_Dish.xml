@@ -20,6 +20,8 @@
     <int name="ims.sip_timer_f_millis_int" value="32000"/>
 
     <!-- Aos -->
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1230"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1230"/>
     <int name="ims.registration_retry_base_timer_millis_int" value="30000"/>
     <int name="ims.registration_retry_max_timer_millis_int" value="300000"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="20000"/>
