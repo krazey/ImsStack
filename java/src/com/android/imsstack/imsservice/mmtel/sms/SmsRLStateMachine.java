@@ -17,13 +17,21 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.os.Handler;
 import android.telephony.CarrierConfigManager;
+import android.telephony.ServiceState;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.imsstack.imsservice.mmtel.ImsRegistrationTracker;
+import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
+import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -489,7 +497,11 @@ public class SmsRLStateMachine {
      */
     public int getSendStatus(int causeCode) {
         int sendStatus = SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode);
-
+        if (needToCheckNetworkStatus(causeCode)) {
+            if (isImsRegisteredOnWifi() && (isRoaming() || !isCellularNetworkAvailable())) {
+                return ImsSmsImplBase.SEND_STATUS_ERROR;
+            }
+        }
         int[] causeValues = getConfigInterface(mContext.getSlotId()).getCarrierConfig()
                 .getIntArray(CarrierConfigManager.ImsSms
                 .KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY);
@@ -505,6 +517,51 @@ public class SmsRLStateMachine {
             sendStatus = ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK;
         }
         return sendStatus;
+    }
+
+    @VisibleForTesting
+    protected boolean isImsRegisteredOnWifi() {
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+        if (serviceRecord == null) {
+            return false;
+        }
+        ImsRegistrationTracker regTracker = serviceRecord.getRegistrationTracker();
+        if (regTracker == null) {
+            return false;
+        }
+        return regTracker.getRegisteredNetworkType() == IAosRegistrationListener.NetworkType.IWLAN;
+    }
+
+    @VisibleForTesting
+    protected boolean isRoaming() {
+        IDcNetWatcher dcnw = getNetworkWatcher();
+        return (dcnw != null) && dcnw.isRoaming();
+    }
+
+    @VisibleForTesting
+    protected boolean isCellularNetworkAvailable() {
+        IDcNetWatcher dcnw = getNetworkWatcher();
+        return (dcnw != null)
+                && (dcnw.getCellularDataServiceState() == ServiceState.STATE_IN_SERVICE);
+    }
+
+    @VisibleForTesting
+    protected boolean needToCheckNetworkStatus(int causeCode) {
+        ConfigInterface config = getConfigInterface(mContext.getSlotId());
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        if (cc == null) {
+            return false;
+        }
+        int[] causeCodes = cc.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY);
+        if (causeCodes != null && Arrays.stream(causeCodes).anyMatch(value -> value == causeCode)) {
+            return true;
+        }
+        return false;
+    }
+
+    private IDcNetWatcher getNetworkWatcher() {
+        return DcFactory.getDcAgent(IDcNetWatcher.class, mContext.getSlotId());
     }
 
     /**
