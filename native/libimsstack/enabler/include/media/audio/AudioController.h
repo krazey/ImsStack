@@ -258,6 +258,13 @@ public:
      */
     virtual void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType);
 
+    /**
+     * @brief Get the media direction of the current active audio session
+     *
+     * @return MEDIA_DIRECTION The media direction
+     */
+    virtual MEDIA_DIRECTION GetMediaDirection();
+
 protected:
     virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
 
