@@ -15,13 +15,20 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "video/VideoSdpGenerator.h"
+#include "video/VideoProfile.h"
+
+#include "core/media/MockIMediaDescriptor.h"
+
+using ::testing::_;
 
 const AString STR_PROFILE_LEVEL_ID = "profile-level-id=42C00C";
 const AString STR_SPROP_PRAMSET = "sprop-parameter-sets=Z0LAFukDwKMg,aM4G4g==";
 
 const AString PROFILE_LEVEL_ID = "42C00C";
 const AString SPROP_PRAMSET = "Z0LAFukDwKMg,aM4G4g==";
+const IMS_SINT32 CVO_ID = 1;
 
 const AString STR_PROFILE_ID = "profile-id=1";
 const AString STR_LEVEL_ID = "level-id=93";
@@ -214,4 +221,70 @@ TEST_F(VideoSdpGeneratorHevcTest, TestAddSpropParamsToFmtp)
 
     AddSpropParamsToFmtp(m_pHevcFmtpFull, strFmtp);
     EXPECT_EQ(strFmtp, STR_SPROP_PARAMSET);
+}
+
+class VideoSdpGeneratorTest : public VideoSdpGenerator, public ::testing::Test
+{
+public:
+    std::unique_ptr<VideoProfile> m_pProfile;
+    std::unique_ptr<MockIMediaDescriptor> m_pDescriptor;
+
+protected:
+    virtual void SetUp() override
+    {
+        m_pProfile = std::make_unique<VideoProfile>();
+        m_pDescriptor = std::make_unique<MockIMediaDescriptor>();
+    }
+
+    virtual void TearDown() override {}
+};
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateFrameRateAttributeAddedForPositive)
+{
+    const IMS_SINT32 kFrameRate = 30;
+    m_pProfile->SetFrameRate(kFrameRate);
+    EXPECT_CALL(*m_pDescriptor, AddAttributeInt(SdpAttribute::FRAMERATE, kFrameRate, _)).Times(1);
+    GenerateFrameRate(m_pDescriptor.get(), m_pProfile.get());
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateFrameRateAttributeNotAddedForZero)
+{
+    m_pProfile->SetFrameRate(0);
+    EXPECT_CALL(*m_pDescriptor, AddAttributeInt(_, _, _)).Times(0);
+    GenerateFrameRate(m_pDescriptor.get(), m_pProfile.get());
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateFrameRateAttributeNotAddedForNegative)
+{
+    m_pProfile->SetFrameRate(-15);
+    EXPECT_CALL(*m_pDescriptor, AddAttributeInt(_, _, _)).Times(0);
+    GenerateFrameRate(m_pDescriptor.get(), m_pProfile.get());
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateCvoAttributeAddedForPositive)
+{
+    const IMS_SINT32 kCvoId = CVO_ID;
+    m_pProfile->SetCvoId(kCvoId);
+    AString expected_attr;
+    expected_attr.Sprintf("%d urn:3gpp:video-orientation", kCvoId);
+
+    EXPECT_CALL(*m_pDescriptor,
+            AddAttribute(SdpAttribute::ATTRIBUTE_OTHER, expected_attr, AString("extmap")))
+            .Times(1);
+
+    GenerateCvo(m_pDescriptor.get(), m_pProfile.get());
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateCvoAttributeNotAddedForZero)
+{
+    m_pProfile->SetCvoId(0);
+    EXPECT_CALL(*m_pDescriptor, AddAttribute(_, _, _)).Times(0);
+    GenerateCvo(m_pDescriptor.get(), m_pProfile.get());
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateCvoAttributeNotAddedForNegative)
+{
+    m_pProfile->SetCvoId(-1);
+    EXPECT_CALL(*m_pDescriptor, AddAttribute(_, _, _)).Times(0);
+    GenerateCvo(m_pDescriptor.get(), m_pProfile.get());
 }

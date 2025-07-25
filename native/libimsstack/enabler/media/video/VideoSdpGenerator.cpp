@@ -488,10 +488,13 @@ void VideoSdpGenerator::GenerateFrameRate(
         return;
     }
 
-    IMS_SINT32 nFrameRate = (IMS_SINT32)pProfile->GetFrameRate();
+    IMS_SINT32 nFrameRate = pProfile->GetFrameRate();
 
-    pDescriptor->AddAttributeInt(SdpAttribute::FRAMERATE, nFrameRate);
-    IMS_TRACE_D("GenerateFrameRate(): frameRate[%d]", nFrameRate, 0, 0);
+    if (nFrameRate > 0)
+    {
+        pDescriptor->AddAttributeInt(SdpAttribute::FRAMERATE, nFrameRate);
+        IMS_TRACE_D("GenerateFrameRate(): frameRate[%d]", nFrameRate, 0, 0);
+    }
 }
 
 PROTECTED
