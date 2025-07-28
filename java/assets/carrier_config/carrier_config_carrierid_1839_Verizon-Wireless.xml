@@ -299,7 +299,6 @@
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="0"/>
 
     <!-- MTC emergency call -->
-    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="-1"/>
     <int-array name="imsvoice.registration_to_18x_timer_millis_int_array" num="2">
