@@ -96,6 +96,8 @@
                 <item value="480"/>
                 <item value="640"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IAHuoPAo01AgICB4QCHA==,aMqPIA==
+            </string>
         </pbundle_as_map>
         <pbundle_as_map name="117">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C01F</string>
@@ -105,6 +107,8 @@
                 <item value="480"/>
                 <item value="640"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IAHuoPAo01AgICB4QCHA==,aMqPIA==
+            </string>
         </pbundle_as_map>
         <pbundle_as_map name="118">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
@@ -114,6 +118,8 @@
                 <item value="240"/>
                 <item value="320"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IADOoIBTxPNQICAgeEAhw=,aMqPIA==
+            </string>
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="imsrtt.text_codec_capability_payload_types_bundle">

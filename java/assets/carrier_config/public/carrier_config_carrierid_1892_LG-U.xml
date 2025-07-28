@@ -103,6 +103,8 @@
                 <item value="480"/>
                 <item value="640"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IADOoIBTxPNQICAgeEAhw=,aMqPIA==
+            </string>
         </pbundle_as_map>
     </pbundle_as_map>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
