@@ -156,10 +156,6 @@
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
     <int name="imsvt.minimum_battery_level_for_limit_video_call_int" value="0"/>
     <int name="imsvoice.call_max_count_int" value="3"/>
-    <int-array name="imsemergency.reject_code_require_temp_failure_int_array" num="0">
-    </int-array>
-    <int-array name="imsemergency.reject_code_require_perm_failure_int_array" num="0">
-    </int-array>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="4"/> <!-- USE_GENERIC_FOR_SPECIAL_CATEGORIES -->
     </int-array>
@@ -189,6 +185,74 @@
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vops_off_string"></string>
+
+    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="65">
+        <item value="0:"/>
+        <item value="300:"/>
+        <item value="301:"/>
+        <item value="302:"/>
+        <item value="305:"/>
+        <item value="380:"/>
+        <item value="400:"/>
+        <item value="401:"/>
+        <item value="402:"/>
+        <item value="403:"/>
+        <item value="404:"/>
+        <item value="405:"/>
+        <item value="406:"/>
+        <item value="407:"/>
+        <item value="408:"/>
+        <item value="410:"/>
+        <item value="412:"/>
+        <item value="413:"/>
+        <item value="414:"/>
+        <item value="415:"/>
+        <item value="416:"/>
+        <item value="417:"/>
+        <item value="420:"/>
+        <item value="421:"/>
+        <item value="422:"/>
+        <item value="423:"/>
+        <item value="424:"/>
+        <item value="428:"/>
+        <item value="429:"/>
+        <item value="430:"/>
+        <item value="433:"/>
+        <item value="436:"/>
+        <item value="437:"/>
+        <item value="438:"/>
+        <item value="439:"/>
+        <item value="440:"/>
+        <item value="469:"/>
+        <item value="470:"/>
+        <item value="480:"/>
+        <item value="481:"/>
+        <item value="482:"/>
+        <item value="483:"/>
+        <item value="484:"/>
+        <item value="485:"/>
+        <item value="486:"/>
+        <item value="487:"/>
+        <item value="488:"/>
+        <item value="489:"/>
+        <item value="491:"/>
+        <item value="493:"/>
+        <item value="494:"/>
+        <item value="499:"/>
+        <item value="500:"/>
+        <item value="501:"/>
+        <item value="502:"/>
+        <item value="503:"/>
+        <item value="504:"/>
+        <item value="505:"/>
+        <item value="513:"/>
+        <item value="580:"/>
+        <item value="600:"/>
+        <item value="603:"/>
+        <item value="604:"/>
+        <item value="606:"/>
+        <item value="699:"/>
+    </string-array>
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
     <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="8">
         <item value=""/> <!-- REG_MODE_NORMAL -->
@@ -205,8 +269,6 @@
         <item value=""/> <!-- REG_MODE_ADMIN -->
         <item value="sip:#IMEIWITHHYPHEN#@#IP#:#PORT#"/> <!-- REG_MODE_INTERNAL -->
         <item value="sip:#IMEIWITHHYPHEN#@#IP#:#PORT#"/> <!-- REG_MODE_NOUICC -->
-    </string-array>
-    <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>
     <string-array name="imsemergency.reject_code_and_reason_require_immediate_termination_string_array" num="0">
     </string-array>
@@ -568,8 +630,6 @@
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
     <int name="imsvoice.delay_update_after_connected_timer_millis_int" value="0"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="0"/>
-    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
-    <boolean name="imsemergency.silent_retry_emergency_call_with_delay_of_retry_after_bool" value="false"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="-1"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="2"/>
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="2"/>
@@ -658,8 +718,6 @@
     </int-array>
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="0"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="0"/>
-    <boolean name="imsemergency.silent_redial_with_voip_by_rtt_rejection_bool" value="false"/>
-    <boolean name="imsemergency.silent_redial_with_anonymous_by_network_rejection_bool" value="false"/>
     <int name="imsvoice.qos_acquisition_after_w2l_handover_wait_timer_millis_int" value="1000"/>
     <int name="imsvoice.wait_video_text_qos_after_audio_qos_acquisition_timer_millis_int" value="1000"/>
     <int name="imsvoice.qos_lost_guard_timer_millis_int" value="5000"/>
