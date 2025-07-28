@@ -186,6 +186,8 @@
     <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vops_off_string"></string>
 
+    <string-array name="imsemergency.reject_code_and_reason_code_set_string_array" num="0">
+    </string-array>
     <string-array name="imsemergency.reject_code_and_action_set_string_array" num="65">
         <item value="0:"/>
         <item value="300:"/>

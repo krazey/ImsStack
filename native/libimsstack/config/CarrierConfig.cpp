@@ -1279,6 +1279,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "p_preferred_identity_header_in_invite_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "reject_code_and_reason_code_set_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "reject_code_and_action_set_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::

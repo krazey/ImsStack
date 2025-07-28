@@ -801,6 +801,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "release_emergency_pdn_on_failure_after_100_bool";
         public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
                 KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
+        public static final String KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_and_reason_code_set_string_array";
         public static final String KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY =
                 KEY_PREFIX + "reject_code_and_action_set_string_array";
         public static final String
