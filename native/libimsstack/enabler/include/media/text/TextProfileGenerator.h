@@ -30,7 +30,7 @@ class TextProfileGenerator : public MediaProfileGenerator
 {
 public:
     TextProfileGenerator();
-    virtual ~TextProfileGenerator();
+    virtual ~TextProfileGenerator() override;
 
 protected:
     TextProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,

@@ -30,7 +30,7 @@ class AudioProfileGenerator : public MediaProfileGenerator
 {
 public:
     AudioProfileGenerator();
-    virtual ~AudioProfileGenerator();
+    virtual ~AudioProfileGenerator() override;
 
 protected:
     AudioProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
@@ -38,16 +38,16 @@ protected:
             IN IMS_SINT32 nSlotId) override;
     void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) override;
-    void SetAudioCodecFmtp(IN CodecAudioConfig* pCodecConfig, IN AudioConfiguration* pAudioConfig,
-            OUT AudioProfile::AudioFmtp* pFmtp);
+    void SetAudioCodecFmtp(IN const CodecAudioConfig* pCodecConfig,
+            IN const AudioConfiguration* pAudioConfig, OUT AudioProfile::AudioFmtp* pFmtp);
     AudioProfile::Payload* CreateAmrPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     AudioProfile::Payload* CreateEvsPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     AudioProfile::Payload* CreateTelephoneEventPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+            IN CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig);
     AudioProfile::Payload* CreatePcmPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+            IN const CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig);
 };
 
 #endif

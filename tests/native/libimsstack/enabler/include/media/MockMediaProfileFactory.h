@@ -25,7 +25,7 @@ class MockMediaProfileFactory : public MediaProfileFactory
 {
 public:
     MockMediaProfileFactory() {}
-    ~MockMediaProfileFactory() {}
+    ~MockMediaProfileFactory() override {}
     MOCK_METHOD(MediaBaseProfile*, CreateProfile,
             (IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile), (override));
     MOCK_METHOD(void, DeleteProfile, (IN MediaBaseProfile * pProfile), (override));

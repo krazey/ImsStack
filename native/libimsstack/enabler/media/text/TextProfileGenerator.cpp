@@ -47,8 +47,8 @@ TextProfile* TextProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 
     SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
 
-    TextProfile* pTextProfile = static_cast<TextProfile*>(pProfile);
-    TextConfiguration* pTextConfig = static_cast<TextConfiguration*>(pConfig);
+    auto pTextProfile = static_cast<TextProfile*>(pProfile);
+    const TextConfiguration* pTextConfig = static_cast<TextConfiguration*>(pConfig);
 
     pTextProfile->SetTransportType("RTP/AVP");
     pTextProfile->SetKeepRedundantLevel(pTextConfig->IsTextCodecEmptyRedundantEnabled());
@@ -96,7 +96,7 @@ PROTECTED TextProfile::Payload* TextProfileGenerator::CreateT140Payload(
         return IMS_NULL;
     }
 
-    CodecT140Config* pT140Config = reinterpret_cast<CodecT140Config*>(pCodecConfig);
+    const CodecT140Config* pT140Config = reinterpret_cast<CodecT140Config*>(pCodecConfig);
     TextProfile::Payload* pTextPayload = new TextProfile::Payload();
     AString strCodecName;
 

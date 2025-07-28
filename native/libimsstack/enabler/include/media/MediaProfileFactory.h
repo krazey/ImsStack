@@ -98,9 +98,9 @@ protected:
     MediaProfileFactory();
 
 private:
-    AudioProfile::Payload* CreateAudioPayload(IN AudioProfile::Payload* payload = IMS_NULL);
-    TextProfile::Payload* CreateTextPayload(IN TextProfile::Payload* payload = IMS_NULL);
-    VideoProfile::Payload* CreateVideoPayload(IN VideoProfile::Payload* payload = IMS_NULL);
+    AudioProfile::Payload* CreateAudioPayload(IN const AudioProfile::Payload* payload = IMS_NULL);
+    TextProfile::Payload* CreateTextPayload(IN const TextProfile::Payload* payload = IMS_NULL);
+    VideoProfile::Payload* CreateVideoPayload(IN const VideoProfile::Payload* payload = IMS_NULL);
 };
 
 #endif

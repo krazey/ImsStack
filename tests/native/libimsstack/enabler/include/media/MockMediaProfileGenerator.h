@@ -24,7 +24,7 @@ class MockMediaProfileGenerator : public MediaProfileGenerator
 {
 public:
     MockMediaProfileGenerator() {}
-    ~MockMediaProfileGenerator() {}
+    ~MockMediaProfileGenerator() override {}
 
     MOCK_METHOD(MediaBaseProfile*, Generate,
             (MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,

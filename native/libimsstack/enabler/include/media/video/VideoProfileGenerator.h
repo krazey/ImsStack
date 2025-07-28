@@ -29,7 +29,7 @@ class VideoProfileGenerator : public MediaProfileGenerator
 {
 public:
     VideoProfileGenerator();
-    virtual ~VideoProfileGenerator();
+    virtual ~VideoProfileGenerator() override;
 
 protected:
     VideoProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
@@ -41,23 +41,23 @@ protected:
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     VideoProfile::Payload* CreateHevcPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    void SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig, IN VideoConfiguration* pVideoConfig,
-            OUT VideoProfile::VideoFmtp* pFmtp);
-    void SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
-            IN VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload);
+    void SetVideoCodecFmtp(IN const CodecVideoConfig* pCodecConfig,
+            IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::VideoFmtp* pFmtp);
+    void SetVideoCodecPayload(IN const CodecVideoConfig* pCodecConfig,
+            IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload);
     IMS_SINT32 SetTransportCapability(OUT VideoProfile* pVideoProfile);
     IMS_SINT32 SetAttributeCapability(
-            OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig);
-    IMS_SINT32 SetAvpfTrr(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetAvpfNack(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetAvpfPli(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetAvpfFir(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetAvpfTmmbr(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
+            OUT VideoProfile* pVideoProfile, IN const VideoConfiguration* pVideoConfig);
+    IMS_SINT32 SetAvpfTrr(OUT VideoProfile* pVideoProfile,
+            IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
+    IMS_SINT32 SetAvpfNack(OUT VideoProfile* pVideoProfile,
+            IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
+    IMS_SINT32 SetAvpfPli(OUT VideoProfile* pVideoProfile,
+            IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
+    IMS_SINT32 SetAvpfFir(OUT VideoProfile* pVideoProfile,
+            IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
+    IMS_SINT32 SetAvpfTmmbr(OUT VideoProfile* pVideoProfile,
+            IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
     void SetCapaNegoForAvpf(OUT VideoProfile* pVideoProfile, IN IMS_SINT32 nCapaNegoForAvpfOption,
             IN IMS_SINT32 nTcap, IN IMS_SINT32 nAcap);
     void SetMaxProfileFrameRate(OUT VideoProfile* pVideoProfile);

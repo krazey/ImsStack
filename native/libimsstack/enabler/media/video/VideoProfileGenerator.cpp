@@ -50,7 +50,7 @@ VideoProfile* VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
     SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
 
     VideoProfile* pVideoProfile = static_cast<VideoProfile*>(pProfile);
-    VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
+    const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
 
     pVideoProfile->SetTransportType((pVideoConfig->IsVideoAvpfEnabled() &&
                                             !pVideoConfig->IsAvpfCapabilityNegotiationEnabled())
@@ -138,8 +138,8 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
 
     IMS_TRACE_I("CreateAvcPayload()", 0, 0, 0);
 
-    CodecAvcConfig* pAvcConfig = static_cast<CodecAvcConfig*>(pCodecConfig);
-    VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
+    auto pAvcConfig = static_cast<CodecAvcConfig*>(pCodecConfig);
+    const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
     VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
 
     if (pAvcConfig->GetProfileLevelId() == AString::ConstEmpty())
@@ -199,8 +199,8 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
 
     IMS_TRACE_I("CreateHevcPayload()", 0, 0, 0);
 
-    CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
-    VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
+    const CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
+    const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
     VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
 
     SetVideoCodecFmtp(pHevcConfig, pVideoConfig, pHevcFmtp);
@@ -231,8 +231,8 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
     return pHevcPayload;
 }
 
-PROTECTED void VideoProfileGenerator::SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig,
-        IN VideoConfiguration* pVideoConfig, OUT VideoProfile::VideoFmtp* pFmtp)
+PROTECTED void VideoProfileGenerator::SetVideoCodecFmtp(IN const CodecVideoConfig* pCodecConfig,
+        IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::VideoFmtp* pFmtp)
 {
     if (pCodecConfig == IMS_NULL || pVideoConfig == IMS_NULL || pFmtp == IMS_NULL)
     {
@@ -258,8 +258,8 @@ PROTECTED void VideoProfileGenerator::SetVideoCodecFmtp(IN CodecVideoConfig* pCo
             pFmtp->GetPacketizationMode(), 0);
 }
 
-PROTECTED void VideoProfileGenerator::SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
-        IN VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload)
+PROTECTED void VideoProfileGenerator::SetVideoCodecPayload(IN const CodecVideoConfig* pCodecConfig,
+        IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload)
 {
     if (pCodecConfig == IMS_NULL || pVideoConfig == IMS_NULL || pPayload == IMS_NULL)
     {
@@ -321,7 +321,7 @@ PROTECTED void VideoProfileGenerator::SetVideoCodecPayload(IN CodecVideoConfig* 
 }
 
 PROTECTED IMS_SINT32 VideoProfileGenerator::SetAttributeCapability(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig)
+        OUT VideoProfile* pVideoProfile, IN const VideoConfiguration* pVideoConfig)
 {
     IMS_SINT32 nAcap = 0;
 
@@ -339,8 +339,8 @@ PROTECTED IMS_SINT32 VideoProfileGenerator::SetAttributeCapability(
     return nAcap;
 }
 
-PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfTrr(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
+PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfTrr(OUT VideoProfile* pVideoProfile,
+        IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
 {
     if (pVideoProfile != IMS_NULL && pVideoConfig != IMS_NULL)
     {
@@ -359,8 +359,8 @@ PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfTrr(
     return nAcap;
 }
 
-PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfNack(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
+PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfNack(OUT VideoProfile* pVideoProfile,
+        IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
 {
     if (pVideoProfile != IMS_NULL && pVideoConfig != IMS_NULL)
     {
@@ -378,8 +378,8 @@ PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfNack(
     return nAcap;
 }
 
-PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfPli(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
+PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfPli(OUT VideoProfile* pVideoProfile,
+        IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
 {
     if (pVideoProfile != IMS_NULL && pVideoConfig != IMS_NULL)
     {
@@ -397,8 +397,8 @@ PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfPli(
     return nAcap;
 }
 
-PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfFir(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
+PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfFir(OUT VideoProfile* pVideoProfile,
+        IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
 {
     if (pVideoProfile != IMS_NULL && pVideoConfig != IMS_NULL)
     {
@@ -416,8 +416,8 @@ PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfFir(
     return nAcap;
 }
 
-PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfTmmbr(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
+PROTECTED IMS_SINT32 VideoProfileGenerator::SetAvpfTmmbr(OUT VideoProfile* pVideoProfile,
+        IN const VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap)
 {
     if (pVideoProfile != IMS_NULL && pVideoConfig != IMS_NULL)
     {

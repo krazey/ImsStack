@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,21 +15,9 @@
  */
 
 #include "ServiceTrace.h"
-#include "config/ImsCodec.h"
-#include "config/CodecAmrConfig.h"
-#include "config/CodecTelephoneEventConfig.h"
-#include "config/CodecEvsConfig.h"
-#include "config/CodecPcmConfig.h"
 #include "config/AudioConfiguration.h"
 #include "audio/AudioDef.h"
-#include "MediaEnvironment.h"
-#include "IService.h"
 #include "audio/AudioProfileUtil.h"
-#include "ServicePhoneInfo.h"
-#include "ServiceSystemTime.h"
-#include "MediaManager.h"
-#include "MediaProfileUtil.h"
-#include "MediaResourceManager.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
 
@@ -70,7 +58,7 @@ const AString AudioProfileUtil::AUDIO_CODEC_BITRATE_STRING[3][9] = {
 };
 
 PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
-        OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
+        OUT AudioProfile* pAudioProfile, IN const AudioConfiguration* pConfig)
 {
     if (pAudioProfile == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -219,192 +207,6 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
     IMS_TRACE_D("ConvertToBandwidthAS() - As[%d]", nResultAs, 0, 0);
 
     return nResultAs;
-}
-
-PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToModeSet(
-        IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6, IN IMS_SINT32 nAs)
-{
-    IMS_TRACE_D("ConvertToModeSet() - Codec[%d], Octet[%d], As[%d]", eCodec, nOctet, nAs);
-
-    IMS_SINT32 nModeSet = -1;
-    const IMS_SINT32* pArrAmr;
-    IMS_SINT32 nModeCount;
-    pArrAmr = GetAmrAsArray(eCodec, nOctet, bIpV6);
-
-    if (pArrAmr == IMS_NULL)
-    {
-        return -1;
-    }
-
-    if (eCodec == AUDIO_CODEC_AMRWB)
-    {
-        nModeCount = 9;
-    }
-    else
-    {
-        nModeCount = 8;
-    }
-
-    for (IMS_SINT32 i = 0; i < nModeCount; ++i)
-    {
-        if (nAs >= pArrAmr[i])
-        {
-            nModeSet = i;
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    IMS_TRACE_D("ConvertToModeSet() - IpV6[%d], ModeSet[%d]", bIpV6, nModeSet, 0);
-    return nModeSet;
-}
-
-/*!
- *  @brief      UpdateAudioProfileBandwidth
- *  @details    UpdateAudioProfileBandwidth for update bandwidth(AS) at audio profile
- */
-PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
-        OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
-{
-    if ((pAudioProfile == IMS_NULL) || (pConfig == IMS_NULL))
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_SINT32 nAsOptimal = -1;
-    IMS_SINT32 nAsMax = -1;
-    IMS_SINT32 nCurrAs = 0;
-    AUDIO_CODEC nCurrCodec = AUDIO_CODEC_NONE;
-
-    for (IMS_UINT32 i = 0; i < pAudioProfile->GetPayloadList().GetSize(); i++)
-    {
-        AudioProfile::Payload* pAudioPayload = pAudioProfile->GetPayloadAt(i);
-        if (pAudioPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        if ((pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
-                (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") == IMS_TRUE))
-        {
-            AudioProfile::AmrFmtp* pAmrFmtp =
-                    reinterpret_cast<AudioProfile::AmrFmtp*>(pAudioPayload->GetFmtp());
-            if (pAmrFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            if (pAudioPayload->GetRtpMap().GetSamplingRate() == 16000)
-            {
-                nCurrCodec = AUDIO_CODEC_AMRWB;
-            }
-            else
-            {
-                nCurrCodec = AUDIO_CODEC_AMR;
-            }
-
-            // find max modeset
-            IMS_SINT32 nMaxModeset = 0;
-            if (pAmrFmtp->GetModeSetList() == 0)
-            {
-                if (nCurrCodec == AUDIO_CODEC_AMRWB)
-                {
-                    nMaxModeset = 8;  // amr wb case
-                }
-                else
-                {
-                    nMaxModeset = 7;  // amr nb case
-                }
-            }
-            else
-            {
-                for (nMaxModeset = 8; nMaxModeset >= 0; nMaxModeset--)
-                {
-                    if (pAmrFmtp->GetModeSetList() & (1 << nMaxModeset))
-                    {
-                        break;
-                    }
-                }
-            }
-
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
-                    pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset);
-            if (nCurrAs > nAsOptimal)
-            {
-                nAsOptimal = nCurrAs;
-            }
-
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
-                    pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset, IMS_TRUE);
-            if (nCurrAs > nAsMax)
-            {
-                nAsMax = nCurrAs;
-            }
-        }
-        else if (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS") == IMS_TRUE)
-        {
-            nCurrCodec = AUDIO_CODEC_EVS;
-            AudioProfile::EvsFmtp* pEvsFmtp =
-                    reinterpret_cast<AudioProfile::EvsFmtp*>(pAudioPayload->GetFmtp());
-            if (pEvsFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            // find max br
-            IMS_SINT32 nMaxBr = 0;
-            {
-                if (pEvsFmtp->GetBrList() == 0)
-                {
-                    nMaxBr = 6;
-                }
-                else
-                {
-                    for (nMaxBr = 6; nMaxBr >= 0; nMaxBr--)
-                    {
-                        if (pEvsFmtp->GetBrList() & (1 << nMaxBr))
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec,
-                    pAudioProfile->GetIpAddress().IsIPv6Address(), 0, nMaxBr);  // primary mode
-            if (nCurrAs > nAsOptimal)
-            {
-                nAsOptimal = nCurrAs;
-            }
-
-            nCurrAs = ConvertToBandwidthAS(
-                    nCurrCodec, pAudioProfile->GetIpAddress().IsIPv6Address(), 0, nMaxBr, IMS_TRUE);
-            if (nCurrAs > nAsMax)
-            {
-                nAsMax = nCurrAs;
-            }
-        }
-        else if ((pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ==
-                         IMS_TRUE) ||
-                (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA") == IMS_TRUE))
-        {
-            if (72 > nAsMax)  // 72 is PCMU/PCMA AS value at IPv6
-            {
-                nAsMax = 72;
-                nAsOptimal = 72;
-            }
-        }
-    }
-
-    pAudioProfile->SetBandwidthAs(pConfig->GetAsBandwidthKbps());
-
-    /* bDirHold is not proper for formoffer() */
-    MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pConfig, IMS_FALSE);
-    IMS_TRACE_D("UpdateAudioProfileBandwidth(): updatedAS[%d]", nAsMax, 0, 0);
-
-    return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
@@ -600,7 +402,7 @@ PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
 {
     if (pProfile != IMS_NULL)
     {
-        MediaSessionConfig* pMediaSessionConfig =
+        const MediaSessionConfig* pMediaSessionConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                         nSlotId, eServiceType);
 
