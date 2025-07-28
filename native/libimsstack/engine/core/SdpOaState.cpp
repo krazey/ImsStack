@@ -1012,7 +1012,9 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
                 }
                 else
                 {
-                    if (m_nOldState == STATE_OFFER_SENT && !piSipMsg->IsMessageRpr())
+                    if (m_nOldState == STATE_OFFER_SENT &&
+                            !(piSipMsg->IsMessageRpr() ||
+                                    SipStatusCode::IsFinalSuccess(piSipMsg->GetStatusCode())))
                     {
                         StartPreviewMode();
                     }
