@@ -110,6 +110,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
                     CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
                     DEFAULT_PAYLOAD_FORMAT);
 
+            SetVisibleModeSet(GetVisibleModeSet());
+
             ImsVector<IMS_SINT32> objCodecAttributeModeset = piCcSubBundle->GetIntArray(
                     CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
             IMS_SINT32 nModeSetList = 0;
@@ -118,6 +120,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
                 nModeSetList = (m_nCodec == ImsCodec::AUDIO_AMR)
                         ? CodecAudioConfig::FULL_MODESET_AMRNB
                         : CodecAudioConfig::FULL_MODESET_AMRWB;
+                SetVisibleModeSet(IMS_FALSE);
             }
             else
             {
