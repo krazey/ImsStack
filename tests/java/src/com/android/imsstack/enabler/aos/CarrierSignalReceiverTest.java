@@ -15,8 +15,8 @@
  */
 package com.android.imsstack.enabler.aos;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import android.content.Context;
 import android.content.Intent;
@@ -92,15 +92,43 @@ public class CarrierSignalReceiverTest {
         // Trigger broadcast
         mFakeCarrierSignalReceiver.onReceive(mMockContext, intent);
 
-        verify(mMockAosService, times(0)).notifyCarrierSignalPcoValueChanged(intent);
+        verifyNoInteractions(mMockAosService);
+    }
+
+    @Test
+    public void testOnReceive_AosServiceNotAvailable() {
+        AosFactory.getInstance().replaceService(SLOT_0, null);
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+
+        // Trigger broadcast
+        mFakeCarrierSignalReceiver.onReceive(mMockContext, intent);
+
+        verifyNoInteractions(mMockAosService);
+    }
+
+    @Test
+    public void testOnReceive_MissingSubscriptionId() {
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        // Note: EXTRA_SUBSCRIPTION_INDEX is intentionally omitted.
+
+        // Trigger broadcast
+        mFakeCarrierSignalReceiver.onReceive(mMockContext, intent);
+
+        verifyNoInteractions(mMockAosService);
     }
 
     private static class FakeCarrierSignalReceiver extends CarrierSignalReceiver {
-
         @Override
         protected int getSlotId(int subId) {
+            if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                return SubscriptionManager.INVALID_SIM_SLOT_INDEX;
+            }
+
             return SLOT_0;
         }
     }
 }
-
