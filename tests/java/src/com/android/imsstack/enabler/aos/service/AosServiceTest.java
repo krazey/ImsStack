@@ -1427,18 +1427,28 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void jniImsListenerProxy_notifyAosIsimState() {
+    public void jniImsListenerProxy_notifyAosIsimState_AllCases() {
         mAosService.addListener(mMockAosInfoListener);
 
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(IIAosService.N2J_NOTIFY_AOS_ISIM_STATE);
-        parcel.writeInt(IAosInfoListener.IsimState.VALID);
-        parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
-        jniImsListener.onMessage(parcel);
-        processAllMessages();
+        int[] isimStates = {
+                IAosInfoListener.IsimState.INVALID,
+                IAosInfoListener.IsimState.VALID,
+                IAosInfoListener.IsimState.REFRESH_STARTED,
+                IAosInfoListener.IsimState.REFRESH_COMPLETE
+        };
 
-        verify(mMockAosInfoListener).notifyAosIsimStateChanged(IAosInfoListener.IsimState.VALID);
+        for (int state : isimStates) {
+            Parcel parcel = Parcel.obtain();
+            parcel.writeInt(IIAosService.N2J_NOTIFY_AOS_ISIM_STATE);
+            parcel.writeInt(state);
+            parcel.setDataPosition(0);
+
+            JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+            jniImsListener.onMessage(parcel);
+            processAllMessages();
+
+            verify(mMockAosInfoListener).notifyAosIsimStateChanged(state);
+        }
     }
 
     @Test
