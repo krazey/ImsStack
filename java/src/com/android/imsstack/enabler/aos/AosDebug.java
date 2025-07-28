@@ -1249,7 +1249,8 @@ public class AosDebug implements IAosDebug {
             }
         }
 
-        private void handleWifiConnectivityChanged(Message msg) {
+        @VisibleForTesting
+        protected void handleWifiConnectivityChanged(Message msg) {
             if (msg == null || !mConnectivityCallback.isConnected()) {
                 clearWifiConnectivityData();
                 return;

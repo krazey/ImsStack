@@ -43,6 +43,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.os.Looper;
@@ -138,7 +139,7 @@ public class AosDebugTest extends ImsStackTest {
         AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mMockAosService);
 
         // FakeAosDebug
-        mFakeAosDebug = new FakeAosDebug(TestAppContext.SLOT0);
+        mFakeAosDebug = spy(new FakeAosDebug(TestAppContext.SLOT0));
         mFakeAosDebug.mNotificationManager = mMockNotificationManager;
         mFakeAosDebug.mSignalStrengthsListener = mMockSignalStrengthsListener;
         mFakeAosDebug.mConnectivityCallback = mMockConnectivityCallback;
@@ -860,6 +861,89 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRP));
         assertNotEquals("TEST_VALUE",
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRQ));
+    }
+
+    @Test
+    public void testHandleWifiOnAvailable() {
+        // GIVEN: The handler will see the network as connected.
+        when(mMockConnectivityCallback.isConnected()).thenReturn(true);
+        when(mMockConnectivityCallback.getNetworkCapabilities())
+                .thenReturn(mock(NetworkCapabilities.class));
+        when(mMockConnectivityCallback.getLinkProperties()).thenReturn(mock(LinkProperties.class));
+
+        // A message simulating the onAvailable callback.
+        Message msg = Message.obtain(mFakeAosDebug.mHandler,
+                AosDebug.DEBUG_WIFI_CONNECTIVITY_CHANGED, mock(Network.class));
+
+        // WHEN
+        mFakeAosDebug.mHandler.handleWifiConnectivityChanged(msg);
+
+        // THEN
+        assertEquals(IAosDebug.DebugData.STR_CONNECTED,
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_CONNECTION_STATE));
+    }
+
+    @Test
+    public void testHandleWifiOnLost() {
+        // GIVEN: The handler will see the network as disconnected.
+        when(mMockConnectivityCallback.isConnected()).thenReturn(false);
+
+        // A message simulating the onLost callback (obj is null).
+        Message msg = Message.obtain(mFakeAosDebug.mHandler,
+                AosDebug.DEBUG_WIFI_CONNECTIVITY_CHANGED, null);
+
+        // WHEN
+        mFakeAosDebug.mHandler.handleWifiConnectivityChanged(msg);
+
+        // THEN
+        assertEquals(IAosDebug.DebugData.STR_DISCONNECTED,
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_CONNECTION_STATE));
+    }
+
+    @Test
+    public void testHandleWifiOnLinkPropertiesChanged() {
+        // GIVEN
+        when(mMockConnectivityCallback.isConnected()).thenReturn(true);
+        when(mMockConnectivityCallback.getNetworkCapabilities())
+                .thenReturn(mock(NetworkCapabilities.class));
+
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.setInterfaceName("test_wlan0");
+        when(mMockConnectivityCallback.getLinkProperties()).thenReturn(linkProperties);
+
+        Message msg = Message.obtain(mFakeAosDebug.mHandler,
+                AosDebug.DEBUG_WIFI_CONNECTIVITY_CHANGED, mock(Network.class));
+
+        // WHEN
+        mFakeAosDebug.mHandler.handleWifiConnectivityChanged(msg);
+
+        // THEN
+        assertEquals("test_wlan0",
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_INTERFACE_NAME));
+    }
+
+    @Test
+    public void testHandleWifiOnCapabilitiesChanged() {
+        // GIVEN
+        when(mMockConnectivityCallback.isConnected()).thenReturn(true);
+        when(mMockConnectivityCallback.getLinkProperties()).thenReturn(mock(LinkProperties.class));
+
+        NetworkCapabilities capabilities = mock(NetworkCapabilities.class);
+        when(mMockConnectivityCallback.getNetworkCapabilities()).thenReturn(capabilities);
+        WifiInfo mockWifiInfo = mock(WifiInfo.class);
+        when(mockWifiInfo.getSSID()).thenReturn("TestWifi-SSID");
+        when(mockWifiInfo.getBSSID()).thenReturn("AA:BB:CC:DD:EE:FF");
+        when(mockWifiInfo.getMacAddress()).thenReturn("FF:EE:DD:CC:BB:AA");
+        doReturn(mockWifiInfo).when(mFakeAosDebug).getWifiInfo(capabilities);
+
+        Message msg = Message.obtain(mFakeAosDebug.mHandler,
+                AosDebug.DEBUG_WIFI_CONNECTIVITY_CHANGED, mock(Network.class));
+
+        // WHEN
+        mFakeAosDebug.mHandler.handleWifiConnectivityChanged(msg);
+
+        // THEN
+        assertEquals("TestWifi-SSID", mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_SSID));
     }
 
     @Test
@@ -2512,7 +2596,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(AccessNetworkConstants.AccessNetworkType.UNKNOWN, type);
     }
 
-    public static class FakeAosDebug extends AosDebug {
+    public class FakeAosDebug extends AosDebug {
 
         boolean mIsDebugScreenEnabled = false;
         boolean mIsGranted = false;
