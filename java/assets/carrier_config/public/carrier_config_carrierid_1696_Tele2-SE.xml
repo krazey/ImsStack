@@ -57,4 +57,8 @@
             <item value="127"/>
         </int-array>
     </pbundle_as_map>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
 </carrier_config>
