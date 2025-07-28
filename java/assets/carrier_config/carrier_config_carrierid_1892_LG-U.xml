@@ -88,7 +88,6 @@
 
     <!-- Media -->
     <boolean name="imsvoice.audio_hold_with_direction_inactive_bool" value="true"/>
-    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
     <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="1230"/>
         <item value="1236"/>
