@@ -16,9 +16,6 @@
 -->
 <carrier_config>
     <!-- Carrier configurations -->
-    <!-- MTC -->
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="3000"/>
-
     <!-- MTS -->
     <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
         <item value="1"/>
@@ -98,4 +95,12 @@
     </pbundle_as_map>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="600"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2000"/>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
 </carrier_config>
