@@ -691,34 +691,12 @@ public:
         // KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY
         enum
         {
-            // KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL
-            // tmo only (4xx/5xx/6xx)
             START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN = 0,
-
-            // KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL
-            // kddi only
             START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER = 1,
-
-            // KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL
-            // tmo only
             START_ERROR_ACTION_SILENT_REINVITE_VOIP_BY_RTT_REJECTION = 2,
-
-            // KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL
-            // videotron only
             START_ERROR_ACTION_SILENT_REINVITE_ANONYMOUS = 3,
-
-            // KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY
-            // by reject code
             START_ERROR_ACTION_CROSS_SIM_TEMP_FAILURE = 4,
-
-            // KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY
-            // by reject code
             START_ERROR_ACTION_CROSS_SIM_PERM_FAILURE = 5,
-
-            // KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY
-            // by reject code
-            // KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY
-            // by reject code + reason phrase
             START_ERROR_ACTION_TERMINATE = 6
         };
     };

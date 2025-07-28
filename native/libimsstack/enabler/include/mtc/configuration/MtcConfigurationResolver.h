@@ -189,32 +189,13 @@ public:
         return objActions;
     }
 
-    inline static IMS_SINT32 LookupTerminateReasonCodeForEmergency(
+    inline static AString GetRequiredReasonTextForEmergencyTermination(
             IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
     {
-        AString strReasonCode = ExtractConfigValue(objProxy,
-                ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY,
-                nStatusCode);
-        if (strReasonCode.GetLength() > 0)
-        {
-            return strReasonCode.ToInt32();
-        }
-        return CODE_NONE;
-    }
-
-    inline static IMS_SINT32 LookupTerminateReasonCodeAndReasonForEmergency(
-            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode,
-            IN const AString& strReason)
-    {
-        AString strReasonCode = ExtractConfigValue(objProxy,
+        return ExtractConfigValue(objProxy,
                 ConfigEmergency::
                         KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY,
-                nStatusCode, strReason);
-        if (strReasonCode.GetLength() > 0)
-        {
-            return strReasonCode.ToInt32();
-        }
-        return CODE_NONE;
+                nStatusCode);
     }
 
     inline static IMS_SINT32 LookupReasonCodeByStatusCodeForNormal(
@@ -222,6 +203,18 @@ public:
     {
         AString strReasonCode = ExtractConfigValue(objProxy,
                 ConfigVoice::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY, nStatusCode);
+        if (strReasonCode.GetLength() > 0)
+        {
+            return strReasonCode.ToInt32();
+        }
+        return CODE_NONE;
+    }
+
+    inline static IMS_SINT32 LookupReasonCodeByStatusCodeForEmergency(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
+    {
+        AString strReasonCode = ExtractConfigValue(objProxy,
+                ConfigEmergency::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY, nStatusCode);
         if (strReasonCode.GetLength() > 0)
         {
             return strReasonCode.ToInt32();
@@ -346,31 +339,6 @@ private:
             AString strValue;
             strItem.SplitF(TextParser::CHAR_COLON, strKey, strValue);
             if (strKey.ToInt32() == nKey)
-            {
-                return strValue;
-            }
-        }
-        return AString::ConstNull();
-    }
-
-    inline static AString ExtractConfigValue(IN const MtcConfigurationProxy& objProxy,
-            IN const IMS_CHAR* pszConfigKey, IN IMS_SINT32 nKey, IN const AString& strKey)
-    {
-        ImsVector<AString> objKeyValueArray = objProxy.GetStringArray(pszConfigKey);
-        for (IMS_UINT32 i = 0; i < objKeyValueArray.GetSize(); ++i)
-        {
-            AString strItem = objKeyValueArray.GetAt(i);
-            AString strKeys;
-            AString strValue;
-            strItem.SplitB(TextParser::CHAR_COLON, strKeys, strValue);
-            AString strNumKey;
-            AString strStringKey;
-            strKeys.SplitF(TextParser::CHAR_COLON, strNumKey, strStringKey);
-            if (strNumKey.ToInt32() != nKey)
-            {
-                continue;
-            }
-            if (strKey.MakeLower().Contains(strStringKey.MakeLower()))
             {
                 return strValue;
             }

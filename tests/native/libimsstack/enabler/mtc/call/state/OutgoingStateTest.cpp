@@ -36,6 +36,7 @@
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
+#include "TextParser.h"
 #include "call/IMtcCall.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/MockEpsFallbackTrigger.h"
@@ -229,14 +230,14 @@ protected:
     {
         AString strActionSet;
         strActionSet.SetNumber(nStatusCode);
-        strActionSet += ":";
+        strActionSet += TextParser::STR_COLON;
 
         bool bFirst = true;
         for (IMS_SINT32 nAction : objActions)
         {
             if (!bFirst)
             {
-                strActionSet += ",";
+                strActionSet += TextParser::STR_COMMA;
             }
             AString strAction;
             strAction.SetNumber(nAction);
@@ -1253,15 +1254,10 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    ImsVector<AString> objArray;
-    ON_CALL(*pConfigurationProxy,
-            GetStringArray(
-                    ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
-            .WillByDefault(Return(objArray));
+    SetActionConfigs(ConfigEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_400,
+            {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN});
+
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT))
             .WillByDefault(Return(1000));

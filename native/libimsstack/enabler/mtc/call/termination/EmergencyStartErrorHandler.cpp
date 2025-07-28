@@ -15,20 +15,43 @@
  */
 
 #include "IMessage.h"
+#include "IMtcService.h"
 #include "ISipHeader.h"
 #include "ImsAosParameter.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
+#include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
 #include "call/termination/EmergencyStartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationResolver.h"
 #include "helper/IMtcAosConnector.h"
 #include "utility/IMessageUtils.h"
+#include <optional>
+#include <unordered_map>
 
 __IMS_TRACE_TAG_COM_MTC__;
+
+// clang-format off
+const std::unordered_map<IMS_SINT32, EmergencyStartErrorHandler::ActionFunc>
+        EmergencyStartErrorHandler::objActionFuncMap = {
+    {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN,
+            &EmergencyStartErrorHandler::HandleSilentReinviteWithNextPcscfIfEpdn},
+    {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER,
+            &EmergencyStartErrorHandler::HandleSilentReinviteByRetryAfter},
+    {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_VOIP_BY_RTT_REJECTION,
+            &EmergencyStartErrorHandler::HandleSilentReinviteAsVoipByRttRejection},
+    {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_ANONYMOUS,
+            &EmergencyStartErrorHandler::HandleSilentReinviteWithAnonymousByNetworkRejection},
+    {ConfigEmergency::START_ERROR_ACTION_CROSS_SIM_TEMP_FAILURE,
+            &EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByTempFailure},
+    {ConfigEmergency::START_ERROR_ACTION_CROSS_SIM_PERM_FAILURE,
+            &EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByPermFailure},
+    {ConfigEmergency::START_ERROR_ACTION_TERMINATE,
+            &EmergencyStartErrorHandler::HandleTerminate},
+};
+// clang-format on
 
 PUBLIC
 EmergencyStartErrorHandler::EmergencyStartErrorHandler(
@@ -47,11 +70,12 @@ EmergencyStartErrorHandler::MaybeGetOverriddenCallReasonInfo(
 {
     if (objReason.nCode == CODE_TIMEOUT_1XX_WAITING || objReason.nCode == CODE_TIMEOUT_NO_ANSWER)
     {
-        IMS_SINT32 nCallReasonInfoCode =
-                MtcConfigurationResolver::LookupTerminateReasonCodeForEmergency(objProxy, 0);
-        if (nCallReasonInfoCode != CODE_NONE)
+        ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
+                objProxy, ConfigEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+                SipStatusCode::SC_INVALID);
+        if (objActions.Contains(ConfigEmergency::START_ERROR_ACTION_TERMINATE))
         {
-            return CallReasonInfo(nCallReasonInfoCode, -1);
+            return CallReasonInfo(GetDefaultReasonCode(objProxy, SipStatusCode::SC_INVALID));
         }
     }
 
@@ -73,51 +97,75 @@ EmergencyStartErrorHandler::MaybeGetOverriddenCallReasonInfo(
 PUBLIC
 CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
-    if (IsRedialWithVoipByRttEmergencyRejectionRequired())
+    IMS_SINT32 nStatusCode = GetStatusCode(piMessage);
+    ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
+            m_objContext.GetConfigurationProxy(),
+            ConfigEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, nStatusCode);
+    for (IMS_UINT32 i = 0; i < objActions.GetSize(); ++i)
     {
-        return HandleRedialWithVoipByRttEmergencyRejection();
+        auto it = objActionFuncMap.find(objActions.GetAt(i));
+        if (it != objActionFuncMap.end())
+        {
+            CallReasonInfo objResult = (this->*(it->second))(piMessage);
+            if (objResult.nCode != CODE_NONE)
+            {
+                return objResult;
+            }
+        }
     }
 
-    IMS_SINT32 nStatusCode =
-            (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+    IMS_TRACE_I("Default action : CSFB for [%d]", nStatusCode, 0, 0);
+    return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+}
 
-    if (IsRedialWithAnonymousByNetworkRejectionRequired(nStatusCode))
+PRIVATE GLOBAL IMS_SINT32 EmergencyStartErrorHandler::GetDefaultReasonCode(
+        IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
+{
+    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForEmergency(
+            objProxy, nStatusCode);
+
+    if (nReasonCode != CODE_NONE)
     {
-        return HandleRedialWithAnonymousByNetworkRejection();
+        return nReasonCode;
     }
 
-    IMS_SINT32 nCallReasonInfoCode = GetCrossSimRedialingReasonCode(nStatusCode);
-    if (nCallReasonInfoCode != CODE_NONE)
+    auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
+    if (it != s_defaultStatusCodeAndReasonCodeMap.end())
     {
-        return CallReasonInfo(nCallReasonInfoCode);
+        nReasonCode = it->second;
     }
 
-    nCallReasonInfoCode = MtcConfigurationResolver::LookupTerminateReasonCodeForEmergency(
-            m_objContext.GetConfigurationProxy(), nStatusCode);
-    if (nCallReasonInfoCode != CODE_NONE)
+    return nReasonCode == CODE_NONE ? CODE_SIP_SERVER_ERROR : nReasonCode;
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteWithNextPcscfIfEpdn(
+        IN [[maybe_unused]] const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteWithNextPcscfIfEpdn", 0, 0, 0);
+    if (!m_objContext.GetService().IsEmergency())
     {
-        return CallReasonInfo(nCallReasonInfoCode, GetExtraCode(nCallReasonInfoCode, piMessage));
+        return CallReasonInfo(CODE_NONE);
     }
 
-    ReasonHeaderValue objValue =
-            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(piMessage);
-    nCallReasonInfoCode = MtcConfigurationResolver::LookupTerminateReasonCodeAndReasonForEmergency(
-            m_objContext.GetConfigurationProxy(), nStatusCode, objValue.strText);
-    if (nCallReasonInfoCode != CODE_NONE)
+    if (m_objContext.GetMessageUtils().GetNumberOfPreviousResponses(
+                &m_objSession, IMessage::SESSION_START) > 1)
     {
-        return CallReasonInfo(nCallReasonInfoCode, objValue.nCause);
+        return CallReasonInfo(CODE_NONE);
     }
 
-    if (IsRedialEmergencyWithNextPcscfRequired(piMessage))
-    {
-        return HandleRedialEmergencyWithNextPcscf();
-    }
+    // support re-dial emergency with next P-CSCF,
+    // an emergency call is over sos pdn,
+    // and it receives an error response without receiving 100 Trying.
+    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
+}
 
-    if (!m_objContext.GetConfigurationProxy().GetBoolean(
-               ConfigEmergency::KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL))
-    {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
-    }
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteByRetryAfter(
+        IN const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteByRetryAfter", 0, 0, 0);
     IMS_SINT32 nRetryAfterInSeconds = m_objContext.GetMessageUtils().GetHeaderValueInt(
             piMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfterInSeconds > 0)
@@ -127,37 +175,80 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
         return CallReasonInfo(
                     CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis);
     }
-
-    return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-IMS_SINT32 EmergencyStartErrorHandler::GetCrossSimRedialingReasonCode(
-        IN IMS_SINT32 nStatusCode) const
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteAsVoipByRttRejection(
+        IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_SINT32 nCallReasonInfoCode = CODE_NONE;
-    // Since inclusion in both is not an expected behavior, priority is arbitrarily given to
-    // CODE_EMERGENCY_TEMP_FAILURE.
-    if (m_objContext.GetConfigurationProxy().Contains(
-                ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, nStatusCode))
+    IMS_TRACE_I("HandleSilentReinviteAsVoipByRttRejection", 0, 0, 0);
+    if (m_objContext.GetSession(&m_objSession)->GetCallType() != CallType::RTT)
     {
-        nCallReasonInfoCode = CODE_EMERGENCY_TEMP_FAILURE;
-    }
-    else if (m_objContext.GetConfigurationProxy().Contains(
-                     ConfigEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY, nStatusCode))
-    {
-        nCallReasonInfoCode = CODE_EMERGENCY_PERM_FAILURE;
+        return CallReasonInfo(CODE_NONE);
     }
 
-    if (nCallReasonInfoCode != CODE_NONE &&
-            PhoneInfoService::GetPhoneInfoService()
-                    ->GetCallInfo(m_objContext.GetSlotId())
-                    ->IsCrossSimRedialingAvailable())
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteWithAnonymousByNetworkRejection(
+        IN [[maybe_unused]] const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteWithAnonymousByNetworkRejection", 0, 0, 0);
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMS_UINT32 nAosRegistrationMode =
+            pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_INTERNAL;
+    if (nAosRegistrationMode == IImsAosInfo::REG_MODE_INTERNAL ||
+            nAosRegistrationMode == IImsAosInfo::REG_MODE_NOUICC)
     {
-        return nCallReasonInfoCode;
+        return CallReasonInfo(CODE_NONE);
     }
 
-    return CODE_NONE;
+    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByTempFailure(
+        IN [[maybe_unused]] const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteCrossSimByTempFailure", 0, 0, 0);
+    return IsCrossSimRedialAvailable() ? CallReasonInfo(CODE_EMERGENCY_TEMP_FAILURE)
+                                       : CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByPermFailure(
+        IN [[maybe_unused]] const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteCrossSimByPermFailure", 0, 0, 0);
+    return IsCrossSimRedialAvailable() ? CallReasonInfo(CODE_EMERGENCY_PERM_FAILURE)
+                                       : CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleTerminate(IN const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleTerminate", 0, 0, 0);
+    const IMS_SINT32 nStatusCode = GetStatusCode(piMessage);
+
+    AString strRequiredReasonText =
+            MtcConfigurationResolver::GetRequiredReasonTextForEmergencyTermination(
+                    m_objContext.GetConfigurationProxy(), nStatusCode);
+    if (strRequiredReasonText.GetLength() > 0)
+    {
+        const ReasonHeaderValue objValue =
+                m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(piMessage);
+        if (!objValue.strText.MakeLower().Contains(strRequiredReasonText.MakeLower()))
+        {
+            // text parameter in Reason header not matched.
+            return CallReasonInfo(CODE_NONE);
+        }
+    }
+    const IMS_SINT32 nReasonCode =
+            GetDefaultReasonCode(m_objContext.GetConfigurationProxy(), nStatusCode);
+    return CallReasonInfo(nReasonCode, GetExtraCode(nReasonCode, piMessage));
 }
 
 PRIVATE
@@ -172,50 +263,9 @@ IMS_SINT32 EmergencyStartErrorHandler::GetExtraCode(
     IMS_SINT32 nExtraCode = m_objContext.GetMessageUtils().GetCauseFromReasonHeader(piMessage);
     if (nExtraCode == -1 && piMessage)
     {
-        nExtraCode = piMessage->GetStatusCode();
+        nExtraCode = GetStatusCode(piMessage);
     }
     return nExtraCode;
-}
-
-PRIVATE
-IMS_BOOL EmergencyStartErrorHandler::IsRedialEmergencyWithNextPcscfRequired(
-        IN const IMessage* piMessage) const
-{
-    if (!m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigEmergency::KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_objContext.GetService().IsEmergency())
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_SINT32 nStatusCode =
-            (piMessage == IMS_NULL) ? SipStatusCode::SC_INVALID : piMessage->GetStatusCode();
-    if (nStatusCode >= SipStatusCode::SC_300 && nStatusCode < SipStatusCode::SC_400)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_objContext.GetMessageUtils().GetNumberOfPreviousResponses(
-                &m_objSession, IMessage::SESSION_START) > 1)
-    {
-        return IMS_FALSE;
-    }
-
-    // support re-dial emergency with next P-CSCF,
-    // an emergency call is over sos pdn,
-    // and it receives error response except 3xx before receiving 100 Trying.
-    return IMS_TRUE;
-}
-
-PRIVATE
-CallReasonInfo EmergencyStartErrorHandler::HandleRedialEmergencyWithNextPcscf() const
-{
-    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF);
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
 }
 
 PRIVATE
@@ -226,51 +276,4 @@ void EmergencyStartErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
     {
         pAosConnector->Control(nCommand);
     }
-}
-
-PRIVATE
-IMS_BOOL EmergencyStartErrorHandler::IsRedialWithVoipByRttEmergencyRejectionRequired() const
-{
-    if (m_objContext.GetSession(&m_objSession)->GetCallType() != CallType::RTT)
-    {
-        return IMS_FALSE;
-    }
-
-    return m_objContext.GetConfigurationProxy().GetBoolean(
-            CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL);
-}
-
-PRIVATE
-CallReasonInfo EmergencyStartErrorHandler::HandleRedialWithVoipByRttEmergencyRejection() const
-{
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
-}
-
-PRIVATE
-IMS_BOOL EmergencyStartErrorHandler::IsRedialWithAnonymousByNetworkRejectionRequired(
-        IN IMS_SINT32 nStatusCode) const
-{
-    if (nStatusCode == SipStatusCode::SC_INVALID)
-    {
-        return IMS_FALSE;
-    }
-
-    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
-    const IMS_UINT32 nAosRegistrationMode =
-            pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_INTERNAL;
-    if (nAosRegistrationMode == IImsAosInfo::REG_MODE_INTERNAL ||
-            nAosRegistrationMode == IImsAosInfo::REG_MODE_NOUICC)
-    {
-        return IMS_FALSE;
-    }
-
-    return m_objContext.GetConfigurationProxy().GetBoolean(CarrierConfig::ImsEmergency::
-                    KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL);
-}
-
-PRIVATE
-CallReasonInfo EmergencyStartErrorHandler::HandleRedialWithAnonymousByNetworkRejection() const
-{
-    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF);
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS);
 }

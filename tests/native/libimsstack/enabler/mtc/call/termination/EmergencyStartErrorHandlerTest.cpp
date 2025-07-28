@@ -18,6 +18,7 @@
 #include "IImsAosInfo.h"
 #include "ISipHeader.h"
 #include "ImsAosParameter.h"
+#include "ImsVector.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -25,12 +26,15 @@
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "TestPhoneInfoService.h"
+#include "TextParser.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/termination/EmergencyStartErrorHandler.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "utility/MockIMessageUtils.h"
+#include <gtest/gtest.h>
+#include <initializer_list>
 
 using ::testing::_;
 using ::testing::Return;
@@ -51,8 +55,8 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objSession;
     TestConfigService* m_pConfigService;
+    ImsVector<AString> objActionSets;
     EmergencyStartErrorHandler* pHandler;
-    ImsVector<AString> objConfigurationArrary;
     TestPhoneInfoService m_objPhoneInfoService;
 
 protected:
@@ -85,28 +89,39 @@ protected:
         delete pHandler;
     }
 
-    void SetRequireImmediateTerminationCode(
-            IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nCallReasonInfoCode)
+    void SetMessageCode(IN IMS_SINT32 nStatusCode)
     {
-        objConfigurationArrary.Clear();
-        AString strConfiguration;
-        strConfiguration.Sprintf("%d:%d", nStatusCode, nCallReasonInfoCode);
-        objConfigurationArrary.Push(strConfiguration);
-        ON_CALL(objConfigurationProxy,
-                GetStringArray(ConfigEmergency::
-                                KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
-                .WillByDefault(Return(objConfigurationArrary));
         ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
     }
 
-    void SetNotRequireImmediateTerminationCode(IN IMS_SINT32 nStatusCode)
+    void SetActionConfig(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nSingleAction)
     {
-        objConfigurationArrary.Clear();
+        SetActionConfigs(nStatusCode, {nSingleAction});
+    }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += TextParser::STR_COLON;
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += TextParser::STR_COMMA;
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
         ON_CALL(objConfigurationProxy,
-                GetStringArray(ConfigEmergency::
-                                KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
-                .WillByDefault(Return(objConfigurationArrary));
-        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+                GetStringArray(ConfigEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
     }
 
     IMS_BOOL CheckHandleResult(IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode)
@@ -125,42 +140,38 @@ protected:
 
 TEST_F(EmergencyStartErrorHandlerTest, HandleRedialEmergencyWithNextPcscf)
 {
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_400;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN);
+
+    // test normal
     ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_INVALID);
+
     ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
             .WillByDefault(Return(1));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(1);
     EXPECT_TRUE(
             CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF));
 
+    // test no action case
+    objActionSets.Clear();
     ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+            GetStringArray(ConfigEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+            .WillByDefault(Return(objActionSets));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
+    // test no Emergency PDN case
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN);
     ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 
-    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_300);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
-    EXPECT_TRUE(
-            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
-
-    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_INVALID);
+    // test error response after 100 Trying case
     ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
             .WillByDefault(Return(2));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
@@ -170,18 +181,16 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleRedialEmergencyWithNextPcscf)
 
 TEST_F(EmergencyStartErrorHandlerTest, HandleRedialWithAnonymousByNetworkRejection)
 {
-    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_INVALID);
+    SetMessageCode(SipStatusCode::SC_INVALID);
+
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(0);
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 
-    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_403);
+    SetMessageCode(SipStatusCode::SC_403);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(0);
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
@@ -192,9 +201,8 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleRedialWithAnonymousByNetworkRejecti
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_ANONYMOUS);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(1);
     EXPECT_TRUE(
             CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS));
@@ -202,63 +210,58 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleRedialWithAnonymousByNetworkRejecti
 
 TEST_F(EmergencyStartErrorHandlerTest, GetCallReasonInfoTimeout)
 {
-    SetRequireImmediateTerminationCode(SipStatusCode::SC_INVALID, CODE_NETWORK_RESP_TIMEOUT);
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_INVALID;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigEmergency::START_ERROR_ACTION_TERMINATE);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, RejectCodeRequireImmediateTermination)
 {
-    SetRequireImmediateTerminationCode(486, 338);
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigEmergency::START_ERROR_ACTION_TERMINATE);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_BUSY, SipStatusCode::SC_486));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, RejectCodeNotRequireImmediateTermination)
 {
-    SetNotRequireImmediateTerminationCode(486);
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, RejectCodeRequireTempFailure)
 {
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
-            .WillByDefault(Return(IMS_TRUE));
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigEmergency::START_ERROR_ACTION_CROSS_SIM_TEMP_FAILURE);
+
     ON_CALL(m_objPhoneInfoService.GetMockCallInfo(), IsCrossSimRedialingAvailable)
             .WillByDefault(Return(IMS_TRUE));
-    SetNotRequireImmediateTerminationCode(486);
     EXPECT_TRUE(CheckHandleResult(CODE_EMERGENCY_TEMP_FAILURE, -1));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, RejectCodeRequirePermFailure)
 {
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY, 486))
-            .WillByDefault(Return(IMS_TRUE));
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigEmergency::START_ERROR_ACTION_CROSS_SIM_PERM_FAILURE);
     ON_CALL(m_objPhoneInfoService.GetMockCallInfo(), IsCrossSimRedialingAvailable)
             .WillByDefault(Return(IMS_TRUE));
-    SetNotRequireImmediateTerminationCode(486);
     EXPECT_TRUE(CheckHandleResult(CODE_EMERGENCY_PERM_FAILURE, -1));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, RejectCodeNotRequireCrossSimRedialing)
 {
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY, 486))
-            .WillByDefault(Return(IMS_FALSE));
-    SetNotRequireImmediateTerminationCode(486);
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
-            .WillByDefault(Return(IMS_TRUE));
+    SetActionConfig(ANY_REJECT_CODE, ConfigEmergency::START_ERROR_ACTION_CROSS_SIM_TEMP_FAILURE);
     ON_CALL(m_objPhoneInfoService.GetMockCallInfo(), IsCrossSimRedialingAvailable)
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(
@@ -268,17 +271,24 @@ TEST_F(EmergencyStartErrorHandlerTest, RejectCodeNotRequireCrossSimRedialing)
 TEST_F(EmergencyStartErrorHandlerTest,
         HandleRedialsWithVoipFromRttIfSilentRedialByRttEmergencyRejectionRequired)
 {
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_VOIP_BY_RTT_REJECTION);
+
     ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::RTT));
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(
-                    CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(
             CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, HandleDoesNotRedialWithVoipIfEmergencyCallIsNotRtt)
 {
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_VOIP_BY_RTT_REJECTION);
+
     ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
     EXPECT_FALSE(
             CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
@@ -287,43 +297,45 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleDoesNotRedialWithVoipIfEmergencyCal
 TEST_F(EmergencyStartErrorHandlerTest,
         HandleDoesNotRedialWithVoipFromRttIfSilentRedialByRttEmergencyRejectionIsNotRequired)
 {
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+
     ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::RTT));
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(
-                    CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+
     EXPECT_FALSE(
             CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, HandleRedialsWithRetryAfterInSipErrorResponse)
 {
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(
+            ANY_REJECT_CODE, ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER);
+
     const IMS_SINT32 nRetryAfterInSeconds = 10;
     AString strRetryAfterInMillis;
     strRetryAfterInMillis.SetNumber(nRetryAfterInSeconds * 1000);
     ON_CALL(objMessageUtils,
             GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
             .WillByDefault(Return(nRetryAfterInSeconds));
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(CheckHandleResult(
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, HandleDoesNotRedialsWithRetryAfterInSipErrorResponse)
 {
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_486;
+    SetMessageCode(ANY_REJECT_CODE);
+
     const IMS_SINT32 nRetryAfterInSeconds = 10;
     AString strRetryAfterInMillis;
     strRetryAfterInMillis.SetNumber(nRetryAfterInSeconds * 1000);
     ON_CALL(objMessageUtils,
             GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
             .WillByDefault(Return(nRetryAfterInSeconds));
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+
     EXPECT_FALSE(CheckHandleResult(
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis));
 }
