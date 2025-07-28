@@ -59,4 +59,5 @@
         <item value="604"/>
         <item value="606"/>
     </int-array>
+    <int name="imsss.ut_transaction_timer_sec_int" value="30"/>
 </carrier_config>

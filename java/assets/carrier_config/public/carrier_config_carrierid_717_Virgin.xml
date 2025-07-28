@@ -15,8 +15,15 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ims General -->
-    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1080"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="6"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="-1"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </carrier_config>
