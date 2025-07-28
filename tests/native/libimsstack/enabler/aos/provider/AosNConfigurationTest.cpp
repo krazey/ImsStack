@@ -804,6 +804,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_PER_PCSCF_INT, -1))
             .WillOnce(Return(0));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_PER_PCSCF_WITH_RA_TIME_INT, -1))
+            .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_RESET_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
@@ -1046,6 +1049,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             m_pAosNConfiguration->GetRegRetrySip503CodePolicy());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegRetryCountOnSinglePcscf());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegRetryCountPerPcscf());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetRegRetryCountPerPcscfWithRaTime());
     EXPECT_EQ(CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
             m_pAosNConfiguration->GetRegRetryCountResetPolicy());
     EXPECT_EQ(3, m_pAosNConfiguration->GetRegRetryCountWithIpsecOnAuthFailure());

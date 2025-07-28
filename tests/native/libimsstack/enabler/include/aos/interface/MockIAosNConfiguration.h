@@ -158,6 +158,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip503CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryCountOnSinglePcscf, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryCountPerPcscf, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegRetryCountPerPcscfWithRaTime, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryCountResetPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryCountWithIpsecOnAuthFailure, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryDefaultPolicy, (), (const, override));

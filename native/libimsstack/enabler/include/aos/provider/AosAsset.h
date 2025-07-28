@@ -101,6 +101,7 @@ public:
             nRegRetry503Policy(CarrierConfig::Ims::SIP_503_CODE_POLICY_DEFAULT),
             nRegRetryCntOnSinglePcscf(0),
             nRegRetryCntPerPcscf(0),
+            nRegRetryCntPerPcscfWithRaTime(0),
             nRegRetryCntResetPolicy(CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION),
             nRegRetryCntWithIpsecOnAuthFailure(3),
             nRegRetryDefaultPolicy(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC),
@@ -213,6 +214,7 @@ public:
     IMS_SINT32 nRegRetry503Policy;
     IMS_SINT32 nRegRetryCntOnSinglePcscf;
     IMS_SINT32 nRegRetryCntPerPcscf;
+    IMS_SINT32 nRegRetryCntPerPcscfWithRaTime;
     IMS_SINT32 nRegRetryCntResetPolicy;
     IMS_SINT32 nRegRetryCntWithIpsecOnAuthFailure;
     IMS_SINT32 nRegRetryDefaultPolicy;

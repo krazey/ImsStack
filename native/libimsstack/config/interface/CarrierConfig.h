@@ -207,6 +207,7 @@ public:
         static const IMS_CHAR KEY_REG_RETRY_503_POLICY_INT[];
         static const IMS_CHAR KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT[];
         static const IMS_CHAR KEY_REG_RETRY_CNT_PER_PCSCF_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_CNT_PER_PCSCF_WITH_RA_TIME_INT[];
         static const IMS_CHAR KEY_REG_RETRY_CNT_RESET_POLICY_INT[];
         static const IMS_CHAR KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT[];
         static const IMS_CHAR KEY_REG_RETRY_DEFAULT_POLICY_INT[];
@@ -491,7 +492,8 @@ public:
             AWT_POLICY_RFC_RULE = 0,
             AWT_POLICY_FAILURE_TO_EVERY_PCSCF = 1,
             AWT_POLICY_FAILURE_TO_EACH_PCSCF = 2,
-            AWT_POLICY_SPECIFIED_INTERVAL = 3
+            AWT_POLICY_SPECIFIED_INTERVAL = 3,
+            AWT_POLICY_ONLY_RETRY_AFTER = 4
         };
 
         // Registration out-of-service policy

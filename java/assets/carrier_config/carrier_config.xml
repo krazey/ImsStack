@@ -409,6 +409,7 @@
     <int name="ims.reg_retry_503_policy_int" value="1"/>
     <int name="ims.reg_retry_cnt_on_single_pcscf_int" value="0"/>
     <int name="ims.reg_retry_cnt_per_pcscf_int" value="0"/>
+    <int name="ims.reg_retry_cnt_per_pcscf_with_ra_time_int" value="0"/>
     <int name="ims.reg_retry_cnt_reset_policy_int" value="0"/>
     <int name="ims.reg_retry_cnt_with_ipsec_on_auth_failure_int" value="3"/>
     <int name="ims.reg_retry_default_policy_int" value="0"/>
