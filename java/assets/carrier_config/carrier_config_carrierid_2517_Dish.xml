@@ -20,6 +20,8 @@
 
     <!-- Aos -->
     <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
+    <int name="ims.reg_actual_wait_time_policy_int" value="4"/>
+    <int name="ims.reg_retry_cnt_per_pcscf_with_ra_time_int" value="5"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array" num="2">
         <item value="3"/>
