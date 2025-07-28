@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,23 +43,8 @@ PUBLIC GLOBAL MEDIA_CONTENT_TYPE MediaProfileUtil::GetMediaType(IN const AString
     }
 }
 
-PUBLIC GLOBAL IMS_BOOL MediaProfileUtil::IsAudioType(IN const AString payloadType)
-{
-    return (GetMediaType(payloadType) == MEDIA_TYPE_AUDIO) ? IMS_TRUE : IMS_FALSE;
-}
-
-PUBLIC GLOBAL IMS_BOOL MediaProfileUtil::IsTextType(IN const AString payloadType)
-{
-    return (GetMediaType(payloadType) == MEDIA_TYPE_TEXT) ? IMS_TRUE : IMS_FALSE;
-}
-
-PUBLIC GLOBAL IMS_BOOL MediaProfileUtil::IsVideoType(IN const AString payloadType)
-{
-    return (GetMediaType(payloadType) == MEDIA_TYPE_VIDEO) ? IMS_TRUE : IMS_FALSE;
-}
-
 PUBLIC GLOBAL void MediaProfileUtil::SetRtcpRsRr(
-        OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig, IN IMS_BOOL bDirHold)
+        OUT MediaBaseProfile* pProfile, IN const MediaConfiguration* pConfig, IN IMS_BOOL bDirHold)
 {
     if (pProfile != IMS_NULL && pConfig != IMS_NULL)
     {

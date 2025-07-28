@@ -61,7 +61,6 @@ PUBLIC
 void MediaProfileFactory::DeleteProfile(IN MediaBaseProfile* pProfile)
 {
     delete pProfile;
-    pProfile = IMS_NULL;
 }
 
 PUBLIC
@@ -102,7 +101,6 @@ PUBLIC
 void MediaProfileFactory::DeletePayload(IN MediaBaseProfile::BasePayload* pPayload)
 {
     delete pPayload;
-    pPayload = IMS_NULL;
 }
 
 PUBLIC
@@ -133,20 +131,20 @@ void MediaProfileFactory::SetInstance(MediaProfileFactory* pMediaProfileFactory)
 }
 
 PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAudioPayload(
-        IN AudioProfile::Payload* payload)
+        IN const AudioProfile::Payload* payload)
 {
     return (payload != IMS_NULL) ? new AudioProfile::Payload(*payload)
                                  : new AudioProfile::Payload();
 }
 
 PRIVATE TextProfile::Payload* MediaProfileFactory::CreateTextPayload(
-        IN TextProfile::Payload* payload)
+        IN const TextProfile::Payload* payload)
 {
     return (payload != IMS_NULL) ? new TextProfile::Payload(*payload) : new TextProfile::Payload();
 }
 
 PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateVideoPayload(
-        IN VideoProfile::Payload* payload)
+        IN const VideoProfile::Payload* payload)
 {
     return (payload != IMS_NULL) ? new VideoProfile::Payload(*payload)
                                  : new VideoProfile::Payload();

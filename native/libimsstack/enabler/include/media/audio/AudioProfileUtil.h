@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,27 +23,80 @@
 class AudioProfileUtil
 {
 public:
-    static IMS_BOOL SetRtcpXr(OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
+    /**
+     * @brief Sets the RTCP-XR (Extended Reports) attribute in an audio profile.
+     *
+     * @param pAudioProfile [out] The audio profile to be updated.
+     * @param pConfig [in] The audio configuration containing the RTCP-XR setting.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
+     */
+    static IMS_BOOL SetRtcpXr(
+            OUT AudioProfile* pAudioProfile, IN const AudioConfiguration* pConfig);
+
+    /**
+     * @brief Retrieves the array of Application Specific (AS) bandwidth values for AMR codecs.
+     *
+     * @param eCodec The AMR codec type (AMR-NB or AMR-WB).
+     * @param nOctet The octet-align mode.
+     * @param bIpV6 Flag indicating if the network is IPv6.
+     * @return A constant pointer to an array of AS bandwidth values.
+     */
     static const IMS_SINT32* GetAmrAsArray(
             IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6);
+
+    /**
+     * @brief Retrieves the array of Application Specific (AS) bandwidth values for the EVS codec.
+     *
+     * @param nEVSFormat The EVS format (e.g., AMR-WB IO, EVS Primary).
+     * @param bIpV6 Flag indicating if the network is IPv6.
+     * @return A constant pointer to an array of AS bandwidth values.
+     */
     static const IMS_SINT32* GetEvsAsArray(IN IMS_SINT32 nEVSFormat, IN IMS_BOOL bIpV6);
+
+    /**
+     * @brief Converts an AMR codec mode-set to its corresponding AS bandwidth value.
+     *
+     * @param eCodec The AMR codec type.
+     * @param nOctet The octet-align mode.
+     * @param bIpV6 Flag indicating if the network is IPv6.
+     * @param nModeSet The mode-set to convert.
+     * @param bGetMaxValue If true, returns the maximum possible bandwidth value.
+     * @return The calculated AS bandwidth value.
+     */
     static IMS_SINT32 ConvertToBandwidthAS(IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet,
             IN IMS_BOOL bIpV6, IN IMS_SINT32 nModeSet, IN IMS_BOOL bGetMaxValue = IMS_FALSE);
+
+    /**
+     * @brief Converts an EVS codec format/mode to its corresponding AS bandwidth value.
+     */
     static IMS_SINT32 ConvertToBandwidthAS(IN IMS_SINT32 eCodec, IN IMS_BOOL bIpV6,
             IN IMS_SINT32 nCodecFormat, IN IMS_SINT32 nCodecMode,
             IN IMS_BOOL bGetMaxValue = IMS_FALSE);
-    static IMS_SINT32 ConvertToModeSet(
-            IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6, IN IMS_SINT32 nAs);
-    static IMS_BOOL UpdateAudioProfileBandwidth(
-            OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
+
+    /**
+     * @brief Parses the 'fmtp' attribute to find the largest mode-set value.
+     *
+     * @param strCodec The name of the codec.
+     * @param pPayload The payload containing the fmtp attribute string.
+     * @return The largest mode-set value found, or a negative value on error.
+     */
     static IMS_SINT32 GetLargestModesetInFmtp(
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
+
+    /**
+     * @brief Parses the 'fmtp' attribute to get a bitmask of all declared mode-sets.
+     *
+     * @param strCodec The name of the codec.
+     * @param pPayload The payload containing the fmtp attribute string.
+     * @return A bitmask representing the list of mode-sets.
+     */
     static IMS_SINT32 GetModesetList(
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
+
     /**
-     * @brief Set Anbr on/off from the media session config
+     * @brief Set ANBR on/off from the media session config
      *
-     * @param pProfile target profile that anbr to be set
+     * @param pProfile target profile that ANBR to be set
      * @param eServiceType The service type of the session
      * @param nSlotId The UICC slot id
      */

@@ -20,7 +20,6 @@
 #include "config/AudioConfiguration.h"
 #include "config/CodecAmrConfig.h"
 #include "config/CodecEvsConfig.h"
-#include "config/CodecPcmConfig.h"
 #include "config/CodecTelephoneEventConfig.h"
 #include "audio/AudioProfileUtil.h"
 
@@ -52,8 +51,8 @@ AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 
     SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
 
-    AudioProfile* pAudioProfile = static_cast<AudioProfile*>(pProfile);
-    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+    auto pAudioProfile = static_cast<AudioProfile*>(pProfile);
+    const AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
 
     pAudioProfile->SetTransportType("RTP/AVP");
     pAudioProfile->SetCandidateAttr(pAudioConfig->GetAudioCandidateAttribute());
@@ -110,8 +109,8 @@ void AudioProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, I
     }
 }
 
-PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCodecConfig,
-        IN AudioConfiguration* pAudioConfig, OUT AudioProfile::AudioFmtp* pFmtp)
+PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN const CodecAudioConfig* pCodecConfig,
+        IN const AudioConfiguration* pAudioConfig, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pCodecConfig == IMS_NULL || pAudioConfig == IMS_NULL || pFmtp == IMS_NULL)
     {
@@ -176,8 +175,8 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
         return IMS_NULL;
     }
 
-    CodecAmrConfig* pAmrConfig = static_cast<CodecAmrConfig*>(pCodecConfig);
-    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+    const CodecAmrConfig* pAmrConfig = static_cast<CodecAmrConfig*>(pCodecConfig);
+    const AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
     AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
     AString strCodecName;
 
@@ -226,8 +225,8 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
         return IMS_NULL;
     }
 
-    CodecEvsConfig* pEvsConfig = static_cast<CodecEvsConfig*>(pCodecConfig);
-    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+    const CodecEvsConfig* pEvsConfig = static_cast<CodecEvsConfig*>(pCodecConfig);
+    const AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
     AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp();
 
     AString strCodecName;
@@ -305,7 +304,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
 }
 
 PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayload(
-        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+        IN CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig)
 {
     if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -313,11 +312,11 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
         return IMS_NULL;
     }
 
-    CodecTelephoneEventConfig* pDtmfConfig = static_cast<CodecTelephoneEventConfig*>(pCodecConfig);
+    const CodecTelephoneEventConfig* pDtmfConfig =
+            static_cast<CodecTelephoneEventConfig*>(pCodecConfig);
     AString strCodecName;
     strCodecName.Sprintf("%s", "telephone-event");
 
-    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
     AudioProfile::TelephoneEventFmtp* pTelephoneEventFmtp =
             new AudioProfile::TelephoneEventFmtp(pDtmfConfig->GetEvents());
 
@@ -334,7 +333,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
 }
 
 PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
-        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+        IN const CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig)
 {
     if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
     {

@@ -38,30 +38,6 @@ public:
     static MEDIA_CONTENT_TYPE GetMediaType(IN const AString payloadType);
 
     /**
-     * @brief Check if this payload type is the audio
-     *
-     * @param payloadType media codec payload type
-     * @return IMS_TRUE if this payload type is the audio, otherwise IMS_FALSE
-     */
-    static IMS_BOOL IsAudioType(IN const AString payloadType);
-
-    /**
-     * @brief Check if this payload type is the text
-     *
-     * @param payloadType media codec payload type
-     * @return IMS_TRUE if this payload type is the text, otherwise IMS_FALSE
-     */
-    static IMS_BOOL IsTextType(IN const AString payloadType);
-
-    /**
-     * @brief Check if this payload type is the video
-     *
-     * @param payloadType media codec payload type
-     * @return IMS_TRUE if this payload type is the video, otherwise IMS_FALSE
-     */
-    static IMS_BOOL IsVideoType(IN const AString payloadType);
-
-    /**
      * @brief Set RTCP RS/RR from the media configuration
      *
      * @param pProfile target profile that RS/RR to be set
@@ -69,8 +45,8 @@ public:
      * @param bDirHold direction flag if the media direction is not sendrecv, this flag is IMS_TRUE,
      * otherwise IMS_FALSE
      */
-    static void SetRtcpRsRr(
-            OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig, IN IMS_BOOL bDirHold);
+    static void SetRtcpRsRr(OUT MediaBaseProfile* pProfile, IN const MediaConfiguration* pConfig,
+            IN IMS_BOOL bDirHold);
 };
 
 #endif
