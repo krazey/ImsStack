@@ -25,7 +25,8 @@ MtsDynamicLoader::MtsDynamicLoader(IN IMtsContext& objContext) :
         m_objContext(objContext),
         m_pMtsSipFormUtils(IMS_NULL),
         m_pMtsSmUtils(IMS_NULL),
-        m_pMtsGeolocationUtils(IMS_NULL)
+        m_pMtsGeolocationUtils(IMS_NULL),
+        m_pMtsAosUtils(IMS_NULL)
 {
     IMS_TRACE_I("+MtsDynamicLoader [slot_%d]", m_objContext.GetSlotId(), 0, 0);
     Initialize();
@@ -45,6 +46,7 @@ void MtsDynamicLoader::Initialize()
     m_pMtsSipFormUtils = new MtsSipFormUtils(m_objContext.GetSlotId());
     m_pMtsSmUtils = new MtsSmUtils();
     m_pMtsGeolocationUtils = new MtsGeolocationUtils();
+    m_pMtsAosUtils = new MtsAosUtils();
 }
 
 PRIVATE
@@ -68,5 +70,11 @@ void MtsDynamicLoader::DestroyAll()
     {
         delete m_pMtsGeolocationUtils;
         m_pMtsGeolocationUtils = IMS_NULL;
+    }
+
+    if (m_pMtsAosUtils != IMS_NULL)
+    {
+        delete m_pMtsAosUtils;
+        m_pMtsAosUtils = IMS_NULL;
     }
 }

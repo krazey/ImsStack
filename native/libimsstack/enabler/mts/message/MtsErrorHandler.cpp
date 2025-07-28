@@ -25,7 +25,6 @@
 #include "INetworkWatcher.h"
 #include "ISipConfigV.h"
 #include "IPageMessage.h"
-#include "ImsAosParameter.h"
 #include "ImsEventDef.h"
 #include "IuMtsApp.h"
 #include "MtsDef.h"
@@ -143,7 +142,7 @@ IMS_SINT32 MtsErrorHandler::Handle(
     }
 
     IMS_SINT32 nPolicy = GetRegistrationRecoveryPolicy(piMessage);
-    if (nPolicy != MTS_REG_RECOVERY_POLICY_NONE)
+    if (nPolicy != MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE)
     {
         objMtsService.RequestRegistrationRecovery(nPolicy);
     }
@@ -153,7 +152,8 @@ IMS_SINT32 MtsErrorHandler::Handle(
         SetRetryAfterStatus(
                 m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->GetRetryAfterValue(
                         piMessage));
-        if (IsRegisterWithNextPcscfRequired(piMessage) && nPolicy == MTS_REG_RECOVERY_POLICY_NONE)
+        if (IsRegisterWithNextPcscfRequired(piMessage) &&
+                nPolicy == MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE)
         {
             objMtsService.RequestRegisterWithNextPcscf(m_nRetryAfterValue);
             nResult = MO_ERROR_GENERIC;
@@ -196,7 +196,7 @@ IMS_SINT32 MtsErrorHandler::GetRegistrationRecoveryPolicy(IN const IMessage* piM
         return Get5xxResponsePolicy(piMessage);
     }
 
-    return MTS_REG_RECOVERY_POLICY_NONE;
+    return MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
 }
 
 PRIVATE
@@ -211,7 +211,7 @@ IMS_SINT32 MtsErrorHandler::GetExpiryTimerFPolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get4xxResponsePolicy(IN const IMessage* piMessage) const
 {
-    IMS_SINT32 nPolicy = MTS_REG_RECOVERY_POLICY_NONE;
+    IMS_SINT32 nPolicy = MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
 
     switch (nStatusCode)
@@ -272,7 +272,7 @@ IMS_SINT32 MtsErrorHandler::Get408ResponsePolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get5xxResponsePolicy(IN const IMessage* piMessage) const
 {
-    IMS_SINT32 nPolicy = MTS_REG_RECOVERY_POLICY_NONE;
+    IMS_SINT32 nPolicy = MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
 
     switch (nStatusCode)
@@ -306,7 +306,7 @@ IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) c
     IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
             CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT);
 
-    if (nPolicy == ImsAosControl::REGISTER_REINITIATE)
+    if (nPolicy == MtsRegRecoveryPolicy::REGISTER_REINITIATE)
     {
         const AString& strPhrase = piMessage->GetReasonPhrase();
         if (strPhrase.GetLength() > 0)
@@ -320,7 +320,7 @@ IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) c
             }
         }
         // In case of no reason header and no "OUTAGE"
-        nPolicy = MTS_REG_RECOVERY_POLICY_NONE;
+        nPolicy = MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
     }
 
     return nPolicy;

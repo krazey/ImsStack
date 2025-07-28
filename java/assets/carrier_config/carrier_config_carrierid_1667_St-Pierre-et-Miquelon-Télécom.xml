@@ -34,7 +34,7 @@
     </int-array>
 
     <!-- Mts -->
-    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="10"/>
+    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="9"/>
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
     <int-array name="imssms.sms_evaluate_radio_status_for_error_codes_int_array" num="9">
         <item value="403"/>

@@ -115,7 +115,7 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_403_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::REGISTER_REFRESH));
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::REGISTER_REFRESH))
@@ -145,7 +145,7 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_404_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::PCSCF_NEXT));
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::PCSCF_NEXT)).Times(1);
@@ -174,7 +174,7 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_406_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::IPSEC_DISABLED));
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::IPSEC_DISABLED))
@@ -204,7 +204,7 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_408_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,
@@ -234,7 +234,7 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_500_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,
@@ -264,7 +264,7 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,
@@ -296,7 +296,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::REGISTER_REINITIATE));
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::REGISTER_REINITIATE))
@@ -326,7 +326,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::REGISTER_REINITIATE));
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(_)).Times(0);
@@ -355,8 +355,8 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithNextPcscfRequired)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
-            .WillByDefault(Return(MTS_REG_RECOVERY_POLICY_NONE));
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
+            .WillByDefault(Return(MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE));
     Engine::GetConfiguration()->RefreshConfigs(SLOT_ID);
 
     EXPECT_CALL(objMockMtsService,
@@ -384,7 +384,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_504_RESPONSE_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,
@@ -412,7 +412,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
             .WillByDefault(Return(objErrorCodes));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,
@@ -442,7 +442,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
             .WillByDefault(Return(MO_ERROR_RETRY));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,
@@ -472,7 +472,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
             .WillByDefault(Return(MO_ERROR_FALLBACK));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT,
-                    MTS_REG_RECOVERY_POLICY_NONE))
+                    MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
             .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
 
     EXPECT_CALL(objMockMtsService,

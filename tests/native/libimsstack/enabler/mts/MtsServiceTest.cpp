@@ -44,6 +44,7 @@
 #include "TestConfigService.h"
 #include "TestImsRadioService.h"
 #include <gtest/gtest.h>
+#include "utility/MtsDynamicLoader.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -96,6 +97,7 @@ public:
     MockIMtsServiceState* pMockEmergencyServiceState;
     TestMtsService* pNormalService;
     TestMtsService* pEmergencyService;
+    MtsDynamicLoader* pMtsDynamicLoader;
 
     TestConfigService objConfigService;
     TestImsRadioService objImsRadioService;
@@ -123,6 +125,7 @@ protected:
 
         pMockNormalServiceState = new MockIMtsServiceState();
         pMockEmergencyServiceState = new MockIMtsServiceState();
+        pMtsDynamicLoader = new MtsDynamicLoader(objMockContext);
 
         pNormalService = new TestMtsService(objMockContext, MtsServiceType::NORMAL);
         pNormalService->Init();
@@ -141,6 +144,7 @@ protected:
         pConnector = &JniEnablerConnector::GetInstance();
         pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTS, &objMockJniEnabler);
         ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockJniAppThread));
+        ON_CALL(objMockContext, GetDynamicLoader).WillByDefault(ReturnRef(*pMtsDynamicLoader));
     }
 
     virtual void TearDown() override
@@ -151,6 +155,7 @@ protected:
 
         delete pNormalService;
         delete pEmergencyService;
+        delete pMtsDynamicLoader;
     }
 };
 
@@ -294,14 +299,14 @@ TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosResumed)
 TEST_F(MtsServiceTest, RequestRegistrationRecoveryToAos)
 {
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
-    pNormalService->RequestRegistrationRecovery(ImsAosControl::PCSCF_NEXT);
+    pNormalService->RequestRegistrationRecovery(MtsRegRecoveryPolicy::PCSCF_NEXT);
 }
 
 TEST_F(MtsServiceTest, RequestRegistrationRecoveryWhenAosIsDetached)
 {
     pNormalService->ReplaceIImsAos(IMS_NULL);
     EXPECT_CALL(objMockIImsAos, Control(_)).Times(0);
-    pNormalService->RequestRegistrationRecovery(ImsAosControl::PCSCF_NEXT);
+    pNormalService->RequestRegistrationRecovery(MtsRegRecoveryPolicy::PCSCF_NEXT);
 }
 
 TEST_F(MtsServiceTest, RequestRegisterWithNextPcscfToAos)

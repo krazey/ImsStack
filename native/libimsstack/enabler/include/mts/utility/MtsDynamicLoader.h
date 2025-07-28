@@ -18,6 +18,7 @@
 #define MTS_DYNAMIC_LOADER_
 
 #include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsAosUtils.h"
 #include "utility/MtsGeolocationUtils.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
@@ -39,6 +40,7 @@ public:
     {
         return m_pMtsGeolocationUtils;
     };
+    inline MtsAosUtils* GetMtsAosUtils() const override { return m_pMtsAosUtils; };
 
 private:
     void Initialize();
@@ -49,6 +51,7 @@ private:
     MtsSipFormUtils* m_pMtsSipFormUtils;
     MtsSmUtils* m_pMtsSmUtils;
     MtsGeolocationUtils* m_pMtsGeolocationUtils;
+    MtsAosUtils* m_pMtsAosUtils;
 };
 
 #endif

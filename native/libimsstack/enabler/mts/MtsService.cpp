@@ -40,6 +40,8 @@
 #include "ServiceImsRadio.h"
 #include "ServicePhoneInfo.h"
 #include "message/IMtsMessageController.h"
+#include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsAosUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTS__;
@@ -328,7 +330,13 @@ void MtsService::RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) const
 {
     if (m_piImsAos != IMS_NULL)
     {
-        m_piImsAos->Control(nRecoveryType);
+        IMS_SINT32 nAosControlPolicy =
+                m_objContext.GetDynamicLoader().GetMtsAosUtils()->ConvertToAosControl(
+                        nRecoveryType);
+        if (nAosControlPolicy != MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE)
+        {
+            m_piImsAos->Control(nAosControlPolicy);
+        }
     }
     else
     {
