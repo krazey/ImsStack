@@ -103,6 +103,15 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
     {
+        IMS_TRACE_D("AcceptUpdate : User accepted the answer", 0, 0, 0);
+        ISession* piSession = &m_objContext.GetSession()->GetISession();
+        m_objContext.GetMediaManager().Run(piSession, IMS_NULL, IMS_FALSE);
+
+        if (m_objContext.GetUpdatingInfo().IsModified())
+        {
+            m_objContext.GetPreconditionManager().OnCallModified(piSession);
+        }
+
         m_objContext.GetUiNotifier().SendUpdated();
         return CallStateName::ESTABLISHED;
     }
@@ -241,8 +250,14 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
                 RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
     }
 
-    // TODO: Internal error handling
-    HandleSdpAnswer();
+    if (HandleSdpAnswer() == IMS_FAILURE)
+    {
+        IMS_TRACE_E(0, "SessionUpdated : SDP negotiation failed", 0, 0, 0);
+        const CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+        return CallStateName::TERMINATING;
+    }
 
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {

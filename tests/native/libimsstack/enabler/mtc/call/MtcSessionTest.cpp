@@ -919,6 +919,25 @@ TEST_F(MtcSessionTest, HandleRequestWithPrackUpdatesCallType)
     EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
 }
 
+TEST_F(MtcSessionTest, HandleRequestWithAckUpdatesCallType)
+{
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    RequestType eType = RequestType::ACK;
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::VT, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
+}
+
 TEST_F(MtcSessionTest, HandleRequestUpdatesVideoCapabilityByAvchange)
 {
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);

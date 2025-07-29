@@ -235,11 +235,14 @@ TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstablished)
 {
+    ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VIDEO_RTT));
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(CallType::VIDEO_RTT)).Times(1);
+    EXPECT_CALL(objMediaManager, Run(&objSession, _, IMS_FALSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession)).Times(1);
     EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
     EXPECT_EQ(CallStateName::ESTABLISHED,
@@ -897,6 +900,19 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAndSendHeldByInOrder)
     }
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedTerminatesCallIfNoSdpAnswerForOfferlessInvite)
+{
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    pUpdatingInfo->SetTargetCallType(CallType::UNKNOWN);
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+
+    const CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objReason));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReason));
+    EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionUpdated(&objSession));
 }
 
 TEST_F(UpdatingStateTest, SessionCancelDeliveryFailedReturnsUpdatingState)
