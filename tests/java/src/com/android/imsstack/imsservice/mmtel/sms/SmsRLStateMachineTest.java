@@ -485,7 +485,73 @@ public class SmsRLStateMachineTest {
                                  SmsManager.RESULT_NETWORK_ERROR, 0);
     }
 
+    @Test
+    public void getSendStatus_errorWhenOnWifiAndRoaming() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_errorWhenOnWifiAndCellularNotAvailable() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(false);
+        mSmsRLStateMachine.setCellularNetworkAvailable(false);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_retryWhenOnWifiAndNotRoamingAndCellularAvailable() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(false);
+        mSmsRLStateMachine.setCellularNetworkAvailable(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_retryWhenNotOnWifi() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(false);
+        mSmsRLStateMachine.setRoaming(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_retryWhenNetworkStatusNotChecked() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{40});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
     private static class TestSmsRLStateMachine extends SmsRLStateMachine {
+        private boolean mIsImsRegisteredOnWifi = false;
+        private boolean mIsRoaming = false;
+        private boolean mIsCellularNetworkAvailable = true;
+
         TestSmsRLStateMachine(int token, int messageType, MtsController mtsController,
                 ImsCallContext context, SmsRelayLayer.Listener listener, String psiSmsc,
                 String destinationAddress) {
@@ -516,6 +582,33 @@ public class SmsRLStateMachineTest {
                 sSemaphore.release();
             }
         };
+
+        @Override
+        protected boolean isImsRegisteredOnWifi() {
+            return mIsImsRegisteredOnWifi;
+        }
+
+        @Override
+        protected boolean isRoaming() {
+            return mIsRoaming;
+        }
+
+        @Override
+        protected boolean isCellularNetworkAvailable() {
+            return mIsCellularNetworkAvailable;
+        }
+
+        public void setImsRegisteredOnWifi(boolean isImsRegisteredOnWifi) {
+            mIsImsRegisteredOnWifi = isImsRegisteredOnWifi;
+        }
+
+        public void setRoaming(boolean isRoaming) {
+            mIsRoaming = isRoaming;
+        }
+
+        public void setCellularNetworkAvailable(boolean isCellularNetworkAvailable) {
+            mIsCellularNetworkAvailable = isCellularNetworkAvailable;
+        }
     }
 
     private boolean waitForEvent(Semaphore semaphore, int expectedNumberOfEvents) {

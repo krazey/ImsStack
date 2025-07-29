@@ -47,4 +47,8 @@
         <item value="505"/>
         <item value="513"/>
     </int-array>
+    <int-array name="imssms.sms_evaluate_radio_status_for_rp_error_causes_int_array" num="2">
+        <item value="41"/>
+        <item value="42"/>
+    </int-array>
 </carrier_config>
