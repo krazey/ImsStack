@@ -18,7 +18,6 @@
 #define MTC_SERVICE_H_
 
 #include "AString.h"
-#include "ICoreService.h"
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IImsAosMonitor.h"
@@ -28,10 +27,13 @@
 #include "helper/SrvccStateManager.h"
 #include "helper/SsacTimerHandler.h"
 
+class ICoreService;
 class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
 class IMtcContext;
+class IPageMessage;
+class IReference;
 class ISsacTimerHandler;
 class MtcAosEventHandler;
 class MtcNetworkWatcher;
@@ -91,13 +93,14 @@ public:
     inline void NotifyJniEnablerSet() override {}
 
     // ICoreServiceListener implementation
-    inline void CoreService_PageMessageReceived(IN ICoreService*, IN IPageMessage*) override {}
-    inline void CoreService_ReferenceReceived(IN ICoreService*, IN IReference*) override{};
-    void CoreService_ServiceClosed(
-            IN ICoreService* piService, IN IReasonInfo* piReasonInfo) override;
+    void CoreService_PageMessageReceived(
+            IN ICoreService* piService, IN IPageMessage* piMessage) override;
+    void CoreService_ReferenceReceived(
+            IN ICoreService* piService, IN IReference* piReference) override;
+    inline void CoreService_ServiceClosed(IN ICoreService*, IN IReasonInfo*) override {};
     void CoreService_SessionInvitationReceived(
             IN ICoreService* piService, IN ISession* piSession) override;
-    inline void CoreService_UnsolicitedNotifyReceived(IN ICoreService*, IN IMessage*) override{};
+    inline void CoreService_UnsolicitedNotifyReceived(IN ICoreService*, IN IMessage*) override {};
     void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 

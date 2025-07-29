@@ -36,10 +36,12 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "MockIPageMessage.h"
 #include "MockIReference.h"
 #include "MockISession.h"
 #include "MtcService.h"
 #include "PlatformContext.h"
+#include "SipStatusCode.h"
 #include "TestConnector.h"
 #include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallManager.h"
@@ -773,18 +775,22 @@ TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
-TEST_F(MtcServiceTest, CoreServicePageMessageReceivedDoesNothing)
+TEST_F(MtcServiceTest, CoreServicePageMessageReceivedAndRejectWith488)
 {
-    IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
-    pNormalMtcService->CoreService_PageMessageReceived(&objMockCoreService, piMessage);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+    MockIPageMessage objMockIPageMessage;
+    EXPECT_CALL(objMockIPageMessage, Reject(SipStatusCode::SC_488, _)).Times(1);
+    EXPECT_CALL(objMockIPageMessage, Destroy).Times(1);
+
+    pNormalMtcService->CoreService_PageMessageReceived(&objMockCoreService, &objMockIPageMessage);
 }
 
-TEST_F(MtcServiceTest, CoreServiceReferenceReceivedDoesNothing)
+TEST_F(MtcServiceTest, CoreServiceReferenceReceivedAndRejectWith488)
 {
     MockIReference objMockReference;
+    EXPECT_CALL(objMockReference, RejectEx(SipStatusCode::SC_488)).Times(1);
+    EXPECT_CALL(objMockReference, Destroy).Times(1);
+
     pNormalMtcService->CoreService_ReferenceReceived(&objMockCoreService, &objMockReference);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 TEST_F(MtcServiceTest, CoreServiceServiceClosedDoesNothing)
