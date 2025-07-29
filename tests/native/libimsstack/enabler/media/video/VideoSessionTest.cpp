@@ -48,17 +48,20 @@ protected:
         m_pSession->SetMediaSessionListener(&m_objMockListener);
 
         VideoProfile::Payload* pLocalPayload = new VideoProfile::Payload();
-        VideoProfile::AvcFmtp* pLocalFmtp = new VideoProfile::AvcFmtp();
+        std::shared_ptr<VideoProfile::AvcFmtp> pLocalFmtp =
+                std::make_shared<VideoProfile::AvcFmtp>();
         pLocalPayload->SetRtpMap(100, "H264", 90000, 1);
         pLocalPayload->SetFmtp(pLocalFmtp);
 
         VideoProfile::Payload* pPeerPayload = new VideoProfile::Payload();
-        VideoProfile::AvcFmtp* pPeerFmtp = new VideoProfile::AvcFmtp();
+        std::shared_ptr<VideoProfile::AvcFmtp> pPeerFmtp =
+                std::make_shared<VideoProfile::AvcFmtp>();
         pPeerPayload->SetRtpMap(100, "H264", 90000, 1);
         pPeerPayload->SetFmtp(pPeerFmtp);
 
         VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
-        VideoProfile::AvcFmtp* pNegoFmtp = new VideoProfile::AvcFmtp();
+        std::shared_ptr<VideoProfile::AvcFmtp> pNegoFmtp =
+                std::make_shared<VideoProfile::AvcFmtp>();
         pNegoPayload->SetRtpMap(100, "H264", 90000, 1);
         pNegoPayload->SetFmtp(pNegoFmtp);
 

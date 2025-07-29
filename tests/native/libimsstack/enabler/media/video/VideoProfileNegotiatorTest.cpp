@@ -100,7 +100,7 @@ protected:
         auto* pPayload = new VideoProfile::Payload();
         pPayload->SetRtpMap(nPayloadNum, "H264", 90000);
 
-        auto* pFmtp = new VideoProfile::AvcFmtp();
+        auto pFmtp = std::make_shared<VideoProfile::AvcFmtp>();
         pFmtp->SetResolution(eResolution);
         pFmtp->SetLevel(nLevel);
         pFmtp->SetProfileLevelId(strProfileLevelId);
@@ -127,7 +127,7 @@ protected:
         auto* pPayload = new VideoProfile::Payload();
         pPayload->SetRtpMap(nPayloadNum, "H265", 90000);
 
-        auto* pFmtp = new VideoProfile::HevcFmtp();
+        auto pFmtp = std::make_shared<VideoProfile::HevcFmtp>();
         pFmtp->SetResolution(eResolution);
         pFmtp->SetLevel(nLevel * 3);  // Store the SDP nLevel-id value
         pFmtp->SetProfile(eHevcProfile);
@@ -179,7 +179,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateBasicSuccess)
             kPeerPayload);  // Should take peer's pPayload number in offer scenario
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
 
-    auto pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
     EXPECT_NE(pNegoFmtp, nullptr);
     EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
     EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
@@ -330,7 +330,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)
             kLocalPayload + 1);  // Should take peer's pPayload number in offer scenario
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
 
-    auto pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
     EXPECT_NE(pNegoFmtp, nullptr);
     EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
     EXPECT_EQ(pNegoFmtp->GetLevel(), 15);
@@ -359,8 +359,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMatchedInMultipleItems)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    VideoProfile::VideoFmtp* pNegoFmtp =
-            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pNegoFmtp = pNegoPayload->GetFmtp();
 
     // Check the negotiated level and the index, direction
     EXPECT_EQ(pNegoFmtp->GetLevel(), 12);
@@ -386,7 +385,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    auto pNegoFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pNegoFmtp = pNegoPayload->GetFmtp();
 
     EXPECT_EQ(pNegoFmtp->GetLevel(), 30);                        // lower Level
     EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
@@ -414,7 +413,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
-    auto pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
     EXPECT_NE(pNegoFmtp, nullptr);
     // Check that the eResolution was set based on GetAvcMaxResolutionFromLevel or highest local
     // In this case, local VGA (index 0) was the temp pPayload. SetClosestAvc uses nLevel 31 ->
@@ -443,7 +442,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    auto pNegoFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pNegoFmtp = pNegoPayload->GetFmtp();
 
     EXPECT_EQ(pNegoFmtp->GetLevel(), 90);                        // lower nLevel
     EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index

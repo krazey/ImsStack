@@ -102,7 +102,7 @@ protected:
         m_pBaseProfile = new VideoProfile();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
         pAvcPayload->SetRtpMap(AVC_PAYLOAD, "H264", 90000, 1);
-        VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+        auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
         pAvcFmtp->SetProfile(AVC_PROFILE_B);
         pAvcFmtp->SetLevel(12);
         pAvcPayload->SetFmtp(pAvcFmtp);
@@ -210,7 +210,7 @@ TEST_F(VideoNegoTest, testIsMediaCodecFromSdpSupported)
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
     pAvcPayload->SetRtpMap(99, "H264", 90000, 1);
 
-    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     pAvcFmtp->SetProfile(AVC_PROFILE_B);
     pAvcFmtp->SetLevel(12);
     pAvcPayload->SetFmtp(pAvcFmtp);
@@ -373,7 +373,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
     pAvcPayload->SetRtpMap(99, "H264", 90000, 1);
 
-    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     pAvcFmtp->SetProfile(AVC_PROFILE_B);
     pAvcFmtp->SetLevel(12);
     pAvcPayload->SetFmtp(pAvcFmtp);
@@ -425,7 +425,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
     pAvcPayload->SetRtpMap(99, "H264", 90000, 1);
 
-    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     pAvcFmtp->SetProfile(AVC_PROFILE_B);
     pAvcFmtp->SetLevel(12);
     pAvcPayload->SetFmtp(pAvcFmtp);

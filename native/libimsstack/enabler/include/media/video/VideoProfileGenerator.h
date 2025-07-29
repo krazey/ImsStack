@@ -42,7 +42,8 @@ protected:
     VideoProfile::Payload* CreateHevcPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     void SetVideoCodecFmtp(IN const CodecVideoConfig* pCodecConfig,
-            IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::VideoFmtp* pFmtp);
+            IN const VideoConfiguration* pVideoConfig,
+            OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp);
     void SetVideoCodecPayload(IN const CodecVideoConfig* pCodecConfig,
             IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload);
     IMS_SINT32 SetTransportCapability(OUT VideoProfile* pVideoProfile);

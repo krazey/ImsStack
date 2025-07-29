@@ -140,12 +140,11 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
 
     auto pAvcConfig = static_cast<CodecAvcConfig*>(pCodecConfig);
     const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
-    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
 
     if (pAvcConfig->GetProfileLevelId() == AString::ConstEmpty())
     {
         IMS_TRACE_D("CreateAvcPayload(): ProfileLevelId is empty, delete pAvcFmtp", 0, 0, 0);
-        delete pAvcFmtp;
         return IMS_NULL;
     }
 
@@ -201,7 +200,7 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
 
     const CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
     const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
-    VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
+    auto pHevcFmtp = std::make_shared<VideoProfile::HevcFmtp>();
 
     SetVideoCodecFmtp(pHevcConfig, pVideoConfig, pHevcFmtp);
 
@@ -232,7 +231,8 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
 }
 
 PROTECTED void VideoProfileGenerator::SetVideoCodecFmtp(IN const CodecVideoConfig* pCodecConfig,
-        IN const VideoConfiguration* pVideoConfig, OUT VideoProfile::VideoFmtp* pFmtp)
+        IN const VideoConfiguration* pVideoConfig,
+        OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
     if (pCodecConfig == IMS_NULL || pVideoConfig == IMS_NULL || pFmtp == IMS_NULL)
     {
@@ -499,8 +499,7 @@ PROTECTED void VideoProfileGenerator::SetMaxProfileFrameRate(OUT VideoProfile* p
             continue;
         }
 
-        IMS_SINT32 nFrameRate =
-                static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->GetFramerate();
+        IMS_SINT32 nFrameRate = pPayload->GetFmtp()->GetFramerate();
 
         if (nFrameRate > nMaxFrameRate)
         {

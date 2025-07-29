@@ -54,7 +54,7 @@ protected:
 
         m_pLocalProfile = new VideoProfile();
         m_pLocalProfile->SetTransportType("RTP/AVP");
-        VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+        auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
         pAvcPayload->GetRtpMap().SetPayloadType("H264");
         pAvcPayload->SetFmtp(pAvcFmtp);

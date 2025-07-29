@@ -178,7 +178,7 @@ PROTECTED IMS_BOOL VideoSdpGenerator::GenerateFmtp(
 
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
     {
-        auto pAvcFmtp = static_cast<VideoProfile::AvcFmtp*>(pPayload->GetFmtp());
+        auto pAvcFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pPayload->GetFmtp());
 
         if (pAvcFmtp == IMS_NULL)
         {
@@ -190,7 +190,7 @@ PROTECTED IMS_BOOL VideoSdpGenerator::GenerateFmtp(
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
-        auto pHevcFmtp = static_cast<VideoProfile::HevcFmtp*>(pPayload->GetFmtp());
+        auto pHevcFmtp = std::static_pointer_cast<VideoProfile::HevcFmtp>(pPayload->GetFmtp());
 
         if (pHevcFmtp == IMS_NULL)
         {
@@ -240,8 +240,7 @@ void VideoSdpGenerator::GenerateImageAttribute(
     }
 
     AString strImageAttr = AString::ConstNull();
-    VIDEO_RESOLUTION eResolution =
-            static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->GetResolution();
+    VIDEO_RESOLUTION eResolution = pPayload->GetFmtp()->GetResolution();
 
     if (pPayload->IsImageAttrIncluded())
     {
@@ -265,8 +264,7 @@ void VideoSdpGenerator::GenerateFrameSize(
     }
 
     AString strFrameSize = AString::ConstNull();
-    VIDEO_RESOLUTION eResolution =
-            static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->GetResolution();
+    VIDEO_RESOLUTION eResolution = pPayload->GetFmtp()->GetResolution();
 
     if (pPayload->IsFrameSizeIncluded())
     {
@@ -758,7 +756,8 @@ PROTECTED IMS_BOOL VideoSdpGenerator::GetWidthHeightFromResolutionId(
     return IMS_TRUE;
 }
 
-PROTECTED AString VideoSdpGenerator::GenerateAvcFmtp(IN VideoProfile::AvcFmtp* pAvcFmtp)
+PROTECTED AString VideoSdpGenerator::GenerateAvcFmtp(
+        IN std::shared_ptr<VideoProfile::AvcFmtp> pAvcFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
@@ -776,7 +775,7 @@ PROTECTED AString VideoSdpGenerator::GenerateAvcFmtp(IN VideoProfile::AvcFmtp* p
 }
 
 PROTECTED void VideoSdpGenerator::AddProfileLevelIdToFmtp(
-        IN VideoProfile::AvcFmtp* pFmtp, OUT AString& fmtp)
+        IN std::shared_ptr<VideoProfile::AvcFmtp> pFmtp, OUT AString& fmtp)
 {
     if (pFmtp != IMS_NULL)
     {
@@ -795,7 +794,7 @@ PROTECTED void VideoSdpGenerator::AddProfileLevelIdToFmtp(
 }
 
 PROTECTED void VideoSdpGenerator::AddPacketizationModeToFmtp(
-        IN VideoProfile::VideoFmtp* pFmtp, OUT AString& fmtp)
+        IN std::shared_ptr<VideoProfile::VideoFmtp> pFmtp, OUT AString& fmtp)
 {
     if (pFmtp != IMS_NULL)
     {
@@ -814,7 +813,7 @@ PROTECTED void VideoSdpGenerator::AddPacketizationModeToFmtp(
 }
 
 PROTECTED void VideoSdpGenerator::AddSpropParameterSetsToFmtp(
-        IN VideoProfile::VideoFmtp* pFmtp, OUT AString& fmtp)
+        IN std::shared_ptr<VideoProfile::VideoFmtp> pFmtp, OUT AString& fmtp)
 {
     if (pFmtp != IMS_NULL)
     {
@@ -832,7 +831,8 @@ PROTECTED void VideoSdpGenerator::AddSpropParameterSetsToFmtp(
     }
 }
 
-PROTECTED AString VideoSdpGenerator::GenerateHevcFmtp(IN VideoProfile::HevcFmtp* pHevcFmtp)
+PROTECTED AString VideoSdpGenerator::GenerateHevcFmtp(
+        IN std::shared_ptr<VideoProfile::HevcFmtp> pHevcFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
@@ -849,7 +849,7 @@ PROTECTED AString VideoSdpGenerator::GenerateHevcFmtp(IN VideoProfile::HevcFmtp*
 }
 
 PROTECTED void VideoSdpGenerator::AddProfileIdToFmtp(
-        IN VideoProfile::HevcFmtp* pFmtp, OUT AString& fmtp)
+        IN std::shared_ptr<VideoProfile::HevcFmtp> pFmtp, OUT AString& fmtp)
 {
     if (pFmtp != IMS_NULL)
     {
@@ -868,7 +868,7 @@ PROTECTED void VideoSdpGenerator::AddProfileIdToFmtp(
 }
 
 PROTECTED void VideoSdpGenerator::AddLevelIdToFmtp(
-        IN VideoProfile::HevcFmtp* pFmtp, OUT AString& fmtp)
+        IN std::shared_ptr<VideoProfile::HevcFmtp> pFmtp, OUT AString& fmtp)
 {
     if (pFmtp != IMS_NULL)
     {
@@ -887,7 +887,7 @@ PROTECTED void VideoSdpGenerator::AddLevelIdToFmtp(
 }
 
 PROTECTED void VideoSdpGenerator::AddSpropParamsToFmtp(
-        IN VideoProfile::HevcFmtp* pFmtp, OUT AString& fmtp)
+        IN std::shared_ptr<VideoProfile::HevcFmtp> pFmtp, OUT AString& fmtp)
 {
     if (pFmtp != IMS_NULL)
     {

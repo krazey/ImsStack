@@ -47,14 +47,14 @@ const AString SPROP_PARAMSET = "AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,"
 class VideoSdpGeneratorAvcTest : public VideoSdpGenerator, public ::testing::Test
 {
 public:
-    VideoProfile::AvcFmtp* m_pAvcFmtpFull;
-    VideoProfile::AvcFmtp* m_pAvcFmtpEmpty;
+    std::shared_ptr<VideoProfile::AvcFmtp> m_pAvcFmtpFull;
+    std::shared_ptr<VideoProfile::AvcFmtp> m_pAvcFmtpEmpty;
 
 protected:
     virtual void SetUp() override
     {
-        m_pAvcFmtpFull = new VideoProfile::AvcFmtp();
-        m_pAvcFmtpEmpty = new VideoProfile::AvcFmtp();
+        m_pAvcFmtpFull = std::make_shared<VideoProfile::AvcFmtp>();
+        m_pAvcFmtpEmpty = std::make_shared<VideoProfile::AvcFmtp>();
 
         m_pAvcFmtpFull->SetProfileLevelId(PROFILE_LEVEL_ID);
         m_pAvcFmtpFull->SetPacketizationMode(PACKETIZATION_MODE);
@@ -65,11 +65,7 @@ protected:
         m_pAvcFmtpFull->SetVisibleSpropParam(IMS_TRUE);
     }
 
-    virtual void TearDown() override
-    {
-        delete m_pAvcFmtpFull;
-        delete m_pAvcFmtpEmpty;
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(VideoSdpGeneratorAvcTest, TestGenerateAvcFmtp)
@@ -130,14 +126,14 @@ TEST_F(VideoSdpGeneratorAvcTest, TestAddSpropParameterSetsToFmtp)
 class VideoSdpGeneratorHevcTest : public VideoSdpGenerator, public ::testing::Test
 {
 public:
-    VideoProfile::HevcFmtp* m_pHevcFmtpFull;
-    VideoProfile::HevcFmtp* m_pHevcFmtpEmpty;
+    std::shared_ptr<VideoProfile::HevcFmtp> m_pHevcFmtpFull;
+    std::shared_ptr<VideoProfile::HevcFmtp> m_pHevcFmtpEmpty;
 
 protected:
     virtual void SetUp() override
     {
-        m_pHevcFmtpFull = new VideoProfile::HevcFmtp();
-        m_pHevcFmtpEmpty = new VideoProfile::HevcFmtp();
+        m_pHevcFmtpFull = std::make_shared<VideoProfile::HevcFmtp>();
+        m_pHevcFmtpEmpty = std::make_shared<VideoProfile::HevcFmtp>();
 
         m_pHevcFmtpFull->SetProfile(PROFILE_ID);
         m_pHevcFmtpFull->SetLevel(LEVEL_ID);
@@ -150,11 +146,7 @@ protected:
         m_pHevcFmtpFull->SetVisibleSpropParam(IMS_TRUE);
     }
 
-    virtual void TearDown() override
-    {
-        delete m_pHevcFmtpFull;
-        delete m_pHevcFmtpEmpty;
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(VideoSdpGeneratorHevcTest, TestGenerateHevcFmtp)

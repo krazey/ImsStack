@@ -77,14 +77,18 @@ protected:
             OUT AString& strFrameSize);
     IMS_BOOL GetWidthHeightFromResolutionId(
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
-    AString GenerateAvcFmtp(IN VideoProfile::AvcFmtp* pAvcFmtp);
-    void AddProfileLevelIdToFmtp(IN VideoProfile::AvcFmtp* pFmtp, OUT AString& strFmtp);
-    void AddPacketizationModeToFmtp(IN VideoProfile::VideoFmtp* pFmtp, OUT AString& strFmtp);
-    void AddSpropParameterSetsToFmtp(IN VideoProfile::VideoFmtp* pFmtp, OUT AString& strFmtp);
-    AString GenerateHevcFmtp(IN VideoProfile::HevcFmtp* pHevcFmtp);
-    void AddProfileIdToFmtp(IN VideoProfile::HevcFmtp* pFmtp, OUT AString& strFmtp);
-    void AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* pFmtp, OUT AString& strFmtp);
-    void AddSpropParamsToFmtp(IN VideoProfile::HevcFmtp* pFmtp, OUT AString& strFmtp);
+    AString GenerateAvcFmtp(IN std::shared_ptr<VideoProfile::AvcFmtp> pAvcFmtp);
+    void AddProfileLevelIdToFmtp(
+            IN std::shared_ptr<VideoProfile::AvcFmtp> pFmtp, OUT AString& strFmtp);
+    void AddPacketizationModeToFmtp(
+            IN std::shared_ptr<VideoProfile::VideoFmtp> pFmtp, OUT AString& strFmtp);
+    void AddSpropParameterSetsToFmtp(
+            IN std::shared_ptr<VideoProfile::VideoFmtp> pFmtp, OUT AString& strFmtp);
+    AString GenerateHevcFmtp(IN std::shared_ptr<VideoProfile::HevcFmtp> pHevcFmtp);
+    void AddProfileIdToFmtp(IN std::shared_ptr<VideoProfile::HevcFmtp> pFmtp, OUT AString& strFmtp);
+    void AddLevelIdToFmtp(IN std::shared_ptr<VideoProfile::HevcFmtp> pFmtp, OUT AString& strFmtp);
+    void AddSpropParamsToFmtp(
+            IN std::shared_ptr<VideoProfile::HevcFmtp> pFmtp, OUT AString& strFmtp);
 };
 
 #endif

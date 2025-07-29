@@ -31,10 +31,10 @@ public:
      * VideoFmtp attributes are used within the SDP to carry video parameters that provide
      * extra configurations for the specific video codecs described in the rtpmap.
      */
-    class VideoFmtp : public BaseFmtp
+    class VideoFmtp
     {
     public:
-        explicit VideoFmtp(IN const VideoFmtp* pFmtp = IMS_NULL) :
+        VideoFmtp() :
                 m_eResolution(VIDEO_RESOLUTION_INVALID),
                 m_nBitrate(0),
                 m_nFrameRate(0),
@@ -46,22 +46,20 @@ public:
                 m_bVisiblePacketizationMode(IMS_FALSE),
                 m_bVisibleSpropParam(IMS_FALSE)
         {
-            if (pFmtp == IMS_NULL)
-            {
-                return;
-            }
-
-            m_eResolution = pFmtp->m_eResolution;
-            m_nBitrate = pFmtp->m_nBitrate;
-            m_nFrameRate = pFmtp->m_nFrameRate;
-            m_nAs = pFmtp->m_nAs;
-            m_nProfile = pFmtp->m_nProfile;
-            m_nLevel = pFmtp->m_nLevel;
-            m_nPacketizationMode = pFmtp->m_nPacketizationMode;
-            m_strSpropParam = pFmtp->m_strSpropParam;
-            m_bVisiblePacketizationMode = pFmtp->m_bVisiblePacketizationMode;
-            m_bVisibleSpropParam = pFmtp->m_bVisibleSpropParam;
-        };
+        }
+        VideoFmtp(IN const VideoFmtp& objFmtp) :
+                m_eResolution(objFmtp.m_eResolution),
+                m_nBitrate(objFmtp.m_nBitrate),
+                m_nFrameRate(objFmtp.m_nFrameRate),
+                m_nAs(objFmtp.m_nAs),
+                m_nProfile(objFmtp.m_nProfile),
+                m_nLevel(objFmtp.m_nLevel),
+                m_nPacketizationMode(objFmtp.m_nPacketizationMode),
+                m_strSpropParam(objFmtp.m_strSpropParam),
+                m_bVisiblePacketizationMode(objFmtp.m_bVisiblePacketizationMode),
+                m_bVisibleSpropParam(objFmtp.m_bVisibleSpropParam)
+        {
+        }
 
         VideoFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_SINT32 nBitrate,
                 IN const IMS_SINT32 nFrameRate, IN const IMS_SINT32 nAs,
@@ -76,9 +74,40 @@ public:
                 m_nPacketizationMode(nPacketization),
                 m_strSpropParam(strSprop),
                 m_bVisiblePacketizationMode(IMS_FALSE),
-                m_bVisibleSpropParam(IMS_FALSE) {};
+                m_bVisibleSpropParam(IMS_FALSE)
+        {
+        }
 
-        virtual ~VideoFmtp() override {};
+        virtual ~VideoFmtp() {}
+
+        VideoFmtp& operator=(IN const VideoFmtp& obj)
+        {
+            if (this != &obj)
+            {
+                m_eResolution = obj.m_eResolution;
+                m_nBitrate = obj.m_nBitrate;
+                m_nFrameRate = obj.m_nFrameRate;
+                m_nAs = obj.m_nAs;
+                m_nProfile = obj.m_nProfile;
+                m_nLevel = obj.m_nLevel;
+                m_nPacketizationMode = obj.m_nPacketizationMode;
+                m_strSpropParam = obj.m_strSpropParam;
+                m_bVisiblePacketizationMode = obj.m_bVisiblePacketizationMode;
+                m_bVisibleSpropParam = obj.m_bVisibleSpropParam;
+            }
+            return (*this);
+        }
+
+        bool operator==(IN const VideoFmtp& obj) const
+        {
+            return (m_eResolution == obj.m_eResolution && m_nBitrate == obj.m_nBitrate &&
+                    m_nFrameRate == obj.m_nFrameRate && m_nAs == obj.m_nAs &&
+                    m_nProfile == obj.m_nProfile && m_nLevel == obj.m_nLevel &&
+                    m_nPacketizationMode == obj.m_nPacketizationMode &&
+                    m_strSpropParam == obj.m_strSpropParam &&
+                    m_bVisiblePacketizationMode == obj.m_bVisiblePacketizationMode &&
+                    m_bVisibleSpropParam == obj.m_bVisibleSpropParam);
+        }
 
         inline void SetResolution(IN const VIDEO_RESOLUTION eResolution)
         {
@@ -133,18 +162,18 @@ public:
     class AvcFmtp : public VideoFmtp
     {
     public:
-        explicit AvcFmtp(IN const AvcFmtp* pFmtp = IMS_NULL) :
-                VideoFmtp(pFmtp),
+        AvcFmtp() :
+                VideoFmtp(),
                 m_strProfileLevelId(AString::ConstNull()),
                 m_bVisibleProfileLevelId(IMS_FALSE)
         {
-            if (pFmtp == IMS_NULL)
-            {
-                return;
-            }
-            m_strProfileLevelId = pFmtp->m_strProfileLevelId;
-            m_bVisibleProfileLevelId = pFmtp->m_bVisibleProfileLevelId;
-        };
+        }
+        AvcFmtp(IN const AvcFmtp& objFmtp) :
+                VideoFmtp(objFmtp),
+                m_strProfileLevelId(objFmtp.m_strProfileLevelId),
+                m_bVisibleProfileLevelId(objFmtp.m_bVisibleProfileLevelId)
+        {
+        }
 
         AvcFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_UINT32 nBitrate,
                 IN const IMS_UINT32 nFrameRate, IN const IMS_UINT32 nAs,
@@ -154,9 +183,28 @@ public:
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
                 m_strProfileLevelId(strProfileLevelId),
-                m_bVisibleProfileLevelId(IMS_FALSE) {};
+                m_bVisibleProfileLevelId(IMS_FALSE)
+        {
+        }
 
-        virtual ~AvcFmtp() override {};
+        virtual ~AvcFmtp() override {}
+
+        AvcFmtp& operator=(IN const AvcFmtp& obj)
+        {
+            if (this != &obj)
+            {
+                VideoFmtp::operator=(obj);
+                m_strProfileLevelId = obj.m_strProfileLevelId;
+                m_bVisibleProfileLevelId = obj.m_bVisibleProfileLevelId;
+            }
+            return (*this);
+        }
+
+        bool operator==(IN const AvcFmtp& obj) const
+        {
+            return (VideoFmtp::operator==(obj) && m_strProfileLevelId == obj.m_strProfileLevelId &&
+                    m_bVisibleProfileLevelId == obj.m_bVisibleProfileLevelId);
+        }
 
         inline void SetProfileLevelId(IN const AString strProfileLevelId)
         {
@@ -181,19 +229,18 @@ public:
     class HevcFmtp : public VideoFmtp
     {
     public:
-        explicit HevcFmtp(IN const HevcFmtp* pFmtp = IMS_NULL) :
-                VideoFmtp(pFmtp),
+        HevcFmtp() :
+                VideoFmtp(),
                 m_bVisibleProfile(IMS_FALSE),
                 m_bVisibleLevel(IMS_FALSE)
         {
-            if (pFmtp == IMS_NULL)
-            {
-                return;
-            }
-
-            m_bVisibleProfile = pFmtp->m_bVisibleProfile;
-            m_bVisibleLevel = pFmtp->m_bVisibleLevel;
-        };
+        }
+        HevcFmtp(IN const HevcFmtp& objFmtp) :
+                VideoFmtp(objFmtp),
+                m_bVisibleProfile(objFmtp.m_bVisibleProfile),
+                m_bVisibleLevel(objFmtp.m_bVisibleLevel)
+        {
+        }
 
         HevcFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_UINT32 nBitrate,
                 IN const IMS_UINT32 nFrameRate, IN const IMS_UINT32 nAs,
@@ -202,9 +249,28 @@ public:
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
                 m_bVisibleProfile(IMS_FALSE),
-                m_bVisibleLevel(IMS_FALSE) {};
+                m_bVisibleLevel(IMS_FALSE)
+        {
+        }
 
-        virtual ~HevcFmtp() override {};
+        virtual ~HevcFmtp() override {}
+
+        HevcFmtp& operator=(IN const HevcFmtp& obj)
+        {
+            if (this != &obj)
+            {
+                VideoFmtp::operator=(obj);
+                m_bVisibleProfile = obj.m_bVisibleProfile;
+                m_bVisibleLevel = obj.m_bVisibleLevel;
+            }
+            return (*this);
+        }
+
+        bool operator==(IN const HevcFmtp& obj) const
+        {
+            return (VideoFmtp::operator==(obj) && m_bVisibleProfile == obj.m_bVisibleProfile &&
+                    m_bVisibleLevel == obj.m_bVisibleLevel);
+        }
 
         inline void SetVisibleProfile(IN const IMS_BOOL nVisible) { m_bVisibleProfile = nVisible; }
         inline IMS_BOOL IsProfileVisible() { return m_bVisibleProfile; }
@@ -227,7 +293,9 @@ public:
                 m_bTmmbrSupported(IMS_FALSE),
                 m_nTmmbrSmaxPr(-1),
                 m_bPliSupported(IMS_FALSE),
-                m_bFirSupported(IMS_FALSE) {};
+                m_bFirSupported(IMS_FALSE)
+        {
+        }
 
         RtcpFbAttributes& operator=(IN const RtcpFbAttributes& obj)
         {
@@ -308,13 +376,17 @@ public:
     public:
         Payload() :
                 BasePayload(),
+                m_pFmtp(IMS_NULL),
                 m_bIncludeImageAttr(IMS_FALSE),
                 m_bIncludeFrameSize(IMS_FALSE),
                 m_strImageAttr(AString::ConstNull()),
-                m_objRtcpFbAttr() {};
+                m_objRtcpFbAttr()
+        {
+        }
 
         Payload(IN const Payload& obj) :
                 BasePayload(obj),
+                m_pFmtp(IMS_NULL),
                 m_bIncludeImageAttr(obj.m_bIncludeImageAttr),
                 m_bIncludeFrameSize(obj.m_bIncludeFrameSize),
                 m_strImageAttr(obj.m_strImageAttr),
@@ -342,7 +414,7 @@ public:
 
         bool operator==(IN const Payload& obj) const
         {
-            return (BasePayload::operator==(obj) &&
+            return (BasePayload::operator==(obj) && m_pFmtp == obj.m_pFmtp &&
                     m_bIncludeImageAttr == obj.m_bIncludeImageAttr &&
                     m_bIncludeFrameSize == obj.m_bIncludeFrameSize &&
                     m_strImageAttr == obj.m_strImageAttr && m_objRtcpFbAttr == obj.m_objRtcpFbAttr);
@@ -356,16 +428,19 @@ public:
             {
                 if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
                 {
-                    m_pFmtp = new VideoProfile::AvcFmtp(
-                            static_cast<VideoProfile::AvcFmtp*>(obj.m_pFmtp));
+                    m_pFmtp = std::make_shared<VideoProfile::AvcFmtp>(
+                            *std::static_pointer_cast<VideoProfile::AvcFmtp>(obj.m_pFmtp));
                 }
                 else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
                 {
-                    m_pFmtp = new VideoProfile::HevcFmtp(
-                            static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
+                    m_pFmtp = std::make_shared<VideoProfile::HevcFmtp>(
+                            *std::static_pointer_cast<VideoProfile::HevcFmtp>(obj.m_pFmtp));
                 }
             }
         }
+
+        inline void SetFmtp(IN std::shared_ptr<VideoFmtp> pFmtp) { m_pFmtp = pFmtp; }
+        inline std::shared_ptr<VideoFmtp> GetFmtp() { return m_pFmtp; }
 
         inline void SetIncludeImageAttr(IN const IMS_BOOL bIncludeImageAttr)
         {
@@ -386,6 +461,7 @@ public:
         inline RtcpFbAttributes& GetRtcpFbAttr() { return m_objRtcpFbAttr; }
 
     private:
+        std::shared_ptr<VideoFmtp> m_pFmtp;
         IMS_BOOL m_bIncludeImageAttr;
         IMS_BOOL m_bIncludeFrameSize;
         AString m_strImageAttr;
@@ -399,7 +475,9 @@ public:
             m_nFrameRate(0),
             m_bSupportAvpf(IMS_FALSE),
             m_nCvoId(-1),
-            m_bSupportCapaNegoForAvpf(IMS_FALSE) {};
+            m_bSupportCapaNegoForAvpf(IMS_FALSE)
+    {
+    }
 
     virtual ~VideoProfile() override {}
 

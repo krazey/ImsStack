@@ -60,106 +60,88 @@ protected:
 
 TEST_F(VideoProfileTest, testVideoFmtpResolution)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetResolution(), VIDEO_RESOLUTION_INVALID);
 
     pFmtp->SetResolution(VIDEO_FMTP_RESOLUTION);
     EXPECT_EQ(pFmtp->GetResolution(), VIDEO_FMTP_RESOLUTION);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpBitrate)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetBitrate(), 0);
 
     pFmtp->SetBitrate(VIDEO_FMTP_BITRATE);
     EXPECT_EQ(pFmtp->GetBitrate(), VIDEO_FMTP_BITRATE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpFrameRate)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetFramerate(), 0);
 
     pFmtp->SetFramerate(VIDEO_FMTP_FRAMERATE);
     EXPECT_EQ(pFmtp->GetFramerate(), VIDEO_FMTP_FRAMERATE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpAs)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetAs(), 0);
 
     pFmtp->SetAs(VIDEO_FMTP_AS);
     EXPECT_EQ(pFmtp->GetAs(), VIDEO_FMTP_AS);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpProfile)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetProfile(), 0);
 
     pFmtp->SetProfile(VIDEO_FMTP_PROFILE);
     EXPECT_EQ(pFmtp->GetProfile(), VIDEO_FMTP_PROFILE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpLevel)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetLevel(), 0);
 
     pFmtp->SetLevel(VIDEO_FMTP_LEVEL);
     EXPECT_EQ(pFmtp->GetLevel(), VIDEO_FMTP_LEVEL);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpSprop)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->GetSpropParam(), AString::ConstNull());
 
     pFmtp->SetSpropParam(VIDEO_FMTP_SPROP);
     EXPECT_EQ(pFmtp->GetSpropParam(), VIDEO_FMTP_SPROP);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpShowPacketizationMode)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->IsPacketizationModeVisible(), IMS_FALSE);
 
     pFmtp->SetVisiblePacketizationMode(VIDEO_FMTP_SHOW_PACKETIZATION_MODE);
     EXPECT_EQ(pFmtp->IsPacketizationModeVisible(), VIDEO_FMTP_SHOW_PACKETIZATION_MODE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpShowSpropParam)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
     EXPECT_EQ(pFmtp->IsSpropParamVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleSpropParam(VIDEO_FMTP_SHOW_SPROP);
     EXPECT_EQ(pFmtp->IsSpropParamVisible(), VIDEO_FMTP_SHOW_SPROP);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpCreationDefault)
 {
-    VideoProfile::VideoFmtp* pFmtp = new VideoProfile::VideoFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::VideoFmtp>();
 
     EXPECT_EQ(pFmtp->GetResolution(), VIDEO_RESOLUTION_INVALID);
     EXPECT_EQ(pFmtp->GetBitrate(), 0);
@@ -170,13 +152,11 @@ TEST_F(VideoProfileTest, testVideoFmtpCreationDefault)
     EXPECT_EQ(pFmtp->GetSpropParam(), AString::ConstNull());
     EXPECT_EQ(pFmtp->IsPacketizationModeVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsSpropParamVisible(), IMS_FALSE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testVideoFmtpCreation)
 {
-    VideoProfile::VideoFmtp* pFmtp1 = new VideoProfile::VideoFmtp(VIDEO_FMTP_RESOLUTION,
+    auto pFmtp1 = std::make_shared<VideoProfile::VideoFmtp>(VIDEO_FMTP_RESOLUTION,
             VIDEO_FMTP_BITRATE, VIDEO_FMTP_FRAMERATE, VIDEO_FMTP_AS, VIDEO_FMTP_PROFILE,
             VIDEO_FMTP_LEVEL, VIDEO_FMTP_PACKETIZATION_MODE, VIDEO_FMTP_SPROP);
 
@@ -190,7 +170,7 @@ TEST_F(VideoProfileTest, testVideoFmtpCreation)
     EXPECT_EQ(pFmtp1->IsPacketizationModeVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp1->IsSpropParamVisible(), IMS_FALSE);
 
-    VideoProfile::VideoFmtp* pFmtp2 = new VideoProfile::VideoFmtp(pFmtp1);
+    auto pFmtp2 = std::make_shared<VideoProfile::VideoFmtp>(*pFmtp1);
 
     EXPECT_EQ(pFmtp2->GetResolution(), VIDEO_FMTP_RESOLUTION);
     EXPECT_EQ(pFmtp2->GetBitrate(), VIDEO_FMTP_BITRATE);
@@ -201,98 +181,78 @@ TEST_F(VideoProfileTest, testVideoFmtpCreation)
     EXPECT_EQ(pFmtp2->GetSpropParam(), VIDEO_FMTP_SPROP);
     EXPECT_EQ(pFmtp2->IsPacketizationModeVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp2->IsSpropParamVisible(), IMS_FALSE);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(VideoProfileTest, testAvcFmtpProfileLevelId)
 {
-    VideoProfile::AvcFmtp* pFmtp = new VideoProfile::AvcFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     EXPECT_EQ(pFmtp->GetProfileLevelId(), AString::ConstNull());
 
     pFmtp->SetProfileLevelId(AVC_FMTP_PROFILE_LEVEL_ID);
     EXPECT_EQ(pFmtp->GetProfileLevelId(), AVC_FMTP_PROFILE_LEVEL_ID);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testAvcFmtpShowProfileLevelId)
 {
-    VideoProfile::AvcFmtp* pFmtp = new VideoProfile::AvcFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     EXPECT_EQ(pFmtp->IsProfileLevelIdVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
     EXPECT_EQ(pFmtp->IsProfileLevelIdVisible(), AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testAvcFmtpCreationDefault)
 {
-    VideoProfile::AvcFmtp* pFmtp = new VideoProfile::AvcFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::AvcFmtp>();
 
     EXPECT_EQ(pFmtp->GetProfileLevelId(), AString::ConstNull());
     EXPECT_EQ(pFmtp->IsProfileLevelIdVisible(), IMS_FALSE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testAvcFmtpCreation)
 {
-    VideoProfile::AvcFmtp* pFmtp1 =
-            new VideoProfile::AvcFmtp(VIDEO_FMTP_RESOLUTION, VIDEO_FMTP_BITRATE,
-                    VIDEO_FMTP_FRAMERATE, VIDEO_FMTP_AS, VIDEO_FMTP_PROFILE, VIDEO_FMTP_LEVEL,
-                    AVC_FMTP_PROFILE_LEVEL_ID, VIDEO_FMTP_PACKETIZATION_MODE, VIDEO_FMTP_SPROP);
+    auto pFmtp1 = std::make_shared<VideoProfile::AvcFmtp>(VIDEO_FMTP_RESOLUTION, VIDEO_FMTP_BITRATE,
+            VIDEO_FMTP_FRAMERATE, VIDEO_FMTP_AS, VIDEO_FMTP_PROFILE, VIDEO_FMTP_LEVEL,
+            AVC_FMTP_PROFILE_LEVEL_ID, VIDEO_FMTP_PACKETIZATION_MODE, VIDEO_FMTP_SPROP);
 
     EXPECT_EQ(pFmtp1->GetProfileLevelId(), AVC_FMTP_PROFILE_LEVEL_ID);
     EXPECT_EQ(pFmtp1->IsProfileLevelIdVisible(), IMS_FALSE);
 
     pFmtp1->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
-    VideoProfile::AvcFmtp* pFmtp2 = new VideoProfile::AvcFmtp(pFmtp1);
+    auto pFmtp2 = std::make_shared<VideoProfile::AvcFmtp>(*pFmtp1);
 
-    EXPECT_EQ(pFmtp2->GetProfileLevelId(), AVC_FMTP_PROFILE_LEVEL_ID);
-    EXPECT_EQ(pFmtp2->IsProfileLevelIdVisible(), AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
-
-    delete pFmtp1;
-    delete pFmtp2;
+    EXPECT_EQ(*pFmtp1, *pFmtp2);
 }
 
 TEST_F(VideoProfileTest, testHevcFmtpShowProfile)
 {
-    VideoProfile::HevcFmtp* pFmtp = new VideoProfile::HevcFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::HevcFmtp>();
     EXPECT_EQ(pFmtp->IsProfileVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleProfile(HEVC_FMTP_SHOW_PROFILE);
     EXPECT_EQ(pFmtp->IsProfileVisible(), HEVC_FMTP_SHOW_PROFILE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testHevcFmtpShowLevel)
 {
-    VideoProfile::HevcFmtp* pFmtp = new VideoProfile::HevcFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::HevcFmtp>();
     EXPECT_EQ(pFmtp->IsLevelVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
     EXPECT_EQ(pFmtp->IsLevelVisible(), HEVC_FMTP_SHOW_LEVEL);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testHevcFmtpCreationDefault)
 {
-    VideoProfile::HevcFmtp* pFmtp = new VideoProfile::HevcFmtp();
+    auto pFmtp = std::make_shared<VideoProfile::HevcFmtp>();
     EXPECT_EQ(pFmtp->IsProfileVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsLevelVisible(), IMS_FALSE);
-
-    delete pFmtp;
 }
 
 TEST_F(VideoProfileTest, testHevcFmtpCreation)
 {
-    VideoProfile::HevcFmtp* pFmtp1 = new VideoProfile::HevcFmtp(VIDEO_FMTP_RESOLUTION,
+    auto pFmtp1 = std::make_shared<VideoProfile::HevcFmtp>(VIDEO_FMTP_RESOLUTION,
             VIDEO_FMTP_BITRATE, VIDEO_FMTP_FRAMERATE, VIDEO_FMTP_AS, VIDEO_FMTP_PROFILE,
             VIDEO_FMTP_LEVEL, VIDEO_FMTP_PACKETIZATION_MODE, VIDEO_FMTP_SPROP);
 
@@ -302,13 +262,41 @@ TEST_F(VideoProfileTest, testHevcFmtpCreation)
     pFmtp1->SetVisibleProfile(HEVC_FMTP_SHOW_PROFILE);
     pFmtp1->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
 
-    VideoProfile::HevcFmtp* pFmtp2 = new VideoProfile::HevcFmtp(pFmtp1);
+    auto pFmtp2 = std::make_shared<VideoProfile::HevcFmtp>(*pFmtp1);
 
+    EXPECT_EQ(*pFmtp1, *pFmtp2);
     EXPECT_EQ(pFmtp2->IsProfileVisible(), HEVC_FMTP_SHOW_PROFILE);
     EXPECT_EQ(pFmtp2->IsLevelVisible(), HEVC_FMTP_SHOW_LEVEL);
+}
 
-    delete pFmtp1;
-    delete pFmtp2;
+TEST_F(VideoProfileTest, testAvcFmtpAssignAndEqual)
+{
+    auto pFmtp1 = std::make_shared<VideoProfile::AvcFmtp>(VIDEO_FMTP_RESOLUTION, VIDEO_FMTP_BITRATE,
+            VIDEO_FMTP_FRAMERATE, VIDEO_FMTP_AS, VIDEO_FMTP_PROFILE, VIDEO_FMTP_LEVEL,
+            AVC_FMTP_PROFILE_LEVEL_ID, VIDEO_FMTP_PACKETIZATION_MODE, VIDEO_FMTP_SPROP);
+    pFmtp1->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+    pFmtp1->SetVisiblePacketizationMode(VIDEO_FMTP_SHOW_PACKETIZATION_MODE);
+    pFmtp1->SetVisibleSpropParam(VIDEO_FMTP_SHOW_SPROP);
+
+    VideoProfile::AvcFmtp pFmtp2;
+    pFmtp2 = *pFmtp1;
+
+    EXPECT_EQ(*pFmtp1, pFmtp2);
+
+    pFmtp2.SetProfileLevelId("another_id");
+    EXPECT_NE(*pFmtp1, pFmtp2);
+}
+
+TEST_F(VideoProfileTest, testHevcFmtpAssignAndEqual)
+{
+    auto pFmtp1 = std::make_shared<VideoProfile::HevcFmtp>();
+    VideoProfile::HevcFmtp pFmtp2;
+    pFmtp2 = *pFmtp1;
+
+    EXPECT_EQ(*pFmtp1, pFmtp2);
+
+    pFmtp2.SetVisibleProfile(IMS_TRUE);
+    EXPECT_NE(*pFmtp1, pFmtp2);
 }
 
 TEST_F(VideoProfileTest, testRtcpFbAttributesTrrSupported)
@@ -524,15 +512,16 @@ TEST_F(VideoProfileTest, testVideoPayloadCreationForAvcFmtp)
     VideoProfile::Payload* pPayload2 = new VideoProfile::Payload(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     pPayload1->SetFmtp(pAvcFmtp);
 
     VideoProfile::Payload* pPayload3 = new VideoProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())
+    std::static_pointer_cast<VideoProfile::AvcFmtp>(pPayload3->GetFmtp())
             ->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
-    EXPECT_EQ(static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())->IsProfileLevelIdVisible(),
+    EXPECT_EQ(std::static_pointer_cast<VideoProfile::AvcFmtp>(pPayload3->GetFmtp())
+                      ->IsProfileLevelIdVisible(),
             AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
     delete pPayload1;
@@ -549,15 +538,16 @@ TEST_F(VideoProfileTest, testVideoPayloadCreationForHevcFmtp)
     VideoProfile::Payload* pPayload2 = new VideoProfile::Payload(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
+    std::shared_ptr<VideoProfile::HevcFmtp> pHevcFmtp = std::make_shared<VideoProfile::HevcFmtp>();
     pPayload1->SetFmtp(pHevcFmtp);
 
     VideoProfile::Payload* pPayload3 = new VideoProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())
+    std::static_pointer_cast<VideoProfile::HevcFmtp>(pPayload3->GetFmtp())
             ->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
-    EXPECT_EQ(static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->IsLevelVisible(),
+    EXPECT_EQ(std::static_pointer_cast<VideoProfile::HevcFmtp>(pPayload3->GetFmtp())
+                      ->IsLevelVisible(),
             HEVC_FMTP_SHOW_LEVEL);
 
     delete pPayload1;
@@ -602,16 +592,17 @@ TEST_F(VideoProfileTest, testVideoPayloadAssignForAvcFmtp)
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     pPayload1->SetFmtp(pAvcFmtp);
 
     VideoProfile::Payload* pPayload3 = new VideoProfile::Payload();
     *pPayload3 = *pPayload1;
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())
+    std::static_pointer_cast<VideoProfile::AvcFmtp>(pPayload3->GetFmtp())
             ->SetVisibleProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
-    EXPECT_EQ(static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())->IsProfileLevelIdVisible(),
+    EXPECT_EQ(std::static_pointer_cast<VideoProfile::AvcFmtp>(pPayload3->GetFmtp())
+                      ->IsProfileLevelIdVisible(),
             AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
 
     delete pPayload1;
@@ -629,16 +620,17 @@ TEST_F(VideoProfileTest, testVideoPayloadAssignForHevcFmtp)
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
+    std::shared_ptr<VideoProfile::HevcFmtp> pHevcFmtp = std::make_shared<VideoProfile::HevcFmtp>();
     pPayload1->SetFmtp(pHevcFmtp);
 
     VideoProfile::Payload* pPayload3 = new VideoProfile::Payload();
     *pPayload3 = *pPayload1;
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())
+    std::static_pointer_cast<VideoProfile::HevcFmtp>(pPayload3->GetFmtp())
             ->SetVisibleLevel(HEVC_FMTP_SHOW_LEVEL);
-    EXPECT_EQ(static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->IsLevelVisible(),
+    EXPECT_EQ(std::static_pointer_cast<VideoProfile::HevcFmtp>(pPayload3->GetFmtp())
+                      ->IsLevelVisible(),
             HEVC_FMTP_SHOW_LEVEL);
 
     delete pPayload1;

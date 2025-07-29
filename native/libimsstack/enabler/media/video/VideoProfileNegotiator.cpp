@@ -18,6 +18,7 @@
 
 #include "MediaProfileUtil.h"
 #include "video/VideoProfileNegotiator.h"
+#include "video/VideoProfile.h"
 #include "video/VideoProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -225,7 +226,7 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
     VideoProfile::Payload* pTempPayload = IMS_NULL;
     VideoProfile::Payload* pMatchedPeerPayload = IMS_NULL;
     VideoProfile::Payload* pNegoPayload = IMS_NULL;
-    VideoProfile::VideoFmtp* pNegotiatedFmtp = IMS_NULL;
+    std::shared_ptr<VideoProfile::VideoFmtp> pNegotiatedFmtp = IMS_NULL;
 
     IMS_TRACE_D("NegotiatePayload(): local payload count[%d], peer payload count[%d]",
             pLocalProfile->GetPayloadList().GetSize(), pPeerProfile->GetPayloadList().GetSize(), 0);
@@ -277,8 +278,8 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
             {
                 pTempPayload = pLocalPayload;
                 pMatchedPeerPayload = pPeerPayload;
+                pNegotiatedFmtp = pNegoPayload->GetFmtp();
 
-                pNegotiatedFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
                 if (pNegotiatedFmtp != IMS_NULL)
                 {
                     pNegotiatedProfile->GetPayloadList().Append(pNegoPayload);
@@ -347,8 +348,8 @@ IMS_BOOL VideoProfileNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPa
         return IMS_FALSE;
     }
 
-    auto pLocalFmtp = static_cast<VideoProfile::AvcFmtp*>(pLocalPayload->GetFmtp());
-    auto pPeerFmtp = static_cast<VideoProfile::AvcFmtp*>(pPeerPayload->GetFmtp());
+    auto pLocalFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pLocalPayload->GetFmtp());
+    auto pPeerFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pPeerPayload->GetFmtp());
 
     if (pLocalFmtp == IMS_NULL || pPeerFmtp == IMS_NULL)
     {
@@ -391,8 +392,8 @@ IMS_BOOL VideoProfileNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPa
 
                 if (pPotentialPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
                 {
-                    auto pPotentialFmtp =
-                            static_cast<VideoProfile::AvcFmtp*>(pPotentialPayload->GetFmtp());
+                    auto pPotentialFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(
+                            pPotentialPayload->GetFmtp());
 
                     // check level and payload
                     if (pPotentialFmtp->GetLevel() == pPeerFmtp->GetLevel() &&
@@ -473,8 +474,8 @@ IMS_BOOL VideoProfileNegotiator::NegotiateHevc(IN VideoProfile::Payload* pLocalP
         return IMS_FALSE;
     }
 
-    auto pLocalFmtp = static_cast<VideoProfile::HevcFmtp*>(pLocalPayload->GetFmtp());
-    auto pPeerFmtp = static_cast<VideoProfile::HevcFmtp*>(pPeerPayload->GetFmtp());
+    auto pLocalFmtp = std::static_pointer_cast<VideoProfile::HevcFmtp>(pLocalPayload->GetFmtp());
+    auto pPeerFmtp = std::static_pointer_cast<VideoProfile::HevcFmtp>(pPeerPayload->GetFmtp());
 
     if (pLocalFmtp == IMS_NULL || pPeerFmtp == IMS_NULL)
     {
@@ -601,7 +602,7 @@ IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
         return IMS_FALSE;
     }
 
-    auto pAvcFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pAvcFmtp = pNegoPayload->GetFmtp();
 
     if (pAvcFmtp == IMS_NULL)
     {
@@ -617,7 +618,7 @@ IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
             nLocalIndex++)
     {
         VideoProfile::Payload* pPayload = pLocalProfile->GetPayloadAt(nLocalIndex);
-        auto pTempLocalFmtp = static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp());
+        auto pTempLocalFmtp = pPayload->GetFmtp();
 
         if (pTempLocalFmtp->GetLevel() <= pAvcFmtp->GetLevel())
         {
@@ -649,13 +650,13 @@ IMS_BOOL VideoProfileNegotiator::SetClosestHevc(
         return IMS_FALSE;
     }
 
-    auto pFmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pFmtp = pNegoPayload->GetFmtp();
     if (pFmtp == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    auto pTempLocalFmtp = static_cast<VideoProfile::VideoFmtp*>(pMatchedPeerPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pTempLocalFmtp = pMatchedPeerPayload->GetFmtp();
     pFmtp->SetResolution(pTempLocalFmtp->GetResolution());
 
     IMS_TRACE_D("SetClosestHevc(): payload[%d], resolution[%d]",
@@ -1093,17 +1094,12 @@ VIDEO_RESOLUTION VideoProfileNegotiator::GetNegotiatedResolution(
         return VIDEO_RESOLUTION_INVALID;
     }
 
-    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264") ||
+            pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
-        auto pFmtp = static_cast<VideoProfile::AvcFmtp*>(pPayload->GetFmtp());
-        if (pFmtp != IMS_NULL)
-        {
-            return pFmtp->GetResolution();
-        }
-    }
-    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
-    {
-        auto pFmtp = static_cast<VideoProfile::HevcFmtp*>(pPayload->GetFmtp());
+        std::shared_ptr<VideoProfile::VideoFmtp> pFmtp =
+                static_cast<VideoProfile::Payload*>(pPayload)->GetFmtp();
+
         if (pFmtp != IMS_NULL)
         {
             return pFmtp->GetResolution();

@@ -218,8 +218,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
 
     if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
     {
-        VideoProfile::AvcFmtp* pFmtp =
-                reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+        auto pFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_AVC);
         pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->GetProfile())));
@@ -240,8 +239,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
     }
     else if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
-        VideoProfile::HevcFmtp* pFmtp =
-                reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->GetFmtp());
+        auto pFmtp = std::static_pointer_cast<VideoProfile::HevcFmtp>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
         pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->GetProfile())));

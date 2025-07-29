@@ -61,27 +61,28 @@ private:
     void ParseCvo(IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
     IMS_BOOL ParseFmtp(IN const SdpAvCodec* pSdpCodec, OUT VideoProfile::Payload* pPayload,
             IN const VIDEO_CODEC eVideoCodec);
-    IMS_BOOL ParseVideoBaseFmtp(
-            IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::VideoFmtp* pFmtp);
+    IMS_BOOL ParseVideoBaseFmtp(IN const ImsList<AString>& objSplitEqual,
+            OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp);
     void ParseAvcFmtp(IN const ImsList<AString>& objSplitEqual, IN const AString& strSpropParam,
-            OUT VideoProfile::AvcFmtp* pFmtp);
+            OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp);
     void ParseHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps,
-            OUT AString& strSps, OUT AString& strPps, OUT VideoProfile::HevcFmtp* pFmtp);
-    IMS_BOOL ParsePacketizationMode(
-            IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::VideoFmtp* pFmtp);
-    IMS_BOOL ParseProfileLevelId(
-            IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::AvcFmtp* pFmtp);
+            OUT AString& strSps, OUT AString& strPps,
+            OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp);
+    IMS_BOOL ParsePacketizationMode(IN const ImsList<AString>& objSplitEqual,
+            OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp);
+    IMS_BOOL ParseProfileLevelId(IN const ImsList<AString>& objSplitEqual,
+            OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp);
     IMS_BOOL ParseSpropParameterSets(IN const ImsList<AString>& objSplitEqual,
-            IN const AString& strSpropParam, OUT VideoProfile::AvcFmtp* pFmtp);
-    IMS_BOOL ParseProfileId(
-            IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::HevcFmtp* pFmtp);
-    IMS_BOOL ParseLevelId(
-            IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::HevcFmtp* pFmtp);
+            IN const AString& strSpropParam, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp);
+    IMS_BOOL ParseProfileId(IN const ImsList<AString>& objSplitEqual,
+            OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp);
+    IMS_BOOL ParseLevelId(IN const ImsList<AString>& objSplitEqual,
+            OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp);
     IMS_BOOL ParseVps(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps);
     IMS_BOOL ParseSps(IN const ImsList<AString>& objSplitEqual, OUT AString& strSps);
     IMS_BOOL ParsePps(IN const ImsList<AString>& objSplitEqual, OUT AString& strPps);
     void ParseSpropParam(IN const AString& strVps, IN const AString& strSps,
-            IN const AString& strPps, OUT VideoProfile::VideoFmtp* pFmtp);
+            IN const AString& strPps, OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp);
     void ParseResolution(OUT VideoProfile::Payload* pPayload, const AString& strImageAttr,
             const AString& strFrameSize, VIDEO_CODEC eVideoCodec);
     void ParseAvpfAttribute(IN const SdpAvCodec* pSdpCodec, IN VideoProfile::Payload* pPayload,

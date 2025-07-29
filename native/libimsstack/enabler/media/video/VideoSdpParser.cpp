@@ -332,15 +332,15 @@ IMS_BOOL VideoSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
     }
 
     AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
-    VideoProfile::VideoFmtp* pFmtp = IMS_NULL;
+    std::shared_ptr<VideoProfile::VideoFmtp> pFmtp = IMS_NULL;
 
     if (eVideoCodec == VIDEO_CODEC_AVC)
     {
-        pFmtp = new VideoProfile::AvcFmtp();
+        pFmtp = std::make_shared<VideoProfile::AvcFmtp>();
     }
     else if (eVideoCodec == VIDEO_CODEC_HEVC)
     {
-        pFmtp = new VideoProfile::HevcFmtp();
+        pFmtp = std::make_shared<VideoProfile::HevcFmtp>();
     }
     else
     {
@@ -391,12 +391,12 @@ IMS_BOOL VideoSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
                     IMS_SINT32 nIndexOf1stEqual = objSplitColon.GetAt(i).GetIndexOf("=");
                     AString strSpropParam = objSplitColon.GetAt(i).GetSubStr(nIndexOf1stEqual + 1);
                     ParseAvcFmtp(objSplitEqual, strSpropParam,
-                            static_cast<VideoProfile::AvcFmtp*>(pFmtp));
+                            std::static_pointer_cast<VideoProfile::AvcFmtp>(pFmtp));
                 }
                 break;
                 case VIDEO_CODEC_HEVC:
                     ParseHevcFmtp(objSplitEqual, strVps, strSps, strPps,
-                            static_cast<VideoProfile::HevcFmtp*>(pFmtp));
+                            std::static_pointer_cast<VideoProfile::HevcFmtp>(pFmtp));
                     break;
                 default:
                     break;
@@ -415,8 +415,8 @@ IMS_BOOL VideoSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
 }
 
 PRIVATE
-IMS_BOOL VideoSdpParser::ParseVideoBaseFmtp(
-        IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::VideoFmtp* pFmtp)
+IMS_BOOL VideoSdpParser::ParseVideoBaseFmtp(IN const ImsList<AString>& objSplitEqual,
+        OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -434,7 +434,7 @@ IMS_BOOL VideoSdpParser::ParseVideoBaseFmtp(
 
 PRIVATE
 void VideoSdpParser::ParseAvcFmtp(IN const ImsList<AString>& objSplitEqual,
-        IN const AString& strSpropParam, OUT VideoProfile::AvcFmtp* pFmtp)
+        IN const AString& strSpropParam, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -454,7 +454,7 @@ void VideoSdpParser::ParseAvcFmtp(IN const ImsList<AString>& objSplitEqual,
 
 PRIVATE
 void VideoSdpParser::ParseHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps,
-        OUT AString& strSps, OUT AString& strPps, OUT VideoProfile::HevcFmtp* pFmtp)
+        OUT AString& strSps, OUT AString& strPps, OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -485,8 +485,8 @@ void VideoSdpParser::ParseHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT
 }
 
 PRIVATE
-IMS_BOOL VideoSdpParser::ParsePacketizationMode(
-        IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::VideoFmtp* pFmtp)
+IMS_BOOL VideoSdpParser::ParsePacketizationMode(IN const ImsList<AString>& objSplitEqual,
+        OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -510,7 +510,7 @@ IMS_BOOL VideoSdpParser::ParsePacketizationMode(
 
 PRIVATE
 IMS_BOOL VideoSdpParser::ParseProfileLevelId(
-        IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::AvcFmtp* pFmtp)
+        IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -540,7 +540,7 @@ IMS_BOOL VideoSdpParser::ParseProfileLevelId(
 
 PRIVATE
 IMS_BOOL VideoSdpParser::ParseSpropParameterSets(IN const ImsList<AString>& objSplitEqual,
-        IN const AString& strSpropParam, OUT VideoProfile::AvcFmtp* pFmtp)
+        IN const AString& strSpropParam, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -578,7 +578,7 @@ IMS_BOOL VideoSdpParser::ParseSpropParameterSets(IN const ImsList<AString>& objS
 
 PRIVATE
 IMS_BOOL VideoSdpParser::ParseProfileId(
-        IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::HevcFmtp* pFmtp)
+        IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -602,7 +602,7 @@ IMS_BOOL VideoSdpParser::ParseProfileId(
 
 PRIVATE
 IMS_BOOL VideoSdpParser::ParseLevelId(
-        IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::HevcFmtp* pFmtp)
+        IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -671,7 +671,7 @@ IMS_BOOL VideoSdpParser::ParsePps(IN const ImsList<AString>& objSplitEqual, OUT 
 
 PRIVATE
 void VideoSdpParser::ParseSpropParam(IN const AString& strVps, IN const AString& strSps,
-        IN const AString& strPps, OUT VideoProfile::VideoFmtp* pFmtp)
+        IN const AString& strPps, OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -706,7 +706,7 @@ void VideoSdpParser::ParseResolution(OUT VideoProfile::Payload* pPayload,
         return;
     }
 
-    VideoProfile::VideoFmtp* pFmtp = static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp());
+    std::shared_ptr<VideoProfile::VideoFmtp> pFmtp = pPayload->GetFmtp();
 
     if (pFmtp == IMS_NULL)
     {
