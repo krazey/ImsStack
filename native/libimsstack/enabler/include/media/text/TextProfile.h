@@ -30,22 +30,28 @@ public:
      * RedFmtp attributes are used within the SDP to carry RED parameters that provide
      * extra configuration details about a specific RED codec used in the RTP stream.
      */
-    class RedFmtp : public BaseFmtp
+    class RedFmtp
     {
     public:
         RedFmtp() :
                 m_nRedLevel(-1),
-                m_nRedPayload(-1) {};
+                m_nRedPayload(-1)
+        {
+        }
 
-        RedFmtp(IN IMS_SINT32 nRed, IN IMS_SINT32 nRedPT) :
-                m_nRedLevel(nRed),
-                m_nRedPayload(nRedPT) {};
+        RedFmtp(IN IMS_SINT32 nRedLevel, IN IMS_SINT32 nRedPayload) :
+                m_nRedLevel(nRedLevel),
+                m_nRedPayload(nRedPayload)
+        {
+        }
 
         RedFmtp(IN const RedFmtp& obj) :
                 m_nRedLevel(obj.m_nRedLevel),
-                m_nRedPayload(obj.m_nRedPayload) {};
+                m_nRedPayload(obj.m_nRedPayload)
+        {
+        }
 
-        virtual ~RedFmtp() override {};
+        ~RedFmtp() {}
 
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
@@ -63,7 +69,9 @@ public:
         inline IMS_SINT32 GetRedPayload() { return m_nRedPayload; }
 
     private:
+        /** Number of RED blocks, equals to the number of T.140 payload copies in a RED payload */
         IMS_SINT32 m_nRedLevel;
+        /** Payload type number of the T.140 codec being protected by RED */
         IMS_SINT32 m_nRedPayload;
     };
 
@@ -75,14 +83,17 @@ public:
     {
     public:
         Payload() :
-                BasePayload() {};
+                BasePayload(),
+                m_pFmtp(IMS_NULL)
+        {
+        }
+
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
             if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.m_pFmtp != IMS_NULL)
             {
-                m_pFmtp =
-                        new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(obj.m_pFmtp));
+                m_pFmtp = std::make_shared<RedFmtp>(*obj.m_pFmtp);
             }
         }
 
@@ -96,20 +107,27 @@ public:
 
                 if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.m_pFmtp != IMS_NULL)
                 {
-                    m_pFmtp = new TextProfile::RedFmtp(
-                            *static_cast<TextProfile::RedFmtp*>(obj.m_pFmtp));
+                    m_pFmtp = std::make_shared<RedFmtp>(*obj.m_pFmtp);
                 }
             }
 
             return (*this);
         }
+
+        inline std::shared_ptr<RedFmtp> GetFmtp() { return m_pFmtp; }
+        inline void SetFmtp(std::shared_ptr<RedFmtp> pFmtp) { m_pFmtp = pFmtp; }
+
+    protected:
+        std::shared_ptr<RedFmtp> m_pFmtp;
     };
 
 public:
     TextProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
-            m_bKeepRedLevel(IMS_TRUE) {};
+            m_bKeepRedLevel(IMS_TRUE)
+    {
+    }
 
     virtual ~TextProfile() override {}
 

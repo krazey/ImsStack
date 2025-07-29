@@ -116,13 +116,12 @@ IMS_BOOL TextSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
     }
 
     AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
 
     if (!ParseRedFmtp(strFmtp, pRedFmtp) ||
             !ParseRedSubPtExist(pRedFmtp->GetRedPayload(), lstMediaFormat))
     {
         IMS_TRACE_E(0, "ParseFmtp(): cannot make red fmtp or No matched subtype", 0, 0, 0);
-        delete pRedFmtp;
         return IMS_FALSE;
     }
 
@@ -132,7 +131,7 @@ IMS_BOOL TextSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
 }
 
 PRIVATE IMS_BOOL TextSdpParser::ParseRedFmtp(
-        IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp)
+        IN const AString& strFmtp, OUT std::shared_ptr<TextProfile::RedFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL || strFmtp.IsEmpty())
     {

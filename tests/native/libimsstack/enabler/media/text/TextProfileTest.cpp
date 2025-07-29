@@ -34,61 +34,50 @@ protected:
 
 TEST_F(TextProfileTest, testRedFmtpRedLevel)
 {
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     EXPECT_EQ(pRedFmtp->GetRedLevel(), -1);
 
     pRedFmtp->SetRedLevel(RED_LEVEL);
     EXPECT_EQ(pRedFmtp->GetRedLevel(), RED_LEVEL);
-
-    delete pRedFmtp;
 }
 
 TEST_F(TextProfileTest, testRedFmtpRedPayload)
 {
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     EXPECT_EQ(pRedFmtp->GetRedPayload(), -1);
 
     pRedFmtp->SetRedPayload(RED_PAYLOAD);
     EXPECT_EQ(pRedFmtp->GetRedPayload(), RED_PAYLOAD);
-
-    delete pRedFmtp;
 }
 
 TEST_F(TextProfileTest, testRedFmtpCreation)
 {
-    TextProfile::RedFmtp* pRedFmtp1 = new TextProfile::RedFmtp();
+    auto pRedFmtp1 = std::make_shared<TextProfile::RedFmtp>();
     EXPECT_EQ(pRedFmtp1->GetRedLevel(), -1);
     EXPECT_EQ(pRedFmtp1->GetRedPayload(), -1);
 
-    TextProfile::RedFmtp* pRedFmtp2 = new TextProfile::RedFmtp(RED_LEVEL, RED_PAYLOAD);
+    auto pRedFmtp2 = std::make_shared<TextProfile::RedFmtp>(RED_LEVEL, RED_PAYLOAD);
     EXPECT_EQ(pRedFmtp2->GetRedLevel(), RED_LEVEL);
     EXPECT_EQ(pRedFmtp2->GetRedPayload(), RED_PAYLOAD);
 
-    TextProfile::RedFmtp* pRedFmtp3 = new TextProfile::RedFmtp(*pRedFmtp2);
+    auto pRedFmtp3 = std::make_shared<TextProfile::RedFmtp>(*pRedFmtp2);
     EXPECT_EQ(pRedFmtp3->GetRedLevel(), RED_LEVEL);
     EXPECT_EQ(pRedFmtp3->GetRedPayload(), RED_PAYLOAD);
-
-    delete pRedFmtp1;
-    delete pRedFmtp2;
-    delete pRedFmtp3;
 }
 
 TEST_F(TextProfileTest, testRedFmtpAssign)
 {
-    TextProfile::RedFmtp* pRedFmtp1 = new TextProfile::RedFmtp();
+    auto pRedFmtp1 = std::make_shared<TextProfile::RedFmtp>();
     EXPECT_EQ(pRedFmtp1->GetRedLevel(), -1);
     EXPECT_EQ(pRedFmtp1->GetRedPayload(), -1);
 
-    TextProfile::RedFmtp* pRedFmtp2 = new TextProfile::RedFmtp(RED_LEVEL, RED_PAYLOAD);
+    auto pRedFmtp2 = std::make_shared<TextProfile::RedFmtp>(RED_LEVEL, RED_PAYLOAD);
     EXPECT_EQ(pRedFmtp2->GetRedLevel(), RED_LEVEL);
     EXPECT_EQ(pRedFmtp2->GetRedPayload(), RED_PAYLOAD);
 
     *pRedFmtp1 = *pRedFmtp2;
     EXPECT_EQ(pRedFmtp1->GetRedLevel(), RED_LEVEL);
     EXPECT_EQ(pRedFmtp1->GetRedPayload(), RED_PAYLOAD);
-
-    delete pRedFmtp1;
-    delete pRedFmtp2;
 }
 
 TEST_F(TextProfileTest, testTextPayload)
@@ -100,14 +89,14 @@ TEST_F(TextProfileTest, testTextPayload)
     TextProfile::Payload* pPayload2 = new TextProfile::Payload(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pPayload1->SetFmtp(pRedFmtp);
 
     TextProfile::Payload* pPayload3 = new TextProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<TextProfile::RedFmtp*>(pPayload3->GetFmtp())->SetRedLevel(RED_LEVEL);
-    EXPECT_EQ(static_cast<TextProfile::RedFmtp*>(pPayload3->GetFmtp())->GetRedLevel(), RED_LEVEL);
+    pPayload3->GetFmtp()->SetRedLevel(RED_LEVEL);
+    EXPECT_EQ(pPayload3->GetFmtp()->GetRedLevel(), RED_LEVEL);
 
     delete pPayload1;
     delete pPayload2;
@@ -124,14 +113,14 @@ TEST_F(TextProfileTest, testTextPayloadAssign)
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pPayload1->SetFmtp(pRedFmtp);
 
     TextProfile::Payload* pPayload3 = new TextProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<TextProfile::RedFmtp*>(pPayload3->GetFmtp())->SetRedLevel(RED_LEVEL);
-    EXPECT_EQ(static_cast<TextProfile::RedFmtp*>(pPayload3->GetFmtp())->GetRedLevel(), RED_LEVEL);
+    pPayload3->GetFmtp()->SetRedLevel(RED_LEVEL);
+    EXPECT_EQ(pPayload3->GetFmtp()->GetRedLevel(), RED_LEVEL);
 
     delete pPayload1;
     delete pPayload2;

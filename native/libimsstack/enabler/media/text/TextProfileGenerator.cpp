@@ -104,7 +104,7 @@ PROTECTED TextProfile::Payload* TextProfileGenerator::CreateT140Payload(
     {
         strCodecName.Sprintf("%s", "red");
 
-        TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp(pT140Config->GetRedLevel(),
+        auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>(pT140Config->GetRedLevel(),
                 static_cast<TextConfiguration*>(pConfig)->GetT140PayloadType());
 
         IMS_TRACE_I("CreateT140Payload(): RED level[%d], RED payload[%d]", pRedFmtp->GetRedLevel(),

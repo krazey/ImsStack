@@ -16,14 +16,11 @@
 
 #include <gtest/gtest.h>
 
-// Include the class under test
 #include "text/TextProfileNegotiator.h"
 
-// Include necessary dependencies and mocks
 #include "text/TextProfile.h"
-#include "config/MockTextConfiguration.h"  // Use the provided mock
+#include "config/MockTextConfiguration.h"
 
-// Constants for payload numbers
 const IMS_UINT32 kLocalT140Payload = 98;
 const IMS_UINT32 kPeerT140Payload = 100;
 const IMS_UINT32 kLocalRedPayload = 99;
@@ -31,21 +28,16 @@ const IMS_UINT32 kPeerRedPayload = 101;
 
 using testing::Return;
 
-// Test Fixture for TextProfileNegotiator
 class TextProfileNegotiatorTest : public ::testing::Test
 {
 protected:
     void SetUp() override;
     void TearDown() override;
 
-    // Helper to create a basic T140 payload
     TextProfile::Payload* CreateT140Payload(IMS_UINT32 nPayloadNum);
-
-    // Helper to create a basic RED payload with T140
     TextProfile::Payload* CreateRedPayload(
             IMS_UINT32 nRedPayloadNum, IMS_UINT32 nT140PayloadNum, IMS_UINT32 nRedLevel);
 
-    // Member variables accessible by tests
     std::unique_ptr<TextProfileNegotiator> m_pNegotiator;
     TextProfile* m_pLocalProfile;
     TextProfile* m_pPeerProfile;
@@ -63,9 +55,9 @@ void TextProfileNegotiatorTest::SetUp()
     // Default mock config values (adjust as needed for Text)
     ON_CALL(m_objMockConfig, GetRtcpIntervalOnActive()).WillByDefault(Return(5));
     ON_CALL(m_objMockConfig, GetRtcpIntervalOnHold()).WillByDefault(Return(3));
-    ON_CALL(m_objMockConfig, GetAsBandwidthKbps()).WillByDefault(Return(2));  // Example AS for text
-    ON_CALL(m_objMockConfig, GetRsBandwidthBps()).WillByDefault(Return(200));  // Example RS
-    ON_CALL(m_objMockConfig, GetRrBandwidthBps()).WillByDefault(Return(200));  // Example RR
+    ON_CALL(m_objMockConfig, GetAsBandwidthKbps()).WillByDefault(Return(2));
+    ON_CALL(m_objMockConfig, GetRsBandwidthBps()).WillByDefault(Return(200));
+    ON_CALL(m_objMockConfig, GetRrBandwidthBps()).WillByDefault(Return(200));
 
     // Set default local profile values
     m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
@@ -106,7 +98,7 @@ TextProfile::Payload* TextProfileNegotiatorTest::CreateRedPayload(
     pPayload->GetRtpMap().SetSamplingRate(1000);  // RED uses the clock rate of the primary codec
     pPayload->GetRtpMap().SetPayloadNumber(nRedPayloadNum);
 
-    TextProfile::RedFmtp* pFmtp = new TextProfile::RedFmtp(nRedLevel, nT140PayloadNum);
+    auto pFmtp = std::make_shared<TextProfile::RedFmtp>(nRedLevel, nT140PayloadNum);
     pPayload->SetFmtp(pFmtp);
     return pPayload;
 }
@@ -207,7 +199,7 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
     ASSERT_NE(pNegoRed->GetFmtp(), nullptr);
-    auto pNegoFmtp = static_cast<TextProfile::RedFmtp*>(pNegoRed->GetFmtp());
+    std::shared_ptr<TextProfile::RedFmtp> pNegoFmtp = pNegoRed->GetFmtp();
     // Check if the FMTP string reflects the peer's primary payload type
     EXPECT_EQ(pNegoFmtp->GetRedPayload(), kPeerT140Payload);
 
@@ -220,7 +212,6 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInLocalPayloa
     // Local profile has a valid T140, but its RED payload has a null fmtp.
     m_pLocalProfile->GetPayloadList().Append(CreateT140Payload(kLocalT140Payload));
     TextProfile::Payload* pLocalRed = CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1);
-    delete pLocalRed->GetFmtp();  // Make fmtp null
     pLocalRed->SetFmtp(IMS_NULL);
     m_pLocalProfile->GetPayloadList().Append(pLocalRed);
 
@@ -259,7 +250,6 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInPeerPayload
     // Peer profile has valid T140 and RED payloads.
     m_pPeerProfile->GetPayloadList().Append(CreateT140Payload(kPeerT140Payload));
     TextProfile::Payload* pPeerRed = CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1);
-    delete pPeerRed->GetFmtp();  // Make fmtp null
     pPeerRed->SetFmtp(IMS_NULL);
     m_pPeerProfile->GetPayloadList().Append(pPeerRed);
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
