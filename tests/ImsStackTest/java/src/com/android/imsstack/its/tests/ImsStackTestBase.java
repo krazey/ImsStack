@@ -69,6 +69,7 @@ import com.android.imsstack.its.base.SmsManagerProxyImpl;
 import com.android.imsstack.its.base.SubscriptionManagerProxyImpl;
 import com.android.imsstack.its.base.SystemProxyResolver;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
+import com.android.imsstack.its.base.TestConstants;
 import com.android.imsstack.its.core.agents.WifiAgent;
 import com.android.imsstack.its.imsservice.ImsServiceConnector;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
@@ -183,6 +184,20 @@ public class ImsStackTestBase {
     }
 
     /**
+     * Sets whether to enable simulated IMS HAL.
+     *
+     * @param enabled The flag specifying whether to enable simulated IMS HAL or not.
+     */
+    public static void setSimulatedImsHal(boolean enabled) {
+        ImsPrivateProperties.Persistent.setBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL, enabled,
+                TestConstants.SLOT0);
+        ImsPrivateProperties.Persistent.setBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL, enabled,
+                TestConstants.SLOT1);
+    }
+
+    /**
      * Initializes the default values of the system proxies.
      *
      * @param slotId The slot id.
@@ -206,8 +221,6 @@ public class ImsStackTestBase {
 
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
         telephony.setDefaultValues();
-        // TODO: Need to be removed when ImsService can handle the startImsTraffic.
-        telephony.setHalVersion(-2, -2);
         telephony.setSimApplicationState(simApplicationState);
         broadcastSimApplicationStateChanged(slotId, subId, simApplicationState);
 

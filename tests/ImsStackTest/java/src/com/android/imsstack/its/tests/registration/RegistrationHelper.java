@@ -193,8 +193,6 @@ public class RegistrationHelper {
 
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
 
-        // TODO: Need to be removed when ImsService can handle the startImsTraffic.
-        telephony.setHalVersion(-2, -2);
         telephony.setSimApplicationState(info.getSimApplicationState());
         testBase.broadcastSimApplicationStateChanged(info.getSlotId(), subId,
                 info.getSimApplicationState());
@@ -209,7 +207,6 @@ public class RegistrationHelper {
 
         telephony.setActiveModemCount(1);
         telephony.setSupportedModemCount(2);
-        telephony.setHalVersion(2, 1);
         telephony.clearEmergencyNumbers();
 
         telephony.clearUsimApplication();

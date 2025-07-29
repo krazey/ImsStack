@@ -28,8 +28,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.its.base.SystemProxyResolver;
-import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.tests.call.TestCall;
@@ -53,10 +51,6 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
 
     @Before
     public void setUp() throws Exception {
-        TelephonyManagerProxyImpl telephony =
-                SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
-        // TODO: Need to be removed when ImsService can handle the startImsTraffic.
-        telephony.setHalVersion(-2, -2);
         setUpBase(SLOT0);
         mImsRegistration = mImsServiceConnector.getRegistration();
         mMmTelFeature = mImsServiceConnector.getMmTelFeature();

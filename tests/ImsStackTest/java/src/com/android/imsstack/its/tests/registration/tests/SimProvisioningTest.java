@@ -22,7 +22,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.its.base.SystemProxyResolver;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
 import com.android.imsstack.its.tests.registration.util.TestRegistration;
@@ -47,9 +46,6 @@ public class SimProvisioningTest extends RegistrationTestBase {
     public void setUp() throws Exception {
 
         setRegistrationBaseConfig();
-
-        mTelephony = SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
-        mTelephony.setHalVersion(-2, -2);
 
         setUpBase(SLOT0);
 

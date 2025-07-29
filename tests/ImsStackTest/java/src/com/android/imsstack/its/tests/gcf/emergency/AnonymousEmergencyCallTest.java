@@ -22,8 +22,6 @@ import android.telephony.ims.ImsReasonInfo;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.imsstack.its.base.SystemProxyResolver;
-import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.ClientMessage;
 import com.android.imsstack.its.servercontrol.ControlProtocolConstants;
@@ -45,10 +43,6 @@ public class AnonymousEmergencyCallTest extends CallTestBase {
 
     @Before
     public void setUp() throws Exception {
-        TelephonyManagerProxyImpl telephony =
-                SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
-        telephony.setHalVersion(-2, -2);
-
         setEnablerStoppable(false);
         setUpBase(SLOT0);
 
