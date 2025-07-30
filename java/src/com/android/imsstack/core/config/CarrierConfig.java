@@ -787,10 +787,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_ecbm_for_vowifi_bool";
         public static final String KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_rtt_guard_timer_millis_int";
-        public static final String KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL =
-                KEY_PREFIX + "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
-        public static final String KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL =
-                KEY_PREFIX + "silent_retry_emergency_call_with_delay_of_retry_after_bool";
         public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT =
                 KEY_PREFIX + "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
         public static final String KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY =
@@ -805,8 +801,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "release_emergency_pdn_on_failure_after_100_bool";
         public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
                 KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
-        public static final String KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =
-                KEY_PREFIX + "reject_code_require_immediate_termination_string_array";
+        public static final String KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_and_reason_code_set_string_array";
+        public static final String KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_and_action_set_string_array";
         public static final String
                 KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =
                 KEY_PREFIX + "reject_code_and_reason_require_immediate_termination_string_array";
@@ -814,18 +812,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_periodic_location_discovery_method_int";
         public static final String KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT =
                 KEY_PREFIX + "call_periodic_location_discovery_timer_millis_int";
-        public static final String KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY =
-                KEY_PREFIX + "reject_code_require_temp_failure_int_array";
-        public static final String KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY =
-                KEY_PREFIX + "reject_code_require_perm_failure_int_array";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY =
                 KEY_PREFIX + "policy_for_emergency_urn_int_array";
         public static final String KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY =
                 KEY_PREFIX + "category_for_generic_urn_int_array";
-        public static final String KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL =
-                KEY_PREFIX + "silent_redial_with_voip_by_rtt_rejection_bool";
-        public static final String KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL =
-                KEY_PREFIX + "silent_redial_with_anonymous_by_network_rejection_bool";
         public static final String KEY_NUMBER_NEED_OIP_STRING_ARRAY =
                 KEY_PREFIX + "number_need_oip_string_array";
         public static final String KEY_NUMBER_NEED_OIR_STRING_ARRAY =

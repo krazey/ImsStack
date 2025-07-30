@@ -1155,13 +1155,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_M
         KEY_IMS_VOICE_PREFIX "delay_update_after_connected_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_rtt_guard_timer_millis_int";
-const IMS_CHAR CarrierConfig::ImsEmergency::
-        KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL[] =
-                KEY_IMS_EMERGENCY_PREFIX
-        "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
-const IMS_CHAR CarrierConfig::ImsEmergency::
-        KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL[] = KEY_IMS_EMERGENCY_PREFIX
-        "silent_retry_emergency_call_with_delay_of_retry_after_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_PREALERTING_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "prealerting_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[] =
@@ -1286,26 +1279,18 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "p_preferred_identity_header_in_invite_string_array";
-const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[] =
-                KEY_IMS_EMERGENCY_PREFIX "reject_code_require_immediate_termination_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "reject_code_and_reason_code_set_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "reject_code_and_action_set_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX
         "reject_code_and_reason_require_immediate_termination_string_array";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY[] =
-        KEY_IMS_EMERGENCY_PREFIX "reject_code_require_temp_failure_int_array";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY[] =
-        KEY_IMS_EMERGENCY_PREFIX "reject_code_require_perm_failure_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "policy_for_emergency_urn_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "category_for_generic_urn_int_array";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "silent_redial_with_voip_by_rtt_rejection_bool";
-const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL[] =
-                KEY_IMS_EMERGENCY_PREFIX "silent_redial_with_anonymous_by_network_rejection_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[] =
         KEY_IMS_WFC_PREFIX "override_media_inactivity_to_wifi_lost_bool";
 

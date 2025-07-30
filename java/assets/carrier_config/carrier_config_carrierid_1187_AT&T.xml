@@ -181,7 +181,6 @@
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
     <int name="imsvoice.delay_update_after_connected_timer_millis_int" value="200"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="-1"/>
-    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="-1"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
@@ -232,8 +231,14 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+    <string-array name="imsemergency.reject_code_and_reason_code_set_string_array" num="1">
+        <item value="503:1622"/>
+    </string-array>
+    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="1">
+        <item value="503:6"/>
+    </string-array>
     <string-array name="imsemergency.reject_code_and_reason_require_immediate_termination_string_array" num="1">
-        <item value="503:Emergency calls over WiFi not allowed in this location:1622"/>
+        <item value="503:Emergency calls over WiFi not allowed in this location"/>
     </string-array>
     <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="true"/>
 

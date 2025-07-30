@@ -18,7 +18,13 @@
 #define EMERGENCY_START_ERROR_HANDLER_H_
 
 #include "CallReasonInfo.h"
+#include "IMessage.h"
+#include "ImsTypeDef.h"
+#include "ServicePhoneInfo.h"
+#include "SipStatusCode.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include <optional>
+#include <unordered_map>
 
 class IMessage;
 class IMtcCallContext;
@@ -50,9 +56,6 @@ public:
      * Returns `CallReasonInfo` for the incoming message.
      * Generally, it returns CODE_LOCAL_CALL_CS_RETRY_REQUIRED to allow the AP DS module to perform
      * domain reselection.
-     * In cases where a call needs to be terminated immediately for a specific carrier, it will be
-     * managed through the imsemergency.reject_code_require_immediate_termination_string_array
-     * configuration.
      *
      * @param piMessage Received error response. Could be null if no response has came.
      * @return See `CallReasonInfo.h` for the possible values.
@@ -60,15 +63,33 @@ public:
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
 private:
-    IMS_SINT32 GetCrossSimRedialingReasonCode(IN IMS_SINT32 nStatusCode) const;
+    static IMS_SINT32 GetDefaultReasonCode(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode);
+    static IMS_SINT32 GetStatusCode(IN const IMessage* piMessage)
+    {
+        return piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+    }
+
+    CallReasonInfo HandleSilentReinviteWithNextPcscfIfEpdn(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteByRetryAfter(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteAsVoipByRttRejection(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteWithAnonymousByNetworkRejection(
+            IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteCrossSimByTempFailure(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteCrossSimByPermFailure(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleTerminate(IN const IMessage* piMessage) const;
+
     IMS_SINT32 GetExtraCode(IN IMS_SINT32 nCode, IN const IMessage* piMessage) const;
-    IMS_BOOL IsRedialEmergencyWithNextPcscfRequired(IN const IMessage* piMessage) const;
-    CallReasonInfo HandleRedialEmergencyWithNextPcscf() const;
+    inline IMS_BOOL IsCrossSimRedialAvailable() const
+    {
+        return PhoneInfoService::GetPhoneInfoService()
+                ->GetCallInfo(m_objContext.GetSlotId())
+                ->IsCrossSimRedialingAvailable();
+    }
     void ControlAos(IN IMS_UINT32 nCommand) const;
-    IMS_BOOL IsRedialWithVoipByRttEmergencyRejectionRequired() const;
-    CallReasonInfo HandleRedialWithVoipByRttEmergencyRejection() const;
-    IMS_BOOL IsRedialWithAnonymousByNetworkRejectionRequired(IN IMS_SINT32 nStatusCode) const;
-    CallReasonInfo HandleRedialWithAnonymousByNetworkRejection() const;
+
+    typedef CallReasonInfo (EmergencyStartErrorHandler::*ActionFunc)(IN const IMessage*) const;
+    static const std::unordered_map<IMS_SINT32, ActionFunc> objActionFuncMap;
 
     IMtcCallContext& m_objContext;
     ISession& m_objSession;

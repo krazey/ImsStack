@@ -267,13 +267,77 @@
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text="User ends call and SIP response time-out"</string>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="2"/>
     <!-- MTC emergency call -->
+    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="64">
+        <item value="300:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
+        <item value="301:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
+        <item value="302:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
+        <item value="305:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
+        <item value="380:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
+        <item value="400:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="401:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="402:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="403:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="404:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="405:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="406:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="407:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="408:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="410:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="412:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="413:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="414:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="415:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="416:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="417:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="420:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="421:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="422:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="423:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="424:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="428:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="429:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="430:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="433:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="436:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="437:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="438:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="439:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="440:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="469:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="470:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="480:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="481:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="482:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="483:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="484:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="485:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="486:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="487:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="488:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="489:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="491:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="493:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="494:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="499:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="500:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="501:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="502:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="503:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="504:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="505:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="513:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="580:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="600:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="603:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="604:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="606:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+        <item value="699:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
+    </string-array>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
-    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
-    <boolean name="imsemergency.silent_redial_with_voip_by_rtt_rejection_bool" value="true"/>
     <boolean name="imsemergency.release_emergency_pdn_on_failure_after_100_bool" value="true"/>
 
     <!-- Media -->

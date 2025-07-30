@@ -94,18 +94,17 @@
     </string-array>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="0"/>
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="10000"/>
-    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="10000"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="0"/> <!-- MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END -->
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/> <!-- MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END -->
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="10000"/>
-    <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="6">
-        <item value="0:1503"/> <!-- 0:CODE_NETWORK_RESP_TIMEOUT -->
-        <item value="403:332"/> <!-- 403:CODE_SIP_FORBIDDEN -->
-        <item value="486:338"/> <!-- 486:CODE_SIP_BUSY -->
-        <item value="487:338"/> <!-- 487:CODE_SIP_REQUEST_CANCELLED -->
-        <item value="503:352"/> <!-- 503:CODE_SIP_SERVICE_UNAVAILABLE -->
-        <item value="603:361"/> <!-- 603:CODE_SIP_USER_REJECTED -->
+    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="6">
+        <item value="0:6"/> <!-- TERMINATE -->
+        <item value="403:6"/> <!-- TERMINATE -->
+        <item value="486:6"/> <!-- TERMINATE -->
+        <item value="487:6"/> <!-- TERMINATE -->
+        <item value="503:6"/> <!-- TERMINATE -->
+        <item value="603:6"/> <!-- TERMINATE -->
     </string-array>
     <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="8">
         <item value=""/> <!-- REG_MODE_NORMAL -->
