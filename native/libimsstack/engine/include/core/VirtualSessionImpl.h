@@ -123,6 +123,7 @@ private:
     inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* /*piSetter*/) override {}
     inline ISdpReader* GetRemoteMediaCapabilities() const override { return IMS_NULL; }
     inline IMS_BOOL IsSessionCanceledOnAccepted() const override { return IMS_FALSE; }
+    inline void AbortEarlyUpdateTransaction() override {}
 
 private:
     ISession* m_piOwnerSession;

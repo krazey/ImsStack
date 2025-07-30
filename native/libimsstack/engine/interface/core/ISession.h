@@ -713,6 +713,12 @@ public:
      */
     virtual IMS_BOOL IsSessionCanceledOnAccepted() const = 0;
 
+    /**
+     * @brief Aborts an early UPDATE transaction sent before the session is established
+     *        or reestablished.
+     */
+    virtual void AbortEarlyUpdateTransaction() = 0;
+
 public:
     /// States of ISession
     enum

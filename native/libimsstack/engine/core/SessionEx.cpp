@@ -732,6 +732,29 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
     return IMS_SUCCESS;
 }
 
+PUBLIC
+void SessionEx::AbortEarlyUpdateTransaction()
+{
+    if (m_nEarlyState != EARLY_STATE_UPDATE_SENT)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("Abort early UPDATE transaction", 0, 0, 0);
+
+    // Restore SDP offer/answer state and media state.
+    RestoreOfferAnswerState();
+    RestoreEx();
+
+    // Clear early update related state.
+    SetEarlyState(EARLY_STATE_IDLE);
+    SetEarlyUpdateNotificationState(IMS_FALSE);
+    SetLastEarlyUpdateCompletedTime(0);
+
+    // Abort SIP transaction.
+    CloseConnection(IMessage::SESSION_EARLY_UPDATE);
+}
+
 PROTECTED VIRTUAL IMS_BOOL SessionEx::DispatchMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
