@@ -60,8 +60,10 @@ def check_value(name, element, validator, value_type):
 def check_array(name, element, item_check_fn):
   try:
     num = element.attrib['num']
-    if int(num if num != '' else 0) != len(element):
-      error(f'"num" attribute is different from the actual count', name)
+    expected_num = len(element)
+    if int(num if num != '' else 0) != expected_num:
+      error(f'"num" attribute is different ' +
+            f'from the actual count {expected_num}', name)
   except ValueError:
     error(f'invalid "num" attribute', name)
   except KeyError:
