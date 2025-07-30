@@ -150,14 +150,13 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
     }
 
     const IMS_BYTE* pbyAuthRes = objAuthRes.GetData();
-    IMS_SINT32 nAuthResLen = objAuthRes.GetLength();
 
     if (OsUtil::GetInstance()->IsDebugMode())
     {
         AString strHex;
         AString strBuffer = AString::ConstEmpty();
 
-        for (IMS_SINT32 i = 0; i < nAuthResLen; i++)
+        for (IMS_SINT32 i = 0; i < objAuthRes.GetLength(); i++)
         {
             strHex.Sprintf("%02X ", pbyAuthRes[i]);
             strBuffer.Append(strHex);
