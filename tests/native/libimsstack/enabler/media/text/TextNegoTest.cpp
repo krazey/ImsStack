@@ -84,7 +84,7 @@ protected:
         m_pBaseProfile = new TextProfile();
         TextProfile::Payload* pT140 = new TextProfile::Payload();
         pT140->SetRtpMap(99, "t140", 1000);
-        TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+        auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
         pT140->SetFmtp(pRedFmtp);
         m_pBaseProfile->GetPayloadList().Append(pT140);
         m_pBaseProfile->SetDataPort(LOCAL_PORT);
@@ -146,7 +146,7 @@ TEST_F(TextNegoTest, testIsMediaCodecFromSdpSupported)
 
     TextProfile::Payload* pT140 = new TextProfile::Payload();
     pT140->SetRtpMap(99, "t140", 1000);
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pT140->SetFmtp(pRedFmtp);
 
     TextProfile* pProfile = new TextProfile();
@@ -305,7 +305,7 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
 
     TextProfile::Payload* pT140 = new TextProfile::Payload();
     pT140->SetRtpMap(99, "t140", 1000);
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pT140->SetFmtp(pRedFmtp);
 
     TextProfile* pLocalProfile = new TextProfile();
@@ -354,7 +354,7 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferSentSuccess)
 
     TextProfile::Payload* pT140 = new TextProfile::Payload();
     pT140->SetRtpMap(99, "t140", 1000);
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pT140->SetFmtp(pRedFmtp);
 
     TextProfile* pLocalProfile = new TextProfile();

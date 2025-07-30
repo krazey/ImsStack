@@ -74,9 +74,7 @@ void TextSdpGenerator::CheckRedPayloadSubTypeValidity(OUT TextProfile* pProfile)
 
         if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            TextProfile::RedFmtp* pRedFmtp =
-                    static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
-
+            std::shared_ptr<TextProfile::RedFmtp> pRedFmtp = pPayload->GetFmtp();
             if (pRedFmtp == IMS_NULL)
             {
                 continue;
@@ -163,7 +161,7 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
 
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
     {
-        auto pRedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
+        std::shared_ptr<TextProfile::RedFmtp> pRedFmtp = pPayload->GetFmtp();
 
         if (pRedFmtp == IMS_NULL)
         {

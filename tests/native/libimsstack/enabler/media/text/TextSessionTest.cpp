@@ -146,17 +146,17 @@ TEST_F(TextSessionTest, testUpdateRtpConfig)
     TextProfile objPeerProfile;
     TextProfile objNegoProfile;
     TextProfile::Payload* pLocalPayload = new TextProfile::Payload();
-    TextProfile::RedFmtp* pLocalFmtp = new TextProfile::RedFmtp(3, 101);
+    auto pLocalFmtp = std::make_shared<TextProfile::RedFmtp>(3, 101);
     pLocalPayload->SetRtpMap(100, "RED", 1000, 1);
     pLocalPayload->SetFmtp(pLocalFmtp);
 
     TextProfile::Payload* pPeerPayload = new TextProfile::Payload();
-    TextProfile::RedFmtp* pPeerFmtp = new TextProfile::RedFmtp(3, 101);
+    auto pPeerFmtp = std::make_shared<TextProfile::RedFmtp>(3, 101);
     pPeerPayload->SetRtpMap(100, "RED", 1000, 1);
     pPeerPayload->SetFmtp(pPeerFmtp);
 
     TextProfile::Payload* pNegoPayload = new TextProfile::Payload();
-    TextProfile::RedFmtp* pNegoFmtp = new TextProfile::RedFmtp(3, 101);
+    auto pNegoFmtp = std::make_shared<TextProfile::RedFmtp>(3, 101);
     pNegoPayload->SetRtpMap(100, "RED", 1000, 1);
     pNegoPayload->SetFmtp(pNegoFmtp);
 

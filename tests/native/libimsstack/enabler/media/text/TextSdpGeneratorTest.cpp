@@ -44,7 +44,7 @@ protected:
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtp)
 {
     TextProfile::Payload* pPayload = new TextProfile::Payload();
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp(3, 101);
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>(3, 101);
     pPayload->SetRtpMap(102, "red", 1000);
     pPayload->SetFmtp(pRedFmtp);
     m_pTextProfile->GetPayloadList().Append(pPayload);
@@ -60,7 +60,7 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtp)
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpEmpty)
 {
     TextProfile::Payload* pPayload = new TextProfile::Payload();
-    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
+    auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pPayload->SetRtpMap(102, "red", 1000);
     pPayload->SetFmtp(pRedFmtp);
     m_pTextProfile->GetPayloadList().Append(pPayload);

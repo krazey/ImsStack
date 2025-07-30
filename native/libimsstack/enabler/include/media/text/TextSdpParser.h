@@ -53,7 +53,8 @@ private:
             OUT AString& strCodecName);
     IMS_BOOL ParseFmtp(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
             IN const ImsList<SdpMediaFormat*>& lstMediaFormat);
-    IMS_BOOL ParseRedFmtp(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
+    IMS_BOOL ParseRedFmtp(
+            IN const AString& strFmtp, OUT std::shared_ptr<TextProfile::RedFmtp> pFmtp);
     IMS_BOOL ParseRedSubPtExist(
             IN const IMS_SINT32 nRedPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat);
 };

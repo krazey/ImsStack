@@ -159,14 +159,14 @@ IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
 
 PRIVATE
 TextProfile::Payload* TextProfileNegotiator::CreatePayload(
-        IN MediaBaseProfile::RtpMap& objRtpMap, IN MediaBaseProfile::BaseFmtp* pFmtp)
+        IN MediaBaseProfile::RtpMap& objRtpMap, IN std::shared_ptr<TextProfile::RedFmtp> pFmtp)
 {
     TextProfile::Payload* pPayload = new TextProfile::Payload();
     pPayload->SetRtpMap(objRtpMap);
 
     if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && pFmtp != IMS_NULL)
     {
-        pPayload->SetFmtp(new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(pFmtp)));
+        pPayload->SetFmtp(std::make_shared<TextProfile::RedFmtp>(*pFmtp));
     }
 
     return pPayload;
@@ -350,9 +350,8 @@ PRIVATE TextProfile::Payload* TextProfileNegotiator::FindT140InProfile(
                     pComparedPayload->GetRtpMap().GetSamplingRate() ==
                             pPayload->GetRtpMap().GetSamplingRate())
             {
-                auto* pComparedFmtp =
-                        static_cast<TextProfile::RedFmtp*>(pComparedPayload->GetFmtp());
-                auto* pReceivedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
+                std::shared_ptr<TextProfile::RedFmtp> pComparedFmtp = pComparedPayload->GetFmtp();
+                std::shared_ptr<TextProfile::RedFmtp> pReceivedFmtp = pPayload->GetFmtp();
 
                 if (pComparedFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                 {
@@ -361,7 +360,6 @@ PRIVATE TextProfile::Payload* TextProfileNegotiator::FindT140InProfile(
 
                 IMS_TRACE_D("FindT140InProfile(): Found RED at [%d], Codec[%s]", i,
                         pComparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
-
                 return pComparedPayload;
             }
         }
