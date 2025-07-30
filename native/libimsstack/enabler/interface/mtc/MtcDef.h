@@ -302,15 +302,17 @@ class SuppService
 {
 public:
     inline SuppService() :
+            nType(0),
             strValue(AString::ConstNull()),
             nValue(0),
             bValue(IMS_FALSE)
     {
     }
-    inline SuppService(IN const SuppService& objRHS) :
-            strValue(objRHS.strValue),
-            nValue(objRHS.nValue),
-            bValue(objRHS.bValue)
+    inline SuppService(IN const SuppService& objRhs) :
+            nType(objRhs.nType),
+            strValue(objRhs.strValue),
+            nValue(objRhs.nValue),
+            bValue(objRhs.bValue)
     {
     }
     inline ~SuppService() {}
@@ -320,6 +322,7 @@ public:
     {
         if (this != &objRhs)
         {
+            nType = objRhs.nType;
             strValue = objRhs.strValue;
             nValue = objRhs.nValue;
             bValue = objRhs.bValue;
@@ -335,12 +338,15 @@ public:
             return IMS_TRUE;
         }
 
-        return strValue == objRhs.strValue && nValue == objRhs.nValue && bValue == objRhs.bValue;
+        return nType == objRhs.nType && strValue == objRhs.strValue && nValue == objRhs.nValue &&
+                bValue == objRhs.bValue;
     }
 
     IMS_BOOL operator!=(const SuppService& objRhs) const { return !(*this == objRhs); }
 
 public:
+    IMS_SINT32 nType;
+
     AString strValue;
     IMS_SINT32 nValue;
     IMS_BOOL bValue;

@@ -104,7 +104,7 @@ public class MtcApp implements Closeable {
         mEmergencyServiceManager =
                 new MtcEmergencyServiceManager(mContext, mCM.getCallStateTracker());
         mTbSsNotifier = new MtcTerminalBasedSupplementaryServiceNotifier(
-                    this, mContext.getSlotId(), mContext.getCallLooper());
+                mContext.getSlotId(), mContext.getCallLooper());
         mMtcJniProxy = MtcJniProxy.getInstance();
 
         init();
@@ -329,7 +329,6 @@ public class MtcApp implements Closeable {
         MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
     }
 
-    @VisibleForTesting
     public MtcAppHandler getHandler() {
         return mHandler;
     }
@@ -389,6 +388,7 @@ public class MtcApp implements Closeable {
             }
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
+            mTbSsNotifier.setHandler(mHandler);
             mTbSsNotifier.notifyInfo();
         }
     }
@@ -400,6 +400,7 @@ public class MtcApp implements Closeable {
             mNativeObject = 0;
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
+            mTbSsNotifier.setHandler(null);
         }
     }
 

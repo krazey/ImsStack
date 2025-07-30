@@ -82,7 +82,7 @@ IdleState::IdleState(IN IMtcCallContext& objContext) :
 PUBLIC VIRTUAL IdleState::~IdleState() {}
 
 PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("Start [%s]", strTarget.GetStr(), 0, 0);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
@@ -127,8 +127,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
 
 PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-        IN const ImsList<ConfUser*>& lstUsers)
+        IN const ImsList<SuppService*>& objSuppServices, IN const ImsList<ConfUser*>& lstUsers)
 {
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
     m_objContext.GetCallInfo().eInitialCallType = eCallType;

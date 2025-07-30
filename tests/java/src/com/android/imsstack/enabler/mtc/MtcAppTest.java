@@ -166,6 +166,7 @@ public class MtcAppTest extends ImsStackTest {
         doReturn(Looper.myLooper()).when(mBaseContext).getCallLooper();
 
         MtcApp mtcApp = new MtcApp(mBaseContext);
+        mtcApp.init();
 
         assertNotNull(mtcApp);
         verify(mBaseContext, times(3)).getCallLooper();

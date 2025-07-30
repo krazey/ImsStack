@@ -43,6 +43,7 @@ import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.SuppInfo;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsLog;
@@ -376,7 +377,7 @@ public class ImsCallUtils {
         int oir = getSuppInfoTypeForOIR(profile.getCallExtraInt(ImsCallProfile.EXTRA_OIR, -1));
 
         if (oir != (-1)) {
-            si.addService_int(SuppInfo.TYPE_CALLERID, oir);
+            si.addServiceInt(SuppInfo.SUPP_TYPE_CALLERID, oir);
         }
 
         Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
@@ -388,7 +389,7 @@ public class ImsCallUtils {
             String cna = getCallExtra(profile, oemExtras, ImsCallProfile.EXTRA_CNA, "");
 
             if (!TextUtils.isEmpty(cna)) {
-                si.addService_str(SuppInfo.TYPE_CNAP, cna);
+                si.addServiceStr(SuppInfo.SUPP_TYPE_CNAP, cna);
             }
         }
 
@@ -398,7 +399,7 @@ public class ImsCallUtils {
         if (isCallPull) {
             int dialogId = profile.getProprietaryCallExtras()
                     .getInt(ImsExternalCallTracker.EXTRA_IMS_EXTERNAL_CALL_ID, -1);
-            si.addService(SuppInfo.TYPE_CALL_PULL, isCallPull, dialogId, null);
+            si.addService(SuppInfo.SUPP_TYPE_CALL_PULL, isCallPull, dialogId, null);
         }
 
         // "sos" URN for IMS emergency call
@@ -434,7 +435,7 @@ public class ImsCallUtils {
             }
 
             if (urn != null) {
-                si.addService_str(SuppInfo.TYPE_TARGET_URI, urn);
+                si.addServiceStr(SuppInfo.SUPP_TYPE_TARGET_URI, urn);
             }
         }
 
@@ -907,7 +908,7 @@ public class ImsCallUtils {
 
     public static void updateCallProfileOnSessionStarted(ImsCallProfile profile,
             final SuppInfo suppInfo) {
-        SuppInfo.SuppService ss = suppInfo.getService(SuppInfo.TYPE_TIP);
+        SuppService ss = suppInfo.getService(SuppInfo.SUPP_TYPE_TIP);
         if (ss != null) {
             if (ss.intValue != SuppInfo.TIP_NONE) {
                 profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR,
@@ -932,7 +933,7 @@ public class ImsCallUtils {
     public static void updateCallProfileFromSuppInfo(ICallContext context,
             ImsCallProfile profile, final SuppInfo si) {
 
-        for (SuppInfo.SuppService ss : si.objSuppService) {
+        for (SuppService ss : si.getServices()) {
             if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
                 String key = getCallExtraNameForBoolean(context, ss.type);
 
@@ -941,7 +942,7 @@ public class ImsCallUtils {
                 }
             } else if (MtcCallUtils.isSuppInfoInt(ss.type)) {
                 String key = getCallExtraNameForInt(context, ss.type);
-                if (ss.type == SuppInfo.TYPE_CALLING_NUM_VERIFICATION) {
+                if (ss.type == SuppInfo.SUPP_TYPE_CALLING_NUM_VERIFICATION) {
                     int verStat =  getOIVerStatusFromCallingNumVerificationType(ss.intValue);
                     if (verStat != -1) {
                         profile.setCallerNumberVerificationStatus(verStat);
@@ -1029,7 +1030,7 @@ public class ImsCallUtils {
 
     private static String getCallExtraNameForInt(ICallContext context, int suppInfo) {
         switch (suppInfo) {
-            case SuppInfo.TYPE_CDIV_CAUSE:
+            case SuppInfo.SUPP_TYPE_CDIV_CAUSE:
                 return ImsCallUtils.EXTRA_CDIV_CAUSE;
             default:
                 // no-op
@@ -1041,9 +1042,9 @@ public class ImsCallUtils {
 
     private static String getCallExtraNameForString(ICallContext context, int suppInfo) {
         switch (suppInfo) {
-            case SuppInfo.TYPE_CNAP:
+            case SuppInfo.SUPP_TYPE_CNAP:
                 return ImsCallProfile.EXTRA_CNA;
-            case SuppInfo.TYPE_CDIV_HISTORY:
+            case SuppInfo.SUPP_TYPE_CDIV_HISTORY:
                 return ImsCallUtils.EXTRA_CDIV_HISTORY;
             default:
                 // no-op

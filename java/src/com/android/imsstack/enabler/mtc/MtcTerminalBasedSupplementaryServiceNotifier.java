@@ -39,15 +39,14 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
     protected static final int MSG_ON_TBCW_CHANGED = 1;
     protected static final int MSG_ON_TBTIR_CHANGED = 2;
 
-    private final MtcApp mMtcApp;
     private final int mSlotId;
     private final MmtelFeatureListener mMmtelFeatureListener = new MmtelFeatureListener();
     private final SscConfigChangeListener mSscConfigChangeListener = new SscConfigChangeListener();
     private final TbssHandler mTbssHandler;
     private SuppInfo mTbss = new SuppInfo();
+    private MtcApp.MtcAppHandler mMtcAppHandler;
 
-    public MtcTerminalBasedSupplementaryServiceNotifier(MtcApp mtcApp, int slotId, Looper looper) {
-        mMtcApp = mtcApp;
+    public MtcTerminalBasedSupplementaryServiceNotifier(int slotId, Looper looper) {
         mSlotId = slotId;
         mTbssHandler = new TbssHandler(looper);
     }
@@ -93,7 +92,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
      * Notifies the Native about terminal-based supplementary service if possible.
      */
     public void notifyInfo() {
-        if (!mMtcApp.isServiceValid()) {
+        if (mMtcAppHandler == null) {
             return;
         }
 
@@ -109,13 +108,17 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
         mTbss.objSuppService.clear();
     }
 
+    public void setHandler(MtcApp.MtcAppHandler handler) {
+        mMtcAppHandler = handler;
+    }
+
     private void sendNotification(int type, boolean enabled) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(type);
         parcel.writeInt(enabled ? 1 : 0);
 
-        Message.obtain(mMtcApp.getHandler(), MtcApp.MSG_SEND_NOTIFICATION, parcel).sendToTarget();
+        Message.obtain(mMtcAppHandler, MtcApp.MSG_SEND_NOTIFICATION, parcel).sendToTarget();
     }
 
     private void updateTbssInfo(int type, Object value) {
@@ -170,7 +173,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
             switch (msg.what) {
                 case MSG_ON_TBCW_CHANGED: {
                     log("MSG_ON_TBCW_CHANGED");
-                    updateTbssInfo(SuppInfo.TYPE_TB_CW, msg.obj);
+                    updateTbssInfo(SuppInfo.SUPP_TYPE_TB_CW, msg.obj);
                     break;
                 }
 
@@ -179,7 +182,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
                     for (SupplementaryServiceConfiguration sscConfig :
                             (List<SupplementaryServiceConfiguration>) msg.obj) {
                         if (sscConfig.getType() == SupplementaryServiceConfiguration.SS_TYPE_TIR) {
-                            updateTbssInfo(SuppInfo.TYPE_TB_TIR, sscConfig.getStatus()
+                            updateTbssInfo(SuppInfo.SUPP_TYPE_TB_TIR, sscConfig.getStatus()
                                     == SupplementaryServiceConfiguration.STATUS_ENABLED);
                         }
                     }

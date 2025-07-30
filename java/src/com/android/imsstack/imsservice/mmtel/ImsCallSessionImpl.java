@@ -61,6 +61,7 @@ import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -3377,7 +3378,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // MO call & OIR is overridden by USAT call control
-            SuppInfo.SuppService ss = suppInfo.getService(SuppInfo.TYPE_TIP);
+            SuppService ss = suppInfo.getService(SuppInfo.SUPP_TYPE_TIP);
             if (mCallDetails.is(CallDetails.MO)
                     && (ss != null) && (ss.intValue == SuppInfo.TIP_NONE)) {
                 ImsCallUtils.setCallExtraIfPresent(mRemoteCallProfile,
@@ -4845,7 +4846,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         log("notifyE2eeCallInfo");
-        SuppInfo.SuppService suppSessionId = suppInfo.getService(SuppInfo.TYPE_SESSION_ID);
+        SuppService suppSessionId = suppInfo.getService(SuppInfo.SUPP_TYPE_SESSION_ID);
         String sessionId = suppSessionId == null ? "" : suppSessionId.strValue;
         if (sessionId.isEmpty()) {
             return;

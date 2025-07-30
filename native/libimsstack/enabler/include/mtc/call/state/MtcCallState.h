@@ -18,7 +18,6 @@
 #define MTC_CALL_STATE_H_
 
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "SipStatusCode.h"
@@ -58,10 +57,9 @@ public:
     inline CallStateName GetStateName() const override { return m_eStateName; }
 
     CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) override;

@@ -20,7 +20,6 @@
 #include "AString.h"
 #include "IMtcService.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 
@@ -101,8 +100,7 @@ public:
      * @param objSuppServices
      */
     virtual void Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Starts
@@ -114,7 +112,7 @@ public:
      * @param objUsers
      */
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
     /**

@@ -33,6 +33,7 @@
 #include "utility/CallComposerUtil.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
+#include "utility/SuppServiceUtils.h"
 #include <utility>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -48,9 +49,9 @@ LOCAL const IMS_CHAR STR_UNAVAILABLE[] = "Unavailable";
 PUBLIC
 MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
         IN MtcConfigurationProxy& objConfigurationProxy,
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices) :
+        IN const ImsList<SuppService*>& objSuppServices) :
         m_objContext(objContext),
-        m_objSuppService(objSuppServices),
+        m_objSuppServices(objSuppServices),
         m_objConfigurationProxy(objConfigurationProxy)
 {
     IMS_TRACE_I("+MtcSupplementaryService", 0, 0, 0);
@@ -65,23 +66,21 @@ MtcSupplementaryService::~MtcSupplementaryService()
 
 PUBLIC
 void MtcSupplementaryService::UpdateOutgoingServices(
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN const ImsList<SuppService*>& objSuppServices)
 {
     IMS_UINT32 nInServiceSize = objSuppServices.GetSize();
     IMS_TRACE_I("MtcSupplementaryService : ServiceNum[%d] InServiceNum[%d]",
-            m_objSuppService.GetSize(), nInServiceSize, 0);
+            m_objSuppServices.GetSize(), nInServiceSize, 0);
 
     for (IMS_UINT32 i = 0; i < nInServiceSize; i++)
     {
-        const SuppType eType = objSuppServices.GetKeyAt(i);
-        IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(eType);
-
-        if (nIndex >= 0)
+        if (SuppServiceUtils::Get(m_objSuppServices, objSuppServices.GetAt(i)->nType) != IMS_NULL)
         {
-            delete m_objSuppService.GetValueAt(nIndex);
+            Delete(static_cast<SuppType>(objSuppServices.GetAt(i)->nType));
         }
 
-        m_objSuppService.Add(eType, objSuppServices.GetValueAt(i));
+        IMS_TRACE_I("UpdateOutgoingServices : Append[%d]", objSuppServices.GetAt(i)->nType, 0, 0);
+        m_objSuppServices.Append(objSuppServices.GetAt(i));
     }
 }
 
@@ -311,106 +310,39 @@ IMS_BOOL MtcSupplementaryService::UpdateSessionId(IN const IMessage* piMessage)
     return IMS_FALSE;
 }
 
-PUBLIC
-void MtcSupplementaryService::Delete(IN SuppType eType)
+PUBLIC void MtcSupplementaryService::Add(IN SuppType eSuppType, IN const AString& strValue)
 {
-    IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(eType);
-
-    if (nIndex >= 0)
-    {
-        SuppService* pSuppService = m_objSuppService.GetValueAt(nIndex);
-        delete pSuppService;
-        m_objSuppService.RemoveAt(nIndex);
-        IMS_TRACE_I("Delete : size[%d] Type[%d]", m_objSuppService.GetSize(), eType, 0);
-        return;
-    }
-
-    IMS_TRACE_I("Delete : NoT Matched Size[%d]", m_objSuppService.GetSize(), 0, 0);
+    SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), strValue);
 }
 
-PUBLIC
-void MtcSupplementaryService::DeleteServices()
+PUBLIC void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_SINT32 nValue)
 {
-    IMS_UINT32 nSize = m_objSuppService.GetSize();
-
-    IMS_TRACE_I("DeleteAll : Size[%d]", nSize, 0, 0);
-
-    for (IMS_UINT32 index = 0; index < nSize; index++)
-    {
-        SuppService* pService = m_objSuppService.GetValueAt(index);
-        delete pService;
-    }
-
-    m_objSuppService.Clear();
+    SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), nValue);
 }
 
-PUBLIC
-const SuppService* MtcSupplementaryService::Get(IN SuppType eType)
+PUBLIC void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
 {
-    IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(eType);
-
-    if (nIndex >= 0)
-    {
-        SuppService* pSuppService = m_objSuppService.GetValueAt(nIndex);
-        return pSuppService;
-    }
-
-    IMS_TRACE_I("Get : NoT Matched, Size[%d]", m_objSuppService.GetSize(), 0, 0);
-    return IMS_NULL;
+    SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), bValue);
 }
 
-PUBLIC
-const ImsMap<SuppType, SuppService*>& MtcSupplementaryService::GetServices() const
+PUBLIC void MtcSupplementaryService::Delete(IN SuppType eSuppType)
 {
-    return m_objSuppService;
+    SuppServiceUtils::Delete(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
 }
 
-PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN const AString& strValue)
+PUBLIC void MtcSupplementaryService::DeleteServices()
 {
-    if (IsExist(eSuppType) == IMS_TRUE)
-    {
-        SuppService* pExistService = m_objSuppService.GetValue(eSuppType);
-        pExistService->strValue = strValue;
-    }
-    else
-    {
-        SuppService* pUpdateService = new SuppService();
-        pUpdateService->strValue = strValue;
-        m_objSuppService.Add(eSuppType, pUpdateService);
-    }
+    SuppServiceUtils::DeleteServices(m_objSuppServices);
 }
 
-PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_SINT32 nValue)
+PUBLIC const SuppService* MtcSupplementaryService::Get(IN SuppType eSuppType) const
 {
-    if (IsExist(eSuppType) == IMS_TRUE)
-    {
-        SuppService* pExistService = m_objSuppService.GetValue(eSuppType);
-        pExistService->nValue = nValue;
-    }
-    else
-    {
-        SuppService* pUpdateService = new SuppService();
-        pUpdateService->nValue = nValue;
-        m_objSuppService.Add(eSuppType, pUpdateService);
-    }
+    return SuppServiceUtils::Get(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
 }
 
-PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
+PUBLIC const ImsList<SuppService*>& MtcSupplementaryService::GetServices() const
 {
-    if (IsExist(eSuppType) == IMS_TRUE)
-    {
-        SuppService* pExistService = m_objSuppService.GetValue(eSuppType);
-        pExistService->bValue = bValue;
-    }
-    else
-    {
-        SuppService* pUpdateService = new SuppService();
-        pUpdateService->bValue = bValue;
-        m_objSuppService.Add(eSuppType, pUpdateService);
-    }
+    return m_objSuppServices;
 }
 
 GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
@@ -427,33 +359,6 @@ GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
     AString strLocalNumberPrefix;
     strSet.SplitF(TextParser::CHAR_COLON, strInternaltionalNumberPrefix, strLocalNumberPrefix);
     strNumber.Replace(strInternaltionalNumberPrefix, strLocalNumberPrefix);
-}
-
-GLOBAL PUBLIC IMS_BOOL MtcSupplementaryService::IsSameSuppServices(
-        IN const ImsMap<SuppType, SuppService*>& objSuppServicesA,
-        IN const ImsMap<SuppType, SuppService*>& objSuppServicesB)
-{
-    if (objSuppServicesA.GetSize() != objSuppServicesB.GetSize())
-    {
-        return IMS_FALSE;
-    }
-
-    for (IMS_UINT32 i = 0; i < objSuppServicesA.GetSize(); i++)
-    {
-        const SuppType eType = objSuppServicesA.GetKeyAt(i);
-        IMS_SLONG nIndex = objSuppServicesB.GetIndexOfKey(eType);
-        if (nIndex < 0)
-        {
-            return IMS_FALSE;
-        }
-
-        if (*objSuppServicesB.GetValueAt(nIndex) != *objSuppServicesA.GetValueAt(i))
-        {
-            return IMS_FALSE;
-        }
-    }
-
-    return IMS_TRUE;
 }
 
 PRIVATE
@@ -659,17 +564,4 @@ void MtcSupplementaryService::GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOO
     {
         return GetCnapByHeader(piMessage, !bFromHeader, strCnap, IMS_FALSE);
     }
-}
-
-PRIVATE
-IMS_BOOL MtcSupplementaryService::IsExist(IN SuppType suppType)
-{
-    IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(suppType);
-
-    if (nIndex >= 0)
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
 }

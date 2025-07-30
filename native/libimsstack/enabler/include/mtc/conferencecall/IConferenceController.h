@@ -18,7 +18,6 @@
 #define INTERFACE_CONFERENCE_CONTROLLER_H_
 
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MtcDef.h"
 
 class ConferenceParticipantList;
@@ -57,7 +56,7 @@ public:
      */
     virtual void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Processs

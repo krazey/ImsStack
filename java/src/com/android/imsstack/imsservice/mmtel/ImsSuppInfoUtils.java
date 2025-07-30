@@ -23,7 +23,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.SuppInfo;
-import com.android.imsstack.enabler.mtc.SuppInfo.SuppService;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsLog;
 
@@ -37,7 +37,7 @@ public final class ImsSuppInfoUtils {
     public static void init() {
         /**
          * If there is any information to pass the call framework or call application,
-         * it needs to be registered in SuppInfoUtils object.
+         * it needs to be registered in SuppServiceUtils object.
          */
     }
 
@@ -45,7 +45,7 @@ public final class ImsSuppInfoUtils {
             final SuppInfo suppInfo, ImsCallProfile outProfile) {
         if (getConfigInterface(context.getSlotId()).getCarrierConfig()
                 .getBoolean(CarrierConfig.ImsVoice.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)) {
-            setCallExtraInt(suppInfo, SuppInfo.TYPE_CDIV_CAUSE,
+            setCallExtraInt(suppInfo, SuppInfo.SUPP_TYPE_CDIV_CAUSE,
                     ImsCallUtils.EXTRA_CDIV_CAUSE, outProfile);
         }
     }
@@ -54,7 +54,7 @@ public final class ImsSuppInfoUtils {
             final ImsCallProfile profile, SuppInfo outSuppInfo) {
         Bundle callExtras = profile.getCallExtras();
         if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
-            outSuppInfo.addService_bool(SuppInfo.TYPE_GEOLOCATION,
+            outSuppInfo.addServiceBool(SuppInfo.SUPP_TYPE_GEOLOCATION,
                     getCallExtraBoolean(callExtras, EXTRA_GEOLOCATION, true));
         }
     }
@@ -67,28 +67,28 @@ public final class ImsSuppInfoUtils {
      */
     public static void addCallExtraForCallComposer(
             final SuppInfo suppInfo, ImsCallProfile outProfile) {
-        SuppService ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY);
+        SuppService ss = suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PRIORITY);
         if (ss != null) {
             outProfile.setCallExtraInt(ImsCallProfile.EXTRA_PRIORITY, ss.intValue);
         }
 
-        ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT);
+        ss = suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_SUBJECT);
         if (ss != null) {
             outProfile.setCallExtra(ImsCallProfile.EXTRA_CALL_SUBJECT, ss.strValue);
         }
 
-        ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL);
+        ss = suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PICTURE_URL);
         if (ss != null) {
             outProfile.setCallExtra(ImsCallProfile.EXTRA_PICTURE_URL, ss.strValue);
         }
 
-        ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_IS_BUSINESS);
+        ss = suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_IS_BUSINESS);
         if (ss != null) {
             outProfile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_BUSINESS_CALL, ss.boolValue);
         }
 
-        SuppService ssLat = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT);
-        SuppService ssLong = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG);
+        SuppService ssLat = suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT);
+        SuppService ssLong = suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG);
         if (ssLat != null && ssLong != null) {
             try {
                 double latitude = Double.parseDouble(ssLat.strValue);
@@ -115,24 +115,24 @@ public final class ImsSuppInfoUtils {
             final ImsCallProfile profile, SuppInfo outSuppInfo) {
         int priority = profile.getCallExtraInt(ImsCallProfile.EXTRA_PRIORITY);
         if (priority >= 0) {
-            outSuppInfo.addService_int(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY, priority);
+            outSuppInfo.addServiceInt(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PRIORITY, priority);
         }
 
         String subject = profile.getCallExtra(ImsCallProfile.EXTRA_CALL_SUBJECT);
         if (subject.length() > 0) {
-            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT, subject);
+            outSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_SUBJECT, subject);
         }
 
         String picture = profile.getCallExtra(ImsCallProfile.EXTRA_PICTURE_URL);
         if (picture.length() > 0) {
-            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL, picture);
+            outSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PICTURE_URL, picture);
         }
 
         Location location = profile.getCallExtraParcelable(ImsCallProfile.EXTRA_LOCATION);
         if (location != null) {
-            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT,
+            outSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT,
                     String.valueOf(location.getLatitude()));
-            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG,
+            outSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG,
                     String.valueOf(location.getLongitude()));
         }
     }
@@ -170,7 +170,7 @@ public final class ImsSuppInfoUtils {
 
     private static void setCallExtraInt(SuppInfo si, int type,
             String key, ImsCallProfile outProfile) {
-        SuppInfo.SuppService ss = si.getService(type);
+        SuppService ss = si.getService(type);
 
         if (ss != null) {
             outProfile.setCallExtraInt(key, ss.intValue);

@@ -161,7 +161,7 @@ PUBLIC VIRTUAL void MtcCall::Attach()
 }
 
 PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("%s - Start", ToString().GetStr(), 0, 0);
 
@@ -178,7 +178,7 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
 }
 
 PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+        IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
         IN const ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("%s - StartConference", ToString().GetStr(), 0, 0);

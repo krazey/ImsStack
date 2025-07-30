@@ -83,7 +83,7 @@ void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* pi
 PUBLIC
 void MtcCallController::Start(IN CallKey nCallKey, IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN const ImsList<SuppService*>& objSuppServices)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->Start(
             eCallType, strTarget, objMediaInfo, objSuppServices);

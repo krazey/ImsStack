@@ -36,9 +36,9 @@ public:
             IN ServiceType eServiceType) override;
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
     void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason) override;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
+            IN OipType eOipType, IN const AString& strRemoteNumber,
+            IN const CallReasonInfo& objReason) override;
 
     void OnJniReady();
     void OnExternalCallsChanged(IN ImsList<const JniExternalCall*>& objJniExternalCalls) override;

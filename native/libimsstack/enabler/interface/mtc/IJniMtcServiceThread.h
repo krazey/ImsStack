@@ -19,7 +19,6 @@
 #include "IJniEnablerThread.h"
 #include "IMtcService.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
@@ -68,9 +67,9 @@ public:
      * @param strRemoteNumber
      */
     virtual void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
+            IN OipType eOipType, IN const AString& strRemoteNumber,
+            IN const CallReasonInfo& objReason) = 0;
 
     /**
      * @brief Notifies Java that {@code JniExternalCall} state is changed.

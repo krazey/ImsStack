@@ -42,13 +42,13 @@ public:
 
     inline void Attach() override {}
 
-    inline void Start(IN CallType, IN const AString&, IN MediaInfo&,
-            IN const ImsMap<SuppType, SuppService*>&) override
+    inline void Start(
+            IN CallType, IN const AString&, IN MediaInfo&, IN const ImsList<SuppService*>&) override
     {
     }
 
     inline void StartConference(IN CallType, IN const AString&, IN MediaInfo&,
-            IN const ImsMap<SuppType, SuppService*>&, IN const ImsList<ConfUser*>&) override
+            IN const ImsList<SuppService*>&, IN const ImsList<ConfUser*>&) override
     {
     }
     inline void StartConference(

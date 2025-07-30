@@ -154,14 +154,13 @@ void SilentRedialHelper::ReStart()
     MtcMediaUtil::RefineMediaInfoByCallType(eType, objMediaInfo);
 
     // SuppService list
-    ImsMap<SuppType, SuppService*> objSuppServices;
-    const ImsMap<SuppType, SuppService*>& objOriginalSuppServices =
+    ImsList<SuppService*> objSuppServices;
+    const ImsList<SuppService*>& objOriginalSuppServices =
             m_objContext.GetSupplementaryService().GetServices();
     for (IMS_UINT32 i = 0; i < objOriginalSuppServices.GetSize(); i++)
     {
         // TODO: consider the case Supplementary services are changed?
-        objSuppServices.Add(objOriginalSuppServices.GetKeyAt(i),
-                new SuppService(*objOriginalSuppServices.GetValueAt(i)));
+        objSuppServices.Append(new SuppService(*objOriginalSuppServices.GetAt(i)));
     }
 
     m_objContext.GetCallManager()

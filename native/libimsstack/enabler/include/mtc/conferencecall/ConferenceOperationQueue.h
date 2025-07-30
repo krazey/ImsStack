@@ -20,7 +20,6 @@
 #include "CallReasonInfo.h"
 #include "ITimer.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceDef.h"
@@ -35,7 +34,7 @@ public:
     // if copy and delete every time an operation is deleted, then too many copy.
     CallStartOperationParams(IN IMS_UINT32 _nType, IN CallInfo& _objCallInfo,
             IN MediaInfo& _objMediaInfo, IN ImsList<ConfUser*>& _objUsers,
-            IN ImsMap<SuppType, SuppService*>& _objSuppServices) :
+            IN ImsList<SuppService*>& _objSuppServices) :
             nType(_nType),
             objCallInfo(_objCallInfo),
             objMediaInfo(_objMediaInfo),
@@ -49,7 +48,7 @@ public:
     CallInfo& objCallInfo;
     MediaInfo& objMediaInfo;
     ImsList<ConfUser*>& objUsers;
-    ImsMap<SuppType, SuppService*>& objSuppServices;
+    ImsList<SuppService*>& objSuppServices;
 };
 
 class ConferenceOperationQueue : public ITimerListener
