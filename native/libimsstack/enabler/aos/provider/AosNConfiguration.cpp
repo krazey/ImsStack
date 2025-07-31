@@ -771,6 +771,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountPerPcscf() const
     return m_objAsset.nRegRetryCntPerPcscf;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountPerPcscfWithRaTime() const
+{
+    return m_objAsset.nRegRetryCntPerPcscfWithRaTime;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountResetPolicy() const
 {
     return m_objAsset.nRegRetryCntResetPolicy;
@@ -1642,6 +1647,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT);
     m_objAsset.nRegRetryCntPerPcscf =
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_PER_PCSCF_INT);
+    m_objAsset.nRegRetryCntPerPcscfWithRaTime =
+            piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_PER_PCSCF_WITH_RA_TIME_INT);
     m_objAsset.nRegRetryCntResetPolicy =
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_CNT_RESET_POLICY_INT);
     m_objAsset.nRegRetryCntWithIpsecOnAuthFailure =

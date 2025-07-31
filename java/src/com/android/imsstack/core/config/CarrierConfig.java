@@ -516,6 +516,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reg_retry_cnt_on_single_pcscf_int";
         public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT =
                 KEY_PREFIX + "reg_retry_cnt_per_pcscf_int";
+        public static final String KEY_REG_RETRY_CNT_PER_PCSCF_WITH_RA_TIME_INT =
+                KEY_PREFIX + "reg_retry_cnt_per_pcscf_with_ra_time_int";
         public static final String KEY_REG_RETRY_CNT_RESET_POLICY_INT =
                 KEY_PREFIX + "reg_retry_cnt_reset_policy_int";
         public static final String KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT =

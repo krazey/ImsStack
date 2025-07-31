@@ -1166,6 +1166,10 @@ public:
      *            as temporary failure without Retry-After header.
      *        CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL
      *            Follow the wait time defined in KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY.
+     *        CarrierConfig::Ims::AWT_POLICY_ONLY_RETRY_AFTER
+     *            If retry-after header is present in the response, register with the same P-CSCF.
+     *            The retry count is defined in KEY_REG_RETRY_CNT_PER_PCSCF_WITH_RA_TIME_INT.
+     *            If retry-after is not present, register with the next P-CSCF.
      *
      * @return IMS_SINT32 Return the actual wait time policy
      * @see {@code ims.reg_actual_wait_time_policy_int}
@@ -1375,6 +1379,19 @@ public:
      * @see {@code ims.reg_retry_cnt_per_pcscf_int}
      */
     virtual IMS_SINT32 GetRegRetryCountPerPcscf() const = 0;
+
+    /**
+     * @brief Get retry count to try to register with that P-CSCF if retry-after header is present
+     *        in the response.
+     *
+     *        If retry-after header is present in the response, register with the same P-CSCF.
+     *        It's applied if CarrierConfig::IMS::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT is
+     *        CarrierConfig::Ims::AWT_POLICY_ONLY_RETRY_AFTER.
+     *
+     * @return IMS_SINT32 Return the number of retry
+     * @see {@code ims.reg_retry_cnt_per_pcscf_with_ra_time_int}
+     */
+    virtual IMS_SINT32 GetRegRetryCountPerPcscfWithRaTime() const = 0;
 
     /**
      * @brief Indicate the policy for clearing the registration retry count
