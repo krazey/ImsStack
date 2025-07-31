@@ -179,8 +179,6 @@ PRIVATE VIRTUAL void OsTrace::OutputString(
     if ((nOption & ITraceOption::OPT_MEDIUM_SERIAL) != 0)
     {
         IMS_UINT32 nCurrentPos = 0;
-        IMS_CHAR cCharToRestore = '\0';
-        IMS_CHAR* pszOutString;
         const IMS_UINT32 MAX_LOG_BUFF = OsTraceNode::MAX_TRACE_SIZE - 1;
 
         while (nLength > 0)
@@ -188,10 +186,10 @@ PRIVATE VIRTUAL void OsTrace::OutputString(
             IMS_UINT32 nLengthToPrint =
                     (nLength >= OsTraceNode::MAX_TRACE_SIZE) ? MAX_LOG_BUFF : nLength;
 
-            cCharToRestore = pszTrace[nCurrentPos + nLengthToPrint];
+            IMS_CHAR cCharToRestore = pszTrace[nCurrentPos + nLengthToPrint];
             pszTrace[nCurrentPos + nLengthToPrint] = '\0';
 
-            pszOutString = &(pszTrace[nCurrentPos]);
+            IMS_CHAR* pszOutString = &(pszTrace[nCurrentPos]);
 
             nCurrentPos += nLengthToPrint;
             nLength -= nLengthToPrint;
