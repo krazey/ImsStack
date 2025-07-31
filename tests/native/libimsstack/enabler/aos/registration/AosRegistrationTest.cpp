@@ -89,112 +89,113 @@ using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
 
-#define DECLARE_USING(Base)                                       \
-    using Base::AddAccesstypeFeatureTag;                          \
-    using Base::AddFeatureTagForMtc;                              \
-    using Base::AddLocationHeaderBody;                            \
-    using Base::AddSpecificOperation;                             \
-    using Base::Block_Changed;                                    \
-    using Base::CallTracker_StateChanged;                         \
-    using Base::CheckPending;                                     \
-    using Base::CleanUp;                                          \
-    using Base::ClearCallingNumberVerification;                   \
-    using Base::ClearIpsecBlock;                                  \
-    using Base::ClearPcscf;                                       \
-    using Base::ClearRetryCount;                                  \
-    using Base::ClearRetryTimers;                                 \
-    using Base::ClearTimers;                                      \
-    using Base::CreateSubscription;                               \
-    using Base::DestroyRegistration;                              \
-    using Base::DestroySubscription;                              \
-    using Base::GetActualWaitTime;                                \
-    using Base::GetNetworkTypeForImsRegState;                     \
-    using Base::GetReasonCode;                                    \
-    using Base::IncreaseConsecutiveFailCount;                     \
-    using Base::Init;                                             \
-    using Base::IsAppReady;                                       \
-    using Base::IsBlocked;                                        \
-    using Base::IsGeolocationInfoRequired;                        \
-    using Base::IsHeldByCall;                                     \
-    using Base::IsImsCall;                                        \
-    using Base::IsIpsecSupported;                                 \
-    using Base::IsPdnReconnectWithDelayRequiredOnWfcSetupFailure; \
-    using Base::IsReregFailureReportOnIpcanChangeRequired;        \
-    using Base::IsConnectionFailureForOfflineRecovery;            \
-    using Base::IsRetryOnSamePcscfRequired;                       \
-    using Base::IsTransactionStarted;                             \
-    using Base::MessageMediator_AdjustMessage;                    \
-    using Base::NConfiguration_NotifyConfigChanged;               \
-    using Base::NetTracker_StatusChanged;                         \
-    using Base::NotifyFailureWithImsReason;                       \
-    using Base::ReinitiateRegistration;                           \
-    using Base::SetRetryTimeToProperty;                           \
-    using Base::OnMessage;                                        \
-    using Base::ProcessForbiddenFailed;                           \
-    using Base::ProcessIpcanChanged;                              \
-    using Base::ProcessIpVersionChange;                           \
-    using Base::ProcessPendingPlmnBlockOnUpdateFailure;           \
-    using Base::ProcessPendingTransaction;                        \
-    using Base::ProcessPlmnBlockWithPcoLimitedModeOnStartFailure; \
-    using Base::ProcessRegEventChange;                            \
-    using Base::ProcessRegRequiredWithNextPcscf;                  \
-    using Base::ProcessRegRequiredWithWaitTime;                   \
-    using Base::ProcessRegTerminatedByNotify;                     \
-    using Base::ProcessRequiredWfcErrMessage;                     \
-    using Base::ProcessReregister;                                \
-    using Base::ProcessRetryInRegStopped;                         \
-    using Base::ProcessStartFailed_305;                           \
-    using Base::ProcessStartFailed_Others;                        \
-    using Base::ProcessSubReinitiate;                             \
-    using Base::ProcessSubscriberFailed;                          \
-    using Base::ProcessUpdateFailed_Others;                       \
-    using Base::ProcessUnpredictableFailure;                      \
-    using Base::Registration_AuthenticationChallenged;            \
-    using Base::Registration_NotifyAkaResponse;                   \
-    using Base::Registration_RefreshTimerExpired;                 \
-    using Base::Registration_Removed;                             \
-    using Base::Registration_Started;                             \
-    using Base::Registration_StartFailed;                         \
-    using Base::Registration_Terminated;                          \
-    using Base::Registration_Updated;                             \
-    using Base::Registration_UpdateFailed;                        \
-    using Base::RegistrationControl_UpdateDataFailureReason;      \
-    using Base::RemoveFeatureTagForMtc;                           \
-    using Base::SendRegisterEx;                                   \
-    using Base::SetBlocked;                                       \
-    using Base::SetDynamicIpQos;                                  \
-    using Base::SetFakeReg;                                       \
-    using Base::SetHeldByCall;                                    \
-    using Base::SetImsCall;                                       \
-    using Base::SetMode;                                          \
-    using Base::SetNextPcscf;                                     \
-    using Base::SetPcscf;                                         \
-    using Base::SetRadioWaiting;                                  \
-    using Base::SetReregFailureReportOnIpcanChangeRequired;       \
-    using Base::SetState;                                         \
-    using Base::SetTcpCriterionLength;                            \
-    using Base::SetStaticIpQos;                                   \
-    using Base::SetTraffic;                                       \
-    using Base::SetTrafficForDeregister;                          \
-    using Base::SetTrafficListener;                               \
-    using Base::SetTrafficPriorityBlocked;                        \
-    using Base::StartSubscription;                                \
-    using Base::StartTimer;                                       \
-    using Base::StopSubscription;                                 \
-    using Base::StopTimer;                                        \
-    using Base::Subscription_CanBeTransmitted;                    \
-    using Base::Subscription_NotifyReceived;                      \
-    using Base::Subscription_Request;                             \
-    using Base::Subscription_StateChanged;                        \
-    using Base::Timer_TimerExpired;                               \
-    using Base::Transaction_OnConnectionFailed;                   \
-    using Base::Transaction_OnTrafficPriorityChanged;             \
-    using Base::TryNextPcscf;                                     \
-    using Base::UpdateCallingNumberVerification;                  \
-    using Base::UpdateFeatureTag;                                 \
-    using Base::UpdateIpsecSupported;                             \
-    using Base::UpdatePreloadedRoute;                             \
-    using Base::UpdateRegIpcanCategory;                           \
+#define DECLARE_USING(Base)                                         \
+    using Base::AddAccesstypeFeatureTag;                            \
+    using Base::AddFeatureTagForMtc;                                \
+    using Base::AddLocationHeaderBody;                              \
+    using Base::AddSpecificOperation;                               \
+    using Base::Block_Changed;                                      \
+    using Base::CallTracker_StateChanged;                           \
+    using Base::CheckPending;                                       \
+    using Base::CleanUp;                                            \
+    using Base::ClearCallingNumberVerification;                     \
+    using Base::ClearIpsecBlock;                                    \
+    using Base::ClearPcscf;                                         \
+    using Base::ClearRetryCount;                                    \
+    using Base::ClearRetryTimers;                                   \
+    using Base::ClearTimers;                                        \
+    using Base::CreateSubscription;                                 \
+    using Base::DestroyRegistration;                                \
+    using Base::DestroySubscription;                                \
+    using Base::GetActualWaitTime;                                  \
+    using Base::GetNetworkTypeForImsRegState;                       \
+    using Base::GetReasonCode;                                      \
+    using Base::IncreaseConsecutiveFailCount;                       \
+    using Base::Init;                                               \
+    using Base::IsAppReady;                                         \
+    using Base::IsBlocked;                                          \
+    using Base::IsGeolocationInfoRequired;                          \
+    using Base::IsHeldByCall;                                       \
+    using Base::IsImsCall;                                          \
+    using Base::IsIpsecSupported;                                   \
+    using Base::IsPdnReconnectWithDelayRequiredOnWfcSetupFailure;   \
+    using Base::IsReregFailureReportOnIpcanChangeRequired;          \
+    using Base::IsConnectionFailureForOfflineRecovery;              \
+    using Base::IsRetryOnSamePcscfRequired;                         \
+    using Base::IsTransactionStarted;                               \
+    using Base::MessageMediator_AdjustMessage;                      \
+    using Base::NConfiguration_NotifyConfigChanged;                 \
+    using Base::NetTracker_StatusChanged;                           \
+    using Base::NotifyFailureWithImsReason;                         \
+    using Base::ReinitiateRegistration;                             \
+    using Base::SetRetryTimeToProperty;                             \
+    using Base::OnMessage;                                          \
+    using Base::ProcessDefaultFlowRecovery_StartWithOnlyRetryAfter; \
+    using Base::ProcessForbiddenFailed;                             \
+    using Base::ProcessIpcanChanged;                                \
+    using Base::ProcessIpVersionChange;                             \
+    using Base::ProcessPendingPlmnBlockOnUpdateFailure;             \
+    using Base::ProcessPendingTransaction;                          \
+    using Base::ProcessPlmnBlockWithPcoLimitedModeOnStartFailure;   \
+    using Base::ProcessRegEventChange;                              \
+    using Base::ProcessRegRequiredWithNextPcscf;                    \
+    using Base::ProcessRegRequiredWithWaitTime;                     \
+    using Base::ProcessRegTerminatedByNotify;                       \
+    using Base::ProcessRequiredWfcErrMessage;                       \
+    using Base::ProcessReregister;                                  \
+    using Base::ProcessRetryInRegStopped;                           \
+    using Base::ProcessStartFailed_305;                             \
+    using Base::ProcessStartFailed_Others;                          \
+    using Base::ProcessSubReinitiate;                               \
+    using Base::ProcessSubscriberFailed;                            \
+    using Base::ProcessUpdateFailed_Others;                         \
+    using Base::ProcessUnpredictableFailure;                        \
+    using Base::Registration_AuthenticationChallenged;              \
+    using Base::Registration_NotifyAkaResponse;                     \
+    using Base::Registration_RefreshTimerExpired;                   \
+    using Base::Registration_Removed;                               \
+    using Base::Registration_Started;                               \
+    using Base::Registration_StartFailed;                           \
+    using Base::Registration_Terminated;                            \
+    using Base::Registration_Updated;                               \
+    using Base::Registration_UpdateFailed;                          \
+    using Base::RegistrationControl_UpdateDataFailureReason;        \
+    using Base::RemoveFeatureTagForMtc;                             \
+    using Base::SendRegisterEx;                                     \
+    using Base::SetBlocked;                                         \
+    using Base::SetDynamicIpQos;                                    \
+    using Base::SetFakeReg;                                         \
+    using Base::SetHeldByCall;                                      \
+    using Base::SetImsCall;                                         \
+    using Base::SetMode;                                            \
+    using Base::SetNextPcscf;                                       \
+    using Base::SetPcscf;                                           \
+    using Base::SetRadioWaiting;                                    \
+    using Base::SetReregFailureReportOnIpcanChangeRequired;         \
+    using Base::SetState;                                           \
+    using Base::SetTcpCriterionLength;                              \
+    using Base::SetStaticIpQos;                                     \
+    using Base::SetTraffic;                                         \
+    using Base::SetTrafficForDeregister;                            \
+    using Base::SetTrafficListener;                                 \
+    using Base::SetTrafficPriorityBlocked;                          \
+    using Base::StartSubscription;                                  \
+    using Base::StartTimer;                                         \
+    using Base::StopSubscription;                                   \
+    using Base::StopTimer;                                          \
+    using Base::Subscription_CanBeTransmitted;                      \
+    using Base::Subscription_NotifyReceived;                        \
+    using Base::Subscription_Request;                               \
+    using Base::Subscription_StateChanged;                          \
+    using Base::Timer_TimerExpired;                                 \
+    using Base::Transaction_OnConnectionFailed;                     \
+    using Base::Transaction_OnTrafficPriorityChanged;               \
+    using Base::TryNextPcscf;                                       \
+    using Base::UpdateCallingNumberVerification;                    \
+    using Base::UpdateFeatureTag;                                   \
+    using Base::UpdateIpsecSupported;                               \
+    using Base::UpdatePreloadedRoute;                               \
+    using Base::UpdateRegIpcanCategory;                             \
     using Base::UpdateTransactionStarted;
 
 const IMS_SINT32 SLOT_ID = 0;
@@ -3628,6 +3629,57 @@ TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenFlowRecoveryFor
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
 
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
+}
+
+TEST_F(AosRegistrationTest, WaitRetryIfOnlyRetryAfterPolicyWhenFlowRecoveryForStart)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_ONLY_RETRY_AFTER));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(Return(AString("60")));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscfWithRaTime())
+            .WillByDefault(Return(5));
+    m_pAosRegistration->SetConsecutiveFailureCount(2);
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_400);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest,
+        TryRegisterWithNextPcscfIfOnlyRetryAfterPolicyWhenFlowRecoveryForStartWithRetryAfter)
+{
+    m_pAosRegistration->SetConsecutiveFailureCount(5);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_ONLY_RETRY_AFTER));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(Return(AString("60")));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscfWithRaTime())
+            .WillByDefault(Return(5));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_491);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 0);
+}
+
+TEST_F(AosRegistrationTest,
+        ReportFailureIfSetNextPcscfFailWhenStartWithOnlyRetryAfterWithoutRetryAfter)
+{
+    m_pAosRegistration->SetConsecutiveFailureCount(2);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscfWithRaTime())
+            .WillByDefault(Return(5));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithOnlyRetryAfter(0);
+
+    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 0);
 }
 
 TEST_F(AosRegistrationTest,

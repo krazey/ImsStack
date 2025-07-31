@@ -4076,6 +4076,10 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
             ProcessDefaultFlowRecovery_StartWithFailureToEachPcscf(nRetryAfter);
             break;
 
+        case CarrierConfig::Ims::AWT_POLICY_ONLY_RETRY_AFTER:
+            ProcessDefaultFlowRecovery_StartWithOnlyRetryAfter(nRetryAfter);
+            break;
+
         case CarrierConfig::Ims::AWT_POLICY_RFC_RULE:  // FALL-THROUGH
         default:
             IncreaseConsecutiveFailCount();
@@ -4212,6 +4216,41 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithFail
 
         SetState(STATE_REGSTOP);
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+    }
+    else
+    {
+        ProcessNextPcscfUnsuccessful(0, REASON_FAILURE_PDN_RECONNECT);
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithOnlyRetryAfter(
+        IN IMS_UINT32 nRetryAfter)
+{
+    A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_StartWithOnlyRetryAfter", 0, 0, 0);
+    if (nRetryAfter > 0 &&
+            m_nConsecutiveFailure < GET_N_CONFIG(m_nSlotId)->GetRegRetryCountPerPcscfWithRaTime())
+    {
+        IncreaseConsecutiveFailCount();
+
+        StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
+        SetState(STATE_REGSTOP);
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        return;
+    }
+    else
+    {
+        ClearRetryCount(IMS_TRUE);
+    }
+
+    if (SetNextPcscf())
+    {
+        if (!SendRegister(IMS_TRUE))
+        {
+            ProcessUnpredictableFailure();
+            return;
+        }
+        SetState(STATE_REGISTERING);
+        ReportTryingState();
     }
     else
     {
