@@ -142,20 +142,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_START);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
-    if (HasNotRespondedQosConfirmation(*piSession))
-    {
-        IMS_TRACE_E(0, "SessionStarted - wait response for QoS confirmation", 0, 0, 0);
-        if (pSession->SendAck() == IMS_FAILURE)
-        {
-            CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
-            HandleCancel(piSession, objReason);
-            OnStartFailed(objReason);
-
-            return CallStateName::TERMINATING;
-        }
-        return GetStateName();
-    }
-
     pSession->HandleResponse(ResponseType::ACCEPT, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
@@ -165,24 +151,32 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
     }
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    if (HasNotRespondedQosConfirmation(*piSession))
     {
-        if (!piSession->GetPreviousRequest(IMessage::SESSION_ACK))
+        // Once receiving a 200-INVITE, we assume that the remote QoS is already confirmed even if
+        // the response for the UPDATE or the PRACK hasn't come. It won't be an issue when the
+        // UPDATE was for the SRVCC, as well as for the QoS confirmation.
+        IMS_TRACE_E(0, "No QoS confirmation from the remote, start anyway", 0, 0, 0);
+        piSession->AbortEarlyUpdateTransaction();
+        m_objContext.GetMediaManager().RestoreSdp(piSession);
+    }
+    else
+    {
+        IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
+        if (eCallReason != CODE_NONE)
         {
             pSession->SendAck();
+            CallReasonInfo objReason(eCallReason);
+            HandleCancel(piSession, objReason);
+            OnStartFailed(objReason);
+
+            return CallStateName::TERMINATING;
         }
-        CallReasonInfo objReason(eCallReason);
-
-        HandleCancel(piSession, objReason);
-        OnStartFailed(objReason);
-
-        return CallStateName::TERMINATING;
     }
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (!piSession->GetPreviousRequest(IMessage::SESSION_ACK) && pSession->SendAck() == IMS_FAILURE)
+    if (pSession->SendAck() == IMS_FAILURE)
     {
         CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
         HandleCancel(piSession, objReason);
@@ -252,12 +246,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
-
-    if (piSession->GetState() == ISession::STATE_ESTABLISHED)
-    {
-        IMS_TRACE_I("SessionEarlyMediaUpdated - Handle pending started event", 0, 0, 0);
-        return SessionStarted(piSession);
-    }
 
     return MaySendPreconditionConfirmation(*piSession);
 }
@@ -372,15 +360,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
     if (nStatusCode == SipStatusCode::SC_183)
     {
         return MaySendPreconditionConfirmation(*piSession);
-    }
-    else if (nStatusCode == SipStatusCode::SC_200)
-    {
-        // TODO: send update after sending ACK to 200 OK response.
-        if (m_objContext.GetMessageUtils().HasSdp(piMessage))
-        {
-            IMS_TRACE_I("SessionPrackDelivered - Handle pending started event", 0, 0, 0);
-            return SessionStarted(piSession);
-        }
     }
 
     return GetStateName();
