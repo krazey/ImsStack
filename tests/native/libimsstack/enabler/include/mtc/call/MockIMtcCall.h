@@ -20,7 +20,6 @@
 #include "AString.h"
 #include "IMtcService.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
@@ -40,11 +39,11 @@ public:
     MOCK_METHOD(void, Attach, (), (override));
     MOCK_METHOD(void, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsList<SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, StartConference,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
+                    (IN const ImsList<SuppService*>& objSuppServices),
                     IN const ImsList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, StartConference,

@@ -747,28 +747,6 @@ TEST_F(MtcServiceTest, ProcessTestCommandChangesRatType)
     pNormalMtcService->ProcessTestCommand(3 /* Not defined */, 0, 0);
 }
 
-TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
-{
-    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
-}
-
-TEST_F(MtcServiceTest, SetAndCheckTerminalBasedTir)
-{
-    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTirStatus());
-
-    pNormalMtcService->SetTerminalBasedTir(IMS_TRUE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTirStatus());
-
-    pNormalMtcService->SetTerminalBasedTir(IMS_FALSE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTirStatus());
-}
-
 TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)
 {
     pNormalMtcService->NotifyJniEnablerSet();

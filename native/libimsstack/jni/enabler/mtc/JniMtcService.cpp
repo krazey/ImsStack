@@ -23,6 +23,7 @@
 #include "JniEnablerConnector.h"
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
+#include "JniMtcUtils.h"
 #include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
@@ -115,8 +116,8 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
         case IuMtcService::SRVCC_STATE_CHANGED:
             NotifySrvccStateChanged(objParcel);
             break;
-        case IuMtcService::SET_TERMINAL_BASED_CALL_WAITING:
-            SetTerminalBasedCallWaiting(objParcel);
+        case IuMtcService::PERMANENT_SUPP_CHANGED:
+            NotifyPermanentSuppChanged(objParcel);
             break;
         case IuMtcService::OPEN_EMERGENCY_SERVICE:
             OpenEmergencyService(objParcel);
@@ -126,9 +127,6 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
             break;
         case IuMtcService::TEST_COMMAND:
             ProcessTestCommand(objParcel);
-            break;
-        case IuMtcService::SET_TERMINAL_BASED_TIR:
-            SetTerminalBasedTir(objParcel);
             break;
         default:
             break;
@@ -161,27 +159,16 @@ void JniMtcService::NotifySrvccStateChanged(IN const android::Parcel& objParcel)
 }
 
 PRIVATE
-void JniMtcService::SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel)
+void JniMtcService::NotifyPermanentSuppChanged(IN const android::Parcel& objParcel)
 {
     IMtcService* piNativeService = GetNativeService();
     if (piNativeService == IMS_NULL)
     {
         return;
     }
-    IMS_BOOL bEnabled = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
-    piNativeService->SetTerminalBasedCallWaiting(bEnabled);
-}
 
-PRIVATE
-void JniMtcService::SetTerminalBasedTir(IN const android::Parcel& objParcel)
-{
-    IMtcService* piNativeService = GetNativeService();
-    if (piNativeService == IMS_NULL)
-    {
-        return;
-    }
-    IMS_BOOL bEnabled = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
-    piNativeService->SetTerminalBasedTir(bEnabled);
+    ImsList<SuppService*> objSuppServices = JniMtcUtils::ReadSupplementaryService(objParcel);
+    piNativeService->UpdatePermanentSuppServices(objSuppServices);
 }
 
 PRIVATE

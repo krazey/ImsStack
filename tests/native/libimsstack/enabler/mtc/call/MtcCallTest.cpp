@@ -18,6 +18,7 @@
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
+#include "ImsList.h"
 #include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
@@ -247,7 +248,7 @@ TEST_F(MtcCallTest, StartCallsState)
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Start(eCallType, strTarget, objMediaInfo, Ref(objSuppServices))).Times(1);
@@ -264,7 +265,7 @@ TEST_F(MtcCallTest, StartCallsStateForUssi)
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Start(eCallType, strTarget, objMediaInfo, Ref(objSuppServices))).Times(1);
@@ -279,7 +280,7 @@ TEST_F(MtcCallTest, StartConference5CallsState)
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     ImsList<ConfUser*> lstUsers;
 
     MockIMtcCallState* pState = new MockIMtcCallState();

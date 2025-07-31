@@ -18,6 +18,7 @@
 #include "CarrierConfig.h"
 #include "FeatureCaps.h"
 #include "IMtcService.h"
+#include "ImsList.h"
 #include "MediaNego.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"
@@ -699,10 +700,6 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
 
 TEST_F(MessageFormatterTest, SetTipHeader)
 {
-    EXPECT_CALL(objService, GetTirStatus)
-            .WillOnce(Return(SuppStatus::UNPROVISIONED))
-            .WillOnce(Return(SuppStatus::PROVISIONED_ENABLED));
-
     EXPECT_CALL(objMessageUtils,
             SetHeader(&objMessage, AString(MessageUtil::STR_ID), ISipHeader::PRIVACY,
                     AString::ConstNull()))

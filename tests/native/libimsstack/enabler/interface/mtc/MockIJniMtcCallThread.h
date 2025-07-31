@@ -20,7 +20,6 @@
 #include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "ImsMap.h"
 #include "ImsList.h"
 #include "conferencecall/ConferenceDef.h"
 
@@ -34,55 +33,45 @@ class MockIJniMtcCallThread : public IJniMtcCallThread
 {
 public:
     MOCK_METHOD(void, OnStarted,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnStartFailed, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnInitiating, (IN const JniCallInfo&, IN const MediaInfo&, IN IMS_SINT32),
             (override));
     MOCK_METHOD(void, OnProgressing,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnHeld,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnHoldFailed, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnResumed,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnResumeFailed, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnHeldBy,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnResumedBy,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnTerminated, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnIncomingResume,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnIncomingUpdate,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnUpdated,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnUpdateFailed, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnUpdatedBy,
-            (IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&)),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
 
     MOCK_METHOD(void, OnMerged,
-            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsMap<SuppType, SuppService*>&),
+            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&),
                     IN const ImsList<ConfUser*>&),
             (override));
     MOCK_METHOD(void, OnMergeFailed, (IN const CallReasonInfo&), (override));
@@ -98,7 +87,7 @@ public:
     MOCK_METHOD(void, OnEctCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnIncomingCallReceived,
             (IN IMS_UINTP, IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsMap<SuppType, SuppService*>&), IN OipType, IN const AString&,
+                    (IN const ImsList<SuppService*>&), IN OipType, IN const AString&,
                     IN IMS_SINT32),
             (override));
     MOCK_METHOD(void, OnInformationNotificationReceived, (IN IMS_UINT32, IN const AString,

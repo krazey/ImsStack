@@ -41,6 +41,7 @@
 #include "call/block/CallWaitingBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
+#include "call/block/IncomingCallBarringBlockRule.h"
 #include "call/block/LocationBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/RadioBlockRule.h"
@@ -552,6 +553,7 @@ ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     CallType eCallType = m_objContext.GetSession()->GetCallType();
 
     ImsList<IMtcBlockRule*> lstRules;
+    lstRules.Append(new IncomingCallBarringBlockRule(m_objContext, eCallType));
     lstRules.Append(new VopsBlockRule(m_objContext));
     lstRules.Append(new WfcBlockRule(m_objContext, eCallType));
     lstRules.Append(new ServiceBlockRule(m_objContext, eCallType));

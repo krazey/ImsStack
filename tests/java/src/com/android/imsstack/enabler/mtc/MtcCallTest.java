@@ -233,12 +233,12 @@ public class MtcCallTest extends ImsStackTest {
                 MediaInfo.GTTMODE_VCO + 1).findFirst().getAsInt());
 
         parcel.writeInt(3);
-        parcel.writeInt(SuppInfo.TYPE_CALLERID);
+        parcel.writeInt(SuppInfo.SUPP_TYPE_CALLERID);
         parcel.writeString("");
         parcel.writeInt(randomGenerator.ints(SuppInfo.CALLERID_NETWORK,
                 SuppInfo.CALLERID_IDENTITY + 1).findFirst().getAsInt());
         parcel.writeInt(0);
-        parcel.writeInt(SuppInfo.TYPE_CNAP);
+        parcel.writeInt(SuppInfo.SUPP_TYPE_CNAP);
         parcel.writeString("test");
         parcel.writeInt(0);
         parcel.writeInt(0);

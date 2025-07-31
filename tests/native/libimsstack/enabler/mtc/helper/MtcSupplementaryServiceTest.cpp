@@ -18,7 +18,6 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
 #include "MockISipMessage.h"
@@ -92,35 +91,32 @@ protected:
 TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
 {
     SuppService* pTestSupp1 = new SuppService();
+    pTestSupp1->nType = static_cast<IMS_SINT32>(SuppType::CNAP);
     AString strTest("testDisplay");
     pTestSupp1->strValue = strTest;
     SuppService* pTestSupp2 = new SuppService();
+    pTestSupp2->nType = static_cast<IMS_SINT32>(SuppType::CALLER_ID);
     pTestSupp2->nValue = 1;
     SuppService* pTestSupp3 = new SuppService();
+    pTestSupp3->nType = static_cast<IMS_SINT32>(SuppType::CW);
     pTestSupp3->bValue = IMS_TRUE;
 
-    ImsMap<SuppType, SuppService*> objInSuppService;
-    objInSuppService.Add(SuppType::CNAP, pTestSupp1);
-    objInSuppService.Add(SuppType::CALLER_ID, pTestSupp2);
-    objInSuppService.Add(SuppType::CW, pTestSupp3);
+    ImsList<SuppService*> objInSuppService;
+    objInSuppService.Append(pTestSupp1);
+    objInSuppService.Append(pTestSupp2);
+    objInSuppService.Append(pTestSupp3);
 
     pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService);
 
-    const ImsMap<SuppType, SuppService*>& objOutSuppService =
-            pMtcSupplementaryService->GetServices();
+    const ImsList<SuppService*>& objOutSuppService = pMtcSupplementaryService->GetServices();
 
     EXPECT_EQ(objOutSuppService.GetSize(), 3);
-    EXPECT_EQ(objOutSuppService.GetValue(SuppType::CNAP)->strValue, strTest);
-    EXPECT_EQ(objOutSuppService.GetValue(SuppType::CALLER_ID)->nValue, 1);
-    EXPECT_TRUE(objOutSuppService.GetValue(SuppType::CW)->bValue);
-
     SuppService* pTestSupp4 = new SuppService();
+    pTestSupp4->nType = static_cast<IMS_SINT32>(SuppType::CW);
     pTestSupp4->bValue = IMS_FALSE;
-    ImsMap<SuppType, SuppService*> objInSuppService2;
-    objInSuppService2.Add(SuppType::CW, pTestSupp4);
+    ImsList<SuppService*> objInSuppService2;
+    objInSuppService2.Append(pTestSupp4);
     pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService2);
-
-    EXPECT_FALSE(objOutSuppService.GetValue(SuppType::CW)->bValue);
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateTip)

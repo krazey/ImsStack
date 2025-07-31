@@ -19,6 +19,7 @@
 
 #include "INativeEnabler.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 
 class AString;
 class ICoreService;
@@ -31,7 +32,6 @@ class ISsacTimerHandler;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
-enum class SuppStatus;
 
 class IMtcService : public INativeEnabler
 {
@@ -215,6 +215,22 @@ public:
     virtual void UpdateSrvccState(IN SrvccState eState) = 0;
 
     /**
+     * @brief Updates the permanent supplementary services status.
+     *
+     * @param objSuppServices A list of `SuppService` objects representing the permanent
+     *                        supplementary services.
+     */
+    virtual void UpdatePermanentSuppServices(IN const ImsList<SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Checks if a specific permanent supplementary service is enabled.
+     *
+     * @param ePermanentSuppType The type of the permanent supplementary service to check.
+     * @return IMS_BOOL Returns true if the service is enabled, false otherwise.
+     */
+    virtual IMS_BOOL IsPermanentSuppServiceEnabled(IN PermanentSuppType ePermanentSuppType) = 0;
+
+    /**
      * @brief Opens an emergency service.
      *
      * @param eServiceType The type of emergency service to open.
@@ -237,34 +253,6 @@ public:
             IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) = 0;
 
     /**
-     * @brief Sets the terminal-based call waiting (TBCW) status.
-     *
-     * @param bEnabled True to enable TBCW, false to disable it.
-     */
-    virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) = 0;
-
-    /**
-     * @brief Gets the terminal-based call waiting (TBCW) status.
-     *
-     * @return The TBCW status.
-     */
-    virtual SuppStatus GetTbcwStatus() const = 0;
-
-    /**
-     * @brief Sets a value for the Terminal based TIR.
-     */
-    virtual void SetTerminalBasedTir(IN IMS_BOOL bEnabled) = 0;
-
-    /**
-     * @brief Gets a value for the Terminal based TIR.
-     *
-     * Currently, this value is always SuppStatus::UNPROVISIONED.
-     * It will be modified when the Terminal-based TIR is actually implemented.
-     * Please refer to a comment in ag/30608488.
-     */
-    virtual SuppStatus GetTirStatus() const = 0;
-
-    /**
      * @brief Gets the ISsacTimerHandler object.
      *
      * @return The ISsacTimerHandler object.
@@ -284,13 +272,6 @@ enum class ServiceType
     UNKNOWN = 0,
     NORMAL = 1 << 0,
     EMERGENCY = 1 << 1,
-};
-
-enum class SuppStatus
-{
-    UNPROVISIONED,
-    PROVISIONED_ENABLED,
-    PROVISIONED_DISABLED,
 };
 
 #endif

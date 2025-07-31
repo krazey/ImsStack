@@ -30,15 +30,15 @@ public:
     SuppServiceUtils(IN const SuppServiceUtils&) = delete;
     SuppServiceUtils& operator=(IN const SuppServiceUtils&) = delete;
 
-    static void Add(IN ImsList<SuppService*>& objSupps, IN IMS_SINT32 nSuppType,
+    static void Add(IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType,
             IN const AString& strValue);
+    static void Add(IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType,
+            IN IMS_SINT32 nValue);
     static void Add(
-            IN ImsList<SuppService*>& objSupps, IN IMS_SINT32 nSuppType, IN IMS_SINT32 nValue);
-    static void Add(
-            IN ImsList<SuppService*>& objSupps, IN IMS_SINT32 nSuppType, IN IMS_BOOL bValue);
-    static void Delete(IN ImsList<SuppService*>& objSupps, IN IMS_SINT32 nType);
-    static void DeleteServices(IN ImsList<SuppService*>& objSupps);
-    static SuppService* Get(IN const ImsList<SuppService*>& objSupps, IN IMS_SINT32 nType);
+            IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType, IN IMS_BOOL bValue);
+    static void Delete(IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nType);
+    static void DeleteServices(IN ImsList<SuppService*>& objSuppServices);
+    static SuppService* Get(IN const ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nType);
     static IMS_BOOL IsSameSuppServices(IN const ImsList<SuppService*>& objSuppServicesA,
             IN const ImsList<SuppService*>& objSuppServicesB);
     static void Clone(IN const ImsList<SuppService*>& objSourceServices,

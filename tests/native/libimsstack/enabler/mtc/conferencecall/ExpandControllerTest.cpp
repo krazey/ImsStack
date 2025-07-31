@@ -693,11 +693,11 @@ TEST_F(ExpandControllerTest, OnCallStateChangedAddsUserToParticipantAndCompletes
 
     ParticipantInfo objParticipantInfo(objConfCallContext);
     ON_CALL(objConfCallContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
-    MtcSupplementaryService objSuppService(objConfCallContext, objConfigurationProxy);
+    MtcSupplementaryService objSuppServices(objConfCallContext, objConfigurationProxy);
     const AString strTargetUriWithScheme("sip:anyUri@domain.com");
     const AString strTargetUri("anyUri");
-    objSuppService.Add(SuppType::TARGET_URI, strTargetUriWithScheme);
-    ON_CALL(objConfCallContext, GetSupplementaryService).WillByDefault(ReturnRef(objSuppService));
+    objSuppServices.Add(SuppType::TARGET_URI, strTargetUriWithScheme);
+    ON_CALL(objConfCallContext, GetSupplementaryService).WillByDefault(ReturnRef(objSuppServices));
 
     ConfUser objUser;
     objUser.strTarget = strTargetUri;

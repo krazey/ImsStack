@@ -308,9 +308,9 @@ void JniMtcCall::Start(
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
     MediaInfo objMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo);
-    ImsList<SuppService*> objSuppService = JniMtcUtils::ReadSupplementaryService(objParcel);
+    ImsList<SuppService*> objSuppServices = JniMtcUtils::ReadSupplementaryService(objParcel);
 
-    objCallController.Start(m_nCallKey, eCallType, strTarget, objMediaInfo, objSuppService);
+    objCallController.Start(m_nCallKey, eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
 PRIVATE
@@ -430,11 +430,11 @@ void JniMtcCall::StartGroupCall(
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
     MediaInfo* pMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel);
-    ImsList<SuppService*> objSuppService = JniMtcUtils::ReadSupplementaryService(
+    ImsList<SuppService*> objSuppServices = JniMtcUtils::ReadSupplementaryService(
             objParcel);
 
     objCallController.StartGroupCall(m_nCallKey, eCallType, strTarget,
-            pMediaInfo, objSuppService);
+            pMediaInfo, objSuppServices);
     */
 }
 

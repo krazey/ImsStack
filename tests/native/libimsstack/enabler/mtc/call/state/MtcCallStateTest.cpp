@@ -20,7 +20,6 @@
 #include "ISipConnection.h"
 #include "ISipServerConnection.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MediaDef.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -106,14 +105,14 @@ TEST_F(MtcCallStateTest, OnExitDoesNothing)
 
 TEST_F(MtcCallStateTest, StartDoesNothing)
 {
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->Start(ANY_CALL_TYPE, "anyTarget", objMediaInfo, objSuppServices));
 }
 
 TEST_F(MtcCallStateTest, StartConference1DoesNothing)
 {
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     ImsList<ConfUser*> lstUsers;
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->StartConference(

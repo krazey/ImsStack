@@ -40,8 +40,7 @@ PUBLIC VIRTUAL CallWaitingBlockRule::Result CallWaitingBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (m_objService.GetTbcwStatus() == SuppStatus::UNPROVISIONED ||
-            m_objService.GetTbcwStatus() == SuppStatus::PROVISIONED_ENABLED)
+    if (m_objService.IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
     {
         return Result(Result::Status::UNBLOCKED);
     }

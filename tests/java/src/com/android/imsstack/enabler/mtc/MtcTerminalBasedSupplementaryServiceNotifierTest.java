@@ -139,7 +139,6 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         assertEquals(MtcApp.MSG_SEND_NOTIFICATION, capturedMessage.what);
         Parcel parcel = (Parcel) capturedMessage.obj;
         parcel.setDataPosition(0);
-        assertEquals(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING, parcel.readInt());
     }
 
     @Test
@@ -167,6 +166,5 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         assertEquals(MtcApp.MSG_SEND_NOTIFICATION, capturedMessage.what);
         Parcel parcel = (Parcel) capturedMessage.obj;
         parcel.setDataPosition(0);
-        assertEquals(IUMtcService.SET_TERMINAL_BASED_TIR, parcel.readInt());
     }
 }

@@ -45,8 +45,7 @@ private:
     void Attach();
     IMtcService* GetNativeService();
     void NotifySrvccStateChanged(IN const android::Parcel& objParcel);
-    void SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel);
-    void SetTerminalBasedTir(IN const android::Parcel& objParcel);
+    void NotifyPermanentSuppChanged(IN const android::Parcel& objParcel);
     void OpenEmergencyService(IN const android::Parcel& objParcel);
     void StopEmergencyService();
     void ProcessTestCommand(IN const android::Parcel& objParcel);

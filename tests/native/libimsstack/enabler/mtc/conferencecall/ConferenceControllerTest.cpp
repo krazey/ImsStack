@@ -16,7 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "ISipHeader.h"
-#include "ImsMap.h"
+#include "ImsList.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"
 #include "MockIMtcContext.h"
@@ -1427,7 +1427,7 @@ TEST_F(ConferenceControllerTest, ProcessGroupCallDoesNothing)
     ImsList<ConfUser*> objUsers;
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     pController->ProcessCommand(
             IuMtcCall::STARTCONF, objUsers, objCallInfo, objMediaInfo, objSuppServices);
 
@@ -1443,7 +1443,7 @@ TEST_F(ConferenceControllerTest, ProcessCommandWithInvalidTypeDoesNothing)
 
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     pController->ProcessCommand(
             IConferenceController::MERGE, objUsers, objCallInfo, objMediaInfo, objSuppServices);
 

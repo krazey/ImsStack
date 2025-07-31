@@ -19,6 +19,7 @@
 
 #include "ImsList.h"
 #include "MtcDef.h"
+#include "utility/SuppServiceUtils.h"
 
 class ISession;
 class IMessage;
@@ -30,9 +31,8 @@ class MtcConfigurationProxy;
 class MtcSupplementaryService final
 {
 public:
-    explicit MtcSupplementaryService(IN IMtcCallContext& objContext,
-            IN MtcConfigurationProxy& objConfigurationProxy,
-            IN const ImsList<SuppService*>& objSuppServices = ImsList<SuppService*>());
+    MtcSupplementaryService(
+            IN IMtcCallContext& objContext, IN MtcConfigurationProxy& objConfigurationProxy);
     ~MtcSupplementaryService();
     MtcSupplementaryService(const MtcSupplementaryService&) = delete;
     MtcSupplementaryService& operator=(const MtcSupplementaryService&) = delete;
@@ -49,13 +49,28 @@ public:
     IMS_BOOL UpdateCallingNumberVerification(IN IMessage* piMessage);
     IMS_BOOL UpdateCallComposerElements(IN const IMessage* piMessage);
     IMS_BOOL UpdateSessionId(IN const IMessage* piMessage);
-    void Add(IN SuppType eSuppType, IN const AString& strValue);
-    void Add(IN SuppType eSuppType, IN IMS_SINT32 nValue);
-    void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
-    void Delete(IN SuppType eSuppType);
-    void DeleteServices();
-    const SuppService* Get(IN SuppType eSuppType) const;
-    const ImsList<SuppService*>& GetServices() const;
+    inline void Add(IN SuppType eSuppType, IN const AString& strValue)
+    {
+        SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), strValue);
+    }
+    inline void Add(IN SuppType eSuppType, IN IMS_SINT32 nValue)
+    {
+        SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), nValue);
+    }
+    inline void Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
+    {
+        SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), bValue);
+    }
+    inline void Delete(IN SuppType eSuppType)
+    {
+        SuppServiceUtils::Delete(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
+    }
+    inline void DeleteServices() { SuppServiceUtils::DeleteServices(m_objSuppServices); }
+    inline const SuppService* Get(IN SuppType eSuppType) const
+    {
+        return SuppServiceUtils::Get(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
+    }
+    inline const ImsList<SuppService*>& GetServices() const { return m_objSuppServices; }
 
     static void ConvertGlobalNumberToLocalNumber(
             IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);

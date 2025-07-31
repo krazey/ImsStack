@@ -185,7 +185,7 @@ TEST_F(ConferenceOperationQueueTest, CreateAndPutWithStartParamProvidesSameParam
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
     ImsList<ConfUser*> objUsers;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     CallStartOperationParams* pParam =
             new CallStartOperationParams(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objCallInfo,
                     objMediaInfo, objUsers, objSuppServices);

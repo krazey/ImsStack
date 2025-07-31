@@ -83,8 +83,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_pNetworkWatcher(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
         m_objSsacTimerHandler(SsacTimerHandler(m_objContext)),
-        m_eTbcwStatus(SuppStatus::UNPROVISIONED),
-        m_eTirStatus(SuppStatus::UNPROVISIONED)
+        m_pPermanentSuppService(std::make_unique<MtcPermanentSupplementaryService>())
 {
     IMS_TRACE_I("+MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
     Init();
@@ -251,6 +250,18 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
     }
 }
 
+PUBLIC VIRTUAL void MtcService::UpdatePermanentSuppServices(
+        IN const ImsList<SuppService*>& objSuppServices)
+{
+    m_pPermanentSuppService->UpdateServices(objSuppServices);
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsPermanentSuppServiceEnabled(
+        IN PermanentSuppType ePermanentSuppType)
+{
+    return m_pPermanentSuppService->IsEnabled(ePermanentSuppType);
+}
+
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN ServiceType eServiceType)
 {
     IMS_TRACE_I("OpenEmergencyService [%d]", eServiceType, 0, 0);
@@ -281,20 +292,6 @@ PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
         default:
             break;
     }
-}
-
-PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled)
-{
-    IMS_TRACE_I("SetTerminalBasedCallWaiting bEnabled[%s]", _TRACE_B_(bEnabled), 0, 0);
-
-    m_eTbcwStatus = bEnabled ? SuppStatus::PROVISIONED_ENABLED : SuppStatus::PROVISIONED_DISABLED;
-}
-
-PUBLIC VIRTUAL void MtcService::SetTerminalBasedTir(IN IMS_BOOL bEnabled)
-{
-    IMS_TRACE_I("SetTerminalBasedTir bEnabled[%s]", _TRACE_B_(bEnabled), 0, 0);
-
-    m_eTirStatus = bEnabled ? SuppStatus::PROVISIONED_ENABLED : SuppStatus::PROVISIONED_DISABLED;
 }
 
 PUBLIC VIRTUAL void MtcService::CoreService_PageMessageReceived(

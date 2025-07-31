@@ -535,7 +535,7 @@ void MessageFormatter::SetSrvccContactParameter()
 PRIVATE
 void MessageFormatter::SetTipHeader()
 {
-    if (m_objContext.GetService().GetTirStatus() == SuppStatus::PROVISIONED_ENABLED)
+    if (m_objContext.GetService().IsPermanentSuppServiceEnabled(PermanentSuppType::TB_TIR))
     {
         m_objContext.GetMessageUtils().SetHeader(
                 m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);

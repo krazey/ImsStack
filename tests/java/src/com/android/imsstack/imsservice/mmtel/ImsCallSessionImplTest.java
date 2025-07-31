@@ -63,6 +63,7 @@ import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcEmergencyServiceManager;
 import com.android.imsstack.enabler.mtc.SuppInfo;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.imsservice.mmtel.ImsCallSessionImpl.ImsCallExtManagerProxy;
@@ -853,7 +854,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testOnCallProgressing() {
         SuppInfo suppInfo = new SuppInfo();
-        suppInfo.addService_bool(SuppInfo.TYPE_CW, false);
+        suppInfo.addServiceBool(SuppInfo.SUPP_TYPE_CW, false);
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.getCallListenerProxy().onCallProgressing(mockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
@@ -872,14 +873,14 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         MediaInfo mediaInfo = new MediaInfo();
         mediaInfo.AQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
-        SuppInfo.SuppService suppServiceCw = new SuppInfo.SuppService();
-        suppServiceCw.type = SuppInfo.TYPE_CW;
+        SuppService suppServiceCw = new SuppService();
+        suppServiceCw.type = SuppInfo.SUPP_TYPE_CW;
         suppServiceCw.boolValue = true;
-        suppInfo.updateService(suppServiceCw);
-        SuppInfo.SuppService suppServiceSessionId = new SuppInfo.SuppService();
-        suppServiceSessionId.type = SuppInfo.TYPE_SESSION_ID;
+        suppInfo.updateService(SuppInfo.SUPP_TYPE_CW, suppServiceCw);
+        SuppService suppServiceSessionId = new SuppService();
+        suppServiceSessionId.type = SuppInfo.SUPP_TYPE_SESSION_ID;
         suppServiceSessionId.strValue = SESSION_ID;
-        suppInfo.updateService(suppServiceSessionId);
+        suppInfo.updateService(SuppInfo.SUPP_TYPE_SESSION_ID, suppServiceSessionId);
         mImsCallSession = createImsCallSession("2");
         ImsCallExtManagerProxy mockProxy = Mockito.mock(ImsCallExtManagerProxy.class);
         mImsCallSession.setImsCallExtManagerProxy(mockProxy);
@@ -900,7 +901,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testOnCallStarted() {
         SuppInfo suppInfo = new SuppInfo();
-        suppInfo.addService_bool(SuppInfo.TYPE_CW, false);
+        suppInfo.addServiceBool(SuppInfo.SUPP_TYPE_CW, false);
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.getCallListenerProxy().onCallStarted(mockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
@@ -912,14 +913,14 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, bundle, new ImsStreamMediaProfile());
         ImsCallProfile localProfile = mImsCallSession.getLocalCallProfile();
-        SuppInfo.SuppService suppService = new SuppInfo.SuppService();
-        suppService.type = SuppInfo.TYPE_TIP;
+        SuppService suppService = new SuppService();
+        suppService.type = SuppInfo.SUPP_TYPE_TIP;
         suppService.intValue = SuppInfo.TIP_NONE;
-        suppInfo.updateService(suppService);
-        SuppInfo.SuppService suppServiceSessionId = new SuppInfo.SuppService();
-        suppServiceSessionId.type = SuppInfo.TYPE_SESSION_ID;
+        suppInfo.updateService(SuppInfo.SUPP_TYPE_TIP, suppService);
+        SuppService suppServiceSessionId = new SuppService();
+        suppServiceSessionId.type = SuppInfo.SUPP_TYPE_SESSION_ID;
         suppServiceSessionId.strValue = SESSION_ID;
-        suppInfo.updateService(suppServiceSessionId);
+        suppInfo.updateService(SuppInfo.SUPP_TYPE_SESSION_ID, suppServiceSessionId);
         mImsCallSession = createImsCallSession("1");
         ImsCallExtManagerProxy mockProxy = Mockito.mock(ImsCallExtManagerProxy.class);
         mImsCallSession.setImsCallExtManagerProxy(mockProxy);

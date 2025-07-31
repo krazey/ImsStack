@@ -48,9 +48,6 @@ public final class SuppInfo implements Parcelable {
     public static final int SUPP_TYPE_CALL_COMPOSER_IS_BUSINESS = 16; // boolean
     public static final int SUPP_TYPE_SESSION_ID = 17; // String
 
-    public static final int SUPP_TYPE_TB_CW = 18;                            // boolean
-    public static final int SUPP_TYPE_TB_TIR = 19;                           // boolean
-
     // CallerID
     public static final int CALLERID_NONE = 0;
     public static final int CALLERID_NETWORK = 1;
@@ -85,9 +82,7 @@ public final class SuppInfo implements Parcelable {
         SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG,
         SUPP_TYPE_CALL_COMPOSER_PICTURE_URL,
         SUPP_TYPE_CALL_COMPOSER_IS_BUSINESS,
-        SUPP_TYPE_SESSION_ID,
-        SUPP_TYPE_TB_CW,
-        SUPP_TYPE_TB_TIR
+        SUPP_TYPE_SESSION_ID
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SuppType {}

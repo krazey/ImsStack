@@ -80,7 +80,6 @@ GLOBAL
 void SuppServiceUtils::Delete(IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType)
 {
     SuppService* pTargetSupp = Get(objSuppServices, nSuppType);
-
     if (pTargetSupp)
     {
         objSuppServices.Remove(pTargetSupp);

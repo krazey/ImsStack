@@ -33,7 +33,6 @@
 #include "utility/CallComposerUtil.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
-#include "utility/SuppServiceUtils.h"
 #include <utility>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -47,12 +46,11 @@ LOCAL const IMS_CHAR STR_INTERACTION_WITH_OTHER_SERVICE[] = "Interaction with ot
 LOCAL const IMS_CHAR STR_UNAVAILABLE[] = "Unavailable";
 
 PUBLIC
-MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
-        IN MtcConfigurationProxy& objConfigurationProxy,
-        IN const ImsList<SuppService*>& objSuppServices) :
+MtcSupplementaryService::MtcSupplementaryService(
+        IN IMtcCallContext& objContext, IN MtcConfigurationProxy& objConfigurationProxy) :
         m_objContext(objContext),
-        m_objSuppServices(objSuppServices),
-        m_objConfigurationProxy(objConfigurationProxy)
+        m_objConfigurationProxy(objConfigurationProxy),
+        m_objSuppServices(ImsList<SuppService*>())
 {
     IMS_TRACE_I("+MtcSupplementaryService", 0, 0, 0);
 }
@@ -308,41 +306,6 @@ IMS_BOOL MtcSupplementaryService::UpdateSessionId(IN const IMessage* piMessage)
         return IMS_TRUE;
     }
     return IMS_FALSE;
-}
-
-PUBLIC void MtcSupplementaryService::Add(IN SuppType eSuppType, IN const AString& strValue)
-{
-    SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), strValue);
-}
-
-PUBLIC void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_SINT32 nValue)
-{
-    SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), nValue);
-}
-
-PUBLIC void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
-{
-    SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), bValue);
-}
-
-PUBLIC void MtcSupplementaryService::Delete(IN SuppType eSuppType)
-{
-    SuppServiceUtils::Delete(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
-}
-
-PUBLIC void MtcSupplementaryService::DeleteServices()
-{
-    SuppServiceUtils::DeleteServices(m_objSuppServices);
-}
-
-PUBLIC const SuppService* MtcSupplementaryService::Get(IN SuppType eSuppType) const
-{
-    return SuppServiceUtils::Get(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
-}
-
-PUBLIC const ImsList<SuppService*>& MtcSupplementaryService::GetServices() const
-{
-    return m_objSuppServices;
 }
 
 GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(

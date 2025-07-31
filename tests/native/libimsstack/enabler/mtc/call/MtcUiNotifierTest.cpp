@@ -16,7 +16,6 @@
 
 #include "CallReasonInfo.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "JniCallInfo.h"
 #include "JniEnablerConnector.h"
 #include "MockIMtcService.h"
@@ -64,7 +63,7 @@ public:
     CallReasonInfo* pReason;
 
     MtcSupplementaryService* pSupplementaryService;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
 protected:
     virtual void SetUp() override

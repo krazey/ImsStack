@@ -15,7 +15,6 @@
  */
 
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/ISilentRedialHelper.h"
@@ -173,9 +172,9 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
     CallType eCallType = CallType::VOIP;
     AString strTarget = "target";
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
-    // TODO: Make a matcher for ImsMap<SuppType, SuppService*>
+    // TODO: Make a matcher for ImsList<SuppService*>
     MockIMtcCall objCall;
     EXPECT_CALL(objCall, Start(eCallType, strTarget, objMediaInfo, _)).Times(1);
 

@@ -32,26 +32,26 @@ public class SuppInfoTest {
     public void testConstructor() {
         SuppInfo suppInfo1 = new SuppInfo();
 
-        assertEquals(0, suppInfo1.getServiceSize());
+        assertEquals(0, suppInfo1.getServicesSize());
 
-        suppInfo1.addService_int(SuppInfo.TYPE_CALLERID, SuppInfo.CALLERID_IDENTITY);
+        suppInfo1.addServiceInt(SuppInfo.SUPP_TYPE_CALLERID, SuppInfo.CALLERID_IDENTITY);
 
-        assertEquals(1, suppInfo1.getServiceSize());
-        assertTrue(suppInfo1.isService(SuppInfo.TYPE_CALLERID));
+        assertEquals(1, suppInfo1.getServicesSize());
+        assertTrue(suppInfo1.isService(SuppInfo.SUPP_TYPE_CALLERID));
 
         SuppInfo copiedSuppInfo1 = new SuppInfo(suppInfo1);
 
-        assertEquals(1, copiedSuppInfo1.getServiceSize());
-        assertTrue(suppInfo1.isService(SuppInfo.TYPE_CALLERID));
-        assertFalse(suppInfo1.isService(SuppInfo.TYPE_CNAP));
+        assertEquals(1, copiedSuppInfo1.getServicesSize());
+        assertTrue(suppInfo1.isService(SuppInfo.SUPP_TYPE_CALLERID));
+        assertFalse(suppInfo1.isService(SuppInfo.SUPP_TYPE_CNAP));
 
         Parcel dest = Parcel.obtain();
         dest.writeInt(3);
-        dest.writeInt(SuppInfo.TYPE_CALLERID);
+        dest.writeInt(SuppInfo.SUPP_TYPE_CALLERID);
         dest.writeString("");
         dest.writeInt(SuppInfo.CALLERID_IDENTITY);
         dest.writeInt(0);
-        dest.writeInt(SuppInfo.TYPE_CNAP);
+        dest.writeInt(SuppInfo.SUPP_TYPE_CNAP);
         dest.writeString("test");
         dest.writeInt(0);
         dest.writeInt(0);
@@ -59,7 +59,7 @@ public class SuppInfoTest {
 
         SuppInfo suppInfo2 = new SuppInfo(dest);
 
-        assertEquals(3, suppInfo2.getServiceSize());
+        assertEquals(3, suppInfo2.getServicesSize());
 
         Parcel parcelWrittenBySuppInfo = Parcel.obtain();
         suppInfo2.writeToParcel(parcelWrittenBySuppInfo, 0);
@@ -67,8 +67,8 @@ public class SuppInfoTest {
 
         SuppInfo copiedSuppInfo = new SuppInfo(parcelWrittenBySuppInfo);
 
-        assertEquals(3, copiedSuppInfo.getServiceSize());
-        assertTrue(copiedSuppInfo.isService(SuppInfo.TYPE_CALLERID));
-        assertTrue(copiedSuppInfo.isService(SuppInfo.TYPE_CNAP));
+        assertEquals(3, copiedSuppInfo.getServicesSize());
+        assertTrue(copiedSuppInfo.isService(SuppInfo.SUPP_TYPE_CALLERID));
+        assertTrue(copiedSuppInfo.isService(SuppInfo.SUPP_TYPE_CNAP));
     }
 }
