@@ -447,6 +447,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
         case RegistrationLog::TIMER_INTERNAL_ERROR:
             return "TIMER_INTERNAL_ERROR";
 
+        case RegistrationLog::TIMER_WAIT_EMERGENCY_NETWORK:
+            return "TIMER_WAIT_EMERGENCY_NETWORK";
+
         default:
             return "__INVALID__";
     }

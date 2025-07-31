@@ -285,6 +285,8 @@ public:
                 return m_piTransactionTimer;
             case AosRegistration::TIMER_INTERNAL_ERROR:
                 return m_piInternalErrorTimer;
+            case AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK:
+                return m_piWaitEmergencyNetworkTimer;
             default:
                 return IMS_NULL;
         }
@@ -6398,6 +6400,7 @@ TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecove
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK, 5000);
 
     m_pAosRegistration->ClearTimers();
 
@@ -6408,6 +6411,7 @@ TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecove
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK));
 }
 
 TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndStopRetryTimer)
@@ -6419,6 +6423,7 @@ TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndS
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK, 5000);
 
     m_pAosRegistration->ClearRetryTimers();
 
@@ -6429,6 +6434,7 @@ TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndS
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK));
 }
 
 TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
@@ -6440,6 +6446,7 @@ TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK, 5000);
 
     m_pAosRegistration->Timer_TimerExpired(IMS_NULL);
 
@@ -6450,6 +6457,7 @@ TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_WAIT_EMERGENCY_NETWORK));
 }
 
 TEST_F(AosRegistrationTest,

@@ -18,6 +18,7 @@
 
 #include "ServiceSystemTime.h"
 #include "interface/IAosEmergencyListener.h"
+#include "interface/IAosServicePhoneListener.h"
 #include "registration/AosRegistration.h"
 
 class EmergencyModeInfo
@@ -70,13 +71,16 @@ private:
     IMS_UINT32 m_nReregTryTimeSec;
 };
 
-class AosERegistration : public AosRegistration, public IAosEmergencyListener
+class AosERegistration :
+        public AosRegistration,
+        public IAosEmergencyListener,
+        public AosServicePhoneListener
 {
 public:
     AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
     ~AosERegistration() override;
 
-    void Start() final;
+    void Start() override;
     void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
             IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
@@ -113,6 +117,7 @@ protected:
     void ProcessStopRetryTimerExpired() final;
     void ProcessModeTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
+    void ProcessWaitEmergencyNetworkTimerExpired() final;
 
     void SetRefreshPolicy() final;
     void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired) final;
@@ -144,6 +149,9 @@ protected:
     void CallbackModeChanged(IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
             IN IMS_ULONG nDuration) override;
 
+    // IAosServicePhoneListener
+    void ServicePhone_EmergencyRegistrationStateChanged(IN IMS_BOOL bEmergencyAttached) override;
+
     void HandleECallState(IN IMS_UINT32 nState);
     void HandleESmsState(IN IMS_UINT32 nState);
     void HandleFakeMode(IN IMS_UINT32 nReason);
@@ -154,6 +162,7 @@ protected:
     IMS_BOOL IsReinitiationRequested() const;
     IMS_BOOL IsRetryAllowed() const;
     IMS_BOOL IsAnonymousECallActionPresent(IN IMS_SINT32 nStatusCode) const;
+    IMS_BOOL IsNetworkReady() const;
 
     void ProcessReRegStart();
     void ProcessFakeMode();

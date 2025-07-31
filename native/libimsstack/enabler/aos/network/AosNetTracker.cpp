@@ -264,6 +264,11 @@ PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileVoiceNetworkType()
     return m_nNetVoiceRadioType;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNetTracker::GetMobileServiceState()
+{
+    return m_piNetWatcherInfo->GetCellularServiceState();
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetNetworkType()
 {
     if (IsEpdgEnabled())

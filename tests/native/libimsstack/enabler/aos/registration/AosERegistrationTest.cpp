@@ -97,11 +97,13 @@ using ::testing::ReturnRef;
     using Base::ProcessUpdateFailed_Others;                                  \
     using Base::ProcessUpdateFailed_StatusCode;                              \
     using Base::ProcessUpdateFailed_TxnTimeout;                              \
+    using Base::ProcessWaitEmergencyNetworkTimerExpired;                     \
     using Base::Registration_RefreshTimerExpired;                            \
     using Base::Registration_StartFailed;                                    \
     using Base::Registration_Started;                                        \
     using Base::Registration_Terminated;                                     \
     using Base::Registration_Updated;                                        \
+    using Base::ServicePhone_EmergencyRegistrationStateChanged;              \
     using Base::SetFakeReg;                                                  \
     using Base::SetImsCall;                                                  \
     using Base::SetReinitiationRequested;                                    \
@@ -154,6 +156,8 @@ public:
 
     inline ITimer* GetModeTimer() { return m_piModeTimer; }
 
+    inline ITimer* GetWaitEmergencyNetworkTimer() { return m_piWaitEmergencyNetworkTimer; }
+
     inline void SetRegistration(IN IRegistration* piRegistration)
     {
         m_piRegistration = piRegistration;
@@ -197,6 +201,12 @@ public:
     {
         m_pCounter->AddCount(__IMS_FUNC__);
         AosERegistration::StartTimer(nType, nDuration);
+    }
+
+    void Start() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosERegistration::Start();
     }
 
 private:
@@ -395,6 +405,8 @@ protected:
         ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
                 .WillByDefault(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
         ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNetTracker, GetMobileServiceState())
+                .WillByDefault(Return(INetworkWatcher::STATE_IN_SERVICE));
 
         // IRegContact
         ON_CALL(m_objMockIRegContact, AddHeaderParameter(_, _)).WillByDefault(Return(IMS_TRUE));
@@ -426,6 +438,17 @@ protected:
         }
     }
 };
+
+TEST_F(AosERegistrationTest, StartWaitEmergencyNetworkTimerWhenNetworkIsNotReady)
+{
+    ON_CALL(m_objMockIAosNetTracker, GetMobileServiceState())
+            .WillByDefault(Return(INetworkWatcher::STATE_OUT_OF_SERVICE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosERegistration->Start();
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
+}
 
 TEST_F(AosERegistrationTest, ReportFailureWhenStartWithFakeModeForEmergencySms)
 {
@@ -1222,6 +1245,16 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenNotRegisteringState)
     m_pAosERegistration->ProcessTransactionTimerExpired();
 }
 
+TEST_F(AosERegistrationTest, StartWhenProcessWaitEmergencyNetworkTimerExpired)
+{
+    m_pAosERegistration->StartTimer(AosERegistration::TIMER_WAIT_EMERGENCY_NETWORK, 1000);
+
+    m_pAosERegistration->ProcessWaitEmergencyNetworkTimerExpired();
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("Start"), 1);
+    EXPECT_EQ(m_pAosERegistration->GetWaitEmergencyNetworkTimer(), nullptr);
+}
+
 TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsAllowed)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
@@ -1756,6 +1789,16 @@ TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegNotTried)
             EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_FALSE(m_pAosERegistration->IsRefreshRequiredByCbm());
+}
+
+TEST_F(AosERegistrationTest,
+        StartIfWaitEmergencyTimerIsRunningWhenServicePhone_EmergencyRegistrationStateChanged)
+{
+    m_pAosERegistration->StartTimer(AosERegistration::TIMER_WAIT_EMERGENCY_NETWORK, 1000);
+
+    m_pAosERegistration->ServicePhone_EmergencyRegistrationStateChanged(IMS_TRUE);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("Start"), 1);
 }
 
 TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyRegistrationSkipIsConfigured)

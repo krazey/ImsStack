@@ -331,7 +331,10 @@ TEST(AosLogTest, RegTimerToString)
     EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_INTERNAL_ERROR),
             "TIMER_INTERNAL_ERROR");
     EXPECT_STREQ(
-            AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_INTERNAL_ERROR + 99),
+            AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_WAIT_EMERGENCY_NETWORK),
+            "TIMER_WAIT_EMERGENCY_NETWORK");
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(
+                         RegistrationLog::TIMER_WAIT_EMERGENCY_NETWORK + 99),
             "__INVALID__");
 }
 

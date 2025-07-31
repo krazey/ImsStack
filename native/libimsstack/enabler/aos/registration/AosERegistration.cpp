@@ -69,6 +69,17 @@ PUBLIC VIRTUAL void AosERegistration::Start()
     A_IMS_TRACE_I(
             REGID, "Start :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
+    if (!IsNetworkReady())
+    {
+        if (m_piWaitEmergencyNetworkTimer == IMS_NULL)
+        {
+            StartTimer(TIMER_WAIT_EMERGENCY_NETWORK, EMERGENCY_NETWORK_WAIT_TIME * 1000);
+            return;
+        }
+    }
+
+    StopTimer(TIMER_WAIT_EMERGENCY_NETWORK);
+
     if (IsFakeModeCondition())
     {
         if (IsERegRequestedByOnlySms())
@@ -187,6 +198,7 @@ PROTECTED VIRTUAL void AosERegistration::Init()
         if (piService != IMS_NULL)
         {
             piService->AddListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
+            piService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         }
     }
 
@@ -220,6 +232,7 @@ PROTECTED VIRTUAL void AosERegistration::CleanUp()
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (piService != IMS_NULL)
     {
+        piService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         piService->RemoveListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
     }
 
@@ -595,6 +608,12 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
     ProcessUnpredictableFailure();
 }
 
+PROTECTED VIRTUAL void AosERegistration::ProcessWaitEmergencyNetworkTimerExpired()
+{
+    Start();
+    StopTimer(TIMER_WAIT_EMERGENCY_NETWORK);
+}
+
 PROTECTED VIRTUAL void AosERegistration::SetRefreshPolicy()
 {
     m_piRegistration->SetRefreshPolicy(IRegistration::REFRESH_POLICY_RATIO, 1200, 50, 50);
@@ -864,6 +883,15 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     }
 }
 
+PROTECTED void AosERegistration::ServicePhone_EmergencyRegistrationStateChanged(
+        IN IMS_BOOL /* bEmergencyAttached */)
+{
+    if (m_piWaitEmergencyNetworkTimer != IMS_NULL)
+    {
+        Start();
+    }
+}
+
 PROTECTED void AosERegistration::HandleECallState(IN IMS_UINT32 nState)
 {
     if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
@@ -1037,6 +1065,13 @@ PROTECTED IMS_BOOL AosERegistration::IsAnonymousECallActionPresent(IN IMS_SINT32
 {
     return (nStatusCode == SipStatusCode::SC_403) &&
             m_pUtil->IsAnonymousECallActionPresent(m_piRegistration->GetPreviousResponse());
+}
+
+PROTECTED IMS_BOOL AosERegistration::IsNetworkReady() const
+{
+    return (m_piContext->GetNetTracker()->GetMobileServiceState() !=
+                    INetworkWatcher::STATE_OUT_OF_SERVICE ||
+            m_piContext->GetNetTracker()->IsEmergencyAttach());
 }
 
 PROTECTED void AosERegistration::ProcessReRegStart()
