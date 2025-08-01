@@ -94,7 +94,7 @@ protected:
 private:
     static const IMS_CHAR* GetKeyString(IN KEY_UCE_BOOL eKey);
     static const IMS_CHAR* GetKeyString(IN KEY_UCE_INT eKey);
-    void Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot = 0);
+    void Update(IN const ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot = 0);
 
 private:
     ImsMap<IMS_SINT32, UceAssetItems*> m_objAssetMap;

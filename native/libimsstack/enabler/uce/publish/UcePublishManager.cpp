@@ -1227,7 +1227,7 @@ void UcePublishManager::LoadConfigValue()
             UceConfig::GetInstance()->GetExponentialRetryPublishRespTimeArray(m_nSimSlot);
 }
 
-IPublishResponseData* UcePublishManager::GetPublishResponseData(ISipMessage* piMessage)
+IPublishResponseData* UcePublishManager::GetPublishResponseData(const ISipMessage* piMessage)
 {
     IMS_SINT32 nReasonCause = -1;
     AString strReasonText = "";
@@ -1544,7 +1544,7 @@ IMS_BOOL UcePublishManager::SetPidfXmlBody(ISipMessage* piMessage)
     return IMS_TRUE;
 }
 
-void UcePublishManager::GetEtagAndExpireValue(ISipMessage* piMessage)
+void UcePublishManager::GetEtagAndExpireValue(const ISipMessage* piMessage)
 {
     m_strEtag = AString::ConstEmpty();
     if (piMessage == IMS_NULL)

@@ -172,7 +172,7 @@ protected:
 
 private:
     void LoadConfigValue();
-    static IPublishResponseData* GetPublishResponseData(ISipMessage* piMessage);
+    static IPublishResponseData* GetPublishResponseData(const ISipMessage* piMessage);
     ISipMessage* GetISIPMessage(IMS_BOOL bRequireResponseMessage = IMS_FALSE);
     void SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 nCommandError);
     void SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResponseCode, AString strReason,
@@ -188,7 +188,7 @@ private:
     IMS_BOOL Publish();
     IMS_BOOL Unpublish();
     IMS_BOOL SetPidfXmlBody(ISipMessage* piMessage);
-    void GetEtagAndExpireValue(ISipMessage* piMessage);
+    void GetEtagAndExpireValue(const ISipMessage* piMessage);
     IMS_BOOL HandleFailResponse(IMS_SINT32 nResponseCode);
     void SetPublishStateToAoS(IN IMS_UINT32 nState);
     IMS_BOOL ProcessRetryAfterHeader();

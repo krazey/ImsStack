@@ -319,7 +319,7 @@ const IMS_CHAR* UceConfig::GetKeyString(IN KEY_UCE_INT eKey)
     return pszIntKey[eKey];
 }
 
-void UceConfig::Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
+void UceConfig::Update(IN const ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
 {
     UceAssetItems* objNew = new UceAssetItems();
     objNew->m_nExpireValuePublish =

@@ -123,7 +123,7 @@ private:
             IMS_SINT32 nReasonHeaderCause, const AString& strReasonHeaderText);
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
     void SendPresenceNotifyInd(const ImsList<AString>& pidfXmls);
-    void SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers);
+    void SendSubscribeResourceTerminatedInd(const UceNonCapabilityUsers* nonCapUsers);
     void SendSubscribeTerminatedInd();
 
     IMS_BOOL SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage) const;
@@ -136,12 +136,12 @@ private:
     IMS_BOOL SendSingleSubscribe();
     IMS_BOOL SendListSubscribe();
 
-    static ISubscribeResponseData* GetSubscribeResponseData(ISipMessage* piMessage);
+    static ISubscribeResponseData* GetSubscribeResponseData(const ISipMessage* piMessage);
 
-    IMS_BOOL HandleRetryAfterHeader(ISipMessage* piSIPMessage);
-    IMS_BOOL Handle403FailureResponse(ISipMessage* piSIPMessage);
-    IMS_BOOL Handle423FailureResponse(ISipMessage* piSIPMessage);
-    IMS_BOOL HandleNotifyInd(IN ISipMessage* piSIPMessage);
+    IMS_BOOL HandleRetryAfterHeader(const ISipMessage* piSIPMessage);
+    IMS_BOOL Handle403FailureResponse(const ISipMessage* piSIPMessage);
+    IMS_BOOL Handle423FailureResponse(const ISipMessage* piSIPMessage);
+    IMS_BOOL HandleNotifyInd(IN const ISipMessage* piSIPMessage);
 
     void StartWaitingNotifyMessageTimer(IMS_UINT32 nDuration);
     void StopWaitingNotifyMessageTimer();

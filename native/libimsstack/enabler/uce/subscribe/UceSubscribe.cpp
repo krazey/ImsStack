@@ -1088,7 +1088,7 @@ void UceSubscribe::SendPresenceNotifyInd(const ImsList<AString>& pidfXmls)
     piJniThread->NotifyInd(m_nKey, pidfXmls.GetSize(), pidfXmls);
 }
 
-void UceSubscribe::SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers)
+void UceSubscribe::SendSubscribeResourceTerminatedInd(const UceNonCapabilityUsers* nonCapUsers)
 {
     if (m_nKey == 0)
     {
@@ -1317,7 +1317,7 @@ IMS_BOOL UceSubscribe::SendListSubscribe()
     return IMS_TRUE;
 }
 
-ISubscribeResponseData* UceSubscribe::GetSubscribeResponseData(ISipMessage* piMessage)
+ISubscribeResponseData* UceSubscribe::GetSubscribeResponseData(const ISipMessage* piMessage)
 {
     IMS_SINT32 nReasonCause = -1;
     AString strReasonText = "";
@@ -1343,7 +1343,7 @@ ISubscribeResponseData* UceSubscribe::GetSubscribeResponseData(ISipMessage* piMe
     return pSubscribeResponseData;
 }
 
-IMS_BOOL UceSubscribe::HandleRetryAfterHeader(ISipMessage* piSIPMessage)
+IMS_BOOL UceSubscribe::HandleRetryAfterHeader(const ISipMessage* piSIPMessage)
 {
     IMS_TRACE_D("HandleRetryAfterHeader", 0, 0, 0);
     AString strHeader = piSIPMessage->GetHeader(ISipHeader::RETRY_AFTER_SEC);
@@ -1366,7 +1366,7 @@ IMS_BOOL UceSubscribe::HandleRetryAfterHeader(ISipMessage* piSIPMessage)
     return StartRetryAfterTimer(nValue);
 }
 
-IMS_BOOL UceSubscribe::Handle403FailureResponse(ISipMessage* piSIPMessage)
+IMS_BOOL UceSubscribe::Handle403FailureResponse(const ISipMessage* piSIPMessage)
 {
 #define NOT_AUTHORIZED_FOR_PRESENCE "NOT AUTHORIZED FOR PRESENCE"
 
@@ -1403,7 +1403,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISipMessage* piSIPMessage)
     return IMS_FALSE;
 }
 
-IMS_BOOL UceSubscribe::Handle423FailureResponse(ISipMessage* piSIPMessage)
+IMS_BOOL UceSubscribe::Handle423FailureResponse(const ISipMessage* piSIPMessage)
 {
     IMS_TRACE_D("Handle423FailureResponse", 0, 0, 0);
     AString strMinExpireHeader = piSIPMessage->GetHeader(ISipHeader::MIN_EXPIRES);
@@ -1437,7 +1437,7 @@ IMS_BOOL UceSubscribe::Handle423FailureResponse(ISipMessage* piSIPMessage)
     }
 }
 
-IMS_BOOL UceSubscribe::HandleNotifyInd(IN ISipMessage* piSIPMessage)
+IMS_BOOL UceSubscribe::HandleNotifyInd(IN const ISipMessage* piSIPMessage)
 {
     IMS_TRACE_D("HandleNotifyInd:m_nThreadRunningCompleted [%d]", m_nThreadRunningCompleted, 0, 0);
     AString strSIPSubState = piSIPMessage->GetHeader(ISipHeader::SUBSCRIPTION_STATE);

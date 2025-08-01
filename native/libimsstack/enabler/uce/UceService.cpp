@@ -385,7 +385,7 @@ void UceService::DisableCoreService()
 }
 
 IMS_BOOL UceService::OptionsReceived(
-        IN ICoreService* piCoreService, IN ICapabilities* piCapabilities)
+        IN const ICoreService* piCoreService, IN ICapabilities* piCapabilities)
 {
     if (m_pUceOptionsManager != IMS_NULL)
     {
