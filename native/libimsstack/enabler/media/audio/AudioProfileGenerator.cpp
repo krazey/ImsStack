@@ -211,7 +211,8 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
     IMS_TRACE_D("CreateAmrPayload(): Codec[%s], Payload[%d], SamplingRate[%d]",
             ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetPayloadType(),
             pAmrConfig->GetSamplingRate());
-    IMS_TRACE_D("CreateAmrPayload(): amrDtx[%d]", pAmrConfig->GetDtx(), 0, 0);
+    IMS_TRACE_D("CreateAmrPayload(): amrDtx[%d], VisibleModeSet[%d]", pAmrConfig->GetDtx(),
+            pAmrConfig->GetVisibleModeSet(), 0);
 
     return pAmrPayload;
 }
