@@ -46,6 +46,7 @@ android_library {
         "androidx.appcompat_appcompat",
         "PixelImsMediaFramework",
         "imsstack-prebuilt",
+        "libphonenumber",
     ],
     libs: [
         "framework-annotations-lib",

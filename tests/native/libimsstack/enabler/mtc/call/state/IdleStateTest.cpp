@@ -226,9 +226,9 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
 
-    SuppService* service = new SuppService();
-    service->nType = static_cast<IMS_SINT32>(SuppType::GEOLOCATION);
-    objInputSuppServices.Append(service);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::GEOLOCATION);
+    objInputSuppServices.Append(pService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pBlockChecker, Check)
@@ -679,10 +679,10 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabledButFailsIfMepIsNotS
     AString strTarget("any_target");
 
     ON_CALL(objCallContext, GetMultiEndpointManager).WillByDefault(Return(nullptr));
-    SuppService* service = new SuppService();
-    service->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
-    service->nValue = 12345;
-    objInputSuppServices.Append(service);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
+    pService->nValue = 12345;
+    objInputSuppServices.Append(pService);
     CallReasonInfo objReasonInfo(CODE_MULTIENDPOINT_NOT_SUPPORTED);
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
 
@@ -698,10 +698,10 @@ TEST_F(IdleStateTest, StartHandlesCallPullButFailsIfNoMatchedDialogExists)
     AString strTarget("any_target");
     IMS_BOOL bUssi = IMS_FALSE;
 
-    SuppService* service = new SuppService();
-    service->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
-    service->nValue = 12345;
-    objInputSuppServices.Append(service);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
+    pService->nValue = 12345;
+    objInputSuppServices.Append(pService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
     ON_CALL(*pBlockChecker, Check)
@@ -725,10 +725,10 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
     AString strTarget("any_target");
     IMS_BOOL bUssi = IMS_FALSE;
 
-    SuppService* service = new SuppService();
-    service->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
-    service->nValue = 12345;
-    objInputSuppServices.Append(service);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
+    pService->nValue = 12345;
+    objInputSuppServices.Append(pService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
     ON_CALL(*pBlockChecker, Check)
@@ -741,6 +741,7 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
     objDialogInfo.strRemoteTag = "anyRemoteTag";
     objDialogInfo.eCallType = CallType::VT;
     objDialogInfo.pMediaInfo = new MediaInfo();
+    EXPECT_CALL(objMepManager, GetDialogInfo(pService->nValue)).WillOnce(Return(objDialogInfo));
     EXPECT_CALL(objMediaManager, SetMediaInfo(*objDialogInfo.pMediaInfo)).Times(1);
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);

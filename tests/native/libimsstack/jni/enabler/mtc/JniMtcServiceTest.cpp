@@ -84,6 +84,16 @@ TEST_F(JniMtcServiceTest, SendDataUpdateSrvccState)
     pJniService->SendData(objParcel);
 }
 
+TEST_F(JniMtcServiceTest, SendDataUpdateSuppServices)
+{
+    objParcel.writeInt32(IuMtcService::PERMANENT_SUPP_CHANGED);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockService, UpdatePermanentSuppServices(_)).Times(1);
+
+    pJniService->SendData(objParcel);
+}
+
 TEST_F(JniMtcServiceTest, SendDataOpenEmergencyService)
 {
     objParcel.writeInt32(IuMtcService::OPEN_EMERGENCY_SERVICE);

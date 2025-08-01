@@ -117,6 +117,9 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
     ImsList<SuppService*> objInSuppService2;
     objInSuppService2.Append(pTestSupp4);
     pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService2);
+
+    const SuppService* pService = pMtcSupplementaryService->Get(SuppType::CW);
+    EXPECT_FALSE(pService->bValue);
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateTip)

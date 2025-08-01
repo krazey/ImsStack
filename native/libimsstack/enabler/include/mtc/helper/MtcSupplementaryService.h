@@ -90,7 +90,7 @@ private:
 
 private:
     IMtcCallContext& m_objContext;
-    ImsList<SuppService*> m_objSuppServices;
     MtcConfigurationProxy& m_objConfigurationProxy;
+    ImsList<SuppService*> m_objSuppServices;
 };
 #endif

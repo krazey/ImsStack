@@ -90,17 +90,35 @@ public final class SuppInfo implements Parcelable {
     private List<SuppServiceUtils.SuppService> mSuppServices =
             new ArrayList<SuppServiceUtils.SuppService>();
 
+    /**
+     * Default constructor for creating an empty SuppInfo object.
+     */
     public SuppInfo() {
     }
 
+    /**
+     * Copy constructor for creating a SuppInfo object from an existing one.
+     *
+     * @param suppInfo The source SuppInfo object to copy from.
+     */
     public SuppInfo(SuppInfo suppInfo) {
         SuppServiceUtils.addServices(suppInfo.getServices(), mSuppServices);
     }
 
+    /**
+     * Constructor for creating a SuppInfo object from a Parcel.
+     *
+     * @param source The Parcel to read the data from.
+     */
     public SuppInfo(Parcel source) {
         readFromParcel(source);
     }
 
+    /**
+     * Logs the contents of the supplementary services list.
+     *
+     * @param tag A string tag to use for logging.
+     */
     public void logLn(String tag) {
         ImsLog.i(tag + " - size[" + mSuppServices.size() + "]");
 
@@ -115,66 +133,130 @@ public final class SuppInfo implements Parcelable {
         }
     }
 
+    /**
+     * Adds a supplementary service with a string value to the list.
+     *
+     * @param type The type of the service.
+     * @param value The string value of the service.
+     */
     public void addServiceStr(@SuppType int type, String value) {
         SuppServiceUtils.addServiceStr(mSuppServices, type, value);
     }
 
+    /**
+     * Adds a supplementary service with an integer value to the list.
+     *
+     * @param type The type of the service.
+     * @param value The integer value of the service.
+     */
     public void addServiceInt(@SuppType int type, int value) {
         SuppServiceUtils.addServiceInt(mSuppServices, type, value);
     }
 
+    /**
+     * Adds a supplementary service with a boolean value to the list.
+     *
+     * @param type The type of the service.
+     * @param value The boolean value of the service.
+     */
     public void addServiceBool(@SuppType int type, boolean value) {
         SuppServiceUtils.addServiceBool(mSuppServices, type, value);
     }
 
     /**
-     * This method is to set and service values
+     * Adds a supplementary service with a boolean, integer, and string value.
      *
-     * @param type service type
-     * @param boolValue service bool value
-     * @param intValue service int value
-     * @param strValue service string value
+     * @param type The service type.
+     * @param boolValue The boolean value of the service.
+     * @param intValue The integer value of the service.
+     * @param strValue The string value of the service.
      */
     public void addService(@SuppType int type, boolean boolValue, int intValue, String strValue) {
         SuppServiceUtils.addService(mSuppServices, type, boolValue, intValue, strValue);
     }
 
+    /**
+     * Returns the list of supplementary services.
+     *
+     * @return A {@link List} of {@link SuppServiceUtils.SuppService} objects.
+     */
     public List<SuppServiceUtils.SuppService> getServices() {
         return mSuppServices;
     }
 
+    /**
+     * Returns the number of supplementary services in the list.
+     *
+     * @return The size of the services list.
+     */
     public int getServicesSize() {
         return mSuppServices.size();
     }
 
+    /**
+     * Checks if a specific supplementary service exists in the list.
+     *
+     * @param type The type of the service to check.
+     * @return {@code true} if the service exists, {@code false} otherwise.
+     */
     public boolean isService(@SuppType int type) {
         return SuppServiceUtils.isService(mSuppServices, type);
     }
 
+    /**
+     * Retrieves a specific supplementary service from the list.
+     *
+     * @param type The type of the service to retrieve.
+     * @return The {@link SuppServiceUtils.SuppService} object, or {@code null} if not found.
+     */
     public SuppServiceUtils.SuppService getService(@SuppType int type) {
         return SuppServiceUtils.getService(mSuppServices, type);
     }
 
+    /**
+     * Updates an existing service in the list with the values from a source service.
+     *
+     * @param type The type of the service to update.
+     * @param sourceService The source service containing the new values.
+     */
     public void updateService(@SuppType int type, SuppServiceUtils.SuppService sourceService) {
         SuppServiceUtils.updateService(mSuppServices, sourceService);
     }
 
+    /**
+     * Updates multiple services in the list from another SuppInfo object.
+     *
+     * @param suppInfo The source SuppInfo object containing the services to update with.
+     */
     public void updateServices(SuppInfo suppInfo) {
         SuppServiceUtils.updateServices(suppInfo.getServices(), mSuppServices);
     }
 
+    /**
+     * Reads the supplementary service data from a Parcel.
+     *
+     * @param source The Parcel from which to read the data.
+     */
     public void readFromParcel(Parcel source) {
         SuppServiceUtils.readSuppFromParcel(mSuppServices, source);
 
         logLn("read");
     }
 
+    /**
+     * Writes the supplementary service data to a Parcel.
+     *
+     * @param dest The Parcel to which to write the data.
+     * @param flags Additional flags for writing.
+     */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         logLn("write");
 
         SuppServiceUtils.writeSuppToParcel(mSuppServices, dest);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }

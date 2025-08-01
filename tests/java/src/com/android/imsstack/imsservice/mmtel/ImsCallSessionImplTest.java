@@ -259,7 +259,30 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testStartWithOutgoingcallBarring() {
+        when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
+        when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
+        when(mMockImsCallManager.getMtcApp()).thenReturn(mMockMtcApp);
+        when(mMockMtcApp.isOutgoingCallBarringActivated(anyInt(), anyString())).thenReturn(true);
+
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+
+        mImsCallSession.start("1234", mImsCallProfile);
+        processAllFutureMessages();
+
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        verify(mMockImsCallSessionCallback).invokeStartFailed(any(ImsCallSessionImplBase.class),
+                any(ImsReasonInfo.class));
+        verify(mMockMtcCall, times(0)).isEmergencyCall();
+    }
+
+    @Test
     public void testStartEmergencyCallAndNormalServiceOpened() {
+        when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
+        when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
+        when(mMockImsCallManager.getMtcApp()).thenReturn(mMockMtcApp);
         final ArgumentCaptor<IServiceStateTracker.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(IServiceStateTracker.Listener.class);
         when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY))

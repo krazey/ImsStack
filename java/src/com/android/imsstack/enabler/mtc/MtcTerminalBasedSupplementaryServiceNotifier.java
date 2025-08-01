@@ -21,7 +21,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 
-import com.android.imsstack.enabler.ssc.SscConstant;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.enabler.mtc.PermanentSuppInfo.PermanentSuppType;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface.CbData;
@@ -33,7 +36,12 @@ import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class notifies the Native of information of the Terminal-based supplementary services.
@@ -47,6 +55,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
     private final SscConfigChangeListener mSscConfigChangeListener = new SscConfigChangeListener();
     private final TbssHandler mTbssHandler;
     private final PermanentSuppInfo mTbSuppInfo = new PermanentSuppInfo();
+    private final PermanentSuppInfo mTbOutgoingCallBarringInfo = new PermanentSuppInfo();
     private MtcApp.MtcAppHandler mMtcAppHandler;
 
     public MtcTerminalBasedSupplementaryServiceNotifier(int slotId, Looper looper) {
@@ -107,56 +116,171 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
         mTbSuppInfo.getServices().clear();
     }
 
+    /**
+     * Sets the {@link MtcApp.MtcAppHandler} to send information.
+     *
+     * @param handler The handler to be set.
+     */
     public void setHandler(MtcApp.MtcAppHandler handler) {
         mMtcAppHandler = handler;
     }
 
+    /**
+     * Checks if an outgoing call is barred based on the call type and the recipient's number.
+     *
+     * @param callType The type of the outgoing call.
+     * @param callee The phone number of the recipient of the outgoing call to check
+     *               if it is an international number.
+     * @return {@code true} if the outgoing call is barred, {@code false} otherwise.
+     */
+    public boolean isOutgoingCallBarringActivated(int callType, String callee) {
+        if (callType == IUMtcCall.CALLTYPE_VT || callType == IUMtcCall.CALLTYPE_VIDEO_RTT) {
+            return isOutgoingBarringActivatedByCallType(
+                    PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VIDEO,
+                    PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VIDEO, callee);
+        } else {
+            return isOutgoingBarringActivatedByCallType(
+                    PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VOICE,
+                    PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VOICE, callee);
+        }
+    }
+
+    private boolean isOutgoingBarringActivatedByCallType(@PermanentSuppType int barringTypeAll,
+            @PermanentSuppType int barringTypeInternational, String callee) {
+        return isOutgoingBarringActivated(barringTypeAll)
+                || (isInternationalCall(callee)
+                && isOutgoingBarringActivated(barringTypeInternational));
+    }
+
+    private boolean isOutgoingBarringActivated(@PermanentSuppType int type) {
+        SuppService targetService = mTbOutgoingCallBarringInfo.getService(type);
+        return targetService != null && targetService.boolValue;
+    }
+
+    /**
+     * Determines if a given phone number is an international number relative to the
+     * network's current country.
+     *
+     * @param callee The phone number to check (e.g., "+821012345678", "01012345678").
+     * @return true if the number is international, false otherwise.
+     */
+    private boolean isInternationalCall(String callee) {
+        if (!callee.startsWith("+")) {
+            return false;
+        }
+
+        String networkCountryIso = getNetworkCountryIso();
+        if (networkCountryIso.isEmpty()) {
+            log("Network country is unknown, can't determine if call is international.");
+            return false;
+        }
+
+        try {
+            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+            Phonenumber.PhoneNumber parsedNumber = phoneUtil.parse(callee, networkCountryIso);
+
+            String numberRegionCode = phoneUtil.getRegionCodeForNumber(parsedNumber);
+            if (!phoneUtil.isValidNumberForRegion(parsedNumber, numberRegionCode)) {
+                log("Invalid number: " + callee);
+                return false;
+            }
+
+
+            log("Checking number: " + callee
+                    + ", network country: " + networkCountryIso
+                    + ", number region: " + numberRegionCode);
+
+            return !networkCountryIso.equals(numberRegionCode);
+
+        } catch (NumberParseException e) {
+            ImsLog.e(this, mSlotId, "Error parsing phone number : callee " + e.toString());
+            return false;
+        }
+    }
+
+    /**
+     * Gets the device's current network country ISO code (e.g., "KR" for South Korea).
+     */
+    private String getNetworkCountryIso() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+
+        if (telephony != null) {
+            String networkCountryIso = telephony.getNetworkCountryIso();
+            if (networkCountryIso != null && !networkCountryIso.isEmpty()) {
+                log("Network country : " + networkCountryIso.toUpperCase(Locale.ROOT));
+                return networkCountryIso.toUpperCase(Locale.ROOT);
+            }
+        }
+
+        log("Could not determine device network country.");
+        return "";
+    }
+
     private void updateTbssInfo(@PermanentSuppInfo.PermanentSuppType int type, Object value) {
+        PermanentSuppInfo targetInfo;
+
+        if (type == PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VOICE
+                || type == PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VOICE
+                || type == PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VIDEO
+                || type == PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VIDEO) {
+            targetInfo = mTbOutgoingCallBarringInfo;
+        } else {
+            targetInfo = mTbSuppInfo;
+        }
+
         if (value instanceof Integer) {
             int intValue = (Integer) value;
-            mTbSuppInfo.addServiceInt(type, intValue);
+            targetInfo.addServiceInt(type, intValue);
         } else if (value instanceof Boolean) {
             boolean boolValue = (Boolean) value;
-            mTbSuppInfo.addServiceBool(type, boolValue);
+            targetInfo.addServiceBool(type, boolValue);
         } else if (value instanceof String) {
-            mTbSuppInfo.addServiceStr(type, String.valueOf(value));
+            targetInfo.addServiceStr(type, String.valueOf(value));
         }
     }
 
     private @PermanentSuppInfo.PermanentSuppType int getTbcbType(
             @Condition int condition, @ServiceClass int serviceClass) {
         if (serviceClass == CbData.SERVICE_CLASS_VOICE) {
-            switch (condition) {
-                case SscConstant.CONDITION_BAOC:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VOICE;
-                case SscConstant.CONDITION_BOIC:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VOICE;
-                case SscConstant.CONDITION_BAIC:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ALL_VOICE;
-                case SscConstant.CONDITION_BIC_WR:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ROAMING_VOICE;
-                case SscConstant.CONDITION_ACR:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ANONYMOUS_VOICE;
-                default:
-                    // No specific TB_CB_ mapping for this VOICE condition
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VOICE;
-            }
-        } else {
-            switch (condition) {
-                case SscConstant.CONDITION_BAOC:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VIDEO;
-                case SscConstant.CONDITION_BOIC:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VIDEO;
-                case SscConstant.CONDITION_BAIC:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ALL_VIDEO;
-                case SscConstant.CONDITION_BIC_WR:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ROAMING_VIDEO;
-                case SscConstant.CONDITION_ACR:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ANONYMOUS_VIDEO;
-                default:
-                    return PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VIDEO;
-            }
+            return switch (condition) {
+                case CbData.CONDITION_BAOC
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VOICE;
+                case CbData.CONDITION_BOIC
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VOICE;
+                case CbData.CONDITION_BAIC
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ALL_VOICE;
+                case CbData.CONDITION_BIC_WR
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ROAMING_VOICE;
+                case CbData.CONDITION_ACR
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ANONYMOUS_VOICE;
+                case CbData.CONDITION_BOIC_EXHC
+                        -> PermanentSuppInfo
+                            .SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_EXCEPT_HOME_VOICE;
+                default -> throw new IllegalArgumentException(
+                        "Unsupported condition: " + condition);
+            };
+        } else if (serviceClass == CbData.SERVICE_CLASS_VIDEO) {
+            return switch (condition) {
+                case CbData.CONDITION_BAOC
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_ALL_VIDEO;
+                case CbData.CONDITION_BOIC
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_VIDEO;
+                case CbData.CONDITION_BAIC
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ALL_VIDEO;
+                case CbData.CONDITION_BIC_WR
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ROAMING_VIDEO;
+                case CbData.CONDITION_ACR
+                        -> PermanentSuppInfo.SUPP_TYPE_TB_CB_INCOMING_ANONYMOUS_VIDEO;
+                case CbData.CONDITION_BOIC_EXHC
+                        -> PermanentSuppInfo
+                            .SUPP_TYPE_TB_CB_OUTGOING_INTERNATIONAL_EXCEPT_HOME_VIDEO;
+                default -> throw new IllegalArgumentException(
+                        "Unsupported condition: " + condition);
+            };
         }
+
+        throw new IllegalArgumentException("Unsupported service class: " + serviceClass);
     }
 
     private static void log(String s) {
@@ -208,9 +332,14 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
                                     == SupplementaryServiceConfiguration.STATUS_ENABLED);
                         } else if (sscConfig.getType()
                                 == SupplementaryServiceConfiguration.SS_TYPE_CB) {
-                            updateTbssInfo(getTbcbType(((CbData) sscConfig).getCondition(),
-                                    ((CbData) sscConfig).getServiceClass()), sscConfig.getStatus()
-                                    == SupplementaryServiceConfiguration.STATUS_ENABLED);
+                            try {
+                                updateTbssInfo(getTbcbType(((CbData) sscConfig).getCondition(),
+                                        ((CbData) sscConfig).getServiceClass()),
+                                        sscConfig.getStatus()
+                                        == SupplementaryServiceConfiguration.STATUS_ENABLED);
+                            } catch (IllegalArgumentException e) {
+                                log("Invalid TBCB condition or service class: " + e.getMessage());
+                            }
                         }
                     }
                     break;

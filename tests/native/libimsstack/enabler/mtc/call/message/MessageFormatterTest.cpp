@@ -700,6 +700,10 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
 
 TEST_F(MessageFormatterTest, SetTipHeader)
 {
+    EXPECT_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_TIR))
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
     EXPECT_CALL(objMessageUtils,
             SetHeader(&objMessage, AString(MessageUtil::STR_ID), ISipHeader::PRIVACY,
                     AString::ConstNull()))

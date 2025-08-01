@@ -46,7 +46,7 @@ public class SuppInfoTest {
         assertFalse(suppInfo1.isService(SuppInfo.SUPP_TYPE_CNAP));
 
         Parcel dest = Parcel.obtain();
-        dest.writeInt(3);
+        dest.writeInt(2);
         dest.writeInt(SuppInfo.SUPP_TYPE_CALLERID);
         dest.writeString("");
         dest.writeInt(SuppInfo.CALLERID_IDENTITY);
@@ -59,16 +59,17 @@ public class SuppInfoTest {
 
         SuppInfo suppInfo2 = new SuppInfo(dest);
 
-        assertEquals(3, suppInfo2.getServicesSize());
+        assertTrue(suppInfo2.isService(SuppInfo.SUPP_TYPE_CALLERID));
+        assertTrue(suppInfo2.isService(SuppInfo.SUPP_TYPE_CNAP));
 
         Parcel parcelWrittenBySuppInfo = Parcel.obtain();
         suppInfo2.writeToParcel(parcelWrittenBySuppInfo, 0);
         parcelWrittenBySuppInfo.setDataPosition(0);
 
-        SuppInfo copiedSuppInfo = new SuppInfo(parcelWrittenBySuppInfo);
+        SuppInfo copiedSuppInfo2 = new SuppInfo(parcelWrittenBySuppInfo);
 
-        assertEquals(3, copiedSuppInfo.getServicesSize());
-        assertTrue(copiedSuppInfo.isService(SuppInfo.SUPP_TYPE_CALLERID));
-        assertTrue(copiedSuppInfo.isService(SuppInfo.SUPP_TYPE_CNAP));
+        assertEquals(2, copiedSuppInfo2.getServicesSize());
+        assertTrue(copiedSuppInfo2.isService(SuppInfo.SUPP_TYPE_CALLERID));
+        assertTrue(copiedSuppInfo2.isService(SuppInfo.SUPP_TYPE_CNAP));
     }
 }

@@ -401,9 +401,18 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
+        ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
+        MtcApp mtcApp = callApp.getCallManager().getMtcApp();
+        if (mtcApp.isOutgoingCallBarringActivated(ImsCallUtils.getCallTypeFromProfile(
+                profile.getCallType(), profile.getMediaProfile().isRttCall()), callee)) {
+            notifyCallStartFailedWithDelay(ImsCallUtils.createReasonInfo(
+                    CallReasonInfo.CODE_CALL_BARRED, 0, "", ImsCallUtils.FLAG_REASON_INFO_CODE),
+                    100);
+            return;
+        }
+
         if (mCall.isEmergencyCall()) {
-            ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
-            MtcApp mtcApp = callApp.getCallManager().getMtcApp();
+
             @EmergencyCallRouting
             int emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
                     mCallContext, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee,

@@ -26,7 +26,7 @@
 class MtcPermanentSupplementaryService final
 {
 public:
-    explicit MtcPermanentSupplementaryService();
+    MtcPermanentSupplementaryService();
     ~MtcPermanentSupplementaryService();
     MtcPermanentSupplementaryService(const MtcPermanentSupplementaryService&) = delete;
     MtcPermanentSupplementaryService& operator=(const MtcPermanentSupplementaryService&) = delete;
