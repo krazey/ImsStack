@@ -81,7 +81,8 @@ private:
     void EnableCoreService();
     void DisableCoreService();
     // received options request
-    IMS_BOOL OptionsReceived(IN ICoreService* piCoreService, IN ICapabilities* piCapabilities);
+    IMS_BOOL OptionsReceived(
+            IN const ICoreService* piCoreService, IN ICapabilities* piCapabilities);
 
     /* ------------------------------------------------------------------------------------------
         VARIABLE

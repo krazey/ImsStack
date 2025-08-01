@@ -336,7 +336,7 @@ IMS_BOOL UceXmlDocumentHelperThread::TerminateMessageHandler(const IMSMSG& objMs
     return IMS_TRUE;
 }
 
-IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg)
+IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(const IMSMSG& objMsg)
 {
     m_pUceNotifyMessageBody = reinterpret_cast<UceNotifyMessageBody*>(objMsg.nLparam);
     if (m_pUceNotifyMessageBody == IMS_NULL)
@@ -437,7 +437,7 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
     return IMS_TRUE;
 }
 
-IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(IMSMSG& objMsg)
+IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(const IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_D("ParsedRlmiXmlMessageHandler:remain bodyPart`s size[%d]", m_objBodyParts.GetSize(),
@@ -488,7 +488,7 @@ void UceXmlDocumentHelperThread::SendParseCompletedMsg(IMS_SINT32 eXMLInfoType)
     }
 }
 
-IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
+IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN const IDocument* piDocument)
 {
     if (piDocument == IMS_NULL)
     {

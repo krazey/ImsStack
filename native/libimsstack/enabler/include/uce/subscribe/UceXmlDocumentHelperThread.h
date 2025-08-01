@@ -62,10 +62,10 @@ private:
     IMS_RESULT XMLDataTokenization(IN const ByteArray& objBytes);
     IMS_BOOL StartMessageHandler(const IMSMSG& objMsg);
     IMS_BOOL TerminateMessageHandler(const IMSMSG& objMsg);
-    IMS_BOOL ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg);
-    IMS_BOOL ParsedRlmiXmlMessageHandler(IMSMSG& objMsg);
+    IMS_BOOL ReceivedRlmiNotifyMessageHandler(const IMSMSG& objMsg);
+    IMS_BOOL ParsedRlmiXmlMessageHandler(const IMSMSG& objMsg);
     void SendParseCompletedMsg(IMS_SINT32 eXMLInfoType);
-    IMS_RESULT ParseRLMIList(IN IDocument* piDocument);
+    IMS_RESULT ParseRLMIList(IN const IDocument* piDocument);
 
 public:
     typedef enum _XMLINFO
