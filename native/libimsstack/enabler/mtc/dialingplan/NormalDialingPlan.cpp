@@ -115,18 +115,13 @@ PRIVATE GLOBAL void NormalDialingPlan::FormTelUri(IN IMtcContext& objContext,
 {
     IMS_TRACE_I("FormTelUri", 0, 0, 0);
 
-    NumberFormat eFormat = GetNumberFormat(objContext);
-    if (eFormat == NumberFormat::LOCAL_FORMAT)
+    if (IsLocalNumberFormat(strNumber))
     {
-        FormTelUriAsLocal(objContext, strNumber, objIdentityProxy);
-    }
-    else if (eFormat == NumberFormat::GLOBAL_FORMAT)
-    {
-        // If the dialed number is already a global number, returns it directly.
-        if (strNumber.StartsWith(TextParser::CHAR_PLUS) == IMS_FALSE)
-        {
-            FormTelUriAsGlobal(objContext, strNumber);
-        }
+        AccessNetworkInfo objAni;
+        strNumber.Append(";phone-context=");
+        strNumber.Append(objIdentityProxy.GetPhoneContext(
+                ConvertDialingPolicy(GetLocalNumberPolicy(objContext)), objContext.GetSlotId(),
+                &GetAccessNetworkInfo(objContext, objAni)));
     }
 
     // Adds the URI scheme
@@ -134,46 +129,6 @@ PRIVATE GLOBAL void NormalDialingPlan::FormTelUri(IN IMtcContext& objContext,
     strNumber.Prepend("tel");
 
     AddAquotIfRequired(strNumber);
-}
-
-PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsGlobal(
-        IN IMtcContext& objContext, IN_OUT AString& strNumber)
-{
-    AString strCountryCode;
-    strCountryCode.SetNumber(
-            objContext.GetConfigurationProxy().GetInt(ConfigWfc::KEY_COUNTRY_CODE_INT));
-    if (strCountryCode.Equals("0"))
-    {
-        return;
-    }
-
-    // National / mobile call
-    if (strNumber.StartsWith('0'))
-    {
-        strNumber = strNumber.GetSubStr(1);
-        strNumber.Prepend(strCountryCode);
-        strNumber.Prepend(TextParser::CHAR_PLUS);
-    }
-    else
-    {
-        strNumber.Prepend(strCountryCode);
-        strNumber.Prepend(TextParser::CHAR_PLUS);
-    }
-}
-
-PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsLocal(IN IMtcContext& objContext,
-        IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy)
-{
-    if (strNumber.StartsWith(TextParser::CHAR_PLUS))
-    {
-        return;
-    }
-
-    AccessNetworkInfo objAni;
-    strNumber.Append(";phone-context=");
-    strNumber.Append(
-            objIdentityProxy.GetPhoneContext(ConvertDialingPolicy(GetLocalNumberPolicy(objContext)),
-                    objContext.GetSlotId(), &GetAccessNetworkInfo(objContext, objAni)));
 }
 
 PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)
@@ -196,6 +151,11 @@ PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsNameAddress(IN const AString& strNu
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsLocalNumberFormat(IN const AString& strNumber)
+{
+    return !strNumber.StartsWith(TextParser::CHAR_PLUS);
 }
 
 PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsAddressSpec(IN const AString& strNumber)
@@ -298,21 +258,6 @@ PRIVATE GLOBAL NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcCon
         default:
             return Scheme::SIP;
     }
-}
-
-PRIVATE GLOBAL NormalDialingPlan::NumberFormat NormalDialingPlan::GetNumberFormat(
-        IN IMtcContext& /*objContext*/)
-{
-    // TODO: target number format doesn't exist in engine config.
-    /*
-    switch (m_objContext.GetConfigurationProxy().GetInt(Feature::target number format))
-    {
-        default:
-            return NumberFormat::LOCAL_FORMAT;
-    }
-    */
-
-    return NumberFormat::LOCAL_FORMAT;
 }
 
 PRIVATE GLOBAL NormalDialingPlan::LocalNumberPolicy NormalDialingPlan::GetLocalNumberPolicy(

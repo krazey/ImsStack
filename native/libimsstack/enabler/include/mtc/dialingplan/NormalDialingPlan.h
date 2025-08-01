@@ -64,12 +64,10 @@ private:
             IN const ImsIdentityProxy& objIdentityProxy);
     static void FormTelUri(IN IMtcContext& objContext, IN_OUT AString& strNumber,
             IN const ImsIdentityProxy& objIdentityProxy);
-    static void FormTelUriAsGlobal(IN IMtcContext& objContext, IN_OUT AString& strNumber);
-    static void FormTelUriAsLocal(IN IMtcContext& objContext, IN_OUT AString& strNumber,
-            IN const ImsIdentityProxy& objIdentityProxy);
 
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
     static IMS_BOOL IsNameAddress(IN const AString& strNumber);
+    static IMS_BOOL IsLocalNumberFormat(IN const AString& strNumber);
     static IMS_BOOL IsAddressSpec(IN const AString& strNumber);
     static void AddAquotIfRequired(IN_OUT AString& strNumber);
 
@@ -80,7 +78,6 @@ private:
             IN IMtcContext& objContext, OUT AccessNetworkInfo& objAni);
 
     static Scheme GetScheme(IN IMtcContext& objContext);
-    static NumberFormat GetNumberFormat(IN IMtcContext& objContext);
     static LocalNumberPolicy GetLocalNumberPolicy(IN IMtcContext& objContext);
     static IMS_UINT32 ConvertDialingPolicy(IN LocalNumberPolicy ePolicy);
 };
