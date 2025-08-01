@@ -209,7 +209,7 @@ public:
      * @brief Returns whether to add geolocation pidf in initial registration over wifi.
      *
      *        It's applied if CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI is set
-     *        in the CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY.
+     *        in the CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY.
      *
      * @return IMS_BOOL Return whether geolocation pidf is added to the initial registration or not
      * @see {@code imswfc.geolocation_pidf_in_wfc_init_reg_bool}
