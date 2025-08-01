@@ -95,6 +95,8 @@
                 <item value="240"/>
                 <item value="320"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IADOoIBTxPNQICAgeEAhw=,aMqPIA==
+            </string>
         </pbundle_as_map>
         <pbundle_as_map name="120">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
@@ -104,6 +106,8 @@
                 <item value="240"/>
                 <item value="320"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IADOoIBTxPNQICAgeEAhw=,aMqPIA==
+            </string>
         </pbundle_as_map>
     </pbundle_as_map>
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>

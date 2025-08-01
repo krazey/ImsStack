@@ -160,6 +160,8 @@
                 <item value="240"/>
                 <item value="320"/>
             </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0IADOoIBTxPNQICAgeEAhw=,aMqPIA==
+            </string>
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="imsrtt.text_codec_capability_payload_types_bundle">
