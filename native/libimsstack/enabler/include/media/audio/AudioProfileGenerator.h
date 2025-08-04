@@ -39,7 +39,8 @@ protected:
     void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) override;
     void SetAudioCodecFmtp(IN const CodecAudioConfig* pCodecConfig,
-            IN const AudioConfiguration* pAudioConfig, OUT AudioProfile::AudioFmtp* pFmtp);
+            IN const AudioConfiguration* pAudioConfig,
+            OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp);
     AudioProfile::Payload* CreateAmrPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     AudioProfile::Payload* CreateEvsPayload(

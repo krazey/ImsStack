@@ -110,7 +110,8 @@ void AudioProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, I
 }
 
 PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN const CodecAudioConfig* pCodecConfig,
-        IN const AudioConfiguration* pAudioConfig, OUT AudioProfile::AudioFmtp* pFmtp)
+        IN const AudioConfiguration* pAudioConfig,
+        OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
     if (pCodecConfig == IMS_NULL || pAudioConfig == IMS_NULL || pFmtp == IMS_NULL)
     {
@@ -177,7 +178,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
 
     const CodecAmrConfig* pAmrConfig = static_cast<CodecAmrConfig*>(pCodecConfig);
     const AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
-    AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
+    auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>();
     AString strCodecName;
 
     SetAudioCodecFmtp(pAmrConfig, pAudioConfig, pAmrFmtp);
@@ -228,7 +229,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
 
     const CodecEvsConfig* pEvsConfig = static_cast<CodecEvsConfig*>(pCodecConfig);
     const AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
-    AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp();
+    auto pEvsFmtp = std::make_shared<AudioProfile::EvsFmtp>();
 
     AString strCodecName;
     strCodecName.Sprintf("%s", "EVS");
@@ -318,8 +319,8 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
     AString strCodecName;
     strCodecName.Sprintf("%s", "telephone-event");
 
-    AudioProfile::TelephoneEventFmtp* pTelephoneEventFmtp =
-            new AudioProfile::TelephoneEventFmtp(pDtmfConfig->GetEvents());
+    auto pTelephoneEventFmtp =
+            std::make_shared<AudioProfile::TelephoneEventFmtp>(pDtmfConfig->GetEvents());
 
     AudioProfile::Payload* pTelephoneEventPayload = new AudioProfile::Payload();
     pTelephoneEventPayload->SetRtpMap(

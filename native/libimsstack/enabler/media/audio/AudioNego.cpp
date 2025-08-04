@@ -147,8 +147,8 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
     }
     else if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp =
-                static_cast<AudioProfile::EvsFmtp*>(PayloadCasting(pNegotiatedPayload)->GetFmtp());
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(
+                PayloadCasting(pNegotiatedPayload)->GetFmtp());
         if (pEvsFmtp == IMS_NULL)
         {
             return AUDIO_CODEC_BITRATE_INVALID;
@@ -195,7 +195,7 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 
 PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
 {
-    MediaBaseProfile::BasePayload* pPayload = GetNegotiatedPayload();
+    auto pPayload = static_cast<AudioProfile::Payload*>(GetNegotiatedPayload());
 
     if (pPayload == IMS_NULL)
     {
@@ -212,7 +212,7 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = static_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
 
         if (pEvsFmtp == IMS_NULL)
         {

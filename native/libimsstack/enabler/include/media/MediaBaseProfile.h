@@ -31,21 +31,6 @@ class MediaBaseProfile
 {
 public:
     /**
-     * Stands for "format parameter"
-     * This class is a base class of each media fmtp.
-     * Fmtp attributes are used within the SDP to carry parameters that provide
-     * extra configuration details about a specific media codec used in the RTP stream.
-     */
-    class BaseFmtp
-    {
-    protected:
-        BaseFmtp() {}
-
-    public:
-        virtual ~BaseFmtp() {}
-    };
-
-    /**
      * This class maps from a RTP payload type number (as used in an "m=" line)
      * to an encoding name denoting the payload format to be used.
      * It also provides information on the clock rate and encoding parameters.
@@ -99,7 +84,7 @@ public:
         {
             m_strPayloadType = strPayloadType;
         }
-        inline AString& GetPayloadType() { return m_strPayloadType; }
+        inline const AString& GetPayloadType() const { return m_strPayloadType; }
         inline void SetSamplingRate(IN const IMS_UINT32 nSamplingRate)
         {
             m_nSamplingRate = nSamplingRate;
@@ -123,25 +108,22 @@ public:
     {
     public:
         explicit BasePayload(IN const IMS_SINT32 channel = 0) :
-                m_objRtpMap(channel),
-                m_pFmtp(IMS_NULL)
+                m_objRtpMap(channel)
         {
         }
 
         BasePayload(IN const BasePayload& obj) :
-                m_objRtpMap(obj.m_objRtpMap),
-                m_pFmtp(IMS_NULL)
+                m_objRtpMap(obj.m_objRtpMap)
         {
         }
 
-        virtual ~BasePayload() { deleteFmtp(); }
+        virtual ~BasePayload() {}
 
         BasePayload& operator=(IN const BasePayload& obj)
         {
             if (this != &obj)
             {
                 m_objRtpMap = obj.m_objRtpMap;
-                deleteFmtp();
             }
 
             return (*this);
@@ -149,8 +131,7 @@ public:
 
         bool operator==(IN const BasePayload& obj) const
         {
-            return (m_objRtpMap == obj.m_objRtpMap &&
-                    (m_pFmtp == obj.m_pFmtp || (m_pFmtp != IMS_NULL && obj.m_pFmtp)));
+            return (m_objRtpMap == obj.m_objRtpMap);
         }
 
         bool operator!=(IN const BasePayload& obj) const { return !(*this == obj); }
@@ -162,26 +143,13 @@ public:
             m_objRtpMap.SetPayloadType(payloadType);
             m_objRtpMap.SetSamplingRate(samplingRate);
             m_objRtpMap.SetChannel(m_nChannel);
-        };
-
-        inline void SetRtpMap(IN const RtpMap& objRtpMap) { m_objRtpMap = objRtpMap; };
-        inline RtpMap& GetRtpMap() { return m_objRtpMap; }
-        inline void SetFmtp(IN BaseFmtp* pFmtp) { m_pFmtp = pFmtp; }
-        inline BaseFmtp* GetFmtp() { return m_pFmtp; }
-
-    protected:
-        void deleteFmtp()
-        {
-            if (m_pFmtp != IMS_NULL)
-            {
-                delete m_pFmtp;
-                m_pFmtp = IMS_NULL;
-            }
         }
+
+        inline void SetRtpMap(IN const RtpMap& objRtpMap) { m_objRtpMap = objRtpMap; }
+        inline RtpMap& GetRtpMap() { return m_objRtpMap; }
 
     protected:
         RtpMap m_objRtpMap;
-        BaseFmtp* m_pFmtp;
     };
 
 public:
@@ -201,7 +169,9 @@ public:
                 /* Actual configuration (acfg) negotiated */
                 m_strAcfg(AString::ConstNull()),
                 /* bool to check if acap is existed in pcfg */
-                m_bAcapInPcfg(IMS_FALSE) {};
+                m_bAcapInPcfg(IMS_FALSE)
+        {
+        }
 
         inline ImsMap<IMS_SINT32, AString>& GetMapTcap() { return m_mapTcap; }
         inline ImsMap<IMS_SINT32, AString>& GetMapAcap() { return m_mapAcap; }

@@ -41,34 +41,42 @@ protected:
     void GenerateCandidateAttribute(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GenerateRtcpXr(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GenerateAnbr(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
-    AString GenerateAmrFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp);
-    AString GenerateEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp);
+    AString GenerateAmrFmtp(IN std::shared_ptr<AudioProfile::AmrFmtp> pAmrFmtp);
+    AString GenerateEvsFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pEvsFmtp);
 
     // AudioFmtp
-    void AddModeSetListToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
-    void AddModeChangeCapabilityToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
-    void AddModeChangePeriodToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
-    void AddModeChangeNeighborToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
-    void AddMaxRedToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+    void AddModeSetListToFmtp(
+            IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
+    void AddModeChangeCapabilityToFmtp(
+            IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
+    void AddModeChangePeriodToFmtp(
+            IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
+    void AddModeChangeNeighborToFmtp(
+            IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
+    void AddMaxRedToFmtp(IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
 
     // AmrFmtp
-    void AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* pFmtp, OUT AString& strFmtp);
+    void AddOctetAlignToFmtp(IN std::shared_ptr<AudioProfile::AmrFmtp> pFmtp, OUT AString& strFmtp);
 
     // EvsFmtp
-    void AddDtxToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddEvsModeSwitchToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddBwToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddBrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddCmrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddChannelAwModeToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddBwSendToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddBrSendToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
-    void AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddDtxToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddHfOnlyToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddEvsModeSwitchToFmtp(
+            IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddBwToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddBrToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddCmrToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddChannelAwModeToFmtp(
+            IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddBwSendToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddBwRecvToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddBrSendToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
+    void AddBrRecvToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
 
-    void ForceToAddModeSetList(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
-    void ForceToAddOctetAlign(IN AudioProfile::AmrFmtp* pFmtp, OUT AString& strFmtp);
+    void ForceToAddModeSetList(
+            IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
+    void ForceToAddOctetAlign(
+            IN std::shared_ptr<AudioProfile::AmrFmtp> pFmtp, OUT AString& strFmtp);
 };
 
 #endif
