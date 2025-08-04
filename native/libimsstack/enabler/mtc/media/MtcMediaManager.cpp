@@ -403,12 +403,13 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
 PUBLIC VIRTUAL void MtcMediaManager::Run(
         IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly)
 {
+    NegotiationState eNegoState = GetNegotiationState(piSession);
     if (bEarly && m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
-        UpdateLocalTone(piSession, piMessage);
+        UpdateLocalTone(piSession, piMessage, eNegoState);
     }
 
-    if (GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
+    if (eNegoState != NegotiationState::STATE_NEGOTIATED)
     {
         IMS_TRACE_D("Run : SDP is not negotiated, Don't run the media.", 0, 0, 0);
         return;
@@ -661,7 +662,8 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsPreviewMode(IN ISession* piSession) c
 }
 
 PRIVATE
-void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN const IMessage* piMessage)
+void MtcMediaManager::UpdateLocalTone(
+        IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState)
 {
     IMS_TRACE_D("UpdateLocalTone", 0, 0, 0);
     IMS_BOOL bUseLocalTone = IMS_FALSE;
@@ -674,6 +676,11 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN const IMessage*
     if (!m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_180))
     {
         bUseLocalTone = IMS_FALSE;
+    }
+    else if (eNegoState != NegotiationState::STATE_NEGOTIATED)
+    {
+        // Play local tone when 180 response is received without negotiation
+        bUseLocalTone = IMS_TRUE;
     }
     else
     {

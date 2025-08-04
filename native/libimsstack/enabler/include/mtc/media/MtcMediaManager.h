@@ -111,7 +111,8 @@ public:
     IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
 
 private:
-    void UpdateLocalTone(IN ISession* piSession, IN const IMessage* piMessage);
+    void UpdateLocalTone(
+            IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState);
     void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
 
