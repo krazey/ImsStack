@@ -338,6 +338,8 @@ public:
         return strValue == objRhs.strValue && nValue == objRhs.nValue && bValue == objRhs.bValue;
     }
 
+    IMS_BOOL operator!=(const SuppService& objRhs) const { return !(*this == objRhs); }
+
 public:
     AString strValue;
     IMS_SINT32 nValue;

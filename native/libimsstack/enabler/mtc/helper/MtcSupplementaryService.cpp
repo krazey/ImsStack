@@ -429,6 +429,33 @@ GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
     strNumber.Replace(strInternaltionalNumberPrefix, strLocalNumberPrefix);
 }
 
+GLOBAL PUBLIC IMS_BOOL MtcSupplementaryService::IsSameSuppServices(
+        IN const ImsMap<SuppType, SuppService*>& objSuppServicesA,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServicesB)
+{
+    if (objSuppServicesA.GetSize() != objSuppServicesB.GetSize())
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < objSuppServicesA.GetSize(); i++)
+    {
+        const SuppType eType = objSuppServicesA.GetKeyAt(i);
+        IMS_SLONG nIndex = objSuppServicesB.GetIndexOfKey(eType);
+        if (nIndex < 0)
+        {
+            return IMS_FALSE;
+        }
+
+        if (*objSuppServicesB.GetValueAt(nIndex) != *objSuppServicesA.GetValueAt(i))
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    return IMS_TRUE;
+}
+
 PRIVATE
 ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN const IMessage* piMessage)
 {

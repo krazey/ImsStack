@@ -60,6 +60,8 @@ public:
 
     static void ConvertGlobalNumberToLocalNumber(
             IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
+    static IMS_BOOL IsSameSuppServices(IN const ImsMap<SuppType, SuppService*>& objSuppServicesA,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServicesB);
 
 private:
     ISipHeader* GetHistoryInfoHeader(IN const IMessage* piMessage);

@@ -832,4 +832,34 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCnapDoesNotConvertToLocalNumber)
     pMtcSupplementaryService->UpdateCnap(static_cast<IMessage*>(&objMockIMessage));
 }
 
+TEST_F(MtcSupplementaryServiceTest, IsSameSuppServices)
+{
+    SuppService* pTestSupp1 = new SuppService();
+    AString strTest("testDisplay");
+    pTestSupp1->strValue = strTest;
+    SuppService* pTestSupp2 = new SuppService();
+    pTestSupp2->nValue = 1;
+    SuppService* pTestSupp3 = new SuppService();
+    pTestSupp3->bValue = IMS_TRUE;
+    SuppService* pTestSupp4 = new SuppService(*pTestSupp3);
+
+    ImsMap<SuppType, SuppService*> objSuppServiceA;
+    objSuppServiceA.Add(SuppType::CNAP, pTestSupp1);
+    objSuppServiceA.Add(SuppType::CALLER_ID, pTestSupp2);
+    objSuppServiceA.Add(SuppType::CW, pTestSupp3);
+
+    ImsMap<SuppType, SuppService*> objSuppServiceB;
+
+    EXPECT_FALSE(MtcSupplementaryService::IsSameSuppServices(objSuppServiceA, objSuppServiceB));
+
+    objSuppServiceB.Add(SuppType::CW, pTestSupp4);
+    EXPECT_FALSE(MtcSupplementaryService::IsSameSuppServices(objSuppServiceA, objSuppServiceB));
+
+    objSuppServiceB.Add(SuppType::CALLER_ID, pTestSupp2);
+    EXPECT_FALSE(MtcSupplementaryService::IsSameSuppServices(objSuppServiceA, objSuppServiceB));
+
+    objSuppServiceB.Add(SuppType::CNAP, pTestSupp1);
+    EXPECT_TRUE(MtcSupplementaryService::IsSameSuppServices(objSuppServiceA, objSuppServiceB));
+}
+
 }  // namespace android
