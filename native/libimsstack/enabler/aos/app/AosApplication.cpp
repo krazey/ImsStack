@@ -988,7 +988,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange() const
     IMS_BOOL bLte = IMS_FALSE;
     IMS_BOOL bNr = IMS_FALSE;
 
-    for (int i = 0; i < objRegUpdateRats.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objRegUpdateRats.GetSize(); i++)
     {
         IMS_SINT32 nRat = objRegUpdateRats.GetAt(i);
         if (nRat == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)

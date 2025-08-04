@@ -518,7 +518,7 @@ void AosNetTracker::InitConfig()
 PRIVATE
 void AosNetTracker::InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats)
 {
-    for (int i = 0; i < objRats.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objRats.GetSize(); i++)
     {
         if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)
         {
@@ -542,7 +542,7 @@ void AosNetTracker::InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats)
 PRIVATE
 void AosNetTracker::InitRoamingCnxPolicy(IN ImsVector<IMS_SINT32>& objRoamingRats)
 {
-    for (int i = 0; i < objRoamingRats.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objRoamingRats.GetSize(); i++)
     {
         if (objRoamingRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN)
         {

@@ -420,7 +420,7 @@ void AosSubscriberManager::ConfigureAsDefault()
 
         m_objPuids.AddElement(strImpu);
 
-        for (int i = 0; i < objPublicUserIds.GetCount(); i++)
+        for (IMS_SINT32 i = 0; i < objPublicUserIds.GetCount(); i++)
         {
             if (i != nIndex && objPublicUserIds.GetElementAt(i).GetLength() > 0)
             {
@@ -604,7 +604,7 @@ IMS_BOOL AosSubscriberManager::UpdateImpuFromIsim(OUT AStringArray& objImpus)
 
     // Stores ordered IMPU lists.
     AStringArray objPublicUserIds = m_piSubscriberConfig->GetPublicUserIds();
-    for (int i = 0; i < objPublicUserIds.GetCount(); i++)
+    for (IMS_SINT32 i = 0; i < objPublicUserIds.GetCount(); i++)
     {
         if (objPublicUserIds.GetElementAt(i).GetLength() > 0)
         {

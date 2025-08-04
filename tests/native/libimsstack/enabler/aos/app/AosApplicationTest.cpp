@@ -1193,7 +1193,7 @@ TEST_F(AosApplicationTest, GetAndSet)
 
 TEST_F(AosApplicationTest, GetSetClearDataFailureReason)
 {
-    int anyDataFailureReason = 1;
+    IMS_SINT32 anyDataFailureReason = 1;
     m_pAosApplication->SetDataFailureReason(anyDataFailureReason);
     EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
     m_pAosApplication->ClearDataFailureReason();
@@ -4135,14 +4135,14 @@ TEST_F(AosApplicationTest,
 
 TEST_F(AosApplicationTest, SetDataFailureReasonWhenUpdateDataFailureReason)
 {
-    int anyDataFailureReason = 1;
+    IMS_SINT32 anyDataFailureReason = 1;
     m_pAosApplication->RegistrationControl_UpdateDataFailureReason(anyDataFailureReason);
     EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
 }
 
 TEST_F(AosApplicationTest, ReportDataFailureReasonWhenControlRegistrationCalledWithStop)
 {
-    int anyDataFailureReason = 1;
+    IMS_SINT32 anyDataFailureReason = 1;
     m_pAosApplication->RegistrationControl_UpdateDataFailureReason(anyDataFailureReason);
     m_pAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
@@ -4153,7 +4153,7 @@ TEST_F(AosApplicationTest, ReportDataFailureReasonWhenControlRegistrationCalledW
 
 TEST_F(AosApplicationTest, ReportDataFailureReasonWhenConnectionDeactiviated)
 {
-    int anyDataFailureReason = 1;
+    IMS_SINT32 anyDataFailureReason = 1;
     m_pAosApplication->RegistrationControl_UpdateDataFailureReason(anyDataFailureReason);
     m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_DISCONNECTED);
 
