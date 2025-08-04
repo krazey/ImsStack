@@ -207,10 +207,7 @@ void AosCallTracker::AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKe
         return;
     }
 
-    if (!objCalls.Add(eKey, eValue))
-    {
-        A_IMS_TRACE_D(AOSTAG, "AddCall :: map error", 0, 0, 0);
-    }
+    objCalls.Add(eKey, eValue);
 }
 
 PROTECTED

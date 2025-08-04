@@ -108,14 +108,7 @@ PUBLIC VIRTUAL void AosTransaction::SetListener(
         ImsList<IAosTransactionListener*> objListeners;
 
         objListeners.Append(piListener);
-
-        if (!m_objListeners.Add(nType, objListeners))
-        {
-            A_IMS_TRACE_D(AOSTAG, "AosTransactionListener :: failed - %d / %d / %p", nType,
-                    m_objListeners.GetSize(), piListener);
-
-            return;
-        }
+        m_objListeners.Add(nType, objListeners);
 
         A_IMS_TRACE_D(AOSTAG, "AosTransactionListener :: add - %d / %d / %p", nType,
                 objListeners.GetSize(), piListener);
