@@ -243,12 +243,7 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
         return IMS_FALSE;
     }
 
-    if (!m_objTxnAggregate.Add(nKey, objTransactions))
-    {
-        delete pTransaction;
-        return IMS_FALSE;
-    }
-
+    m_objTxnAggregate.Add(nKey, objTransactions);
     return IMS_TRUE;
 }
 

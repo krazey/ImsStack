@@ -412,13 +412,7 @@ CallerCapability* FeatureCaps::GetFeaturesForRequest(
         if (bCreate)
         {
             CallerCapability* pCc = new CallerCapability(0);
-
-            if (!m_pFeaturesForRequest->Add(nSipMethod, pCc))
-            {
-                delete pCc;
-                return IMS_NULL;
-            }
-
+            m_pFeaturesForRequest->Add(nSipMethod, pCc);
             return pCc;
         }
         else
@@ -456,13 +450,7 @@ CallerCapability* FeatureCaps::GetFeaturesForResponse(
         if (bCreate)
         {
             CallerCapability* pCc = new CallerCapability(0);
-
-            if (!m_pFeaturesForResponse->Add(nSipMethod, pCc))
-            {
-                delete pCc;
-                return IMS_NULL;
-            }
-
+            m_pFeaturesForResponse->Add(nSipMethod, pCc);
             return pCc;
         }
         else

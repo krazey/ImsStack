@@ -78,11 +78,7 @@ PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nS
 
         LockGuard objLock(m_piLock);
 
-        if (!m_objRegistrations.Add(RegKey(pFakeReg->GetSlotId(), nFlowId), pFakeReg))
-        {
-            delete pFakeReg;
-            return IMS_FALSE;
-        }
+        m_objRegistrations.Add(RegKey(pFakeReg->GetSlotId(), nFlowId), pFakeReg);
     }
     else
     {
@@ -101,11 +97,7 @@ PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nS
 
         LockGuard objLock(m_piLock);
 
-        if (!m_objRegistrations.Add(RegKey(pReg->GetSlotId(), nFlowId), pReg))
-        {
-            delete pReg;
-            return IMS_FALSE;
-        }
+        m_objRegistrations.Add(RegKey(pReg->GetSlotId(), nFlowId), pReg);
     }
 
     return IMS_TRUE;

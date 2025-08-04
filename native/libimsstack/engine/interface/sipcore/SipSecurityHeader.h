@@ -252,10 +252,8 @@ public:
      *
      * @param strName The extension parameter name
      * @param strValue The extension parameter value
-     * @return If the parameter is successfully set, returns IMS_TRUE.
-     *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetExtensionParameter(IN const AString& strName, IN const AString& strValue);
+    void SetExtensionParameter(IN const AString& strName, IN const AString& strValue);
 
     /**
      * @brief Sets the unknown parameter.
@@ -266,11 +264,8 @@ public:
      *              #SEC_P_MODE\n
      *              #SEC_P_EALG
      * @param strValue The unknown parameter value
-     * @return If the parameter is successfully set, returns IMS_TRUE.
-     *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetUnknownParameterValue(
-            IN IMS_SINT32 nName /*SEC_P_XXX*/, IN const AString& strValue);
+    void SetUnknownParameterValue(IN IMS_SINT32 nName /*SEC_P_XXX*/, IN const AString& strValue);
 
     /**
      * @brief Returns the string representation of SIP security header.

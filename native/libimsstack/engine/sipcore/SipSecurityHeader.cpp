@@ -171,33 +171,33 @@ void SipSecurityHeader::SetSpi(
 }
 
 PUBLIC
-IMS_BOOL SipSecurityHeader::SetExtensionParameter(
-        IN const AString& strName, IN const AString& strValue)
+void SipSecurityHeader::SetExtensionParameter(IN const AString& strName, IN const AString& strValue)
 {
     IMS_SLONG nIndex = m_objExtensions.GetIndexOfKey(strName);
 
     if (nIndex < 0)
     {
         // new one
-        return m_objExtensions.Add(strName, strValue);
+        m_objExtensions.Add(strName, strValue);
+        return;
     }
 
-    return m_objExtensions.SetValueAt(nIndex, strValue);
+    m_objExtensions.SetValueAt(nIndex, strValue);
 }
 
 PUBLIC
-IMS_BOOL SipSecurityHeader::SetUnknownParameterValue(
-        IN IMS_SINT32 nName, IN const AString& strValue)
+void SipSecurityHeader::SetUnknownParameterValue(IN IMS_SINT32 nName, IN const AString& strValue)
 {
     IMS_SLONG nIndex = m_objUnknownParamValues.GetIndexOfKey(nName);
 
     if (nIndex < 0)
     {
         // new one
-        return m_objUnknownParamValues.Add(nName, strValue);
+        m_objUnknownParamValues.Add(nName, strValue);
+        return;
     }
 
-    return m_objUnknownParamValues.SetValueAt(nIndex, strValue);
+    m_objUnknownParamValues.SetValueAt(nIndex, strValue);
 }
 
 PUBLIC

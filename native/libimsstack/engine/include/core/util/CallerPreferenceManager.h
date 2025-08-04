@@ -29,7 +29,7 @@ public:
     CallerPreferenceManager& operator=(IN const CallerPreferenceManager&) = delete;
 
 public:
-    IMS_BOOL CreatePreferenceWrapper(IN const AString& strName, IN const AString& strDialogId);
+    void CreatePreferenceWrapper(IN const AString& strName, IN const AString& strDialogId);
     void DestroyPreferenceWrapper(IN const AString& strName);
     const ImsList<AString>& GetAcceptContacts(IN const AString& strDialogId) const;
     const ImsList<AString>& GetAcceptContactsByName(IN const AString& strName) const;

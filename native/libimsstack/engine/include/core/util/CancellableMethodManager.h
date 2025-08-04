@@ -34,7 +34,7 @@ public:
     CancellableMethodManager& operator=(IN const CancellableMethodManager&) = delete;
 
 public:
-    IMS_BOOL AddMethod(IN const AString& strName, IN ICancellableMethod* piMethod);
+    void AddMethod(IN const AString& strName, IN ICancellableMethod* piMethod);
     void RemoveMethod(IN const AString& strName);
 
     static CancellableMethodManager* GetInstance();

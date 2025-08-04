@@ -35,7 +35,7 @@ public:
     CallControlHelper& operator=(IN const CallControlHelper&) = delete;
 
 public:
-    IMS_BOOL AddSession(IN const AString& strSessionId, IN Replaces* pReplaces);
+    void AddSession(IN const AString& strSessionId, IN Replaces* pReplaces);
     inline IMS_UINT32 GetSessionCount() const { return m_objSessions.GetSize(); }
     void RemoveSession(IN const AString& strSessionId);
 
