@@ -857,12 +857,12 @@ TEST_F(MediaNegoTest, testGetNegotiatedAudioQualityNullAudioNego)
 
 TEST_F(MediaNegoTest, testGetNegotiatedVideoQuality)
 {
-    EXPECT_CALL(*m_pMockVideoNego, GetRemotePort()).WillOnce(Return(10000));
+    EXPECT_CALL(*m_pMockVideoNego, GetNegotiatedRtpPort()).WillOnce(Return(10000));
     EXPECT_CALL(*m_pMockVideoNego, GetNegotiatedResolution())
             .WillOnce(Return(VIDEO_RESOLUTION_VGA_PR));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoQuality(), VIDEO_RESOLUTION_VGA_PR);
 
-    EXPECT_CALL(*m_pMockVideoNego, GetRemotePort()).WillOnce(Return(0));
+    EXPECT_CALL(*m_pMockVideoNego, GetNegotiatedRtpPort()).WillOnce(Return(0));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoQuality(), VIDEO_RESOLUTION_NOT_USED);
 
     m_objMediaNego.SetVideoNego(nullptr);
@@ -871,9 +871,15 @@ TEST_F(MediaNegoTest, testGetNegotiatedVideoQuality)
 
 TEST_F(MediaNegoTest, testGetNegotiatedTextQuality)
 {
-    ON_CALL(*m_pMockTextNego, GetRemotePort()).WillByDefault(Return(10000));
-    ON_CALL(*m_pMockTextNego, GetNegotiatedCodec()).WillByDefault(Return(TEXT_CODEC_T140));
+    EXPECT_CALL(*m_pMockTextNego, GetNegotiatedRtpPort()).WillOnce(Return(10000));
+    EXPECT_CALL(*m_pMockTextNego, GetNegotiatedCodec()).WillOnce(Return(TEXT_CODEC_T140));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextQuality(), TEXT_CODEC_T140);
+
+    EXPECT_CALL(*m_pMockTextNego, GetNegotiatedRtpPort()).WillOnce(Return(0));
+    EXPECT_EQ(m_objMediaNego.GetNegotiatedTextQuality(), TEXT_CODEC_NOT_USED);
+
+    m_objMediaNego.SetTextNego(nullptr);
+    EXPECT_EQ(m_objMediaNego.GetNegotiatedTextQuality(), TEXT_CODEC_NOT_USED);
 }
 
 TEST_F(MediaNegoTest, testGetNegotiatedTextQualityRemotePortZero)

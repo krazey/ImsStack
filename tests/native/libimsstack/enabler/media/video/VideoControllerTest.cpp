@@ -203,6 +203,36 @@ TEST_F(VideoControllerTest, testModifySession)
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
 
+TEST_F(VideoControllerTest, testUpdateSessionWithZeroRemotePortClosesSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    // Set peer port to 0
+    m_pPeerProfile->SetDataPort(0);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
+
+    // UpdateSession should detect port 0 and close the session.
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
+    EXPECT_FALSE(m_pController->IsSessionOpened());
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionWithZeroLocalPortClosesSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    // Set negotiated local port to 0
+    m_pNegoProfile->SetDataPort(0);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
+
+    // UpdateSession should detect port 0 and close the session.
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
+    EXPECT_FALSE(m_pController->IsSessionOpened());
+}
+
 TEST_F(VideoControllerTest, testSendMessageWithNoSession)
 {
     ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();

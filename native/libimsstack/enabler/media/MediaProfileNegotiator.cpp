@@ -48,13 +48,13 @@ IMS_BOOL MediaProfileNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProf
     pNegotiatedProfile->SetDataPort(pLocalProfile->GetDataPort());
     pNegotiatedProfile->SetControlPort(pLocalProfile->GetControlPort());
 
-    if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
+    if (pPeerProfile->GetDataPort() == 0)
     {
         pNegotiatedProfile->SetDataPort(0);
-
-        IMS_TRACE_D("NegotiateIpPort(): type[%d], negotiatedPort[%d], peerPort[%d]", m_eType,
-                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort());
     }
+
+    IMS_TRACE_D("NegotiateIpPort(): type[%d], negotiatedPort[%d], peerPort[%d]", m_eType,
+            pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort());
 
     return IMS_TRUE;
 }
