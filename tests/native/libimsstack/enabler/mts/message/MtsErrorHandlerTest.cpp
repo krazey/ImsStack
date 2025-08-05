@@ -54,6 +54,7 @@ const IMS_UINT32 RETRY_COUNT_FOR_2ND_ATTEMPT = 1;
 class MtsErrorHandlerTest : public ::testing::Test
 {
 public:
+    // cppcheck-suppress unusedStructMember
     MockIMessage objMockMessage;
     MockIMtsContext objContext;
     MockIMtsMessage objMockMtsMessage;
