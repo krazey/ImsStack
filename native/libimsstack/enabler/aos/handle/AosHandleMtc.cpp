@@ -843,7 +843,7 @@ void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
 }
 
 PROTECTED
-void AosHandleMtc::UpdateVopsState()
+void AosHandleMtc::UpdateVopsState(IN IMS_BOOL bCheckEmergencyReg /* = IMS_TRUE */)
 {
     if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
     {
@@ -861,6 +861,12 @@ void AosHandleMtc::UpdateVopsState()
     }
 
     IAosNetTracker* piAosNetTracker = m_piAppContext->GetNetTracker();
+    if (bCheckEmergencyReg && piAosNetTracker->IsEmergencyAttach())
+    {
+        A_IMS_TRACE_D(APPPROFILE, "Not update VoPS due to emergency reg state", 0, 0, 0);
+        return;
+    }
+
     IMS_UINT32 nNewVopsState = piAosNetTracker->IsImsVoiceCallSupported()
             ? IMS_VOICE_OVER_PS_SUPPORTED
             : IMS_VOICE_OVER_PS_NOT_SUPPORTED;
@@ -1313,6 +1319,27 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
     }
 }
 
+PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_EmergencyRegistrationStateChanged(
+        IN IMS_BOOL bEmergencyAttached)
+{
+    A_IMS_TRACE_I(APPPROFILE,
+            "ServicePhone_EmergencyRegistrationStateChanged :: bEmergencyAttached(%s)",
+            _TRACE_B_(bEmergencyAttached), 0, 0);
+
+    if (bEmergencyAttached)
+    {
+        if (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+        {
+            SetVolteHysTimerBlock(VOLTE_HYS_TIMER_BLOCK_EMERGENCY_ATTACHED);
+            ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, m_strVopsPlmn);
+        }
+
+        return;
+    }
+
+    UpdateVopsState(IMS_FALSE);
+}
+
 PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged(IN const AString& strPlmn)
 {
     A_IMS_TRACE_I(APPPROFILE, "ServicePhone_PlmnChanged :: strPlmn(%s)", strPlmn.GetStr(), 0, 0);
@@ -1344,6 +1371,12 @@ PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_VopsStateChanged(
 
     A_IMS_TRACE_I(APPPROFILE, "ServicePhone_VopsStateChanged :: nState(%d), strPlmn(%s)", nState,
             strPlmn.GetStr(), 0);
+
+    if (m_piAppContext->GetNetTracker()->IsEmergencyAttach())
+    {
+        A_IMS_TRACE_D(APPPROFILE, "Not handle the VoPS change to emergency reg state", 0, 0, 0);
+        return;
+    }
 
     if (m_nVopsState != nState || !m_strVopsPlmn.Equals(strPlmn) ||
             (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED &&

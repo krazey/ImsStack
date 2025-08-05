@@ -79,7 +79,7 @@ protected:
     void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
 
     void UpdateGGsmaRcsTelephonyFeatureTag();
-    void UpdateVopsState();
+    void UpdateVopsState(IN IMS_BOOL bCheckEmergencyReg = IMS_TRUE);
     void SetVopsInfo(IN IMS_UINT32 nState, IN const AString& strPlmn);
 
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
@@ -112,6 +112,7 @@ protected:
     void ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo) override;
 
     // IAosServicePhoneListener
+    void ServicePhone_EmergencyRegistrationStateChanged(IN IMS_BOOL bEmergencyAttached) override;
     void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
     void ServicePhone_VopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn) override;
 
@@ -123,7 +124,8 @@ protected:
         VOLTE_HYS_TIMER_BLOCK_NONE = 0,
         VOLTE_HYS_TIMER_BLOCK_VOPS_PLMN_CHANGED = 0x1,
         VOLTE_HYS_TIMER_BLOCK_DATA_DISCONNECTED = 0x2,
-        VOLTE_HYS_TIMER_BLOCK_VOPS_IGNORED = 0x4
+        VOLTE_HYS_TIMER_BLOCK_VOPS_IGNORED = 0x4,
+        VOLTE_HYS_TIMER_BLOCK_EMERGENCY_ATTACHED = 0x8
     };
 
 protected:
