@@ -21,8 +21,7 @@
         <item value="2"/>
     </int-array>
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="3">
-        <item value="1"/>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
         <item value="2"/>
         <item value="5"/>
     </int-array>
