@@ -34,7 +34,7 @@ public:
     DialogMethodManager& operator=(IN const DialogMethodManager&) = delete;
 
 public:
-    IMS_BOOL AddMethod(IN const AString& strName, IN IDialogMethod* piMethod);
+    void AddMethod(IN const AString& strName, IN IDialogMethod* piMethod);
     void RemoveMethod(IN const AString& strName);
     IMS_BOOL IsEmpty() const;
 

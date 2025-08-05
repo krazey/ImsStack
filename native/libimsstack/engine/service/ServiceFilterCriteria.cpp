@@ -48,12 +48,7 @@ PUBLIC VIRTUAL IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(
         return 0;
     }
 
-    if (!m_objTriggerPoints.Add(m_nNextTriggerPointId, pTriggerPoint))
-    {
-        IMS_TRACE_E(0, "Adding a TriggerPoint failed", 0, 0, 0);
-        return 0;
-    }
-
+    m_objTriggerPoints.Add(m_nNextTriggerPointId, pTriggerPoint);
     ++m_nNextTriggerPointId;
 
     return (m_nNextTriggerPointId - 1);

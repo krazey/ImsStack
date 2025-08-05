@@ -25,21 +25,19 @@ CallerPreferenceManager::CallerPreferenceManager() :
 }
 
 PUBLIC
-IMS_BOOL CallerPreferenceManager::CreatePreferenceWrapper(
+void CallerPreferenceManager::CreatePreferenceWrapper(
         IN const AString& strName, IN const AString& strDialogId)
 {
     IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 
     if (nIndex >= 0)
     {
-        return IMS_TRUE;
+        return;
     }
 
     PreferenceWrapper objPreferenceWrapper;
-
     objPreferenceWrapper.SetDialogId(strDialogId);
-
-    return m_objPreferenceWrappers.SetValue(strName, objPreferenceWrapper);
+    m_objPreferenceWrappers.SetValue(strName, objPreferenceWrapper);
 }
 
 PUBLIC

@@ -35,7 +35,7 @@ public:
     ForkedDialogMethodManager& operator=(IN const ForkedDialogMethodManager&) = delete;
 
 public:
-    IMS_BOOL AddMethod(IN const AString& strName, IN IForkedDialogMethod* piMethod);
+    void AddMethod(IN const AString& strName, IN IForkedDialogMethod* piMethod);
     void RemoveMethod(IN const AString& strName);
 
     static ForkedDialogMethodManager* GetInstance();

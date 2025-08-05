@@ -44,12 +44,10 @@ CancellableMethodManager::~CancellableMethodManager()
 }
 
 PUBLIC
-IMS_BOOL CancellableMethodManager::AddMethod(
-        IN const AString& strName, IN ICancellableMethod* piMethod)
+void CancellableMethodManager::AddMethod(IN const AString& strName, IN ICancellableMethod* piMethod)
 {
     LockGuard objLock(m_piLock);
-
-    return m_objCancellableMethods.SetValue(strName, piMethod);
+    m_objCancellableMethods.SetValue(strName, piMethod);
 }
 
 PUBLIC

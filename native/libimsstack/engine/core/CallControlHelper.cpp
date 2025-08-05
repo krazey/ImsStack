@@ -46,11 +46,11 @@ PUBLIC VIRTUAL CallControlHelper::~CallControlHelper()
 }
 
 PUBLIC
-IMS_BOOL CallControlHelper::AddSession(IN const AString& strSessionId, IN Replaces* pReplaces)
+void CallControlHelper::AddSession(IN const AString& strSessionId, IN Replaces* pReplaces)
 {
     if (pReplaces == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     IMS_SLONG nIndex = m_objSessions.GetIndexOfKey(strSessionId);
@@ -67,7 +67,7 @@ IMS_BOOL CallControlHelper::AddSession(IN const AString& strSessionId, IN Replac
         m_objSessions.RemoveAt(nIndex);
     }
 
-    return m_objSessions.Add(strSessionId, pReplaces);
+    m_objSessions.Add(strSessionId, pReplaces);
 }
 
 PUBLIC

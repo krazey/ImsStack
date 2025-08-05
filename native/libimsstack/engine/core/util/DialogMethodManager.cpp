@@ -44,11 +44,10 @@ DialogMethodManager::~DialogMethodManager()
 }
 
 PUBLIC
-IMS_BOOL DialogMethodManager::AddMethod(IN const AString& strName, IN IDialogMethod* piMethod)
+void DialogMethodManager::AddMethod(IN const AString& strName, IN IDialogMethod* piMethod)
 {
     LockGuard objLock(m_piLock);
-
-    return m_objDialogMethods.SetValue(strName, piMethod);
+    m_objDialogMethods.SetValue(strName, piMethod);
 }
 
 PUBLIC

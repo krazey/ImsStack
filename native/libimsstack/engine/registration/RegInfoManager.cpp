@@ -85,13 +85,7 @@ PUBLIC VIRTUAL IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey
         }
 
         LockGuard objLock(m_piLock);
-
-        if (!m_objRegInfos.Add(objRegKey, pRegInfo))
-        {
-            delete pRegInfo;
-
-            return IMS_FALSE;
-        }
+        m_objRegInfos.Add(objRegKey, pRegInfo);
     }
 
     return IMS_TRUE;

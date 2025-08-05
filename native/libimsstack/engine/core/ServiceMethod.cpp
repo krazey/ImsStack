@@ -313,15 +313,7 @@ void ServiceMethod::CopyPreviousMessage(
     }
 
     RemovePreviousMessage(nDstServiceMethod);
-
-    if (!m_objPreviousMessages.Add(nDstServiceMethod, pNewPreviousMessage))
-    {
-        delete pNewPreviousMessage;
-
-        IMS_TRACE_E(0, "Adding the previous message (%s) failed",
-                Message::GetMessageType(nDstServiceMethod), 0, 0);
-        return;
-    }
+    m_objPreviousMessages.Add(nDstServiceMethod, pNewPreviousMessage);
 }
 
 PROTECTED
@@ -845,16 +837,7 @@ IMS_BOOL ServiceMethod::SetPreviousRequest(
         return IMS_FALSE;
     }
 
-    if (!m_objPreviousMessages.Add(nServiceMethod, pPreviousMessage))
-    {
-        pPreviousMessage->m_pRequest = IMS_NULL;
-        delete pPreviousMessage;
-
-        IMS_TRACE_E(0, "Adding the previous message (%s) failed",
-                Message::GetMessageType(nServiceMethod), 0, 0);
-        return IMS_FALSE;
-    }
-
+    m_objPreviousMessages.Add(nServiceMethod, pPreviousMessage);
     // Store the SIP connection for the response message
     pPreviousMessage->m_piSc = piSc;
 
