@@ -1624,6 +1624,11 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class), eq(digit));
     }
 
+    @Test
+    public void testGetImsConferenceState() {
+        assertNotNull(mImsCallSession.getImsConferenceState());
+    }
+
     private TestImsCallSessionImpl createImsCallSession(String callId) {
         TestImsCallSessionImpl callSession =  new TestImsCallSessionImpl(mMockCallContext,
                 mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, true,

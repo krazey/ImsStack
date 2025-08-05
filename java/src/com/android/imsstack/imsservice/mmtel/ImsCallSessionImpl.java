@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telecom.Connection.RttModifyStatus;
@@ -1552,7 +1553,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         List<ConferenceInfo.User> confUsers = ci.getUsers();
-        ImsConferenceState confState = new ImsConferenceState();
+        ImsConferenceState confState = getImsConferenceState();
 
         for (int i = 0; i < confUsers.size(); ++i) {
             ConferenceInfo.User user = confUsers.get(i);
@@ -1583,6 +1584,18 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         return confState;
+    }
+
+    @VisibleForTesting
+    protected @NonNull ImsConferenceState getImsConferenceState() {
+        Parcel parcel = Parcel.obtain();
+        try {
+            parcel.writeInt(0);
+            parcel.setDataPosition(0);
+            return ImsConferenceState.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
     }
 
     private UsersInfo createUsersInfoForInvitation(String[] participants) {
@@ -5259,7 +5272,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallback.invokeConferenceExtendFailed(ImsCallSessionImpl.this, reasonInfo);
                 // Empty conference state notification
                 mCallback.invokeConferenceStateUpdated(ImsCallSessionImpl.this,
-                        new ImsConferenceState());
+                        getImsConferenceState());
             }
         }
 
