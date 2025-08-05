@@ -67,7 +67,7 @@ void MtcSupplementaryService::UpdateOutgoingServices(
         IN const ImsList<SuppService*>& objSuppServices)
 {
     IMS_UINT32 nInServiceSize = objSuppServices.GetSize();
-    IMS_TRACE_I("MtcSupplementaryService : ServiceNum[%d] InServiceNum[%d]",
+    IMS_TRACE_I("UpdateOutgoingServices : ServiceNum[%d] InServiceNum[%d]",
             m_objSuppServices.GetSize(), nInServiceSize, 0);
 
     for (IMS_UINT32 i = 0; i < nInServiceSize; i++)
