@@ -102,15 +102,15 @@ public:
     //
     // Add an element in the right place (or replaces it if there is one)
     //
-    inline IMS_BOOL Add(IN const T& element);
+    inline void Add(IN const T& element);
     //
     // Remove an element
     //
-    inline IMS_BOOL Remove(IN const T& element);
+    inline void Remove(IN const T& element);
     // Remove several elements
-    inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
+    inline void RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
     // Remove one element
-    inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex) { return RemoveElementsAt(nIndex); }
+    inline void RemoveAt(IN IMS_UINT32 nIndex) { RemoveElementsAt(nIndex); }
 
     inline void Shrink();
 
@@ -281,7 +281,7 @@ inline IMS_BOOL ImsSortedVector<T>::Merge(IN const ImsSortedVector<T>& other)
 
 PUBLIC
 template <class T>
-inline IMS_BOOL ImsSortedVector<T>::Add(IN const T& element)
+inline void ImsSortedVector<T>::Add(IN const T& element)
 {
     IMS_SLONG nIndex = GetIndexOf(element);
 
@@ -294,34 +294,31 @@ inline IMS_BOOL ImsSortedVector<T>::Add(IN const T& element)
     {
         m_objVector.at(nIndex) = element;
     }
-
-    return IMS_TRUE;
 }
 
 PUBLIC
 template <class T>
-inline IMS_BOOL ImsSortedVector<T>::Remove(IN const T& element)
+inline void ImsSortedVector<T>::Remove(IN const T& element)
 {
     IMS_SLONG nIndex = GetIndexOf(element);
 
     if (nIndex < 0)
     {
-        return IMS_FALSE;
+        return;
     }
 
-    return RemoveElementsAt(nIndex);
+    RemoveElementsAt(nIndex);
 }
 
 PUBLIC
 template <class T>
-inline IMS_BOOL ImsSortedVector<T>::RemoveElementsAt(
-        IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
+inline void ImsSortedVector<T>::RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
 {
     if (nIndex == 0 && nCount == GetSize())
     {
         m_objVector.clear();
         Shrink();
-        return IMS_TRUE;
+        return;
     }
 
     while (nCount > 0 && !m_objVector.empty())
@@ -331,8 +328,6 @@ inline IMS_BOOL ImsSortedVector<T>::RemoveElementsAt(
     }
 
     Shrink();
-
-    return IMS_TRUE;
 }
 
 PUBLIC

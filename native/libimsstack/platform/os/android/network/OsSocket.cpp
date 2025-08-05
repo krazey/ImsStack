@@ -48,17 +48,7 @@ __IMS_TRACE_TAG_IPL__;
 #define IMSSOCKET_DEBUG(ec)
 #endif
 
-#define IMS_MAX_RETRY_COUNT_ON_BIND_FAILED    3
-#define IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED 5
-
-LOCAL
-IMS_BOOL osSocket_IsConnectRetryRequired(IN IMS_SINT32 nSlotId)
-{
-    // TODO: This is required for VoNR and VoWiFi to retry
-    // when the connection establishment is failed.
-    (void)nSlotId;
-    return IMS_FALSE;
-}
+#define IMS_MAX_RETRY_COUNT_ON_BIND_FAILED 3
 
 LOCAL
 void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT32 nAddrLen,
@@ -846,48 +836,6 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
                     // }
                     return RESULT_SUCCESS;
                 }
-
-                if ((errno == ENETUNREACH) &&
-                        osSocket_IsConnectRetryRequired(m_piOwnerThread->GetSlotId()))
-                {
-                    IMS_SINT32 nRetryCount = 0;
-
-                    do
-                    {
-                        nConnectResult = connect(m_hSocket,
-                                reinterpret_cast<const struct sockaddr*>(&stSockAddr),
-                                sizeof(stSockAddr));
-
-                        if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED)
-                        {
-                            break;
-                        }
-
-                        // "Network is unreachable"
-                        if (nConnectResult == SOCKET_ERROR)
-                        {
-                            if (errno == ENETUNREACH)
-                            {
-                                ++nRetryCount;
-                                IMS_TRACE_D("Waiting for network reachable (%d) ...", nRetryCount,
-                                        0, 0);
-                                usleep(200000);  // 200 milli-seconds
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            SetSocketConnected(IMS_TRUE);
-                            // __LINUX_SOCKET_EVENT__ {
-                            SelectEventEx(FD_READ | FD_TCP_C);
-                            // }
-                            return RESULT_SUCCESS;
-                        }
-                    } while (1);
-                }
             }
             else if ((nError == EINPROGRESS) || (nError == EWOULDBLOCK))
             {
@@ -947,48 +895,6 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
                     SelectEventEx(FD_READ | FD_TCP_C);
                     // }
                     return RESULT_SUCCESS;
-                }
-
-                if ((errno == ENETUNREACH) &&
-                        osSocket_IsConnectRetryRequired(m_piOwnerThread->GetSlotId()))
-                {
-                    IMS_SINT32 nRetryCount = 0;
-
-                    do
-                    {
-                        nConnectResult = connect(m_hSocket,
-                                reinterpret_cast<const struct sockaddr*>(&stSockAddr),
-                                sizeof(stSockAddr));
-
-                        if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED)
-                        {
-                            break;
-                        }
-
-                        // "Network is unreachable"
-                        if (nConnectResult == SOCKET_ERROR)
-                        {
-                            if (errno == ENETUNREACH)
-                            {
-                                ++nRetryCount;
-                                IMS_TRACE_D("Waiting for network reachable (%d) ...", nRetryCount,
-                                        0, 0);
-                                usleep(200000);  // 200 milli-seconds
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            SetSocketConnected(IMS_TRUE);
-                            // __LINUX_SOCKET_EVENT__ {
-                            SelectEventEx(FD_READ | FD_TCP_C);
-                            // }
-                            return RESULT_SUCCESS;
-                        }
-                    } while (1);
                 }
             }
 
