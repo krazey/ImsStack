@@ -277,12 +277,6 @@ public class ServiceStateBuilder {
             p.writeString(mOperatorNumeric);
             p.writeInt(0); // mIsManualNetworkSelection
             p.writeInt(0); // mCssIndicator
-            p.writeInt(-1); // mNetworkId
-            p.writeInt(-1); // mSystemId
-            p.writeInt(-1); // mCdmaRoamingIndicator
-            p.writeInt(-1); // mCdmaDefaultRoamingIndicator
-            p.writeInt(-1); // mCdmaEriIconIndex
-            p.writeInt(-1); // mCdmaEriIconMode
             p.writeInt(mIsEmergencyOnly ? 1 : 0);
             p.writeInt(0); // mArfcnRsrpBoost
             p.writeList(mNetworkRegistrationInfos);
