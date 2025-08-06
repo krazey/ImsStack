@@ -73,32 +73,16 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         return IMS_FALSE;
     }
 
-    VideoProfile::Payload* pLocalPayload;
-    VideoProfile::Payload* pNegoPayload;
+    auto pNegoPayload = pNegoProfile->GetPayloadAt(0);
+    auto pPeerPayload = pPeerProfile->GetPayloadAt(0);
 
-    if (pLocalProfile->GetNegotiatedPayloadIndex() < 0)
-    {
-        pLocalPayload = pLocalProfile->GetPayloadAt(0);
-    }
-    else
-    {
-        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
-    }
-
-    pNegoPayload = pNegoProfile->GetPayloadAt(0);
-
-    if (pLocalPayload == IMS_NULL || pNegoPayload == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    SetLocalEndPoint(pLocalProfile->GetIpAddress(), pNegoProfile->GetDataPort());
+    SetLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     SetRemoteEndPoint(pPeerProfile->GetIpAddress(), pPeerProfile->GetDataPort());
 
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
-    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->GetRtpMap().GetPayloadNumber());
-    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
+    pVideoConfig->setTxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
+    pVideoConfig->setRxPayloadTypeNumber(pPeerPayload->GetRtpMap().GetPayloadNumber());
 
     if (GetConfiguration() != IMS_NULL)
     {

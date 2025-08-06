@@ -69,8 +69,8 @@ protected:
         m_objNegoProfile.GetPayloadList().Append(pNegoPayload);
         m_objPeerProfile.GetPayloadList().Append(pPeerPayload);
         m_objLocalProfile.SetDataPort(10000);
-        m_objPeerProfile.SetDataPort(10000);
-        m_objNegoProfile.SetDataPort(10000);
+        m_objPeerProfile.SetDataPort(20000);
+        m_objNegoProfile.SetDataPort(30000);
     }
 
     virtual void TearDown() override {}
@@ -167,6 +167,47 @@ TEST_F(VideoSessionTest, testUpdateRtpConfigRecvOnlyHoldOn)
             &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
 
     EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
+}
+
+TEST_F(VideoSessionTest, testUpdateRtpConfigPayloadType)
+{
+    // Arrange
+    const IMS_UINT32 kLocalPayloadNum = 97;
+    const IMS_UINT32 kPeerPayloadNum = 98;
+    const IMS_UINT32 kNegoPayloadNum = 99;
+
+    // Clear existing payloads from SetUp
+    m_objLocalProfile.DeletePayloads();
+    m_objPeerProfile.DeletePayloads();
+    m_objNegoProfile.DeletePayloads();
+
+    // Add new payloads with distinct numbers
+    VideoProfile::Payload* pLocalPayload = new VideoProfile::Payload();
+    pLocalPayload->SetRtpMap(kLocalPayloadNum, "H264", 90000);
+    pLocalPayload->SetFmtp(std::make_shared<VideoProfile::AvcFmtp>());
+    m_objLocalProfile.GetPayloadList().Append(pLocalPayload);
+
+    VideoProfile::Payload* pPeerPayload = new VideoProfile::Payload();
+    pPeerPayload->SetRtpMap(kPeerPayloadNum, "H264", 90000);
+    pPeerPayload->SetFmtp(std::make_shared<VideoProfile::AvcFmtp>());
+    m_objPeerProfile.GetPayloadList().Append(pPeerPayload);
+
+    VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
+    pNegoPayload->SetRtpMap(kNegoPayloadNum, "H264", 90000);
+    pNegoPayload->SetFmtp(std::make_shared<VideoProfile::AvcFmtp>());
+    m_objNegoProfile.GetPayloadList().Append(pNegoPayload);
+
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+    // Act
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_FALSE));
+
+    // Assert
+    VideoConfig* pVideoConfig = reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig());
+    ASSERT_TRUE(pVideoConfig != nullptr);
+    EXPECT_EQ(pVideoConfig->getTxPayloadTypeNumber(), kNegoPayloadNum);
+    EXPECT_EQ(pVideoConfig->getRxPayloadTypeNumber(), kPeerPayloadNum);
 }
 
 TEST_F(VideoSessionTest, testSetMtu)
