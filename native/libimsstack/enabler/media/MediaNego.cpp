@@ -627,7 +627,7 @@ AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality()
 PUBLIC
 VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality()
 {
-    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetRemotePort() <= 0)
+    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetNegotiatedRtpPort() <= 0)
     {
         return VIDEO_RESOLUTION_NOT_USED;
     }
@@ -645,7 +645,7 @@ VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality()
 PUBLIC
 TEXT_CODEC MediaNego::GetNegotiatedTextQuality()
 {
-    if (m_pTextNego == IMS_NULL || m_pTextNego->GetRemotePort() <= 0)
+    if (m_pTextNego == IMS_NULL || m_pTextNego->GetNegotiatedRtpPort() <= 0)
     {
         return TEXT_CODEC_NOT_USED;
     }

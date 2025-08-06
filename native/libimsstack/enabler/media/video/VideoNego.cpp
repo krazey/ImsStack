@@ -194,14 +194,15 @@ PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescript
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d]", eDirection, bDisable, 0);
-
     // Modify a RTP/RTCP port to ZERO if video is not supported
     if (bDisable)
     {
         pNewOaModel->pNegotiatedProfile->SetDataPort(0);
         pNewOaModel->pNegotiatedProfile->SetControlPort(0);
     }
+
+    IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d], port[%d]", eDirection, bDisable,
+            pNewOaModel->pNegotiatedProfile->GetDataPort());
 
     // Modify a direction by Enabler
     if (IS_VALID_MEDIA_DIRECTION(eDirection))

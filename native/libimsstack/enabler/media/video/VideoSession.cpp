@@ -92,7 +92,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         return IMS_FALSE;
     }
 
-    SetLocalEndPoint(pLocalProfile->GetIpAddress(), pLocalProfile->GetDataPort());
+    SetLocalEndPoint(pLocalProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     SetRemoteEndPoint(pPeerProfile->GetIpAddress(), pPeerProfile->GetDataPort());
 
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
@@ -120,7 +120,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
 
     IMS_SINT32 nVideoDirection;
 
-    if (pNegoProfile->GetDataPort() == 0 || pLocalProfile->GetDataPort() == 0)
+    if (pNegoProfile->GetDataPort() == 0)
     {
         nVideoDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     }

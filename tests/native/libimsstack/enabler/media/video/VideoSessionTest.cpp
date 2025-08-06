@@ -114,14 +114,6 @@ TEST_F(VideoSessionTest, testUpdateRtpConfig)
             &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
 
     EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_NO_FLOW);
-
-    m_objNegoProfile.SetDataPort(10000);
-    m_objLocalProfile.SetDataPort(0);
-
-    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
-            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
-
-    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_NO_FLOW);
 }
 
 TEST_F(VideoSessionTest, testUpdateRtpConfigSendRecv)
