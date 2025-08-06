@@ -294,8 +294,13 @@ PROTECTED VIRTUAL void MediaSession::RequestQosParam(
                 ImsMediaMsgQosParam* pQosInfoParam = new ImsMediaMsgQosParam(
                         pQosParams->m_eMediaType, pQosParams->m_objIpAddress, pQosParams->m_nPort);
                 pQosInfoParam->m_bResult = pQosParams->m_bResult;
+
                 pMediaManager->PostMessage(
                         IJniMedia::NOTIFY_QOS_INFO, m_nCallKey, (IMS_UINTP)pQosInfoParam);
+            }
+            else
+            {
+                IMS_TRACE_D("RequestQosParam() - MediaManager is invalid", 0, 0, 0);
             }
         }
         else  // request again

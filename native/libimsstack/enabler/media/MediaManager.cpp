@@ -254,6 +254,42 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::HandleRequestMsg(
 }
 
 PROTECTED
+VIRTUAL void MediaManager::HandleMessage(
+        IN IMS_SINT32 nMsg, IN IMS_UINTP wParam, IN IMS_SINTP lParam)
+{
+    IMS_TRACE_I("HandleMessage() - nMsg[%d]", nMsg, 0, 0);
+
+    switch (nMsg)
+    {
+        case IJniMedia::NOTIFY_QOS_INFO:
+        {
+            IMS_SINTP nCallKey = wParam;
+            ImsMediaMsgQosParam* pQosNotifyParam = reinterpret_cast<ImsMediaMsgQosParam*>(lParam);
+
+            if (pQosNotifyParam != IMS_NULL)
+            {
+                MediaSession* pSession = GetSession(nCallKey);
+                if (pSession != IMS_NULL)
+                {
+                    IMS_TRACE_I("HandleMessage() - QOS - CallKey[%d], nPort[%d], bResult[%d]",
+                            nCallKey, pQosNotifyParam->m_nPort, pQosNotifyParam->m_bResult);
+                    pSession->SendMessage(nMsg, lParam);
+                }
+            }
+        }
+        break;
+    }
+}
+
+PROTECTED
+IMS_BOOL MediaManager::DispatchMessage(IN ImsMessage& objMsg)
+{
+    IMS_TRACE_I("DispatchMessage() - nMsg[%d]", objMsg.GetName(), 0, 0);
+    HandleMessage(objMsg.GetName(), objMsg.nWparam, objMsg.nLparam);
+    return IMS_TRUE;
+}
+
+PROTECTED
 void MediaManager::ClearMediaSessionNode()
 {
     IMS_TRACE_D("ClearMediaSessionNode() - list size[%d]", m_lstSessionNode.GetSize(), 0, 0);

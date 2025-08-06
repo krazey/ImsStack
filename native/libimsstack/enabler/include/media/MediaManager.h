@@ -131,6 +131,18 @@ public:
     virtual IMS_BOOL HandleRequestMsg(
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
 
+    /**
+     * @brief Handle the disaptch messages
+     *
+     * @param nMsg enum of message ID. It is defined in IJniMedia.h
+     * @param wParam The key to identify the call session, nCallKey
+     * @param param additional message parameters
+     */
+    virtual void HandleMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP wParam, IN IMS_SINTP lParam);
+
+    // ImsActivity
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
+
 protected:
     static const IMS_UINT32 TIME_WAIT_MEDIA_RESPONSE = 5000;
 
