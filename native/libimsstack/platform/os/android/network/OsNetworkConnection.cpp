@@ -1134,56 +1134,34 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
     }
 
     // IPv4 address
-    IpAddress objIpv4;
     AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
             GetApnType(), IpAddress::IPV4, GetSlotId());
-
-    if (!objIpv4.Parse(strIpAddr))
+    if (!m_objLocalAddressIpv4.Parse(strIpAddr))
     {
-        objIpv4 = IpAddress::NONE;
+        m_objLocalAddressIpv4 = IpAddress::NONE;
     }
 
     // IPv6 address
-    IpAddress objIpv6;
     strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
             GetApnType(), IpAddress::IPV6, GetSlotId());
-
-    if (!objIpv6.Parse(strIpAddr))
+    if (!m_objLocalAddressIpv6.Parse(strIpAddr))
     {
-        objIpv6 = IpAddress::IPv6NONE;
+        m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
     }
 
-    IMS_BOOL bIpUpdated = IMS_FALSE;
-
-    if (!m_objLocalAddressIpv4.Equals(objIpv4))
+    // Default IP address based on configuration
+    strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), -1, GetSlotId());
+    if (!m_objLocalAddress.Parse(strIpAddr))
     {
-        bIpUpdated = IMS_TRUE;
-        m_objLocalAddressIpv4 = objIpv4;
+        m_objLocalAddress = IpAddress::NONE;
     }
 
-    if (!m_objLocalAddressIpv6.Equals(objIpv6))
-    {
-        bIpUpdated = IMS_TRUE;
-        m_objLocalAddressIpv6 = objIpv6;
-    }
+    AdjustPreferredLocalAddress();
 
-    if (bIpUpdated)
-    {
-        // Default IP address based on configuration
-        strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
-                GetApnType(), -1, GetSlotId());
-
-        if (!m_objLocalAddress.Parse(strIpAddr))
-        {
-            m_objLocalAddress = IpAddress::NONE;
-        }
-
-        AdjustPreferredLocalAddress();
-
-        IMS_TRACE_D("EmergencyPdnOnIpChanged :: preferred=%s, ipv4=%s, ipv6=%s",
-                m_objLocalAddress.ToString().GetStr(), m_objLocalAddressIpv4.ToString().GetStr(),
-                m_objLocalAddressIpv6.ToString().GetStr());
-    }
+    IMS_TRACE_D("EmergencyPdnOnIpChanged :: preferred=%s, ipv4=%s, ipv6=%s",
+            m_objLocalAddress.ToString().GetStr(), m_objLocalAddressIpv4.ToString().GetStr(),
+            m_objLocalAddressIpv6.ToString().GetStr());
 
     if (m_piConnectionListener != IMS_NULL)
     {
