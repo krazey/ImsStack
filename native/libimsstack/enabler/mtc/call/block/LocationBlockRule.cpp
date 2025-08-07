@@ -74,6 +74,5 @@ PRIVATE
 IMS_BOOL LocationBlockRule::IsLocationUpdateCompleted() const
 {
     // It assumes that a update request have been made by EmergencyServiceManager if it's required.
-    // TODO(b/412489169): The subject to trigger the location update could be changed.
     return m_objLocationRefresher.GetState() == MtcLocationRefresher::LocationRefreshState::IDLE;
 }

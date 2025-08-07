@@ -173,13 +173,31 @@ TEST_F(MtcEmergencyServiceManagerTest, StartOpenDoesNotRequestsLocationUpdateIfT
     pEsm->StartOpen(ServiceType::EMERGENCY);
 }
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenRequestsLocationUpdateIfTimerIsSet)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenRequestsLocationUpdateOnceIfTimerIsSet)
 {
     ON_CALL(objConfigurationProxy,
             GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
             .WillByDefault(Return(1000));
 
-    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(1000, _));
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(1000, _)).Times(1);
 
     pEsm->StartOpen(ServiceType::EMERGENCY);
+    pLocationRefresher->LocationUpdate_OnCompleted();
+    pEsm->StartOpen(ServiceType::NORMAL);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenRequestsLocationUpdateAgainAfterStopOpen)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+    pLocationRefresher->LocationUpdate_OnCompleted();
+    pEsm->StopOpen(IMS_TRUE);
+
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(1000, _)).Times(1);
+
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+    pLocationRefresher->LocationUpdate_OnCompleted();
+    pEsm->StartOpen(ServiceType::NORMAL);
 }

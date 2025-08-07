@@ -28,7 +28,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContext) :
         m_pController(nullptr),
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_bLocationUpdateRequested(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
 }
@@ -64,6 +65,7 @@ PUBLIC VIRTUAL void MtcEmergencyServiceManager::StopOpen(IN IMS_BOOL bClose)
         m_pController->Close();
     }
     m_pController.reset();
+    m_bLocationUpdateRequested = IMS_FALSE;
 }
 
 PRIVATE IEmergencyServiceController* MtcEmergencyServiceManager::CreateController(
@@ -78,10 +80,16 @@ PRIVATE IEmergencyServiceController* MtcEmergencyServiceManager::CreateControlle
 
 PRIVATE void MtcEmergencyServiceManager::RequestLocationUpdateIfRequired()
 {
+    if (m_bLocationUpdateRequested)
+    {
+        return;
+    }
+
     IMS_SINT32 nWaitTime = m_objContext.GetConfigurationProxy().GetInt(
             ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT);
     if (nWaitTime > 0)
     {
+        m_bLocationUpdateRequested = IMS_TRUE;
         m_objContext.GetLocationRefresher().RequestUpdate(nWaitTime);
     }
 }

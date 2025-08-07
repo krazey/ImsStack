@@ -46,6 +46,7 @@ protected:
 
 private:
     IMtcContext& m_objContext;
+    IMS_BOOL m_bLocationUpdateRequested;
 
     IEmergencyServiceController* CreateController(IN ServiceType eServiceType);
     void RequestLocationUpdateIfRequired();
