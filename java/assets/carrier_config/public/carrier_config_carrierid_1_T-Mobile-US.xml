@@ -37,6 +37,7 @@
         <item value="4"/>
     </int-array>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
+    <int name="imsemergency.refresh_geolocation_timeout_millis_int" value="0"/>
     <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
     <int-array name="imsvoice.srvcc_type_int_array" num="3">
         <item value="0"/>
