@@ -26,11 +26,9 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager.AuthType;
 import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
 import android.telephony.TelephonyManager.CellInfoCallback;
-import android.telephony.TelephonyManager.HalService;
 import android.telephony.TelephonyManager.SimState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -438,17 +436,6 @@ public interface TelephonyManagerProxy {
     void bootstrapAuthenticationRequest(@UiccAppTypeExt int appType, @NonNull Uri nafId,
             @NonNull UaSecurityProtocolIdentifier securityProtocol, boolean forceBootStrapping,
             @NonNull Executor executor, @NonNull BootstrapAuthenticationCallback callback);
-
-    /**
-     * Retrieves the HAL Version of a specific service for this device.
-     *
-     * Get the HAL version for a specific HAL interface for test purposes.
-     *
-     * @param halService The service id to query.
-     * @return A Pair of (major version, minor version), HAL_VERSION_UNKNOWN if unknown
-     *         or HAL_VERSION_UNSUPPORTED if unsupported.
-     */
-    @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService);
 
     /**
      * Get the emergency number list based on current locale, sim, default, modem and network.

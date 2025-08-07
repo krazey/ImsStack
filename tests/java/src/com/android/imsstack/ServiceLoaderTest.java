@@ -101,8 +101,6 @@ public class ServiceLoaderTest {
         TelephonyManagerProxy tmp =
                 mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         when(tmp.getSimApplicationState()).thenReturn(TelephonyManager.SIM_STATE_ABSENT);
-        when(tmp.getHalVersion(TelephonyManager.HAL_SERVICE_IMS))
-                .thenReturn(TelephonyManager.HAL_VERSION_UNSUPPORTED);
         setUpSharedPreferences(mTestAppContext.getContext());
 
         JniImsProxy.setJniIms(mJniIms);

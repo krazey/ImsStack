@@ -45,12 +45,10 @@ import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.AuthType;
 import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
 import android.telephony.TelephonyManager.CellInfoCallback;
-import android.telephony.TelephonyManager.HalService;
 import android.telephony.TelephonyManager.SimState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
@@ -84,7 +82,6 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     private final NetworkInfoRecord mNetworkInfoRecord = new NetworkInfoRecord();
     private int mActiveModemCount = 1;
     private int mSupportedModemCount = 2;
-    private Pair<Integer, Integer> mHalVersion = new Pair<>(2, 1);
 
     TelephonyManagerProxyImpl(@NonNull Context context) {
         this(context, TestConstants.SUB_ID_1);
@@ -329,11 +326,6 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
-    public @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService) {
-        return mHalVersion;
-    }
-
-    @Override
     public @NonNull Map<Integer, List<EmergencyNumber>> getEmergencyNumberList() {
         // This is not supported yet in the test environment.
         return Collections.emptyMap();
@@ -428,7 +420,6 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     public void setDefaultValues() {
         setActiveModemCount(1);
         setSupportedModemCount(2);
-        setHalVersion(2, 1);
         clearEmergencyNumbers();
         // The SIM state is NOT_READY by default,
         // so we should change the SIM state to LOADED to start the IMS service.
@@ -837,16 +828,6 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void setAllCellInfo(List<CellInfo> cellInfos) {
         mNetworkInfoRecord.setAllCellInfo(cellInfos);
-    }
-
-    /**
-     * Sets the HAL version.
-     *
-     * @param major The major version code.
-     * @param minor The minor version code.
-     */
-    public void setHalVersion(int major, int minor) {
-        mHalVersion = new Pair<>(major, minor);
     }
 
     /**

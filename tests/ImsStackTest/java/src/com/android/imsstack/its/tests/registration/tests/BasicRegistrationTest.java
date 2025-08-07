@@ -33,7 +33,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.its.base.ServiceStateBuilder;
-import com.android.imsstack.its.base.SystemProxyResolver;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
@@ -54,9 +53,6 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     public void setUp() throws Exception {
 
         setRegistrationBaseConfig();
-
-        mTelephony = SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
-        mTelephony.setHalVersion(-2, -2);
 
         setUpBase(SLOT0);
 

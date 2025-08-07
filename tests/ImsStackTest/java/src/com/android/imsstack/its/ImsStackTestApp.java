@@ -38,6 +38,7 @@ public class ImsStackTestApp extends Application {
         AppContextInitializer.init(this);
         WifiAgent.getInstance().init(this);
         ImsStackTestBase.initPcscfAddresses();
+        ImsStackTestBase.setSimulatedImsHal(true);
         mMain.start(this);
     }
 

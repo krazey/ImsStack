@@ -31,11 +31,9 @@ import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.AuthType;
 import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
 import android.telephony.TelephonyManager.CellInfoCallback;
-import android.telephony.TelephonyManager.HalService;
 import android.telephony.TelephonyManager.SimState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -364,13 +362,6 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
                         TelephonyManager.GBA_FAILURE_REASON_FEATURE_NOT_READY);
             });
         }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService) {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getHalVersion(halService) : TelephonyManager.HAL_VERSION_UNKNOWN;
     }
 
     @Override

@@ -25,8 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.its.base.SystemProxyResolver;
-import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
 import com.android.imsstack.its.imsservice.ImsServiceConnector;
 import com.android.imsstack.its.imsservice.mmtel.sms.ImsSmsWrapper;
 import com.android.imsstack.its.tests.ImsStackTestBase;
@@ -48,10 +46,6 @@ public class SmsTestBase extends ImsStackTestBase {
     protected @Nullable PersistableBundle mConfig;
 
     protected final void setUpSmsBase(int slotId) {
-        TelephonyManagerProxyImpl telephony =
-                SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
-        telephony.setHalVersion(-2, -2);
-
         setUpBase(slotId);
 
         mImsSms = ImsServiceConnector.getInstance().getSms();

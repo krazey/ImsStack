@@ -18,7 +18,6 @@ package com.android.imsstack.its.tests.registration.tests;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
-import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.ControlConnection;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
@@ -31,7 +30,6 @@ import com.android.imsstack.its.tests.registration.util.TestRegistration;
 public class RegistrationTestBase extends ImsStackTestBase {
 
     protected ControlConnection mServerControlConnection;
-    protected TelephonyManagerProxyImpl mTelephony;
     protected TestRegistration mRegistration;
     protected RegistrationHelper mRegistrationHelper;
     protected PersistableBundle mConfig;
