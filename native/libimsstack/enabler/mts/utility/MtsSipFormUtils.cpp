@@ -37,7 +37,7 @@ MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+MtsSipFormUtils [slot_%d]", m_nSlotId, 0, 0);
 
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_SINT32 nRequestUriType = GetRequestUriType();
     AString strUriScheme;
 
@@ -286,7 +286,7 @@ IMS_SINT32 MtsSipFormUtils::GetRetryAfterValue(IN const IMessage* piMessage) con
 PRIVATE
 IMS_SINT32 MtsSipFormUtils::GetRequestUriType()
 {
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_SINT32 nValue = piCc->GetInt(CarrierConfig::ImsSms::KEY_SMS_PREFERRED_PSI_URI_TYPE_INT);
 
     if (nValue == URI_SCHEME_UNKNOWN)

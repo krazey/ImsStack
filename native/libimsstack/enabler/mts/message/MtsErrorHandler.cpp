@@ -93,7 +93,7 @@ IMS_SINT32 MtsErrorHandler::Handle(
         }
     }
 
-    IMessage* piMessage =
+    const IMessage* piMessage =
             piMtsMessage->GetPageMessage()->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
     // ORG Requirements - IMS_SMSIP_40, IMS_SMSIP_43, IMS_SMSIP_540, IMS_SMSIP_543
     nResult = EvaluateNetworkStatusForErrorCode(objMtsService, piMessage);

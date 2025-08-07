@@ -89,7 +89,7 @@ PUBLIC VIRTUAL const IMtsService& MtsApp::GetService(IN MtsServiceType eServiceT
 
 PUBLIC VIRTUAL IJniMtsAppThread* MtsApp::GetJniAppThread() const
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::MTS);
     if (piJniEnabler == IMS_NULL)
     {

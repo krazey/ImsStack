@@ -762,7 +762,7 @@ void MtsMessageController::AddGeolocationPidf(
     IMS_SINT32 nGeolocationPidfType =
             m_objContext.GetDynamicLoader().GetMtsGeolocationUtils()->GetGeolocationPidfAllowedType(
                     bWlan, bEmergencyNumber);
-    ICarrierConfig* piCc =
+    const ICarrierConfig* piCc =
             ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId());
     ImsVector<IMS_SINT32> objSupportPidf = piCc->GetIntArray(
             CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_IN_SIP_MESSAGE_SUPPORT_INT_ARRAY);
@@ -1240,7 +1240,7 @@ IMS_BOOL MtsMessageController::GetSmsgwFromReceivedMessage(
                 "header is used for SMS-GW",
             0, 0, 0);
 
-    IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    const IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
     if (piMessage == IMS_NULL)
     {

@@ -76,7 +76,7 @@ protected:
     {
         for (IMS_UINT32 i = 0; i < objMtsTraffics.GetSize(); i++)
         {
-            MtsTraffic* pTmpMtsTraffic = objMtsTraffics.GetAt(i);
+            const MtsTraffic* pTmpMtsTraffic = objMtsTraffics.GetAt(i);
 
             if (pTmpMtsTraffic)
             {

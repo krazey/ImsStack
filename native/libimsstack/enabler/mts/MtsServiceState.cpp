@@ -176,7 +176,7 @@ void MtsServiceState::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
         return;
     }
 
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
     if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "CarrierConfig_NotifyConfigChanged : config failed", 0, 0, 0);

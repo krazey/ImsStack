@@ -183,7 +183,7 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(
     objUri.Append(ImsIdentity::GetHomeDomainName(m_nSlotId));
 
     // "user" parameter
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     if (piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL))
     // if ((m_nDialingPolicy != ImsIdentity::DIALING_POLICY_OTHER) &&
     //         (nNumberFormat == NUMBER_FORMAT_NON_TEL))
