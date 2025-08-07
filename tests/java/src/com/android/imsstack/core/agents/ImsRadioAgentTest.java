@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -74,11 +73,10 @@ public class ImsRadioAgentTest {
         when(mMockSystemInterface.getSystem(SLOT0)).thenReturn(mMockISystem);
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
-        when(mTelephonyManagerProxy.getHalVersion(TelephonyManager.HAL_SERVICE_IMS))
-                .thenReturn(TelephonyManager.HAL_VERSION_UNSUPPORTED);
 
         mImsRadioAgent = new ImsRadioAgent(SLOT0);
         mImsRadioAgent.init(mTestAppContext.getContext());
+        mImsRadioAgent.mSimulatedImsHalEnabled = true;
     }
 
     @After

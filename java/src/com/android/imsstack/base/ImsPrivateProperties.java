@@ -266,6 +266,11 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_WIFI_TEST = "wifi_test";
         /**
+         * IMS HAL test configuration for testing without actual IMS HAL interaction.
+         * Value: boolean (true / false)
+         */
+        public static final String KEY_TEST_SIMULATED_IMS_HAL = "test_simulated_ims_hal";
+        /**
          * Carrier signal PCO test configuration.
          * Value: int (1 / 0)
          */
@@ -457,6 +462,7 @@ public final class ImsPrivateProperties {
             KEY_PREF_COUNTRY,
             KEY_PREF_KR_ENABLER,
             KEY_WIFI_TEST,
+            KEY_TEST_SIMULATED_IMS_HAL,
             KEY_CARRIER_SIGNAL_PCO_TEST,
             KEY_TEST_IMS_DISABLED,
             KEY_TEST_DEBUG_ENABLED,

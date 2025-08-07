@@ -45,6 +45,7 @@ public class TestConfigMenu extends AppCompatActivity {
     protected static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
     protected static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
     protected static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
+    protected static final String KEY_TEST_SIMULATED_IMS_HAL = "test_simulated_ims_hal";
     protected static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
     protected static final String KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED =
             "test_carrier_signal_pco_enabled";
@@ -71,6 +72,7 @@ public class TestConfigMenu extends AppCompatActivity {
     private CheckBoxPreference mDebugEnabled;
     private CheckBoxPreference mTestModeEnabled;
     private CheckBoxPreference mWifiTestEnabled;
+    private CheckBoxPreference mSimulatedImsHal;
     private CheckBoxPreference mCrossSimEnabled;
     private CheckBoxPreference mCarrierSignalPcoEnabled;
     private EditTextPreference mHomeDomainName;
@@ -143,6 +145,17 @@ public class TestConfigMenu extends AppCompatActivity {
                     ImsPrivateProperties.Persistent.KEY_WIFI_TEST, 0, mSlotId) == 1);
             mWifiTestEnabled.setChecked(wifiTestEnabled);
             mWifiTestEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
+        }
+
+        mSimulatedImsHal =
+                (CheckBoxPreference) findPreference(KEY_TEST_SIMULATED_IMS_HAL);
+
+        if (mSimulatedImsHal != null) {
+            boolean simulatedImsHalEnabled = ImsPrivateProperties.Persistent.getBoolean(
+                    ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL, false, mSlotId);
+
+            mSimulatedImsHal.setChecked(simulatedImsHalEnabled);
+            mSimulatedImsHal.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
         }
 
         mCrossSimEnabled = (CheckBoxPreference) findPreference(KEY_TEST_CROSS_SIM_ENABLED);
@@ -316,6 +329,9 @@ public class TestConfigMenu extends AppCompatActivity {
                 case KEY_TEST_WIFI_TEST_ENABLED:
                     key = ImsPrivateProperties.Persistent.KEY_WIFI_TEST;
                     isValueTypeInt = true;
+                    break;
+                case KEY_TEST_SIMULATED_IMS_HAL:
+                    key = ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL;
                     break;
                 case KEY_TEST_CROSS_SIM_ENABLED:
                     ImsMmTelManagerProxy imtmp = getImsMmTelManagerProxy();
