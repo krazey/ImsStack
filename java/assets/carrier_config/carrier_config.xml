@@ -81,7 +81,7 @@
     <boolean name="imsvoice.enable_conference_subscribe_by_participant_bool" value="false"/>
     <int name="imsvoice.conference_sip_flow_order_int" value="0"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="1"/>
-    <int name="imsvoice.policy_qos_precondition_mechanism_while_call_modification_int" value="1"/>
+    <boolean name="imsvoice.disable_precondition_after_call_established_bool" value="false"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="486"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
     <int name="imsvoice.prack_wait_timer_millis_int" value="-1"/>

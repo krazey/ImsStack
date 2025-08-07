@@ -31,7 +31,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 PreconditionExtension::PreconditionExtension(IN IMtcCallContext& objContext) :
         MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_PRECONDITION,
-                {RequestType::START, RequestType::EARLY_UPDATE, RequestType::PRACK},
+                {RequestType::START, RequestType::EARLY_UPDATE, RequestType::PRACK,
+                        RequestType::UPDATE},
                 {ResponseType::PROVISIONAL_RESPONSE})
 {
 }

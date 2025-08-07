@@ -157,6 +157,9 @@ protected:
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objSession));
         ON_CALL(objCallContext, GetCallKey()).WillByDefault(Return(CALL_KEY));
         ON_CALL(objCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(objUpdatingInfo));
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL))
+                .WillByDefault(Return(IMS_FALSE));
 
         CreateMtcPreconditionManager();
     }
@@ -743,6 +746,19 @@ TEST_F(MtcPreconditionManagerTest, RemovePreconditionSdpWhenQosInfoDoesNotExist)
 TEST_F(MtcPreconditionManagerTest, RemovePreconditionSdpWhenPreconditionIsNotSupported)
 {
     SetUpMockQosInfo();
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(*pSdpPreconditionHelper, RemovePreconditionSdp(&objISession));
+    pPreconditionManager->FormPreconditionSdp(&objISession, IMS_FALSE);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        RemovePreconditionSdpWhenPreconditionSupportedForEstablishedCallIfConfigIsSet)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCallContext, IsEstablished).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(*pSdpPreconditionHelper, RemovePreconditionSdp(&objISession));
     pPreconditionManager->FormPreconditionSdp(&objISession, IMS_FALSE);

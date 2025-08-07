@@ -1112,6 +1112,14 @@ IMS_BOOL MtcPreconditionManager::IsLocalResourceReservedForVideoOrText(IN ISessi
 PRIVATE
 IMS_BOOL MtcPreconditionManager::IsPreconditionSupported(IN ISession* piSession) const
 {
+    if (m_objContext.IsEstablished() &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL))
+    {
+        IMS_TRACE_I("IsPreconditionSupported : Not supported after established", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
     const QosInfo* pInfo = GetQosInfo(piSession);
     IMS_BOOL bResult = (pInfo != IMS_NULL) ? pInfo->IsPreconditionSupported() : IMS_FALSE;
     IMS_TRACE_D("IsPreconditionSupported [%s]", _TRACE_B_(bResult), 0, 0);

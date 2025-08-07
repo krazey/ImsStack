@@ -1076,8 +1076,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "conference_sip_flow_order_int";
         public static final String KEY_CONFERENCE_INVITING_REFER_TYPE_INT =
                 KEY_PREFIX + "conference_inviting_refer_type_int";
-        public static final String KEY_POLICY_QOS_PRECONDITION_MECHANISM_WHILE_CALL_MODIFICATION_INT =
-                KEY_PREFIX + "policy_qos_precondition_mechanism_while_call_modification_int";
+        public static final String KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL =
+                KEY_PREFIX + "disable_precondition_after_call_established_bool";
         public static final String KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT =
                 KEY_PREFIX + "incoming_call_reject_code_for_user_decline_int";
         public static final String KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT =

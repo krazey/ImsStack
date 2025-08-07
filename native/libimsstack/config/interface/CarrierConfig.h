@@ -882,7 +882,7 @@ public:
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
         static const IMS_CHAR KEY_CONFERENCE_SIP_FLOW_ORDER_INT[];
         static const IMS_CHAR KEY_CONFERENCE_INVITING_REFER_TYPE_INT[];
-        static const IMS_CHAR KEY_POLICY_QOS_PRECONDITION_MECHANISM_WHILE_CALL_MODIFICATION_INT[];
+        static const IMS_CHAR KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL[];
         static const IMS_CHAR KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT[];
         static const IMS_CHAR KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT[];
         static const IMS_CHAR KEY_PRACK_WAIT_TIMER_MILLIS_INT[];
@@ -1133,13 +1133,6 @@ public:
             CONFERENCE_INVITE_COPYCONTROL = 0,
             CONFERENCE_INVITE_REFER_SINGLE = 1,
             CONFERENCE_INVITE_REFER_MULTIPLE = 2
-        };
-
-        // Policy of using QoS precondition mechanism after call established
-        enum
-        {
-            QOS_PRECONDITION_NOT_AVAILABLE = 0,
-            QOS_PRECONDITION_BY_MESSAGE_CONTEXT = 1
         };
 
         // Registration restoration methods (INVITE/504)

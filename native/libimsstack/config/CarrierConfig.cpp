@@ -838,9 +838,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_sip_flow_order_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_inviting_refer_type_int";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_POLICY_QOS_PRECONDITION_MECHANISM_WHILE_CALL_MODIFICATION_INT[] = KEY_IMS_VOICE_PREFIX
-        "policy_qos_precondition_mechanism_while_call_modification_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "disable_precondition_after_call_established_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT[] =
         KEY_IMS_VOICE_PREFIX "incoming_call_reject_code_for_user_decline_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT[] =

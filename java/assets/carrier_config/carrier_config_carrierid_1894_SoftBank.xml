@@ -68,6 +68,7 @@
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="610000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.enable_conference_subscribe_by_participant_bool" value="false"/>
+    <boolean name="imsvoice.disable_precondition_after_call_established_bool" value="true"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
     <string-array name="imsvoice.reject_code_and_reason_code_set_string_array" num="2">
         <item value="403:336"/> <!-- CODE_SIP_TEMPRARILY_UNAVAILABLE -->
