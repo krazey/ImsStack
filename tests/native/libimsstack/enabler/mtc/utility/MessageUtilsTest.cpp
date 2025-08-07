@@ -689,7 +689,7 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
 TEST_F(MessageUtilsTest, GetCauseFromReasonHeader)
 {
     ImsList<AString> objHeaders;
-    objHeaders.Append("Reason: SIP;cause=603;text=\"any resason\"");
+    objHeaders.Append("SIP;cause=603;text=\"any resason\"");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
 
     EXPECT_EQ(objMessageUtils.GetCauseFromReasonHeader(piMessage), 603);
@@ -702,17 +702,33 @@ TEST_F(MessageUtilsTest, GetCauseAndTextFromReasonHeader)
 {
     ReasonHeaderValue objValue;
     ImsList<AString> objHeaders;
-    objHeaders.Append("Reason: SIP;cause=603;text=\"any resason\"");
+    objHeaders.Append("SIP;cause=603;text=\"any resason\"");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
 
     objValue = objMessageUtils.GetCauseAndTextFromReasonHeader(piMessage);
     EXPECT_EQ(objValue.nCause, 603);
     EXPECT_STREQ(objValue.strText.GetStr(), "\"any resason\"");
+    EXPECT_STREQ(objValue.strProtocol.GetStr(), "SIP");
 
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     objValue = objMessageUtils.GetCauseAndTextFromReasonHeader(piMessage);
     EXPECT_EQ(objValue.nCause, -1);
     EXPECT_STREQ(objValue.strText.GetStr(), "");
+    EXPECT_STREQ(objValue.strProtocol.GetStr(), "");
+}
+
+TEST_F(MessageUtilsTest, GetPrioritizedReasonHeader)
+{
+    ReasonHeaderValue objResult;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("SIP;cause=603;text=\"any resason\"");
+    objHeaders.Append("Q.850;cause=19;text=\"no answer\"");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
+    objResult = objMessageUtils.GetPrioritizedReasonHeader(
+            piMessage, {"SIP", "Q.850", AString::ConstNull()});
+    EXPECT_EQ(objResult.nCause, 603);
+    EXPECT_STREQ(objResult.strText.GetStr(), "\"any resason\"");
+    EXPECT_STREQ(objResult.strProtocol.GetStr(), "SIP");
 }
 
 TEST_F(MessageUtilsTest, GetIms3gppFromBody)

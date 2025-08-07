@@ -37,8 +37,9 @@ public:
 private:
     static CallReasonInfo GetCallReasonInfoFromSessionTerminationReason(
             IN IMS_SINT32 nTerminationReason);
+    void EnrichReasonInfoWithMessage(IN const ReasonHeaderValue& objReasonResult,
+            IN_OUT CallReasonInfo& objReasonInfo) const;
     IMS_BOOL IsByCallPull(IN const ReasonHeaderValue& objValue) const;
-
     IMtcCallContext& m_objContext;
 };
 

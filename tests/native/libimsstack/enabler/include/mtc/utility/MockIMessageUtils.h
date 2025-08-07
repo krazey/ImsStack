@@ -80,6 +80,9 @@ public:
             (override));
     MOCK_METHOD(ReasonHeaderValue, GetCauseAndTextFromReasonHeader,
             (IN const IMessage*, IN const AString&), (override));
+    MOCK_METHOD(ReasonHeaderValue, GetPrioritizedReasonHeader,
+            (IN const IMessage*, IN const std::initializer_list<AString>& lstPrioritizedProtocols),
+            (override));
     MOCK_METHOD(Ims3gpp&, GetIms3gppFromBody, (IN const IMessage*, OUT Ims3gpp&), (override));
     MOCK_METHOD(Ims3gppData, GetIms3gppData, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_SINT32, GetStatusCodeInNotify, (IN IMessage*), (override));

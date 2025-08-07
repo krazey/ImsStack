@@ -34,9 +34,6 @@ public:
     CallReasonInfo Handle(IN const IMessage& objMessage) const;
 
 private:
-    static CallReasonInfo GetCallReasonInfoFromReasonHeader(
-            IN IMS_SINT32 nCause, IN const AString& strText);
-
     IMtcCallContext& m_objContext;
 };
 

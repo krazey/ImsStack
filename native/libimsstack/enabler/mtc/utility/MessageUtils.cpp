@@ -690,20 +690,49 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
         {
             continue;
         }
-        objValue.nCause = nCause;
-        objValue.strText = strText;
 
         if ((strProtocol.GetLength() > 0) && (!strProtocol.EqualsIgnoreCase(strReceivedProtocol)))
         {
-            objValue.nCause = -1;
-            objValue.strText = AString::ConstNull();
             continue;
         }
+
+        objValue.nCause = nCause;
+        objValue.strText = strText;
+        objValue.strProtocol = strReceivedProtocol;
 
         return objValue;
     }
 
     return objValue;
+}
+
+PUBLIC ReasonHeaderValue MessageUtils::GetPrioritizedReasonHeader(IN const IMessage* piMessage,
+        IN const std::initializer_list<AString>& lstPrioritizedProtocols)
+{
+    ReasonHeaderValue objResaultValue;
+    if (!piMessage)
+    {
+        return objResaultValue;
+    }
+
+    for (const auto& strProtocol : lstPrioritizedProtocols)
+    {
+        IMS_TRACE_D("GetPrioritizedReasonHeader: Trying protocol [%s]",
+                strProtocol.GetStr() ? strProtocol.GetStr() : "any", 0, 0);
+
+        ReasonHeaderValue objValue = GetCauseAndTextFromReasonHeader(piMessage, strProtocol);
+
+        if (objValue.nCause != -1 || objValue.strText.GetLength() > 0)
+        {
+            objResaultValue.nCause = objValue.nCause;
+            objResaultValue.strText = objValue.strText;
+            objResaultValue.strProtocol = objValue.strProtocol;
+
+            return objResaultValue;
+        }
+    }
+    IMS_TRACE_D("GetPrioritizedReasonHeader: No matching Reason Header found.", 0, 0, 0);
+    return objResaultValue;
 }
 
 PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(

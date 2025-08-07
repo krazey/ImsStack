@@ -22,6 +22,8 @@
 #include "MockISipMessage.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/CancelHandler.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -29,9 +31,6 @@
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-
-LOCAL AString SIP_PROTOCOL = "SIP";
-LOCAL AString NON_SIP_PROTOCOL = "Q.850";
 
 class CancelHandlerTest : public ::testing::Test
 {
@@ -45,6 +44,7 @@ public:
     MockISipMessage objSipMessage;
     MockIMessage objMessage;
     MockIMessageUtils objMessageUtils;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     CancelHandler objHandler;
 
 protected:
@@ -53,103 +53,195 @@ protected:
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+        pConfigurationProxy = new MockMtcConfigurationProxy();
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override { delete pConfigurationProxy; }
 
-    void SetUpReasonHeader(
+    void SetUpPrioritizedReasonHeader(
             IN const AString& strProtocol, IN IMS_SINT32 nCause, IN const AString& strText)
     {
-        ReasonHeaderValue objValue;
-        objValue.nCause = nCause;
-        objValue.strText = strText;
-        ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, strProtocol))
-                .WillByDefault(Return(objValue));
+        ReasonHeaderValue objResult;
+        objResult.strProtocol = strProtocol;
+        objResult.nCause = nCause;
+        objResult.strText = strText;
+        ON_CALL(objMessageUtils, GetPrioritizedReasonHeader(&objMessage, _))
+                .WillByDefault(Return(objResult));
     }
 };
 
 TEST_F(CancelHandlerTest, HandleMessageWithNoReasonReturnsDefaultReason)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, -1, "");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, -1, "");
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageReturnsDefaultReason)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 999, "\"any_text\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999, "\"any_text\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith200CallCompletedReturnsAnsweredElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith200AnyTextReturnsAnsweredElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 200, "\"any text\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 200, "\"any text\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith600BusyEverywhereReturnsRejectedElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 600, "\"busy everywhere\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 600, "\"busy everywhere\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith600AnyTextReturnsRejectedElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 600, "\"any text\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 600, "\"any text\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith603DeclinedReturnsRejectedElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 603, "\"declined\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 603, "\"declined\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith603AnyTextReturnsRejectedElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 603, "\"any text\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 603, "\"any text\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWithCallCompletedVzwReturnsAnsweredElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 999, "\"Call Completion Elsewhere\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999, "\"Call Completion Elsewhere\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWithBusyEverywhereVzwReturnsRejectedElsewhere)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 999, "\"Another device sent All Devices Busy response\"");
+    SetUpPrioritizedReasonHeader(
+            REASON_SIP_PROTOCOL, 999, "\"Another device sent All Devices Busy response\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageCheckReasonTextCaseInsensitive)
 {
-    SetUpReasonHeader(SIP_PROTOCOL, 603, "\"DECLINED\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 603, "\"DECLINED\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, NonSipProtocolReasonValueIsNotUsed)
 {
-    SetUpReasonHeader(NON_SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 200, "\"call completed elsewhere\"");
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 
-    SetUpReasonHeader(SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, HandleMessageWithExtraMessageFromSIPReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    AString strFormattedMessage = "call completed elsewhere";
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE, 200, strFormattedMessage),
+            objHandler.Handle(objMessage));
+
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 603, "\"DECLINED\"");
+    strFormattedMessage = "DECLINED";
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE, 603, strFormattedMessage),
+            objHandler.Handle(objMessage));
+}
+TEST_F(CancelHandlerTest, HandleMessageWithExtraMessageFromQ850ReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 18, "\"No user responding\"");
+    AString strFormattedMessage = "q.850;No user responding";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, 18, strFormattedMessage),
+            objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, EnrichCallReasonInfoIsSkippedWhenConfigIsFalse)
+{
+    // Explicitly set the config to false to ensure the enrichment logic is skipped.
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 200, "\"call completed elsewhere\"");
+
+    // The expected CallReasonInfo only has the code, not the extra message or code.
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_NonSipProtocol_ReturnsTerminatedByRemote)
+{
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 200, "any text");
+
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolBusyText_ReturnsRejectedElsewhere)
+{
+    SetUpPrioritizedReasonHeader(
+            REASON_SIP_PROTOCOL, 999, " another device sent all devices busy response ");
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolCompletedText_ReturnsAnsweredElsewhere)
+{
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999, " Call Completion Elsewhere ");
+
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolCause200_ReturnsAnsweredElsewhere)
+{
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 200, "any text");
+
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolCause600_ReturnsRejectedElsewhere)
+{
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 600, "any text");
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolCause603_ReturnsRejectedElsewhere)
+{
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 603, "any text");
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolNoMatch_ReturnsTerminatedByRemote)
+{
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999, "any text");
+
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
