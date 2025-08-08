@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.RtpConfig;
+import android.telephony.imsmedia.VideoConfig;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -57,7 +58,7 @@ public class MediaManagerHelper {
     @VisibleForTesting
     @SuppressWarnings("StaticAssignmentInConstructor")
     public MediaManagerHelper(Context context, IMediaConnectionObserver mediaObserver,
-        ImsMediaManager imsMediaManager, Executor executor) {
+            ImsMediaManager imsMediaManager, Executor executor) {
 
         mContext = context;
         sMediaObserver = mediaObserver;
@@ -78,8 +79,8 @@ public class MediaManagerHelper {
             sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             sExecutor = Executors.newSingleThreadExecutor();
             setImsMediaConnected(false);
-            sImsMediaManager =
-                    new ImsMediaManager(mContext, sExecutor, new ImsMediaManagerCallback());
+            sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
+                    new ImsMediaManagerCallback());
             if (sMediaHandlerThread.getState() == Thread.State.NEW) {
                 sMediaHandlerThread.start();
             }
@@ -173,6 +174,20 @@ public class MediaManagerHelper {
      */
     public void closeSession(@NonNull final ImsMediaSession session) {
         getImsMediaManagerInstance().closeSession(session);
+    }
+
+    /**
+     * Generate Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) and
+     * Video Parameter Set (VPS) for video codec.
+     * The response will be returned via {@link ImsMediaManager.ImsMediaManagerCallback}.
+     * @param videoConfigs an array of {@link VideoConfig}
+     * @param callback     callbacks to receive the response.
+     */
+    public void generateVideoSprop(
+            @NonNull final VideoConfig[] videoConfigs,
+            @NonNull final ImsMediaManager.ImsMediaManagerCallback callback) {
+        getImsMediaManagerInstance()
+                .generateVideoSprop(videoConfigs, callback);
     }
 
     /**
