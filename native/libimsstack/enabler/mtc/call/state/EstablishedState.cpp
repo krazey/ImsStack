@@ -32,6 +32,7 @@
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/MtcBlockChecker.h"
 #include "call/block/SrvccBlockRule.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/EstablishedState.h"
 #include "call/state/UpdatingState.h"
 #include "call/termination/TerminationHandler.h"
@@ -196,7 +197,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
-    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
     // Use CallType before it's updated by receiving INVITE.
     m_objContext.GetUpdatingInfo().GetOriginalInfo() =
@@ -207,6 +208,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     m_objContext.GetUpdatingInfo().SetTargetCallType(
             m_objContext.GetMessageUtils().GetCallType(piMessage, piSession, IMS_TRUE));
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     // TODO, conference
 
@@ -571,11 +573,14 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
 
     if (m_objContext.GetUpdatingInfo().IsNeedToAlert())
     {
-        if (UpdatingState::IsPreconditionRequired(
-                    m_objContext.GetConfigurationProxy(), m_objContext.GetUpdatingInfo()))
+        if (IsRprRequired() &&
+                pMtcSession->GetExtensionSet().IsAvailableOnBoth(
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION) &&
+                UpdatingState::IsPreconditionRequired(
+                        m_objContext.GetConfigurationProxy(), m_objContext.GetUpdatingInfo()))
         {
             // re-INVITE for update call type is just received.
-            m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE, IsRprRequired());
+            pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 
             // No QoS wait timer is used for Upgrade media.
             // And, TIMER_CONVERT_USER_RESPONSE is started when the precondition negotiation is

@@ -174,13 +174,25 @@ protected:
         delete pEpsFbTrigger;
     }
 
-    MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag, IN const IMS_BOOL& bSupoort)
+    MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag1,
+            IN const IMS_BOOL& bSupoort1, IN const AString& strOptionTag2 = AString::ConstNull(),
+            IN const IMS_BOOL& bSupoort2 = IMS_FALSE)
     {
         ImsList<IMtcExtension*> objExtensions;
-        MockIMtcExtension* pExtension = new MockIMtcExtension();
-        ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
-        ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(bSupoort));
-        objExtensions.Append(pExtension);
+        MockIMtcExtension* pExtension1 = new MockIMtcExtension();
+        ON_CALL(*pExtension1, GetOptionTag).WillByDefault(ReturnRef(strOptionTag1));
+        ON_CALL(*pExtension1, IsAvailableOnRemote).WillByDefault(Return(bSupoort1));
+        objExtensions.Append(pExtension1);
+
+        if (!strOptionTag2.IsNull())
+        {
+            MockIMtcExtension* pExtension2 = new MockIMtcExtension();
+            ON_CALL(*pExtension2, GetOptionTag).WillByDefault(ReturnRef(strOptionTag2));
+            ON_CALL(*pExtension2, IsAvailableOnRemote).WillByDefault(Return(bSupoort2));
+            ON_CALL(*pExtension2, IsRequiredOnRemote).WillByDefault(Return(bSupoort2));
+            objExtensions.Append(pExtension2);
+        }
+
         MtcExtensionSet objMtcExtensionSet(objMockCallContext, objExtensions);
         return objMtcExtensionSet;
     }
@@ -549,10 +561,6 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
 
 TEST_F(EstablishedStateTest, SendIncomingUpdateIsInvokedIfUpdateNeedsToAlert)
 {
-    ON_CALL(*pConfigurationProxy,
-            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
-            .WillByDefault(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
-
     ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
@@ -562,6 +570,10 @@ TEST_F(EstablishedStateTest, SendIncomingUpdateIsInvokedIfUpdateNeedsToAlert)
     // SetUp IsNeedToAlert() true.
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE));
+    ON_CALL(objMockMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_));
 
@@ -585,12 +597,67 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSup
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
-    MtcExtensionSet objMtcExtensionSet(
-            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_PRECONDITION,
+            IMS_TRUE, MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE));
     ON_CALL(objMockMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
-    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE, IMS_FALSE));
+    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE, IMS_TRUE));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest, SendProvisionalResponseIsNotInvokedIfRprIsNotSupported)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
+
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+
+    // SetUp IsNeedToAlert() true.
+    ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE));
+
+    ON_CALL(objMockMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(1);
+    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE, _)).Times(0);
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest, SendProvisionalResponseIsNotInvokedIfPreconditionIsNotSupported)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
+
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+
+    // SetUp IsNeedToAlert() true.
+    ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
+
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_PRECONDITION,
+            IMS_FALSE, MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE));
+    ON_CALL(objMockMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(1);
+    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE, _)).Times(0);
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
