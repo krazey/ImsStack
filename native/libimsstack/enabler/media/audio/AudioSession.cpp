@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+#include <memory>
+
+#include <AudioConfig.h>
+
 #include "IJniMedia.h"
 #include "IMediaSessionListener.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
-#include "config/AudioConfiguration.h"
 #include "audio/AudioSession.h"
 #include "audio/AudioProfileUtil.h"
-
-#include <AudioConfig.h>
+#include "config/AudioConfiguration.h"
 
 using namespace android::telephony::imsmedia;
 
@@ -286,8 +288,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
         if (pLocalPayload != IMS_NULL && pLocalPayload->GetFmtp() != IMS_NULL)
         {
-            bLocalDtx =
-                    static_cast<AudioProfile::AudioFmtp*>(pLocalPayload->GetFmtp())->IsDtxEnabled();
+            bLocalDtx = pLocalPayload->GetFmtp()->IsDtxEnabled();
             IMS_TRACE_D("UpdateRtpConfig() - local Dtx[%d]", bLocalDtx, 0, 0);
         }
     }
@@ -295,8 +296,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
             pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
-        AudioProfile::AmrFmtp* pFmtp =
-                REINTERPRET_CAST(AudioProfile::AmrFmtp*, pNegoPayload->GetFmtp());
+        auto pFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
             return IMS_NULL;
@@ -337,10 +337,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     }
     else if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pFmtp =
-                REINTERPRET_CAST(AudioProfile::EvsFmtp*, pNegoPayload->GetFmtp());
-        AudioProfile::EvsFmtp* pPeerFmtp =
-                REINTERPRET_CAST(AudioProfile::EvsFmtp*, pPeerPayload->GetFmtp());
+        auto pFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
+        auto pPeerFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPeerPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
             return IMS_NULL;

@@ -74,7 +74,7 @@ protected:
         m_pLocalProfile = new AudioProfile();
         AudioProfile::Payload* pSrcAmrPayload = new AudioProfile::Payload();
         pSrcAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
-        pSrcAmrPayload->SetFmtp(new AudioProfile::AmrFmtp());
+        pSrcAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
         m_pLocalProfile->GetPayloadList().Append(pSrcAmrPayload);
         m_pLocalProfile->SetDataPort(LOCAL_PORT);
 

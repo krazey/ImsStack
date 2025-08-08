@@ -96,17 +96,17 @@ TEST_F(AudioSessionTest, testUpdateRtpConfig)
     AudioProfile objPeerProfile;
     AudioProfile objNegoProfile;
     AudioProfile::Payload* pLocalPayload = new AudioProfile::Payload();
-    AudioProfile::EvsFmtp* pLocalFmtp = new AudioProfile::EvsFmtp();
+    std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp = std::make_shared<AudioProfile::EvsFmtp>();
     pLocalPayload->SetRtpMap(100, "EVS", 16000, 1);
     pLocalPayload->SetFmtp(pLocalFmtp);
 
     AudioProfile::Payload* pPeerPayload = new AudioProfile::Payload();
-    AudioProfile::EvsFmtp* pPeerFmtp = new AudioProfile::EvsFmtp();
+    std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp = std::make_shared<AudioProfile::EvsFmtp>();
     pPeerPayload->SetRtpMap(100, "EVS", 16000, 1);
     pPeerPayload->SetFmtp(pPeerFmtp);
 
     AudioProfile::Payload* pNegoPayload = new AudioProfile::Payload();
-    AudioProfile::EvsFmtp* pNegoFmtp = new AudioProfile::EvsFmtp();
+    std::shared_ptr<AudioProfile::EvsFmtp> pNegoFmtp = std::make_shared<AudioProfile::EvsFmtp>();
     pNegoPayload->SetRtpMap(100, "EVS", 16000, 1);
     pNegoPayload->SetFmtp(pNegoFmtp);
 

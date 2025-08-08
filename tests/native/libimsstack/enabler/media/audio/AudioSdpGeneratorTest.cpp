@@ -61,15 +61,15 @@ const AString STR_BR_RECV_LIST = "br-recv=5.9-13.2";
 class AudioSdpGeneratorAmrTest : public AudioSdpGenerator, public ::testing::Test
 {
 public:
-    AudioProfile::AmrFmtp* m_pAmrFmtpFull;
-    AudioProfile::AmrFmtp* m_pAmrFmtpEmpty;
-    AudioProfile::AmrFmtp* m_pAmrFmtpNull;
+    std::shared_ptr<AudioProfile::AmrFmtp> m_pAmrFmtpFull;
+    std::shared_ptr<AudioProfile::AmrFmtp> m_pAmrFmtpEmpty;
+    std::shared_ptr<AudioProfile::AmrFmtp> m_pAmrFmtpNull;
 
 protected:
     virtual void SetUp() override
     {
-        m_pAmrFmtpFull = new AudioProfile::AmrFmtp();
-        m_pAmrFmtpEmpty = new AudioProfile::AmrFmtp();
+        m_pAmrFmtpFull = std::make_shared<AudioProfile::AmrFmtp>();
+        m_pAmrFmtpEmpty = std::make_shared<AudioProfile::AmrFmtp>();
         m_pAmrFmtpNull = IMS_NULL;
 
         m_pAmrFmtpFull->SetModeSetList(MODESET_LIST);
@@ -87,11 +87,7 @@ protected:
         m_pAmrFmtpFull->SetVisibleMaxRed(IMS_TRUE);
     }
 
-    virtual void TearDown() override
-    {
-        delete m_pAmrFmtpFull;
-        delete m_pAmrFmtpEmpty;
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(AudioSdpGeneratorAmrTest, TestGenerateAmrFmtp)
@@ -234,15 +230,15 @@ TEST_F(AudioSdpGeneratorAmrTest, TestAddMaxRedToFmtp)
 class AudioSdpGeneratorEvsTest : public AudioSdpGenerator, public ::testing::Test
 {
 public:
-    AudioProfile::EvsFmtp* m_pEvsFmtpFull;
-    AudioProfile::EvsFmtp* m_pEvsFmtpEmpty;
-    AudioProfile::EvsFmtp* m_pEvsFmtpNull;
+    std::shared_ptr<AudioProfile::EvsFmtp> m_pEvsFmtpFull;
+    std::shared_ptr<AudioProfile::EvsFmtp> m_pEvsFmtpEmpty;
+    std::shared_ptr<AudioProfile::EvsFmtp> m_pEvsFmtpNull;
 
 protected:
     virtual void SetUp() override
     {
-        m_pEvsFmtpFull = new AudioProfile::EvsFmtp();
-        m_pEvsFmtpEmpty = new AudioProfile::EvsFmtp();
+        m_pEvsFmtpFull = std::make_shared<AudioProfile::EvsFmtp>();
+        m_pEvsFmtpEmpty = std::make_shared<AudioProfile::EvsFmtp>();
         m_pEvsFmtpNull = IMS_NULL;
 
         m_pEvsFmtpEmpty->SetShowBrList(IMS_FALSE);
@@ -279,11 +275,7 @@ protected:
         m_pEvsFmtpFull->SetVisibleModeSet(IMS_TRUE);
     }
 
-    virtual void TearDown() override
-    {
-        delete m_pEvsFmtpFull;
-        delete m_pEvsFmtpEmpty;
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(AudioSdpGeneratorEvsTest, TestGenerateEvsFmtp)

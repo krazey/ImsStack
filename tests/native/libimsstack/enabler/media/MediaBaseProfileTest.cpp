@@ -209,14 +209,12 @@ TEST_F(MediaBaseProfileTest, TestBasePayloadCreation)
 
     // Compare default values
     EXPECT_EQ(basePayload->GetRtpMap(), tempRtpMap);
-    EXPECT_EQ(basePayload->GetFmtp(), nullptr);
 
     MediaBaseProfile::BasePayload* basePayload1 = new MediaBaseProfile::BasePayload(CHANNEL);
     EXPECT_NE(basePayload1->GetRtpMap(), tempRtpMap);
 
     tempRtpMap.SetChannel(CHANNEL);
     EXPECT_EQ(basePayload1->GetRtpMap(), tempRtpMap);
-    EXPECT_EQ(basePayload1->GetFmtp(), nullptr);
 
     basePayload1->GetRtpMap().SetPayloadNumber(PAYLOAD_NUMBER);
     basePayload1->GetRtpMap().SetPayloadType(PAYLOAD_TYPE);
@@ -224,7 +222,6 @@ TEST_F(MediaBaseProfileTest, TestBasePayloadCreation)
 
     MediaBaseProfile::BasePayload* basePayload2 = new MediaBaseProfile::BasePayload(*basePayload1);
     EXPECT_EQ(basePayload2->GetRtpMap(), basePayload1->GetRtpMap());
-    EXPECT_EQ(basePayload2->GetFmtp(), nullptr);
 
     delete basePayload;
     delete basePayload1;
@@ -241,12 +238,10 @@ TEST_F(MediaBaseProfileTest, TestBasePayloadAssign)
     MediaBaseProfile::BasePayload* basePayload1 = new MediaBaseProfile::BasePayload();
 
     EXPECT_NE(basePayload->GetRtpMap(), basePayload1->GetRtpMap());
-    EXPECT_EQ(basePayload->GetFmtp(), nullptr);
 
     *basePayload1 = *basePayload;
 
     EXPECT_EQ(basePayload1->GetRtpMap(), basePayload->GetRtpMap());
-    EXPECT_EQ(basePayload1->GetFmtp(), nullptr);
 
     delete basePayload;
     delete basePayload1;

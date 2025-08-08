@@ -230,8 +230,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
 
     if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
     {
-        AudioProfile::AmrFmtp* pAmrFmtp =
-                reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
+        auto pAmrFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp());
         if (pAmrFmtp == IMS_NULL)
         {
             return NO_MODESET;
@@ -265,8 +264,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
     }
     else if (strCodec.EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp =
-                reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
         if (pEvsFmtp == IMS_NULL)
         {
             return NO_MODESET;
@@ -335,8 +333,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
 
     if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
     {
-        AudioProfile::AmrFmtp* pAmrFmtp =
-                reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
+        auto pAmrFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp());
         if (pAmrFmtp == IMS_NULL)
         {
             return NO_MODESET;
@@ -356,8 +353,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
     }
     else if (strCodec.EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp =
-                reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
         if (pEvsFmtp == IMS_NULL)
         {
             return NO_MODESET;

@@ -20,85 +20,97 @@
 #include "audio/AudioProfile.h"
 #include "config/AudioConfiguration.h"
 
+/**
+ * @brief A utility class for handling audio profiles, particularly for AMR and EVS codecs.
+ *
+ * This class provides static methods to manage and convert audio codec parameters,
+ * such as RTCP-XR settings, Application Specific (AS) bandwidth, and mode-sets.
+ */
 class AudioProfileUtil
 {
 public:
     /**
-     * @brief Sets the RTCP-XR (Extended Reports) attribute in an audio profile.
+     * @brief Sets the RTCP-XR (Extended Reports) attributes in the audio profile.
      *
-     * @param pAudioProfile [out] The audio profile to be updated.
-     * @param pConfig [in] The audio configuration containing the RTCP-XR setting.
-     * @return IMS_TRUE on success, IMS_FALSE on failure.
+     * @param pAudioProfile The audio profile to be updated.
+     * @param pConfig The audio configuration containing RTCP-XR settings.
+     * @return IMS_TRUE on success, IMS_FALSE otherwise.
      */
     static IMS_BOOL SetRtcpXr(
             OUT AudioProfile* pAudioProfile, IN const AudioConfiguration* pConfig);
-
     /**
-     * @brief Retrieves the array of Application Specific (AS) bandwidth values for AMR codecs.
+     * @brief Gets the AMR AS (Application Specific) bandwidth array.
      *
-     * @param eCodec The AMR codec type (AMR-NB or AMR-WB).
-     * @param nOctet The octet-align mode.
-     * @param bIpV6 Flag indicating if the network is IPv6.
-     * @return A constant pointer to an array of AS bandwidth values.
+     * @param eCodec The AMR codec type (AMR or AMR-WB).
+     * @param nOctet The octet-align mode (0 for bandwidth-efficient, 1 for octet-aligned).
+     * @param bIpV6 Flag indicating if IPv6 is used.
+     * @return A pointer to the corresponding AMR AS array.
      */
     static const IMS_SINT32* GetAmrAsArray(
             IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6);
-
     /**
-     * @brief Retrieves the array of Application Specific (AS) bandwidth values for the EVS codec.
+     * @brief Gets the EVS AS (Application Specific) bandwidth array.
      *
-     * @param nEVSFormat The EVS format (e.g., AMR-WB IO, EVS Primary).
-     * @param bIpV6 Flag indicating if the network is IPv6.
-     * @return A constant pointer to an array of AS bandwidth values.
+     * @param nEVSFormat The EVS format (0 for Primary, 1 for AMR-IO).
+     * @param bIpV6 Flag indicating if IPv6 is used.
+     * @return A pointer to the corresponding EVS AS array.
      */
     static const IMS_SINT32* GetEvsAsArray(IN IMS_SINT32 nEVSFormat, IN IMS_BOOL bIpV6);
-
     /**
-     * @brief Converts an AMR codec mode-set to its corresponding AS bandwidth value.
+     * @brief Converts an AMR mode-set to its corresponding AS bandwidth value.
      *
      * @param eCodec The AMR codec type.
      * @param nOctet The octet-align mode.
-     * @param bIpV6 Flag indicating if the network is IPv6.
+     * @param bIpV6 Flag indicating if IPv6 is used.
      * @param nModeSet The mode-set to convert.
-     * @param bGetMaxValue If true, returns the maximum possible bandwidth value.
-     * @return The calculated AS bandwidth value.
+     * @param bGetMaxValue Flag to get the maximum value for the given configuration.
+     * @return The AS bandwidth value in kbps, or -1 on error.
      */
     static IMS_SINT32 ConvertToBandwidthAS(IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet,
             IN IMS_BOOL bIpV6, IN IMS_SINT32 nModeSet, IN IMS_BOOL bGetMaxValue = IMS_FALSE);
-
     /**
-     * @brief Converts an EVS codec format/mode to its corresponding AS bandwidth value.
+     * @brief Converts an EVS codec mode to its corresponding AS bandwidth value.
+     *
+     * @param eCodec The codec type (should be EVS).
+     * @param bIpV6 Flag indicating if IPv6 is used.
+     * @param nCodecFormat The EVS codec format (Primary/AMR-IO).
+     * @param nCodecMode The EVS codec mode/bitrate index.
+     * @param bGetMaxValue Flag to get the maximum value for the given configuration.
+     * @return The AS bandwidth value in kbps, or -1 on error.
      */
     static IMS_SINT32 ConvertToBandwidthAS(IN IMS_SINT32 eCodec, IN IMS_BOOL bIpV6,
             IN IMS_SINT32 nCodecFormat, IN IMS_SINT32 nCodecMode,
             IN IMS_BOOL bGetMaxValue = IMS_FALSE);
 
     /**
-     * @brief Parses the 'fmtp' attribute to find the largest mode-set value.
+     * @brief Gets the largest mode-set or bitrate index from the FMTP attributes of a payload.
      *
-     * @param strCodec The name of the codec.
-     * @param pPayload The payload containing the fmtp attribute string.
-     * @return The largest mode-set value found, or a negative value on error.
+     * @param strCodec The codec name (e.g., "AMR", "AMR-WB", "EVS").
+     * @param pPayload The audio payload to inspect.
+     * @return The largest mode-set/bitrate index, or -1 if not found or on error.
      */
     static IMS_SINT32 GetLargestModesetInFmtp(
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
-
     /**
-     * @brief Parses the 'fmtp' attribute to get a bitmask of all declared mode-sets.
+     * @brief Gets the mode-set list or bitrate list from the FMTP attributes of a payload.
      *
-     * @param strCodec The name of the codec.
-     * @param pPayload The payload containing the fmtp attribute string.
-     * @return A bitmask representing the list of mode-sets.
+     * @param strCodec The codec name (e.g., "AMR", "AMR-WB", "EVS").
+     * @param pPayload The audio payload to inspect.
+     * @return The mode-set/bitrate list as a bitmask, or 0 if not found or on error.
      */
     static IMS_SINT32 GetModesetList(
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
 
     /**
-     * @brief Set ANBR on/off from the media session config
+     * @brief Sets the ANBR (Adaptive Narrow-Band Rate) support status in the audio profile.
      *
-     * @param pProfile target profile that ANBR to be set
-     * @param eServiceType The service type of the session
-     * @param nSlotId The UICC slot id
+     * This function checks the media session configuration for the given slot and service type
+     * to determine if ANBR is supported. It then updates the profile's ANBR flag, which
+     * controls the inclusion of the 'a=anbr' attribute in the SDP offer.
+     *
+     * @param pProfile The audio profile to be updated with the ANBR support status.
+     * @param eServiceType The service type of the session (e.g., default, emergency).
+     * @param nSlotId The UICC slot ID for which to look up the configuration.
      */
     static void SetAnbr(
             OUT AudioProfile* pProfile, IN MEDIA_SERVICE_TYPE eServiceType, IN IMS_SINT32 nSlotId);

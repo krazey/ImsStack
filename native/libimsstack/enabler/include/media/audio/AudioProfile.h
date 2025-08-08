@@ -31,7 +31,7 @@ public:
      * AudioFmtp attributes are used within the SDP to carry audio parameters that provide
      * extra configurations for the specific audio codecs described in the rtpmap.
      */
-    class AudioFmtp : public BaseFmtp
+    class AudioFmtp
     {
     public:
         AudioFmtp() :
@@ -68,7 +68,28 @@ public:
         {
         }
 
-        virtual ~AudioFmtp() override {};
+        virtual ~AudioFmtp() {}
+
+        AudioFmtp& operator=(IN const AudioFmtp& obj)
+        {
+            if (this != &obj)
+            {
+                m_nModeSetList = obj.m_nModeSetList;
+                m_nDefaultRtpModeSet = obj.m_nDefaultRtpModeSet;
+                m_nModeChangeCapability = obj.m_nModeChangeCapability;
+                m_nModeChangePeriod = obj.m_nModeChangePeriod;
+                m_nModeChangeNeighbor = obj.m_nModeChangeNeighbor;
+                m_nMaxRed = obj.m_nMaxRed;
+                m_bDtx = obj.m_bDtx;
+                m_bVisibleModeSet = obj.m_bVisibleModeSet;
+                m_bVisibleModeChangeCapability = obj.m_bVisibleModeChangeCapability;
+                m_bVisibleModeChangePeriod = obj.m_bVisibleModeChangePeriod;
+                m_bVisibleModeChangeNeighbor = obj.m_bVisibleModeChangeNeighbor;
+                m_bVisibleMaxRed = obj.m_bVisibleMaxRed;
+                m_bVisibleDtx = obj.m_bVisibleDtx;
+            }
+            return *this;
+        }
 
         inline void SetModeSetList(IN const IMS_UINT32 nModeSetList)
         {
@@ -80,6 +101,7 @@ public:
             m_nDefaultRtpModeSet = nDefaultRtpModeSet;
         }
         inline IMS_UINT32 GetDefaultRtpModeSet() { return m_nDefaultRtpModeSet; }
+
         inline void SetModeChangeCapability(IN const IMS_SINT32 nModeChangeCapability)
         {
             m_nModeChangeCapability = nModeChangeCapability;
@@ -95,6 +117,7 @@ public:
             m_nModeChangeNeighbor = nModeChangeNeighbor;
         }
         inline IMS_SINT32 GetModeChangeNeighbor() { return m_nModeChangeNeighbor; }
+
         inline void SetMaxRed(IN const IMS_SINT32 nMaxRed) { m_nMaxRed = nMaxRed; }
         inline IMS_SINT32 GetMaxRed() { return m_nMaxRed; }
         inline void SetDtx(IN const IMS_BOOL bDtx) { m_bDtx = bDtx; }
@@ -104,6 +127,7 @@ public:
             m_bVisibleModeSet = bVisibleModeSet;
         }
         inline IMS_BOOL IsModeSetVisible() { return m_bVisibleModeSet; }
+
         inline void SetVisibleModeChangeCapability(IN const IMS_BOOL bVisibleModeChangeCapability)
         {
             m_bVisibleModeChangeCapability = bVisibleModeChangeCapability;
@@ -119,6 +143,7 @@ public:
             m_bVisibleModeChangeNeighbor = bVisibleModeChangeNeighbor;
         }
         inline IMS_BOOL IsModeChangeNeighborVisible() { return m_bVisibleModeChangeNeighbor; }
+
         inline void SetVisibleMaxRed(IN const IMS_BOOL bVisibleMaxRed)
         {
             m_bVisibleMaxRed = bVisibleMaxRed;
@@ -169,10 +194,11 @@ public:
         {
         }
 
-        virtual ~AmrFmtp() override {};
+        virtual ~AmrFmtp() override {}
 
         inline void SetOctetAlign(IN const IMS_SINT32 nOctetAlign) { m_nOctetAlign = nOctetAlign; }
         inline IMS_SINT32 GetOctetAlign() { return m_nOctetAlign; }
+
         inline void SetVisibleOctetAlign(IN const IMS_BOOL bVisibleOctetAlign)
         {
             m_bVisibleOctetAlign = bVisibleOctetAlign;
@@ -250,7 +276,7 @@ public:
         {
         }
 
-        virtual ~EvsFmtp() override {};
+        virtual ~EvsFmtp() override {}
 
         inline void SetHfOnly(IN const IMS_UINT32 nHfOnly) { m_nHfOnly = nHfOnly; }
         inline IMS_UINT32 GetHfOnly() { return m_nHfOnly; }
@@ -336,19 +362,28 @@ public:
      * TelephoneEventFmtp attributes are used within the SDP to carry TelephoneEvent parameters that
      * provide extra configurations for the specific TelephoneEvent codecs described in the rtpmap.
      */
-    class TelephoneEventFmtp : public BaseFmtp
+    class TelephoneEventFmtp : public AudioFmtp
     {
     public:
         TelephoneEventFmtp() :
-                m_strEvents("0-15") {};
+                AudioFmtp(),
+                m_strEvents("0-15")
+        {
+        }
 
-        explicit TelephoneEventFmtp(IN const AString& events) :
-                m_strEvents(events) {};
+        TelephoneEventFmtp(IN const AString& events) :
+                AudioFmtp(),
+                m_strEvents(events)
+        {
+        }
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
-                m_strEvents(objFmtp.m_strEvents) {};
+                AudioFmtp(),
+                m_strEvents(objFmtp.m_strEvents)
+        {
+        }
 
-        virtual ~TelephoneEventFmtp() override {};
+        virtual ~TelephoneEventFmtp() override {}
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
@@ -382,7 +417,9 @@ public:
     {
     public:
         Payload() :
-                BasePayload(1) {};
+                BasePayload(1)
+        {
+        }
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
@@ -409,21 +446,28 @@ public:
                 if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
                         m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
                 {
-                    m_pFmtp = new AudioProfile::AmrFmtp(
-                            *static_cast<AudioProfile::AmrFmtp*>(obj.m_pFmtp));
+                    m_pFmtp = std::make_shared<AudioProfile::AmrFmtp>(
+                            *std::static_pointer_cast<AudioProfile::AmrFmtp>(obj.m_pFmtp));
                 }
                 else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
                 {
-                    m_pFmtp = new AudioProfile::EvsFmtp(
-                            *static_cast<AudioProfile::EvsFmtp*>(obj.m_pFmtp));
+                    m_pFmtp = std::make_shared<AudioProfile::EvsFmtp>(
+                            *std::static_pointer_cast<AudioProfile::EvsFmtp>(obj.m_pFmtp));
                 }
                 else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
                 {
-                    m_pFmtp = new AudioProfile::TelephoneEventFmtp(
-                            *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.m_pFmtp));
+                    m_pFmtp = std::make_shared<AudioProfile::TelephoneEventFmtp>(
+                            *std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(
+                                    obj.m_pFmtp));
                 }
             }
         }
+
+        inline void SetFmtp(IN std::shared_ptr<AudioFmtp> pFmtp) { m_pFmtp = pFmtp; }
+        inline std::shared_ptr<AudioFmtp> GetFmtp() { return m_pFmtp; }
+
+    private:
+        std::shared_ptr<AudioFmtp> m_pFmtp;
     };
 
 public:
@@ -434,7 +478,9 @@ public:
                 m_bSupportStatisticMetrics(IMS_FALSE),
                 m_bSupportVoipMetrics(IMS_FALSE),
                 m_bSupportPacketLossRle(IMS_FALSE),
-                m_bSupportPacketDuplicatedRle(IMS_FALSE) {};
+                m_bSupportPacketDuplicatedRle(IMS_FALSE)
+        {
+        }
 
         RtcpXrAttributes& operator=(const RtcpXrAttributes& p)
         {
@@ -502,9 +548,11 @@ public:
             m_objCandidateAttr(ImsVector<AString>()),
             m_bSupportRtcpXr(IMS_FALSE),
             m_objRtcpXrAttr(RtcpXrAttributes()),
-            m_bAnbr(IMS_FALSE) {};
+            m_bAnbr(IMS_FALSE)
+    {
+    }
 
-    virtual ~AudioProfile() override {};
+    virtual ~AudioProfile() override {}
 
     AudioProfile(IN const AudioProfile& obj) :
             MediaBaseProfile(obj),

@@ -107,7 +107,7 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
             pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
     {
-        auto pAmrFmtp = static_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
+        auto pAmrFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp());
         if (pAmrFmtp == IMS_NULL)
         {
             return IMS_FALSE;
@@ -117,7 +117,8 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
     {
-        auto pTeFmtp = static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload->GetFmtp());
+        auto pTeFmtp =
+                std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(pPayload->GetFmtp());
         if (pTeFmtp == IMS_NULL)
         {
             return IMS_FALSE;
@@ -127,7 +128,7 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        auto pEvsFmtp = static_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
         if (pEvsFmtp == IMS_NULL)
         {
             return IMS_FALSE;
@@ -256,7 +257,8 @@ void AudioSdpGenerator::GenerateAnbr(OUT IMediaDescriptor* pDescriptor, IN Audio
     }
 }
 
-PROTECTED AString AudioSdpGenerator::GenerateAmrFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp)
+PROTECTED AString AudioSdpGenerator::GenerateAmrFmtp(
+        IN std::shared_ptr<AudioProfile::AmrFmtp> pAmrFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
@@ -286,7 +288,8 @@ PROTECTED AString AudioSdpGenerator::GenerateAmrFmtp(IN AudioProfile::AmrFmtp* p
     return strFmtp;
 }
 
-PROTECTED AString AudioSdpGenerator::GenerateEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp)
+PROTECTED AString AudioSdpGenerator::GenerateEvsFmtp(
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pEvsFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
@@ -322,7 +325,7 @@ PROTECTED AString AudioSdpGenerator::GenerateEvsFmtp(IN AudioProfile::EvsFmtp* p
 }
 
 PROTECTED void AudioSdpGenerator::AddModeSetListToFmtp(
-        IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -356,7 +359,7 @@ PROTECTED void AudioSdpGenerator::AddModeSetListToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddModeChangeCapabilityToFmtp(
-        IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -378,7 +381,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangeCapabilityToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddModeChangePeriodToFmtp(
-        IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -399,7 +402,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangePeriodToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddModeChangeNeighborToFmtp(
-        IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -421,7 +424,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangeNeighborToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddMaxRedToFmtp(
-        IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -443,7 +446,7 @@ PROTECTED void AudioSdpGenerator::AddMaxRedToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddOctetAlignToFmtp(
-        IN AudioProfile::AmrFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AmrFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -465,7 +468,7 @@ PROTECTED void AudioSdpGenerator::AddOctetAlignToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddDtxToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -487,7 +490,7 @@ PROTECTED void AudioSdpGenerator::AddDtxToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddHfOnlyToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -508,7 +511,7 @@ PROTECTED void AudioSdpGenerator::AddHfOnlyToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddEvsModeSwitchToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -528,7 +531,8 @@ PROTECTED void AudioSdpGenerator::AddEvsModeSwitchToFmtp(
     }
 }
 
-PROTECTED void AudioSdpGenerator::AddBwToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+PROTECTED void AudioSdpGenerator::AddBwToFmtp(
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -584,7 +588,8 @@ PROTECTED void AudioSdpGenerator::AddBwToFmtp(IN AudioProfile::EvsFmtp* pFmtp, O
     }
 }
 
-PROTECTED void AudioSdpGenerator::AddBrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+PROTECTED void AudioSdpGenerator::AddBrToFmtp(
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -636,7 +641,7 @@ PROTECTED void AudioSdpGenerator::AddBrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, O
 }
 
 PROTECTED void AudioSdpGenerator::AddCmrToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -657,7 +662,7 @@ PROTECTED void AudioSdpGenerator::AddCmrToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddChannelAwModeToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -679,7 +684,7 @@ PROTECTED void AudioSdpGenerator::AddChannelAwModeToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddBwSendToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -730,7 +735,7 @@ PROTECTED void AudioSdpGenerator::AddBwSendToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddBwRecvToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -781,7 +786,7 @@ PROTECTED void AudioSdpGenerator::AddBwRecvToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddBrSendToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -832,7 +837,7 @@ PROTECTED void AudioSdpGenerator::AddBrSendToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::AddBrRecvToFmtp(
-        IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -884,7 +889,7 @@ PROTECTED void AudioSdpGenerator::AddBrRecvToFmtp(
 }
 
 PROTECTED void AudioSdpGenerator::ForceToAddModeSetList(
-        IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -902,7 +907,7 @@ PROTECTED void AudioSdpGenerator::ForceToAddModeSetList(
 }
 
 PROTECTED void AudioSdpGenerator::ForceToAddOctetAlign(
-        IN AudioProfile::AmrFmtp* pFmtp, OUT AString& strFmtp)
+        IN std::shared_ptr<AudioProfile::AmrFmtp> pFmtp, OUT AString& strFmtp)
 {
     if (pFmtp == IMS_NULL)
     {

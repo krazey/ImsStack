@@ -79,150 +79,124 @@ protected:
 
 TEST_F(AudioProfileTest, testAudioFmtpModeSetList)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
 
     pFmtp->SetModeSetList(AUDIO_FMTP_MODESET_LIST);
     EXPECT_EQ(pFmtp->GetModeSetList(), AUDIO_FMTP_MODESET_LIST);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpDefaultModeSet)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
 
     pFmtp->SetDefaultRtpModeSet(AUDIO_FMTP_DEFAULT_MODESET);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), AUDIO_FMTP_DEFAULT_MODESET);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpModeChangeCapability)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetModeChangeCapability(), CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
 
     pFmtp->SetModeChangeCapability(AUDIO_FMTP_MODE_CHANGE_CAPABILITY);
     EXPECT_EQ(pFmtp->GetModeChangeCapability(), AUDIO_FMTP_MODE_CHANGE_CAPABILITY);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpModeChangePeriod)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
 
     pFmtp->SetModeChangePeriod(AUDIO_FMTP_MODE_CHANGE_PERIOD);
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), AUDIO_FMTP_MODE_CHANGE_PERIOD);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpModeChangeNeighbor)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
 
     pFmtp->SetModeChangeNeighbor(AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpMaxRed)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetMaxRed(), CodecAudioConfig::DEFAULT_MAXRED);
 
     pFmtp->SetMaxRed(AUDIO_FMTP_MAX_RED);
     EXPECT_EQ(pFmtp->GetMaxRed(), AUDIO_FMTP_MAX_RED);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpDtx)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsDtxEnabled(), CodecAudioConfig::DEFAULT_DTX);
 
     pFmtp->SetDtx(AUDIO_FMTP_DTX);
     EXPECT_EQ(pFmtp->IsDtxEnabled(), AUDIO_FMTP_DTX);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpShowModeSet)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleModeSet(AUDIO_FMTP_SHOW_MODESET);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), AUDIO_FMTP_SHOW_MODESET);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpShowModeChangeCapability)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpShowModeChangePeriod)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpShowModeChangeNeighbor)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsModeChangeNeighborVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp->IsModeChangeNeighborVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpShowMaxRed)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsMaxRedVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
     EXPECT_EQ(pFmtp->IsMaxRedVisible(), AUDIO_FMTP_SHOW_MAX_RED);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpShowDtx)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->IsDtxVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleDtx(AUDIO_FMTP_SHOW_DTX);
     EXPECT_EQ(pFmtp->IsDtxVisible(), AUDIO_FMTP_SHOW_DTX);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpCreationDefault)
 {
-    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AudioFmtp>();
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
     EXPECT_EQ(pFmtp->GetModeChangeCapability(), CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
@@ -236,13 +210,11 @@ TEST_F(AudioProfileTest, testAudioFmtpCreationDefault)
     EXPECT_EQ(pFmtp->IsModeChangeNeighborVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsMaxRedVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsDtxVisible(), IMS_FALSE);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAudioFmtpCreation)
 {
-    AudioProfile::AudioFmtp* pFmtp1 = new AudioProfile::AudioFmtp();
+    auto pFmtp1 = std::make_unique<AudioProfile::AudioFmtp>();
 
     pFmtp1->SetModeSetList(AUDIO_FMTP_MODESET_LIST);
     pFmtp1->SetDefaultRtpModeSet(AUDIO_FMTP_DEFAULT_MODESET);
@@ -258,7 +230,7 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     pFmtp1->SetVisibleMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
     pFmtp1->SetVisibleDtx(AUDIO_FMTP_SHOW_DTX);
 
-    AudioProfile::AudioFmtp* pFmtp2 = new AudioProfile::AudioFmtp(*pFmtp1);
+    auto pFmtp2 = std::make_unique<AudioProfile::AudioFmtp>(*pFmtp1);
 
     EXPECT_EQ(pFmtp2->GetModeSetList(), AUDIO_FMTP_MODESET_LIST);
     EXPECT_EQ(pFmtp2->GetDefaultRtpModeSet(), AUDIO_FMTP_DEFAULT_MODESET);
@@ -273,36 +245,29 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     EXPECT_EQ(pFmtp2->IsModeChangeNeighborVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp2->IsMaxRedVisible(), AUDIO_FMTP_SHOW_MAX_RED);
     EXPECT_EQ(pFmtp2->IsDtxVisible(), AUDIO_FMTP_SHOW_DTX);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(AudioProfileTest, testAmrFmtpOctetAlign)
 {
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AmrFmtp>();
     EXPECT_EQ(pFmtp->GetOctetAlign(), 0);
 
     pFmtp->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
     EXPECT_EQ(pFmtp->GetOctetAlign(), AMR_FMTP_OCTET_ALIGN);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAmrFmtpVisibleOctetAlign)
 {
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AmrFmtp>();
     EXPECT_EQ(pFmtp->IsOctetAlignVisible(), IMS_FALSE);
 
     pFmtp->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
     EXPECT_EQ(pFmtp->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAmrFmtpCreationDefault)
 {
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::AmrFmtp>();
 
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
@@ -320,13 +285,11 @@ TEST_F(AudioProfileTest, testAmrFmtpCreationDefault)
 
     EXPECT_EQ(pFmtp->GetOctetAlign(), 0);
     EXPECT_EQ(pFmtp->IsOctetAlignVisible(), IMS_FALSE);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testAmrFmtpCreation)
 {
-    AudioProfile::AmrFmtp* pFmtp1 = new AudioProfile::AmrFmtp();
+    auto pFmtp1 = std::make_unique<AudioProfile::AmrFmtp>();
 
     pFmtp1->SetModeSetList(AUDIO_FMTP_MODESET_LIST);
     pFmtp1->SetDefaultRtpModeSet(AUDIO_FMTP_DEFAULT_MODESET);
@@ -345,7 +308,7 @@ TEST_F(AudioProfileTest, testAmrFmtpCreation)
     pFmtp1->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
     pFmtp1->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
 
-    AudioProfile::AmrFmtp* pFmtp2 = new AudioProfile::AmrFmtp(*pFmtp1);
+    auto pFmtp2 = std::make_unique<AudioProfile::AmrFmtp>(*pFmtp1);
 
     EXPECT_EQ(pFmtp2->GetModeSetList(), AUDIO_FMTP_MODESET_LIST);
     EXPECT_EQ(pFmtp2->GetDefaultRtpModeSet(), AUDIO_FMTP_DEFAULT_MODESET);
@@ -363,212 +326,173 @@ TEST_F(AudioProfileTest, testAmrFmtpCreation)
 
     EXPECT_EQ(pFmtp2->GetOctetAlign(), AMR_FMTP_OCTET_ALIGN);
     EXPECT_EQ(pFmtp2->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpHfOnly)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetHfOnly(), 0);
 
     pFmtp->SetHfOnly(EVS_FMTP_HF_ONLY);
     EXPECT_EQ(pFmtp->GetHfOnly(), EVS_FMTP_HF_ONLY);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpEvsModeSwitch)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetEvsModeSwitch(), 0);
 
     pFmtp->SetEvsModeSwitch(EVS_FMTP_MODE_SWITCH);
     EXPECT_EQ(pFmtp->GetEvsModeSwitch(), EVS_FMTP_MODE_SWITCH);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpBrList)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetBrList(), 0);
 
     pFmtp->SetBrList(EVS_FMTP_BR_LIST);
     EXPECT_EQ(pFmtp->GetBrList(), EVS_FMTP_BR_LIST);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpBrSend)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetBrSend(), 0);
 
     pFmtp->SetBrSend(EVS_FMTP_BR_SEND);
     EXPECT_EQ(pFmtp->GetBrSend(), EVS_FMTP_BR_SEND);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpBrRecv)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetBrRecv(), 0);
 
     pFmtp->SetBrRecv(EVS_FMTP_BR_RECV);
     EXPECT_EQ(pFmtp->GetBrRecv(), EVS_FMTP_BR_RECV);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpBwList)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetBwList(), 0);
 
     pFmtp->SetBwList(EVS_FMTP_BW_LIST);
     EXPECT_EQ(pFmtp->GetBwList(), EVS_FMTP_BW_LIST);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpBwSend)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetBwSend(), 0);
 
     pFmtp->SetBwSend(EVS_FMTP_BW_SEND);
     EXPECT_EQ(pFmtp->GetBwSend(), EVS_FMTP_BW_SEND);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpBwRecv)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetBwRecv(), 0);
 
     pFmtp->SetBwRecv(EVS_FMTP_BW_RECV);
     EXPECT_EQ(pFmtp->GetBwRecv(), EVS_FMTP_BW_RECV);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpCmr)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetCmr(), 0);
 
     pFmtp->SetCmr(EVS_FMTP_CMR);
     EXPECT_EQ(pFmtp->GetCmr(), EVS_FMTP_CMR);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpChAwMode)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetChAwRecv(), 0);
 
     pFmtp->SetChAwRecv(EVS_FMTP_CH_AW_MODE);
     EXPECT_EQ(pFmtp->GetChAwRecv(), EVS_FMTP_CH_AW_MODE);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpReceivedChAwMode)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->GetReceivedChAwRecv(), 0);
 
     pFmtp->SetReceivedChAwRecv(EVS_FMTP_RECEIVED_CH_AW_MODE);
     EXPECT_EQ(pFmtp->GetReceivedChAwRecv(), EVS_FMTP_RECEIVED_CH_AW_MODE);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpShowHfOnly)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsHfOnlyVisible(), IMS_FALSE);
 
     pFmtp->SetShowHfOnly(EVS_FMTP_SHOW_HF_ONLY);
     EXPECT_EQ(pFmtp->IsHfOnlyVisible(), EVS_FMTP_SHOW_HF_ONLY);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpShowEvsModeSwitch)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsEvsModeSwitchVisible(), IMS_FALSE);
 
     pFmtp->SetShowEvsModeSwitch(EVS_FMTP_SHOW_MODE_SWITCH);
     EXPECT_EQ(pFmtp->IsEvsModeSwitchVisible(), EVS_FMTP_SHOW_MODE_SWITCH);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpShowCmr)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsCmrVisible(), IMS_FALSE);
 
     pFmtp->SetShowCmr(EVS_FMTP_SHOW_CMR);
     EXPECT_EQ(pFmtp->IsCmrVisible(), EVS_FMTP_SHOW_CMR);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpShowChAwMode)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsChannelAwModeVisible(), IMS_FALSE);
 
     pFmtp->SetShowChannelAwMode(EVS_FMTP_SHOW_CH_AW_MODE);
     EXPECT_EQ(pFmtp->IsChannelAwModeVisible(), EVS_FMTP_SHOW_CH_AW_MODE);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpShowBrList)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsBrListVisible(), IMS_TRUE);
 
     pFmtp->SetShowBrList(EVS_FMTP_SHOW_BR_LIST);
     EXPECT_EQ(pFmtp->IsBrListVisible(), EVS_FMTP_SHOW_BR_LIST);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpShowBwList)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsBwListVisible(), IMS_TRUE);
 
     pFmtp->SetShowBwList(EVS_FMTP_SHOW_BW_LIST);
     EXPECT_EQ(pFmtp->IsBwListVisible(), EVS_FMTP_SHOW_BW_LIST);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpSendCmr)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
     EXPECT_EQ(pFmtp->IsSendCmrEnabled(), IMS_FALSE);
 
     pFmtp->SetSendCmr(EVS_FMTP_SEND_CMR);
     EXPECT_EQ(pFmtp->IsSendCmrEnabled(), EVS_FMTP_SEND_CMR);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpCreationDefault)
 {
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::EvsFmtp>();
 
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
@@ -602,13 +526,11 @@ TEST_F(AudioProfileTest, testEvsFmtpCreationDefault)
     EXPECT_EQ(pFmtp->IsBrListVisible(), IMS_TRUE);
     EXPECT_EQ(pFmtp->IsBwListVisible(), IMS_TRUE);
     EXPECT_EQ(pFmtp->IsSendCmrEnabled(), IMS_FALSE);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testEvsFmtpCreation)
 {
-    AudioProfile::EvsFmtp* pFmtp1 = new AudioProfile::EvsFmtp();
+    auto pFmtp1 = std::make_unique<AudioProfile::EvsFmtp>();
 
     pFmtp1->SetModeSetList(AUDIO_FMTP_MODESET_LIST);
     pFmtp1->SetDefaultRtpModeSet(AUDIO_FMTP_DEFAULT_MODESET);
@@ -643,7 +565,7 @@ TEST_F(AudioProfileTest, testEvsFmtpCreation)
     pFmtp1->SetShowBwList(EVS_FMTP_SHOW_BW_LIST);
     pFmtp1->SetSendCmr(EVS_FMTP_SEND_CMR);
 
-    AudioProfile::EvsFmtp* pFmtp2 = new AudioProfile::EvsFmtp(*pFmtp1);
+    auto pFmtp2 = std::make_unique<AudioProfile::EvsFmtp>(*pFmtp1);
 
     EXPECT_EQ(pFmtp2->GetModeSetList(), AUDIO_FMTP_MODESET_LIST);
     EXPECT_EQ(pFmtp2->GetDefaultRtpModeSet(), AUDIO_FMTP_DEFAULT_MODESET);
@@ -677,336 +599,289 @@ TEST_F(AudioProfileTest, testEvsFmtpCreation)
     EXPECT_EQ(pFmtp2->IsBrListVisible(), EVS_FMTP_SHOW_BR_LIST);
     EXPECT_EQ(pFmtp2->IsBwListVisible(), EVS_FMTP_SHOW_BW_LIST);
     EXPECT_EQ(pFmtp2->IsSendCmrEnabled(), EVS_FMTP_SEND_CMR);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(AudioProfileTest, testTelephonyEventFmtpEvents)
 {
-    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::TelephoneEventFmtp>();
 
     EXPECT_EQ(pFmtp->GetEvents(), "0-15");
 
     pFmtp->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
     EXPECT_EQ(pFmtp->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testTelephonyEventFmtpCreationDefault)
 {
-    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+    auto pFmtp = std::make_unique<AudioProfile::TelephoneEventFmtp>();
 
     EXPECT_EQ(pFmtp->GetEvents(), "0-15");
-
-    delete pFmtp;
 }
 
 TEST_F(AudioProfileTest, testTelephonyEventFmtpCreation)
 {
-    AudioProfile::TelephoneEventFmtp* pFmtp1 =
-            new AudioProfile::TelephoneEventFmtp(TELEPHONY_EVENT_FMTP_EVENTS);
+    auto pFmtp1 = std::make_unique<AudioProfile::TelephoneEventFmtp>(TELEPHONY_EVENT_FMTP_EVENTS);
 
     EXPECT_EQ(pFmtp1->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
 
-    AudioProfile::TelephoneEventFmtp* pFmtp2 = new AudioProfile::TelephoneEventFmtp(*pFmtp1);
+    auto pFmtp2 = std::make_unique<AudioProfile::TelephoneEventFmtp>(*pFmtp1);
     EXPECT_EQ(pFmtp2->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(AudioProfileTest, testTelephonyEventFmtpAssign)
 {
-    AudioProfile::TelephoneEventFmtp* pFmtp1 =
-            new AudioProfile::TelephoneEventFmtp(TELEPHONY_EVENT_FMTP_EVENTS);
+    auto pFmtp1 = std::make_unique<AudioProfile::TelephoneEventFmtp>(TELEPHONY_EVENT_FMTP_EVENTS);
     EXPECT_EQ(pFmtp1->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
 
-    AudioProfile::TelephoneEventFmtp* pFmtp2 = new AudioProfile::TelephoneEventFmtp();
+    auto pFmtp2 = std::make_unique<AudioProfile::TelephoneEventFmtp>();
     *pFmtp2 = *pFmtp1;
     EXPECT_EQ(pFmtp2->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(AudioProfileTest, testTelephonyEventFmtpEqual)
 {
-    AudioProfile::TelephoneEventFmtp* pFmtp1 =
-            new AudioProfile::TelephoneEventFmtp(TELEPHONY_EVENT_FMTP_EVENTS);
-    AudioProfile::TelephoneEventFmtp* pFmtp2 = new AudioProfile::TelephoneEventFmtp();
+    auto pFmtp1 = std::make_unique<AudioProfile::TelephoneEventFmtp>(TELEPHONY_EVENT_FMTP_EVENTS);
+    auto pFmtp2 = std::make_unique<AudioProfile::TelephoneEventFmtp>();
 
     EXPECT_NE(*pFmtp1, *pFmtp2);
 
     pFmtp2->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
 
     EXPECT_EQ(*pFmtp1, *pFmtp2);
-
-    delete pFmtp1;
-    delete pFmtp2;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadCreationForAmrFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(AMR_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
-    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload3 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
-    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->GetOctetAlign(),
+    std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload3->GetFmtp())
+            ->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
+    EXPECT_EQ(
+            std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload3->GetFmtp())->GetOctetAlign(),
             AMR_FMTP_OCTET_ALIGN);
-
-    delete pPayload1;
-    delete pPayload2;
-    delete pPayload3;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadCreationForAmrWbFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(AMR_WB_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
-    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload3 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())
+    std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload3->GetFmtp())
             ->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
-    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->IsOctetAlignVisible(),
+    EXPECT_EQ(std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload3->GetFmtp())
+                      ->IsOctetAlignVisible(),
             AMR_FMTP_SHOW_OCTET_ALIGN);
-
-    delete pPayload1;
-    delete pPayload2;
-    delete pPayload3;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadCreationForEvsFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(EVS_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::EvsFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
-    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload3 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::EvsFmtp*>(pPayload3->GetFmtp())->SetHfOnly(EVS_FMTP_HF_ONLY);
-    EXPECT_EQ(static_cast<AudioProfile::EvsFmtp*>(pPayload3->GetFmtp())->GetHfOnly(),
+    std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload3->GetFmtp())
+            ->SetHfOnly(EVS_FMTP_HF_ONLY);
+    EXPECT_EQ(std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload3->GetFmtp())->GetHfOnly(),
             EVS_FMTP_HF_ONLY);
-
-    delete pPayload1;
-    delete pPayload2;
-    delete pPayload3;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadCreationForTelephoneEventFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(TELEPHONY_EVENT_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::TelephoneEventFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
-    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    auto pPayload3 = std::make_unique<AudioProfile::Payload>(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload3->GetFmtp())
+    std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(pPayload3->GetFmtp())
             ->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
-    EXPECT_EQ(static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload3->GetFmtp())->GetEvents(),
+    EXPECT_EQ(std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(pPayload3->GetFmtp())
+                      ->GetEvents(),
             TELEPHONY_EVENT_FMTP_EVENTS);
-
-    delete pPayload1;
-    delete pPayload2;
-    delete pPayload3;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadAssignForAmrFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(AMR_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>();
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
     *pPayload2 = *pPayload1;
     EXPECT_NE(pPayload2->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
-    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->GetOctetAlign(),
+    std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload2->GetFmtp())
+            ->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
+    EXPECT_EQ(
+            std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload2->GetFmtp())->GetOctetAlign(),
             AMR_FMTP_OCTET_ALIGN);
-
-    delete pPayload1;
-    delete pPayload2;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadAssignForAmrWbFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(AMR_WB_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>();
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
     *pPayload2 = *pPayload1;
     EXPECT_NE(pPayload2->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())
+    std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload2->GetFmtp())
             ->SetVisibleOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
-    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->IsOctetAlignVisible(),
+    EXPECT_EQ(std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload2->GetFmtp())
+                      ->IsOctetAlignVisible(),
             AMR_FMTP_SHOW_OCTET_ALIGN);
-
-    delete pPayload1;
-    delete pPayload2;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadAssignForEvsFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(EVS_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>();
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::EvsFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
     *pPayload2 = *pPayload1;
     EXPECT_NE(pPayload2->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::EvsFmtp*>(pPayload2->GetFmtp())->SetHfOnly(EVS_FMTP_HF_ONLY);
-    EXPECT_EQ(static_cast<AudioProfile::EvsFmtp*>(pPayload2->GetFmtp())->GetHfOnly(),
+    std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload2->GetFmtp())
+            ->SetHfOnly(EVS_FMTP_HF_ONLY);
+    EXPECT_EQ(std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload2->GetFmtp())->GetHfOnly(),
             EVS_FMTP_HF_ONLY);
-
-    delete pPayload1;
-    delete pPayload2;
 }
 
 TEST_F(AudioProfileTest, testAudioPayloadAssignForTelephoneEventFmtp)
 {
-    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    auto pPayload1 = std::make_unique<AudioProfile::Payload>();
     pPayload1->GetRtpMap().SetPayloadType(TELEPHONY_EVENT_PAYLOAD_TYPE);
     EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
 
-    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    auto pPayload2 = std::make_unique<AudioProfile::Payload>();
     *pPayload2 = *pPayload1;
     EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
 
-    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+    auto pFmtp = std::make_shared<AudioProfile::TelephoneEventFmtp>();
     pPayload1->SetFmtp(pFmtp);
 
     *pPayload2 = *pPayload1;
     EXPECT_NE(pPayload2->GetFmtp(), nullptr);
 
-    static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload2->GetFmtp())
+    std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(pPayload2->GetFmtp())
             ->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
-    EXPECT_EQ(static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload2->GetFmtp())->GetEvents(),
+    EXPECT_EQ(std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(pPayload2->GetFmtp())
+                      ->GetEvents(),
             TELEPHONY_EVENT_FMTP_EVENTS);
-
-    delete pPayload1;
-    delete pPayload2;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesSupportStatisticMetrics)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     EXPECT_EQ(pRtcpXrAttr->IsStatisticMetricsSupported(), IMS_FALSE);
 
     pRtcpXrAttr->SetSupportStatisticMetrics(RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
     EXPECT_EQ(pRtcpXrAttr->IsStatisticMetricsSupported(), RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
-
-    delete pRtcpXrAttr;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesSupportVoipMetrics)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     EXPECT_EQ(pRtcpXrAttr->IsVoipMetricsSupported(), IMS_FALSE);
 
     pRtcpXrAttr->SetSupportVoipMetrics(RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
     EXPECT_EQ(pRtcpXrAttr->IsVoipMetricsSupported(), RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
-
-    delete pRtcpXrAttr;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesSupportPacketLossRle)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     EXPECT_EQ(pRtcpXrAttr->IsPacketLossRleSupported(), IMS_FALSE);
 
     pRtcpXrAttr->SetSupportPacketLossRle(RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
     EXPECT_EQ(pRtcpXrAttr->IsPacketLossRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
-
-    delete pRtcpXrAttr;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesSupportPacketDuplicatedRle)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     EXPECT_EQ(pRtcpXrAttr->IsPacketDuplicatedRleSupported(), IMS_FALSE);
 
     pRtcpXrAttr->SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
     EXPECT_EQ(pRtcpXrAttr->IsPacketDuplicatedRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
-
-    delete pRtcpXrAttr;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesCreation)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     EXPECT_EQ(pRtcpXrAttr->IsStatisticMetricsSupported(), IMS_FALSE);
     EXPECT_EQ(pRtcpXrAttr->IsVoipMetricsSupported(), IMS_FALSE);
     EXPECT_EQ(pRtcpXrAttr->IsPacketLossRleSupported(), IMS_FALSE);
     EXPECT_EQ(pRtcpXrAttr->IsPacketDuplicatedRleSupported(), IMS_FALSE);
-
-    delete pRtcpXrAttr;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesAssign)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr1 = new AudioProfile::RtcpXrAttributes();
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr2 = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr1 = std::make_unique<AudioProfile::RtcpXrAttributes>();
+    auto pRtcpXrAttr2 = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     pRtcpXrAttr1->SetSupportStatisticMetrics(RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
     pRtcpXrAttr1->SetSupportVoipMetrics(RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
@@ -1019,15 +894,12 @@ TEST_F(AudioProfileTest, testRtcpXrAttributesAssign)
     EXPECT_EQ(pRtcpXrAttr2->IsVoipMetricsSupported(), RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
     EXPECT_EQ(pRtcpXrAttr2->IsPacketLossRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
     EXPECT_EQ(pRtcpXrAttr2->IsPacketDuplicatedRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
-
-    delete pRtcpXrAttr1;
-    delete pRtcpXrAttr2;
 }
 
 TEST_F(AudioProfileTest, testRtcpXrAttributesEqualNotEqual)
 {
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr1 = new AudioProfile::RtcpXrAttributes();
-    AudioProfile::RtcpXrAttributes* pRtcpXrAttr2 = new AudioProfile::RtcpXrAttributes();
+    auto pRtcpXrAttr1 = std::make_unique<AudioProfile::RtcpXrAttributes>();
+    auto pRtcpXrAttr2 = std::make_unique<AudioProfile::RtcpXrAttributes>();
 
     EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
 
@@ -1054,14 +926,11 @@ TEST_F(AudioProfileTest, testRtcpXrAttributesEqualNotEqual)
 
     pRtcpXrAttr2->SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
     EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
-
-    delete pRtcpXrAttr1;
-    delete pRtcpXrAttr2;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileCandidateAttr)
 {
-    AudioProfile* pProfile = new AudioProfile();
+    auto pProfile = std::make_unique<AudioProfile>();
 
     EXPECT_EQ(pProfile->GetCandidateAttr(), ImsVector<AString>());
 
@@ -1072,25 +941,21 @@ TEST_F(AudioProfileTest, testAudioProfileCandidateAttr)
     pProfile->SetCandidateAttr(objCandidateAttr);
     EXPECT_EQ(pProfile->GetCandidateAttr().GetAt(0), AUDIO_PROFILE_CANDIDATE_ATTR1);
     EXPECT_EQ(pProfile->GetCandidateAttr().GetAt(1), AUDIO_PROFILE_CANDIDATE_ATTR2);
-
-    delete pProfile;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileSupportRtcpXr)
 {
-    AudioProfile* pProfile = new AudioProfile();
+    auto pProfile = std::make_unique<AudioProfile>();
 
     EXPECT_EQ(pProfile->IsRtcpXrSupported(), IMS_FALSE);
 
     pProfile->SetSupportRtcpXr(AUDIO_PROFILE_SUPPORT_RTXP_XR);
     EXPECT_EQ(pProfile->IsRtcpXrSupported(), AUDIO_PROFILE_SUPPORT_RTXP_XR);
-
-    delete pProfile;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileRtcpXrAttr)
 {
-    AudioProfile* pProfile = new AudioProfile();
+    auto pProfile = std::make_unique<AudioProfile>();
 
     EXPECT_EQ(pProfile->GetRtcpXrAttr(), AudioProfile::RtcpXrAttributes());
 
@@ -1110,25 +975,21 @@ TEST_F(AudioProfileTest, testAudioProfileRtcpXrAttr)
             RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
     EXPECT_EQ(pProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported(),
             RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
-
-    delete pProfile;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileAnbr)
 {
-    AudioProfile* pProfile = new AudioProfile();
+    auto pProfile = std::make_unique<AudioProfile>();
 
     EXPECT_EQ(pProfile->IsAnbrSupported(), IMS_FALSE);
 
     pProfile->SetAnbr(AUDIO_PROFILE_ANBR);
     EXPECT_EQ(pProfile->IsAnbrSupported(), AUDIO_PROFILE_ANBR);
-
-    delete pProfile;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileCreationDefault)
 {
-    AudioProfile* pProfile = new AudioProfile();
+    auto pProfile = std::make_unique<AudioProfile>();
 
     EXPECT_EQ(pProfile->GetPtime(), 0);
     EXPECT_EQ(pProfile->GetMaxPtime(), 0);
@@ -1136,8 +997,6 @@ TEST_F(AudioProfileTest, testAudioProfileCreationDefault)
     EXPECT_EQ(pProfile->IsRtcpXrSupported(), IMS_FALSE);
     EXPECT_EQ(pProfile->GetRtcpXrAttr(), AudioProfile::RtcpXrAttributes());
     EXPECT_EQ(pProfile->IsAnbrSupported(), IMS_FALSE);
-
-    delete pProfile;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileCreation)
@@ -1149,7 +1008,7 @@ TEST_F(AudioProfileTest, testAudioProfileCreation)
     ImsVector<AString> objCandidateAttr;
     objCandidateAttr.Add(AUDIO_PROFILE_CANDIDATE_ATTR1);
 
-    AudioProfile* pProfile1 = new AudioProfile();
+    auto pProfile1 = std::make_unique<AudioProfile>();
 
     pProfile1->SetPtime(AUDIO_PROFILE_PTIME);
     pProfile1->SetMaxPtime(AUDIO_PROFILE_MAX_PTIME);
@@ -1158,12 +1017,9 @@ TEST_F(AudioProfileTest, testAudioProfileCreation)
     pProfile1->SetRtcpXrAttr(objRtcpXrAttr);
     pProfile1->SetAnbr(AUDIO_PROFILE_ANBR);
 
-    AudioProfile* pProfile2 = new AudioProfile(*pProfile1);
+    auto pProfile2 = std::make_unique<AudioProfile>(*pProfile1);
 
     EXPECT_EQ(*pProfile1, *pProfile2);
-
-    delete pProfile1;
-    delete pProfile2;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileAssign)
@@ -1175,8 +1031,8 @@ TEST_F(AudioProfileTest, testAudioProfileAssign)
     ImsVector<AString> objCandidateAttr;
     objCandidateAttr.Add(AUDIO_PROFILE_CANDIDATE_ATTR2);
 
-    AudioProfile* pProfile1 = new AudioProfile();
-    AudioProfile* pProfile2 = new AudioProfile();
+    auto pProfile1 = std::make_unique<AudioProfile>();
+    auto pProfile2 = std::make_unique<AudioProfile>();
 
     pProfile1->SetPtime(AUDIO_PROFILE_PTIME);
     pProfile1->SetMaxPtime(AUDIO_PROFILE_MAX_PTIME);
@@ -1188,9 +1044,6 @@ TEST_F(AudioProfileTest, testAudioProfileAssign)
     *pProfile2 = *pProfile1;
 
     EXPECT_EQ(*pProfile1, *pProfile2);
-
-    delete pProfile1;
-    delete pProfile2;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileEqualNotEqual)
@@ -1199,8 +1052,8 @@ TEST_F(AudioProfileTest, testAudioProfileEqualNotEqual)
     objRtcpXrAttr.SetSupportPacketLossRle(RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
     objRtcpXrAttr.SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
 
-    AudioProfile* pProfile1 = new AudioProfile();
-    AudioProfile* pProfile2 = new AudioProfile();
+    auto pProfile1 = std::make_unique<AudioProfile>();
+    auto pProfile2 = std::make_unique<AudioProfile>();
 
     EXPECT_EQ(*pProfile1, *pProfile2);
 
@@ -1239,7 +1092,4 @@ TEST_F(AudioProfileTest, testAudioProfileEqualNotEqual)
 
     pProfile2->SetAnbr(AUDIO_PROFILE_ANBR);
     EXPECT_EQ(*pProfile1, *pProfile2);
-
-    delete pProfile1;
-    delete pProfile2;
 }
