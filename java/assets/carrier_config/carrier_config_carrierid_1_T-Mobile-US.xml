@@ -267,7 +267,8 @@
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text="User ends call and SIP response time-out"</string>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="2"/>
     <!-- MTC emergency call -->
-    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="64">
+    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="65">
+        <item value="0:0"/> <!-- SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
         <item value="300:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
         <item value="301:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
         <item value="302:2"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION -->
