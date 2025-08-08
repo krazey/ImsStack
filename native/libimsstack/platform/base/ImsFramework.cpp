@@ -78,13 +78,6 @@ void ImsFramework::RemoveListener(IN const IFrameworkThreadListener* piListener)
     }
 }
 
-PROTECTED VIRTUAL IMS_BOOL ImsFramework::Initialize()
-{
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL void ImsFramework::Uninitialize() {}
-
 PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnStart(IN ImsMessage& objMsg)
 {
     ImsAppThread::OnStart(objMsg);
