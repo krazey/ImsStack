@@ -15,5 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- MTC -->
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="90000"/>
+
+    <!-- Media -->
     <int name="imsvoice.audio_maxred_int" value="255"/>
 </carrier_config>
