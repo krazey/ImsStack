@@ -330,8 +330,6 @@ PUBLIC VIRTUAL void OsIsimDigestAka::Destroy()
 
 PUBLIC VIRTUAL IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 {
-    const OsIsim* pIsim = osIsim_GetInstance(m_pIsim->GetSlotId());
-
     if (OsUtil::GetInstance()->IsDebugMode())
     {
         AString strHex;
