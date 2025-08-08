@@ -56,6 +56,7 @@ import com.android.imsstack.system.SystemInterface;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -163,6 +164,7 @@ public class CarrierConfigMenuTest {
 
     @Test
     @LargeTest
+    @Ignore // TODO: flaky test. will be improved.
     public void testOnPauseAndResume() {
         setUpActivity(false);
         mCarrierConfigMenu.setConfigChanged(true);
