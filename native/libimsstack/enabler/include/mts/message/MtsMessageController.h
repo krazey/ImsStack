@@ -98,7 +98,7 @@ private:
 
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
     void CleanMtsMessageWithRpMr(IN IMS_SINT32 nMrOfRp);
-    void CleanMtsMessageWithInReplyTo(IN IPageMessage* piPageMessage);
+    void CleanMtsMessageWithInReplyTo(IN const IPageMessage* piPageMessage);
     void CleanRetryContent();
     void TerminateAllMessages();
     void TerminateMessage(IN IMtsMessage* piMtsMessage);
@@ -111,7 +111,7 @@ private:
     static IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     static void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri);
-    IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
+    IMS_BOOL IsDeliverMessage(IN const IPageMessage* piPageMessage);
     static IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
     // TODO(b/381001673): Remove `MESSAGE_TYPE_INVALID`.
     static IMS_BOOL IsSentMessage(IN IMtsMessage* piMtsMessage);

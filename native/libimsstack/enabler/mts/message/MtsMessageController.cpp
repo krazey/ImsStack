@@ -100,7 +100,7 @@ void MtsMessageController::PageMessageDelivered(IN IPageMessage* piPageMessage)
         return;
     }
 
-    IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
+    const IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "No received responses in the page message", 0, 0, 0);
@@ -156,7 +156,7 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
     m_piMtsErrorHandler->ResetRetryAfterStatus();
 
-    IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
+    const IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "No received responses in the page message", 0, 0, 0);
@@ -309,7 +309,7 @@ PRIVATE void MtsMessageController::Remove(IN const IMtsMessage* piMtsMessage)
 
     for (IMS_UINT32 i = 0; i < m_objMsgList.GetSize(); i++)
     {
-        IMtsMessage* piTmpMtsMessage = m_objMsgList.GetAt(i);
+        const IMtsMessage* piTmpMtsMessage = m_objMsgList.GetAt(i);
         if (piTmpMtsMessage == piMtsMessage)
         {
             m_objMsgList.RemoveAt(i);
@@ -319,7 +319,7 @@ PRIVATE void MtsMessageController::Remove(IN const IMtsMessage* piMtsMessage)
 
     for (IMS_UINT32 i = 0; i < m_objMsgList.GetSize(); i++)
     {
-        IMtsMessage* piTmpMtsMessage = m_objMsgList.GetAt(i);
+        const IMtsMessage* piTmpMtsMessage = m_objMsgList.GetAt(i);
         if (IsDeliverMessage(piTmpMtsMessage->GetPageMessage()))
         {
             PostMessage(0, 0, 0);
@@ -443,7 +443,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         return;
     }
 
-    ICoreService* pMtsICoreService = m_objContext.GetService(eServiceType).GetICoreService();
+    const ICoreService* pMtsICoreService = m_objContext.GetService(eServiceType).GetICoreService();
 
     if (pMtsICoreService == IMS_NULL)
     {
@@ -705,7 +705,7 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
                 SmsFormatType::SMSFORMAT_3GPP, objContent);
         if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
         {
-            IMtsMessage* piMtsMessage =
+            const IMtsMessage* piMtsMessage =
                     Search(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent));
             AString strCallId = GetPreviousCallId(piMtsMessage);
             // Set the Call-ID in the In-Reply-To header
@@ -735,7 +735,7 @@ PRIVATE
 IMS_RESULT MtsMessageController::AddContactHeader(
         IN IMessage* piMessage, IN MtsServiceType eServiceType)
 {
-    ICoreService* piCoreService = m_objContext.GetService(eServiceType).GetICoreService();
+    const ICoreService* piCoreService = m_objContext.GetService(eServiceType).GetICoreService();
     if (piCoreService == IMS_NULL || piMessage->GetMessage() == IMS_NULL)
     {
         return IMS_FAILURE;
@@ -842,7 +842,7 @@ const ByteArray& MtsMessageController::ProcessReceivedMessage(
 {
     AString strTempSmsgw = AString::ConstNull();
 
-    IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    const IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
     if (piMessage == IMS_NULL)
     {
@@ -855,7 +855,7 @@ const ByteArray& MtsMessageController::ProcessReceivedMessage(
 
     ImsList<AString> objSipToHeaderList = piMessage->GetHeaders("To");
 
-    if (objSipToHeaderList.GetSize() <= 0)
+    if (objSipToHeaderList.GetSize() == 0)
     {
         IMS_TRACE_E(0, "To header is not found in IMessage!!", 0, 0, 0);
 
@@ -1019,7 +1019,8 @@ void MtsMessageController::CleanMtsMessageWithRpMr(IMS_SINT32 nMrOfRp)
     }
 }
 
-PRIVATE void MtsMessageController::CleanMtsMessageWithInReplyTo(IN IPageMessage* piPageMessage)
+PRIVATE void MtsMessageController::CleanMtsMessageWithInReplyTo(
+        IN const IPageMessage* piPageMessage)
 {
     if (m_objMsgList.GetSize() == 0)
     {
@@ -1027,10 +1028,10 @@ PRIVATE void MtsMessageController::CleanMtsMessageWithInReplyTo(IN IPageMessage*
     }
 
     // received page message
-    IMessage* piCurrentMessage = piPageMessage != IMS_NULL
+    const IMessage* piCurrentMessage = piPageMessage != IMS_NULL
             ? piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND)
             : IMS_NULL;
-    ISipMessage* piCurrentSipMessage =
+    const ISipMessage* piCurrentSipMessage =
             piCurrentMessage != IMS_NULL ? piCurrentMessage->GetMessage() : IMS_NULL;
     AString strInReplyTo = piCurrentSipMessage != IMS_NULL
             ? piCurrentSipMessage->GetHeader(ISipHeader::IN_REPLY_TO)
@@ -1050,10 +1051,10 @@ PRIVATE void MtsMessageController::CleanMtsMessageWithInReplyTo(IN IPageMessage*
         }
 
         // sent page message
-        IPageMessage* piTargetPageMessage = piMtsMessage->GetPageMessage();
-        IMessage* piTargetMessage =
+        const IPageMessage* piTargetPageMessage = piMtsMessage->GetPageMessage();
+        const IMessage* piTargetMessage =
                 piTargetPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
-        ISipMessage* piTargetSipMessage =
+        const ISipMessage* piTargetSipMessage =
                 piTargetMessage != IMS_NULL ? piTargetMessage->GetMessage() : IMS_NULL;
         AString strCallId = piTargetSipMessage != IMS_NULL
                 ? piTargetSipMessage->GetHeader(ISipHeader::CALL_ID)
@@ -1144,7 +1145,7 @@ PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
 {
     IMS_TRACE_I("SetLocationToMessage", 0, 0, 0);
 
-    GeolocationPidfCreator* pPidfCreator =
+    const GeolocationPidfCreator* pPidfCreator =
             GeolocationHelper::GetInstance()->GetPidfCreator(m_objContext.GetSlotId());
 
     if (pPidfCreator == IMS_NULL)
@@ -1196,10 +1197,11 @@ AString MtsMessageController::GetPreviousCallId(IN const IMtsMessage* piMtsMessa
     AString strCallId;
     if (piMtsMessage != IMS_NULL)
     {
-        IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();
+        const IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();
         if (piPageMessage != IMS_NULL)
         {
-            IMessage* piPrevMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+            const IMessage* piPrevMessage =
+                    piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
             ImsList<AString> objCallId = piPrevMessage->GetHeaders("Call-ID");
             if (!objCallId.IsEmpty())
@@ -1287,7 +1289,7 @@ void MtsMessageController::GetUriFromHeaders(IN const AString& strFromHdr, OUT A
     IMS_TRACE_I("GetUriFromHeaders : strUri[%s]", strUri.GetStr(), 0, 0);
 }
 
-PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageMessage)
+PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN const IPageMessage* piPageMessage)
 {
     IMS_TRACE_I("IsDeliverMessage", 0, 0, 0);
 
@@ -1297,7 +1299,7 @@ PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageM
         return IMS_FALSE;
     }
 
-    IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    const IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
     if (piMessage == IMS_NULL)
     {
@@ -1415,8 +1417,8 @@ IMS_RESULT MtsMessageController::ValidateInReplyToHeader(
 {
     IMS_TRACE_I("ValidateInReplyToHeader", 0, 0, 0);
 
-    IMessage* piMessage = objPageMessage.GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
-    ISipMessage* piSipMessage = piMessage != IMS_NULL ? piMessage->GetMessage() : IMS_NULL;
+    const IMessage* piMessage = objPageMessage.GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    const ISipMessage* piSipMessage = piMessage != IMS_NULL ? piMessage->GetMessage() : IMS_NULL;
     AString strInReplyTo = piSipMessage != IMS_NULL
             ? piSipMessage->GetHeader(ISipHeader::IN_REPLY_TO)
             : AString::ConstEmpty();
