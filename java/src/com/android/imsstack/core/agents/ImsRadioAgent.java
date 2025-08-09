@@ -22,6 +22,8 @@ import android.os.Looper;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.BarringInfo;
 import android.telephony.BarringInfo.BarringServiceInfo;
+import android.telephony.CellIdentity;
+import android.telephony.CellIdentityNr;
 import android.telephony.TelephonyCallback;
 import android.telephony.ims.feature.ConnectionFailureInfo;
 import android.telephony.ims.feature.ImsTrafficSessionCallback;
@@ -381,7 +383,14 @@ public class ImsRadioAgent implements ImsRadioInterface {
         return id;
     }
 
-    private void handleBarringInfo(BarringInfo barringInfo) {
+    @VisibleForTesting
+    protected void handleBarringInfo(BarringInfo barringInfo) {
+        CellIdentity ci = barringInfo.getCellIdentity();
+        if (ci instanceof CellIdentityNr) {
+            ImsLog.i(this, mSlotId, "handleBarringInfo: Ignoring, cellType=NR");
+            return;
+        }
+
         SsacInfo ssacInfo = new SsacInfo();
 
         BarringServiceInfo mmtelVoice = barringInfo.getBarringServiceInfo(
