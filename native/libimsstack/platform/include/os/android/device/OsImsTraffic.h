@@ -211,7 +211,7 @@ private:
     class TrafficListeners
     {
     public:
-        inline TrafficListeners(IN IImsTrafficListener* piListener) :
+        inline explicit TrafficListeners(IN IImsTrafficListener* piListener) :
                 piOwnerThread(IMS_NULL),
                 objListeners(ImsList<IImsTrafficListener*>())
         {

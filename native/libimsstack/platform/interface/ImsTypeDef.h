@@ -335,7 +335,7 @@ class ByRef final
 {
 public:
     inline ByRef() = default;
-    inline ByRef(IN const T value) :
+    inline explicit ByRef(IN const T value) :
             mValue(value)
     {
     }
