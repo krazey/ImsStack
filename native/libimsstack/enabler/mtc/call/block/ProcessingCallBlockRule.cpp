@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 
@@ -55,7 +57,7 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
-    if (IsCallUpdating(lstCalls) && ePeerType == PeerType::MT)
+    if (IsCallConverting(lstCalls) && ePeerType == PeerType::MT)
     {
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_UPGRADE));
     }
@@ -80,15 +82,20 @@ IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const ImsList<IMtcCal
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsCallUpdating(IN const ImsList<IMtcCall*>& lstCalls)
+IMS_BOOL ProcessingCallBlockRule::IsCallConverting(IN const ImsList<IMtcCall*>& lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
         if (eState == IMtcCall::State::UPDATING)
         {
-            IMS_TRACE_I("IsCallUpdating : Updating call exists", eState, 0, 0);
-            return IMS_TRUE;
+            const UpdateType eType =
+                    lstCalls.GetAt(nIndex)->GetCallContext().GetUpdatingInfo().GetRequestingType();
+            IMS_TRACE_I("IsCallConverting : Converting call exists eType[%d]", eType, 0, 0);
+            if (eType == UpdateType::SESSION)
+            {
+                return IMS_TRUE;
+            }
         }
     }
     return IMS_FALSE;

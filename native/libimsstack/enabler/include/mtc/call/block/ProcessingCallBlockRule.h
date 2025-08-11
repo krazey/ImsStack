@@ -36,7 +36,7 @@ public:
 
 private:
     static IMS_BOOL IsCallSetupProcessing(IN const ImsList<IMtcCall*>& lstCalls);
-    static IMS_BOOL IsCallUpdating(IN const ImsList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsCallConverting(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL IsEmergencyCallExists(IN const ImsList<IMtcCall*>& lstCalls);
 
     IMtcCallContext& m_objContext;
