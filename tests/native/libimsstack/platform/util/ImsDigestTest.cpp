@@ -33,7 +33,7 @@ TEST_F(ImsDigestTest, CalculateResponse)
     HASHHEX hEntity = {
             0,
     };
-    HASHHEX hA1 = {
+    IMS_CHAR acA1[HASHHEX_SIZE + 1] = {
             0,
     };
     IMS_CHAR acResponse[HASHHEX_SIZE + 1] = {
@@ -49,11 +49,11 @@ TEST_F(ImsDigestTest, CalculateResponse)
 
     // Calculate the H(A1)
     ImsDigest_CalculateA1(
-            "AKAv1-MD5", strUserName, strRealm, strPassword, strNonce, strCNonce, hA1);
-    EXPECT_STREQ(hA1, "634a9b99a3db5d06f0fd1b8c4b4ab18e");
+            "AKAv1-MD5", strUserName, strRealm, strPassword, strNonce, strCNonce, acA1);
+    EXPECT_STREQ(acA1, "634a9b99a3db5d06f0fd1b8c4b4ab18e");
 
     // Calculate the response digest
-    ImsDigest_CalculateResponse(hA1, strNonce, "00000002", strCNonce, "auth", "REGISTER",
+    ImsDigest_CalculateResponse(acA1, strNonce, "00000002", strCNonce, "auth", "REGISTER",
             "sip:one.att.net", hEntity, acResponse);
 
     EXPECT_STREQ(acResponse, "90686613c9e29457f98d59fc84d33416");
