@@ -159,7 +159,8 @@ IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
 
 PRIVATE
 TextProfile::Payload* TextProfileNegotiator::CreatePayload(
-        IN MediaBaseProfile::RtpMap& objRtpMap, IN std::shared_ptr<TextProfile::RedFmtp> pFmtp)
+        IN const MediaBaseProfile::RtpMap& objRtpMap,
+        IN std::shared_ptr<TextProfile::RedFmtp> pFmtp)
 {
     TextProfile::Payload* pPayload = new TextProfile::Payload();
     pPayload->SetRtpMap(objRtpMap);

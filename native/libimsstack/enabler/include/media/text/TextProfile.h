@@ -131,17 +131,6 @@ public:
 
     virtual ~TextProfile() override {}
 
-    explicit TextProfile(IN const TextProfile* profile) :
-            MediaBaseProfile(profile)
-    {
-        if (profile == nullptr)
-        {
-            return;
-        }
-
-        m_bKeepRedLevel = profile->m_bKeepRedLevel;
-    }
-
     TextProfile(IN const TextProfile& obj) :
             MediaBaseProfile(obj)
     {

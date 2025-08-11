@@ -93,9 +93,9 @@ private:
             OUT AudioProfile* pNegotiatedProfile, IN AudioProfile::Payload* pNegotiatedPayload,
             IN MediaConfiguration* pConfig);
     IMS_SINT32 NegotiateAs(IN AudioProfile::Payload* pNegotiatedPayload, IN IMS_BOOL bIpv6);
-    IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig, IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegotiatedCodec,
-            OUT AudioProfile* pNegotiatedProfile);
+    IMS_BOOL MakeNegotiatedBandwidth(IN const AudioConfiguration* pConfig,
+            IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
+            IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT AudioProfile* pNegotiatedProfile);
     void NegotiateRtcpInterval(OUT AudioProfile* pNegotiatedProfile,
             IN IMS_SINT32 nRtcpIntervalOnHold, IN IMS_SINT32 nRtcpIntervalOnActive);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,

@@ -191,12 +191,26 @@ public:
     };
 
 public:
-    MediaBaseProfile(IN const IpAddress ipAddress = IpAddress::IPv6NONE,
-            IN const IMS_UINT32 dataPort = 0, IN const IMS_UINT32 controlPort = 0,
-            IN const AString transportType = "RTP/AVP", IN const IMS_UINT32 rtcpInterval = 0,
-            IN const IMS_SINT32 bandwidthAs = 0, IN const IMS_SINT32 bandwidthRs = 0,
-            IN const IMS_SINT32 bandwidthRr = 0,
-            IN const MEDIA_DIRECTION direction = MEDIA_DIRECTION_INVALID) :
+    MediaBaseProfile() :
+            m_objIpAddress(IpAddress::IPv6NONE),
+            m_nDataPort(0),
+            m_nControlPort(0),
+            m_strTransportType("RTP/AVP"),
+            m_nRtcpInterval(0),
+            m_nBandwidthAs(0),
+            m_nBandwidthRs(0),
+            m_nBandwidthRr(0),
+            m_eDirection(MEDIA_DIRECTION_INVALID),
+            m_objCapaNego(CapaNego()),
+            m_nNegotiatedPayloadIndex(-1)
+    {
+    }
+
+    explicit MediaBaseProfile(IN const IpAddress ipAddress, IN const IMS_UINT32 dataPort,
+            IN const IMS_UINT32 controlPort, IN const AString transportType,
+            IN const IMS_UINT32 rtcpInterval, IN const IMS_SINT32 bandwidthAs,
+            IN const IMS_SINT32 bandwidthRs, IN const IMS_SINT32 bandwidthRr,
+            IN const MEDIA_DIRECTION direction) :
             m_objIpAddress(ipAddress),
             m_nDataPort(dataPort),
             m_nControlPort(controlPort),
@@ -210,28 +224,6 @@ public:
             m_nNegotiatedPayloadIndex(-1),
             m_lstPayload(ImsList<BasePayload*>())
     {
-    }
-
-    virtual ~MediaBaseProfile() { DeletePayloads(); }
-
-    explicit MediaBaseProfile(const MediaBaseProfile* profile) :
-            m_objIpAddress(profile ? profile->m_objIpAddress : IpAddress::IPv6NONE),
-            m_nDataPort(profile ? profile->m_nDataPort : 0),
-            m_nControlPort(profile ? profile->m_nControlPort : 0),
-            m_strTransportType(profile ? profile->m_strTransportType : "RTP/AVP"),
-            m_nRtcpInterval(profile ? profile->m_nRtcpInterval : 0),
-            m_nBandwidthAs(profile ? profile->m_nBandwidthAs : 0),
-            m_nBandwidthRs(profile ? profile->m_nBandwidthRs : 0),
-            m_nBandwidthRr(profile ? profile->m_nBandwidthRr : 0),
-            m_eDirection(profile ? profile->m_eDirection : MEDIA_DIRECTION_INVALID),
-            m_objCapaNego(profile ? profile->m_objCapaNego : CapaNego()),
-            m_nNegotiatedPayloadIndex(profile ? profile->m_nNegotiatedPayloadIndex : -1)
-    {
-        if (profile != nullptr)
-        {
-            DeletePayloads();
-            CopyPayloads(profile->m_lstPayload);
-        }
     }
 
     MediaBaseProfile(const MediaBaseProfile& obj) :
@@ -250,6 +242,8 @@ public:
         DeletePayloads();
         CopyPayloads(obj.m_lstPayload);
     }
+
+    virtual ~MediaBaseProfile() { DeletePayloads(); }
 
     MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
     {

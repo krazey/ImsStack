@@ -77,7 +77,7 @@ void AudioSdpParser::ParsePayloads(
 }
 
 PRIVATE
-void AudioSdpParser::ParsePayload(IN SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile)
+void AudioSdpParser::ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile)
 {
     if (pSdpCodec == IMS_NULL || pProfile == IMS_NULL)
     {

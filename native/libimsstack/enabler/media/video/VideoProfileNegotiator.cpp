@@ -1157,8 +1157,9 @@ VIDEO_RESOLUTION VideoProfileNegotiator::GetAvcMaxResolutionFromLevel(IN IMS_UIN
     }
 }
 
-PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig,
-        IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
+PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(
+        IN const VideoConfiguration* pConfig, IN VideoProfile* pLocalProfile,
+        IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT VideoProfile* pNegotiatedProfile)
 {
     if (bIsOfferReceived == IMS_FALSE)

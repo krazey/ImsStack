@@ -800,7 +800,7 @@ IMS_SINT32 AudioProfileNegotiator::NegotiateAs(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
+IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN const AudioConfiguration* pConfig,
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
         IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT AudioProfile* pNegotiatedProfile)
 {

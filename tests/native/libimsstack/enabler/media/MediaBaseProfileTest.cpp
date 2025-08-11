@@ -402,175 +402,147 @@ TEST_F(MediaBaseProfileTest, TestCapaNegoAttCapaInPcfg)
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileIpAddress)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetIpAddress(), IpAddress::IPv6NONE);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetIpAddress(), IpAddress::IPv6NONE);
 
-    baseProfile->SetIpAddress(IP_ADDRESS);
-    EXPECT_EQ(baseProfile->GetIpAddress(), IP_ADDRESS);
-
-    delete baseProfile;
+    objBaseProfile.SetIpAddress(IP_ADDRESS);
+    EXPECT_EQ(objBaseProfile.GetIpAddress(), IP_ADDRESS);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileDataPort)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetDataPort(), 0);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetDataPort(), 0);
 
-    baseProfile->SetDataPort(DATA_PORT);
-    EXPECT_EQ(baseProfile->GetDataPort(), DATA_PORT);
-
-    delete baseProfile;
+    objBaseProfile.SetDataPort(DATA_PORT);
+    EXPECT_EQ(objBaseProfile.GetDataPort(), DATA_PORT);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileControlPort)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetControlPort(), 0);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetControlPort(), 0);
 
-    baseProfile->SetControlPort(CONTROL_PORT);
-    EXPECT_EQ(baseProfile->GetControlPort(), CONTROL_PORT);
-
-    delete baseProfile;
+    objBaseProfile.SetControlPort(CONTROL_PORT);
+    EXPECT_EQ(objBaseProfile.GetControlPort(), CONTROL_PORT);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileTransportType)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetTransportType(), "RTP/AVP");
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetTransportType(), "RTP/AVP");
 
-    baseProfile->SetTransportType(TRANSPORT_TYPE);
-    EXPECT_EQ(baseProfile->GetTransportType(), TRANSPORT_TYPE);
-
-    delete baseProfile;
+    objBaseProfile.SetTransportType(TRANSPORT_TYPE);
+    EXPECT_EQ(objBaseProfile.GetTransportType(), TRANSPORT_TYPE);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileRtcpInterval)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetRtcpInterval(), 0);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetRtcpInterval(), 0);
 
-    baseProfile->SetRtcpInterval(RTCP_INTERVAL);
-    EXPECT_EQ(baseProfile->GetRtcpInterval(), RTCP_INTERVAL);
-
-    delete baseProfile;
+    objBaseProfile.SetRtcpInterval(RTCP_INTERVAL);
+    EXPECT_EQ(objBaseProfile.GetRtcpInterval(), RTCP_INTERVAL);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileBandwidthAs)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetBandwidthAs(), 0);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetBandwidthAs(), 0);
 
-    baseProfile->SetBandwidthAs(AS);
-    EXPECT_EQ(baseProfile->GetBandwidthAs(), AS);
-
-    delete baseProfile;
+    objBaseProfile.SetBandwidthAs(AS);
+    EXPECT_EQ(objBaseProfile.GetBandwidthAs(), AS);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileBandwidthRs)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetBandwidthRs(), 0);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetBandwidthRs(), 0);
 
-    baseProfile->SetBandwidthRs(RS);
-    EXPECT_EQ(baseProfile->GetBandwidthRs(), RS);
-
-    delete baseProfile;
+    objBaseProfile.SetBandwidthRs(RS);
+    EXPECT_EQ(objBaseProfile.GetBandwidthRs(), RS);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileBandwidthRr)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetBandwidthRr(), 0);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetBandwidthRr(), 0);
 
-    baseProfile->SetBandwidthRr(RR);
-    EXPECT_EQ(baseProfile->GetBandwidthRr(), RR);
-
-    delete baseProfile;
+    objBaseProfile.SetBandwidthRr(RR);
+    EXPECT_EQ(objBaseProfile.GetBandwidthRr(), RR);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileDirection)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetDirection(), MEDIA_DIRECTION_INVALID);
 
-    baseProfile->SetDirection(DIRECTION);
-    EXPECT_EQ(baseProfile->GetDirection(), DIRECTION);
-
-    delete baseProfile;
+    objBaseProfile.SetDirection(DIRECTION);
+    EXPECT_EQ(objBaseProfile.GetDirection(), DIRECTION);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileCapaNego)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_FALSE(baseProfile->GetCapaNego().IsAttCapaInPcfg());
+    MediaBaseProfile objBaseProfile;
+    EXPECT_FALSE(objBaseProfile.GetCapaNego().IsAttCapaInPcfg());
 
-    baseProfile->GetCapaNego().SetAttCapaInPcfg(IMS_TRUE);
-    EXPECT_TRUE(baseProfile->GetCapaNego().IsAttCapaInPcfg());
-
-    delete baseProfile;
+    objBaseProfile.GetCapaNego().SetAttCapaInPcfg(IMS_TRUE);
+    EXPECT_TRUE(objBaseProfile.GetCapaNego().IsAttCapaInPcfg());
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileNegotiatedPayloadIndex)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetNegotiatedPayloadIndex(), -1);
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetNegotiatedPayloadIndex(), -1);
 
-    baseProfile->SetNegotiatedPayloadIndex(NEGOTIATED_PAYLOAD_INDEX);
-    EXPECT_EQ(baseProfile->GetNegotiatedPayloadIndex(), NEGOTIATED_PAYLOAD_INDEX);
-
-    delete baseProfile;
+    objBaseProfile.SetNegotiatedPayloadIndex(NEGOTIATED_PAYLOAD_INDEX);
+    EXPECT_EQ(objBaseProfile.GetNegotiatedPayloadIndex(), NEGOTIATED_PAYLOAD_INDEX);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileGetPayloadList)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
+    MediaBaseProfile objBaseProfile;
 
     MediaBaseProfile::BasePayload* basePayload = new MediaBaseProfile::BasePayload();
     basePayload->SetRtpMap(PAYLOAD_NUMBER, PAYLOAD_TYPE, SAMPLEING_RATE, CHANNEL);
-    baseProfile->GetPayloadList().Append(basePayload);
+    objBaseProfile.GetPayloadList().Append(basePayload);
 
-    EXPECT_EQ(baseProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(objBaseProfile.GetPayloadList().GetSize(), 1);
 
-    EXPECT_EQ(
-            baseProfile->GetPayloadList().GetAt(0)->GetRtpMap().GetPayloadNumber(), PAYLOAD_NUMBER);
-    EXPECT_EQ(baseProfile->GetPayloadList().GetAt(0)->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
-    EXPECT_EQ(
-            baseProfile->GetPayloadList().GetAt(0)->GetRtpMap().GetSamplingRate(), SAMPLEING_RATE);
-    EXPECT_EQ(baseProfile->GetPayloadList().GetAt(0)->GetRtpMap().GetChannel(), CHANNEL);
-
-    delete baseProfile;
+    EXPECT_EQ(objBaseProfile.GetPayloadList().GetAt(0)->GetRtpMap().GetPayloadNumber(),
+            PAYLOAD_NUMBER);
+    EXPECT_EQ(objBaseProfile.GetPayloadList().GetAt(0)->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(objBaseProfile.GetPayloadList().GetAt(0)->GetRtpMap().GetSamplingRate(),
+            SAMPLEING_RATE);
+    EXPECT_EQ(objBaseProfile.GetPayloadList().GetAt(0)->GetRtpMap().GetChannel(), CHANNEL);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileGetPayloadAt)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
+    MediaBaseProfile objBaseProfile;
 
     MediaBaseProfile::BasePayload* basePayload = new MediaBaseProfile::BasePayload();
     basePayload->SetRtpMap(PAYLOAD_NUMBER, PAYLOAD_TYPE, SAMPLEING_RATE, CHANNEL);
-    baseProfile->GetPayloadList().Append(basePayload);
+    objBaseProfile.GetPayloadList().Append(basePayload);
 
-    EXPECT_EQ(baseProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), PAYLOAD_NUMBER);
-    EXPECT_EQ(baseProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
-    EXPECT_EQ(baseProfile->GetPayloadAt(0)->GetRtpMap().GetSamplingRate(), SAMPLEING_RATE);
-    EXPECT_EQ(baseProfile->GetPayloadAt(0)->GetRtpMap().GetChannel(), CHANNEL);
-
-    delete baseProfile;
+    EXPECT_EQ(objBaseProfile.GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(objBaseProfile.GetPayloadAt(0)->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(objBaseProfile.GetPayloadAt(0)->GetRtpMap().GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(objBaseProfile.GetPayloadAt(0)->GetRtpMap().GetChannel(), CHANNEL);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileCreation)
 {
-    MediaBaseProfile* baseProfile = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile->GetIpAddress(), IpAddress::IPv6NONE);
-    EXPECT_EQ(baseProfile->GetDataPort(), 0);
-    EXPECT_EQ(baseProfile->GetControlPort(), 0);
-    EXPECT_EQ(baseProfile->GetTransportType(), "RTP/AVP");
-    EXPECT_EQ(baseProfile->GetRtcpInterval(), 0);
-    EXPECT_EQ(baseProfile->GetBandwidthAs(), 0);
-    EXPECT_EQ(baseProfile->GetBandwidthRs(), 0);
-    EXPECT_EQ(baseProfile->GetBandwidthRr(), 0);
-    EXPECT_EQ(baseProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
-
-    delete baseProfile;
+    MediaBaseProfile objBaseProfile;
+    EXPECT_EQ(objBaseProfile.GetIpAddress(), IpAddress::IPv6NONE);
+    EXPECT_EQ(objBaseProfile.GetDataPort(), 0);
+    EXPECT_EQ(objBaseProfile.GetControlPort(), 0);
+    EXPECT_EQ(objBaseProfile.GetTransportType(), "RTP/AVP");
+    EXPECT_EQ(objBaseProfile.GetRtcpInterval(), 0);
+    EXPECT_EQ(objBaseProfile.GetBandwidthAs(), 0);
+    EXPECT_EQ(objBaseProfile.GetBandwidthRs(), 0);
+    EXPECT_EQ(objBaseProfile.GetBandwidthRr(), 0);
+    EXPECT_EQ(objBaseProfile.GetDirection(), MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaBaseProfileTest, TestMediaBaseProfileAssign)
