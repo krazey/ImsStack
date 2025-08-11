@@ -712,6 +712,200 @@ TEST_F(MediaSessionTest, testNotifyMediaInactivityElse)
             IMS_TRUE);
 }
 
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_NetworkToneTimeout)
+{
+    const IMS_SINT32 kNetworkToneTimer = 1000;
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = kNetworkToneTimer;
+
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kNetworkToneTimer));  // Corrected enum value
+
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+
+    EXPECT_CALL(*m_pMockAudioController, SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0)).Times(1);
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(
+                    REPORT_NW_TONE_RTP_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP))
+            .Times(1);
+
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_RtpTimeout)
+{
+    const IMS_SINT32 kRtpTimer = 2000;
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = kRtpTimer;
+
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));  // No network tone timer
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtpTimer));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));  // No rtcp timer
+
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP))
+            .Times(1);
+
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_RtcpTimeout)
+{
+    const IMS_SINT32 kRtcpTimer = 3000;
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtcpInactivityTimerMillis = kRtcpTimer;
+
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));  // No network tone timer
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));  // No rtp timer
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtcpTimer));
+
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTCP))
+            .Times(1);
+
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_NoTimeout)
+{
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = 500;
+    objParam.m_nRtcpInactivityTimerMillis = 500;
+
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(1000));  // Timer not expired
+
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+
+    EXPECT_CALL(m_objMockClientListener, MediaSession_Notify(_, _, _)).Times(0);
+
+    EXPECT_FALSE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_NoTimersSet)
+{
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = 1000;
+    objParam.m_nRtcpInactivityTimerMillis = 1000;
+
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+
+    EXPECT_CALL(m_objMockClientListener, MediaSession_Notify(_, _, _)).Times(0);
+
+    EXPECT_FALSE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_RtpAndRtcpTimeout)
+{
+    const IMS_SINT32 kRtpTimer = 2000;
+    const IMS_SINT32 kRtcpTimer = 3000;
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = kRtpTimer;
+    objParam.m_nRtcpInactivityTimerMillis = kRtcpTimer;
+
+    // The direction is NOT send-receive
+    EXPECT_CALL(*m_pMockAudioController, GetMediaDirection())
+            .WillOnce(Return(MEDIA_DIRECTION_SEND));
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));  // No network tone timer
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtpTimer));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtcpTimer));
+
+    // Only RTP timeout should be reported as it's checked first
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP))
+            .Times(1);
+    // RTCP timeout should not be reported
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTCP))
+            .Times(0);
+
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_ActiveDirection_RtpTimeout)
+{
+    const IMS_SINT32 kRtpTimer = 2000;
+    const IMS_SINT32 kRtcpTimer = 3000;
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = kRtpTimer;
+    objParam.m_nRtcpInactivityTimerMillis = kRtcpTimer;
+
+    EXPECT_CALL(*m_pMockAudioController, GetMediaDirection())
+            .WillOnce(Return(MEDIA_DIRECTION_SEND_RECEIVE));
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));  // No network tone timer
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtpTimer));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtcpTimer));
+
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP))
+            .Times(1);
+
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTCP))
+            .Times(0);
+
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
+TEST_F(MediaSessionTest, testNotifyMediaInactivityAudio_ActiveDirection_NoTimeout)
+{
+    const IMS_SINT32 kRtpTimer = 2000;
+    ImsMediaNotifyQualityStatusParam objParam(MEDIA_TYPE_AUDIO);
+    objParam.m_nRtpInactivityTimerMillis = kRtpTimer - 1;  // Timer not expired
+
+    EXPECT_CALL(*m_pMockAudioController, GetMediaDirection())
+            .WillOnce(Return(MEDIA_DIRECTION_SEND_RECEIVE));
+    EXPECT_CALL(
+            *m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(0));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(kRtpTimer));
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID))
+            .WillOnce(Return(3000));
+
+    EXPECT_CALL(m_objMockClientListener, MediaSession_Notify(_, _, _)).Times(0);
+
+    EXPECT_FALSE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(&objParam)));
+}
+
 TEST_F(MediaSessionTest, testNotifyVideoBitrate)
 {
     EXPECT_CALL(m_objMockClientListener, MediaSession_Notify(REPORT_VIDEO_LOWEST_BITRATE, _, _))

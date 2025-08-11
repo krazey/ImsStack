@@ -681,3 +681,17 @@ void AudioController::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE eP
         IMS_TRACE_E(0, "SetMediaPemType(): session not found", 0, 0, 0);
     }
 }
+
+PUBLIC
+MEDIA_DIRECTION AudioController::GetMediaDirection()
+{
+    AudioSession* pAudioSession = FindAudioSession(m_nCurrentActiveNegoId);
+
+    if (pAudioSession != IMS_NULL)
+    {
+        return pAudioSession->GetDirection();
+    }
+
+    IMS_TRACE_E(0, "GetMediaDirection(): session is not found", 0, 0, 0);
+    return MEDIA_DIRECTION_INVALID;
+}

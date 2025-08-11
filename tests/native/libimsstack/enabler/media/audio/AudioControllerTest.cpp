@@ -40,6 +40,8 @@ public:
 
     virtual ~FakeAudioController() override {}
 
+    MEDIA_DIRECTION GetDirection() { return MEDIA_DIRECTION_SEND_RECEIVE; }
+
     IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig) override
     {
         return AudioController::IsAudioConfigChanged(pAudioConfig);
@@ -393,4 +395,22 @@ TEST_F(AudioControllerTest, testUpdateAccessNetworkSuccess)
 
     m_pController->CloseSession();
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 0);
+}
+
+TEST_F(AudioControllerTest, testGetMediaDirection)
+{
+    IMS_UINTP nNegoId = 1000;
+    MEDIA_DIRECTION direction = MEDIA_DIRECTION_SEND_RECEIVE;
+
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, nNegoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
+    // EXPECT_CALL(*m_pAudioNego, GetDirection()).WillOnce(Return(direction));
+    EXPECT_EQ(m_pController->OpenSession(nNegoId), IMS_TRUE);
+
+    EXPECT_EQ(m_pController->GetDirection(), direction);
+
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
 }
