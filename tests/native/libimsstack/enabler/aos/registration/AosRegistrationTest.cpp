@@ -1722,20 +1722,54 @@ TEST_F(AosRegistrationTest, GetNetworkTypeForImsRegStateAlwaysReturnsLteIfWifiTe
     m_pAosRegistration->GetUtil()->SetWifiTest(IMS_FALSE);
 }
 
-TEST_F(AosRegistrationTest, GetNetworkTypeForImsRegStateReturnsNetworkTypeGotFromAosNetTracker)
+TEST_F(AosRegistrationTest, GetNetworkTypeForImsRegStateReturnsAosNetworkTypeIwlanIfEpdgEnabled)
 {
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillOnce(Return(NW_REPORT_RADIO_WLAN))
-            .WillOnce(Return(NW_REPORT_RADIO_LTE))
-            .WillOnce(Return(NW_REPORT_RADIO_NR))
-            .WillOnce(Return(NW_REPORT_RADIO_WCDMA))
-            .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
+    // GIVEN
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
 
+    // WHEN & THEN
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::IWLAN);
+}
+
+TEST_F(AosRegistrationTest, GetNetworkTypeForImsRegStateReturnsAosNetworkTypeLteIfCurrentRatIsLte)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    // WHEN & THEN
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::LTE);
+}
+
+TEST_F(AosRegistrationTest, GetNetworkTypeForImsRegStateReturnsAosNetworkTypeNrIfCurrentRatIsNr)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    // WHEN & THEN
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::NR);
+}
+
+TEST_F(AosRegistrationTest,
+        GetNetworkTypeForImsRegStateReturnsAosNetworkTypeUtranIfCurrentRatIsWcdma)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
+
+    // WHEN & THEN
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::UTRAN);
+}
+
+TEST_F(AosRegistrationTest,
+        GetNetworkTypeForImsRegStateReturnsAosNetworkTypeNoneIfCurrentRatIsNoSrv)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+
+    // WHEN & THEN
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::NONE);
 }
 
@@ -3751,7 +3785,8 @@ TEST_F(AosRegistrationTest, ReportFailurePdnReconnectIfNrBlockConditionWhenFlowR
     ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
             .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_RFC_RULE));
     ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return((NW_REPORT_RADIO_NR)));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return((NW_REPORT_RADIO_NR)));
     m_objRegTempPlmnBlockRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,

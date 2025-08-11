@@ -21,6 +21,7 @@
 class AString;
 class IAosRegistrationListener;
 
+enum class AosNetworkType;
 enum class AosRegistrationType;
 enum class AosReasonCode;
 
@@ -102,6 +103,11 @@ public:
      * @brief Get the registration type. (@see AosRegistrationType)
      */
     virtual AosRegistrationType GetRegType() = 0;
+
+    /**
+     * @brief Get the registered network. (@see AosNetworkType)
+     */
+    virtual AosNetworkType GetImsRegNetwork() const = 0;
 
     /**
      * @brief Get the IMS registration type. (@see IMS_REG_TYPE_XXX enum)

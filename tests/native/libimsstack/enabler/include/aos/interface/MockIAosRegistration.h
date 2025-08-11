@@ -47,6 +47,7 @@ public:
             OUT AString& strValue), (override));
     MOCK_METHOD(IMS_UINT32, GetState, (), (override));
     MOCK_METHOD(AosRegistrationType, GetRegType, (), (override));
+    MOCK_METHOD(AosNetworkType, GetImsRegNetwork, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsRegType, (), (override));
     MOCK_METHOD(IMS_BOOL, IsInCallbackMode, (), (override));
     MOCK_METHOD(IMS_BOOL, IsRegistered, (), (override));

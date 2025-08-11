@@ -568,6 +568,11 @@ PUBLIC VIRTUAL AosRegistrationType AosRegistration::GetRegType()
     return m_eRegType;
 }
 
+PUBLIC VIRTUAL AosNetworkType AosRegistration::GetImsRegNetwork() const
+{
+    return m_eImsRegNetwork;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosRegistration::GetImsRegType()
 {
     if (m_eRegType == AosRegistrationType::NORMAL)
@@ -1075,21 +1080,12 @@ AosNetworkType AosRegistration::GetNetworkTypeForImsRegState() const
         return AosNetworkType::LTE;
     }
 
-    switch (m_piContext->GetNetTracker()->GetNetworkType())
+    if (m_piContext->GetConnection()->IsEpdgEnabled())
     {
-        case NW_REPORT_RADIO_WLAN:
-            return AosNetworkType::IWLAN;
-        case NW_REPORT_RADIO_LTE:
-            return AosNetworkType::LTE;
-        case NW_REPORT_RADIO_NR:
-            return AosNetworkType::NR;
-        case NW_REPORT_RADIO_WCDMA:  // FALL-THROUGH
-        case NW_REPORT_RADIO_HSPA:
-            return AosNetworkType::UTRAN;
-
-        default:
-            return AosNetworkType::NONE;
+        return AosNetworkType::IWLAN;
     }
+
+    return m_pUtil->GetAosNetworkType(m_piContext->GetNetTracker()->GetMobileChangingNetworkType());
 }
 
 PROTECTED
