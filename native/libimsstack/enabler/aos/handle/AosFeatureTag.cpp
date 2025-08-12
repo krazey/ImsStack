@@ -193,13 +193,13 @@ void AosFeatureTagList::RemoveUnavailableFeature(IN IMS_UINT32 nFeature)
 }
 
 PUBLIC
-IMS_UINT32 AosFeatureTagList::GetFeatures()
+IMS_UINT32 AosFeatureTagList::GetFeatures() const
 {
     return m_nFeatures;
 }
 
 PUBLIC
-IMS_UINT32 AosFeatureTagList::GetUnavailableFeatures()
+IMS_UINT32 AosFeatureTagList::GetUnavailableFeatures() const
 {
     return m_nUnavailableFeatures;
 }

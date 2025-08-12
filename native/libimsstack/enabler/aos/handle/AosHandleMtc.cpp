@@ -81,7 +81,7 @@ PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
             m_strAppId.GetStr(), sizeof(AosHandleMtc), this);
 }
 
-PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures()
+PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures() const
 {
     /* Description: This function enables some features internally.
      *              MtcService will get the enabled features by this logic.
@@ -866,14 +866,14 @@ void AosHandleMtc::UpdateVopsInfo(IN IMS_UINT32 nState, IN const AString& strPlm
 }
 
 PROTECTED
-IMS_UINT32 AosHandleMtc::GetVoiceBlockReasonForIpcan()
+IMS_UINT32 AosHandleMtc::GetVoiceBlockReasonForIpcan() const
 {
     return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
                                                     : BLOCK_VOLTE_CAPABILITY;
 }
 
 PROTECTED
-IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan()
+IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan() const
 {
     return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
                                                     : BLOCK_VILTE_CAPABILITY;

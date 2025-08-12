@@ -62,7 +62,7 @@ PROTECTED VIRTUAL void AosHandleEmergencyMtc::InitializeServiceFeature()
             m_objFeatureTagList.GetFeatures(), 0, 0);
 }
 
-PROTECTED IMS_BOOL AosHandleEmergencyMtc::IsVideoFeatureSupported()
+PROTECTED IMS_BOOL AosHandleEmergencyMtc::IsVideoFeatureSupported() const
 {
     if (!m_piAppContext->GetBlock()->IsReasonBlocked(
                 BLOCK_SUBSCRIBER_INCOMPLETED, IMS_FALSE, SERVICE_TYPE::SERVICE_WHOLE))

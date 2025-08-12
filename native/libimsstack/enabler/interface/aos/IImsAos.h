@@ -61,14 +61,14 @@ public:
      * @return Indicated the fetures that contains in 200 OK response for registration.
      *         (@see ImsAosFeature)
      */
-    virtual IMS_UINT32 GetFeatures() = 0;
+    virtual IMS_UINT32 GetFeatures() const = 0;
 
     /**
      * @brief Get the suspended reason
      *
      * @return Indicate the suspended reason
      */
-    virtual IMS_UINT32 GetSuspendedReason() = 0;
+    virtual IMS_UINT32 GetSuspendedReason() const = 0;
 
     /**
      * @brief Indicate whether the feature is registered or not
@@ -76,14 +76,14 @@ public:
      * @param nFeature Indicate the feature for registration. (@see ImsAosFeature)
      * @return If the feature is registered, returns IMS_TRUE.
      */
-    virtual IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) = 0;
+    virtual IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const = 0;
 
     /**
      * @brief Indicate whether the service is connected or not
      *
      * @return If the service is connected, returns IMS_TRUE.
      */
-    virtual IMS_BOOL IsImsConnected() = 0;
+    virtual IMS_BOOL IsImsConnected() const = 0;
 
     /**
      * @brief Indicate whether the service is suspended or not
@@ -91,7 +91,7 @@ public:
      *
      * @return If the service is suspended, returns IMS_TRUE.
      */
-    virtual IMS_BOOL IsImsSuspended() = 0;
+    virtual IMS_BOOL IsImsSuspended() const = 0;
 
     /**
      * @brief Set the listener that provides the each service statsus related to registration

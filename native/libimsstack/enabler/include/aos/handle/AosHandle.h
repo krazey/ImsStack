@@ -64,20 +64,20 @@ public:
     ~AosHandle() override;
 
     // IAosHandle
-    AString& GetAppId() override;
-    AString& GetServiceId() override;
-    IMS_UINT32 GetServiceType() override;
+    const AString& GetAppId() const override;
+    const AString& GetServiceId() const override;
+    IMS_UINT32 GetServiceType() const override;
 
     IImsAosMonitor* GetMonitor() override;
 
-    IMS_SINT32 GetRequestType() override;
+    IMS_SINT32 GetRequestType() const override;
     void SetRequestType(IN IMS_SINT32 nReqType) override;
 
-    IMS_BOOL IsRegBinded() override;
+    IMS_BOOL IsRegBinded() const override;
     void SetRegBinded(IN IMS_BOOL bBind) override;
 
-    IMS_BOOL IsRegFeatureTagRequired() override;
-    IMS_BOOL IsRegToNextPcscfRequested() override;
+    IMS_BOOL IsRegFeatureTagRequired() const override;
+    IMS_BOOL IsRegToNextPcscfRequested() const override;
 
     AosFeatureTagList& GetFeatureTagList() override;
     AosFeatureTagList& GetBindedFeatureTagList() override;
@@ -94,11 +94,11 @@ public:
     // IImsAos
     IMS_BOOL Control(IN IMS_UINT32 nType) override;
     IImsAosInfo* GetAosInfo() override;
-    IMS_UINT32 GetFeatures() override;
-    IMS_UINT32 GetSuspendedReason() override;
-    IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) override;
-    IMS_BOOL IsImsConnected() override;
-    IMS_BOOL IsImsSuspended() override;
+    IMS_UINT32 GetFeatures() const override;
+    IMS_UINT32 GetSuspendedReason() const override;
+    IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const override;
+    IMS_BOOL IsImsConnected() const override;
+    IMS_BOOL IsImsSuspended() const override;
     void SetListener(IN IImsAosListener* piListener) override;
     void SetMonitor(IN IImsAosMonitor* piMonitor) override;
     IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) override;
@@ -184,9 +184,9 @@ protected:
     void ClearSuspendedReason();
 
     IMS_UINT32 GetAppState();
-    IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason);
-    IMS_UINT32 GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason);
-    IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason);
+    IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason) const;
+    IMS_UINT32 GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason) const;
+    IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason) const;
 
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const;
@@ -194,16 +194,16 @@ protected:
     IMS_BOOL IsCapabilityExistedForNetworkType(
             IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
-    IMS_BOOL IsWifiConnected();
-    IMS_BOOL IsDataConnected();
-    IMS_BOOL IsEmergencyService();
+    IMS_BOOL IsWifiConnected() const;
+    IMS_BOOL IsDataConnected() const;
+    IMS_BOOL IsEmergencyService() const;
     IMS_BOOL IsRoaming() const;
     IMS_BOOL IsFeatureUnavailableInLimitedReg(IN IMS_UINT32 nFeature) const;
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
     IMS_UINT32 GetMobileChangingNetworkType() const;
-    IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
+    IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock) const;
 
     void AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
     void RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);

@@ -32,11 +32,11 @@ class MockIImsAos : public IImsAos
 public:
     MOCK_METHOD(IMS_BOOL, Control, (IN IMS_UINT32), (override));
     MOCK_METHOD(IImsAosInfo*, GetAosInfo, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetFeatures, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetSuspendedReason, (), (override));
-    MOCK_METHOD(IMS_BOOL, IsFeatureConnected, (IN IMS_UINT32), (override));
-    MOCK_METHOD(IMS_BOOL, IsImsConnected, (), (override));
-    MOCK_METHOD(IMS_BOOL, IsImsSuspended, (), (override));
+    MOCK_METHOD(IMS_UINT32, GetFeatures, (), (const, override));
+    MOCK_METHOD(IMS_UINT32, GetSuspendedReason, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsFeatureConnected, (IN IMS_UINT32), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsImsConnected, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsImsSuspended, (), (const, override));
     MOCK_METHOD(void, SetListener, (IN IImsAosListener*), (override));
     MOCK_METHOD(void, SetMonitor, (IN IImsAosMonitor*), (override));
     MOCK_METHOD(IMS_BOOL, SetReady, (IN IMS_BOOL, IN IMS_UINT32), (override));

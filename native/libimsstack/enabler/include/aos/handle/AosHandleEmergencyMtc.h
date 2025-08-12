@@ -28,6 +28,6 @@ public:
 protected:
     void InitializeServiceFeature() override;
 
-    IMS_BOOL IsVideoFeatureSupported();
+    IMS_BOOL IsVideoFeatureSupported() const;
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTC_H_
