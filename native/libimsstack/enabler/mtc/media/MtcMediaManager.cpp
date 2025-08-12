@@ -60,22 +60,14 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
     IMS_TRACE_D("~MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 
-    m_pMediaReportListener = IMS_NULL;
-    m_pQosListener = IMS_NULL;
-
     delete m_pProfileManager;
+    delete m_pMediaInfo;
+    delete m_pOldMediaInfo;
 
-    if (m_pMediaInfo)
+    if (m_piMediaSession != IMS_NULL)
     {
-        delete m_pMediaInfo;
+        m_objMediaManager.DestroySession(m_piMediaSession);
     }
-
-    if (m_pOldMediaInfo)
-    {
-        delete m_pOldMediaInfo;
-    }
-
-    m_objMediaManager.DestroySession(m_piMediaSession);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportType,
@@ -234,9 +226,11 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
 PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
 {
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
-
-    m_objMediaManager.DestroySession(m_piMediaSession);
-    m_piMediaSession = IMS_NULL;
+    if (m_piMediaSession != IMS_NULL)
+    {
+        m_objMediaManager.DestroySession(m_piMediaSession);
+        m_piMediaSession = IMS_NULL;
+    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(

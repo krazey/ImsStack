@@ -167,8 +167,6 @@ TEST_F(MtcMediaManagerTest, DestroyMediaSessionDestroysMediaSession)
     EXPECT_CALL(objMediaManager, DestroySession(&objMediaSession));
 
     pMediaManager->DestroyMediaSession();
-
-    EXPECT_CALL(objMediaManager, DestroySession(nullptr));  // Destructor
 }
 
 TEST_F(MtcMediaManagerTest, CreateMediaProfileCreatesMediaProfile)
