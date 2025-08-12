@@ -53,7 +53,5 @@
             <item value="127"/>
         </int-array>
     </pbundle_as_map>
-    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
-    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
     <string name="imsvoice.conference_factory_uri_string">sip:Conf-Factory@three.co.uk</string>
 </carrier_config>

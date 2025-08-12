@@ -44,4 +44,5 @@
         <item value="20000"/>
     </int-array>
     <int name="ims.hide_mac_address_in_pani_header_int" value="2"/>
+    <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
 </carrier_config>

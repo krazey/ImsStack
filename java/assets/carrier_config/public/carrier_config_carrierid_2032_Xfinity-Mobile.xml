@@ -68,10 +68,10 @@
             <item value="106"/>
         </int-array>
         <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
-            <item value="100"/>
+            <item value="105"/>
         </int-array>
         <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="105"/>
+            <item value="100"/>
         </int-array>
     </pbundle_as_map>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">

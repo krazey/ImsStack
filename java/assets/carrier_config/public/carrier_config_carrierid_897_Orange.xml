@@ -16,6 +16,50 @@
 -->
 <!-- carrier_name: Orange (Luxem-bourg) -->
 <carrier_config>
+    <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="2">
+            <item value="126"/>
+            <item value="127"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="100"/>
+            <item value="105"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="98"/>
+            <item value="103"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="96"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="97"/>
+        </int-array>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="126">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="6"/>
+            </int-array>
+        </pbundle_as_map>
+        <pbundle_as_map name="127">
+            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="2"/>
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="3"/>
+                <item value="6"/>
+            </int-array>
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+
     <!-- MTS -->
     <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
         <item value="1"/>

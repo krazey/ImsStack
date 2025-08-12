@@ -35,10 +35,10 @@
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>
     <boolean name="ims.init_ipsec_setting_with_new_pcscf_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="false"/>
-    <int name="ims.reg_actual_wait_time_policy_int" value="1"/>
     <int name="ims.reg_out_of_service_policy_int" value="1"/>
     <int name="ims.reg_retry_cnt_on_single_pcscf_int" value="1"/>
     <int name="ims.reg_retry_cnt_with_ipsec_on_auth_failure_int" value="0"/>

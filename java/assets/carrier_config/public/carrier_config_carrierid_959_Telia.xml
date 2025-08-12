@@ -19,10 +19,10 @@
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
             <item value="126"/>
         </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="1">
             <item value="104"/>
         </int-array>
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">
             <item value="102"/>
         </int-array>
         <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
@@ -55,4 +55,12 @@
     </pbundle_as_map>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
 </carrier_config>

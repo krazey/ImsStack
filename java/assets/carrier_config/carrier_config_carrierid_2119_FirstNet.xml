@@ -145,7 +145,6 @@
     <int name="imsrtt.policy_on_text_qos_deactivation_int" value="1"/>
     <int name="imswfc.country_code_int" value="1"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
-    <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="10000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="210000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="20000"/>

@@ -36,8 +36,8 @@
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle_as_map>
-    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="14000"/>
-    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="14000"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="5">
         <item value="0"/>
         <item value="1"/>

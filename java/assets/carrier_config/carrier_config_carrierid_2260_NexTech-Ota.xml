@@ -16,4 +16,5 @@
 -->
 <carrier_config>
     <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b;i-wlan-node-id=#IMEIASADDRREFID#</string>
+    <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
 </carrier_config>

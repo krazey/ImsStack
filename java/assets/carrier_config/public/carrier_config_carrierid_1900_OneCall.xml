@@ -58,4 +58,12 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
 </carrier_config>

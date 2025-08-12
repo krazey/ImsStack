@@ -68,4 +68,29 @@
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
         </pbundle_as_map>
     </pbundle_as_map>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="2">
+            <item value="115"/>
+            <item value="109"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="104"/>
+            <item value="110"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="3">
+            <item value="102"/>
+            <item value="108"/>
+            <item value="106"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="105"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="100"/>
+        </int-array>
+    </pbundle_as_map>
 </carrier_config>

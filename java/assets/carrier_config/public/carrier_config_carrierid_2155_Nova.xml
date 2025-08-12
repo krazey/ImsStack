@@ -15,21 +15,15 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
-    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
-    <string name="imsvoice.conference_factory_uri_string">sip:8881112663@msg.pc.t-mobile.com</string>
-    <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="127">
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="0"/>
-                <item value="4"/>
+                <item value="6"/>
             </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <int name="imsvoice.evs_codec_attribute_hf_only_int" value="1"/>
         </pbundle_as_map>
     </pbundle_as_map>
 </carrier_config>

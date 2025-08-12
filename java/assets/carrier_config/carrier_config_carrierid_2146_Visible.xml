@@ -44,4 +44,5 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
 </carrier_config>

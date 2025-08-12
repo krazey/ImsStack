@@ -15,5 +15,36 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.ut_requires_ims_registration_bool" value="true"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="10000"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:ALU_CONF@ims.attmex.mx</string>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="3"/>
+                <item value="6"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="255"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle_as_map name="100">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle_as_map>
+        <pbundle_as_map name="105">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </carrier_config>

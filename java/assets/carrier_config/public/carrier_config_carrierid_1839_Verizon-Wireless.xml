@@ -28,7 +28,6 @@
     <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
     <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <int name="imsvoice.session_refresher_type_int" value="0"/>
-    <int name="imsvoice.session_refresh_method_int" value="1"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="300"/>
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="300"/>
     <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">

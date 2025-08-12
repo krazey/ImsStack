@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="15000"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="15000"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:confserver@ims.cellcom.com</string>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="5">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+        <item value="4"/>
+    </int-array>
+    <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="109"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="104"/>
+            <item value="110"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="3">
+            <item value="102"/>
+            <item value="108"/>
+            <item value="106"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="105"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="100"/>
+        </int-array>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="109">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="4"/>
+            </int-array>
+        </pbundle_as_map>
+    </pbundle_as_map>
+</carrier_config>
