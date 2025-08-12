@@ -334,7 +334,6 @@ template <typename T>
 class ByRef final
 {
 public:
-    inline ByRef() = default;
     inline explicit ByRef(IN const T value) :
             mValue(value)
     {

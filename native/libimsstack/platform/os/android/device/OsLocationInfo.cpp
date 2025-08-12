@@ -130,7 +130,8 @@ class LocationUpdateCompletedHandler final : public AsyncExecutor
 {
 public:
     inline explicit LocationUpdateCompletedHandler(IN AsyncExecutor::IListener* piListener) :
-            AsyncExecutor(piListener, IMS_FALSE)
+            AsyncExecutor(piListener, IMS_FALSE),
+            m_nId(0)
     {
     }
     ~LocationUpdateCompletedHandler() override = default;
@@ -138,12 +139,12 @@ public:
 public:
     inline void OnExecute(IN IMS_UINTP /*nParam1*/, IN IMS_UINTP nParam2) override
     {
-        nId = static_cast<IMS_SINT32>(nParam2);
+        m_nId = static_cast<IMS_SINT32>(nParam2);
     }
-    inline IMS_SINT32 GetId() const { return nId; }
+    inline IMS_SINT32 GetId() const { return m_nId; }
 
 private:
-    IMS_SINT32 nId;
+    IMS_SINT32 m_nId;
 };
 
 PUBLIC
