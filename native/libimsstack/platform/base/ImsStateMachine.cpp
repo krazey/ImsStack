@@ -23,8 +23,8 @@ ImsStateMachine::ImsStateMachine(IN IMS_UINT32 nState) :
 {
 }
 
-// cppcheck-suppress constParameterReference
 PUBLIC
+// cppcheck-suppress constParameterReference
 IMS_BOOL ImsStateMachine::OnStateMessage(IN ImsMessage& objMsg)
 {
     const StateMap* pStateMap = GetStateMap();
