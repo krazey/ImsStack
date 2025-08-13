@@ -28,9 +28,9 @@ class IAosHandle
 public:
     virtual ~IAosHandle(){};
 
-    virtual AString& GetAppId() = 0;
-    virtual AString& GetServiceId() = 0;
-    virtual IMS_UINT32 GetServiceType() = 0;
+    virtual const AString& GetAppId() const = 0;
+    virtual const AString& GetServiceId() const = 0;
+    virtual IMS_UINT32 GetServiceType() const = 0;
     virtual IImsAosMonitor* GetMonitor() = 0;
 
     // nReqType is set from AoSHandle
@@ -39,7 +39,7 @@ public:
         DETACH = 0,  // This service will be removed in Registration
         ATTACH       // This service will be added in Registration
     };
-    virtual IMS_SINT32 GetRequestType() = 0;
+    virtual IMS_SINT32 GetRequestType() const = 0;
     virtual void SetRequestType(IN IMS_SINT32 nReqType) = 0;
 
     // bBind is set from AoSRegistration
@@ -47,11 +47,11 @@ public:
         if bBind is true, this service is added in Registration
         if bBind is false, this service is removed in Registration
     */
-    virtual IMS_BOOL IsRegBinded() = 0;
+    virtual IMS_BOOL IsRegBinded() const = 0;
     virtual void SetRegBinded(IN IMS_BOOL bBind) = 0;
 
-    virtual IMS_BOOL IsRegFeatureTagRequired() = 0;
-    virtual IMS_BOOL IsRegToNextPcscfRequested() = 0;
+    virtual IMS_BOOL IsRegFeatureTagRequired() const = 0;
+    virtual IMS_BOOL IsRegToNextPcscfRequested() const = 0;
 
     virtual AosFeatureTagList& GetFeatureTagList() = 0;
     virtual AosFeatureTagList& GetBindedFeatureTagList() = 0;

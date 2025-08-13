@@ -159,17 +159,17 @@ PUBLIC VIRTUAL AosHandle::~AosHandle()
     }
 }
 
-PUBLIC VIRTUAL AString& AosHandle::GetAppId()
+PUBLIC VIRTUAL const AString& AosHandle::GetAppId() const
 {
     return m_strAppId;
 }
 
-PUBLIC VIRTUAL AString& AosHandle::GetServiceId()
+PUBLIC VIRTUAL const AString& AosHandle::GetServiceId() const
 {
     return m_strServiceId;
 }
 
-PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetServiceType()
+PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetServiceType() const
 {
     return m_nServiceType;
 }
@@ -179,7 +179,7 @@ PUBLIC VIRTUAL IImsAosMonitor* AosHandle::GetMonitor()
     return m_piMonitor;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosHandle::GetRequestType()
+PUBLIC VIRTUAL IMS_SINT32 AosHandle::GetRequestType() const
 {
     return m_nReqType;
 }
@@ -192,7 +192,7 @@ PUBLIC VIRTUAL void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
     m_nReqType = nReqType;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegBinded()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegBinded() const
 {
     return m_bBind;
 }
@@ -204,12 +204,12 @@ PUBLIC VIRTUAL void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
     m_bBind = bBind;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegFeatureTagRequired()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegFeatureTagRequired() const
 {
     return m_bRegFeatureTagRequired;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegToNextPcscfRequested()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegToNextPcscfRequested() const
 {
     return m_bRegToNextPcscfRequested;
 }
@@ -353,7 +353,7 @@ PUBLIC VIRTUAL IImsAosInfo* AosHandle::GetAosInfo()
     return m_piInfo;
 }
 
-PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures()
+PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures() const
 {
     if (!IsImsConnected())
     {
@@ -364,17 +364,17 @@ PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures()
             ~(m_objBindedFeatureTagList.GetUnavailableFeatures()));
 }
 
-PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetSuspendedReason()
+PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetSuspendedReason() const
 {
     return m_nSuspendedReason;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature)
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature) const
 {
     return (GetFeatures() & nFeature) > 0;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected() const
 {
     IMS_UINT32 nState = GetState();
 
@@ -384,7 +384,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected()
     return (nState == STATE_CONNECTED);
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended() const
 {
     A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: reason(%x)", m_nSuspendedReason, 0, 0);
 
@@ -637,7 +637,7 @@ IMS_UINT32 AosHandle::GetAppState()
 }
 
 PROTECTED
-IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
+IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason) const
 {
     IMS_UINT32 nImsAosReason = ImsAosReason::NOT_SPECIFIED;
 
@@ -690,7 +690,7 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
 }
 
 PROTECTED
-IMS_UINT32 AosHandle::GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason)
+IMS_UINT32 AosHandle::GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason) const
 {
     IMS_UINT32 nImsAosReason = GetImsAosReason(nAosReason);
 
@@ -707,7 +707,7 @@ IMS_UINT32 AosHandle::GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason)
 }
 
 PROTECTED
-IMS_UINT32 AosHandle::GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason)
+IMS_UINT32 AosHandle::GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason) const
 {
     IMS_UINT32 nImsAosReason = ImsAosReason::SUSPEND_NONE;
 
@@ -798,13 +798,13 @@ IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT3
 }
 
 PROTECTED
-IMS_BOOL AosHandle::IsWifiConnected()
+IMS_BOOL AosHandle::IsWifiConnected() const
 {
     return (m_piWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED);
 }
 
 PROTECTED
-IMS_BOOL AosHandle::IsDataConnected()
+IMS_BOOL AosHandle::IsDataConnected() const
 {
     IAosConnection* piConnection = m_piAppContext->GetConnection();
 
@@ -812,7 +812,7 @@ IMS_BOOL AosHandle::IsDataConnected()
 }
 
 PROTECTED
-IMS_BOOL AosHandle::IsEmergencyService()
+IMS_BOOL AosHandle::IsEmergencyService() const
 {
     return (m_nServiceType == ImsAosService::EMERGENCY_MTC ||
             m_nServiceType == ImsAosService::EMERGENCY_MTS);
@@ -852,7 +852,7 @@ IMS_UINT32 AosHandle::GetMobileChangingNetworkType() const
 }
 
 PROTECTED
-IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
+IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock) const
 {
     IMS_UINT32 nFeature = ImsAosFeature::NONE;
 

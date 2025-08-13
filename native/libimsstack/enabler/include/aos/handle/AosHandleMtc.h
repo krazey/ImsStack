@@ -35,7 +35,7 @@ public:
     ~AosHandleMtc() override;
 
     // IImsAos
-    IMS_UINT32 GetFeatures() override;
+    IMS_UINT32 GetFeatures() const override;
 
     // IAosHandle
     IMS_BOOL App_Notify() override;
@@ -81,8 +81,8 @@ protected:
     void UpdateGGsmaRcsTelephonyFeatureTag();
     void UpdateVopsInfo(IN IMS_UINT32 nState, IN const AString& strPlmn);
 
-    IMS_UINT32 GetVoiceBlockReasonForIpcan();
-    IMS_UINT32 GetVideoBlockReasonForIpcan();
+    IMS_UINT32 GetVoiceBlockReasonForIpcan() const;
+    IMS_UINT32 GetVideoBlockReasonForIpcan() const;
 
     IMS_BOOL IsCsFeatureTagRequired() const;
     IMS_BOOL IsInvalidMobileNetwork() const;
