@@ -31,6 +31,8 @@
 #include "IMtcContext.h"
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
+#include "IPageMessage.h"
+#include "IReference.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
 #include "ImsAos.h"
@@ -46,6 +48,7 @@
 #include "ServiceTrace.h"
 #include "SipFactory.h"
 #include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "common/IAppConfig.h"
 #include "common/ICoreServiceConfig.h"
 #include "common/IMediaConfig.h"
@@ -294,16 +297,25 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedTir(IN IMS_BOOL bEnabled)
     m_eTirStatus = bEnabled ? SuppStatus::PROVISIONED_ENABLED : SuppStatus::PROVISIONED_DISABLED;
 }
 
-PUBLIC VIRTUAL void MtcService::CoreService_ServiceClosed(
-        IN ICoreService* /*piService*/, IN IReasonInfo* /*piReasonInfo*/)
+PUBLIC VIRTUAL void MtcService::CoreService_PageMessageReceived(
+        IN [[maybe_unused]] ICoreService* piService, IN IPageMessage* piMessage)
 {
-    IMS_TRACE_I("CoreService_ServiceClosed", 0, 0, 0);
+    IMS_TRACE_I("CoreService_PageMessageReceived", 0, 0, 0);
+    piMessage->Reject(SipStatusCode::SC_488);
+    piMessage->Destroy();
+}
+
+PUBLIC VIRTUAL void MtcService::CoreService_ReferenceReceived(
+        IN [[maybe_unused]] ICoreService* piService, IN IReference* piReference)
+{
+    IMS_TRACE_I("CoreService_ReferenceReceived", 0, 0, 0);
+    piReference->RejectEx(SipStatusCode::SC_488);
+    piReference->Destroy();
 }
 
 PUBLIC VIRTUAL void MtcService::CoreService_SessionInvitationReceived(
-        IN ICoreService* piService, IN ISession* piSession)
+        IN [[maybe_unused]] ICoreService* piService, IN ISession* piSession)
 {
-    (void)piService;
     IMS_TRACE_I("CoreService_SessionInvitationReceived", 0, 0, 0);
     m_objContext.GetCallController().HandleIncoming(this, piSession);
 }
