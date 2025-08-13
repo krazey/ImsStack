@@ -263,6 +263,7 @@ protected:
     virtual void ClearIpsecBlock();
     virtual void CloseUnsecureTcpSocket();
     virtual void ClearReasonCode();
+    virtual void ClearSipRtConfig();
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();

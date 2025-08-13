@@ -2051,8 +2051,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
         return IMS_FALSE;
     }
 
-    SetContactAddressConfiguration(IMS_FALSE);
-
     if (bRestore)
     {
         m_piRegistration->Restore();
@@ -2175,11 +2173,10 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddOperation_OnSendRegister()
         return IMS_FALSE;
     }
 
-    m_piRegContact->RemoveHeaderParameter(AosString::STR_ACCESS_TYPE_FEATURE);
+    ClearSipRtConfig();
+
     AddAccesstypeFeatureTag();
-
     UpdatePaniHeader();
-
     ControlPrivateHeader();
 
     return IMS_TRUE;
@@ -2239,6 +2236,9 @@ PROTECTED VIRTUAL void AosRegistration::AddSpecificOperation()
 
 PROTECTED VIRTUAL void AosRegistration::AddAccesstypeFeatureTag()
 {
+    // Need to remove it whenever invoking this function.
+    m_piRegContact->RemoveHeaderParameter(AosString::STR_ACCESS_TYPE_FEATURE);
+
     IMS_SINT32 nAccessType =
             GET_N_CONFIG(m_nSlotId)->GetRegistrationPreferredAccessTypeFeatureTag();
 
@@ -2678,6 +2678,9 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
 
 PROTECTED VIRTUAL void AosRegistration::SetStaticIpQos()
 {
+    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(m_nSlotId);
+    piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_IP_QOS, IMS_NULL);
+
     IMS_SINT32 nPreferredImsDscp = GET_N_CONFIG(m_nSlotId)->GetPreferredImsDscp();
     if (nPreferredImsDscp == CarrierConfig::Ims::PREFERRED_DSCP_NONE)
     {
@@ -2706,20 +2709,14 @@ PROTECTED VIRTUAL void AosRegistration::SetStaticIpQos()
         }
     }
 
-    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(m_nSlotId);
-    if (piRtConfigHelper != IMS_NULL)
-    {
-        piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_IP_QOS, IMS_NULL);
+    SipRtConfig::IpQos objIpQos;
+    A_IMS_TRACE_I(REGID, "SetStaticIpQos : Set DSCP to %d", nDscp, 0, 0);
 
-        SipRtConfig::IpQos objIpQos;
-        A_IMS_TRACE_I(REGID, "SetStaticIpQos : Set DSCP to %d", nDscp, 0, 0);
+    objIpQos.nValue = nDscp << 2;
+    objIpQos.objIpAddr = m_objIpa;
+    objIpQos.nPort = 0;
 
-        objIpQos.nValue = nDscp << 2;
-        objIpQos.objIpAddr = m_objIpa;
-        objIpQos.nPort = 0;
-
-        piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_IP_QOS, &objIpQos);
-    }
+    piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_IP_QOS, &objIpQos);
 }
 
 PROTECTED VIRTUAL void AosRegistration::SetDynamicIpQos()
@@ -3152,6 +3149,23 @@ PROTECTED VIRTUAL void AosRegistration::ClearReasonCode()
 {
     m_eImsReasonCode = AosReasonCode::UNSPECIFIED;
     m_nDataFailureReason = 0;
+}
+
+PROTECTED VIRTUAL void AosRegistration::ClearSipRtConfig()
+{
+    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(m_nSlotId);
+    SipRtConfig::Header objHeader = SipRtConfig::Header();
+
+    // PCNI header
+    objHeader.strName = AosString::STR_P_CELLULAR_NETWORK_INFO;
+    piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objHeader);
+
+    // PLANI header
+    objHeader.strName = AosString::STR_P_LAST_ACCESS_NETWORK_INFO;
+    piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objHeader);
+
+    // Reg contact address
+    piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_REG_CONTACT_ADDRESS, IMS_NULL);
 }
 
 PROTECTED VIRTUAL void AosRegistration::CloseUnsecureTcpSocket()
