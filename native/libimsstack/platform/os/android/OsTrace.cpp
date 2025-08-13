@@ -47,7 +47,7 @@ protected:
     }
 
 public:
-    // 250 in android
+    // Android log system truncates log messages larger than 1k.
     static constexpr IMS_SINT32 MAX_TRACE_SIZE = 1024;
 };
 
@@ -168,18 +168,19 @@ PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetDirName() const
     return IMS_SOLUTION_STORAGE_ROOT_DIR "/";
 }
 
-PRIVATE VIRTUAL void OsTrace::OutputString(
-        IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength)
+PRIVATE VIRTUAL void OsTrace::OutputString(IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace,
+        IN IMS_UINT32 nLength, IN const IMS_CHAR* pszLogTag /*= IMS_NULL*/)
 {
     IMS_UINT32 nOption = GetOption();
 
-    ImsTrace::OutputString(nCategory, pszTrace, nLength);
+    ImsTrace::OutputString(nCategory, pszTrace, nLength, pszLogTag);
 
     // If serial logging is set ...
     if ((nOption & ITraceOption::OPT_MEDIUM_SERIAL) != 0)
     {
         IMS_UINT32 nCurrentPos = 0;
         const IMS_UINT32 MAX_LOG_BUFF = OsTraceNode::MAX_TRACE_SIZE - 1;
+        const IMS_CHAR* pszImsLogTag = (pszLogTag == IMS_NULL) ? IMS_LOG_TAG : pszLogTag;
 
         while (nLength > 0)
         {
@@ -196,15 +197,15 @@ PRIVATE VIRTUAL void OsTrace::OutputString(
 
             if (nCategory == ITrace::CAT_I)
             {
-                (void)ALOG(LOG_INFO, IMS_LOG_TAG, "%s", pszOutString);
+                (void)ALOG(LOG_INFO, pszImsLogTag, "%s", pszOutString);
             }
             else if (nCategory == ITrace::CAT_E)
             {
-                (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "%s", pszOutString);
+                (void)ALOG(LOG_ERROR, pszImsLogTag, "%s", pszOutString);
             }
             else
             {
-                (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "%s", pszOutString);
+                (void)ALOG(LOG_DEBUG, pszImsLogTag, "%s", pszOutString);
             }
 
             pszTrace[nCurrentPos] = cCharToRestore;

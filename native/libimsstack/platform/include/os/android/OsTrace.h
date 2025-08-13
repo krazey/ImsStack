@@ -38,8 +38,8 @@ public:
 
 protected:
     const IMS_CHAR* GetDirName() const override;
-    void OutputString(
-            IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength) override;
+    void OutputString(IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength,
+            IN const IMS_CHAR* pszLogTag = IMS_NULL) override;
 
     void AddTraceNode(IN OsTraceNode* pNode);
     IMS_SINT32 GetTraceNodeCount();

@@ -20,20 +20,25 @@
 #include "ImsTrace.h"
 #include "ServiceMemory.h"
 
-// SDP/SIP/XML: SP is added before first LF to align a size of start string
 PRIVATE GLOBAL const IMS_CHAR* ImsTrace::START[ITrace::TEXT_MAX] = {
-        "\nTEXT_TEXT_START\n",
-        " \nTEXT_SDP_START\n",
-        " \nTEXT_SIP_START\n",
-        " \nTEXT_XML_START\n",
+        "TEXT_ANY_START\n",
+        "TEXT_SDP_START\n",
+        "TEXT_SIP_START\n",
+        "TEXT_XML_START\n",
 };
 
-// SDP/SIP/XML: SP is added before last LF to align a size of end string
 PRIVATE GLOBAL const IMS_CHAR* ImsTrace::END[ITrace::TEXT_MAX] = {
-        "TEXT_TEXT_END\n\n",
-        "TEXT_SDP_END\n \n",
-        "TEXT_SIP_END\n \n",
-        "TEXT_XML_END\n \n",
+        "TEXT_ANY_END\n\n",
+        "TEXT_SDP_END\n\n",
+        "TEXT_SIP_END\n\n",
+        "TEXT_XML_END\n\n",
+};
+
+PRIVATE GLOBAL const IMS_CHAR* ImsTrace::TEXT_LOG_TAG[ITrace::TEXT_MAX] = {
+        IMS_LOG_TAG "-TXT",
+        IMS_LOG_TAG "-SDP",
+        IMS_LOG_TAG "-SIP",
+        IMS_LOG_TAG "-XML",
 };
 
 PUBLIC
@@ -129,8 +134,9 @@ PUBLIC GLOBAL IMS_SINT32 ImsTrace::IsLoggable(IN IMS_SINT32 nCategory)
     return __android_log_is_loggable(nPriority, IMS_LOG_TAG, ANDROID_LOG_INFO);
 }
 
-PROTECTED VIRTUAL void ImsTrace::OutputString(
-        IN IMS_SINT32 /*nCategory*/, IN IMS_CHAR* /*pszTrace*/, IN IMS_UINT32 /*nLength*/)
+PROTECTED VIRTUAL void ImsTrace::OutputString(IN IMS_SINT32 /*nCategory*/,
+        IN IMS_CHAR* /*pszTrace*/, IN IMS_UINT32 /*nLength*/,
+        IN const IMS_CHAR* /*pszLogTag = IMS_NULL*/)
 {
 }
 
@@ -250,6 +256,7 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
         return;
     }
 
+    const IMS_CHAR* pszLogTag = TEXT_LOG_TAG[nType];
     IMS_CHAR acBuffer[MAX_SUMMARY_SIZE + 1];
     IMS_SINT32 nLength = 0;
 
@@ -263,7 +270,7 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
     }
 
     // Display Start & Info.
-    OutputString(ITrace::CAT_I, acBuffer, nLength);
+    OutputString(ITrace::CAT_I, acBuffer, nLength, pszLogTag);
 
     IMS_SINT32 nTotalLength = static_cast<IMS_SINT32>(nTextSize);
     IMS_CHAR* pszTextStart = const_cast<IMS_CHAR*>(pszText);
@@ -285,7 +292,7 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
             {
                 IMS_CHAR* pszLineEnd = IMS_StrChr(pszHeaderStart, '\n');
 
-                OutputString(ITrace::CAT_I, pszHeaderStart, pszLineEnd - pszHeaderStart);
+                OutputString(ITrace::CAT_I, pszHeaderStart, pszLineEnd - pszHeaderStart, pszLogTag);
 
                 pszHeaderStart = pszLineEnd + 1;  // Skip LF
 
@@ -304,13 +311,13 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
     // Print other text messages or SIP message body parts here.
     if (nTotalLength > 0)
     {
-        OutputString(ITrace::CAT_I, pszTextStart, nTotalLength);
+        OutputString(ITrace::CAT_I, pszTextStart, nTotalLength, pszLogTag);
     }
 
     // Display END
     IMS_MEM_Memcpy(acBuffer, END[nType], END_SIZE);
     acBuffer[END_SIZE] = '\0';
-    OutputString(ITrace::CAT_I, acBuffer, END_SIZE);
+    OutputString(ITrace::CAT_I, acBuffer, END_SIZE, pszLogTag);
 }
 
 PRIVATE
