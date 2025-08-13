@@ -17,6 +17,7 @@
 <carrier_config>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
+    <int name="ims.sip_preferred_transport_int" value="1"/>
     <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
         <item value="0"/>
         <item value="1"/>
