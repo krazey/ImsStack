@@ -182,7 +182,11 @@ TEST(AosLogTest, AppTimerToString)
             "TIMER_APP_TERMINATED");
     EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_PDN_BLOCKED),
             "TIMER_PDN_BLOCKED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_PDN_BLOCKED + 99),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_IMS_ESTABLISHMENT),
+            "TIMER_IMS_ESTABLISHMENT");
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_RAT_BLOCK),
+            "TIMER_RAT_BLOCK");
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_RAT_BLOCK + 99),
             "__INVALID__");
 }
 
