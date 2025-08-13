@@ -1137,12 +1137,6 @@ PROTECTED VIRTUAL IMS_BOOL SipClientConnection::DispatchMessage(IN ImsMessage& o
 PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ForkedResponseReceived(
         IN SipClientTransactionState* pCtState)
 {
-    if (m_piListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "No listener", 0, 0, 0);
-        return;
-    }
-
     SipClientConnection* pScc = new SipClientConnection(pCtState);
 
     IMS_TRACE_D("SCC :: Handling a forked response ...", 0, 0, 0);
