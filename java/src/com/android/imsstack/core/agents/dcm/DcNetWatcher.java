@@ -53,6 +53,7 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -115,6 +116,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     // So they could be overridden by the carrier config
     private boolean mDataRoaming = false;
     private boolean mVoiceRoaming = false;
+    private boolean mRoamingChanged = false;
     // data network roaming state that was not overridden by any carrier config
     private boolean mDataNetworkRoaming = false;
     private boolean mAirplaneMode = false;
@@ -728,6 +730,15 @@ public class DcNetWatcher implements IDcNetWatcher {
                 ? wwanRegInfo.getRejectCause() : REGISTRATION_REJECT_CAUSE_NONE;
     }
 
+    private int getCellularDataRat() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+
+        return (telephony != null)
+                ? telephony.getNetworkType()
+                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    }
+
     private boolean is1xRttRequired() {
         return ((mRatPolicy & POLICY_RAT_1XRTT) != 0);
     }
@@ -844,25 +855,234 @@ public class DcNetWatcher implements IDcNetWatcher {
         ImsLog.i(mSlotId, "mRatPolicy=" + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US));
     }
 
-    private void handleNetworkOperatorChanged() {
+    private boolean updateVoiceServiceState(ServiceState serviceState) {
+        int voiceServiceState = serviceState.getState();
+
+        if (mVoiceServiceState != voiceServiceState) {
+            mVoiceServiceState = voiceServiceState;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateNetworkOperator(ServiceState serviceState) {
+        String operatorNumeric = serviceState.getOperatorNumeric();
+
+        if (operatorNumeric == null) {
+            mNetworkOperator = "";
+        } else if (!mNetworkOperator.equals(operatorNumeric)) {
+            if (getDataServiceState(serviceState) == ServiceState.STATE_IN_SERVICE) {
+                mNetworkOperator = operatorNumeric;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean updateDataServiceState(ServiceState serviceState) {
+        int dataServiceState = getDataServiceState(serviceState);
+
+        mCellularDataServiceState = getCellularDataServiceState(serviceState);
+        if (mDataServiceState != dataServiceState) {
+            mDataServiceState = dataServiceState;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateDataRadioTech() {
+        int dataRat = checkAndConvertNrRat(getCellularDataRat());
+
+        if (mRat != dataRat || getNetworkType() != mRatFromTm) {
+            mRat = dataRat;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateVoiceRadioTech(ServiceState serviceState) {
+        int voiceRat = checkAndConvertNrRat(getAccessNetworkTechnology(serviceState));
+
+        if (mVoiceRat != voiceRat || getVoiceNetworkType() != mVoiceRatFromTm) {
+            mVoiceRat = voiceRat;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateRoamingState(ServiceState serviceState) {
+        boolean roaming = isRoaming();
+        boolean isVoiceRoamingChanged = updateVoiceRoamingState(serviceState);
+        boolean isDataRoamingChanged = updateDataRoamingState(serviceState);
+        mRoamingChanged = roaming != isRoaming();
+
+        return isVoiceRoamingChanged || isDataRoamingChanged;
+    }
+
+    private boolean updateVoiceRoamingState(ServiceState serviceState) {
+        boolean isUpdated = false;
+        boolean isVoiceRoaming = getVoiceRoaming(serviceState);
+        int voiceRoamingType = getVoiceRoamingType(serviceState);
+
+        if (mVoiceRoaming != isVoiceRoaming) {
+            mVoiceRoaming = isVoiceRoaming;
+            isUpdated = true;
+        }
+
+        if (mVoiceRoamingType != voiceRoamingType) {
+            mVoiceRoamingType = voiceRoamingType;
+        }
+
+        return isUpdated;
+    }
+
+    private boolean updateDataRoamingState(ServiceState serviceState) {
+        boolean isUpdated = false;
+        boolean isDataRoaming = getDataRoaming(serviceState);
+        int dataRoamingType = getDataRoamingType(serviceState);
+
+        if (mDataRoaming != isDataRoaming) {
+            mDataRoaming = isDataRoaming;
+            isUpdated = true;
+        }
+
+        if (mDataRoamingType != dataRoamingType) {
+            mDataRoamingType = dataRoamingType;
+        }
+
+        mDataNetworkRoaming = getDataNetworkRoaming(serviceState);
+
+        return isUpdated;
+    }
+
+    private boolean updateVopsState(ServiceState serviceState) {
+        NetworkRegistrationInfo regInfo =
+                serviceState.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (regInfo == null) {
+            return false;
+        }
+
+        DataSpecificRegistrationInfo dsrInfo = regInfo.getDataSpecificInfo();
+        if (dsrInfo == null) {
+            return false;
+        }
+
+        VopsSupportInfo vsi = dsrInfo.getVopsSupportInfo();
+        if (vsi == null) {
+            return false;
+        }
+
+        // Emergency service
+        boolean emcbs = vsi.isEmergencyServiceSupported();
+        if (mEmcbs != emcbs) {
+            ImsLog.w(mSlotId, "update emergency service supported info : " + emcbs);
+            mEmcbs = emcbs;
+        }
+
+        // VoPS
+        boolean isVopsSupported = vsi.isVopsSupported() || mDcSettings == null
+                || mDcSettings.isVopsIgnored();
+        if (mImsVops != isVopsSupported || !mImsVopsPlmn.equals(mNetworkOperator)) {
+            ImsLog.d(mSlotId, "VoPS supported indication is updated as = " + isVopsSupported
+                    + " on PLMN(" + mNetworkOperator + ")");
+
+            mImsVops = isVopsSupported;
+            mImsVopsPlmn = mNetworkOperator;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateLteInfo(ServiceState serviceState) {
+        // LTE duplex mode
+        if (serviceState.getDuplexMode() != ServiceState.DUPLEX_MODE_UNKNOWN) {
+            mLteDuplexMode = serviceState.getDuplexMode();
+            ImsLog.d(mSlotId, "lte duplex mode = " + mLteDuplexMode);
+        }
+
+        // LTE attach result and extra info
+        NetworkRegistrationInfo regInfo =
+                serviceState.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (regInfo == null) {
+            return false;
+        }
+
+        DataSpecificRegistrationInfo dsrInfo = regInfo.getDataSpecificInfo();
+        if (dsrInfo == null) {
+            return false;
+        }
+
+        int lteAttachResultType = getLteAttachResultType(dsrInfo.getLteAttachResultType());
+        int lteAttachExtraInfo = getLteAttachExtraInfo(dsrInfo.getLteAttachExtraInfo());
+
+        if (mLteAttachResultType != lteAttachResultType
+                || mLteAttachExtraInfo != lteAttachExtraInfo) {
+            ImsLog.d(mSlotId, "lte attach result = " + lteAttachResultType
+                    + ", extra = " + lteAttachExtraInfo);
+            mLteAttachResultType = lteAttachResultType;
+            mLteAttachExtraInfo = lteAttachExtraInfo;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateNetworkRegistrationState(ServiceState serviceState) {
+        boolean isUpdated = false;
+
+        // WWAN network registration state
+        int networkRegistrationState = getWwanNetworkRegistrationState(serviceState);
+        if (networkRegistrationState != mNetworkRegistrationState) {
+            mNetworkRegistrationState = networkRegistrationState;
+            isUpdated = true;
+        }
+
+        // WWAN network registration reject cause
+        if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
+                || mNetworkRegistrationState
+                        == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING) {
+            mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
+        } else {
+            int rejectCause = getWwanNetworkRegistrationRejectCause(serviceState);
+            if (rejectCause != REGISTRATION_REJECT_CAUSE_NONE) {
+                mNetworkRegistrationRejectCause = rejectCause;
+            }
+        }
+
+        return isUpdated;
+    }
+
+    private void notifyNetworkOperatorChanged() {
         for (Listener l : mListeners) {
             l.onNetworkOperatorChanged(mNetworkOperator);
         }
     }
 
-    private void handleDataServiceStateChanged() {
+    private void notifyDataServiceStateChanged() {
         for (Listener l : mListeners) {
             l.onDataServiceStateChanged(mDataServiceState);
         }
         mSystem.notifyServiceStateChanged(mDataServiceState);
     }
 
-    private void handleVoiceServiceStateChanged() {
+    private void notifyVoiceServiceStateChanged() {
         mSystem.notifyEvent(ImsEventDef.IMS_EVENT_VOICE_SERVICE_STATE, mVoiceServiceState, 0);
     }
 
     // Data Radio Tech
-    private void handleRadioTechChanged() {
+    private void notifyRadioTechChanged() {
         for (Listener l : mListeners) {
             l.onDataNetworkTypeChanged();
         }
@@ -870,40 +1090,21 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     // Voice Radio Tech
-    private void handleVoiceRadioTechChanged() {
+    private void notifyVoiceRadioTechChanged() {
         for (Listener l : mListeners) {
             l.onVoiceNetworkTypeChanged();
         }
         mSystem.notifyVoiceNetworkTypeChanged(getRadioTechCategory(mVoiceRat));
     }
 
-    private void handleRoamingStateChanged(ServiceState ss) {
-        // Notify combination of data and voice roaming state
-        boolean roaming = ss.getRoaming();
-        if (isRoaming() != roaming) {
-            for (Listener l : mListeners) {
-                l.onRoamingStateChanged(roaming);
-            }
-        }
-
-        // Notify data and voice roaming state respectively
-        boolean isDataRoaming = getDataRoaming(ss);
-        boolean isVoiceRoaming = getVoiceRoaming(ss);
-        if (mVoiceRoaming != isVoiceRoaming) {
-            if (mDataRoaming != isDataRoaming) {
-                mDataRoaming = isDataRoaming;
-            }
-            mVoiceRoaming = isVoiceRoaming;
-            notifyRoamingState(mDataRoaming, mVoiceRoaming);
-        } else if (mDataRoaming != isDataRoaming) {
-            mDataRoaming = isDataRoaming;
-            notifyRoamingState(mDataRoaming, mVoiceRoaming);
-        }
-
-        mDataNetworkRoaming = getDataNetworkRoaming(ss);
-    }
-
     private void notifyRoamingState(boolean dataRoaming, boolean voiceRoaming) {
+        if (mRoamingChanged) {
+            for (Listener l : mListeners) {
+                l.onRoamingStateChanged(isRoaming());
+            }
+            mRoamingChanged = false;
+        }
+
         int psRoamingState =
                 (dataRoaming)
                         ? ImsEventDef.IMS_ROAMING_STATE_ON
@@ -915,82 +1116,27 @@ public class DcNetWatcher implements IDcNetWatcher {
         mSystem.notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE, psRoamingState, csRoamingState);
     }
 
-    private void handleImsNetworkFeature(ServiceState ss) {
-        // LTE duplex mode
-        if (is4G() && (ss.getDuplexMode() != ServiceState.DUPLEX_MODE_UNKNOWN)) {
-            mLteDuplexMode = ss.getDuplexMode();
-            ImsLog.d(mSlotId, "lte duplex mode = " + mLteDuplexMode);
-        }
+    private void notifyImsNetworkVopsChanged() {
+        int state =
+                (mImsVops)
+                        ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
+                        : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
 
-        // VoPS and Emergency service
-        NetworkRegistrationInfo regInfo =
-                ss.getNetworkRegistrationInfo(
-                        NetworkRegistrationInfo.DOMAIN_PS,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        mSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, state, 0);
 
-        if (regInfo != null) {
-            DataSpecificRegistrationInfo dsrInfo = regInfo.getDataSpecificInfo();
-            if (dsrInfo != null) {
-                VopsSupportInfo vsi = dsrInfo.getVopsSupportInfo();
-                if (vsi != null) {
-                    boolean vops = vsi.isVopsSupported();
-                    boolean emcbs = vsi.isEmergencyServiceSupported();
-
-                    handleImsNetworkVopsChanged(vops);
-                    if (mEmcbs != emcbs) {
-                        ImsLog.w(mSlotId, "update emergency service supported info : " + emcbs);
-                        mEmcbs = emcbs;
-                    }
-                }
-
-                // LTE attach result and extra info
-                if (is4G()) {
-                    int lteAttachResultType = getLteAttachResultType(
-                            dsrInfo.getLteAttachResultType());
-                    int lteAttachExtraInfo = getLteAttachExtraInfo(dsrInfo.getLteAttachExtraInfo());
-
-                    if (mLteAttachResultType != lteAttachResultType
-                            || mLteAttachExtraInfo != lteAttachExtraInfo) {
-                        ImsLog.d(mSlotId, "lte attach result = " + lteAttachResultType
-                                + ", extra = " + lteAttachExtraInfo);
-                        mLteAttachResultType = lteAttachResultType;
-                        mLteAttachExtraInfo = lteAttachExtraInfo;
-                        mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
-                                mLteAttachExtraInfo);
-                    }
-                }
-            }
-        }
-    }
-
-    private void handleImsNetworkVopsChanged(boolean currentVops) {
-        boolean isVopsSupported = currentVops || mDcSettings == null || mDcSettings.isVopsIgnored();
-
-        if (mImsVops != isVopsSupported || !mImsVopsPlmn.equals(mNetworkOperator)) {
-            ImsLog.d(mSlotId, "VoPS supported indication is updated as = " + isVopsSupported
-                    + " on PLMN(" + mNetworkOperator + ")");
-
-            int state =
-                    (isVopsSupported)
-                            ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
-                            : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
-
-            if (mImsVops != isVopsSupported) {
-                mImsVops = isVopsSupported;
-                mSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, state, 0);
-            }
-
-            mImsVopsPlmn = mNetworkOperator;
-
-            for (Listener l : mListeners) {
-                l.onVopsStateChanged(state, mImsVopsPlmn);
-            }
-        }
-    }
-
-    private void handleNetworkRegistrationStateChanged(int regState) {
         for (Listener l : mListeners) {
-            l.onNetworkRegistrationStateChanged(regState);
+            l.onVopsStateChanged(state, mImsVopsPlmn);
+        }
+    }
+
+    private void notifyLteInfoChanged() {
+        mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
+                mLteAttachExtraInfo);
+    }
+
+    private void notifyNetworkRegistrationStateChanged() {
+        for (Listener l : mListeners) {
+            l.onNetworkRegistrationStateChanged(mNetworkRegistrationState);
         }
     }
 
@@ -1052,13 +1198,25 @@ public class DcNetWatcher implements IDcNetWatcher {
             // roaming state
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
 
-            handleVoiceServiceStateChanged();
+            notifyVoiceServiceStateChanged();
             mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
                     mLteAttachExtraInfo);
         }
     }
 
     private class DcNetWatcherPhoneStateListener implements ImsPhoneStateListener {
+        private enum NetworkServiceState {
+            VOICE_SERVICE_STATE,
+            NETWORK_OPERATOR,
+            DATA_SERVICE_STATE,
+            DATA_RAT,
+            VOICE_RAT,
+            ROAMING_STATE,
+            VOPS_STATE,
+            LTE_INFO,
+            NETWORK_REGISTRATION_STATE
+        }
+
         private IPhoneStateNotifier mNotifier;
         private PhoneStateInterface mPhoneState;
 
@@ -1091,96 +1249,89 @@ public class DcNetWatcher implements IDcNetWatcher {
         /** Invokes when service state is changed. */
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
-            int voiceServiceState = serviceState.getState();
-            int voiceRAT = getAccessNetworkTechnology(serviceState);
-            int dataServiceState = getDataServiceState(serviceState);
-            int dataRAT = getCellularDataRAT();
-            String operatorNumeric = serviceState.getOperatorNumeric();
-            int voiceRoamingType = getVoiceRoamingType(serviceState);
-            int dataRoamingType = getDataRoamingType(serviceState);
+            Set<NetworkServiceState> changedStates = EnumSet.noneOf(NetworkServiceState.class);
 
-            // Voice service state
-            if (mVoiceServiceState != voiceServiceState) {
-                mVoiceServiceState = voiceServiceState;
-                handleVoiceServiceStateChanged();
+            if (updateVoiceServiceState(serviceState)) {
+                changedStates.add(NetworkServiceState.VOICE_SERVICE_STATE);
             }
 
-            // Network Operator Info.
-            if (operatorNumeric == null) {
-                mNetworkOperator = "";
-            } else if (!mNetworkOperator.equals(operatorNumeric)) {
-                if (dataServiceState == ServiceState.STATE_IN_SERVICE) {
-                    mNetworkOperator = operatorNumeric;
-                    handleNetworkOperatorChanged();
-                }
+            if (updateNetworkOperator(serviceState)) {
+                changedStates.add(NetworkServiceState.NETWORK_OPERATOR);
             }
 
-            // Data service state
-            mCellularDataServiceState = getCellularDataServiceState(serviceState);
-            if (mDataServiceState != dataServiceState) {
-                mDataServiceState = dataServiceState;
-                handleDataServiceStateChanged();
+            if (updateDataServiceState(serviceState)) {
+                changedStates.add(NetworkServiceState.DATA_SERVICE_STATE);
             }
 
-            // Data RAT info.
-            dataRAT = checkAndConvertNrRat(dataRAT);
-            if (mRat != dataRAT || getNetworkType() != mRatFromTm) {
-                mRat = dataRAT;
-                handleRadioTechChanged();
+            if (updateDataRadioTech()) {
+                changedStates.add(NetworkServiceState.DATA_RAT);
             }
 
-            // Voice RAT info.
-            voiceRAT = checkAndConvertNrRat(voiceRAT);
-            if (mVoiceRat != voiceRAT || getVoiceNetworkType() != mVoiceRatFromTm) {
-                mVoiceRat = voiceRAT;
-                handleVoiceRadioTechChanged();
+            if (updateVoiceRadioTech(serviceState)) {
+                changedStates.add(NetworkServiceState.VOICE_RAT);
             }
 
-            // Roaming state
-            handleRoamingStateChanged(serviceState);
+            if (updateRoamingState(serviceState)) {
+                changedStates.add(NetworkServiceState.ROAMING_STATE);
+            }
 
-            // network feature for IMS
             if (is4G() || is5G()) {
-                handleImsNetworkFeature(serviceState);
-            }
-
-            // Voice Roaming Type
-            if (mVoiceRoamingType != voiceRoamingType) {
-                mVoiceRoamingType = voiceRoamingType;
-            }
-
-            // Data Roaming Type
-            if (mDataRoamingType != dataRoamingType) {
-                mDataRoamingType = dataRoamingType;
-            }
-
-            // WWAN network registration state
-            int networkRegistrationState = getWwanNetworkRegistrationState(serviceState);
-            if (networkRegistrationState != mNetworkRegistrationState) {
-                handleNetworkRegistrationStateChanged(networkRegistrationState);
-                mNetworkRegistrationState = networkRegistrationState;
-            }
-
-            // WWAN network registration reject cause
-            if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
-                    || mNetworkRegistrationState
-                            == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING) {
-                mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
-            } else {
-                int rejectCause = getWwanNetworkRegistrationRejectCause(serviceState);
-                if (rejectCause != REGISTRATION_REJECT_CAUSE_NONE) {
-                    mNetworkRegistrationRejectCause = rejectCause;
+                if (updateVopsState(serviceState)) {
+                    changedStates.add(NetworkServiceState.VOPS_STATE);
                 }
+            }
+
+            if (is4G()) {
+                if (updateLteInfo(serviceState)) {
+                    changedStates.add(NetworkServiceState.LTE_INFO);
+                }
+            }
+
+            if (updateNetworkRegistrationState(serviceState)) {
+                changedStates.add(NetworkServiceState.NETWORK_REGISTRATION_STATE);
+            }
+
+            if (!changedStates.isEmpty()) {
+                notifyServiceStateChanged(changedStates);
             }
         }
 
-        private int getCellularDataRAT() {
-            TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
-                    TelephonyInterface.class, mSlotId);
+        private void notifyServiceStateChanged(Set<NetworkServiceState> changedStates) {
+            if (changedStates.contains(NetworkServiceState.VOICE_SERVICE_STATE)) {
+                notifyVoiceServiceStateChanged();
+            }
 
-            return (telephony != null)
-                    ? telephony.getNetworkType()
-                    : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+            if (changedStates.contains(NetworkServiceState.NETWORK_OPERATOR)) {
+                notifyNetworkOperatorChanged();
+            }
+
+            if (changedStates.contains(NetworkServiceState.DATA_SERVICE_STATE)) {
+                notifyDataServiceStateChanged();
+            }
+
+            if (changedStates.contains(NetworkServiceState.DATA_RAT)) {
+                notifyRadioTechChanged();
+            }
+
+            if (changedStates.contains(NetworkServiceState.VOICE_RAT)) {
+                notifyVoiceRadioTechChanged();
+            }
+
+            if (changedStates.contains(NetworkServiceState.ROAMING_STATE)) {
+                notifyRoamingState(mDataRoaming, mVoiceRoaming);
+            }
+
+            if (changedStates.contains(NetworkServiceState.VOPS_STATE)) {
+                notifyImsNetworkVopsChanged();
+            }
+
+            if (changedStates.contains(NetworkServiceState.LTE_INFO)) {
+                notifyLteInfoChanged();
+            }
+
+            if (changedStates.contains(NetworkServiceState.NETWORK_REGISTRATION_STATE)) {
+                notifyNetworkRegistrationStateChanged();
+            }
         }
     }
 
