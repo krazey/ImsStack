@@ -498,11 +498,35 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
         StartTimer(TIMER_MO_NOANSWER);
     }
 
+    const IMS_BOOL bNeedToConfirm = m_objContext.GetConfigurationProxy().GetBoolean(
+                                      ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL) &&
+            IsNeedToSendLocalResourceConfirmation(piSession);
+    if (!bNeedToConfirm)
+    {
+        // Assume that there is no case to send ANSWER in PRACK.
+        // Therefore, when QoS Confirmation is unnecessary, MTC sends the PRACK first and then
+        // proceed with internal processing.
+        if (piSession->IsFinalResponseReceivedForInitialInviteRequest())
+        {
+            IMS_TRACE_E(0, "SessionRprReceived - Session already has final response.", 0, 0, 0);
+        }
+        else
+        {
+            if (pSession->SendPrack(IMS_FALSE) == IMS_FAILURE)
+            {
+                CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
+                HandleCancel(piSession, objReason);
+                OnStartFailed(objReason);
+
+                return CallStateName::TERMINATING;
+            }
+        }
+    }
+
     AString strNotSupportedExtension;
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(
                 *piMessage, strNotSupportedExtension))
     {
-        pSession->SendPrack(IMS_FALSE);
         CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(objReason);
@@ -527,7 +551,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
     if (eCallReason != CODE_NONE)
     {
-        pSession->SendPrack(IMS_FALSE);
         if (MultipleDialogHandler().OnUnavailableDialogCreated(m_objContext,
                     *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
         {
@@ -542,7 +565,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (objMediaManager.GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
     {
-        pSession->SendPrack(IMS_FALSE);
         CallReasonInfo objReason(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
         HandleCancel(piSession, objReason);
@@ -559,19 +581,18 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
     else
     {
-        IMS_BOOL bNeedToConfirm = IsNeedToSendLocalResourceConfirmation(piSession);
         if (bNeedToConfirm)
         {
             objMediaManager.AdjustDirectionForLocalResourceConfirmation(pSession->GetCallType());
-        }
 
-        if (pSession->SendPrack(bNeedToConfirm) == IMS_FAILURE)
-        {
-            CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
-            HandleCancel(piSession, objReason);
-            OnStartFailed(objReason);
+            if (pSession->SendPrack(IMS_TRUE) == IMS_FAILURE)
+            {
+                CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
+                HandleCancel(piSession, objReason);
+                OnStartFailed(objReason);
 
-            return CallStateName::TERMINATING;
+                return CallStateName::TERMINATING;
+            }
         }
     }
 

@@ -138,12 +138,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bSdpOfferRequired)
 {
-    IMS_BOOL bAllowSdp = m_objContext.GetConfigurationProxy().GetBoolean(
-            ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL);
-    IMS_TRACE_D(
-            "SendPrack offer[%s] allow[%s]", _TRACE_B_(bSdpOfferRequired), _TRACE_B_(bAllowSdp), 0);
+    IMS_TRACE_D("SendPrack offer required[%s]", _TRACE_B_(bSdpOfferRequired), 0, 0);
 
-    if (SetSdpToSend(bSdpOfferRequired && bAllowSdp) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(bSdpOfferRequired) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }

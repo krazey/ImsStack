@@ -479,7 +479,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
         return CallStateName::ESTABLISHED;
     }
 
-    if (pSession->SendPrack(IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
+    if (pSession->SendPrack(m_objContext.GetConfigurationProxy().GetBoolean(
+                                    ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL) &&
+                IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();

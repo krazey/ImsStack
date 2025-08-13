@@ -1238,6 +1238,9 @@ TEST_F(UpdatingStateTest,
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
@@ -1245,6 +1248,25 @@ TEST_F(UpdatingStateTest,
 
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
     EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionRprReceived(&objSession, -1));
+}
+
+TEST_F(UpdatingStateTest,
+        SessionRprReceivedDoesNotSendLocalResourceConfirmationWithPrackIfNotSupported)
+{
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .Times(0);
+    EXPECT_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .Times(0);
+
+    EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionRprReceived(&objSession, -1));
 }

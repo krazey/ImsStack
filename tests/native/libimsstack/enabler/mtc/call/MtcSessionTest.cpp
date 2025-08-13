@@ -333,8 +333,6 @@ TEST_F(MtcSessionTest, SendPrackFailsIfSetSdpFails)
 TEST_F(MtcSessionTest, SendPrackSendsPrackWithoutReOfferIfSdpOfferIsSent)
 {
     CreateMtcSession();
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(0);
@@ -347,8 +345,6 @@ TEST_F(MtcSessionTest, SendPrackSendsPrackWithoutReOfferIfSdpOfferIsSent)
 TEST_F(MtcSessionTest, SendPrackSendsPrackWithReOffer)
 {
     CreateMtcSession();
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
@@ -356,21 +352,6 @@ TEST_F(MtcSessionTest, SendPrackSendsPrackWithReOffer)
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objSession, IMS_FALSE)).Times(1);
-    EXPECT_CALL(*pMessageSender, SendPrack).Times(1);
-
-    pMtcSession->SendPrack(IMS_TRUE);
-}
-
-TEST_F(MtcSessionTest, SendPrackSendsPrackWithoutReOfferEvenIfReOfferIsRequiredIfSdpIsNotAllowed)
-{
-    CreateMtcSession();
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
-            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
-
-    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(0);
-    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(_, _)).Times(0);
     EXPECT_CALL(*pMessageSender, SendPrack).Times(1);
 
     pMtcSession->SendPrack(IMS_TRUE);
