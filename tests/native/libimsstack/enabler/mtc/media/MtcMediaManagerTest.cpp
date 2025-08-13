@@ -745,6 +745,25 @@ TEST_F(MtcMediaManagerTest, RunIf180IsNotReceived)
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
 }
 
+TEST_F(MtcMediaManagerTest, RunIf180IsReceivedWithoutNegotiation)
+{
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+
+    EXPECT_CALL(objMediaSession, GetNegoState(NEGO_ID))
+            .WillOnce(Return(NegotiationState::STATE_NEGOTIATED));
+    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
+    EXPECT_FALSE(pMediaManager->IsLocalTone());
+
+    EXPECT_CALL(objMediaSession, GetNegoState(NEGO_ID))
+            .WillOnce(Return(NegotiationState::STATE_OFFER_SENT));
+    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
+    EXPECT_TRUE(pMediaManager->IsLocalTone());
+}
+
 TEST_F(MtcMediaManagerTest, RunAndLocalToneStateIsNotChangedIf180IsReceivedInCaseOfInvalidPolicy)
 {
     CallInfo objCallInfo;
@@ -756,7 +775,7 @@ TEST_F(MtcMediaManagerTest, RunAndLocalToneStateIsNotChangedIf180IsReceivedInCas
             .WillByDefault(Return(-1));
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
     ON_CALL(objMediaSession, GetNegoState(NEGO_ID))
-            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
     IMS_BOOL bLocalTone = pMediaManager->IsLocalTone();
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
