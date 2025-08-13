@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "MediaDef.h"
+#include "video/VideoDef.h"
 #include "video/VideoProfileNegotiator.h"
 #include "video/VideoProfile.h"
 #include "video/VideoProfileUtil.h"
@@ -30,7 +31,7 @@ using ::testing::Return;
 
 const AString kAvcProfileID = "42e01f";
 const IMS_UINT32 kLocalPayload = 97;
-const IMS_UINT32 kPeerPayload = 98;
+const IMS_UINT32 kPeerPayload = 100;
 
 // Test fixture for VideoProfileNegotiator tests
 class VideoProfileNegotiatorTest : public ::testing::Test
@@ -180,7 +181,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateBasicSuccess)
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
 
     auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
-    EXPECT_NE(pNegoFmtp, nullptr);
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
     EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
     EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
     EXPECT_EQ(pNegoFmtp->GetProfileLevelId(), kAvcProfileID);
@@ -309,8 +310,8 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)
     AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 15, "640C1F");
     AddAvcPayload(m_pLocalProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 15,
             kTargetAvcProfileID);
-    AddAvcPayload(m_pPeerProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 15,
-            kTargetAvcProfileID);
+    AddAvcPayload(
+            m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 15, kTargetAvcProfileID);
 
     // Act: Perform negotiation (Offer received scenario)
     // Pass the mock config object using .get()
@@ -325,12 +326,12 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)
             MEDIA_DIRECTION_SEND_RECEIVE);  // Example expected direction
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    EXPECT_NE(pNegoPayload, nullptr);
-    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(),
-            kLocalPayload + 1);  // Should take peer's pPayload number in offer scenario
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
 
     auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
     EXPECT_NE(pNegoFmtp, nullptr);
     EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
     EXPECT_EQ(pNegoFmtp->GetLevel(), 15);
@@ -339,13 +340,13 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMatchedInMultipleItems)
 {
-    const IMS_SINT32 nLocalPayload1 = kLocalPayload;
-    const IMS_SINT32 nLocalPayload2 = kLocalPayload + 1;
+    const IMS_SINT32 kLocalPayload1 = kLocalPayload;
+    const IMS_SINT32 kLocalPayload2 = kLocalPayload + 1;
     // Arrange: Multiple local payloads and single peer payload, the 2nd local payload is matched
     // with the peer payload.
-    AddAvcPayload(m_pLocalProfile.get(), nLocalPayload1, VIDEO_RESOLUTION_VGA_LS, 30,
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload1, VIDEO_RESOLUTION_VGA_LS, 30,
             "42e01e");  // Level 3.0
-    AddAvcPayload(m_pLocalProfile.get(), nLocalPayload2, VIDEO_RESOLUTION_VGA_LS, 12,
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload2, VIDEO_RESOLUTION_VGA_LS, 12,
             "42e00C");  // Level 1.2
     AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 12,
             "42e00C");  // Level 1.2
@@ -359,9 +360,12 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMatchedInMultipleItems)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     std::shared_ptr<VideoProfile::VideoFmtp> pNegoFmtp = pNegoPayload->GetFmtp();
 
     // Check the negotiated level and the index, direction
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
     EXPECT_EQ(pNegoFmtp->GetLevel(), 12);
     EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 1);  // 2nd index
     EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
@@ -385,12 +389,134 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     std::shared_ptr<VideoProfile::VideoFmtp> pNegoFmtp = pNegoPayload->GetFmtp();
 
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
     EXPECT_EQ(pNegoFmtp->GetLevel(), 30);                        // lower Level
     EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
     EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchPeerLower)
+{
+    // Arrange: Local nLevel is lower than peer's
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");  // Level 3.1
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 30,
+            "42e01e");  // Level 3.0
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 30);                        // lower Level
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateMultipleAvcLevelPeerPickMiddle)
+{
+    // Arrange: Local nLevel is lower than peer's
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "640C1F");  // Level 3.1
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");  // Level 3.1
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload + 2, VIDEO_RESOLUTION_QVGA_LS, 12,
+            "42C00C");  // Level 1.2
+    AddAvcPayload(m_pPeerProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 12,
+            "42C00C");  // Level 1.2
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kLocalPayload + 1);
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 12);                        // level 1.2
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 1);  // 2nd index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateMultipleAvcLevelPeerPickLast)
+{
+    // Arrange: Local nLevel is lower than peer's
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "640C1F");  // Level 3.1
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");  // Level 3.1
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload + 2, VIDEO_RESOLUTION_QVGA_LS, 12,
+            "42C00C");  // Level 1.2
+    AddAvcPayload(m_pPeerProfile.get(), kLocalPayload + 1, VIDEO_RESOLUTION_QVGA_LS, 12,
+            "42C00C");  // Level 1.2
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kLocalPayload + 1);
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 12);                        // level 1.2
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 2);  // 3rd index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcPeerResolutionNotSpecified)
+{
+    // Arrange: No exact eResolution match, but levels match. Local has VGA+.
+    // Expect negotiation to succeed using the closest available local eResolution (VGA).
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31, "42e01f");
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_NOT_USED, 31, "42e01f");
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+
+    // VGA_LS
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
@@ -411,10 +537,10 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
     EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    EXPECT_NE(pNegoPayload, nullptr);
+    ASSERT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
-    auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
-    EXPECT_NE(pNegoFmtp, nullptr);
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
     // Check that the eResolution was set based on GetAvcMaxResolutionFromLevel or highest local
     // In this case, local VGA (index 0) was the temp pPayload. SetClosestAvc uses nLevel 31 ->
     // VGA_LS
@@ -427,7 +553,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
 {
-    // Arrange: Local nLevel is lower than peer's
+    // Arrange: Local level is lower than peer's
     AddHevcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS,
             30);  // Level 3.0 (SDP 90)
     AddHevcPayload(
@@ -442,12 +568,95 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     std::shared_ptr<VideoProfile::VideoFmtp> pNegoFmtp = pNegoPayload->GetFmtp();
 
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
     EXPECT_EQ(pNegoFmtp->GetLevel(), 90);                        // lower nLevel
     EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
     EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchPeerLower)
+{
+    // Arrange: peer level is lower than local's
+    AddHevcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS,
+            31);  // Level 3.1 (SDP 93)
+    AddHevcPayload(
+            m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 30);  // Level 3.0 (SDP 93)
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 90);                        // lower nLevel
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateHevcPeerResolutionNotSpecified)
+{
+    // Arrange: Local level and profile is the same and different resolution.
+    AddHevcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31);
+    AddHevcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_NOT_USED, 31);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1) << "Assert by the no payload";
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
+
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_NE(m_pNegotiatedProfile->GetDataPort(), 0);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateHevcResolutionMismatch)
+{
+    // Arrange: Local level and profile is the same and different resolution.
+    AddHevcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31);
+    AddHevcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_HD_LS, 31);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1) << "Assert by the no payload";
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
+
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_NE(m_pNegotiatedProfile->GetDataPort(), 0);
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAnswerSentBasicSuccess)
@@ -464,7 +673,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAnswerSentBasicSuccess)
     EXPECT_TRUE(bResult);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
-    EXPECT_NE(pNegoPayload, nullptr);
+    ASSERT_NE(pNegoPayload, nullptr);
     // Should use local pPayload number in answer scenario
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
