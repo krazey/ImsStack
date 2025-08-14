@@ -388,7 +388,6 @@ AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
         while (nULL != 0)
         {
             // The "nBase" is always not zero.
-            // cppcheck-suppress zerodivcond
             n1Cipher = nULL % nBase;
 
             --pULL;
