@@ -24,6 +24,8 @@ class ISipConfigV;
 class ISipMessage;
 class IRegistration;
 
+enum class AosNetworkType;
+
 /**
  * @brief This class provides useful services to be used commonly to Aos classes
  */
@@ -102,6 +104,8 @@ public:
     IMS_BOOL IsWifiTest() const;
 
     IMS_BOOL IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const;
+
+    AosNetworkType GetAosNetworkType(IN IMS_UINT32 nNetworkType) const;
 
     // Test
     void SetISipConfigV(IN ISipConfigV* piSipConfigV);

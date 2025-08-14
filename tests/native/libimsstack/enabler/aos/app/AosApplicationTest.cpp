@@ -208,6 +208,7 @@ enum
     using Base::SetCleanState;                                  \
     using Base::IsUpdateAvailable;                              \
     using Base::IsReconfigHandleChanged;                        \
+    using Base::IsRegisteredNetwork;                            \
     using Base::IsRequestCmdHeldByCondition;                    \
     using Base::IsAllHandleDetached;                            \
     using Base::IsConditionTimerSkippedDueToTimer;              \
@@ -3504,6 +3505,8 @@ TEST_F(AosApplicationTest, Callback)
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosRegistration, GetImsRegNetwork())
+            .WillByDefault(Return(AosNetworkType::NR));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(1);
@@ -4218,4 +4221,34 @@ TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToAirplan
 
     m_pAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+}
+
+TEST_F(AosApplicationTest, ReturnTrueIfRegisteredOnTheGivenNetworkType)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosRegistration, GetImsRegNetwork())
+            .WillByDefault(Return(AosNetworkType::LTE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosApplication->IsRegisteredNetwork(NW_REPORT_RADIO_LTE));
+}
+
+TEST_F(AosApplicationTest, ReturnFalseIfRegisteredOnOtherThanTheGivenNetworkType)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosRegistration, GetImsRegNetwork())
+            .WillByDefault(Return(AosNetworkType::LTE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosApplication->IsRegisteredNetwork(NW_REPORT_RADIO_NR));
+}
+
+TEST_F(AosApplicationTest, ReturnFalseIfRegisteredNetworkIsNone)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosRegistration, GetImsRegNetwork())
+            .WillByDefault(Return(AosNetworkType::NONE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosApplication->IsRegisteredNetwork(NW_REPORT_RADIO_INVALID));
 }

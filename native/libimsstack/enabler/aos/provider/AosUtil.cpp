@@ -33,6 +33,7 @@
 #include "Sip.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
+#include "IAosService.h"
 #include "provider/AosUtil.h"
 #include "provider/AosString.h"
 
@@ -748,6 +749,26 @@ IMS_BOOL AosUtil::IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSl
             strSimCountry.GetStr(), 0);
 
     return !strCountry.Equals(strSimCountry);
+}
+
+PUBLIC
+AosNetworkType AosUtil::GetAosNetworkType(IN IMS_UINT32 nNetworkType) const
+{
+    switch (nNetworkType)
+    {
+        case NW_REPORT_RADIO_WLAN:
+            return AosNetworkType::IWLAN;
+        case NW_REPORT_RADIO_LTE:
+            return AosNetworkType::LTE;
+        case NW_REPORT_RADIO_NR:
+            return AosNetworkType::NR;
+        case NW_REPORT_RADIO_WCDMA:  // FALL-THROUGH
+        case NW_REPORT_RADIO_HSPA:
+            return AosNetworkType::UTRAN;
+
+        default:
+            return AosNetworkType::NONE;
+    }
 }
 
 PUBLIC

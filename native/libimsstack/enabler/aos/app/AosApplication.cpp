@@ -391,21 +391,7 @@ AosNetworkType AosApplication::GetNetworkTypeForImsRegState() const
         return AosNetworkType::LTE;
     }
 
-    switch (m_piContext->GetNetTracker()->GetNetworkType())
-    {
-        case NW_REPORT_RADIO_WLAN:
-            return AosNetworkType::IWLAN;
-        case NW_REPORT_RADIO_LTE:
-            return AosNetworkType::LTE;
-        case NW_REPORT_RADIO_NR:
-            return AosNetworkType::NR;
-        case NW_REPORT_RADIO_WCDMA:  // FALL-THROUGH
-        case NW_REPORT_RADIO_HSPA:
-            return AosNetworkType::UTRAN;
-
-        default:
-            return AosNetworkType::NONE;
-    }
+    return m_pUtil->GetAosNetworkType(m_piContext->GetNetTracker()->GetNetworkType());
 }
 
 PROTECTED
@@ -628,6 +614,23 @@ PROTECTED
 IMS_BOOL AosApplication::IsRegStateUpdatedByNrLteRatChange() const
 {
     return IsRegTypeNormal();
+}
+
+PROTECTED
+IMS_BOOL AosApplication::IsRegisteredNetwork(IN IMS_UINT32 nNetworkType) const
+{
+    AosNetworkType eCurrentNetwork = m_pUtil->GetAosNetworkType(nNetworkType);
+    AosNetworkType eImsRegNetwork = m_piRegistration->GetImsRegNetwork();
+
+    A_IMS_TRACE_D(APPID, "IsRegisteredNetwork :: Current Network(%d), Registered Network(%d)",
+            eCurrentNetwork, eImsRegNetwork, 0);
+
+    if (eImsRegNetwork == AosNetworkType::NONE)
+    {
+        return IMS_FALSE;
+    }
+
+    return (eImsRegNetwork == eCurrentNetwork);
 }
 
 PROTECTED IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
@@ -3430,7 +3433,7 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
             m_pUtil->IsSupportedNetworkTypeForCellular(m_nRat) &&
             m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
     {
-        if (IsOn() && IsRegUpdatedByNrLteRatChange())
+        if (IsOn() && IsRegUpdatedByNrLteRatChange() && !IsRegisteredNetwork(nNewRat))
         {
             if (IsTimerRunning(TIMER_RECONFIG_GUARD))
             {

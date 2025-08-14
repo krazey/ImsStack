@@ -22,6 +22,7 @@
 
 #include "CarrierConfig.h"
 #include "ImsList.h"
+#include "IAosService.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -801,4 +802,14 @@ TEST_F(AosUtilTest, WifiTestIsFalseWhenTurningOffWifiTest)
 {
     m_pAosUtil->SetWifiTest(IMS_FALSE);
     EXPECT_FALSE(m_pAosUtil->IsWifiTest());
+}
+
+TEST_F(AosUtilTest, ReturnMappedAosNetworkTypeForGivenNetworkType)
+{
+    EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_WLAN), AosNetworkType::IWLAN);
+    EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_LTE), AosNetworkType::LTE);
+    EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_NR), AosNetworkType::NR);
+    EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_WCDMA), AosNetworkType::UTRAN);
+    EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_HSPA), AosNetworkType::UTRAN);
+    EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_EHRPD), AosNetworkType::NONE);
 }

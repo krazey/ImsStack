@@ -123,6 +123,7 @@ protected:
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsRegTypeNormal() const;
     IMS_BOOL IsRegStateUpdatedByNrLteRatChange() const;
+    IMS_BOOL IsRegisteredNetwork(IN IMS_UINT32 nNetworkType) const;
     IMS_BOOL IsPdnDisconnectRequired() const;
     IMS_BOOL IsPlmnBlockRequired() const;
     IMS_BOOL IsBlockRat(IN IMS_UINT32 nRat) const;
