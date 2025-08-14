@@ -1013,6 +1013,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
                 else
                 {
                     if (m_nOldState == STATE_OFFER_SENT &&
+                            piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE &&
                             !(piSipMsg->IsMessageRpr() ||
                                     SipStatusCode::IsFinalSuccess(piSipMsg->GetStatusCode())))
                     {
