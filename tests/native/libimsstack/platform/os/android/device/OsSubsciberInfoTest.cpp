@@ -37,7 +37,6 @@ public:
     MockISystem m_objMockSystem;
 
     ISystem* m_piDefaultSystem;
-    ISystemListener* m_piSystemListener;
     OsSubscriberInfo* m_pOsSubscriberInfo;
 
     TestPhoneInfoService m_objPhoneInfoService;
