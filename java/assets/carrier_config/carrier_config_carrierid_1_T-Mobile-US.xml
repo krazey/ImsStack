@@ -347,16 +347,15 @@
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="30"/>
             <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
+                <item value="720"/>
+                <item value="1280"/>
             </int-array>
-            <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
             <int name="imsvt.hevc_profile_int" value="1"/>
             <int name="imsvt.hevc_level_int" value="93"/>
         </pbundle_as_map>
     </pbundle_as_map>
     <string-array name="imsvt.video_codec_frame_size_string_array" num="4">
-        <item value="115 480 640"/>
+        <item value="115 720 1280"/>
         <item value="116 480 640"/>
         <item value="117 480 640"/>
         <item value="118 240 320"/>

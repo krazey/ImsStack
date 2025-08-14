@@ -39,7 +39,6 @@
                 <item value="480"/>
                 <item value="640"/>
             </int-array>
-            <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
             <int name="imsvt.hevc_profile_int" value="1"/>
             <int name="imsvt.hevc_level_int" value="93"/>
         </pbundle_as_map>
