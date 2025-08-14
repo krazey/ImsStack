@@ -30,8 +30,7 @@ protected:
     virtual void TearDown() override {}
 
 protected:
-    static const IMS_SIZE_T DST_DATA_LEN = 256;
-
+    static const IMS_SIZE_T DST_DATA_LEN;
     static const IMS_CHAR DATA_WITH_TWO_PADDING[];
     static const IMS_CHAR DATA_WITH_ONE_PADDING[];
     static const IMS_CHAR DATA_WITH_NO_PADDING[];
@@ -44,6 +43,7 @@ protected:
     static const IMS_CHAR BASE64_FOR_CRLF[];
 };
 
+const IMS_SIZE_T ImsBase64Test::DST_DATA_LEN = 256;
 const IMS_CHAR ImsBase64Test::DATA_WITH_TWO_PADDING[] = "Hello~! This is an IMS world";
 const IMS_CHAR ImsBase64Test::DATA_WITH_ONE_PADDING[] = "Hello~! This is an IMS world.";
 const IMS_CHAR ImsBase64Test::DATA_WITH_NO_PADDING[] = "Hello~! This is an IMS world..";
