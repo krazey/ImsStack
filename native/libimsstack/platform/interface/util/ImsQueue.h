@@ -18,6 +18,9 @@
 
 #include "ImsVector.h"
 
+// The duplInheritedMember warning is suppressed because the identical member function name
+// is an intentional design, which uses private inheritance and method wrapping.
+// cppcheck-suppress-begin duplInheritedMember
 template <class T>
 class ImsQueue : private ImsVector<T>
 {
@@ -95,6 +98,7 @@ public:
     // Adds an element to the back of the queue
     inline void Push(IN const T& element) { ImsVector<T>::Push(element); }
 };
+// cppcheck-suppress-end duplInheritedMember
 
 // Overrides operators
 PUBLIC

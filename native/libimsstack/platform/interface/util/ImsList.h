@@ -18,6 +18,9 @@
 
 #include "ImsVector.h"
 
+// The duplInheritedMember warning is suppressed because the identical member function name
+// is an intentional design, which uses private inheritance and method wrapping.
+// cppcheck-suppress-begin duplInheritedMember
 template <class T>
 class ImsList : private ImsVector<T>
 {
@@ -30,7 +33,7 @@ public:
             ImsVector<T>(other)
     {
     }
-    inline virtual ~ImsList() {}
+    ~ImsList() override = default;
 
 public:
     inline ImsList<T>& operator=(IN const ImsList<T>& other)
@@ -124,6 +127,7 @@ public:
     // Removes all elements that match the specified element.
     inline IMS_BOOL Remove(IN const T& element) { return ImsVector<T>::Remove(element); }
 };
+// cppcheck-suppress-end duplInheritedMember
 
 // Overrides operators
 PUBLIC
