@@ -51,6 +51,7 @@ PROTECTED VIRTUAL IMS_BOOL ImsService::DispatchMessage(IN ImsMessage& objMsg)
 }
 
 PRIVATE
+// cppcheck-suppress constParameterReference
 IMS_BOOL ImsService::OnStateMsgProcess(IN ImsMessage& objMsg)
 {
     const StateMap* pStateMap = GetStateMap();
