@@ -114,6 +114,8 @@ public class SscTransactionTest {
         when(mMockSscUtils.getCurrentUtcTimeEpochMs()).thenReturn(1000L);
         when(mMockSscConnection.isConnected()).thenReturn(true);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false);
+        when(mMockSscAuthAgent.getLastSuccessfulGbaMode()).thenReturn(SscConfig.GBA_NONE);
+        when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
         when(mMockSscXui.getXui(eq(SLOT_0), eq(null))).thenReturn(mDefaultXui);
         when(mMockSscUrl.getQueryUri(any(), eq(mDefaultXui))).thenReturn(mDefaultRequestUri);
         when(mMockSscUrl.getUpdateUri(any(), eq(mDefaultXui))).thenReturn(mDefaultRequestUri);
@@ -926,6 +928,118 @@ public class SscTransactionTest {
 
         verifyTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CB,
                 ISscHttpConnection.HTTP_REQUEST_PUT);
+    }
+
+    @Test
+    public void getGbaKey_gbaUFailureBySpecificError_noRetry() {
+        String nafFqdn = "xcap.3gpp.com";
+        String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
+        int appType = SscConstant.APPTYPE_ISIM;
+        mGbaMode = SscConfig.GBA_U;
+
+        when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
+        when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
+        when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
+        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
+        when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt()))
+                .thenReturn(new GbaCredentials(GbaInterface.GBA_FAILURE_REASON_KEY_INVALID));
+
+        boolean result = mSscTransaction.getGbaKey(true);
+
+        assertEquals(false, result);
+        verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt());
+        verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
+
+        verifyNoMoreInteractions(mMockGbaAgent);
+    }
+
+    @Test
+    public void getGbaKey_gbaUFailureByUnknownError_retryWithGbaMeAndSuccess() {
+        String nafFqdn = "xcap.3gpp.com";
+        String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
+        int appType = SscConstant.APPTYPE_ISIM;
+        mGbaMode = SscConfig.GBA_U;
+
+        when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
+        when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
+        when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
+        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
+        when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt()))
+                .thenReturn(new GbaCredentials(TelephonyManager.GBA_FAILURE_REASON_UNKNOWN));
+        when(mMockGbaAgent.getGbaKey(eq(appType), eq(SscConfig.GBA_ME), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt()))
+                .thenReturn(new GbaCredentials("B-TID", "Ks_NAF_KEY"));
+
+        boolean result = mSscTransaction.getGbaKey(true);
+
+        assertEquals(true, result);
+        verify(mMockGbaAgent, times(2)).getGbaKey(eq(appType), anyInt(), anyBoolean(), eq(nafFqdn),
+                 eq(securityProtocol), eq(true), anyInt());
+        verify(mMockSscAuthAgent).setLastSuccessfulGbaMode(eq(SscConfig.GBA_ME)); // GBA ME.
+
+        verifyNoMoreInteractions(mMockGbaAgent);
+    }
+
+    @Test
+    public void getGbaKey_gbaMeFailureByUnknownError_noRetry() {
+        String nafFqdn = "xcap.3gpp.com";
+        String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
+        int appType = SscConstant.APPTYPE_ISIM;
+        mGbaMode = SscConfig.GBA_ME;
+
+        when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
+        when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
+        when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
+        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
+        when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt()))
+                .thenReturn(new GbaCredentials(GbaInterface.GBA_FAILURE_REASON_KEY_INVALID));
+
+        boolean result = mSscTransaction.getGbaKey(true);
+
+        assertEquals(false, result);
+        verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt());
+        verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
+
+        verifyNoMoreInteractions(mMockGbaAgent);
+    }
+
+    @Test
+    public void getGbaKey_gbaUButLastSuccessfulGbaWasGbaMe_tryGbaMeAndSuccess() {
+        String nafFqdn = "xcap.3gpp.com";
+        String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
+        int appType = SscConstant.APPTYPE_ISIM;
+        mGbaMode = SscConfig.GBA_U;
+
+        when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
+        when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
+        when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
+        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
+        when(mMockSscAuthAgent.getLastSuccessfulGbaMode()).thenReturn(SscConfig.GBA_ME);
+        when(mMockGbaAgent.getGbaKey(eq(appType), eq(SscConfig.GBA_ME), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt()))
+                .thenReturn(new GbaCredentials("B-TID", "Ks_NAF_KEY"));
+
+        boolean result = mSscTransaction.getGbaKey(true);
+
+        assertEquals(true, result);
+        // Don't try with GBA U.
+        verify(mMockGbaAgent, never()).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(),
+                eq(nafFqdn), eq(securityProtocol), eq(true), anyInt());
+        // Try with GBA ME directly.
+        verify(mMockGbaAgent).getGbaKey(eq(appType), eq(SscConfig.GBA_ME), anyBoolean(),
+                eq(nafFqdn), eq(securityProtocol), eq(true), anyInt());
+        verify(mMockSscAuthAgent).setLastSuccessfulGbaMode(eq(SscConfig.GBA_ME)); // GBA ME.
+
+        verifyNoMoreInteractions(mMockGbaAgent);
     }
 
     private void verifyTransactionSuccess(int requestedEventNum, int requestType) {

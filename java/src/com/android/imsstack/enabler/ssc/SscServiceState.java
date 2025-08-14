@@ -278,6 +278,7 @@ public class SscServiceState {
         ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
         authAgent.setIsCredentialInfoUpdated(false);
         authAgent.setETag("");
+        authAgent.setLastSuccessfulGbaMode(SscConfig.GBA_NONE);
 
         stopUtBlockTimer();
     }

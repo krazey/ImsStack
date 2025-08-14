@@ -43,6 +43,7 @@ public final class SscConfig {
     // CarrierConfigManager.OIR_NO_REQUEST_TO_SERVER;
     public static final int OIR_NO_REQUEST_TO_SERVER = 4;
 
+    public static final int GBA_NONE = 0;
     public static final int GBA_ME = CarrierConfigManager.GBA_ME; // 1
     public static final int GBA_U = CarrierConfigManager.GBA_U; // 2
     public static final int GBA_DIGEST = CarrierConfigManager.GBA_DIGEST; // 3

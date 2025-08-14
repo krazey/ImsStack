@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.TelephonyManager.GBA_FAILURE_REASON_UNKNOWN;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_IWLAN;
 
 import android.os.Handler;
@@ -466,7 +467,8 @@ public class SscTransaction {
         return AgentFactory.getInstance().getAgent(GbaInterface.class, mSlotId);
     }
 
-    private boolean getGbaKey(boolean forceBootStrapping) {
+    @VisibleForTesting
+    protected boolean getGbaKey(boolean forceBootStrapping) {
         GbaInterface gbaAgent = getGbaAgent();
         if (gbaAgent == null) {
             return false;
@@ -485,20 +487,42 @@ public class SscTransaction {
         }
 
         int appType = getSscUtils().getTelephonySimType(mSlotId);
-        int gbaMode = SscConfig.getGbaMode(mSlotId);
         boolean isTls = SscConfig.isTls(mSlotId);
         String nafFqdn = authAgent.getNafFqdn();
         String securityProtocol = authAgent.getCipherSuite();
 
-        GbaCredentials gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
-                securityProtocol, forceBootStrapping, timeLeftSec);
-        if (gbaCredentials == null || gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
+        GbaCredentials gbaCredentials;
+        int gbaMode = authAgent.getLastSuccessfulGbaMode();
+        if (gbaMode != SscConfig.GBA_NONE) {
+            gbaCredentials = gbaAgent.getGbaKey(appType, authAgent.getLastSuccessfulGbaMode(),
+                    isTls, nafFqdn, securityProtocol, forceBootStrapping, timeLeftSec);
+        } else {
+            gbaMode = authAgent.getGbaMode(appType);
+            gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn, securityProtocol,
+                    forceBootStrapping, timeLeftSec);
+
+            if (gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
+                if (gbaMode == SscConfig.GBA_U
+                        && gbaCredentials.getReason() == GBA_FAILURE_REASON_UNKNOWN) {
+                    timeLeftSec = getTransactionTimeLeftMs() / 1000;
+                    if (timeLeftSec > 0) {
+                        // Retry GBA authentication with GBA ME if it failed with GBA U.
+                        gbaMode = SscConfig.GBA_ME;
+                        gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls,
+                                nafFqdn, securityProtocol, forceBootStrapping, timeLeftSec);
+                    }
+                }
+            }
+        }
+
+        if (gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
             ImsLog.e(mSlotId, "Getting gba key failure");
             authAgent.setIsCredentialInfoUpdated(false);
             return false;
         }
 
         authAgent.setGbaKeys(gbaCredentials.getTransactionId(), gbaCredentials.getKey());
+        authAgent.setLastSuccessfulGbaMode(gbaMode);
         return true;
     }
 

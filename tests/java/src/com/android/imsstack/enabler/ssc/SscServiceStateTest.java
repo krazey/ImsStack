@@ -284,6 +284,7 @@ public class SscServiceStateTest {
 
         ISscAuthAgent authAgent = SscAuthAgent.getInstance(SLOT0);
         authAgent.setIsCredentialInfoUpdated(true);
+        authAgent.setLastSuccessfulGbaMode(SscConfig.GBA_ME);
         authAgent.setETag("etag");
 
         mSscServiceState = new SscServiceState(SLOT0, mLooper.getLooper());
@@ -310,6 +311,7 @@ public class SscServiceStateTest {
         verify(mMockUtInterface).onServiceStateChanged();
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         assertEquals(false, authAgent.isCredentialInfoUpdated());
+        assertEquals(SscConfig.GBA_NONE, authAgent.getLastSuccessfulGbaMode());
         assertEquals("", authAgent.getETag());
     }
 
@@ -861,6 +863,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         ISscAuthAgent authAgent = SscAuthAgent.getInstance(SLOT0);
         authAgent.setIsCredentialInfoUpdated(true);
+        authAgent.setLastSuccessfulGbaMode(SscConfig.GBA_ME);
         authAgent.setETag("etag");
         when(mMockSimInterface.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
 
@@ -869,6 +872,7 @@ public class SscServiceStateTest {
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         assertEquals(false, authAgent.isCredentialInfoUpdated());
+        assertEquals(SscConfig.GBA_NONE, authAgent.getLastSuccessfulGbaMode());
         assertEquals("", authAgent.getETag());
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }

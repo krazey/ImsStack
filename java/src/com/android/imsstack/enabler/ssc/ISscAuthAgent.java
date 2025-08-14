@@ -66,4 +66,29 @@ public interface ISscAuthAgent {
      * @param wwwAuthenticate The full value of the WWW-Authenticate header.
      */
     void parse(String wwwAuthenticate);
+
+    /**
+     * Returns the currently available GBA authentication mode.
+     * <p>
+     * This mode is determined based on {@code CarrierConfigManager#KEY_GBA_MODE_INT} configuration
+     * and the GBA availability from UICC.
+     *
+     * @param appType The application type to be used for GBA.
+     * @return The current GBA mode.
+     */
+    int getGbaMode(int appType);
+
+    /**
+     * Returns the GBA mode that was used in the last successful GBA authentication.
+     *
+     * @return The GBA mode of the last successful authentication.
+     */
+    int getLastSuccessfulGbaMode();
+
+    /**
+     * Sets the GBA mode used in the successful authentication.
+     *
+     * @param gbaMode The GBA mode from the successful authentication to be stored.
+     */
+    void setLastSuccessfulGbaMode(int gbaMode);
 }
