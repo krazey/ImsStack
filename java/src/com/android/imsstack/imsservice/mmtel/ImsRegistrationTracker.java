@@ -856,12 +856,12 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
+            logi("notifyRegEventStateChanged: statusCode=" + statusCode
+                    + ", size of impus=" + impus.size());
             SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class,
                     mContext.getSlotId());
-            UsatInterface usat = sim.getUsatInterface();
-
-            if (usat != null && usat.isServiceAvailable(
-                    Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS)) {
+            UsatInterface usat = (sim != null) ? sim.getUsatInterface() : null;
+            if (usat != null && isUsatRegEventDownloadRequired(sim, usat)) {
                 UsatBasedRegEvent event = new UsatBasedRegEvent();
                 event.mRegEventDownloadCmd = usat.createRegEventDownloadCommand(
                         statusCode, impus, event);
@@ -905,6 +905,24 @@ public class ImsRegistrationTracker {
             mAosReg = null;
 
             cleanup();
+        }
+
+        private boolean isUsatRegEventDownloadRequired(
+                @NonNull SimInterface sim, @NonNull UsatInterface usat) {
+            ConfigInterface config = getConfigInterface(mContext.getSlotId());
+            CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+            if (cc == null) {
+                return false;
+            }
+
+            return switch (cc.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT)) {
+                case CarrierConfig.Ims.USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD -> true;
+                case CarrierConfig.Ims.USAT_REG_EVENT_NOT_DOWNLOAD -> false;
+                case CarrierConfig.Ims.USAT_REG_EVENT_CONDITIONAL_DOWNLOAD ->
+                        (usat.isInSetupEventList(Usat.SETUP_EVENT_IMS_REGISTRATION)
+                                && !sim.getUiccIari().isEmpty());
+                default -> false;
+            };
         }
 
         private int convertToTelephonyCapability(int capability) {
