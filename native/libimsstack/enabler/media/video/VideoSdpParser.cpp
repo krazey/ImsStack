@@ -129,7 +129,7 @@ void VideoSdpParser::ParsePayloads(
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
-        SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
+        const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
         VideoProfile::Payload* pPayload = new VideoProfile::Payload();
 
         if (pSdpCodec == IMS_NULL || pPayload == IMS_NULL)

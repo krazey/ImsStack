@@ -132,45 +132,8 @@ protected:
         ON_CALL(*m_pMockVideoController, CloseSession()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(*m_pMockTextController, CloseSession()).WillByDefault(Return(IMS_TRUE));
     }
+
     virtual void TearDown() override {}
-
-private:
-    // Helper to simulate successful negotiation and opening for a media type
-    void SimulateNegotiateAndOpen(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE typeToOpen)
-    {
-        IMS_SINT32 nAudioDir = MEDIA_DIRECTION_INACTIVE;
-        IMS_SINT32 nVideoDir = MEDIA_DIRECTION_INACTIVE;
-        IMS_SINT32 nTextDir = MEDIA_DIRECTION_INACTIVE;
-        MediaNego::MediaNegoResult errorReason = MediaNego::NO_ERROR;
-
-        EXPECT_CALL(*m_pMockMediaNegoHandler,
-                NegotiateSdp(
-                        nNegoId, m_pIsession.get(), _, _, _, An<MediaNego::MediaNegoResult&>()))
-                .WillOnce(Return(IMS_TRUE));
-        EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(nNegoId))
-                .WillRepeatedly(Return(m_pMediaNego));  // Ensure nego is found
-        EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
-                .WillOnce(Return(typeToOpen));
-
-        if (typeToOpen & MEDIA_TYPE_AUDIO)
-        {
-            EXPECT_CALL(*m_pMockAudioController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
-            EXPECT_CALL(*m_pMockAudioController, OpenSession(nNegoId)).WillOnce(Return(IMS_TRUE));
-        }
-        if (typeToOpen & MEDIA_TYPE_VIDEO)
-        {
-            EXPECT_CALL(*m_pMockVideoController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
-            EXPECT_CALL(*m_pMockVideoController, OpenSession()).WillOnce(Return(IMS_TRUE));
-        }
-        if (typeToOpen & MEDIA_TYPE_TEXT)
-        {
-            EXPECT_CALL(*m_pMockTextController, UpdateLocalAddress(_)).WillOnce(Return(IMS_TRUE));
-            EXPECT_CALL(*m_pMockTextController, OpenSession()).WillOnce(Return(IMS_TRUE));
-        }
-
-        EXPECT_TRUE(m_pSession->NegotiateSdp(
-                nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
-    }
 };
 
 // --- Profile Management Tests ---

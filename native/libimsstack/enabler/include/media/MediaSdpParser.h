@@ -43,7 +43,7 @@ protected:
     void Parse(IN const ISessionDescriptor* pSessionDescriptor,
             IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile* pProfile);
     IMS_BOOL ParseCapaNego(
-            IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
+            IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
     IMS_BOOL ParseAcfg(
             IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
     IMS_BOOL ParseTcap(

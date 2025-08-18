@@ -88,7 +88,7 @@ void MediaSdpParser::Parse(IN const ISessionDescriptor* pSessionDescriptor,
 
 PROTECTED
 IMS_BOOL MediaSdpParser::ParseCapaNego(
-        IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
+        IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     if (pDescriptor == IMS_NULL || pObjCapaNego == IMS_NULL)
     {

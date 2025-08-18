@@ -143,15 +143,11 @@ TEST_F(TextProfileTest, testTextProfileCreation)
     TextProfile* pProfile1 = new TextProfile();
     pProfile1->SetKeepRedundantLevel(KEEP_REDUNDANT_LEVEL);
 
-    TextProfile* pProfile2 = new TextProfile(pProfile1);
+    TextProfile* pProfile2 = new TextProfile(*pProfile1);
     EXPECT_EQ(pProfile2->GetKeepRedundantLevel(), KEEP_REDUNDANT_LEVEL);
-
-    TextProfile* pProfile3 = new TextProfile(*pProfile1);
-    EXPECT_EQ(pProfile3->GetKeepRedundantLevel(), KEEP_REDUNDANT_LEVEL);
 
     delete pProfile1;
     delete pProfile2;
-    delete pProfile3;
 }
 
 TEST_F(TextProfileTest, testTextProfileAssign)
@@ -168,22 +164,10 @@ TEST_F(TextProfileTest, testTextProfileAssign)
     delete pProfile2;
 }
 
-TEST_F(TextProfileTest, testTextProfileEqual)
-{
-    TextProfile* pProfile1 = new TextProfile();
-    pProfile1->SetKeepRedundantLevel(KEEP_REDUNDANT_LEVEL);
-
-    TextProfile* pProfile2 = new TextProfile(pProfile1);
-    EXPECT_EQ(*pProfile2, *pProfile1);
-
-    delete pProfile1;
-    delete pProfile2;
-}
-
 TEST_F(TextProfileTest, testTextProfileNotEqual)
 {
     TextProfile* pProfile1 = new TextProfile();
-    TextProfile* pProfile2 = new TextProfile(pProfile1);
+    TextProfile* pProfile2 = new TextProfile(*pProfile1);
     pProfile1->SetKeepRedundantLevel(KEEP_REDUNDANT_LEVEL);
 
     EXPECT_NE(*pProfile2, *pProfile1);

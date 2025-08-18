@@ -371,7 +371,7 @@ public:
         {
         }
 
-        TelephoneEventFmtp(IN const AString& events) :
+        explicit TelephoneEventFmtp(IN const AString& events) :
                 AudioFmtp(),
                 m_strEvents(events)
         {

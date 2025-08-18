@@ -45,7 +45,7 @@ public:
 
 private:
     void ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
-    void ParsePayload(IN SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile);
+    void ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile);
     void ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile::Payload* pPayload,
             OUT IMS_SINT32& nPayloadTypeNumber, OUT AString& strCodecName);
     IMS_BOOL ParseFmtp(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile::Payload* pPayload,
