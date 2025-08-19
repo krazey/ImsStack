@@ -61,11 +61,6 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
-    public String getRealm() {
-        return mSscAuthCredentials.getRealm();
-    }
-
-    @Override
     public void setGbaKeys(String username, String password) {
         mSscAuthCredentials.setUsername(username);
         mSscAuthCredentials.setPassword(password);
@@ -92,6 +87,22 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
+    public boolean isCredentialInfoUpdated() {
+        return mIsCredentialInfoUpdated;
+    }
+
+    @Override
+    public void setIsCredentialInfoUpdated(boolean updated) {
+        ImsLog.d(mSlotId, "setIsCredentialInfoUpdated() " + updated);
+        mIsCredentialInfoUpdated = updated;
+
+        if (!mIsCredentialInfoUpdated) {
+            mCipherSuite = "";
+            mSscAuthCredentials.clear();
+        }
+    }
+
+    @Override
     public String getNafFqdn() {
         String nafFqdn = SscConfig.getNafFqdn(mSlotId);
         if (TextUtils.isEmpty(nafFqdn)) {
@@ -100,6 +111,11 @@ public class SscAuthAgent implements ISscAuthAgent {
             ImsLog.d("nafFqdn : "  + nafFqdn);
             return nafFqdn;
         }
+    }
+
+    @Override
+    public String getRealm() {
+        return mSscAuthCredentials.getRealm();
     }
 
     @Override
@@ -163,22 +179,6 @@ public class SscAuthAgent implements ISscAuthAgent {
 
         // Set flag to show credential information is stored
         setIsCredentialInfoUpdated(true);
-    }
-
-    @Override
-    public void setIsCredentialInfoUpdated(boolean updated) {
-        ImsLog.d(mSlotId, "setIsCredentialInfoUpdated() " + updated);
-        mIsCredentialInfoUpdated = updated;
-
-        if (!mIsCredentialInfoUpdated) {
-            mCipherSuite = "";
-            mSscAuthCredentials.clear();
-        }
-    }
-
-    @Override
-    public boolean isCredentialInfoUpdated() {
-        return mIsCredentialInfoUpdated;
     }
 
     private String getNafFqdnFromRealm() {

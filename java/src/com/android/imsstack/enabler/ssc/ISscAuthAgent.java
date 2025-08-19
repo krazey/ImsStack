@@ -27,6 +27,19 @@ public interface ISscAuthAgent {
     void setETag(String tag);
 
     /**
+     * Returns {@code true} if the credentials are updated. {@code false} otherwise.
+     */
+    boolean isCredentialInfoUpdated();
+
+    /**
+     * Sets a flag indicating whether the credential information has been updated.
+     *
+     * @param updated {@code true} if the credential information has been updated,
+     *                {@code false} otherwise.
+     */
+    void setIsCredentialInfoUpdated(boolean updated);
+
+    /**
      * Returns Network Application Function(NAF) fully qualified domain name (FQDN) from
      * {@link CarrierConfig.ImsSs#KEY_UT_NAF_FQDN_STRING} or from realm in the network response.
      *
@@ -35,10 +48,22 @@ public interface ISscAuthAgent {
      */
     String getNafFqdn();
 
-    void parse(String wwwAuthenticate);
-
-    boolean isCredentialInfoUpdated();
-    void setIsCredentialInfoUpdated(boolean updated);
-
+    /**
+     * Returns the realm used for authentication.
+     * <p>
+     * The realm is extracted from the WWW-Authenticate header sent by the network.
+     *
+     * @return The authentication realm as a string.
+     */
     String getRealm();
+
+    /**
+     * Parses the WWW-Authenticate header from a network response.
+     * <p>
+     * This method extracts the necessary authentication parameters (e.g. realm, nonce)
+     * from the challenge string, which are required to calculate the authentication response.
+     *
+     * @param wwwAuthenticate The full value of the WWW-Authenticate header.
+     */
+    void parse(String wwwAuthenticate);
 }
