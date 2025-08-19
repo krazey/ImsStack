@@ -25,7 +25,7 @@ class JniMediaSessionThread final : public BaseServiceThread, public IJniMediaSe
 {
 public:
     JniMediaSessionThread();
-    virtual ~JniMediaSessionThread();
+    ~JniMediaSessionThread() override;
     IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam) override;
     IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam) override;
     IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam) override;

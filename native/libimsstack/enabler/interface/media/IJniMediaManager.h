@@ -24,8 +24,6 @@
 class IJniMediaManager : public INativeEnabler
 {
 public:
-    virtual ~IJniMediaManager() override {};
-
     /**
      * @brief Sends a message from java layer through jni interface
      *

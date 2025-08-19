@@ -28,7 +28,7 @@ public:
             MediaMsgHandler(nSlotId, nCallKey)
     {
     }
-    virtual ~MockMediaMsgHandler() {}
+    ~MockMediaMsgHandler() override = default;
     MOCK_METHOD(void, SetListener, (IN const AString& strName), (override));
     MOCK_METHOD(IMS_BOOL, SendMessageToJava,
             (IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam), (override));

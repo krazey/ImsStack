@@ -29,7 +29,7 @@ public:
     explicit MockAudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
             AudioConfiguration(eSessionType) {};
 
-    virtual ~MockAudioConfiguration() = default;
+    ~MockAudioConfiguration() override = default;
 
     // --- Mocked Methods from MediaConfiguration (Base Class) ---
     MOCK_METHOD(IMS_BOOL, Create, (IN ICarrierConfig * piCc), (override));

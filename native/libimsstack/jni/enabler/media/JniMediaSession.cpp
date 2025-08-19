@@ -105,17 +105,6 @@ void JniMediaSession::Initialize(
 }
 
 PUBLIC
-void JniMediaSession::SetMtcCallId(IN IMS_SINTP nCallKey)
-{
-    m_nCallKey = nCallKey;
-}
-
-PUBLIC VIRTUAL void JniMediaSession::NotifyNativeEnablerSet()
-{
-    // TODO: send pending messages if needed.
-}
-
-PUBLIC
 IJniEnablerThread* JniMediaSession::GetJniThread() const
 {
     return DYNAMIC_CAST(IJniEnablerThread*, m_pThread);

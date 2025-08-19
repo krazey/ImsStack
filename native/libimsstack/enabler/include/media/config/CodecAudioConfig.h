@@ -53,12 +53,6 @@ public:
      */
     IMS_SINT32 GetChannel() const { return m_nChannel; }
     /**
-     * @brief Get the mode-set
-     *
-     * @return IMS_SINT32 Return the audio codec mode-set
-     */
-    IMS_SINT32 GetModeSet() const;
-    /**
      * @brief Get the mode-set list
      *
      * @return IMS_UINT32 Return the audio codec mode-set list

@@ -43,7 +43,7 @@ public:
     /**
      * @brief Destroy the codec video config
      */
-    virtual ~CodecVideoConfig();
+    ~CodecVideoConfig() override;
 
     /**
      * @brief Create codec using the configuration

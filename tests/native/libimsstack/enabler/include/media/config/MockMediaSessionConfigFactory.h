@@ -25,7 +25,7 @@ class MockMediaSessionConfigFactory : public MediaSessionConfigFactory
 {
 public:
     MockMediaSessionConfigFactory() = default;
-    virtual ~MockMediaSessionConfigFactory() = default;
+    ~MockMediaSessionConfigFactory() override = default;
 
     // mocking the public methods
     MOCK_METHOD(void, CreateMediaSessionConfig,

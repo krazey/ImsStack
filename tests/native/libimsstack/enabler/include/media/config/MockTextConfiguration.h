@@ -29,7 +29,7 @@ public:
     explicit MockTextConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
             TextConfiguration(eSessionType) {};
 
-    virtual ~MockTextConfiguration() = default;
+    ~MockTextConfiguration() override = default;
 
     // --- Mocked Methods from MediaConfiguration (Base Class) ---
     MOCK_METHOD(IMS_BOOL, Create, (IN ICarrierConfig * piCc), (override));

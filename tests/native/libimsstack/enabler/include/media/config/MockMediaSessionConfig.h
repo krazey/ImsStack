@@ -24,10 +24,10 @@
 class MockMediaSessionConfig : public MediaSessionConfig
 {
 public:
-    MockMediaSessionConfig(
+    explicit MockMediaSessionConfig(
             IN IMS_SINT32 nSlotId = 0, IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT) :
             MediaSessionConfig(nSlotId, eServiceType) {};
-    virtual ~MockMediaSessionConfig() = default;
+    ~MockMediaSessionConfig() override = default;
 
     // --- Mocked Public Methods ---
     MOCK_METHOD(IMS_BOOL, Create, (IN IMS_SINT32 nSlotId), (override));

@@ -33,7 +33,7 @@ public:
      * @brief Destroy the codec avc config object
      *
      */
-    virtual ~CodecAvcConfig();
+    ~CodecAvcConfig() override;
     /**
      * @brief Create codec using the configuration
      *

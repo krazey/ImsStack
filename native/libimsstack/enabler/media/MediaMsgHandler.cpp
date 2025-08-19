@@ -49,7 +49,7 @@ IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsg
     IMS_TRACE_I("SendMessageToJava() - eEvent[%d], strListenerThread[%s]", eEvent,
             m_strListenerThread.GetStr(), 0);
 
-    IJniEnabler* piJniMediaSession = JniEnablerConnector::GetInstance().GetJniEnabler(
+    const IJniEnabler* piJniMediaSession = JniEnablerConnector::GetInstance().GetJniEnabler(
             m_nSlotId, EnablerType::MEDIA_SESSION, m_nCallKey);
 
     if (piJniMediaSession == IMS_NULL)

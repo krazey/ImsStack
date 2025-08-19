@@ -28,7 +28,7 @@ PUBLIC VIRTUAL MediaSessionConfigFactory::~MediaSessionConfigFactory()
 {
     for (IMS_UINT32 nIdx = 0; nIdx <= IMS_SLOT_1; nIdx++)
     {
-        DestroyListSessionConfig(nIdx);
+        DestroyListSessionConfigImpl(nIdx);
         m_mapListMediaSessionConfig.Remove(nIdx);
     }
 }
@@ -75,8 +75,9 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
     {
         for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
         {
-            MediaSessionConfig* pTempMediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
-            if (pTempMediaSessionConfig == pMediaSessionConfig)  /// Already Have
+            const MediaSessionConfig* pTempMediaSessionConfig =
+                    pListMediaSessionConfig->GetAt(nIdxList);
+            if (pTempMediaSessionConfig == pMediaSessionConfig)
             {
                 return;
             }
@@ -89,25 +90,30 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
     }
 }
 
-PUBLIC
-void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
+PRIVATE
+void MediaSessionConfigFactory::DestroyListSessionConfigImpl(IN IMS_SINT32 nSlotId)
 {
     ImsList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
     if (pListMediaSessionConfig != IMS_NULL)
     {
-        IMS_TRACE_D("DestroyListSessionConfig - ListSize[%d]", pListMediaSessionConfig->GetSize(),
-                0, 0);
+        IMS_TRACE_D("DestroyListSessionConfigImpl - ListSize[%d]",
+                pListMediaSessionConfig->GetSize(), 0, 0);
 
-        for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
+        while (!pListMediaSessionConfig->IsEmpty())
         {
-            MediaSessionConfig* pMediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
-            DestroySessionConfig(pMediaSessionConfig);
+            DestroySessionConfig(pListMediaSessionConfig->GetAt(0));
         }
 
         pListMediaSessionConfig->Clear();
         delete pListMediaSessionConfig;
     }
+}
+
+PUBLIC
+void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
+{
+    DestroyListSessionConfigImpl(nSlotId);
 }
 
 PUBLIC
@@ -175,7 +181,7 @@ void MediaSessionConfigFactory::DestroySessionConfig(
 
             for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
             {
-                MediaSessionConfig* pTempMediaSessionConfig =
+                const MediaSessionConfig* pTempMediaSessionConfig =
                         pListMediaSessionConfig->GetAt(nIdxList);
 
                 if (pTempMediaSessionConfig == pMediaSessionConfig)

@@ -29,7 +29,7 @@ public:
     explicit MockVideoConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
             VideoConfiguration(eSessionType) {};
 
-    virtual ~MockVideoConfiguration() = default;
+    ~MockVideoConfiguration() override = default;
 
     // --- Mocked Methods from MediaConfiguration (Base Class) ---
     MOCK_METHOD(IMS_BOOL, Create, (IN ICarrierConfig * piCc), (override));

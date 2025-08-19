@@ -33,7 +33,7 @@ public:
      * @brief Destroy the codec T140 config
      *
      */
-    virtual ~CodecT140Config();
+    ~CodecT140Config() override;
     /**
      * @brief Create codec using the configuration
      *

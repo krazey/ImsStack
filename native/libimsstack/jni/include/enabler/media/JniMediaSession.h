@@ -33,12 +33,10 @@ class JniMediaSession : public BaseService
 public:
     JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
             IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject);
-    virtual ~JniMediaSession();
+    ~JniMediaSession() override;
 
     virtual int SendData(const Parcel& objParcel) override;
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject);
-    void SetMtcCallId(IN IMS_SINTP nCallKey);
-    void NotifyNativeEnablerSet() override;
     IJniEnablerThread* GetJniThread() const override;
     static IMS_BOOL IsMediaMessage(IN IMS_SINT32 nMsg);
 

@@ -146,9 +146,11 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
         }
 
         m_nBrList = ConvertEvsBitrateToList(nBrStart, nBrEnd);
-        m_nBwList = piCcSubBundle->GetInt(
-                CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT, DEFAULT_BW_LIST);
-        m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
+        m_nBwList = CheckEvsBandwidthWithBitrate(
+                piCcSubBundle->GetInt(
+                        CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
+                        DEFAULT_BW_LIST),
+                m_nBrList);
 
         m_nCmr = piCcSubBundle->GetInt(
                 CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, NOT_DEFINED);
@@ -159,7 +161,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
         else
         {
             m_nCmr = DEFAULT_CMR;
-            m_bVisibleChAwRecv = IMS_FALSE;
+            m_bVisibleCmr = IMS_FALSE;
         }
 
         m_nChAwRecv = piCcSubBundle->GetInt(
@@ -500,8 +502,7 @@ PUBLIC VIRTUAL void CodecEvsConfig::CreateDefaultEvsCodec()
     m_bVisibleEvsModeSwitch = IMS_FALSE;
 
     m_nBrList = ConvertEvsBitrateToList(DEFAULT_BR, DEFAULT_BR);
-    m_nBwList = DEFAULT_BW_LIST;
-    m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
+    m_nBwList = CheckEvsBandwidthWithBitrate(DEFAULT_BW_LIST, m_nBrList);
 
     m_nCmr = DEFAULT_CMR;
     m_bVisibleChAwRecv = IMS_FALSE;

@@ -99,6 +99,7 @@ public:
     static void SetInstance(MediaSessionConfigFactory* pSessionConfigFactory);
 
 private:
+    void DestroyListSessionConfigImpl(IN IMS_SINT32 nSlotId);
     ImsMap<IMS_UINT32, ImsList<MediaSessionConfig*>*> m_mapListMediaSessionConfig;
 };
 

@@ -158,7 +158,8 @@ PROTECTED VIRTUAL void MediaConfiguration::ToDebugString() const
             m_nRtpInactivityTimerMillis, m_nRtcpInactivityTimerMillis, 0);
 }
 
-PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
+PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(
+        IN const CodecConfig* pCodecConfig) const
 {
     if (pCodecConfig == IMS_NULL)
     {
@@ -170,81 +171,53 @@ PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* p
         case ImsCodec::AUDIO_AMR:
         case ImsCodec::AUDIO_AMR_WB:
         {
-            CodecAmrConfig* pAmrConfig = IMS_NULL;
-            pAmrConfig = reinterpret_cast<CodecAmrConfig*>(pCodecConfig);
-
-            if (pAmrConfig)
-            {
-                pAmrConfig->ToDebugString();
-            }
+            const CodecAmrConfig* pAmrConfig =
+                    reinterpret_cast<const CodecAmrConfig*>(pCodecConfig);
+            pAmrConfig->ToDebugString();
         }
         break;
         case ImsCodec::AUDIO_PCMA:
         case ImsCodec::AUDIO_PCMU:
         {
-            CodecPcmConfig* pPcmConfig = IMS_NULL;
-            pPcmConfig = reinterpret_cast<CodecPcmConfig*>(pCodecConfig);
-
-            if (pPcmConfig)
-            {
-                pPcmConfig->ToDebugString();
-            }
+            const CodecPcmConfig* pPcmConfig =
+                    reinterpret_cast<const CodecPcmConfig*>(pCodecConfig);
+            pPcmConfig->ToDebugString();
         }
         break;
         case ImsCodec::AUDIO_TELEPHONE_EVENT:
         case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
         {
-            CodecTelephoneEventConfig* pTelephoneEventConfig = IMS_NULL;
-            pTelephoneEventConfig = reinterpret_cast<CodecTelephoneEventConfig*>(pCodecConfig);
-
-            if (pTelephoneEventConfig)
-            {
-                pTelephoneEventConfig->ToDebugString();
-            }
+            const CodecTelephoneEventConfig* pTelephoneEventConfig =
+                    reinterpret_cast<const CodecTelephoneEventConfig*>(pCodecConfig);
+            pTelephoneEventConfig->ToDebugString();
         }
         break;
         case ImsCodec::AUDIO_EVS:
         {
-            CodecEvsConfig* pEvsConfig = IMS_NULL;
-            pEvsConfig = reinterpret_cast<CodecEvsConfig*>(pCodecConfig);
-
-            if (pEvsConfig)
-            {
-                pEvsConfig->ToDebugString();
-            }
+            const CodecEvsConfig* pEvsConfig =
+                    reinterpret_cast<const CodecEvsConfig*>(pCodecConfig);
+            pEvsConfig->ToDebugString();
         }
         break;
         case ImsCodec::VIDEO_AVC:
         {
-            CodecAvcConfig* pAvcConfig = IMS_NULL;
-            pAvcConfig = reinterpret_cast<CodecAvcConfig*>(pCodecConfig);
-
-            if (pAvcConfig)
-            {
-                pAvcConfig->ToDebugString();
-            }
+            const CodecAvcConfig* pAvcConfig =
+                    reinterpret_cast<const CodecAvcConfig*>(pCodecConfig);
+            pAvcConfig->ToDebugString();
         }
         break;
         case ImsCodec::VIDEO_HEVC:
         {
-            CodecHevcConfig* pHevcConfig = IMS_NULL;
-            pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
-
-            if (pHevcConfig)
-            {
-                pHevcConfig->ToDebugString();
-            }
+            const CodecHevcConfig* pHevcConfig =
+                    reinterpret_cast<const CodecHevcConfig*>(pCodecConfig);
+            pHevcConfig->ToDebugString();
         }
         break;
         case ImsCodec::TEXT_T140:
         {
-            CodecT140Config* pT140Config = IMS_NULL;
-            pT140Config = reinterpret_cast<CodecT140Config*>(pCodecConfig);
-
-            if (pT140Config)
-            {
-                pT140Config->ToDebugString();
-            }
+            const CodecT140Config* pT140Config =
+                    reinterpret_cast<const CodecT140Config*>(pCodecConfig);
+            pT140Config->ToDebugString();
         }
         break;
         default:

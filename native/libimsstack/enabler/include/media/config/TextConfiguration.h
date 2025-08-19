@@ -32,7 +32,7 @@ public:
      * @brief Destroy the text configuration
      *
      */
-    virtual ~TextConfiguration();
+    ~TextConfiguration() override;
     /**
      * @brief Create codec using the configuration
      *

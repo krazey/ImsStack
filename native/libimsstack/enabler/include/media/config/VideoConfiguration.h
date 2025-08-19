@@ -77,7 +77,7 @@ public:
      * @brief Destroy the video configuration
      *
      */
-    virtual ~VideoConfiguration();
+    ~VideoConfiguration() override;
 
     /**
      * @brief Create codec using the configuration

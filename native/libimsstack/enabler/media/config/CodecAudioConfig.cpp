@@ -82,27 +82,6 @@ PUBLIC VIRTUAL void CodecAudioConfig::ToDebugString() const
 }
 
 PUBLIC
-IMS_SINT32 CodecAudioConfig::GetModeSet() const
-{
-    IMS_SINT32 nModeSet;
-
-    if (m_nModeSetList == 0)
-    {
-        return (GetCodec() == ImsCodec::AUDIO_AMR) ? DEFAULT_MODESET_AMRNB : DEFAULT_MODESET_AMRWB;
-    }
-
-    // Find the highest mode set in the list
-    for (nModeSet = DEFAULT_MODESET_AMRWB; nModeSet >= 0; nModeSet--)
-    {
-        if (m_nModeSetList & (1 << nModeSet))
-        {
-            return nModeSet;
-        }
-    }
-    return 0;
-}
-
-PUBLIC
 IMS_SINT32 CodecAudioConfig::ConvertModeSetList(ImsVector<IMS_SINT32> objCodecModeset)
 {
     IMS_SINT32 nModeSetList = 0;

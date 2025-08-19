@@ -34,7 +34,7 @@ public:
      * @brief Destroy the Audio Configuration
      *
      */
-    virtual ~AudioConfiguration();
+    ~AudioConfiguration() override;
 
     /**
      * @brief Read the carrier configuration items

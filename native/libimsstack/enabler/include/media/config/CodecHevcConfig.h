@@ -33,7 +33,7 @@ public:
      * @brief Destroy the codec hevc config
      *
      */
-    virtual ~CodecHevcConfig();
+    ~CodecHevcConfig() override;
     /**
      * @brief Create codec using the configuration
      *

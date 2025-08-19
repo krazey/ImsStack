@@ -263,11 +263,11 @@ VIRTUAL void MediaManager::HandleMessage(
     {
         case IJniMedia::NOTIFY_QOS_INFO:
         {
-            IMS_SINTP nCallKey = wParam;
             ImsMediaMsgQosParam* pQosNotifyParam = reinterpret_cast<ImsMediaMsgQosParam*>(lParam);
 
             if (pQosNotifyParam != IMS_NULL)
             {
+                IMS_SINTP nCallKey = wParam;
                 MediaSession* pSession = GetSession(nCallKey);
                 if (pSession != IMS_NULL)
                 {
