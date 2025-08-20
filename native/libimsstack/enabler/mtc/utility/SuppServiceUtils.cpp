@@ -22,9 +22,8 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-GLOBAL
-void SuppServiceUtils::Add(IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType,
-        IN const AString& strValue)
+PUBLIC GLOBAL void SuppServiceUtils::Add(IN ImsList<SuppService*>& objSuppServices,
+        IN IMS_SINT32 nSuppType, IN const AString& strValue)
 {
     SuppService* pService = Get(objSuppServices, nSuppType);
     if (pService)
@@ -40,8 +39,7 @@ void SuppServiceUtils::Add(IN ImsList<SuppService*>& objSuppServices, IN IMS_SIN
     }
 }
 
-GLOBAL
-void SuppServiceUtils::Add(
+PUBLIC GLOBAL void SuppServiceUtils::Add(
         IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType, IN IMS_SINT32 nValue)
 {
     SuppService* pService = Get(objSuppServices, nSuppType);
@@ -58,8 +56,7 @@ void SuppServiceUtils::Add(
     }
 }
 
-GLOBAL
-void SuppServiceUtils::Add(
+PUBLIC GLOBAL void SuppServiceUtils::Add(
         IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType, IN IMS_BOOL bValue)
 {
     SuppService* pService = Get(objSuppServices, nSuppType);
@@ -76,8 +73,8 @@ void SuppServiceUtils::Add(
     }
 }
 
-GLOBAL
-void SuppServiceUtils::Delete(IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType)
+PUBLIC GLOBAL void SuppServiceUtils::Delete(
+        IN ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType)
 {
     SuppService* pTargetSupp = Get(objSuppServices, nSuppType);
     if (pTargetSupp)
@@ -91,8 +88,7 @@ void SuppServiceUtils::Delete(IN ImsList<SuppService*>& objSuppServices, IN IMS_
     IMS_TRACE_I("Delete : type[%d] not found", nSuppType, 0, 0);
 }
 
-GLOBAL
-void SuppServiceUtils::DeleteServices(IN ImsList<SuppService*>& objSuppServices)
+PUBLIC GLOBAL void SuppServiceUtils::DeleteServices(IN ImsList<SuppService*>& objSuppServices)
 {
     IMS_UINT32 nSize = objSuppServices.GetSize();
 
@@ -107,8 +103,7 @@ void SuppServiceUtils::DeleteServices(IN ImsList<SuppService*>& objSuppServices)
     objSuppServices.Clear();
 }
 
-GLOBAL
-SuppService* SuppServiceUtils::Get(
+PUBLIC GLOBAL SuppService* SuppServiceUtils::Get(
         IN const ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nSuppType)
 {
     for (IMS_UINT32 index = 0; index < objSuppServices.GetSize(); index++)
@@ -123,7 +118,7 @@ SuppService* SuppServiceUtils::Get(
     return IMS_NULL;
 }
 
-GLOBAL IMS_BOOL SuppServiceUtils::IsSameSuppServices(
+PUBLIC GLOBAL IMS_BOOL SuppServiceUtils::IsSameSuppServices(
         IN const ImsList<SuppService*>& objSuppServicesA,
         IN const ImsList<SuppService*>& objSuppServicesB)
 {
@@ -144,12 +139,15 @@ GLOBAL IMS_BOOL SuppServiceUtils::IsSameSuppServices(
     return IMS_TRUE;
 }
 
-GLOBAL void SuppServiceUtils::Clone(IN const ImsList<SuppService*>& objSourceServices,
-        IN ImsList<SuppService*>& objDestServices)
+PUBLIC GLOBAL ImsList<SuppService*> SuppServiceUtils::Clone(
+        IN const ImsList<SuppService*>& objSuppServices)
 {
-    for (IMS_UINT32 index = 0; index < objSourceServices.GetSize(); index++)
+    ImsList<SuppService*> objCloneSuppServices;
+
+    for (IMS_UINT32 index = 0; index < objSuppServices.GetSize(); index++)
     {
-        SuppService* service = new SuppService(*objSourceServices.GetAt(index));
-        objDestServices.Append(service);
+        objCloneSuppServices.Append(new SuppService(*objSuppServices.GetAt(index)));
     }
+
+    return objCloneSuppServices;
 }

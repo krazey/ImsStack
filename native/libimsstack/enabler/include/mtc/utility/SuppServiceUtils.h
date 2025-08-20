@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef SUPP_SERVICE_UTILS_H_
+#define SUPP_SERVICE_UTILS_H_
+
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -41,6 +44,7 @@ public:
     static SuppService* Get(IN const ImsList<SuppService*>& objSuppServices, IN IMS_SINT32 nType);
     static IMS_BOOL IsSameSuppServices(IN const ImsList<SuppService*>& objSuppServicesA,
             IN const ImsList<SuppService*>& objSuppServicesB);
-    static void Clone(IN const ImsList<SuppService*>& objSourceServices,
-            IN ImsList<SuppService*>& objDestServices);
+    static ImsList<SuppService*> Clone(IN const ImsList<SuppService*>& objSuppServices);
 };
+
+#endif
