@@ -61,7 +61,7 @@ TEST_F(SuppServiceUtilsTest, CloneAndIsSameSuppServicesReturnsTrue)
             static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ALL_VOICE), srtTest);
 
     ImsList<SuppService*> suppServices2;
-    SuppServiceUtils::Clone(suppServices, suppServices2);
+    suppServices2 = SuppServiceUtils::Clone(suppServices);
     EXPECT_TRUE(SuppServiceUtils::IsSameSuppServices(suppServices, suppServices2));
 
     SuppServiceUtils::Add(suppServices,
