@@ -75,8 +75,6 @@ PRIVATE void AudioSession::NetworkToneTimerExpired()
 
     if (m_nNetworkToneTimer > 0)
     {
-        SetNetworkToneTimer(0);
-
         if (m_piMediaSessionListener != IMS_NULL)
         {
             m_piMediaSessionListener->MediaSession_NotifyToClient(
