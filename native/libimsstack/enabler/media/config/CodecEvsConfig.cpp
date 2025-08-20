@@ -27,6 +27,8 @@ const IMS_SINT32 CodecEvsConfig::DEFAULT_BR_LIST = 1 << DEFAULT_BR;
 const IMS_SINT32 CodecEvsConfig::DEFAULT_BW_LIST = CodecEvsConfig::EVS_ENCODED_BW_TYPE_NB_WB_SWB;
 const IMS_SINT32 CodecEvsConfig::DEFAULT_CMR = 0;
 const IMS_SINT32 CodecEvsConfig::DEFAULT_CH_AW_RECV = 0;
+const IMS_SINT32 CodecEvsConfig::CARRIERCONFIG_CH_AW_RECV_DISABLED = 255;
+const IMS_SINT32 CodecEvsConfig::CH_AW_RECV_DISABLED = -1;
 const IMS_SINT32 CodecEvsConfig::CMR_NOT_PRESENT = -2;
 const IMS_SINT32 CodecEvsConfig::NOT_DEFINED = -2;
 
@@ -164,6 +166,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 
         m_nChAwRecv = piCcSubBundle->GetInt(
                 CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT, NOT_DEFINED);
+        if (m_nChAwRecv == CARRIERCONFIG_CH_AW_RECV_DISABLED)
+        {
+            m_nChAwRecv = CH_AW_RECV_DISABLED;
+        }
         if (m_nChAwRecv != NOT_DEFINED)
         {
             m_bVisibleChAwRecv = IMS_TRUE;
