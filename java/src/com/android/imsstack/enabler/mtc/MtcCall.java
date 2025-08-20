@@ -1539,21 +1539,21 @@ public class MtcCall extends Call implements ConferenceTracker {
     private void updateCallExtraFromSuppInfo(SuppInfo si) {
         removeAllCallExtrasFromSuppInfo();
 
-        for (SuppInfo.SuppService ss : si.objSuppService) {
+        for (SuppServiceUtils.SuppService ss : si.getServices()) {
             if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
-                String key = SuppInfoUtils.getKey(ss.type);
+                String key = SuppServiceUtils.getKey(ss.type);
 
                 if (key != null) {
                     setCallExtraBoolean(key, ss.boolValue);
                 }
             } else if (MtcCallUtils.isSuppInfoInt(ss.type)) {
-                String key = SuppInfoUtils.getKey(ss.type);
+                String key = SuppServiceUtils.getKey(ss.type);
 
                 if (key != null) {
                     setCallExtraInt(key, ss.intValue);
                 }
             } else if (MtcCallUtils.isSuppInfoString(ss.type)) {
-                String key = SuppInfoUtils.getKey(ss.type);
+                String key = SuppServiceUtils.getKey(ss.type);
 
                 if (key != null) {
                     setCallExtra(key, ss.strValue);
@@ -2473,19 +2473,21 @@ public class MtcCall extends Call implements ConferenceTracker {
     // MTC_CONFERENCE_WRAPPER }
 
     static {
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_CAUSE, EXTRA_CDIV_CAUSE);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_CAUSE, SuppInfoUtils.TYPE_INT);
+        SuppServiceUtils.addKey(SuppInfo.SUPP_TYPE_CDIV_CAUSE, EXTRA_CDIV_CAUSE);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CDIV_CAUSE, SuppServiceUtils.TYPE_INT);
 
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CNAP, EXTRA_CNA);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CNAP, SuppInfoUtils.TYPE_STRING);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_HISTORY, EXTRA_CDIV_HISTORY);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_HISTORY, SuppInfoUtils.TYPE_STRING);
+        SuppServiceUtils.addKey(SuppInfo.SUPP_TYPE_CNAP, EXTRA_CNA);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CNAP, SuppServiceUtils.TYPE_STRING);
+        SuppServiceUtils.addKey(SuppInfo.SUPP_TYPE_CDIV_HISTORY, EXTRA_CDIV_HISTORY);
+        SuppServiceUtils.addValueType(
+                SuppInfo.SUPP_TYPE_CDIV_HISTORY, SuppServiceUtils.TYPE_STRING);
 
         // The below things are not managed for extra call information
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CW, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_ENFORCE_LT, SuppInfoUtils.TYPE_BOOLEAN);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CW, SuppServiceUtils.TYPE_BOOLEAN);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_ENFORCE_LT, SuppServiceUtils.TYPE_BOOLEAN);
 
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLERID, SuppInfoUtils.TYPE_INT);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLING_NUM_VERIFICATION, SuppInfoUtils.TYPE_INT);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CALLERID, SuppServiceUtils.TYPE_INT);
+        SuppServiceUtils.addValueType(
+                SuppInfo.SUPP_TYPE_CALLING_NUM_VERIFICATION, SuppServiceUtils.TYPE_INT);
     }
 }

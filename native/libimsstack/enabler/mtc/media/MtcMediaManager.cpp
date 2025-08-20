@@ -848,14 +848,14 @@ void MtcMediaManager::HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceive
     }
     else
     {
-        MtcSupplementaryService& objSuppService = m_objContext.GetSupplementaryService();
+        MtcSupplementaryService& objSuppServices = m_objContext.GetSupplementaryService();
         if (bNetworkToneReceived)
         {
-            objSuppService.Delete(SuppType::ENFORCE_LT);
+            objSuppServices.Delete(SuppType::ENFORCE_LT);
         }
         else
         {
-            objSuppService.Add(SuppType::ENFORCE_LT, IMS_TRUE);
+            objSuppServices.Add(SuppType::ENFORCE_LT, IMS_TRUE);
         }
     }
 

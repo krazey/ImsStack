@@ -109,9 +109,9 @@ public:
     void Attach() override;
 
     void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN const ImsList<SuppService*>& objSuppServices) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& objUsers) override;

@@ -44,11 +44,11 @@ public:
     MOCK_METHOD(CallStateName, GetStateName, (), (const, override));
     MOCK_METHOD(CallStateName, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsList<SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(CallStateName, StartConference,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
+                    (IN const ImsList<SuppService*>& objSuppServices),
                     IN const ImsList<ConfUser*>& lstUsers),
             (override));
     MOCK_METHOD(CallStateName, StartConference,

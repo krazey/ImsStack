@@ -16,7 +16,6 @@
 #include "AString.h"
 #include "CallReasonInfo.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "JniMtcUtils.h"
@@ -108,36 +107,36 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadMediaInfo)
 
 TEST_F(JniMtcUtilsTest, WtiteAndReadSuppServices)
 {
-    ImsMap<SuppType, SuppService*> objSuppServices;
-    SuppType eAnyType1 = SuppType::CNAP;
+    ImsList<SuppService*> objSuppServices;
     SuppService objAnySuppService1;
+    objAnySuppService1.nType = static_cast<IMS_SINT32>(SuppType::CNAP);
     objAnySuppService1.strValue = "anyValue1";
     objAnySuppService1.nValue = 1;
     objAnySuppService1.bValue = IMS_TRUE;
 
-    SuppType eAnyType2 = SuppType::CALL_PULL;
     SuppService objAnySuppService2;
+    objAnySuppService2.nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
     objAnySuppService2.strValue = "anyValue2";
     objAnySuppService2.nValue = 2;
     objAnySuppService2.bValue = IMS_FALSE;
 
-    objSuppServices.Add(eAnyType1, &objAnySuppService1);
-    objSuppServices.Add(eAnyType2, &objAnySuppService2);
+    objSuppServices.Append(&objAnySuppService1);
+    objSuppServices.Append(&objAnySuppService2);
 
     Parcel objParcel;
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
     objParcel.setDataPosition(0);
 
-    ImsMap<SuppType, SuppService*> objConvertedSuppServices =
+    ImsList<SuppService*> objConvertedSuppServices =
             JniMtcUtils::ReadSupplementaryService(objParcel);
     EXPECT_EQ(objSuppServices.GetSize(), objConvertedSuppServices.GetSize());
-    EXPECT_EQ(*objSuppServices.GetValue(eAnyType1), *objConvertedSuppServices.GetValue(eAnyType1));
-    EXPECT_EQ(*objSuppServices.GetValue(eAnyType2), *objConvertedSuppServices.GetValue(eAnyType2));
+    EXPECT_EQ(*objSuppServices.GetAt(0), *objConvertedSuppServices.GetAt(0));
+    EXPECT_EQ(*objSuppServices.GetAt(1), *objConvertedSuppServices.GetAt(1));
 
     objSuppServices.Clear();
 
-    delete objConvertedSuppServices.GetValue(eAnyType1);
-    delete objConvertedSuppServices.GetValue(eAnyType2);
+    delete objConvertedSuppServices.GetAt(0);
+    delete objConvertedSuppServices.GetAt(1);
     objConvertedSuppServices.Clear();
 }
 

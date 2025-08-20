@@ -19,7 +19,6 @@
 
 #include "AString.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "JniExternalCall.h"
@@ -38,16 +37,15 @@ public:
     static JniCallInfo ReadCallInfo(IN const android::Parcel& objParcel);
     static MediaInfo& ReadMediaInfo(
             IN const android::Parcel& objParcel, IN_OUT MediaInfo& objMediaInfo);
-    static ImsMap<SuppType, SuppService*> ReadSupplementaryService(
-            IN const android::Parcel& objParcel);
+    static ImsList<SuppService*> ReadSupplementaryService(IN const android::Parcel& objParcel);
     static ImsList<ConfUser*> ReadConferenceParticipants(IN const android::Parcel& objParcel);
 
     static void WriteCallInfoToParcel(
             IN const JniCallInfo& objCallInfo, IN_OUT android::Parcel& objParcel);
     static void WriteMediaInfoToParcel(
             IN const MediaInfo& objMediaInfo, IN_OUT android::Parcel& objParcel);
-    static void WriteSuppServicesToParcel(IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN_OUT android::Parcel& objParcel);
+    static void WriteSuppServicesToParcel(
+            IN const ImsList<SuppService*>& objSuppServices, IN_OUT android::Parcel& objParcel);
     static void WriteConfUsersToParcel(
             IN const ImsList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel);
     static void WriteExternalCallsToParcel(IN ImsList<const JniExternalCall*>& objJniExternalCalls,

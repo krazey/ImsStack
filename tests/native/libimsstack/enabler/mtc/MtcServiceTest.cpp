@@ -23,6 +23,7 @@
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsEventDef.h"
+#include "ImsList.h"
 #include "ImsVector.h"
 #include "JniEnablerConnector.h"
 #include "MockICapabilities.h"
@@ -39,6 +40,7 @@
 #include "MockIPageMessage.h"
 #include "MockIReference.h"
 #include "MockISession.h"
+#include "MtcDef.h"
 #include "MtcService.h"
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
@@ -747,26 +749,18 @@ TEST_F(MtcServiceTest, ProcessTestCommandChangesRatType)
     pNormalMtcService->ProcessTestCommand(3 /* Not defined */, 0, 0);
 }
 
-TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
+TEST_F(MtcServiceTest, UpdatePermanentSuppServicesAndIsPermanentSuppServiceEnabledReturnsTrue)
 {
-    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
+    // `pTestSupp` will be deleted through `MtcPermanentSupplementaryService`'s destructor.
+    SuppService* pTestSupp = new SuppService();
+    pTestSupp->nType = static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO);
+    pTestSupp->bValue = IMS_TRUE;
+    ImsList<SuppService*> objSuppServices;
+    objSuppServices.Append(pTestSupp);
+    pNormalMtcService->UpdatePermanentSuppServices(objSuppServices);
 
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
-}
-
-TEST_F(MtcServiceTest, SetAndCheckTerminalBasedTir)
-{
-    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTirStatus());
-
-    pNormalMtcService->SetTerminalBasedTir(IMS_TRUE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTirStatus());
-
-    pNormalMtcService->SetTerminalBasedTir(IMS_FALSE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTirStatus());
+    EXPECT_TRUE(pNormalMtcService->IsPermanentSuppServiceEnabled(
+            PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO));
 }
 
 TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)

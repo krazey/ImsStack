@@ -207,6 +207,24 @@ enum
     CALLING_NUM_VERSTAT_NOT_VERIFIED = 2,
 };
 
+enum class PermanentSuppType
+{
+    TB_CW = 0,
+    TB_TIR = 1,
+    TB_CB_OUTGOING_ALL_VOICE = 2,
+    TB_CB_OUTGOING_ALL_VIDEO = 3,
+    TB_CB_OUTGOING_INTERNATIONAL_VOICE = 4,
+    TB_CB_OUTGOING_INTERNATIONAL_VIDEO = 5,
+    TB_CB_OUTGOING_INTERNATIONAL_EXCEPT_HOME_VOICE = 6,
+    TB_CB_OUTGOING_INTERNATIONAL_EXCEPT_HOME_VIDEO = 7,
+    TB_CB_INCOMING_ALL_VOICE = 8,
+    TB_CB_INCOMING_ALL_VIDEO = 9,
+    TB_CB_INCOMING_ROAMING_VOICE = 10,
+    TB_CB_INCOMING_ROAMING_VIDEO = 11,
+    TB_CB_INCOMING_ANONYMOUS_VOICE = 12,
+    TB_CB_INCOMING_ANONYMOUS_VIDEO = 13,
+};
+
 enum
 {
     CONF_CREATE_NONE = 0,
@@ -302,15 +320,17 @@ class SuppService
 {
 public:
     inline SuppService() :
+            nType(0),
             strValue(AString::ConstNull()),
             nValue(0),
             bValue(IMS_FALSE)
     {
     }
-    inline SuppService(IN const SuppService& objRHS) :
-            strValue(objRHS.strValue),
-            nValue(objRHS.nValue),
-            bValue(objRHS.bValue)
+    inline SuppService(IN const SuppService& objRhs) :
+            nType(objRhs.nType),
+            strValue(objRhs.strValue),
+            nValue(objRhs.nValue),
+            bValue(objRhs.bValue)
     {
     }
     inline ~SuppService() {}
@@ -320,6 +340,7 @@ public:
     {
         if (this != &objRhs)
         {
+            nType = objRhs.nType;
             strValue = objRhs.strValue;
             nValue = objRhs.nValue;
             bValue = objRhs.bValue;
@@ -335,12 +356,15 @@ public:
             return IMS_TRUE;
         }
 
-        return strValue == objRhs.strValue && nValue == objRhs.nValue && bValue == objRhs.bValue;
+        return nType == objRhs.nType && strValue == objRhs.strValue && nValue == objRhs.nValue &&
+                bValue == objRhs.bValue;
     }
 
     IMS_BOOL operator!=(const SuppService& objRhs) const { return !(*this == objRhs); }
 
 public:
+    IMS_SINT32 nType;
+
     AString strValue;
     IMS_SINT32 nValue;
     IMS_BOOL bValue;

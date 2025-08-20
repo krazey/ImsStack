@@ -17,7 +17,9 @@
 package com.android.imsstack.enabler.mtc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,9 +34,10 @@ import android.util.SparseArray;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.enabler.ssc.SscConstant;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface.CbData;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface.SupplementaryServiceConfiguration;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface.TerminalBasedSupplementaryServiceConfigurationChangeListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface.TirData;
 import com.android.imsstack.internal.ImsStackRegistry;
@@ -59,7 +62,6 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
     @Mock ImsServiceRegistry mMockImsServiceRegistry;
     @Mock MmTelFeatureRegistry mMockMmTelFeatureRegistry;
     @Mock private IUtInterface mUtInterface;
-    @Mock private MtcApp mMockMtcApp;
     @Mock private MtcApp.MtcAppHandler mMockMtcAppHandler;
     @Captor ArgumentCaptor<ImsStackRegistry.ImsServiceListener> mImsServiceListenerCaptor;
     @Captor private ArgumentCaptor<TerminalBasedSupplementaryServiceConfigurationChangeListener>
@@ -76,7 +78,6 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         MockitoAnnotations.initMocks(this);
         AppContext.init(mContext);
 
-        when(mMockMtcApp.getHandler()).thenReturn(mMockMtcAppHandler);
         when(mMockImsServiceRegistrys.get(mSlotId0)).thenReturn(mMockImsServiceRegistry);
         when(mMockImsServiceRegistry.getMmTelFeatureRegistry()).thenReturn(
                 mMockMmTelFeatureRegistry);
@@ -86,7 +87,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         UtFactory.getInstance().setUtInterfaceForSlot(mSlotId0, mUtInterface);
 
         mTbSscSender = new MtcTerminalBasedSupplementaryServiceNotifier(
-                mMockMtcApp, mSlotId0, mTestableLooper.getLooper());
+                mSlotId0, mTestableLooper.getLooper());
     }
 
     @After
@@ -121,7 +122,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         verify(mMockMmTelFeatureRegistry, times(1)).addListener(
                 mMmtelFeatureListenerCaptor.capture());
 
-        when(mMockMtcApp.isServiceValid()).thenReturn(false);
+        mTbSscSender.setHandler(null);
         MmTelFeatureRegistry.Listener mmtelFeatureListener = mMmtelFeatureListenerCaptor.getValue();
         when(mMockMmTelFeatureRegistry.isTerminalBasedCallWaitingEnabled()).thenReturn(true);
         mmtelFeatureListener.onTerminalBasedCallWaitingStatusChanged();
@@ -129,7 +130,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
 
         verify(mMockMtcAppHandler, never()).sendMessage(any());
 
-        when(mMockMtcApp.isServiceValid()).thenReturn(true);
+        mTbSscSender.setHandler(mMockMtcAppHandler);
         mmtelFeatureListener.onTerminalBasedCallWaitingStatusChanged();
         processAllMessages();
 
@@ -137,9 +138,6 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         Message capturedMessage = mMessageCaptor.getValue();
         assertNotNull(capturedMessage);
         assertEquals(MtcApp.MSG_SEND_NOTIFICATION, capturedMessage.what);
-        Parcel parcel = (Parcel) capturedMessage.obj;
-        parcel.setDataPosition(0);
-        assertEquals(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING, parcel.readInt());
     }
 
     @Test
@@ -147,18 +145,18 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         mTbSscSender.init();
         verify(mUtInterface, times(1)).addTbSscChangeListener(mTbSscConfigListenerCaptor.capture());
 
-        when(mMockMtcApp.isServiceValid()).thenReturn(false);
+        mTbSscSender.setHandler(null);
         TerminalBasedSupplementaryServiceConfigurationChangeListener TbSscConfigListener =
                 mTbSscConfigListenerCaptor.getValue();
         TbSscConfigListener.onSupplementaryServiceConfigurationChanged(
-                List.of(new TirData(SscConstant.STATUS_ENABLE)));
+                List.of(new TirData(SupplementaryServiceConfiguration.STATUS_ENABLED)));
         processAllMessages();
 
-        verify(mMockMtcAppHandler, never()).sendMessage(mMessageCaptor.capture());
+        verify(mMockMtcAppHandler, never()).sendMessage(any());
 
-        when(mMockMtcApp.isServiceValid()).thenReturn(true);
+        mTbSscSender.setHandler(mMockMtcAppHandler);
         TbSscConfigListener.onSupplementaryServiceConfigurationChanged(
-                List.of(new TirData(SscConstant.STATUS_ENABLE)));
+                List.of(new TirData(SupplementaryServiceConfiguration.STATUS_ENABLED)));
         processAllMessages();
 
         verify(mMockMtcAppHandler).sendMessage(mMessageCaptor.capture());
@@ -167,6 +165,28 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         assertEquals(MtcApp.MSG_SEND_NOTIFICATION, capturedMessage.what);
         Parcel parcel = (Parcel) capturedMessage.obj;
         parcel.setDataPosition(0);
-        assertEquals(IUMtcService.SET_TERMINAL_BASED_TIR, parcel.readInt());
+        assertEquals(IUMtcService.PERMANENT_SUPP_CHANGED, parcel.readInt());
+        assertEquals(1, parcel.readInt());
+        assertEquals(PermanentSuppInfo.SUPP_TYPE_TB_TIR, parcel.readInt());
+    }
+
+    @Test
+    public void testIsOutgoingCallBarringActivated() {
+        mTbSscSender.init();
+        verify(mUtInterface, times(1)).addTbSscChangeListener(mTbSscConfigListenerCaptor.capture());
+        assertFalse(mTbSscSender.isOutgoingCallBarringActivated(
+                IUMtcCall.CALLTYPE_VOIP, "+8279281327"));
+
+        mTbSscSender.setHandler(mMockMtcAppHandler);
+        TerminalBasedSupplementaryServiceConfigurationChangeListener TbSscConfigListener =
+                mTbSscConfigListenerCaptor.getValue();
+        TbSscConfigListener.onSupplementaryServiceConfigurationChanged(
+                List.of(new CbData(CbData.CONDITION_BAOC, CbData.SERVICE_CLASS_VOICE,
+                SupplementaryServiceConfiguration.STATUS_ENABLED)));
+        processAllMessages();
+
+        verify(mMockMtcAppHandler, never()).sendMessage(any());
+        assertTrue(mTbSscSender.isOutgoingCallBarringActivated(
+                IUMtcCall.CALLTYPE_VOIP, "+8279281327"));
     }
 }

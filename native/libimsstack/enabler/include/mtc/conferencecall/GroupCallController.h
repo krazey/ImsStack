@@ -18,7 +18,6 @@
 #define GROUP_CALL_CONTROLLER_H_
 
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -43,8 +42,7 @@ public:
 
 protected:
     void ProcessGroupCall(IN ImsList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
-            IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN MediaInfo& objMediaInfo, IN ImsList<SuppService*>& objSuppServices) override;
     void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     void Recover() override;
 

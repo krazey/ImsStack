@@ -85,26 +85,26 @@ TEST(MtcDefTest, SuppServiceCopyConstructor)
     objSuppServiceToCopy.nValue = ANY_SUPP_INT;
     objSuppServiceToCopy.bValue = ANY_SUPP_BOOL;
 
-    SuppService objSuppService(objSuppServiceToCopy);
+    SuppService objSuppServices(objSuppServiceToCopy);
 
-    EXPECT_STREQ(objSuppService.strValue.GetStr(), objSuppServiceToCopy.strValue.GetStr());
-    EXPECT_EQ(objSuppService.nValue, objSuppServiceToCopy.nValue);
-    EXPECT_EQ(objSuppService.bValue, objSuppServiceToCopy.bValue);
+    EXPECT_STREQ(objSuppServices.strValue.GetStr(), objSuppServiceToCopy.strValue.GetStr());
+    EXPECT_EQ(objSuppServices.nValue, objSuppServiceToCopy.nValue);
+    EXPECT_EQ(objSuppServices.bValue, objSuppServiceToCopy.bValue);
 }
 
 TEST(MtcDefTest, SuppServiceAssignmentOperator)
 {
-    SuppService objSuppService;
+    SuppService objSuppServices;
     SuppService objRightHandSide;
     objRightHandSide.strValue = ANY_SUPP_STR;
     objRightHandSide.nValue = ANY_SUPP_INT;
     objRightHandSide.bValue = ANY_SUPP_BOOL;
 
-    objSuppService = objRightHandSide;
+    objSuppServices = objRightHandSide;
 
-    EXPECT_STREQ(objSuppService.strValue.GetStr(), objRightHandSide.strValue.GetStr());
-    EXPECT_EQ(objSuppService.nValue, objRightHandSide.nValue);
-    EXPECT_EQ(objSuppService.bValue, objRightHandSide.bValue);
+    EXPECT_STREQ(objSuppServices.strValue.GetStr(), objRightHandSide.strValue.GetStr());
+    EXPECT_EQ(objSuppServices.nValue, objRightHandSide.nValue);
+    EXPECT_EQ(objSuppServices.bValue, objRightHandSide.bValue);
 }
 
 TEST(MtcDefTest, SuppServiceEqualToOperator)

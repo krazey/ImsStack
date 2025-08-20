@@ -181,7 +181,7 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.isCallWaitingEnabled(suppInfo));
 
-        suppInfo.addService_bool(SuppInfo.TYPE_CW, true);
+        suppInfo.addServiceBool(SuppInfo.SUPP_TYPE_CW, true);
 
         assertTrue(MtcCallUtils.isCallWaitingEnabled(suppInfo));
     }
@@ -255,7 +255,7 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.isLocalHoldToneEnforced(suppInfo));
 
-        suppInfo.addService_bool(SuppInfo.TYPE_ENFORCE_LT, true);
+        suppInfo.addServiceBool(SuppInfo.SUPP_TYPE_ENFORCE_LT, true);
 
         assertTrue(MtcCallUtils.isLocalHoldToneEnforced(suppInfo));
     }
@@ -276,24 +276,24 @@ public class MtcCallUtilsTest {
     public void testisSuppInfoBoolean() {
         MtcCall call = Mockito.mock(MtcCall.class);
 
-        assertFalse(MtcCallUtils.isSuppInfoBoolean(SuppInfo.TYPE_GEOLOCATION));
-        assertTrue(MtcCallUtils.isSuppInfoBoolean(SuppInfo.TYPE_ENFORCE_LT));
+        assertFalse(MtcCallUtils.isSuppInfoBoolean(SuppInfo.SUPP_TYPE_GEOLOCATION));
+        assertTrue(MtcCallUtils.isSuppInfoBoolean(SuppInfo.SUPP_TYPE_ENFORCE_LT));
     }
 
     @Test
     public void isSuppInfoInt() {
         MtcCall call = Mockito.mock(MtcCall.class);
 
-        assertFalse(MtcCallUtils.isSuppInfoInt(SuppInfo.TYPE_ENFORCE_LT));
-        assertTrue(MtcCallUtils.isSuppInfoInt(SuppInfo.TYPE_CALLING_NUM_VERIFICATION));
+        assertFalse(MtcCallUtils.isSuppInfoInt(SuppInfo.SUPP_TYPE_ENFORCE_LT));
+        assertTrue(MtcCallUtils.isSuppInfoInt(SuppInfo.SUPP_TYPE_CALLING_NUM_VERIFICATION));
     }
 
     @Test
     public void isSuppInfoString() {
         MtcCall call = Mockito.mock(MtcCall.class);
 
-        assertFalse(MtcCallUtils.isSuppInfoString(SuppInfo.TYPE_GEOLOCATION));
-        assertTrue(MtcCallUtils.isSuppInfoString(SuppInfo.TYPE_CNAP));
+        assertFalse(MtcCallUtils.isSuppInfoString(SuppInfo.SUPP_TYPE_GEOLOCATION));
+        assertTrue(MtcCallUtils.isSuppInfoString(SuppInfo.SUPP_TYPE_CNAP));
     }
 
     @Test

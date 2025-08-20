@@ -16,6 +16,7 @@
 
 #include "IMessage.h"
 #include "ISipHeader.h"
+#include "ImsList.h"
 #include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
@@ -102,7 +103,7 @@ public:
 
     MediaInfo objInputMediaInfo;
     MediaInfo objOutputMediaInfo;
-    ImsMap<SuppType, SuppService*> objInputSuppServices;
+    ImsList<SuppService*> objInputSuppServices;
     CallInfo objCallInfo;
 
 protected:
@@ -225,8 +226,9 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
 
-    SuppType eSuppType = SuppType::GEOLOCATION;
-    objInputSuppServices.Add(eSuppType, new SuppService());
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::GEOLOCATION);
+    objInputSuppServices.Append(pService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pBlockChecker, Check)
@@ -236,7 +238,7 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 
-    EXPECT_NE(nullptr, pSupplementaryService->Get(eSuppType));
+    EXPECT_NE(nullptr, pSupplementaryService->Get(SuppType::GEOLOCATION));
 }
 
 TEST_F(IdleStateTest, StartUpdatesRemoteNumberIfCallerIdRestrictionIsIncluded)
@@ -677,10 +679,10 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabledButFailsIfMepIsNotS
     AString strTarget("any_target");
 
     ON_CALL(objCallContext, GetMultiEndpointManager).WillByDefault(Return(nullptr));
-    SuppType eSuppType = SuppType::CALL_PULL;
-    SuppService* pSuppService = new SuppService();
-    pSuppService->nValue = 12345;
-    objInputSuppServices.Add(eSuppType, pSuppService);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
+    pService->nValue = 12345;
+    objInputSuppServices.Append(pService);
     CallReasonInfo objReasonInfo(CODE_MULTIENDPOINT_NOT_SUPPORTED);
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
 
@@ -696,10 +698,10 @@ TEST_F(IdleStateTest, StartHandlesCallPullButFailsIfNoMatchedDialogExists)
     AString strTarget("any_target");
     IMS_BOOL bUssi = IMS_FALSE;
 
-    SuppType eSuppType = SuppType::CALL_PULL;
-    SuppService* pSuppService = new SuppService();
-    pSuppService->nValue = 12345;
-    objInputSuppServices.Add(eSuppType, pSuppService);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
+    pService->nValue = 12345;
+    objInputSuppServices.Append(pService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
     ON_CALL(*pBlockChecker, Check)
@@ -707,7 +709,6 @@ TEST_F(IdleStateTest, StartHandlesCallPullButFailsIfNoMatchedDialogExists)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
 
     IMultiEndpointManager::PullingDialogInfo objDialogInfo;
-    EXPECT_CALL(objMepManager, GetDialogInfo(pSuppService->nValue)).WillOnce(Return(objDialogInfo));
 
     CallReasonInfo objReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC);
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
@@ -724,10 +725,10 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
     AString strTarget("any_target");
     IMS_BOOL bUssi = IMS_FALSE;
 
-    SuppType eSuppType = SuppType::CALL_PULL;
-    SuppService* pSuppService = new SuppService();
-    pSuppService->nValue = 12345;
-    objInputSuppServices.Add(eSuppType, pSuppService);
+    SuppService* pService = new SuppService();
+    pService->nType = static_cast<IMS_SINT32>(SuppType::CALL_PULL);
+    pService->nValue = 12345;
+    objInputSuppServices.Append(pService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
     ON_CALL(*pBlockChecker, Check)
@@ -740,7 +741,7 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
     objDialogInfo.strRemoteTag = "anyRemoteTag";
     objDialogInfo.eCallType = CallType::VT;
     objDialogInfo.pMediaInfo = new MediaInfo();
-    EXPECT_CALL(objMepManager, GetDialogInfo(pSuppService->nValue)).WillOnce(Return(objDialogInfo));
+    EXPECT_CALL(objMepManager, GetDialogInfo(pService->nValue)).WillOnce(Return(objDialogInfo));
     EXPECT_CALL(objMediaManager, SetMediaInfo(*objDialogInfo.pMediaInfo)).Times(1);
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);

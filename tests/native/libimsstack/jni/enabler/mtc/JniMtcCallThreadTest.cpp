@@ -15,6 +15,7 @@
  */
 #include "BaseServiceThread.h"
 #include "CallReasonInfo.h"
+#include "ImsList.h"
 #include "ImsProcess.h"
 #include "IuMtcCall.h"
 #include "JniCallInfo.h"
@@ -70,7 +71,7 @@ public:
     CallReasonInfo objReason;
     JniCallInfo objCallInfo;
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
 protected:
     virtual void SetUp() override {}

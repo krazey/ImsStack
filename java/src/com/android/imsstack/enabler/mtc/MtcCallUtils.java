@@ -207,7 +207,8 @@ public class MtcCallUtils {
     }
 
     public static boolean isCallWaitingEnabled(SuppInfo si) {
-        SuppInfo.SuppService ss = (si != null) ? si.getService(SuppInfo.TYPE_CW) : null;
+        SuppServiceUtils.SuppService ss = (si != null)
+                ? si.getService(SuppInfo.SUPP_TYPE_CW) : null;
         return (ss != null) && ss.boolValue;
     }
 
@@ -273,8 +274,8 @@ public class MtcCallUtils {
     }
 
     public static boolean isLocalHoldToneEnforced(SuppInfo si) {
-        for (SuppInfo.SuppService ss : si.objSuppService) {
-            if (ss.type == SuppInfo.TYPE_ENFORCE_LT) {
+        for (SuppServiceUtils.SuppService ss : si.getServices()) {
+            if (ss.type == SuppInfo.SUPP_TYPE_ENFORCE_LT) {
                 return ss.boolValue;
             }
         }
@@ -295,15 +296,15 @@ public class MtcCallUtils {
     }
 
     public static boolean isSuppInfoBoolean(int type) {
-        return SuppInfoUtils.isValueBoolean(type);
+        return SuppServiceUtils.isValueBoolean(type);
     }
 
     public static boolean isSuppInfoInt(int type) {
-        return SuppInfoUtils.isValueInt(type);
+        return SuppServiceUtils.isValueInt(type);
     }
 
     public static boolean isSuppInfoString(int type) {
-        return SuppInfoUtils.isValueString(type);
+        return SuppServiceUtils.isValueString(type);
     }
 
     /**
@@ -387,7 +388,7 @@ public class MtcCallUtils {
     }
 
     public static String toString(final SuppInfo suppInfo) {
-        int size = suppInfo.objSuppService.size();
+        int size = suppInfo.getServicesSize();
 
         if (size == 0) {
             return "[ SuppInfo: size=0 ]";
@@ -401,7 +402,7 @@ public class MtcCallUtils {
 
         if (size > 0)
         {
-            SuppInfo.SuppService ss = suppInfo.objSuppService.get(0);
+            SuppServiceUtils.SuppService ss = suppInfo.getServices().get(0);
 
             sb.append("{ ");
             sb.append(ss.type);
@@ -419,7 +420,7 @@ public class MtcCallUtils {
         }
 
         for (int i = 1; i < size; i++) {
-            SuppInfo.SuppService ss = suppInfo.objSuppService.get(i);
+            SuppServiceUtils.SuppService ss = suppInfo.getServices().get(i);
 
             sb.append(", { ");
             sb.append(ss.type);

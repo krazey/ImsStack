@@ -19,7 +19,6 @@
 
 #include "IMtcCallStateListener.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "SipStatusCode.h"
 #include "call/IMtcUiNotifier.h"
 #include "conferencecall/ConferenceEventNotifier.h"
@@ -87,7 +86,7 @@ public:
     // IConferenceController interfaces implementation
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN ImsList<SuppService*>& objSuppServices) override;
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers) override;
     IMS_SINT32 GetState() const override;
     IndividualCallState GetCallStatusInConference(IN CallKey nKey) const override;
@@ -98,7 +97,7 @@ public:
 protected:
     // basic operation set
     inline virtual void ProcessGroupCall(
-            IN ImsList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN ImsMap<SuppType, SuppService*>&)
+            IN ImsList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN ImsList<SuppService*>&)
     {
     }
     inline virtual void ProcessExpand(IN ImsList<ConfUser*>&) {}

@@ -18,7 +18,6 @@
 
 #include "IJniEnablerThread.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 
@@ -37,7 +36,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnStarted(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -67,7 +66,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -77,7 +76,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnHeld(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -94,7 +93,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnResumed(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -111,7 +110,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnHeldBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -121,7 +120,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnResumedBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -138,8 +137,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnIncomingResume(IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -149,8 +147,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnIncomingUpdate(IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -160,7 +157,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnUpdated(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -177,7 +174,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -188,7 +185,7 @@ public:
      * @param objUsers
      */
     virtual void OnMerged(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
     /**
@@ -264,9 +261,8 @@ public:
      * @param eRatType The current RAT type.
      */
     virtual void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber, IN IMS_SINT32 eRatType) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
+            IN OipType eOipType, IN const AString& strRemoteNumber, IN IMS_SINT32 eRatType) = 0;
 
     /**
      * @brief Notifies

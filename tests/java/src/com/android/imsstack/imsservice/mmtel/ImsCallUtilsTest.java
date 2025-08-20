@@ -249,35 +249,35 @@ public class ImsCallUtilsTest {
         profile.setEmergencyServiceCategories(1);
         SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
                 mContext, profile, "999", "");
-        assertEquals(1, suppInfo.getServiceSize());
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(1, suppInfo.getServicesSize());
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
         assertEquals(SOS_SERVICE_URN_POLICE,
-                suppInfo.getService(SuppInfo.TYPE_TARGET_URI).strValue);
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
 
         //Case 2:- urns is empty and ESCV is UNSPECIFIED
         profile.setEmergencyServiceCategories(0);
         suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999", "");
-        assertEquals(1, suppInfo.getServiceSize());
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(1, suppInfo.getServicesSize());
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
         assertEquals(SOS_SERVICE_URN_GENERIC,
-                suppInfo.getService(SuppInfo.TYPE_TARGET_URI).strValue);
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
 
         //Case 3:- urns is not empty
         urns.add(SOS_SERVICE_URN_AMBULANCE);
         profile.setEmergencyUrns(urns);
         suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999", "");
-        assertEquals(1, suppInfo.getServiceSize());
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(1, suppInfo.getServicesSize());
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
         assertEquals(SOS_SERVICE_URN_AMBULANCE,
-                suppInfo.getService(SuppInfo.TYPE_TARGET_URI).strValue);
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
 
         //Case 4:- urns is empty and normal routing
         urns.clear();
         profile.setEmergencyUrns(urns);
         profile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL);
         suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "110", "");
-        assertEquals(0, suppInfo.getServiceSize());
-        assertNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(0, suppInfo.getServicesSize());
+        assertNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
 
         //verify SuppInfo for TYPE_CALLERID, TYPE_CNAP and TYPE_CALL_PULL
         profile = new ImsCallProfile();
@@ -288,10 +288,10 @@ public class ImsCallUtilsTest {
         profile.setCallExtra(ImsCallProfile.EXTRA_CNA, "UNKNOWN");
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CALL_PULL, true);
         suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999", "");
-        assertEquals(3, suppInfo.getServiceSize());
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_CALLERID));
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_CNAP));
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_CALL_PULL));
+        assertEquals(3, suppInfo.getServicesSize());
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_CALLERID));
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_CNAP));
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_CALL_PULL));
     }
 
     @Test
@@ -824,7 +824,7 @@ public class ImsCallUtilsTest {
     public void testUpdateCallProfileFromSuppInfoExtension() {
         ImsCallProfile profile = new ImsCallProfile();
         SuppInfo suppInfo = new SuppInfo();
-        suppInfo.addService_int(SuppInfo.TYPE_CDIV_CAUSE, 1);
+        suppInfo.addServiceInt(SuppInfo.SUPP_TYPE_CDIV_CAUSE, 1);
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfig.ImsVoice.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
         ImsCallUtils.updateCallProfileFromSuppInfoExtension(mContext, profile, suppInfo);
@@ -912,13 +912,13 @@ public class ImsCallUtilsTest {
         ImsCallProfile profile = new ImsCallProfile();
         SuppInfo suppInfo = new SuppInfo();
         // added api for setting all the values for junit
-        suppInfo.addService(SuppInfo.TYPE_TIP, false, SuppInfo.TIP_IDENTITY,
+        suppInfo.addService(SuppInfo.SUPP_TYPE_TIP, false, SuppInfo.TIP_IDENTITY,
                 "Testing Demo,sip:+12345678902");
 
         ImsCallUtils.updateCallProfileOnSessionStarted(profile, suppInfo);
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TIP));
-        assertTrue(suppInfo.getService(SuppInfo.TYPE_TIP).intValue == 1);
-        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TIP));
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TIP));
+        assertTrue(suppInfo.getService(SuppInfo.SUPP_TYPE_TIP).intValue == 1);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TIP));
         assertNotNull(profile.getCallExtra(ImsCallProfile.EXTRA_OI));
         assertNotNull(profile.getCallExtra(ImsCallProfile.EXTRA_CNA));
         assertTrue(profile.getCallExtraInt(ImsCallProfile.EXTRA_OIR)

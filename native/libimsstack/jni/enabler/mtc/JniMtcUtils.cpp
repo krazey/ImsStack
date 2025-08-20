@@ -73,20 +73,22 @@ PUBLIC GLOBAL MediaInfo& JniMtcUtils::ReadMediaInfo(
     return objMediaInfo;
 }
 
-PUBLIC GLOBAL ImsMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(
+PUBLIC GLOBAL ImsList<SuppService*> JniMtcUtils::ReadSupplementaryService(
         IN const Parcel& objParcel)
 {
-    ImsMap<SuppType, SuppService*> objSupp;
+    ImsList<SuppService*> objSupp;
 
-    IMS_UINT32 nSuppService = objParcel.readInt32();
-    for (IMS_UINT32 index = 0; index < nSuppService; index++)
+    IMS_UINT32 nServiceSize = objParcel.readInt32();
+    for (IMS_UINT32 index = 0; index < nServiceSize; index++)
     {
         SuppService* pSuppService = new SuppService();
 
-        objSupp.Add(static_cast<SuppType>(objParcel.readInt32()), pSuppService);
+        pSuppService->nType = objParcel.readInt32();
         ConvertString(objParcel.readString16(), pSuppService->strValue);
         pSuppService->nValue = objParcel.readInt32();
         pSuppService->bValue = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
+
+        objSupp.Append(pSuppService);
     }
 
     return objSupp;
@@ -150,7 +152,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
+        IN const ImsList<SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
 {
     IMS_UINT32 nSuppService = objSuppServices.GetSize();
 
@@ -159,7 +161,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
     {
         SuppService* pService = objSuppServices.GetValueAt(index);
 
-        objParcel.writeInt32(static_cast<IMS_SINT32>(objSuppServices.GetKeyAt(index)));
+        objParcel.writeInt32(pService->nType);
         objParcel.writeString16(String16(pService->strValue.GetStr()));
         objParcel.writeInt32(pService->nValue);
         objParcel.writeInt32(pService->bValue);

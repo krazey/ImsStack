@@ -19,7 +19,6 @@
 
 #include "INativeEnabler.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "call/IMtcCall.h"
 
 class AString;
@@ -79,8 +78,7 @@ public:
      * @param lstSuppServices Supplementary services.
      */
     virtual void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * Notifies the call that the user is alerted by the incoming call.
@@ -246,7 +244,7 @@ public:
     /*
     void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices);
+            IN ImsList<SuppService*>& objSuppServices);
     */
 
     /**

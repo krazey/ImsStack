@@ -18,6 +18,7 @@
 #define MOCK_I_MTC_SERVICE_H_
 
 #include "IMtcService.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 
@@ -29,6 +30,7 @@ class IMtcAosStateListener;
 class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
 class ISsacTimerHandler;
+class SuppService;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
@@ -61,14 +63,12 @@ public:
     MOCK_METHOD(IJniMtcServiceThread*, GetJniServiceThread, (), (const, override));
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
-    MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL), (override));
+    MOCK_METHOD(void, UpdatePermanentSuppServices, (IN const ImsList<SuppService*>&), (override));
+    MOCK_METHOD(IMS_BOOL, IsPermanentSuppServiceEnabled, (IN PermanentSuppType), (override));
     MOCK_METHOD(void, OpenEmergencyService, (IN ServiceType), (override));
     MOCK_METHOD(void, StopEmergencyService, (), (override));
     MOCK_METHOD(
             void, ProcessTestCommand, (IN IMS_SINT32, IN IMS_SINT32, IN IMS_SINT32), (override));
-    MOCK_METHOD(SuppStatus, GetTbcwStatus, (), (const, override));
-    MOCK_METHOD(void, SetTerminalBasedTir, (IN IMS_BOOL), (override));
-    MOCK_METHOD(SuppStatus, GetTirStatus, (), (const, override));
     MOCK_METHOD(ISsacTimerHandler&, GetSsacTimerHandler, (), (override));
 
     // IEnablerService

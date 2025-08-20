@@ -15,7 +15,7 @@
  */
 #include "CallReasonInfo.h"
 #include "IMtcService.h"
-#include "ImsMap.h"
+#include "ImsList.h"
 #include "ImsProcess.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
@@ -145,7 +145,7 @@ TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
 
     JniCallInfo objCallInfo;
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     CallReasonInfo objReason(CODE_NONE);
     pJniServiceThread->OnRejectedIncomingCall(
             nCallKey, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", objReason);

@@ -20,7 +20,6 @@
 #include "IMtcCallController.h"
 #include "IMtcService.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 
@@ -48,8 +47,7 @@ public:
             (IN IMtcService* pService, IN ISession* piSession), (override));
     MOCK_METHOD(void, Start,
             (IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-                    IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
+                    IN MediaInfo& objMediaInfo, (IN const ImsList<SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, HandleUserAlert, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, Accept,

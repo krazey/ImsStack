@@ -84,12 +84,12 @@ TEST_F(JniMtcServiceTest, SendDataUpdateSrvccState)
     pJniService->SendData(objParcel);
 }
 
-TEST_F(JniMtcServiceTest, SendDataSetTbcw)
+TEST_F(JniMtcServiceTest, SendDataUpdateSuppServices)
 {
-    objParcel.writeInt32(IuMtcService::SET_TERMINAL_BASED_CALL_WAITING);
+    objParcel.writeInt32(IuMtcService::PERMANENT_SUPP_CHANGED);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockService, SetTerminalBasedCallWaiting(_)).Times(1);
+    EXPECT_CALL(objMockService, UpdatePermanentSuppServices(_)).Times(1);
 
     pJniService->SendData(objParcel);
 }

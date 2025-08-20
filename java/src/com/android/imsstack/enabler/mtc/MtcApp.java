@@ -104,7 +104,7 @@ public class MtcApp implements Closeable {
         mEmergencyServiceManager =
                 new MtcEmergencyServiceManager(mContext, mCM.getCallStateTracker());
         mTbSsNotifier = new MtcTerminalBasedSupplementaryServiceNotifier(
-                    this, mContext.getSlotId(), mContext.getCallLooper());
+                mContext.getSlotId(), mContext.getCallLooper());
         mMtcJniProxy = MtcJniProxy.getInstance();
 
         init();
@@ -329,7 +329,6 @@ public class MtcApp implements Closeable {
         MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
     }
 
-    @VisibleForTesting
     public MtcAppHandler getHandler() {
         return mHandler;
     }
@@ -346,6 +345,18 @@ public class MtcApp implements Closeable {
 
     public long getJNIService() {
         return mNativeObject;
+    }
+
+    /**
+     * Checks if an outgoing call is barred based on the call type and the recipient's number.
+     *
+     * @param callType The type of the outgoing call.
+     * @param callee The phone number of the recipient of the outgoing call to check
+     *               if it is an international number.
+     * @return {@code true} if the outgoing call is barred, {@code false} otherwise.
+     */
+    public boolean isOutgoingCallBarringActivated(int callType, String callee) {
+        return mTbSsNotifier.isOutgoingCallBarringActivated(callType, callee);
     }
 
     private void bindJNIService() {
@@ -389,6 +400,7 @@ public class MtcApp implements Closeable {
             }
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
+            mTbSsNotifier.setHandler(mHandler);
             mTbSsNotifier.notifyInfo();
         }
     }
@@ -400,6 +412,7 @@ public class MtcApp implements Closeable {
             mNativeObject = 0;
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
+            mTbSsNotifier.setHandler(null);
         }
     }
 

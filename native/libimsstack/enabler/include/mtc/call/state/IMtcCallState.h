@@ -73,8 +73,7 @@ public:
      * @return
      */
     virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Starts
@@ -87,7 +86,7 @@ public:
      * @return
      */
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) = 0;
 
     /**

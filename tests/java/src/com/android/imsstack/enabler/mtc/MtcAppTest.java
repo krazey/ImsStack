@@ -189,6 +189,7 @@ public class MtcAppTest extends ImsStackTest {
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, times(1)).setNativeObject(anyLong());
         verify(mTbSsNotifier, times(1)).init();
+        verify(mTbSsNotifier, times(1)).setHandler(any());
         verify(mTbSsNotifier, times(1)).notifyInfo();
 
         processAllMessages();
@@ -211,6 +212,7 @@ public class MtcAppTest extends ImsStackTest {
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, never()).setNativeObject(anyLong());
         verify(mTbSsNotifier, times(1)).init();
+        verify(mTbSsNotifier, never()).setHandler(any());
         verify(mTbSsNotifier, never()).notifyInfo();
         verify(mNativeStateInterface, times(1)).addListener(mNativeStateListenerCaptor.capture());
 
@@ -230,6 +232,7 @@ public class MtcAppTest extends ImsStackTest {
         verify(mNativeStateInterface, times(2)).removeListener(
                 any(NativeStateInterface.Listener.class));
         verify(mEmergencyServiceManager, times(1)).setNativeObject(anyLong());
+        verify(mTbSsNotifier, times(1)).setHandler(any());
         verify(mTbSsNotifier, times(1)).notifyInfo();
 
         processAllMessages();
@@ -292,6 +295,7 @@ public class MtcAppTest extends ImsStackTest {
 
         verify(mEmergencyServiceManager, times(0)).setNativeObject(anyLong());
         verify(mEmergencyServiceManager, times(1)).clear();
+        verify(mTbSsNotifier, never()).setHandler(null);
         verify(mBaseContext, times(1)).removeImsServiceListener(any());
         verify(mCM, times(1)).clear();
         verify(mTbSsNotifier, times(1)).deinit();
@@ -313,6 +317,7 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.clear();
 
         verify(mEmergencyServiceManager, times(1)).setNativeObject(0);
+        verify(mTbSsNotifier, times(1)).setHandler(null);
         verify(mBaseContext, times(1)).removeImsServiceListener(any());
         verify(mEmergencyServiceManager, times(1)).clear();
         verify(mCM, times(1)).clear();
