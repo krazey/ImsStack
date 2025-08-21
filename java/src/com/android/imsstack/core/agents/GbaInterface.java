@@ -141,6 +141,6 @@ public interface GbaInterface extends IAgent {
      * @return GbaCredentials that includes the result of Gba operation, an error reason when
      * failed, B-TID and Ks_(ext)_NAF key.
      */
-    GbaCredentials getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
+    @NonNull GbaCredentials getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
             String securityProtocol, boolean forceBootStrapping, int timeoutSeconds);
 }

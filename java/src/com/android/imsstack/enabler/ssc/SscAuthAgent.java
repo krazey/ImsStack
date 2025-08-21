@@ -18,6 +18,8 @@ package com.android.imsstack.enabler.ssc;
 
 import android.text.TextUtils;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 
@@ -26,10 +28,12 @@ import java.util.Locale;
 
 public class SscAuthAgent implements ISscAuthAgent {
     public static HashMap<Integer, ISscAuthAgent> sSscAuthAgent = new HashMap<>();
+    private static final String ME_BASED_GBA = "3gpp-bootstrapping@";
 
     private int mSlotId = 0;
     private String mCipherSuite = "";
     private String mETag = "";
+    private int mLastSuccessfulGbaMode = SscConfig.GBA_NONE;
 
     private boolean mIsCredentialInfoUpdated = false;
     private final SscAuthCredentials mSscAuthCredentials;
@@ -144,8 +148,17 @@ public class SscAuthAgent implements ISscAuthAgent {
             String[] nameValue = token.split("=");
             if ("realm".equalsIgnoreCase(nameValue[0])) {
                 String temp_realm = nameValue[1].replaceAll("\"", "");
-                String[] realm_send = temp_realm.split(";");
-                mSscAuthCredentials.setRealm(realm_send[0]);
+                String[] realms = temp_realm.split(";");
+                for (String realm : realms) {
+                    if (!TextUtils.isEmpty(realm)
+                            && realm.toLowerCase(Locale.US).startsWith(ME_BASED_GBA)) {
+                        mSscAuthCredentials.setRealm(realm);
+                        break;
+                    }
+                }
+                if (TextUtils.isEmpty(mSscAuthCredentials.getRealm())) {
+                    mSscAuthCredentials.setRealm(realms[0]);
+                }
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
                         + ", getRealm() : " + mSscAuthCredentials.getRealm());
             } else if ("nonce".equalsIgnoreCase(nameValue[0])) {
@@ -181,6 +194,27 @@ public class SscAuthAgent implements ISscAuthAgent {
         setIsCredentialInfoUpdated(true);
     }
 
+    @Override
+    public int getGbaMode(int appType) {
+        int gbaMode = SscConfig.getGbaMode(mSlotId);
+        if (gbaMode == SscConfig.GBA_U) {
+            return isGbaValid(appType) ? SscConfig.GBA_U : SscConfig.GBA_ME;
+        }
+
+        return gbaMode;
+    }
+
+    @Override
+    public int getLastSuccessfulGbaMode() {
+        ImsLog.d("GBA type : " + mLastSuccessfulGbaMode);
+        return mLastSuccessfulGbaMode;
+    }
+
+    @Override
+    public void setLastSuccessfulGbaMode(int gbaMode) {
+        mLastSuccessfulGbaMode = gbaMode;
+    }
+
     private String getNafFqdnFromRealm() {
         String realm = mSscAuthCredentials.getRealm();
         if (TextUtils.isEmpty(realm)) {
@@ -193,6 +227,33 @@ public class SscAuthAgent implements ISscAuthAgent {
 
         ImsLog.d("nafFqdn : "  + nafFqdn);
         return nafFqdn;
+    }
+
+    private boolean isGbaValid(int appType) {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (sim == null) {
+            ImsLog.e("SimInterface is null!!");
+            return false;
+        }
+
+        if (appType == SscConstant.APPTYPE_ISIM) {
+            if (sim.getIsimServiceTable().length == 0) {
+                ImsLog.e("IST is null!!");
+                return true;
+            }
+
+            return sim.isGbaAvailable();
+        } else if (appType == SscConstant.APPTYPE_USIM) {
+            if (sim.getUsimServiceTable().length == 0) {
+                ImsLog.e("UST is null!!");
+                return true;
+            }
+
+            // TODO: It should check if USIM support GBA.
+            return true;
+        }
+
+        return false;
     }
 
     private static class SscAuthCredentials {
