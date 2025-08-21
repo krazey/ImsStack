@@ -325,8 +325,18 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
 
                 case MSG_ON_TBTIR_TBCB_CHANGED: {
                     log("MSG_ON_TBTIR_TBCB_CHANGED");
-                    for (SupplementaryServiceConfiguration sscConfig :
-                            (List<SupplementaryServiceConfiguration>) msg.obj) {
+                    if (!(msg.obj instanceof List)) {
+                        ImsLog.e(this, mSlotId, "Invalid object type for "
+                                + "MSG_ON_TBTIR_TBCB_CHANGED: " + msg.obj);
+                        break;
+                    }
+
+                    for (Object item : (List<?>) msg.obj) {
+                        if (!(item instanceof SupplementaryServiceConfiguration)) {
+                            continue;
+                        }
+                        SupplementaryServiceConfiguration sscConfig =
+                                (SupplementaryServiceConfiguration) item;
                         if (sscConfig.getType() == SupplementaryServiceConfiguration.SS_TYPE_TIR) {
                             updateTbssInfo(PermanentSuppInfo.SUPP_TYPE_TB_TIR, sscConfig.getStatus()
                                     == SupplementaryServiceConfiguration.STATUS_ENABLED);
