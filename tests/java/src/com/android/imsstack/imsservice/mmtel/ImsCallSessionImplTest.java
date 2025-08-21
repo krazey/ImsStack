@@ -221,7 +221,19 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testSetListener() {
         mImsCallSession.setListener(mMockImsCallSessionListener);
+        processAllFutureMessages();
+
         verify(mMockImsCallSessionCallback).setListener(any(ImsCallSessionListener.class));
+        verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
+
+        mImsCallSession.mImmediateCallEndReason = new ImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED, ImsReasonInfo.CODE_UNSPECIFIED, null);
+        mImsCallSession.setListener(mMockImsCallSessionListener);
+        processAllFutureMessages();
+
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
     }
 
     @Test
@@ -847,6 +859,27 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     public void testNotifyAnbr() {
         mImsCallSession.callSessionNotifyAnbr(1, 1, 244);
         verify(mMockMtcCall, times(1)).notifyAnbr(eq(1), eq(1), eq(244));
+    }
+
+    @Test
+    public void testAlertUser() {
+        mImsCallSession.alertUser();
+        verify(mMockMtcCall, times(1)).alertUser();
+
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
+        mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
+        mImsCallSession.alertUser();
+        processAllFutureMessages();
+
+        verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
+
+        mImsCallSession.setListener(mMockImsCallSessionListener);
+        mImsCallSession.alertUser();
+        processAllFutureMessages();
+
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
     }
 
     private void verifyWaitOrNotifyCallTerminated() {

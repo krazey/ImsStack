@@ -357,6 +357,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void setListener(ImsCallSessionListener listener) {
+        log("setListener : " + listener);
+
         synchronized (mLock) {
             mCallback.setListener(listener);
 
@@ -1292,7 +1294,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     loge("Call extra is invalid");
                 }
             }
-            notifyCallStartFailedWithDelay(ImsCallUtils.createReasonInfo(code, 0, "", 0), 100);
+
+            ImsReasonInfo reasonInfo =  ImsCallUtils.createReasonInfo(code, 0, "", 0);
+            if (checkAndSetImmediateCallEndReason(reasonInfo)) {
+                setState(ImsCallSessionImplBase.State.TERMINATED);
+                return;
+            }
+
+            notifyCallStartFailedWithDelay(reasonInfo, 0);
             return;
         }
 
@@ -2445,6 +2454,35 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 != MtcCallUtils.isGttEnabled(mi.GTTMode));
     }
 
+    private boolean checkAndSetImmediateCallEndReason(final ImsReasonInfo reasonInfo) {
+        int state = getState();
+
+        synchronized (mLock) {
+            if (!mCallback.hasListener()) {
+                // TIMING_ISSUE :: if incoming call is sent to the framework
+                // and the call is terminated by the remote end immediately,
+                // the listener is null. So, when the framework sets the listener,
+                // the call setup failure should be notified to the framework.
+                mImmediateCallEndReason = reasonInfo;
+                return true;
+            } else if ((state == ImsCallSessionImplBase.State.IDLE)
+                    || (state == ImsCallSessionImplBase.State.INITIATED)) {
+                if (((mMoPendingCall != null) && !mMoPendingCall.isIdle())
+                        || ((mLocationBasedCall != null) && !mLocationBasedCall.isIdle())
+                        || ((mUsatBasedCall != null) && !mUsatBasedCall.isIdle())) {
+                    return false;
+                }
+
+                // TIMING_ISSUE :: The call can't be initiated and StartFailed
+                // event can be came before calling start(...) method.
+                mImmediateCallEndReason = reasonInfo;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static void updateMediaProfile(
             ImsCallProfile toProfile, ImsCallProfile fromProfile) {
         if (toProfile == null || fromProfile == null) {
@@ -3437,7 +3475,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsCallUtils.refineCallReasonInfoForCode(mCallContext, mCallProfile, callReasonInfo);
 
-            if (checkAndSetImmediateCallEndReason(callReasonInfo)) {
+            if (checkAndSetImmediateCallEndReason(ImsCallUtils.createReasonInfo(
+                        callReasonInfo, ImsCallUtils.FLAG_REASON_INFO_ALL))) {
                 setState(ImsCallSessionImplBase.State.TERMINATED);
                 return;
             }
@@ -4804,37 +4843,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     } catch (Throwable t) {
                         loge(t.toString());
                     }
-                }
-            }
-
-            return false;
-        }
-
-        private boolean checkAndSetImmediateCallEndReason(CallReasonInfo callReasonInfo) {
-            int state = getState();
-
-            synchronized (mLock) {
-                if (!mCallback.hasListener()) {
-                    // TIMING_ISSUE :: if incoming call is sent to the framework
-                    // and the call is terminated by the remote end immediately,
-                    // the listener is null. So, when the framework sets the listener,
-                    // the call setup failure should be notified to the framework.
-                    mImmediateCallEndReason = ImsCallUtils.createReasonInfo(
-                            callReasonInfo, ImsCallUtils.FLAG_REASON_INFO_ALL);
-                    return true;
-                } else if ((state == ImsCallSessionImplBase.State.IDLE)
-                        || (state == ImsCallSessionImplBase.State.INITIATED)) {
-                    if (((mMoPendingCall != null) && !mMoPendingCall.isIdle())
-                            || ((mLocationBasedCall != null) && !mLocationBasedCall.isIdle())
-                            || ((mUsatBasedCall != null) && !mUsatBasedCall.isIdle())) {
-                        return false;
-                    }
-
-                    // TIMING_ISSUE :: The call can't be initiated and StartFailed
-                    // event can be came before calling start(...) method.
-                    mImmediateCallEndReason = ImsCallUtils.createReasonInfo(
-                            callReasonInfo, ImsCallUtils.FLAG_REASON_INFO_ALL);
-                    return true;
                 }
             }
 
