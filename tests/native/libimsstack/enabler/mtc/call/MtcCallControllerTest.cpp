@@ -40,8 +40,6 @@ using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-LOCAL const IMS_SINT32 SLOT_ID = 0;
-
 class MtcCallControllerTest : public ::testing::Test
 {
 public:
