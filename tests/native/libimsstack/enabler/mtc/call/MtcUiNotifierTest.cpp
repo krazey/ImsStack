@@ -22,6 +22,7 @@
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcCallThread.h"
 #include "MockIJniMtcServiceThread.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MtcUiNotifier.h"
@@ -31,6 +32,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
+#include "utility/SuppServiceUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -225,6 +227,20 @@ TEST_F(MtcUiNotifierTest, SendProgressingSkipOnProgressingWhenParametersAreSame)
     objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
     objJniCallInfo.bConferenceEnabled = IMS_TRUE;
     ON_CALL(objContext, CreateJniCallInfo).WillByDefault(Return(objJniCallInfo));
+
+    SuppServiceUtils::Add(objSuppServices,
+            static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ROAMING_VOICE), IMS_TRUE);
+    pSupplementaryService->UpdateOutgoingServices(objSuppServices);
+
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(1);
+    pNotifier->SendProgressing();
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(0);
+    pNotifier->SendProgressing();
+
+    ImsList<SuppService*> objSuppServices2;
+    SuppServiceUtils::Add(objSuppServices2,
+            static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO), 0);
+    pSupplementaryService->UpdateOutgoingServices(objSuppServices2);
 
     EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(1);
     pNotifier->SendProgressing();

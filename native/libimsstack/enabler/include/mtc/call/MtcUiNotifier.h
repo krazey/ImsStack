@@ -28,6 +28,7 @@
 class AString;
 class IMtcCallContext;
 class IJniMtcCallThread;
+class SuppService;
 
 class MtcUiNotifier final : public IMtcUiNotifier
 {
@@ -67,14 +68,16 @@ public:
 
 private:
     IJniMtcCallThread* GetCallThread() const;
-    IMS_BOOL ShouldNotifyProgressing(
-            IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) const;
+    IMS_BOOL ShouldNotifyProgressing(IN const JniCallInfo& objCallInfo,
+            IN const MediaInfo& objMediaInfo,
+            IN const ImsList<SuppService*>& objSuppServices) const;
 
     IMtcCallContext& m_objContext;
     std::function<void()> m_objBlockedNotification;
     CallReasonInfo m_objStartFailedReason;
     MediaInfo m_objLastDispatchedMediaInfo;
     JniCallInfo m_objLastDispatchedJniCallInfo;
+    ImsList<SuppService*> m_objLastDispatchedSuppServices;
 };
 
 #endif

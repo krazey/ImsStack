@@ -92,7 +92,7 @@ PUBLIC GLOBAL void SuppServiceUtils::DeleteServices(IN ImsList<SuppService*>& ob
 {
     IMS_UINT32 nSize = objSuppServices.GetSize();
 
-    IMS_TRACE_I("DeleteAll : size[%d]", nSize, 0, 0);
+    IMS_TRACE_I("DeleteServices : size[%d]", nSize, 0, 0);
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {

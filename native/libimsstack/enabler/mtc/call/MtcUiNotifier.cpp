@@ -33,6 +33,7 @@
 #include "call/UpdatingInfo.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/IMtcMediaManager.h"
+#include "utility/SuppServiceUtils.h"
 #include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -43,7 +44,8 @@ MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
         m_objBlockedNotification(IMS_NULL),
         m_objStartFailedReason(CODE_UNSPECIFIED),
         m_objLastDispatchedMediaInfo(),
-        m_objLastDispatchedJniCallInfo()
+        m_objLastDispatchedJniCallInfo(),
+        m_objLastDispatchedSuppServices()
 {
 }
 
@@ -181,9 +183,10 @@ void MtcUiNotifier::SendProgressing()
         objRefinedMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     }
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
+    const ImsList<SuppService*> objSuppServices =
+            m_objContext.GetSupplementaryService().GetServices();
 
-    // TODO: b/436398906 -Need to add logic to compare SuppServices
-    if (!ShouldNotifyProgressing(objJniCallInfo, objRefinedMediaInfo))
+    if (!ShouldNotifyProgressing(objJniCallInfo, objRefinedMediaInfo, objSuppServices))
     {
         IMS_TRACE_I("skip SendProgressing - parameters are same", 0, 0, 0);
         return;
@@ -191,9 +194,11 @@ void MtcUiNotifier::SendProgressing()
 
     m_objLastDispatchedMediaInfo = objRefinedMediaInfo;
     m_objLastDispatchedJniCallInfo = objJniCallInfo;
+    SuppServiceUtils::DeleteServices(m_objLastDispatchedSuppServices);
+    m_objLastDispatchedSuppServices = SuppServiceUtils::Clone(objSuppServices);
 
     piThread->OnProgressing(m_objLastDispatchedJniCallInfo, m_objLastDispatchedMediaInfo,
-            m_objContext.GetSupplementaryService().GetServices());
+            m_objLastDispatchedSuppServices);
 }
 
 PUBLIC
@@ -498,10 +503,10 @@ IJniMtcCallThread* MtcUiNotifier::GetCallThread() const
 }
 
 PRIVATE
-IMS_BOOL MtcUiNotifier::ShouldNotifyProgressing(
-        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) const
+IMS_BOOL MtcUiNotifier::ShouldNotifyProgressing(IN const JniCallInfo& objCallInfo,
+        IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) const
 {
-    // TODO: b/436398906 -Need to add logic to compare SuppServices
     return objCallInfo != m_objLastDispatchedJniCallInfo ||
-            objMediaInfo != m_objLastDispatchedMediaInfo;
+            objMediaInfo != m_objLastDispatchedMediaInfo ||
+            !SuppServiceUtils::IsSameSuppServices(objSuppServices, m_objLastDispatchedSuppServices);
 }
