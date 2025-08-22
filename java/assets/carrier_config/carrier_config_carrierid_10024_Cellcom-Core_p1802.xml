@@ -21,5 +21,10 @@
         <item value="1802"/>
     </int-array>
 
+    <!-- Ims General -->
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <int name="ims.registration_contact_user_info_part_int" value="1"/>
+
+    <!-- Aos -->
+    <int name="ims.isim_index_for_impu_int" value="0"/>
 </carrier_config>
