@@ -57,6 +57,12 @@ public:
     virtual void SetMediaInfo(IN const MediaInfo& objInfo) = 0;
 
     /**
+     * @brief This method is to update a media information corresponging to the ISession.
+     * @param piSession ISession instance is used for managing the media profile.
+     */
+    virtual void UpdateMediaInfo(IN const ISession* piSession) = 0;
+
+    /**
      * @brief Updates
      *
      * @param eMediaType
@@ -204,14 +210,16 @@ public:
      * @param piSession ISession instance to get media profile id.
      * @return Negotiated direction.
      */
-    virtual IMS_SINT32 GetNegotiatedDirection(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
+    virtual IMS_SINT32 GetNegotiatedDirection(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
     /**
      * @brief Get the negotiated quality via MediaSession.
      * @param piSession ISession instance to get media profile id.
      * @return Negotiated quality.
      */
-    virtual IMS_SINT32 GetNegotiatedQuality(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
+    virtual IMS_SINT32 GetNegotiatedQuality(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
     /**
      * @brief Get the session type from the media contents via MediaSession.

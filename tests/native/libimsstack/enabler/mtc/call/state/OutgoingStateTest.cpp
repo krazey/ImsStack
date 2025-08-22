@@ -939,6 +939,7 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesSendStartedToUi)
     ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_FALSE));
+    EXPECT_CALL(objMediaManager, UpdateMediaInfo(&objSession));
     EXPECT_CALL(objUiNotifier, SendStarted);
     EXPECT_CALL(objPreconditionManager, OnCallEstablished(&objSession));
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT, _));
