@@ -143,9 +143,7 @@
     </string-array>
 
     <!-- Mts -->
-    <int-array name="imssms.sms_generic_error_codes_int_array" num="1">
-        <item value="0"/>
-    </int-array>
+    <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="2"/>
     <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="8"/>
     <int name="imssms.sms_reg_policy_for_504_response_int" value="8"/>
 

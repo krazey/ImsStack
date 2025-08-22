@@ -258,8 +258,7 @@
     <boolean name="imsvoice.eps_fallback_trigger_by_ac_barring_bool" value="false"/>
 
     <!-- Mts -->
-    <int-array name="imssms.sms_generic_error_codes_int_array" num="7">
-        <item value="0"/>
+    <int-array name="imssms.sms_generic_error_codes_int_array" num="6">
         <item value="403"/>
         <item value="404"/>
         <item value="408"/>
@@ -267,6 +266,7 @@
         <item value="503"/>
         <item value="504"/>
     </int-array>
+    <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="2"/>
     <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="12"/>
     <int name="imssms.sms_reg_policy_for_403_response_int" value="12"/>
     <int name="imssms.sms_reg_policy_for_404_response_int" value="12"/>
