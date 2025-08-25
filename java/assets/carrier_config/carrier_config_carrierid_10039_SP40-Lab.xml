@@ -18,6 +18,9 @@
     <!-- Aos -->
     <int name="ims.isim_index_for_impu_int" value="0"/>
 
+    <!-- Ssc -->
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
+
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>

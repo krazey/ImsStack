@@ -53,4 +53,40 @@
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
+
+    <!-- Ssc -->
+    <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
+    <int-array name="imsss.ut_server_based_services_int_array" num="22">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+        <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
+        <item value="7"/>
+        <item value="8"/>
+        <item value="9"/>
+        <item value="10"/>
+        <item value="11"/>
+        <item value="12"/>
+        <item value="13"/>
+        <item value="14"/>
+        <item value="15"/>
+        <item value="16"/>
+        <item value="17"/>
+        <item value="18"/>
+        <item value="19"/>
+        <item value="20"/>
+        <item value="21"/>
+    </int-array>
+    <int-array name="imsss.xcap_over_ut_supported_rats_int_array" num="5">
+        <item value="3"/>
+        <item value="6"/>
+        <item value="5"/>
+        <item value="1"/>
+        <item value="2"/>
+    </int-array>
+    <string name="imsss.ut_as_server_fqdn_string">xcap.ims.ericsson.ca</string>
+    <int name="imsss.ut_as_server_port_int" value="80"/>
 </carrier_config>
