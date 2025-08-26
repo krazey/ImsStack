@@ -65,9 +65,9 @@ protected:
         pNegoPayload->SetRtpMap(100, "H264", 90000, 1);
         pNegoPayload->SetFmtp(pNegoFmtp);
 
-        m_objLocalProfile.GetPayloadList().Append(pLocalPayload);
-        m_objNegoProfile.GetPayloadList().Append(pNegoPayload);
-        m_objPeerProfile.GetPayloadList().Append(pPeerPayload);
+        m_objLocalProfile.AddPayload(pLocalPayload);
+        m_objNegoProfile.AddPayload(pNegoPayload);
+        m_objPeerProfile.AddPayload(pPeerPayload);
 
         m_objLocalProfile.SetBandwidthAs(32);
         m_objPeerProfile.SetBandwidthAs(32);
@@ -249,17 +249,17 @@ TEST_F(VideoSessionTest, testUpdateRtpConfigPayloadType)
     VideoProfile::Payload* pLocalPayload = new VideoProfile::Payload();
     pLocalPayload->SetRtpMap(kLocalPayloadNum, "H264", 90000);
     pLocalPayload->SetFmtp(std::make_shared<VideoProfile::AvcFmtp>());
-    m_objLocalProfile.GetPayloadList().Append(pLocalPayload);
+    m_objLocalProfile.AddPayload(pLocalPayload);
 
     VideoProfile::Payload* pPeerPayload = new VideoProfile::Payload();
     pPeerPayload->SetRtpMap(kPeerPayloadNum, "H264", 90000);
     pPeerPayload->SetFmtp(std::make_shared<VideoProfile::AvcFmtp>());
-    m_objPeerProfile.GetPayloadList().Append(pPeerPayload);
+    m_objPeerProfile.AddPayload(pPeerPayload);
 
     VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
     pNegoPayload->SetRtpMap(kNegoPayloadNum, "H264", 90000);
     pNegoPayload->SetFmtp(std::make_shared<VideoProfile::AvcFmtp>());
-    m_objNegoProfile.GetPayloadList().Append(pNegoPayload);
+    m_objNegoProfile.AddPayload(pNegoPayload);
 
     m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 

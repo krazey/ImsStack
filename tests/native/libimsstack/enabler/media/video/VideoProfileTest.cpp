@@ -749,12 +749,12 @@ TEST_F(VideoProfileTest, testVideoProfileGetPayloadAt)
     VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
     pPayload1->GetRtpMap().SetPayloadType(HEVC_PAYLOAD_TYPE);
     pPayload1->GetRtpMap().SetPayloadNumber(nPayload1);
-    pProfile->GetPayloadList().Append(pPayload1);
+    pProfile->AddPayload(pPayload1);
 
     VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
     pPayload2->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
     pPayload2->GetRtpMap().SetPayloadNumber(nPayload2);
-    pProfile->GetPayloadList().Append(pPayload2);
+    pProfile->AddPayload(pPayload2);
 
     EXPECT_EQ(pProfile->GetPayloadList().GetSize(), 2);
 
@@ -844,12 +844,12 @@ TEST_F(VideoProfileTest, testVideoProfileEqualNotEqual)
     // Add Payload to test
     VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
     pPayload1->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
-    pProfile1->GetPayloadList().Append(pPayload1);
+    pProfile1->AddPayload(pPayload1);
     EXPECT_NE(*pProfile1, *pProfile2);
 
     VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
     pPayload2->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
-    pProfile2->GetPayloadList().Append(pPayload2);
+    pProfile2->AddPayload(pPayload2);
     EXPECT_EQ(*pProfile1, *pProfile2);
 
     // Change Payload

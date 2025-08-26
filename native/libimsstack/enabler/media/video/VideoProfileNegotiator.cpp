@@ -282,7 +282,7 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
 
                 if (pNegotiatedFmtp != IMS_NULL)
                 {
-                    pNegotiatedProfile->GetPayloadList().Append(pNegoPayload);
+                    pNegotiatedProfile->AddPayload(pNegoPayload);
                     break;
                 }
             }
@@ -559,7 +559,7 @@ VideoProfile::Payload* VideoProfileNegotiator::SetClosestPayload(IN VideoProfile
 
         if (bFoundMatched)
         {
-            pNegotiatedProfile->GetPayloadList().Append(pNegoPayload);
+            pNegotiatedProfile->AddPayload(pNegoPayload);
             pNegotiatedProfile->SetNegotiatedPayloadIndex(0);
 
             return pNegoPayload;

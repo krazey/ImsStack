@@ -148,7 +148,7 @@ IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
                 TextProfile::Payload* pNegotiatedPayload = CreatePayload(pPeerPayload->GetRtpMap(),
                         pPeerPayload->GetFmtp() == IMS_NULL ? pLocalPayload->GetFmtp()
                                                             : pPeerPayload->GetFmtp());
-                pNegotiatedProfile->GetPayloadList().Append(pNegotiatedPayload);
+                pNegotiatedProfile->AddPayload(pNegotiatedPayload);
                 bRet = IMS_TRUE;
             }
         }

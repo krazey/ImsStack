@@ -130,13 +130,13 @@ void VideoSdpParser::ParsePayloads(
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
         const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-        VideoProfile::Payload* pPayload = new VideoProfile::Payload();
 
-        if (pSdpCodec == IMS_NULL || pPayload == IMS_NULL)
+        if (pSdpCodec == IMS_NULL)
         {
-            delete pPayload;
             continue;
         }
+
+        VideoProfile::Payload* pPayload = new VideoProfile::Payload();
 
         IMS_TRACE_I("ParsePayloads(): At[%d]", i, 0, 0);
 
@@ -163,7 +163,7 @@ void VideoSdpParser::ParsePayloads(
             ParseResolution(pPayload, strImageAttr, strFrameSize, eVideoCodec);
             ParseAvpfAttribute(pSdpCodec, pPayload, pProfile);
 
-            pProfile->GetPayloadList().Append(pPayload);
+            pProfile->AddPayload(pPayload);
         }
         else
         {

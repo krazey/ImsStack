@@ -245,7 +245,7 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
             nNegoModeSetList, nNegoDefaultRtpModeSet, nLocalPayloadIndex);
 
     pAmr->SetFmtp(pAmrFmtp);
-    pNegotiatedProfile->GetPayloadList().Append(pAmr);
+    pNegotiatedProfile->AddPayload(pAmr);
 
     if (pPeerProfile->GetNegotiatedPayloadIndex() == -1)
     {
@@ -342,7 +342,7 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile* pLo
             nBandwidthNegoList, nBitrateNegoList, nModeSetNegoList, nLocalPayloadIndex);
 
     pEvs->SetFmtp(pEvsFmtp);
-    pNegotiatedProfile->GetPayloadList().Append(pEvs);
+    pNegotiatedProfile->AddPayload(pEvs);
 
     if (pPeerProfile->GetNegotiatedPayloadIndex() == -1)
     {
@@ -526,7 +526,7 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePcm(IN AudioProfile* pLo
     }
 
     pPcm->SetRtpMap(pPeerPayload->GetRtpMap());
-    pNegotiatedProfile->GetPayloadList().Append(pPcm);
+    pNegotiatedProfile->AddPayload(pPcm);
 
     if (pPeerProfile->GetNegotiatedPayloadIndex() == -1)
     {
@@ -577,7 +577,7 @@ IMS_BOOL AudioProfileNegotiator::NegotiateTelephoneEventPayload(
                 pTelephoneEvent->SetFmtp(std::make_shared<AudioProfile::TelephoneEventFmtp>(
                         *std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(
                                 pPeerPayload->GetFmtp())));
-                pNegotiatedProfile->GetPayloadList().Append(pTelephoneEvent);
+                pNegotiatedProfile->AddPayload(pTelephoneEvent);
 
                 IMS_TRACE_D("NegotiateTelephoneEventPayload(): payload[%d]",
                         pTelephoneEvent->GetRtpMap().GetPayloadNumber(), 0, 0);
@@ -625,7 +625,7 @@ void AudioProfileNegotiator::NegotiateTelephoneEvent8000Payload(
                 pTelephoneEvent->SetFmtp(std::make_shared<AudioProfile::TelephoneEventFmtp>(
                         *std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(
                                 pPeerPayload->GetFmtp())));
-                pNegotiatedProfile->GetPayloadList().Append(pTelephoneEvent);
+                pNegotiatedProfile->AddPayload(pTelephoneEvent);
 
                 return;
             }

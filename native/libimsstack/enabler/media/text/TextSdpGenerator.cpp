@@ -113,7 +113,6 @@ void TextSdpGenerator::CheckRedPayloadSubTypeValidity(OUT TextProfile* pProfile)
                         pPayload->GetRtpMap().GetPayloadType().GetStr(),
                         pPayload->GetRtpMap().GetPayloadNumber(), 0);
                 pProfile->GetPayloadList().RemoveAt(i);
-                delete pPayload;
             }
         }
     }

@@ -79,7 +79,7 @@ void TextProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN
 
         if (pTempPayload != IMS_NULL)
         {
-            static_cast<TextProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
+            static_cast<TextProfile*>(pProfile)->AddPayload(pTempPayload);
         }
     }
 }

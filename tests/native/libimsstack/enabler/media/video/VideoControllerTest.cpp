@@ -58,7 +58,7 @@ protected:
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
         pAvcPayload->GetRtpMap().SetPayloadType("H264");
         pAvcPayload->SetFmtp(pAvcFmtp);
-        m_pLocalProfile->GetPayloadList().Append(pAvcPayload);
+        m_pLocalProfile->AddPayload(pAvcPayload);
         m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
         m_pPeerProfile = new VideoProfile(*m_pLocalProfile);

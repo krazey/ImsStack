@@ -120,7 +120,7 @@ void AudioSdpParser::ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfi
 
     if (pPayload != IMS_NULL)
     {
-        pProfile->GetPayloadList().Append(pPayload);
+        pProfile->AddPayload(pPayload);
     }
 }
 

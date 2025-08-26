@@ -106,7 +106,7 @@ protected:
         AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
         pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
         pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
-        m_pBaseProfile->GetPayloadList().Append(pAmrPayload);
+        m_pBaseProfile->AddPayload(pAmrPayload);
         m_pBaseProfile->SetDataPort(LOCAL_PORT);
 
         ON_CALL(*m_pMockProfileGenerator, Generate(_, _, _, _))
@@ -236,7 +236,7 @@ TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupported)
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
     pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
-    pProfile->GetPayloadList().Append(pAmrPayload);
+    pProfile->AddPayload(pAmrPayload);
     pProfile->SetDataPort(10000);
 
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
@@ -408,7 +408,7 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
     pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
-    pLocalProfile->GetPayloadList().Append(pAmrPayload);
+    pLocalProfile->AddPayload(pAmrPayload);
     pLocalProfile->SetDataPort(10000);
 
     auto pPeerProfile = std::make_shared<AudioProfile>(*pLocalProfile);
@@ -453,7 +453,7 @@ TEST_F(AudioNegoTest, testNegotiateSdpOfferSentSuccess)
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
     pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
-    pLocalProfile->GetPayloadList().Append(pAmrPayload);
+    pLocalProfile->AddPayload(pAmrPayload);
     pLocalProfile->SetDataPort(10000);
 
     auto pPeerProfile = std::make_shared<AudioProfile>(*pLocalProfile);

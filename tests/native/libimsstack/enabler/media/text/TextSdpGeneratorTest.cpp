@@ -47,11 +47,11 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtp)
     auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>(3, 101);
     pPayload->SetRtpMap(102, "red", 1000);
     pPayload->SetFmtp(pRedFmtp);
-    m_pTextProfile->GetPayloadList().Append(pPayload);
+    m_pTextProfile->AddPayload(pPayload);
 
     TextProfile::Payload* pSubPayload = new TextProfile::Payload();
     pSubPayload->SetRtpMap(101, "t140", 1000);
-    m_pTextProfile->GetPayloadList().Append(pSubPayload);
+    m_pTextProfile->AddPayload(pSubPayload);
 
     EXPECT_TRUE(Generate(
             m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
@@ -63,11 +63,11 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpEmpty)
     auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pPayload->SetRtpMap(102, "red", 1000);
     pPayload->SetFmtp(pRedFmtp);
-    m_pTextProfile->GetPayloadList().Append(pPayload);
+    m_pTextProfile->AddPayload(pPayload);
 
     TextProfile::Payload* pSubPayload = new TextProfile::Payload();
     pSubPayload->SetRtpMap(101, "t140", 1000);
-    m_pTextProfile->GetPayloadList().Append(pSubPayload);
+    m_pTextProfile->AddPayload(pSubPayload);
 
     EXPECT_TRUE(Generate(
             m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
@@ -78,11 +78,11 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpNull)
     TextProfile::Payload* pPayload = new TextProfile::Payload();
     pPayload->SetRtpMap(102, "red", 1000);
     pPayload->SetFmtp(IMS_NULL);
-    m_pTextProfile->GetPayloadList().Append(pPayload);
+    m_pTextProfile->AddPayload(pPayload);
 
     TextProfile::Payload* pSubPayload = new TextProfile::Payload();
     pSubPayload->SetRtpMap(101, "t140", 1000);
-    m_pTextProfile->GetPayloadList().Append(pSubPayload);
+    m_pTextProfile->AddPayload(pSubPayload);
 
     EXPECT_TRUE(Generate(
             m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
@@ -93,7 +93,7 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpNoSubPayload)
     TextProfile::Payload* pPayload = new TextProfile::Payload();
     pPayload->SetRtpMap(102, "red", 1000);
     pPayload->SetFmtp(IMS_NULL);
-    m_pTextProfile->GetPayloadList().Append(pPayload);
+    m_pTextProfile->AddPayload(pPayload);
 
     EXPECT_TRUE(Generate(
             m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));

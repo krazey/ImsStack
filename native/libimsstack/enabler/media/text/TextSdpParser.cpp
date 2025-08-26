@@ -59,13 +59,13 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
         const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-        TextProfile::Payload* pPayload = new TextProfile::Payload();
 
-        if (pSdpCodec == IMS_NULL || pPayload == IMS_NULL)
+        if (pSdpCodec == IMS_NULL)
         {
-            delete pPayload;
             continue;
         }
+
+        TextProfile::Payload* pPayload = new TextProfile::Payload();
 
         AString strCodecName = AString::ConstNull();
         ParseRtpMap(pSdpCodec, pPayload, strCodecName);
@@ -82,7 +82,7 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
             continue;
         }
 
-        pProfile->GetPayloadList().Append(pPayload);
+        pProfile->AddPayload(pPayload);
     }
 }
 

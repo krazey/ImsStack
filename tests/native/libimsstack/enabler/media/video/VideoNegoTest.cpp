@@ -107,7 +107,7 @@ protected:
         pAvcFmtp->SetLevel(12);
         pAvcPayload->SetFmtp(pAvcFmtp);
 
-        m_pBaseProfile->GetPayloadList().Append(pAvcPayload);
+        m_pBaseProfile->AddPayload(pAvcPayload);
         m_pBaseProfile->SetDataPort(LOCAL_PORT);
 
         ON_CALL(*m_pMockProfileGenerator, Generate(_, _, _, _))
@@ -215,7 +215,7 @@ TEST_F(VideoNegoTest, testIsMediaCodecFromSdpSupported)
     pAvcFmtp->SetLevel(12);
     pAvcPayload->SetFmtp(pAvcFmtp);
 
-    pProfile->GetPayloadList().Append(pAvcPayload);
+    pProfile->AddPayload(pAvcPayload);
     pProfile->SetDataPort(LOCAL_PORT);
 
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
@@ -378,7 +378,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     pAvcFmtp->SetLevel(12);
     pAvcPayload->SetFmtp(pAvcFmtp);
 
-    pLocalProfile->GetPayloadList().Append(pAvcPayload);
+    pLocalProfile->AddPayload(pAvcPayload);
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
@@ -430,7 +430,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
     pAvcFmtp->SetLevel(12);
     pAvcPayload->SetFmtp(pAvcFmtp);
 
-    pLocalProfile->GetPayloadList().Append(pAvcPayload);
+    pLocalProfile->AddPayload(pAvcPayload);
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 

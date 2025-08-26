@@ -110,9 +110,9 @@ TEST_F(AudioSessionTest, testUpdateRtpConfig)
     pNegoPayload->SetRtpMap(100, "EVS", 16000, 1);
     pNegoPayload->SetFmtp(pNegoFmtp);
 
-    objLocalProfile.GetPayloadList().Append(pLocalPayload);
-    objNegoProfile.GetPayloadList().Append(pNegoPayload);
-    objPeerProfile.GetPayloadList().Append(pPeerPayload);
+    objLocalProfile.AddPayload(pLocalPayload);
+    objNegoProfile.AddPayload(pNegoPayload);
+    objPeerProfile.AddPayload(pPeerPayload);
 
     EXPECT_NE(m_pSession->UpdateRtpConfig(
                       0, &objLocalProfile, &objPeerProfile, &objNegoProfile, IMS_TRUE),

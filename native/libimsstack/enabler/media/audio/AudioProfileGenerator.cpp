@@ -102,7 +102,8 @@ void AudioProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, I
 
         if (pTempPayload != IMS_NULL)
         {
-            static_cast<AudioProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
+            static_cast<AudioProfile*>(pProfile)->AddPayload(
+                    std::shared_ptr<AudioProfile::Payload>(pTempPayload));
         }
     }
 }
