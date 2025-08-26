@@ -813,3 +813,55 @@ TEST_F(AosUtilTest, ReturnMappedAosNetworkTypeForGivenNetworkType)
     EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_HSPA), AosNetworkType::UTRAN);
     EXPECT_EQ(m_pAosUtil->GetAosNetworkType(NW_REPORT_RADIO_EHRPD), AosNetworkType::NONE);
 }
+
+TEST_F(AosUtilTest, UserInfoIsNullIfSipAddressIsNull)
+{
+    // GIVEN
+    AString strSipAddress;
+    AString strUserInfo;
+
+    // WHEN
+    m_pAosUtil->GetUserInfo(strSipAddress, strUserInfo);
+
+    // THEN
+    EXPECT_STREQ(strUserInfo.GetStr(), AString::ConstNull().GetStr());
+}
+
+TEST_F(AosUtilTest, UserInfoIsNullIfSipAddressIsInvalid)
+{
+    // GIVEN
+    AString strSipAddress = "1111";
+    AString strUserInfo;
+
+    // WHEN
+    m_pAosUtil->GetUserInfo(strSipAddress, strUserInfo);
+
+    // THEN
+    EXPECT_STREQ(strUserInfo.GetStr(), AString::ConstNull().GetStr());
+}
+
+TEST_F(AosUtilTest, UserInfoWhenSipAddressSchemeIsSip)
+{
+    // GIVEN
+    AString strSipAddress = "sip:+1111@ims.mnc.mcc.3gppnetwork.org";
+    AString strUserInfo;
+
+    // WHEN
+    m_pAosUtil->GetUserInfo(strSipAddress, strUserInfo);
+
+    // THEN
+    EXPECT_STREQ(strUserInfo.GetStr(), "+1111");
+}
+
+TEST_F(AosUtilTest, UserInfoWhenSipAddressSchemeIsTel)
+{
+    // GIVEN
+    AString strSipAddress = "tel:+1111";
+    AString strUserInfo;
+
+    // WHEN
+    m_pAosUtil->GetUserInfo(strSipAddress, strUserInfo);
+
+    // THEN
+    EXPECT_STREQ(strUserInfo.GetStr(), "+1111");
+}

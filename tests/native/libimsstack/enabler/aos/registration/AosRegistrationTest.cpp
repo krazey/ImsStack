@@ -84,6 +84,7 @@ using ::testing::_;
 using ::testing::An;
 using ::testing::AnyNumber;
 using ::testing::DoAll;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
@@ -129,6 +130,7 @@ using ::testing::SetArgReferee;
     using Base::NotifyFailureWithImsReason;                         \
     using Base::ReinitiateRegistration;                             \
     using Base::SetRetryTimeToProperty;                             \
+    using Base::SetUserInfoWithAuthorizedImpu;                      \
     using Base::OnMessage;                                          \
     using Base::ProcessDefaultFlowRecovery_StartWithOnlyRetryAfter; \
     using Base::ProcessForbiddenFailed;                             \
@@ -1876,6 +1878,55 @@ TEST_F(AosRegistrationTest, DoSetRetryTimeToPropIfCdmalessAndNormalRegType)
     EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(AnyNumber());
 
     m_pAosRegistration->SetRetryTimeToProperty(60);
+}
+
+TEST_F(AosRegistrationTest, DoNotSetUserInfoForContactHeaderIfAssociatedUrisAreEmpty)
+{
+    AStringArray objUris;
+    ON_CALL(m_objMockIRegistration, GetAssociatedUris()).WillByDefault(ReturnRef(objUris));
+
+    EXPECT_CALL(m_objMockIRegistration, SetUserInfoForContactHeader(_)).Times(0);
+
+    m_pAosRegistration->SetUserInfoWithAuthorizedImpu();
+}
+
+TEST_F(AosRegistrationTest,
+        DoSetDefaultUserInfoForContactHeaderWhenAssociatedUrisAreNotMatchedWithPhoneNumber)
+{
+    AStringArray objUris;
+    objUris.AddElement("sip:+1111@ims.mnc.mcc.3gppnetwork.org");
+
+    ON_CALL(m_objMockIRegistration, GetAssociatedUris()).WillByDefault(ReturnRef(objUris));
+    ON_CALL(m_objPhoneInfoService.GetMockSubscriberInfo(), GetPhoneNumber(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strPhoneNumber)
+                    {
+                        strPhoneNumber = "12345678901";
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_CALL(m_objMockIRegistration, SetUserInfoForContactHeader(_)).Times(1);
+
+    m_pAosRegistration->SetUserInfoWithAuthorizedImpu();
+}
+
+TEST_F(AosRegistrationTest, DoSetUserInfoForContactHeaderWhenAssociatedUriIsMatchedWithPhoneNumber)
+{
+    AStringArray objUris;
+    objUris.AddElement("sip:+12345678901@ims.mnc.mcc.3gppnetwork.org");
+
+    ON_CALL(m_objMockIRegistration, GetAssociatedUris()).WillByDefault(ReturnRef(objUris));
+    ON_CALL(m_objPhoneInfoService.GetMockSubscriberInfo(), GetPhoneNumber(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strPhoneNumber)
+                    {
+                        strPhoneNumber = "12345678901";
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_CALL(m_objMockIRegistration, SetUserInfoForContactHeader(_)).Times(1);
+
+    m_pAosRegistration->SetUserInfoWithAuthorizedImpu();
 }
 
 TEST_F(AosRegistrationTest, IgnoreUpdatePreloadedRouteIfRegParameterIsNull)
