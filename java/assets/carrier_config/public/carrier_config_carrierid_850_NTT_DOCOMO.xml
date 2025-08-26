@@ -25,19 +25,16 @@
     <int name="ims.request_uri_type_int" value="1"/>
     <boolean name="imsvoice.session_timer_supported_bool" value="false"/>
     <int name="imsvoice.session_privacy_type_int" value="2"/>
-    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
-    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="0"/>
     <int-array name="imsvoice.srvcc_type_int_array" num="4">
         <item value="0"/>
         <item value="1"/>
         <item value="2"/>
         <item value="3"/>
     </int-array>
-    <int name="imsvoice.ringing_timer_millis_int" value="180000"/>
-    <int name="imsvoice.ringback_timer_millis_int" value="180000"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <int name="imsvoice.mo_call_request_timeout_millis_int" value="-1"/>
     <boolean name="imsvt.video_qos_precondition_supported_bool" value="true"/>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="12000"/>
+    <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
 </carrier_config>

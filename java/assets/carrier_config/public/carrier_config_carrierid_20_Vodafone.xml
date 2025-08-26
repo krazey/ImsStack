@@ -57,9 +57,6 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
     <string name="imsvoice.conference_factory_uri_string">sip:conference@conference.ims.mnc004.mcc204.3gppnetwork.org</string>

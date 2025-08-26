@@ -21,7 +21,6 @@
         <item value="1"/>
         <item value="3"/>
     </int-array>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="8000"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
@@ -86,17 +85,9 @@
             </int-array>
         </pbundle_as_map>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
-    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
-    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
         <item value="0"/>
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
-    <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
-    <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
 </carrier_config>

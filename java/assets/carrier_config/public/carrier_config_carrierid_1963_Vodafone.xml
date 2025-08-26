@@ -22,69 +22,6 @@
         <item value="1"/>
         <item value="3"/>
     </int-array>
-    <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="111"/>
-        </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
-            <item value="97"/>
-            <item value="98"/>
-        </int-array>
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
-            <item value="99"/>
-            <item value="100"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
-            <item value="101"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="102"/>
-        </int-array>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
-        <pbundle_as_map name="111">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="0"/>
-                <item value="6"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="-1"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle_as_map name="97">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="98">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle_as_map name="99">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="100">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
     <pbundle_as_map name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="105"/>
@@ -101,11 +38,6 @@
             </int-array>
         </pbundle_as_map>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
-    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
-    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
         <item value="0"/>
         <item value="2"/>

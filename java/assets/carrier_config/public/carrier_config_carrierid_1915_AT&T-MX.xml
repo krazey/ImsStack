@@ -15,8 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
-    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="10000"/>
     <string name="imsvoice.conference_factory_uri_string">sip:ALU_CONF@ims.attmex.mx</string>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="127">

@@ -67,7 +67,6 @@
         <item value="711"/>
         <item value="811"/>
     </string-array>
-    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="false"/>
     <boolean name="imsemergency.emergency_qos_precondition_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
@@ -112,8 +111,6 @@
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle_as_map>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>

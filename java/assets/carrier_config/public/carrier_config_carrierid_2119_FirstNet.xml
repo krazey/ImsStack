@@ -114,8 +114,6 @@
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle_as_map>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1142"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1142"/>
     <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="3">
