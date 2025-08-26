@@ -523,7 +523,7 @@ public:
         {
             CONTACT_USER_INFO_POLICY_DEFAULT = 1,
             CONTACT_USER_INFO_POLICY_NONE = 2,
-            CONTACT_USER_INFO_POLICY_NO_IMSI = 3
+            CONTACT_USER_INFO_POLICY_AUTHORIZED_IMPU = 3
         };
 
         // Geolocation pidf Forming policy

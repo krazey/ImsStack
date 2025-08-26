@@ -1398,6 +1398,57 @@ void AosRegistration::SetRetryTimeToProperty(IN IMS_UINT32 nSeconds)
     UtilService::GetUtilService()->GetSystemProperty()->Set(strName, strSecs);
 }
 
+PROTECTED
+void AosRegistration::SetUserInfoWithAuthorizedImpu()
+{
+    const AStringArray& objUris = m_piRegistration->GetAssociatedUris();
+    if (objUris.IsEmpty())
+    {
+        A_IMS_TRACE_I(REGID, "SetUserInfoWithAuthorizedImpu :: no associated uris", 0, 0, 0);
+        return;
+    }
+
+    AString strPhoneNumber;
+    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->GetPhoneNumber(
+            strPhoneNumber);
+
+    AString strDefaultUserInfo;
+    for (IMS_SINT32 i = 0; i < objUris.GetCount(); i++)
+    {
+        const AString& strUri = objUris.GetElementAt(i);
+        AString strUserInfo;
+        AosUtil::GetInstance()->GetUserInfo(strUri, strUserInfo);
+        if (strUserInfo.GetLength() == 0)
+        {
+            continue;
+        }
+
+        if (strDefaultUserInfo.GetLength() == 0)
+        {
+            strDefaultUserInfo = strUserInfo;
+        }
+
+        if (strPhoneNumber.GetLength() == 0)
+        {
+            break;
+        }
+
+        if (strUserInfo.Contains(strPhoneNumber))
+        {
+            A_IMS_TRACE_I(REGID,
+                    "SetUserInfoWithAuthorizedImpu :: update with phone number based uri", 0, 0, 0);
+            m_piRegistration->SetUserInfoForContactHeader(strUserInfo);
+            return;
+        }
+    }
+
+    if (strDefaultUserInfo.GetLength() != 0)
+    {
+        A_IMS_TRACE_I(REGID, "SetUserInfoWithAuthorizedImpu :: update with default", 0, 0, 0);
+        m_piRegistration->SetUserInfoForContactHeader(strDefaultUserInfo);
+    }
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
 {
     A_IMS_TRACE_I(REGID, "OnMessage :: (%s)",
@@ -6825,11 +6876,24 @@ void AosRegistration::UpdateUserInfoInContact()
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetUserInfoPolicyForNonRegisterMessage() ==
-            CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NONE)
+    switch (GET_N_CONFIG(m_nSlotId)->GetUserInfoPolicyForNonRegisterMessage())
     {
-        A_IMS_TRACE_D(REGID, "UpdateUserInfoInContact :: apply none policy", 0, 0, 0);
-        m_piRegistration->SetUserInfoForContactHeader(AString::ConstEmpty());
+        case CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NONE:
+        {
+            A_IMS_TRACE_D(REGID, "UpdateUserInfoInContact :: apply none policy", 0, 0, 0);
+            m_piRegistration->SetUserInfoForContactHeader(AString::ConstEmpty());
+            break;
+        }
+        case CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_AUTHORIZED_IMPU:
+            if (IsRegTypeEqual(AosRegistrationType::NORMAL))
+            {
+                A_IMS_TRACE_D(
+                        REGID, "UpdateUserInfoInContact :: apply authorized impu policy", 0, 0, 0);
+                SetUserInfoWithAuthorizedImpu();
+            }
+            break;
+        default:
+            break;
     }
 }
 

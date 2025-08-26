@@ -172,6 +172,7 @@ protected:
     void UpdateStopRetryTimer(IN IMS_UINT32 nRetryTime);
     void ReinitiateRegistration(IN IMS_UINT32 nRetryAfterSec);
     void SetRetryTimeToProperty(IN IMS_UINT32 nSeconds);
+    void SetUserInfoWithAuthorizedImpu();
 
     /// Log
     AString FeatureToString();
