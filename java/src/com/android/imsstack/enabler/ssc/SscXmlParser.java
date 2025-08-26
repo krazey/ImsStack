@@ -177,16 +177,15 @@ public class SscXmlParser {
     }
 
     private void updateRuleIdForService(int slotId, ESsType ssType, Element rootElement) {
-        NodeList serviceElement = rootElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, ssType.getSsName()));
-        if (serviceElement.getLength() == 0) {
+        Element serviceElement = SscUtils.getElementByName(rootElement, ssType.getSsName());
+        if (serviceElement == null) {
             ImsLog.d(slotId, ssType.getSsName() + " is null");
             return;
         }
 
         SscServiceQueryData queryData = new SscServiceQueryData(slotId, ssType,
                 SscConstant.EVENT_SSC_QUERY_DOCUMENT, 0, SscServiceClassUtil.SERVICE_CLASS_CALL);
-        ArrayList<SscRuleData> ruleSet = getRuleSetData(queryData, (Element)serviceElement.item(0));
+        ArrayList<SscRuleData> ruleSet = getRuleSetData(queryData, serviceElement);
         if (ruleSet == null) {
             return;
         }
@@ -218,9 +217,8 @@ public class SscXmlParser {
     }
 
     private void checkCfnrTimerPosition(int slotId, Element rootElement) {
-        NodeList timerList = rootElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER));
-        if (timerList.getLength() == 0) {
+        Element timerElement = SscUtils.getElementByName(rootElement, SscXmlFormat.NOREPLYTIMER);
+        if (timerElement == null) {
             SscXmlFormat.setIsNoReplyTimerOmitted(slotId, true);
 
             if (SscConfig.getCfnrTimerUpdateMethod(slotId)
@@ -233,7 +231,6 @@ public class SscXmlParser {
             return;
         }
 
-        Element timerElement = (Element) timerList.item(0);
         if (!timerElement.getParentNode().getParentNode().isEqualNode(rootElement)) {
             SscXmlFormat.setIsNoReplyTimerInRule(slotId, true);
         } else {
@@ -242,9 +239,8 @@ public class SscXmlParser {
     }
 
     private void checkCfnlRuleExist(int slotId, Element rootElement) {
-        NodeList elementList = rootElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.CFNL));
-        if (elementList.getLength() > 0) {
+        Element element = SscUtils.getElementByName(rootElement, SscXmlFormat.CFNL);
+        if (element != null) {
             SscXmlFormat.setCfnlExist(slotId, true);
         } else {
             SscXmlFormat.setCfnlExist(slotId, false);
@@ -268,14 +264,11 @@ public class SscXmlParser {
 
     private OipServiceData getOipServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-        NodeList oipNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.OIP));
-        if (oipNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element oipElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.OIP);
+        if (oipElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.OIP + " element is null");
             return null;
         }
-
-        Element oipElement = (Element) oipNodeList.item(0);
         int active = getActiveAttribute(oipElement);
 
         OipServiceData data = new OipServiceData(slotId, queryData.getSsType(),
@@ -288,10 +281,9 @@ public class SscXmlParser {
 
     private OirServiceData getOirServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-        NodeList oirNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.OIR));
-        if (oirNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element oirElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.OIR);
+        if (oirElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.OIR + " element is null");
             return null;
         }
 
@@ -303,7 +295,6 @@ public class SscXmlParser {
          * When deactivated and not overruled by operator settings,
          * basic communication procedures apply.
          */
-        Element oirElement = (Element) oirNodeList.item(0);
         int active = getActiveAttribute(oirElement);
         int provisionStatus = SscConstant.OIR_NOT_PROVISIONED; //3GPP 27.007 7.7 m
         int outgoingState = SscConstant.OIR_SUPPRESSION; // 3GPP 27.007 7.7 n
@@ -311,10 +302,9 @@ public class SscXmlParser {
             provisionStatus = SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED;
             outgoingState = SscConstant.OIR_INVOCATION;
 
-            NodeList dbNodeList = doc.getElementsByTagName(
-                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR));
-            if (dbNodeList.getLength() > 0) {
-                Element dbElement = (Element) dbNodeList.item(0);
+            Element dbElement = SscUtils.getElementByName(
+                    doc.getDocumentElement(), SscXmlFormat.DEFAULT_BEHAVIOUR);
+            if (dbElement != null) {
                 String defaultBehaviour = dbElement.getTextContent().trim();
                 if (SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equalsIgnoreCase(defaultBehaviour)) {
                     provisionStatus = SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
@@ -337,14 +327,12 @@ public class SscXmlParser {
 
     private TipServiceData getTipServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-        NodeList tipNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.TIP));
-        if (tipNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element tipElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.TIP);
+        if (tipElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.TIP + " element is null");
             return null;
         }
 
-        Element tipElement = (Element) tipNodeList.item(0);
         int active = getActiveAttribute(tipElement);
 
         TipServiceData data = new TipServiceData(slotId, queryData.getSsType(),
@@ -357,23 +345,20 @@ public class SscXmlParser {
 
     private TirServiceData getTirServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-        NodeList tirNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.TIR));
-        if (tirNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element tirElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.TIR);
+        if (tirElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.TIR + " element is null");
             return null;
         }
 
-        Element tirElement = (Element) tirNodeList.item(0);
         int active = getActiveAttribute(tirElement);
         int provisionStatus = SscConstant.TIR_NOT_PROVISIONED; // 3GPP 27.007 7.31 m
         if (active == SscConstant.STATUS_ENABLE) {
             provisionStatus = SscConstant.TIR_PROVISIONED;
 
-            NodeList dbNodeList = doc.getElementsByTagName(
-                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR));
-            if (dbNodeList.getLength() > 0) {
-                Element dbElement = (Element) dbNodeList.item(0);
+            Element dbElement = SscUtils.getElementByName(
+                    doc.getDocumentElement(), SscXmlFormat.DEFAULT_BEHAVIOUR);
+            if (dbElement != null) {
                 String defaultBehaviour = dbElement.getTextContent().trim();
                 if (SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equalsIgnoreCase(defaultBehaviour)) {
                     provisionStatus = SscConstant.TIR_NOT_PROVISIONED;
@@ -394,15 +379,12 @@ public class SscXmlParser {
 
     private SscServiceData getCfServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-
-        NodeList cdNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.CD));
-        if (cdNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element cdElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.CD);
+        if (cdElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.CD + " element is null");
             return null;
         }
 
-        Element cdElement = (Element) cdNodeList.item(0);
         int active = getActiveAttribute(cdElement);
         int noReplyTimer = getNoPeplyTimer(slotId, cdElement);
 
@@ -418,64 +400,60 @@ public class SscXmlParser {
     }
 
     private void updateCfProvisionStatusFromServiceCapability(int slotId, Document doc) {
-        NodeList scCdNodeList = doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId,
-                SscXmlFormat.SC_CD));
-        if (scCdNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element scCdElement =
+                SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.SC_CD);
+        if (scCdElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.SC_CD + " element is null");
             return;
         }
 
-        Element scCdElement = (Element) scCdNodeList.item(0);
         int active = getActiveAttribute(scCdElement);
         if (active == SscConstant.STATUS_DISABLE) {
             return;
         }
 
-        NodeList conditionNodeList = scCdElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CONDITIONS));
-        if (conditionNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element conditionElement =
+                SscUtils.getElementByName(scCdElement, SscXmlFormat.SC_CONDITIONS);
+        if (conditionElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.SC_CONDITIONS + " element is null");
             return;
         }
 
-        Element conditionElement = (Element) conditionNodeList.item(0);
-        NodeList conditionCfuNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFU));
-        if (conditionCfuNodeList.getLength() > 0) {
+        Element conditionCfuElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_CFU);
+        if (conditionCfuElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFU,
-                    getProvisionedAttribute((Element) conditionCfuNodeList.item(0)));
+                    getProvisionedAttribute(conditionCfuElement));
         }
-        NodeList conditionCfbNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFB));
-        if (conditionCfbNodeList.getLength() > 0) {
+        Element conditionCfbElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_CFB);
+        if (conditionCfbElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFB,
-                    getProvisionedAttribute((Element) conditionCfbNodeList.item(0)));
+                    getProvisionedAttribute(conditionCfbElement));
         }
-        NodeList conditionCfnrNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFNR));
-        if (conditionCfnrNodeList.getLength() > 0) {
+        Element conditionCfnrElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_CFNR);
+        if (conditionCfnrElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNR,
-                    getProvisionedAttribute((Element) conditionCfnrNodeList.item(0)));
+                    getProvisionedAttribute(conditionCfnrElement));
         }
-        NodeList conditionCfnrcNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFNRC));
-        if (conditionCfnrcNodeList.getLength() > 0) {
+        Element conditionCfnrcElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_CFNRC);
+        if (conditionCfnrcElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNRC,
-                    getProvisionedAttribute((Element) conditionCfnrcNodeList.item(0)));
+                    getProvisionedAttribute(conditionCfnrcElement));
         }
-        NodeList conditionCfnlNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFNL));
-        if (conditionCfnlNodeList.getLength() > 0) {
+        Element conditionCfnlElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_CFNL);
+        if (conditionCfnlElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNL,
-                    getProvisionedAttribute((Element) conditionCfnlNodeList.item(0)));
+                    getProvisionedAttribute(conditionCfnlElement));
         }
 
-        NodeList scMediaNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_MEDIA));
-        if (scMediaNodeList.getLength() > 0) {
-            Element scMediaElement = (Element) scMediaNodeList.item(0);
-            NodeList mediaNodeList = scMediaElement.getElementsByTagName(
-                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA));
+        Element scMediaElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_MEDIA);
+        if (scMediaElement != null) {
+            NodeList mediaNodeList = SscUtils.getNodeListByName(scMediaElement, SscXmlFormat.MEDIA);
             for (int i = 0; i < mediaNodeList.getLength(); i++) {
                 String mediaValue = mediaNodeList.item(i).getTextContent().trim();
                 if (SscXmlFormat.AUDIO.equalsIgnoreCase(mediaValue)) {
@@ -491,22 +469,18 @@ public class SscXmlParser {
 
     private SscServiceData getCbServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-
-        NodeList cbNodeList;
+        Element cbElement;
         if (queryData.getSsType() == ESsType.ICB) {
-            cbNodeList =
-                    doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.ICB));
+            cbElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.ICB);
         } else { // ESsType.OCB
-            cbNodeList =
-                    doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.OCB));
+            cbElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.OCB);
         }
 
-        if (cbNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        if (cbElement == null) {
+            ImsLog.e(slotId, "cb element is null");
             return null;
         }
 
-        Element cbElement = (Element) cbNodeList.item(0);
         int active = getActiveAttribute(cbElement);
 
         ArrayList<SscRuleData> ruleSet = getRuleSetData(queryData, cbElement);
@@ -521,68 +495,62 @@ public class SscXmlParser {
     }
 
     private void updateCbProvisionStatusFromServiceCapability(int slotId, Document doc) {
-        NodeList scCbNodeList = doc.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CB));
-        if (scCbNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element scCbElement = SscUtils.getElementByName(
+                doc.getDocumentElement(), SscXmlFormat.SC_CB);
+        if (scCbElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.SC_CB + " element is null");
             return;
         }
 
-        Element scCbElement = (Element) scCbNodeList.item(0);
         int active = getActiveAttribute(scCbElement);
         if (active == SscConstant.STATUS_DISABLE) {
             return;
         }
 
-        NodeList conditionNodeList = scCbElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CONDITIONS));
-        if (conditionNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element conditionElement = SscUtils.getElementByName(
+                scCbElement, SscXmlFormat.SC_CONDITIONS);
+        if (conditionElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.SC_CONDITIONS + " element is null");
             return;
         }
 
-        Element conditionElement = (Element) conditionNodeList.item(0);
-        NodeList conditionCbuNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CBU));
-        if (conditionCbuNodeList.getLength() > 0) {
+        Element conditionCbuElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_CBU);
+        if (conditionCbuElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BAIC,
-                    getProvisionedAttribute((Element) conditionCbuNodeList.item(0)));
+                    getProvisionedAttribute(conditionCbuElement));
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BAOC,
-                    getProvisionedAttribute((Element) conditionCbuNodeList.item(0)));
+                    getProvisionedAttribute(conditionCbuElement));
         }
-        NodeList conditionBoicNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_BOIC));
-        if (conditionBoicNodeList.getLength() > 0) {
+        Element conditionBoicElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_BOIC);
+        if (conditionBoicElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BOIC,
-                    getProvisionedAttribute((Element) conditionBoicNodeList.item(0)));
+                    getProvisionedAttribute(conditionBoicElement));
         }
-        NodeList conditionBoicExhcNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_BOIC_EXHC));
-        if (conditionBoicExhcNodeList.getLength() > 0) {
+        Element conditionBoicExhcElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_BOIC_EXHC);
+        if (conditionBoicExhcElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB,
                     SscConstant.CONDITION_BOIC_EXHC,
-                    getProvisionedAttribute((Element) conditionBoicExhcNodeList.item(0)));
+                    getProvisionedAttribute(conditionBoicExhcElement));
         }
-        NodeList conditionBicWrcNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_BIC_WR));
-        if (conditionBicWrcNodeList.getLength() > 0) {
+        Element conditionBicWrcElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_BIC_WR);
+        if (conditionBicWrcElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB,
                     SscConstant.CONDITION_BIC_WR,
-                    getProvisionedAttribute((Element) conditionBicWrcNodeList.item(0)));
+                    getProvisionedAttribute(conditionBicWrcElement));
         }
-        NodeList conditionAcrNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_ACR));
-        if (conditionAcrNodeList.getLength() > 0) {
+        Element conditionAcrElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.SC_ACR);
+        if (conditionAcrElement != null) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_ACR,
-                    getProvisionedAttribute((Element) conditionAcrNodeList.item(0)));
+                    getProvisionedAttribute(conditionAcrElement));
         }
-
-        NodeList scMediaNodeList = conditionElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_MEDIA));
-        if (scMediaNodeList.getLength() > 0) {
-            Element scMediaElement = (Element) scMediaNodeList.item(0);
-            NodeList mediaNodeList = scMediaElement.getElementsByTagName(
-                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA));
+        Element scMediaElement = SscUtils.getElementByName(conditionElement, SscXmlFormat.SC_MEDIA);
+        if (scMediaElement != null) {
+            NodeList mediaNodeList = SscUtils.getNodeListByName(scMediaElement, SscXmlFormat.MEDIA);
             for (int i = 0; i < mediaNodeList.getLength(); i++) {
                 String mediaValue = mediaNodeList.item(i).getTextContent().trim();
                 if (SscXmlFormat.AUDIO.equalsIgnoreCase(mediaValue)) {
@@ -598,14 +566,12 @@ public class SscXmlParser {
 
     private SscServiceData getCwServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-        NodeList cwNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.CW));
-        if (cwNodeList.getLength() == 0) {
-            ImsLog.e(slotId, "target node is null");
+        Element cwElement = SscUtils.getElementByName(doc.getDocumentElement(), SscXmlFormat.CW);
+        if (cwElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.CW + " element is null");
             return null;
         }
 
-        Element cwElement = (Element) cwNodeList.item(0);
         int active = getActiveAttribute(cwElement);
 
         CwServiceData data = new CwServiceData(slotId, queryData.getSsType(),
@@ -639,8 +605,7 @@ public class SscXmlParser {
 
     private ArrayList<SscRuleData> getRuleSetData(SscServiceQueryData queryData, Element element) {
         int slotId = queryData.getSlotId();
-        NodeList ruleList =
-                element.getElementsByTagName(SscXmlFormat.getCpElement(slotId, SscXmlFormat.RULE));
+        NodeList ruleList = SscUtils.getNodeListByName(element, SscXmlFormat.RULE);
         if (ruleList.getLength() == 0) {
             ImsLog.d(slotId, "No rules");
             return null;
@@ -684,23 +649,21 @@ public class SscXmlParser {
 
     private SscRuleData getRuleData(SscServiceQueryData queryData, Element element) {
         int slotId = queryData.getSlotId();
-        NodeList conditionList = element.getElementsByTagName(
-                SscXmlFormat.getCpElement(slotId, SscXmlFormat.CONDITIONS));
-        if (conditionList.getLength() == 0) {
-            ImsLog.d(slotId, "No conditions");
+        Element conditionElement = SscUtils.getElementByName(element, SscXmlFormat.CONDITIONS);
+        if (conditionElement == null) {
+            ImsLog.e(slotId, SscXmlFormat.CONDITIONS + " element is null");
             return null;
         }
 
         SscRuleData ruleData = new SscRuleData();
 
         // Set Conditions
-        setConditionData(slotId, queryData.getSsType(), (Element) conditionList.item(0), ruleData);
+        setConditionData(slotId, queryData.getSsType(), conditionElement, ruleData);
 
         // Set Actions
-        NodeList actionList = element.getElementsByTagName(SscXmlFormat.getCpElement(slotId,
-                SscXmlFormat.ACTIONS));
-        if (actionList.getLength() > 0) {
-            setActionData(slotId, (Element) actionList.item(0), ruleData);
+        Element actionElement = SscUtils.getElementByName(element, SscXmlFormat.ACTIONS);
+        if (actionElement != null) {
+            setActionData(slotId, actionElement, ruleData);
         }
 
         return ruleData;
@@ -731,7 +694,7 @@ public class SscXmlParser {
                     conditions.add(new SscRuleElement(SscXmlFormat.CONDITIONS, nodeName));
                 } else if (nodeName.endsWith(SscXmlFormat.RULE_DEACTIVATED)) {
                     state = SscConstant.STATUS_DISABLE;
-                } else if (SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA).equals(nodeName)) {
+                } else if (nodeName.endsWith(SscXmlFormat.MEDIA)) {
                     String mediaValue = childNode.getTextContent();
                     ImsLog.d(slotId, "Media Tag : " + mediaValue);
                     if (SscXmlFormat.AUDIO.equalsIgnoreCase(mediaValue)) {
@@ -891,11 +854,10 @@ public class SscXmlParser {
     }
 
     private String getTargetNumberInForwardTo(int slotId, Element forwardToElement) {
-        NodeList targetNodes = forwardToElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.TARGET));
-        if (targetNodes.getLength() > 0) {
+        Element targetElement = SscUtils.getElementByName(forwardToElement, SscXmlFormat.TARGET);
+        if (targetElement != null) {
             return SscUtils.getInstance().getNumberFromUri(slotId,
-                    targetNodes.item(0).getTextContent().trim());
+                    targetElement.getTextContent().trim());
         }
 
         return null;
@@ -952,10 +914,9 @@ public class SscXmlParser {
 
     private int getNoPeplyTimer(int slotId, Element element) {
         int noReplyTimer = -1;
-        NodeList timerList = element.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER));
-        if (timerList.getLength() > 0) {
-            noReplyTimer = Integer.parseInt(timerList.item(0).getTextContent().trim());
+        Element timerElement = SscUtils.getElementByName(element, SscXmlFormat.NOREPLYTIMER);
+        if (timerElement != null) {
+            noReplyTimer = Integer.parseInt(timerElement.getTextContent().trim());
         }
         ImsLog.d("noReplyTimer is " + noReplyTimer);
 

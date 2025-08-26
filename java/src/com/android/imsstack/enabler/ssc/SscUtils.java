@@ -30,6 +30,10 @@ import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -219,6 +223,51 @@ public class SscUtils {
 
         ImsLog.d("uri is " + uri);
         return uri;
+    }
+
+    /**
+     * Gets the first Element with a specified name.
+     *
+     * @param element The root Element to begin the search from.
+     * @param name The name to match.
+     * @return The first matching {@code Element} if found, otherwise {@code null}.
+     */
+    public static Element getElementByName(Element element, String name) {
+        NodeList elementList = getNodeListByName(element, name);
+        if (elementList.getLength() == 0) {
+            return null;
+        }
+        return (Element) elementList.item(0);
+    }
+
+    /**
+     * Gets all Nodes with a specified name regardless of namespace.
+     *
+     * @param element The root Element to begin the search from.
+     * @param name The name to match.
+     * @return A {@code NodeList} containing all matching nodes.
+     *         an empty list if no matches are found.
+     */
+    public static NodeList getNodeListByName(Element element, String name) {
+        SscNodeListImpl results = new SscNodeListImpl();
+        getAllNodesByName(results, element, name);
+        return results;
+    }
+
+    private static void getAllNodesByName(SscNodeListImpl out, Element rootElement, String name) {
+        final String nodeName = rootElement.getNodeName();
+        final String localName = nodeName.contains(":") ? nodeName.split(":")[1] : nodeName;
+        if (name.equals(localName)) {
+            out.add(rootElement);
+        }
+
+        NodeList children = rootElement.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node node = children.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                getAllNodesByName(out, (Element) node, name);
+            }
+        }
     }
 
     /**
