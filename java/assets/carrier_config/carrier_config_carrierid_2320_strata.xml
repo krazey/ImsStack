@@ -15,15 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="2"/>
-    </int-array>
-    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="2"/>
-    </int-array>
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
 </carrier_config>
