@@ -116,6 +116,7 @@ public:
             nUsatRegEventDownloadPolicy(CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD),
             nVolteHysTimeSec(0),
             nSubConsecutiveRetryCntForRegForbiddenInWifi(0),
+            objKeepRegWithMmtelFeatureTagPolicy(ImsVector<IMS_SINT32>()),
             objRegErrCodeForPcscfDiscovery(ImsVector<IMS_SINT32>()),
             objRegPermanentErrMaxCnt(ImsVector<IMS_SINT32>()),
             objRegRetryErrCodeWithoutIpsec(ImsVector<IMS_SINT32>()),
@@ -228,6 +229,7 @@ public:
     IMS_SINT32 nUsatRegEventDownloadPolicy;
     IMS_SINT32 nVolteHysTimeSec;
     IMS_SINT32 nSubConsecutiveRetryCntForRegForbiddenInWifi;
+    ImsVector<IMS_SINT32> objKeepRegWithMmtelFeatureTagPolicy;
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     ImsVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     ImsVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;

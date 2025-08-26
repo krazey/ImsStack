@@ -357,6 +357,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUB_RETRY_503_POLICY_INT[] =
         KEY_IMS_PREFIX "sub_retry_503_policy_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[] =
         KEY_IMS_PREFIX "usat_reg_event_download_policy_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_KEEP_REG_WITH_MMTEL_FEATURE_TAG_POLICY_INT_ARRAY[] =
+        KEY_IMS_PREFIX "keep_reg_with_mmtel_feature_tag_policy_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
         KEY_IMS_PREFIX "permanent_pdn_failure_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY[] =
