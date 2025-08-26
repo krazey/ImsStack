@@ -71,7 +71,7 @@ public:
     std::shared_ptr<MockAudioSdpParser> m_pMockAudioSdpParser;
     std::shared_ptr<MockAudioProfileNegotiator> m_pMockProfileNegotiator;
     std::shared_ptr<MockMediaProfileGenerator> m_pMockProfileGenerator;
-    AudioProfile* m_pBaseProfile;
+    std::shared_ptr<AudioProfile> m_pBaseProfile;
 
 protected:
     virtual void SetUp() override
@@ -102,7 +102,7 @@ protected:
         m_pAudioNego->SetProfileNegotiator(m_pMockProfileNegotiator);
         m_pAudioNego->SetProfileGenerator(m_pMockProfileGenerator);
 
-        m_pBaseProfile = new AudioProfile();
+        m_pBaseProfile = std::make_shared<AudioProfile>();
         AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
         pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
         pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
@@ -232,7 +232,7 @@ TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupported)
             m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor),
             IMS_FALSE);
 
-    AudioProfile* pProfile = new AudioProfile();
+    auto pProfile = std::make_shared<AudioProfile>();
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
     pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
@@ -241,11 +241,11 @@ TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupported)
 
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, IMS_NULL))
-            .WillOnce(Return(IMS_NULL))
-            .WillOnce(Return(pProfile));
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, testing::NotNull()))
-            .WillRepeatedly(Return(IMS_NULL));
+            .WillOnce(Return(pProfile));
+    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, testing::IsNull()))
+            .WillOnce(Return(pProfile))
+            .WillOnce(Return(pProfile));
 
     EXPECT_EQ(
             m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor),
@@ -404,15 +404,15 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     MockMediaProfileFactory objMediaProfileFactory;
     MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
-    AudioProfile* pLocalProfile = new AudioProfile();
+    auto pLocalProfile = std::make_shared<AudioProfile>();
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
     pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
     pLocalProfile->GetPayloadList().Append(pAmrPayload);
     pLocalProfile->SetDataPort(10000);
 
-    AudioProfile* pPeerProfile = new AudioProfile(*pLocalProfile);
-    AudioProfile* pNegoProfile = new AudioProfile(*pLocalProfile);
+    auto pPeerProfile = std::make_shared<AudioProfile>(*pLocalProfile);
+    auto pNegoProfile = std::make_shared<AudioProfile>(*pLocalProfile);
     pNegoProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
@@ -449,15 +449,15 @@ TEST_F(AudioNegoTest, testNegotiateSdpOfferSentSuccess)
     MockMediaProfileFactory objMediaProfileFactory;
     MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
-    AudioProfile* pLocalProfile = new AudioProfile();
+    auto pLocalProfile = std::make_shared<AudioProfile>();
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
     pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
     pLocalProfile->GetPayloadList().Append(pAmrPayload);
     pLocalProfile->SetDataPort(10000);
 
-    AudioProfile* pPeerProfile = new AudioProfile(*pLocalProfile);
-    AudioProfile* pNegoProfile = new AudioProfile(*pLocalProfile);
+    auto pPeerProfile = std::make_shared<AudioProfile>(*pLocalProfile);
+    auto pNegoProfile = std::make_shared<AudioProfile>(*pLocalProfile);
     pNegoProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))

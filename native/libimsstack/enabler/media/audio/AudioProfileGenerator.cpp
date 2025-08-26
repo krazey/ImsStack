@@ -39,14 +39,14 @@ PUBLIC VIRTUAL AudioProfileGenerator::~AudioProfileGenerator()
 }
 
 PROTECTED
-AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
+void AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
         IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
         IN IMS_SINT32 nSlotId)
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
         IMS_TRACE_E(0, "SetProfile(): invalid arguments", 0, 0, 0);
-        return IMS_NULL;
+        return;
     }
 
     SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
@@ -66,8 +66,6 @@ AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
             pAudioProfile->GetMaxPtime(), 0);
     IMS_TRACE_D("SetProfile(): AS[%d], RR[%d], RS[%d]", pAudioProfile->GetBandwidthAs(),
             pAudioProfile->GetBandwidthRr(), pAudioProfile->GetBandwidthRs());
-
-    return pAudioProfile;
 }
 
 PROTECTED

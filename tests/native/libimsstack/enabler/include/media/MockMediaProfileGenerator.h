@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_AUDIO_PROFILE_GENERATOR_H_
-#define MOCK_AUDIO_PROFILE_GENERATOR_H_
+#ifndef MOCK_MEDIA_PROFILE_GENERATOR_H_
+#define MOCK_MEDIA_PROFILE_GENERATOR_H_
 
 #include <gmock/gmock.h>
 #include <media/MediaProfileGenerator.h>
@@ -26,12 +26,12 @@ public:
     MockMediaProfileGenerator() {}
     ~MockMediaProfileGenerator() override {}
 
-    MOCK_METHOD(MediaBaseProfile*, Generate,
+    MOCK_METHOD(std::shared_ptr<MediaBaseProfile>, Generate,
             (MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
                     IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId),
             (override));
 
-    MOCK_METHOD(MediaBaseProfile*, SetProfile,
+    MOCK_METHOD(void, SetProfile,
             (IN MediaBaseProfile * pProfile, IN MediaConfiguration* pConfig,
                     MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService, IN IMS_SINT32 nSlotId),
             (override));
@@ -39,12 +39,12 @@ public:
             (IN MediaBaseProfile * pProfile, IN MediaConfiguration* pConfig, IN IService* pIService,
                     IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(MediaBaseProfile*, SetPayloads,
-            (IN MediaBaseProfile * pProfile, IN MediaConfiguration* pConfig), (override));
+    MOCK_METHOD(void, SetPayloads, (IN MediaBaseProfile * pProfile, IN MediaConfiguration* pConfig),
+            (override));
     MOCK_METHOD(void, CreateCodecPayloads,
             (IN MediaBaseProfile * pProfile, IN IMS_SINT32 nCodec, IN CodecConfig* pCodecConfig,
                     IN MediaConfiguration* pConfig),
             (override));
 };
 
-#endif
+#endif  // MOCK_MEDIA_PROFILE_GENERATOR_H_

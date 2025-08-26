@@ -26,9 +26,8 @@ class MockMediaProfileFactory : public MediaProfileFactory
 public:
     MockMediaProfileFactory() {}
     ~MockMediaProfileFactory() override {}
-    MOCK_METHOD(MediaBaseProfile*, CreateProfile,
+    MOCK_METHOD(std::shared_ptr<MediaBaseProfile>, CreateProfile,
             (IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile), (override));
-    MOCK_METHOD(void, DeleteProfile, (IN MediaBaseProfile * pProfile), (override));
     MOCK_METHOD(MediaBaseProfile::BasePayload*, CreatePayload, (IN MEDIA_CONTENT_TYPE eType),
             (override));
     MOCK_METHOD(MediaBaseProfile::BasePayload*, CreatePayload,

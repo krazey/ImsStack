@@ -61,16 +61,6 @@ public:
     virtual IMS_BOOL HasNegotiatedDtmf(void);
 
     /**
-     * @brief static cast from MediaBaseProfile to AudioProfile
-     */
-    AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
-
-    /**
-     * @brief static cast from MediaBaseProfile::BasePayload to AudioProfile::Payload
-     */
-    AudioProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
-
-    /**
      * @brief Set the SDP parser object
      */
     void SetSdpParser(std::shared_ptr<AudioSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }

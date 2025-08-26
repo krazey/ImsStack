@@ -54,7 +54,7 @@ public:
     std::shared_ptr<MockTextSdpGenerator> m_pMockTextSdpGenerator;
     std::shared_ptr<MockTextProfileNegotiator> m_pMockProfileNegotiator;
 
-    TextProfile* m_pBaseProfile;
+    std::shared_ptr<TextProfile> m_pBaseProfile;
 
 protected:
     virtual void SetUp() override
@@ -81,7 +81,7 @@ protected:
         m_pTextNego->SetProfileNegotiator(m_pMockProfileNegotiator);
         m_pTextNego->SetProfileGenerator(m_pMockProfileGenerator);
 
-        m_pBaseProfile = new TextProfile();
+        m_pBaseProfile = std::make_shared<TextProfile>();
         TextProfile::Payload* pT140 = new TextProfile::Payload();
         pT140->SetRtpMap(99, "t140", 1000);
         auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
@@ -149,7 +149,7 @@ TEST_F(TextNegoTest, testIsMediaCodecFromSdpSupported)
     auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pT140->SetFmtp(pRedFmtp);
 
-    TextProfile* pProfile = new TextProfile();
+    std::shared_ptr<TextProfile> pProfile = std::make_shared<TextProfile>();
     pProfile->GetPayloadList().Append(pT140);
     pProfile->SetDataPort(LOCAL_PORT);
 
@@ -308,13 +308,13 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pT140->SetFmtp(pRedFmtp);
 
-    TextProfile* pLocalProfile = new TextProfile();
+    auto pLocalProfile = std::make_shared<TextProfile>();
     pLocalProfile->GetPayloadList().Append(pT140);
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
-    TextProfile* pPeerProfile = new TextProfile(*pLocalProfile);
-    TextProfile* pNegoProfile = new TextProfile(*pLocalProfile);
+    auto pPeerProfile = std::make_shared<TextProfile>(*pLocalProfile);
+    auto pNegoProfile = std::make_shared<TextProfile>(*pLocalProfile);
 
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
             .WillOnce(Return(pLocalProfile))
@@ -357,13 +357,13 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferSentSuccess)
     auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
     pT140->SetFmtp(pRedFmtp);
 
-    TextProfile* pLocalProfile = new TextProfile();
+    auto pLocalProfile = std::make_shared<TextProfile>();
     pLocalProfile->GetPayloadList().Append(pT140);
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
-    TextProfile* pPeerProfile = new TextProfile(*pLocalProfile);
-    TextProfile* pNegoProfile = new TextProfile(*pLocalProfile);
+    auto pPeerProfile = std::make_shared<TextProfile>(*pLocalProfile);
+    auto pNegoProfile = std::make_shared<TextProfile>(*pLocalProfile);
 
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
             .WillOnce(Return(pLocalProfile))

@@ -52,16 +52,6 @@ public:
     virtual TEXT_CODEC GetNegotiatedCodec();
 
     /**
-     * @brief static cast from MediaBaseProfile to TextProfile
-     */
-    TextProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
-
-    /**
-     * @brief static cast from MediaBaseProfile::BasePayload to TextProfile::Payload
-     */
-    TextProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
-
-    /**
      * @brief Set the SDP parser object
      */
     void SetSdpParser(std::shared_ptr<TextSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }

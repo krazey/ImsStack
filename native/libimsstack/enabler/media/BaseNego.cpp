@@ -54,17 +54,16 @@ BaseNego& BaseNego::operator=(IN const BaseNego& obj)
         ImsSlot::operator=(obj);
         m_eType = obj.m_eType;
 
-        if (m_pBaseProfile != IMS_NULL)
+        if (m_pBaseProfile)
         {
             MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
-            delete m_pBaseProfile;
-            m_pBaseProfile = IMS_NULL;
+            m_pBaseProfile.reset();
         }
 
-        if (obj.m_pBaseProfile != IMS_NULL)
+        if (obj.m_pBaseProfile)
         {
-            m_pBaseProfile =
-                    MediaProfileFactory::GetInstance()->CreateProfile(m_eType, obj.m_pBaseProfile);
+            m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                    m_eType, obj.m_pBaseProfile.get());
         }
 
         m_pConfig = obj.m_pConfig;
@@ -80,14 +79,13 @@ PUBLIC VIRTUAL BaseNego::~BaseNego()
 {
     IMS_TRACE_I("~BaseNego(): type[%d]", m_eType, 0, 0);
 
-    if (m_pBaseProfile != IMS_NULL)
+    if (m_pBaseProfile)
     {
         MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
         m_pBaseProfile->DeletePayloads();
     }
 
-    delete m_pBaseProfile;
-    m_pBaseProfile = IMS_NULL;
+    m_pBaseProfile.reset();
 
     DestroyListOaModel();
 }
@@ -101,13 +99,12 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(
         return;
     }
 
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->GetDataPort() != 0)
+    if (m_pBaseProfile && m_pBaseProfile->GetDataPort() != 0)
     {
         MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
 
-    delete m_pBaseProfile;
-    m_pBaseProfile = IMS_NULL;
+    m_pBaseProfile.reset();
 
     m_pEnvironment = pEnvironment;
     m_pConfig = pConfig;
@@ -403,15 +400,15 @@ void BaseNego::SetProfileGenerator(std::shared_ptr<MediaProfileGenerator> pProfi
 
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN const OaModel& objOaModel)
 {
-    return objOaModel.pLocalProfile;
+    return objOaModel.pLocalProfile.get();
 }
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetPeerProfile(IN const OaModel& objOaModel)
 {
-    return objOaModel.pPeerProfile;
+    return objOaModel.pPeerProfile.get();
 }
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedProfile(IN const OaModel& objOaModel)
 {
-    return objOaModel.pNegotiatedProfile;
+    return objOaModel.pNegotiatedProfile.get();
 }
 
 PROTECTED
@@ -421,7 +418,7 @@ std::shared_ptr<BaseNego::OaModel> BaseNego::GetNegotiatedOaModel(IMS_BOOL bChec
 
     while (nTempOaModelCount > 0)
     {
-        std::shared_ptr<OaModel> pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
+        const auto& pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
 
         if (pLatestOaModel != IMS_NULL)
         {
@@ -440,7 +437,7 @@ std::shared_ptr<BaseNego::OaModel> BaseNego::GetNegotiatedOaModel(IMS_BOOL bChec
 
 PUBLIC IMS_BOOL BaseNego::SetLocalPort(IN IMS_UINT32 nPort)
 {
-    if (m_pBaseProfile == IMS_NULL)
+    if (!m_pBaseProfile)
     {
         IMS_TRACE_E(0, "SetLocalPort(): type[%d], invalid profile", m_eType, 0, 0);
         return IMS_FALSE;
@@ -481,16 +478,16 @@ void BaseNego::Copy(IN const BaseNego* pNego)
 
     IMS_TRACE_I("Copy(): type[%d]", m_eType, 0, 0);
 
-    if (m_pBaseProfile != IMS_NULL)
+    if (m_pBaseProfile)
     {
         MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
-        delete m_pBaseProfile;
+        m_pBaseProfile.reset();
     }
 
     m_pBaseProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pNego->GetBaseProfile());
 
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->GetDataPort() != 0)
+    if (m_pBaseProfile && m_pBaseProfile->GetDataPort() != 0)
     {
         MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
@@ -500,7 +497,7 @@ void BaseNego::Copy(IN const BaseNego* pNego)
     if (pNewOaModel != IMS_NULL)
     {
         pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
         m_listOaModel.Append(pNewOaModel);
     }
 
@@ -514,9 +511,9 @@ std::shared_ptr<BaseNego::OaModel> BaseNego::CreateOaModel(
     // Make new Offer/Answer model, and copy source profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
     pNewOaModel->pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
 
-    if (pNewOaModel->pLocalProfile == IMS_NULL)
+    if (!pNewOaModel->pLocalProfile)
     {
         IMS_TRACE_E(0, "CreateOaModel(): type[%d], invalid profile", m_eType, 0, 0);
         return IMS_NULL;
@@ -550,7 +547,7 @@ IMS_BOOL BaseNego::CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection)
 {
     // Handling exception case
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (!m_pBaseProfile || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
         IMS_TRACE_E(0, "CheckArgument(): type[%d], invalid arguments", m_eType, 0, 0);
         return IMS_FALSE;

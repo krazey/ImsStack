@@ -37,15 +37,8 @@ public:
      * @param pProfile if not null, this profile will be copied to the media profile just created
      * @return MediaBaseProfile* The media profile created
      */
-    virtual MediaBaseProfile* CreateProfile(
+    virtual std::shared_ptr<MediaBaseProfile> CreateProfile(
             IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile = IMS_NULL);
-
-    /**
-     * @brief Delete the profile
-     *
-     * @param pProfile The media profile to be deleted
-     */
-    virtual void DeleteProfile(IN MediaBaseProfile* pProfile);
 
     /**
      * @brief Create a media(audio/text/video) codec payload

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,30 +34,29 @@ PUBLIC MediaProfileGenerator::MediaProfileGenerator(IN const MEDIA_CONTENT_TYPE 
 PUBLIC VIRTUAL MediaProfileGenerator::~MediaProfileGenerator() {}
 
 PUBLIC
-MediaBaseProfile* MediaProfileGenerator::Generate(MEDIA_SERVICE_TYPE eServiceType,
+std::shared_ptr<MediaBaseProfile> MediaProfileGenerator::Generate(MEDIA_SERVICE_TYPE eServiceType,
         IN IService* pIService, IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId)
 {
     if (pIService == IMS_NULL || pConfig == IMS_NULL)
     {
-        return IMS_NULL;
+        return nullptr;
     }
 
     IMS_TRACE_I("Generate() media type[%d]", m_eType, 0, 0);
 
-    MediaBaseProfile* pProfile = IMS_NULL;
-    pProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
-    pProfile = SetPayloads(pProfile, pConfig);
-    pProfile = SetProfile(pProfile, pConfig, eServiceType, pIService, nSlotId);
+    auto pProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
+    SetPayloads(pProfile.get(), pConfig);
+    SetProfile(pProfile.get(), pConfig, eServiceType, pIService, nSlotId);
 
     return pProfile;
 }
 
-PRIVATE MediaBaseProfile* MediaProfileGenerator::SetPayloads(
+PRIVATE void MediaProfileGenerator::SetPayloads(
         IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL)
     {
-        return IMS_NULL;
+        return;
     }
 
     ImsList<CodecConfig*> pCodecs;
@@ -84,8 +83,6 @@ PRIVATE MediaBaseProfile* MediaProfileGenerator::SetPayloads(
 
         CreateCodecPayloads(pProfile, nCodec, pCodecConfig, pConfig);
     }
-
-    return pProfile;
 }
 
 PROTECTED

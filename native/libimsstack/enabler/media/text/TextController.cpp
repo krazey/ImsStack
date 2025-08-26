@@ -149,9 +149,9 @@ IMS_BOOL TextController::UpdateRtpConfig(IN std::shared_ptr<TextNego> pNego)
     if (m_pSession != IMS_NULL)
     {
         return m_pSession->UpdateRtpConfig(
-                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
+                static_cast<TextProfile*>(pNego->GetNegotiatedLocalProfile()),
+                static_cast<TextProfile*>(pNego->GetNegotiatedPeerProfile()),
+                static_cast<TextProfile*>(pNego->GetNegotiatedNegoProfile()));
     }
 
     return IMS_FALSE;

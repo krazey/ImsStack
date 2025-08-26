@@ -41,11 +41,11 @@ public:
     {
     public:
         /** The SDP profile for local device side */
-        MediaBaseProfile* pLocalProfile;
+        std::shared_ptr<MediaBaseProfile> pLocalProfile;
         /** The SDP profile for peer device side */
-        MediaBaseProfile* pPeerProfile;
+        std::shared_ptr<MediaBaseProfile> pPeerProfile;
         /** The SDP profile to store negotiated profiles */
-        MediaBaseProfile* pNegotiatedProfile;
+        std::shared_ptr<MediaBaseProfile> pNegotiatedProfile;
         /** The identification of SDP description object from the SDP engine */
         IMS_SINTP nSessionDescriptorKey;
         /** checking variable for confirmed session*/
@@ -58,12 +58,6 @@ public:
                 pNegotiatedProfile(IMS_NULL),
                 nSessionDescriptorKey(0),
                 bConfirmedSession(IMS_FALSE) {};
-        ~OaModel()
-        {
-            delete pLocalProfile;
-            delete pPeerProfile;
-            delete pNegotiatedProfile;
-        };
 
     private:
         OaModel(IN const OaModel& obj);
@@ -164,7 +158,7 @@ public:
     /**
      * @brief Get the MediaBaseProfile object
      */
-    MediaBaseProfile* GetBaseProfile() const { return m_pBaseProfile; }
+    MediaBaseProfile* GetBaseProfile() const { return m_pBaseProfile.get(); }
 
     /**
      * @brief Get the negotiated remote ip address
@@ -257,7 +251,7 @@ protected:
 
 protected:
     MEDIA_CONTENT_TYPE m_eType;
-    MediaBaseProfile* m_pBaseProfile;
+    std::shared_ptr<MediaBaseProfile> m_pBaseProfile;
     ImsList<std::shared_ptr<OaModel>> m_listOaModel;
     MediaConfiguration* m_pConfig;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;

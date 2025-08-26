@@ -37,14 +37,14 @@ PUBLIC VIRTUAL VideoProfileGenerator::~VideoProfileGenerator()
 }
 
 PROTECTED
-VideoProfile* VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
+void VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
         IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE /*eServiceType*/, IN IService* pIService,
         IN IMS_SINT32 nSlotId)
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
         IMS_TRACE_E(0, "SetProfile(): invalid argument", 0, 0, 0);
-        return IMS_NULL;
+        return;
     }
 
     SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
@@ -75,8 +75,6 @@ VideoProfile* VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 
     IMS_TRACE_D("SetProfile(): SupportAvpf[%d], SupportCapaNegoForAvpf[%d]",
             pVideoProfile->IsAvpfSupported(), pVideoProfile->IsCapaNegoForAvpfSupported(), 0);
-
-    return pVideoProfile;
 }
 
 PROTECTED IMS_SINT32 VideoProfileGenerator::SetTransportCapability(OUT VideoProfile* pVideoProfile)

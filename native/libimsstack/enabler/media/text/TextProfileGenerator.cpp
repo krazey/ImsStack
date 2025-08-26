@@ -35,14 +35,13 @@ PUBLIC VIRTUAL TextProfileGenerator::~TextProfileGenerator()
 }
 
 PROTECTED
-TextProfile* TextProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
-        IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE /*eServiceType*/, IN IService* pIService,
-        IN IMS_SINT32 nSlotId)
+void TextProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
+        MEDIA_SERVICE_TYPE /*eServiceType*/, IN IService* pIService, IN IMS_SINT32 nSlotId)
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
         IMS_TRACE_E(0, "SetProfile(): invalid arguments", 0, 0, 0);
-        return IMS_NULL;
+        return;
     }
 
     SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
@@ -55,8 +54,6 @@ TextProfile* TextProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 
     IMS_TRACE_I("SetProfile(): transport type[%s], keep red level[%d]",
             pTextProfile->GetTransportType().GetStr(), pTextProfile->GetKeepRedundantLevel(), 0);
-
-    return pTextProfile;
 }
 
 PROTECTED

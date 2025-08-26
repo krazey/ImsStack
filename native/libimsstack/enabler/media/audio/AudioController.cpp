@@ -112,7 +112,7 @@ IMS_BOOL AudioController::UpdateSession(
 
     m_nCurrentActiveNegoId = nNegoId;
 
-    AudioProfile* pNegotiatedProfile = pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile());
+    auto pNegotiatedProfile = static_cast<AudioProfile*>(pNego->GetNegotiatedNegoProfile());
     if (pNegotiatedProfile == IMS_NULL)
     {
         IMS_TRACE_E(0, "UpdateSession(): Invalid negotiated profile", 0, 0, 0);
@@ -375,9 +375,9 @@ IMS_BOOL AudioController::UpdateRtpConfig(
     if (pAudioSession != IMS_NULL)
     {
         AudioConfig* pAudioConfig = pAudioSession->UpdateRtpConfig(nAccessNetwork,
-                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()),
+                static_cast<AudioProfile*>(pNego->GetNegotiatedLocalProfile()),
+                static_cast<AudioProfile*>(pNego->GetNegotiatedPeerProfile()),
+                static_cast<AudioProfile*>(pNego->GetNegotiatedNegoProfile()),
                 m_eCallState == CONFIRMED_SESSION);
 
         return IsAudioConfigChanged(pAudioConfig);
@@ -480,7 +480,7 @@ IMS_BOOL AudioController::UpdateQualityThreshold(
 
     if (pAudioSession != IMS_NULL && pNego != IMS_NULL)
     {
-        AudioProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
+        auto pPeerProfile = static_cast<AudioProfile*>(pNego->GetNegotiatedPeerProfile());
         IMS_BOOL bEnableRtcp = IMS_TRUE;
 
         if (pPeerProfile != IMS_NULL && pPeerProfile->GetBandwidthRs() == 0 &&

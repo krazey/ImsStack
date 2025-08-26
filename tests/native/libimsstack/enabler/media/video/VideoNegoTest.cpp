@@ -64,7 +64,7 @@ public:
     std::shared_ptr<MockVideoSdpGenerator> m_pMockVideoSdpGenerator;
     std::shared_ptr<MockVideoProfileNegotiator> m_pMockProfileNegotiator;
 
-    VideoProfile* m_pBaseProfile;
+    std::shared_ptr<VideoProfile> m_pBaseProfile;
     IpAddress m_objIpAddr;
     ImsVector<IMS_SINT32> m_objHevcPayloadType;
     ImsVector<IMS_SINT32> m_objAvcPayloadType;
@@ -99,7 +99,7 @@ protected:
         m_pVideoNego->SetProfileNegotiator(m_pMockProfileNegotiator);
         m_pVideoNego->SetProfileGenerator(m_pMockProfileGenerator);
 
-        m_pBaseProfile = new VideoProfile();
+        m_pBaseProfile = std::make_shared<VideoProfile>();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
         pAvcPayload->SetRtpMap(AVC_PAYLOAD, "H264", 90000, 1);
         auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
@@ -206,7 +206,7 @@ TEST_F(VideoNegoTest, testIsMediaCodecFromSdpSupported)
             m_pVideoNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objVideoDescriptor),
             IMS_FALSE);
 
-    VideoProfile* pProfile = new VideoProfile();
+    auto pProfile = std::make_shared<VideoProfile>();
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
     pAvcPayload->SetRtpMap(99, "H264", 90000, 1);
 
@@ -369,7 +369,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     MockMediaProfileFactory objMediaProfileFactory;
     MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
-    VideoProfile* pLocalProfile = new VideoProfile();
+    auto pLocalProfile = std::make_shared<VideoProfile>();
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
     pAvcPayload->SetRtpMap(99, "H264", 90000, 1);
 
@@ -382,8 +382,8 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
-    VideoProfile* pPeerProfile = new VideoProfile(*pLocalProfile);
-    VideoProfile* pNegoProfile = new VideoProfile(*pLocalProfile);
+    auto pPeerProfile = std::make_shared<VideoProfile>(*pLocalProfile);
+    auto pNegoProfile = std::make_shared<VideoProfile>(*pLocalProfile);
 
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
             .WillOnce(Return(pLocalProfile))
@@ -421,7 +421,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
     MockMediaProfileFactory objMediaProfileFactory;
     MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
-    VideoProfile* pLocalProfile = new VideoProfile();
+    auto pLocalProfile = std::make_shared<VideoProfile>();
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
     pAvcPayload->SetRtpMap(99, "H264", 90000, 1);
 
@@ -434,8 +434,8 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
-    VideoProfile* pPeerProfile = new VideoProfile(*pLocalProfile);
-    VideoProfile* pNegoProfile = new VideoProfile(*pLocalProfile);
+    auto pPeerProfile = std::make_shared<VideoProfile>(*pLocalProfile);
+    auto pNegoProfile = std::make_shared<VideoProfile>(*pLocalProfile);
 
     EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
             .WillOnce(Return(pLocalProfile))

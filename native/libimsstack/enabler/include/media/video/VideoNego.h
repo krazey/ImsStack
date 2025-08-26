@@ -51,16 +51,6 @@ public:
     virtual VIDEO_RESOLUTION GetNegotiatedResolution();
 
     /**
-     * @brief static cast from MediaBaseProfile to VideoProfile
-     */
-    VideoProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
-
-    /**
-     * @brief static cast from MediaBaseProfile::BasePayload to VideoProfile::Payload
-     */
-    VideoProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
-
-    /**
      * @brief Set the SDP parser object
      */
     void SetSdpParser(std::shared_ptr<VideoSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }

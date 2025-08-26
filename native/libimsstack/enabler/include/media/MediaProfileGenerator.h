@@ -41,8 +41,8 @@ public:
      * @param nSlotId The UICC slot id
      * @return MediaBaseProfile* The MediaBaseProfile to be created
      */
-    virtual MediaBaseProfile* Generate(MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
-            IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId);
+    virtual std::shared_ptr<MediaBaseProfile> Generate(MEDIA_SERVICE_TYPE eServiceType,
+            IN IService* pIService, IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId);
 
 protected:
     /**
@@ -55,13 +55,11 @@ protected:
      * @param nSlotId The UICC slot id
      * @return MediaBaseProfile* The media profile created
      */
-    virtual MediaBaseProfile* SetProfile(IN MediaBaseProfile* pProfile,
-            IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
+            MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService, IN IMS_SINT32 nSlotId) = 0;
     virtual void SetCommonProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             IN IService* pIService, IN IMS_SINT32 nSlotId);
-    virtual MediaBaseProfile* SetPayloads(
-            IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+    virtual void SetPayloads(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     virtual void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) = 0;
 

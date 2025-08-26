@@ -30,37 +30,28 @@ MediaProfileFactory::MediaProfileFactory() {}
 PUBLIC VIRTUAL MediaProfileFactory::~MediaProfileFactory() {}
 
 PUBLIC
-MediaBaseProfile* MediaProfileFactory::CreateProfile(
+std::shared_ptr<MediaBaseProfile> MediaProfileFactory::CreateProfile(
         IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile)
 {
     switch (eType)
     {
         case MEDIA_TYPE_AUDIO:
-        {
-            return pProfile != IMS_NULL ? new AudioProfile(*static_cast<AudioProfile*>(pProfile))
-                                        : new AudioProfile();
-        }
+            return (pProfile != IMS_NULL)
+                    ? std::make_shared<AudioProfile>(*static_cast<AudioProfile*>(pProfile))
+                    : std::make_shared<AudioProfile>();
         case MEDIA_TYPE_VIDEO:
-        {
-            return pProfile != IMS_NULL ? new VideoProfile(*static_cast<VideoProfile*>(pProfile))
-                                        : new VideoProfile();
-        }
+            return (pProfile != IMS_NULL)
+                    ? std::make_shared<VideoProfile>(*static_cast<VideoProfile*>(pProfile))
+                    : std::make_shared<VideoProfile>();
         case MEDIA_TYPE_TEXT:
-        {
-            return pProfile != IMS_NULL ? new TextProfile(*static_cast<TextProfile*>(pProfile))
-                                        : new TextProfile();
-        }
+            return (pProfile != IMS_NULL)
+                    ? std::make_shared<TextProfile>(*static_cast<TextProfile*>(pProfile))
+                    : std::make_shared<TextProfile>();
         default:
             IMS_TRACE_I("CreateProfile(): invalid type[%d]", eType, 0, 0);
             break;
     }
-    return IMS_NULL;
-}
-
-PUBLIC
-void MediaProfileFactory::DeleteProfile(IN MediaBaseProfile* pProfile)
-{
-    delete pProfile;
+    return nullptr;
 }
 
 PUBLIC

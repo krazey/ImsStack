@@ -33,7 +33,7 @@ public:
     virtual ~AudioProfileGenerator() override;
 
 protected:
-    AudioProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
+    void SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
             IN IMS_SINT32 nSlotId) override;
     void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,

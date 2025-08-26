@@ -85,7 +85,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
 
     OaModel objOaModel;
     objOaModel.pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
 
     // Make a destination profile from SDP
     objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
@@ -106,7 +106,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
         return IMS_FALSE;
     }
 
-    return (objOaModel.pNegotiatedProfile->GetPayloadList().GetSize() > 0 &&
+    return (objOaModel.pNegotiatedProfile != IMS_NULL &&
+                   objOaModel.pNegotiatedProfile->GetPayloadList().GetSize() > 0 &&
                    objOaModel.pNegotiatedProfile->GetDataPort() != 0)
             ? IMS_TRUE
             : IMS_FALSE;
@@ -124,29 +125,19 @@ PUBLIC VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
     return VIDEO_RESOLUTION_INVALID;
 }
 
-PUBLIC VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
-{
-    return (pProfile != IMS_NULL) ? static_cast<VideoProfile*>(pProfile) : IMS_NULL;
-}
-
-PUBLIC VideoProfile::Payload* VideoNego::PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload)
-{
-    return (pPayload != IMS_NULL) ? static_cast<VideoProfile::Payload*>(pPayload) : IMS_NULL;
-}
-
 PROTECTED VideoProfile* VideoNego::GetLocalProfile(IN const OaModel& objOaModel)
 {
-    return ProfileCasting(BaseNego::GetLocalProfile(objOaModel));
+    return static_cast<VideoProfile*>(BaseNego::GetLocalProfile(objOaModel));
 }
 
 PROTECTED VideoProfile* VideoNego::GetPeerProfile(IN const OaModel& objOaModel)
 {
-    return ProfileCasting(BaseNego::GetPeerProfile(objOaModel));
+    return static_cast<VideoProfile*>(BaseNego::GetPeerProfile(objOaModel));
 }
 
 PROTECTED VideoProfile* VideoNego::GetNegotiatedProfile(IN const OaModel& objOaModel)
 {
-    return ProfileCasting(BaseNego::GetNegotiatedProfile(objOaModel));
+    return static_cast<VideoProfile*>(BaseNego::GetNegotiatedProfile(objOaModel));
 }
 
 PROTECTED
@@ -255,7 +246,7 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
     if (m_listOaModel.IsEmpty())
     {
         pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
     }
     else
     {
@@ -270,15 +261,15 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
         if (pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
                 pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0 && !bDisable)  // upgrade case
         {
-            pNewOaModel->pLocalProfile =
-                    MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+            pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                    m_eType, m_pBaseProfile.get());
         }
         else
         {
             if (bEnforceReofferMode || pMediaSessionConfig->IsSdpReofferFullCapability())
             {
-                pNewOaModel->pLocalProfile =
-                        MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                        m_eType, m_pBaseProfile.get());
             }
             else
             {
@@ -290,7 +281,7 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
                 else
                 {
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, m_pBaseProfile);
+                            m_eType, m_pBaseProfile.get());
                 }
             }
         }
@@ -349,7 +340,7 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(
     // Make new Offer/Answer model, and copy source profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
     pNewOaModel->pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
 
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
@@ -400,11 +391,6 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    if (pNewOaModel->pPeerProfile != IMS_NULL)
-    {
-        delete pNewOaModel->pPeerProfile;
-    }
-
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
     if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(*pNewOaModel)))
@@ -412,11 +398,6 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
         IMS_TRACE_E(0, "NegotiateAnswer(): failed to parse SDP", 0, 0, 0);
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
-    }
-
-    if (pNewOaModel->pNegotiatedProfile != IMS_NULL)
-    {
-        delete pNewOaModel->pNegotiatedProfile;
     }
 
     // Make a negotiated profile from Local & Peer profile

@@ -164,9 +164,9 @@ IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, I
     {
         IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
         return m_pSession->UpdateRtpConfig(
-                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()),
+                static_cast<VideoProfile*>(pNego->GetNegotiatedLocalProfile()),
+                static_cast<VideoProfile*>(pNego->GetNegotiatedPeerProfile()),
+                static_cast<VideoProfile*>(pNego->GetNegotiatedNegoProfile()),
                 m_eCallState == CONFIRMED_SESSION, bHold);
     }
 
