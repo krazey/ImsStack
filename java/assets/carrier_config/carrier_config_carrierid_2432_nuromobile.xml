@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 -->
 <carrier_config>
     <int-array name="ims.parent_carrier_ids_int_array" num="1">
-        <item value="1690"/>
+        <item value="850"/>
     </int-array>
-
-    <!-- Ut/Xcap -->
-    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 </carrier_config>

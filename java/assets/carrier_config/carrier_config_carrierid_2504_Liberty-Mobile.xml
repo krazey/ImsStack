@@ -15,6 +15,10 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="1187"/>
+    </int-array>
+
     <!-- Ims General -->
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
     <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="true"/>

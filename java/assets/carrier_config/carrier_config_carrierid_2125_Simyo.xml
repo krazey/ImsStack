@@ -15,6 +15,10 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="678"/>
+    </int-array>
+
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>

@@ -15,5 +15,8 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="1344"/>
+    </int-array>
     <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
 </carrier_config>

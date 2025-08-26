@@ -15,5 +15,8 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="1403"/>
+    </int-array>
     <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>

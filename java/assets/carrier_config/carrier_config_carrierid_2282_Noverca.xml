@@ -15,5 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="33"/>
+    </int-array>
+
     <int name="imsvoice.audio_maxred_int" value="220"/>
 </carrier_config>
