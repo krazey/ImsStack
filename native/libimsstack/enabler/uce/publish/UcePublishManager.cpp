@@ -192,8 +192,7 @@ IMS_RESULT UcePublishManager::MessageMediator_AdjustMessage(
         return IMS_SUCCESS;
     }
 
-    if (strContactHeader.Contains(UceTag::TAG_CHAT) == IMS_FALSE &&
-            (m_nConnectedServices & CONNECTED_SERVICE_CPM_SESSION) == CONNECTED_SERVICE_CPM_SESSION)
+    if (strContactHeader.Contains(UceTag::TAG_CHAT) == IMS_FALSE)
     {
         if (strContactHeader.Contains(UceTag::TAG_ICSI) == IMS_FALSE && bAppendICSITag == IMS_FALSE)
         {
@@ -1889,7 +1888,6 @@ IMS_BOOL UcePublishManager::StartTimer(INTERNAL_TIMER eTimer, IMS_UINT32 nTime)
             m_pExponentialTimer->SetTimer(nTime * 1000, this);
             return IMS_TRUE;
         }
-        break;
         case TIMER_RETRY:
         {
             StopTimer(TIMER_RETRY);
@@ -1903,7 +1901,6 @@ IMS_BOOL UcePublishManager::StartTimer(INTERNAL_TIMER eTimer, IMS_UINT32 nTime)
             m_pRetryTimer->SetTimer(nTime * 1000, this);
             return IMS_TRUE;
         }
-        break;
         case TIMER_RETRYAFTER:
         {
             StopTimer(TIMER_RETRYAFTER);
@@ -1917,7 +1914,6 @@ IMS_BOOL UcePublishManager::StartTimer(INTERNAL_TIMER eTimer, IMS_UINT32 nTime)
             m_pRetryAfterTimer->SetTimer(nTime * 1000, this);
             return IMS_TRUE;
         }
-        break;
         default:
             break;
     }
@@ -1970,7 +1966,6 @@ void UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
             StopTimer(TIMER_RETRYAFTER);
             return;
         }
-        break;
         default:
             break;
     }

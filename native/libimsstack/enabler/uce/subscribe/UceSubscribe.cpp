@@ -161,8 +161,7 @@ IMS_RESULT UceSubscribe::MessageMediator_AdjustMessage(
         return IMS_SUCCESS;
     }
 
-    if (strContactHeader.Contains(UceTag::TAG_CHAT) == IMS_FALSE &&
-            (m_nConnectedServices & CONNECTED_SERVICE_CPM_SESSION) == CONNECTED_SERVICE_CPM_SESSION)
+    if (strContactHeader.Contains(UceTag::TAG_CHAT) == IMS_FALSE)
     {
         if (strContactHeader.Contains(UceTag::TAG_ICSI) == IMS_FALSE && bAppendICSITag == IMS_FALSE)
         {

@@ -323,10 +323,6 @@ IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& o
 
 IMS_BOOL UceXmlDocumentHelperThread::StartMessageHandler(const IMSMSG& objMsg)
 {
-    if (!Initialize())
-    {
-        return IMS_FALSE;
-    }
     return OnStart(objMsg);
 }
 
