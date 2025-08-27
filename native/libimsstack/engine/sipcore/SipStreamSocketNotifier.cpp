@@ -62,7 +62,7 @@ PUBLIC VIRTUAL SipSocket* SipStreamSocketNotifier::Accept()
             return IMS_NULL;
         }
 
-        ApplyIpSec(piNewSocket);
+        ApplyIpSec(pStreamSocket);
 
         // Inherits the server's listener
         pStreamSocket->SetListener(m_piListener);

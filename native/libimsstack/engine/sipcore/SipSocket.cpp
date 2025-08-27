@@ -268,13 +268,14 @@ PROTECTED VIRTUAL void SipSocket::Socket_OnClosed(
 
 PROTECTED
 void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
-        IN const SocketAddress* pRemote /*= IMS_NULL*/, IN ISocket* piAcceptedSocket /*= IMS_NULL*/)
+        IN const SocketAddress* pRemote /*= IMS_NULL*/,
+        IN SipSocket* pAcceptedSocket /*= IMS_NULL*/)
 {
     INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec(GetSlotId());
 
     if (piIpSec != IMS_NULL)
     {
-        if (piAcceptedSocket == IMS_NULL)
+        if (pAcceptedSocket == IMS_NULL)
         {
             IMS_TRACE_D("ApplyIpSecInternal: socket=%d, local-addr=(%s), remote-addr=(%s)",
                     m_piSocket->GetSocketId(), objLocal.ToString().GetStr(),
@@ -285,9 +286,10 @@ void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
         else
         {
             IMS_TRACE_D("ApplyIpSecInternal: socket=%d, serverSocket=%d",
-                    piAcceptedSocket->GetSocketId(), m_piSocket->GetSocketId(), 0);
+                    pAcceptedSocket->m_piSocket->GetSocketId(), m_piSocket->GetSocketId(), 0);
 
-            piIpSec->ApplyIpSecTransform(piAcceptedSocket, m_piSocket);
+            piIpSec->ApplyIpSecTransform(pAcceptedSocket->m_piSocket, m_piSocket,
+                    pAcceptedSocket->m_objSockAddr.GetSocketAddress());
         }
     }
 }

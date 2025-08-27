@@ -120,7 +120,7 @@ PUBLIC VIRTUAL SipStreamSocket::~SipStreamSocket()
     StopKeepAliveTimer();
 }
 
-PUBLIC VIRTUAL void SipStreamSocket::ApplyIpSec(IN ISocket* /*piAcceptedSocket = IMS_NULL*/)
+PUBLIC VIRTUAL void SipStreamSocket::ApplyIpSec(IN SipSocket* /*pAcceptedSocket = IMS_NULL*/)
 {
     IpAddress objIpAddr;
     IMS_UINT32 nPort = 0;
