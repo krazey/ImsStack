@@ -90,10 +90,12 @@ public:
      *
      * @param piSocket The socket object to be applied
      * @param piServerSocket The socket object to be found
+     * @param objRemote The remote socket address (IP & Port)
      * @return Returns IMS_TRUE if the operation is successfully done.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket) = 0;
+    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket,
+            IN const SocketAddress& objRemote) = 0;
 
     /**
      * @brief Removes IPSec SA from the specified socket information.
