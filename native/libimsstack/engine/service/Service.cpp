@@ -2080,8 +2080,11 @@ void Service::FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPriv
     IMS_BOOL bDeviceIdRequired = IMS_FALSE;
 
     // "+sip.instance" parameter can be inserted
-    // if UE detects that the destination of requests & responses is a trusted intermediary.
-    if (IsWithinTrustDomain())
+    // if UE detects that the destination of requests & responses is a trusted intermediary, and
+    // it's allowed by the configuration.
+    if (IsWithinTrustDomain() &&
+            SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
+                    GetSlotId(), GetSipProfile()))
     {
         bDeviceIdRequired = IMS_TRUE;
     }

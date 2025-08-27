@@ -1385,27 +1385,11 @@ IMS_BOOL RegSubscription::SetContactHeader(
         }
     }
 
-    IMS_BOOL bDeviceIdRequired = IMS_FALSE;
-    IMS_BOOL bIsWithinTrustDomain = m_pRegStateTracker->IsWithinTrustDomain(GetSlotId());
-
-    if (!bIsContactGruu && bIsWithinTrustDomain)
-    {
-        bDeviceIdRequired = IMS_TRUE;
-    }
-
-    // FIXME: it is not required, if not necessary, remove it later.
-    if (!bDeviceIdRequired && !bIsContactGruu)
-    {
-        if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()) &&
-                bIsWithinTrustDomain)
-        {
-            bDeviceIdRequired = IMS_TRUE;
-        }
-    }
-
     IMS_BOOL bInstanceParameterIncluded = IMS_FALSE;
 
-    if (bDeviceIdRequired && (pRegContact != IMS_NULL))
+    if (pRegContact != IMS_NULL && m_pRegStateTracker->IsWithinTrustDomain(GetSlotId()) &&
+            SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
+                    GetSlotId(), m_pRegStateTracker->GetSipProfile()))
     {
         // Add the '+sip.instance' parameter
         const SipParameter* pParameter = pRegContact->GetInstanceParameter();
@@ -1440,7 +1424,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
                 if (bInstanceParameterIncluded)
                 {
-                    if (pParameter->GetName().Equals("+sip.instance"))
+                    if (pParameter->GetName().Equals(Sip::STR_SIP_INSTANCE))
                     {
                         continue;
                     }
