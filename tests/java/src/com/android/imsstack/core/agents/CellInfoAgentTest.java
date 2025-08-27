@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.SharedPreferences;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -450,7 +451,7 @@ public class CellInfoAgentTest {
     }
 
     private void testUpdateAllCellInfoWithInvalidCellIdentity(int networkType) {
-        setUpVoNrEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
+        setUpNgranEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
         setUpAllCellInfo(networkType, false);
 
         mCellInfoAgent.startTrackingCellInfo();
@@ -462,7 +463,7 @@ public class CellInfoAgentTest {
 
     private void testUpdateAllCellInfoUsingTelephonyCallback(int networkType,
             boolean timeOffsetEnabled) {
-        setUpVoNrEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
+        setUpNgranEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
         mCellInfoAgent.setTimeOffsetEnabledForUtcTimeFormat(timeOffsetEnabled);
         mCellInfoAgent.startTrackingCellInfo();
         notifyCellInfoChanged(networkType, TelephonyManager.NETWORK_TYPE_UNKNOWN,
@@ -487,7 +488,7 @@ public class CellInfoAgentTest {
 
     private void testUpdateAllCellInfoUsingTelephonyCallback(
             int networkType1, int networkType2, long timestamp1, long timestamp2) {
-        setUpVoNrEnabled((networkType1 == TelephonyManager.NETWORK_TYPE_NR)
+        setUpNgranEnabled((networkType1 == TelephonyManager.NETWORK_TYPE_NR)
                 || (networkType2 == TelephonyManager.NETWORK_TYPE_NR));
 
         mCellInfoAgent.startTrackingCellInfo();
@@ -553,12 +554,12 @@ public class CellInfoAgentTest {
         cellInfoListener.onCellInfoChanged(mCellInfos);
     }
 
-    private void setUpVoNrEnabled(boolean enabled) {
+    private void setUpNgranEnabled(boolean enabled) {
         when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
         when(mCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY)))
+                eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
                 .thenReturn(enabled
-                        ? new int[] { CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA }
+                        ? new int[] { AccessNetworkConstants.AccessNetworkType.NGRAN }
                         : null);
     }
 

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 
 import androidx.test.filters.SmallTest;
@@ -69,7 +70,7 @@ public class CapabilityConfigsTest {
         assertFalse(CapabilityConfigs.isWfcEnabled(SLOT0));
         assertFalse(CapabilityConfigs.isUceEnabled(SLOT0));
         assertFalse(CapabilityConfigs.isRttEnabled(SLOT0));
-        assertFalse(CapabilityConfigs.isVoNrEnabled(SLOT0));
+        assertFalse(CapabilityConfigs.isNgranSupported(SLOT0));
         assertFalse(CapabilityConfigs.isVoLteRoamingEnabled(SLOT0));
     }
 
@@ -83,7 +84,7 @@ public class CapabilityConfigsTest {
         assertTrue(CapabilityConfigs.isWfcEnabled(SLOT0));
         assertTrue(CapabilityConfigs.isUceEnabled(SLOT0));
         assertTrue(CapabilityConfigs.isRttEnabled(SLOT0));
-        assertTrue(CapabilityConfigs.isVoNrEnabled(SLOT0));
+        assertTrue(CapabilityConfigs.isNgranSupported(SLOT0));
         assertTrue(CapabilityConfigs.isVoLteRoamingEnabled(SLOT0));
 
         when(mCarrierConfig.getBoolean(
@@ -103,14 +104,14 @@ public class CapabilityConfigsTest {
         assertFalse(CapabilityConfigs.isWfcEnabled(SLOT0));
         assertFalse(CapabilityConfigs.isUceEnabled(SLOT0));
         assertFalse(CapabilityConfigs.isRttEnabled(SLOT0));
-        assertFalse(CapabilityConfigs.isVoNrEnabled(SLOT0));
+        assertFalse(CapabilityConfigs.isNgranSupported(SLOT0));
         assertFalse(CapabilityConfigs.isVoLteRoamingEnabled(SLOT0));
 
         when(mCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY)))
+                eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
                 .thenReturn(null);
 
-        assertFalse(CapabilityConfigs.isVoNrEnabled(SLOT0));
+        assertFalse(CapabilityConfigs.isNgranSupported(SLOT0));
     }
 
     private void setUpCarrierConfigs(boolean enabled) {
@@ -136,11 +137,11 @@ public class CapabilityConfigsTest {
                 eq(CarrierConfigManager.ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL),
                 eq(false))).thenReturn(enabled);
 
-        int[] nrAvailabilities = enabled
-                ? new int[] { CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA }
-                : new int[] { CarrierConfigManager.CARRIER_NR_AVAILABILITY_NSA };
+        int[] supportedRats = enabled
+                ? new int[] { AccessNetworkConstants.AccessNetworkType.NGRAN }
+                : new int[] { AccessNetworkConstants.AccessNetworkType.EUTRAN };
         when(mCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY)))
-                .thenReturn(nrAvailabilities);
+                eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
+                .thenReturn(supportedRats);
     }
 }

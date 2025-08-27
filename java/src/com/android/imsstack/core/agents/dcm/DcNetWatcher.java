@@ -35,7 +35,6 @@ import android.telephony.VopsSupportInfo;
 import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
@@ -822,15 +821,13 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private void setRatPolicy() {
-        // NR RAT
-        if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
-            mRatPolicy |= POLICY_RAT_5G;
-        }
-
         if (mDcSettings != null) {
             int[] supportedRats = mDcSettings.getImsSupportedRats();
             for (int supportedRat : supportedRats) {
                 switch (supportedRat) {
+                    case AccessNetworkConstants.AccessNetworkType.NGRAN -> {
+                        mRatPolicy |= POLICY_RAT_5G;
+                    }
                     case AccessNetworkConstants.AccessNetworkType.EUTRAN -> {
                         mRatPolicy |= POLICY_RAT_4G;
                     }
@@ -848,6 +845,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
             // Temp Setting
             if (supportedRats.length == 0) {
+                mRatPolicy |= POLICY_RAT_5G;
                 mRatPolicy |= POLICY_RAT_4G;
                 mRatPolicy |= POLICY_RAT_WLAN;
             }
