@@ -34,6 +34,7 @@
 #include "media/MockIMediaReportEventListener.h"
 #include "media/MockMediaProfileManager.h"
 #include "media/MtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -427,6 +428,42 @@ TEST_F(MtcMediaManagerTest, UpdateTextMediaDirectionUpdatesMediaInfo)
         pMediaManager->UpdateMediaDirection(MEDIATYPE_TEXT, eDirection);
         EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, eDirection);
     }
+}
+
+TEST_F(MtcMediaManagerTest, UpdateMediaInfoUpdatesMediaInfoWithNegotiatedValues)
+{
+    const MEDIA_DIRECTION eAudioDir = MEDIA_DIRECTION::MEDIA_DIRECTION_SEND_RECEIVE;
+    const MEDIA_DIRECTION eVideoDir = MEDIA_DIRECTION::MEDIA_DIRECTION_SEND;
+    const MEDIA_DIRECTION eTextDir = MEDIA_DIRECTION::MEDIA_DIRECTION_INACTIVE;
+    const IMS_SINT32 eAudioQuality = AUDIO_QUALITY_AMR_WB;
+    const IMS_SINT32 eVideoQuality = VIDEO_QUALITY_VGA_PR;
+    const IMS_SINT32 eTextQuality = TEXT_QUALITY_T140;
+
+    const MediaInfo objMediaInfo = MediaInfo(eAudioDir, eVideoDir, eTextDir, eAudioQuality,
+            eVideoQuality, MtcMediaUtil::GetGttModeFromTextQuality(eTextQuality));
+
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+
+    EXPECT_CALL(
+            objMediaSession, GetNegotiatedDirection(NEGO_ID, MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO))
+            .WillOnce(Return(eAudioDir));
+    EXPECT_CALL(
+            objMediaSession, GetNegotiatedDirection(NEGO_ID, MEDIA_CONTENT_TYPE::MEDIA_TYPE_VIDEO))
+            .WillOnce(Return(eVideoDir));
+    EXPECT_CALL(
+            objMediaSession, GetNegotiatedDirection(NEGO_ID, MEDIA_CONTENT_TYPE::MEDIA_TYPE_TEXT))
+            .WillOnce(Return(eTextDir));
+    EXPECT_CALL(
+            objMediaSession, GetNegotiatedQuality(NEGO_ID, MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO))
+            .WillOnce(Return(eAudioQuality));
+    EXPECT_CALL(
+            objMediaSession, GetNegotiatedQuality(NEGO_ID, MEDIA_CONTENT_TYPE::MEDIA_TYPE_VIDEO))
+            .WillOnce(Return(eVideoQuality));
+    EXPECT_CALL(objMediaSession, GetNegotiatedQuality(NEGO_ID, MEDIA_CONTENT_TYPE::MEDIA_TYPE_TEXT))
+            .WillOnce(Return(eTextQuality));
+    pMediaManager->UpdateMediaInfo(&objISession);
+
+    EXPECT_EQ(objMediaInfo, pMediaManager->GetMediaInfo());
 }
 
 TEST_F(MtcMediaManagerTest, FormSdpWhenNegotiationStateIsOfferSent)

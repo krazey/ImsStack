@@ -57,6 +57,7 @@ public:
 
     /* Media Info */
     void SetMediaInfo(IN const MediaInfo& objInfo) override;
+    void UpdateMediaInfo(IN const ISession* piSession) override;
     void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
     // using enum values defined in MtcDef.h
     const MediaInfo& GetMediaInfo() const override;
@@ -95,8 +96,10 @@ public:
     void SetConfirmedSession(IN ISession* piSession) override;
 
     NegotiationState GetNegotiationState(IN ISession* piSession) override;
-    IMS_SINT32 GetNegotiatedDirection(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    IMS_SINT32 GetNegotiatedQuality(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    IMS_SINT32 GetNegotiatedDirection(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    IMS_SINT32 GetNegotiatedQuality(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType) override;
     CallType GetNegotiatedCallType(IN ISession* piSession) override;
 
     PemType GetPemType(IN ISession* piSession) override;  // remove..?

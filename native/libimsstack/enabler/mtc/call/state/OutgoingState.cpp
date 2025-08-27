@@ -187,6 +187,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
+    m_objContext.GetMediaManager().UpdateMediaInfo(piSession);
     OnStarted(*pSession);
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
 

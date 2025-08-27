@@ -38,6 +38,7 @@ public:
             (override));
     MOCK_METHOD(void, SetQosListener, (IN IMediaQosEventListener* pListener), (override));
     MOCK_METHOD(void, SetMediaInfo, (IN const MediaInfo& objInfo), (override));
+    MOCK_METHOD(void, UpdateMediaInfo, (IN const ISession* piSession), (override));
     MOCK_METHOD(
             void, UpdateMediaDirection, (IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir), (override));
     MOCK_METHOD(const MediaInfo&, GetMediaInfo, (), (const, override));
@@ -67,9 +68,9 @@ public:
     MOCK_METHOD(void, SetConfirmedSession, (IN ISession * piSession), (override));
     MOCK_METHOD(NegotiationState, GetNegotiationState, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedDirection,
-            (IN ISession* piSession, IN IMS_UINT32 eMediaType), (override));
+            (IN const ISession* piSession, IN IMS_UINT32 eMediaType), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedQuality,
-            (IN ISession* piSession, IN IMS_UINT32 eMediaType), (override));
+            (IN const ISession* piSession, IN IMS_UINT32 eMediaType), (override));
     MOCK_METHOD(CallType, GetNegotiatedCallType, (IN ISession * piSession), (override));
     MOCK_METHOD(PemType, GetPemType, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));

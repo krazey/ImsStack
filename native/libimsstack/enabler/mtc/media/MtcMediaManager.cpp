@@ -158,6 +158,18 @@ PUBLIC VIRTUAL void MtcMediaManager::SetMediaInfo(IN const MediaInfo& objInfo)
     *m_pMediaInfo = objInfo;
 }
 
+PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaInfo(IN const ISession* piSession)
+{
+    MediaInfo objInfo(GetNegotiatedDirection(piSession, MEDIATYPE_AUDIO),
+            GetNegotiatedDirection(piSession, MEDIATYPE_VIDEO),
+            GetNegotiatedDirection(piSession, MEDIATYPE_TEXT),
+            GetNegotiatedQuality(piSession, MEDIATYPE_AUDIO),
+            GetNegotiatedQuality(piSession, MEDIATYPE_VIDEO),
+            MtcMediaUtil::GetGttModeFromTextQuality(
+                    GetNegotiatedQuality(piSession, MEDIATYPE_TEXT)));
+    SetMediaInfo(objInfo);
+}
+
 PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaDirection(
         IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir)
 {
@@ -491,7 +503,7 @@ PUBLIC VIRTUAL NegotiationState MtcMediaManager::GetNegotiationState(IN ISession
 }
 
 PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(
-        IN ISession* piSession, IN IMS_UINT32 eMediaType)
+        IN const ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     if (!m_piMediaSession)
     {
@@ -511,7 +523,7 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(
 }
 
 PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedQuality(
-        IN ISession* piSession, IN IMS_UINT32 eMediaType)
+        IN const ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     MEDIA_CONTENT_TYPE eContent = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType);
     IMS_SINT32 eQuality =
