@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -308,6 +309,26 @@ public class MtcCall extends Call implements ConferenceTracker {
     }
 
     /**
+     * A listener interface for handling emergency call failures.
+     *
+     * This listener is designed to be implemented by a module
+     * that needs to react to a specific type of emergency call failure,
+     * such as when an already-opened service unexpectedly closes.
+     */
+    public interface IEmergencyCallFailureListener {
+        /**
+         * Called when an emergency call fails because the already-opened service was closed.
+         *
+         * This method signals to the listener that the failure was due to a loss of a
+         * pre-existing emergency registration. Upon this event, the listener is expected
+         * to perform a recovery action, such as re-opening the emergency service and
+         * initiating a retry.
+         * @return true if the service reopen process was started successfully, false otherwise.
+         */
+        boolean onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+    }
+
+    /**
      * Listener interface for audio session callback
      */
     protected class AudioSessionListener extends MtcMediaSession.AudioListener {
@@ -421,6 +442,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     private final MtcConference mConference;
     protected MtcMediaSession mMediaSession;
     private MtcCall.Listener mListener = null;
+    private MtcCall.IEmergencyCallFailureListener mEmergencyCallFailureListener = null;
     protected MtcCall.AudioSessionListener mAudioListener = null;
     protected MtcCall.TextSessionListener mTextListener = null;
     private MtcCallInfo mCallInfo = null;
@@ -430,6 +452,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     /** It will be controlled when audio is in sendrecv & video direction is only changed */
     private int mVideoState = ONE_WAY_VIDEO_NONE;
     private MtcJniProxy mMtcJniProxy;
+    private boolean mUsingAlreadyOpenedEmergencyService = false;
 
     boolean mJniCreated;
 
@@ -852,10 +875,19 @@ public class MtcCall extends Call implements ConferenceTracker {
     }
 
     /**
+     * Sets the listener to be notified when an emergency call fails.
+     */
+    public void setEmergencyCallFailureListener(
+            @Nullable MtcCall.IEmergencyCallFailureListener listener) {
+        mEmergencyCallFailureListener = listener;
+    }
+
+    /**
      * Creates an outgoing call before it starts.
      */
-    public void open(int serviceType, int emergencyType, boolean offline,
-            boolean ussi) {
+    public void open(int serviceType, int emergencyType, boolean offline, boolean ussi,
+            boolean usingAlreadyOpenedEmergencyService) {
+        mUsingAlreadyOpenedEmergencyService = usingAlreadyOpenedEmergencyService;
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcCall.OPEN);
@@ -1604,6 +1636,17 @@ public class MtcCall extends Call implements ConferenceTracker {
         parcelText.recycle();
     }
 
+    private boolean isCallFailedByAlreadyOpenedServiceClosed(CallReasonInfo callReasonInfo) {
+        if (mUsingAlreadyOpenedEmergencyService
+                && callReasonInfo.mCode == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                && CallReasonInfo.EXTRA_MESSAGE_AOS_DISCONNECTED.equals(
+                        callReasonInfo.mExtraMessage)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private static void closeInternal(final MtcCall call) {
         if (call == null) {
             return;
@@ -2070,6 +2113,16 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         private void onStartFailed(CallReasonInfo callReasonInfo) {
             logi("START_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
+
+            if (isCallFailedByAlreadyOpenedServiceClosed(callReasonInfo)) {
+                if (mEmergencyCallFailureListener != null && mEmergencyCallFailureListener
+                        .onEmergencyCallFailedByAlreadyOpenedServiceClosed()) {
+                    mUsingAlreadyOpenedEmergencyService = false;
+                    Message.obtain(mHandler, MSG_CLEAR_INTERFACE,
+                            Long.valueOf(getNativeCallId())).sendToTarget();
+                    return;
+                }
+            }
 
             setCallState(CallTracker.CALL_STATE_IDLE);
 

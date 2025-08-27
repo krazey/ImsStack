@@ -314,7 +314,7 @@ public class ConferenceProxy {
 
         if (confCall != null) {
             confCall.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE,
-                    false, false);
+                    false, false, false);
         }
 
         return confCall;

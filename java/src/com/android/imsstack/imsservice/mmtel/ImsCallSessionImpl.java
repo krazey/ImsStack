@@ -27,6 +27,7 @@ import android.telecom.Connection.RttModifyStatus;
 import android.telephony.CallQuality;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
@@ -103,6 +104,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
     private final MtcCallListenerProxy mListenerProxy = new MtcCallListenerProxy();
+    private final EmergencyCallFailureListener mEmergencyCallFailureListener =
+            new EmergencyCallFailureListener();
     private final MtcConferenceListenerProxy mConferenceListenerProxy
             = new MtcConferenceListenerProxy();
     private final CallTracker mCT;
@@ -186,6 +189,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         if (call != null) {
             call.setListener(mListenerProxy);
             MtcCall.setListener(call, mConferenceListenerProxy);
+            call.setEmergencyCallFailureListener(mEmergencyCallFailureListener);
         }
 
         mVideoCallSession = videoCallSession == null
@@ -281,6 +285,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             mCall.setListener(null);
+            mCall.setEmergencyCallFailureListener(null);
             mCall.close();
             mCall = null;
         }
@@ -1402,6 +1407,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     @VisibleForTesting
     protected MtcCallListenerProxy getCallListenerProxy() {
         return mListenerProxy;
+    }
+
+    @VisibleForTesting
+    protected MtcCall.IEmergencyCallFailureListener getEmergencyCallFailureListener() {
+        return mEmergencyCallFailureListener;
     }
 
     @VisibleForTesting
@@ -2772,6 +2782,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
         }
 
+        private void start() {
+            start(mCallee);
+        }
+
         private int startCall(MtcServiceState ss) {
             if (ss == null) {
                 return RESULT_NOK;
@@ -3317,6 +3331,30 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return EApnType.EMERGENCY.getType();
         } else {
             return EApnType.IMS.getType();
+        }
+    }
+
+    protected class EmergencyCallFailureListener implements MtcCall.IEmergencyCallFailureListener {
+        @Override
+        public boolean onEmergencyCallFailedByAlreadyOpenedServiceClosed() {
+            if (mMoPendingCall == null) {
+                log("There is no MoPendingCall.");
+                return false;
+            }
+
+            IServiceStateTracker sst = mCallContext.getServiceStateTracker();
+            if (sst.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)) {
+                log("The emergency service is already registered.");
+                return false;
+            }
+
+            ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
+            callApp.getCallManager().getMtcApp().openEmergencyService(
+                    mCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
+            setState(ImsCallSessionImplBase.State.IDLE);
+            mMoPendingCall.start();
+
+            return true;
         }
     }
 

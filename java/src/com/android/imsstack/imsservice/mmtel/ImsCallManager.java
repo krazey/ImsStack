@@ -199,7 +199,8 @@ public class ImsCallManager {
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
         if (!call.isEmergencyCall()) {
-            call.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE, offline, ussi);
+            call.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE, offline, ussi,
+                    false);
         }
 
         return callSession;

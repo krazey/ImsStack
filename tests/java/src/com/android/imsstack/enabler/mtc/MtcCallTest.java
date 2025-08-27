@@ -76,6 +76,7 @@ public class MtcCallTest extends ImsStackTest {
     @Mock private MtcConference mMtcConference;
     @Mock private MtcMediaSession mMtcMediaSession;
     @Mock private MtcCall.Listener mListener;
+    @Mock private MtcCall.IEmergencyCallFailureListener mEmergencyCallFailureListener;
     @Mock private CallInfo mCallInfo;
     @Mock private MediaInfo mMediaInfo;
     @Mock private MtcJniProxy mMtcJniProxy;
@@ -232,7 +233,7 @@ public class MtcCallTest extends ImsStackTest {
         parcel.writeInt(randomGenerator.ints(MediaInfo.GTTMODE_FULL,
                 MediaInfo.GTTMODE_VCO + 1).findFirst().getAsInt());
 
-        parcel.writeInt(3);
+        parcel.writeInt(2);
         parcel.writeInt(SuppInfo.SUPP_TYPE_CALLERID);
         parcel.writeString("");
         parcel.writeInt(randomGenerator.ints(SuppInfo.CALLERID_NETWORK,
@@ -254,6 +255,41 @@ public class MtcCallTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(command);
         parcel.writeInt(send);
+        parcel.setDataPosition(0);
+        mJNIImsListenerCaptor.getValue().onMessage(parcel);
+        processAllMessages();
+        parcel.recycle();
+    }
+
+    private void sendMessageToJniListener(int command, long longValue, int intValue) {
+        mTestMtcCallWithMockJniProxy.createNativeCallObject();
+        mTestMtcCallWithMockJniProxy.setListener(mListener);
+
+        verify(mMtcJniProxy, atLeastOnce()).getJniInterfaceAndSetListener(anyInt(), anyInt(),
+                mJNIImsListenerCaptor.capture());
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(command);
+        fillInfo(parcel);
+        parcel.writeLong(longValue);
+        parcel.writeInt(intValue);
+        parcel.setDataPosition(0);
+        mJNIImsListenerCaptor.getValue().onMessage(parcel);
+        processAllMessages();
+        parcel.recycle();
+    }
+
+    private void sendMessageToJniListener(int command, CallReasonInfo callReasonInfo) {
+        mTestMtcCallWithMockJniProxy.createNativeCallObject();
+        mTestMtcCallWithMockJniProxy.setListener(mListener);
+        mTestMtcCallWithMockJniProxy.setEmergencyCallFailureListener(mEmergencyCallFailureListener);
+
+        verify(mMtcJniProxy, atLeastOnce()).getJniInterfaceAndSetListener(anyInt(), anyInt(),
+                mJNIImsListenerCaptor.capture());
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(command);
+        callReasonInfo.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         mJNIImsListenerCaptor.getValue().onMessage(parcel);
         processAllMessages();
@@ -480,14 +516,14 @@ public class MtcCallTest extends ImsStackTest {
     @Test
     public void testOpen() {
         mTestMtcCall.open(IUMtcCall.SERVICETYPE_EMERGENCY,
-                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true);
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, false);
         processAllMessages();
         assertEquals(mInvalidCommand, mCommand);
 
         mTestMtcCall.createNativeCallObject();
 
         mTestMtcCall.open(IUMtcCall.SERVICETYPE_EMERGENCY,
-                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true);
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, false);
         processAllMessages();
 
         assertEquals(IUMtcCall.OPEN, mCommand);
@@ -866,6 +902,50 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testJniListenerStartFailedByAlreadyOpenedServiceClosed() {
+        mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, true);
+        mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                    CallReasonInfo.EXTRA_CODE_CALL_RETRY_EMERGENCY,
+                    CallReasonInfo.EXTRA_MESSAGE_AOS_DISCONNECTED);
+        sendMessageToJniListener(IUMtcCall.START_FAILED, callReasonInfo);
+
+        verify(mEmergencyCallFailureListener, times(1))
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+    }
+
+    @Test
+    public void testJniListenerStartFailedWhenNewServiceClosed() {
+        mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, false);
+        mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                    CallReasonInfo.EXTRA_CODE_CALL_RETRY_EMERGENCY,
+                    CallReasonInfo.EXTRA_MESSAGE_AOS_DISCONNECTED);
+        sendMessageToJniListener(IUMtcCall.START_FAILED, callReasonInfo);
+
+        verify(mEmergencyCallFailureListener, times(0))
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+    }
+
+    @Test
+    public void testJniListenerStartFailedByNotServiceClosed() {
+        mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, true);
+        mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                    CallReasonInfo.EXTRA_CODE_CALL_RETRY_EMERGENCY, "");
+        sendMessageToJniListener(IUMtcCall.START_FAILED, callReasonInfo);
+
+        verify(mEmergencyCallFailureListener, times(0))
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+    }
+
+    @Test
     public void testJniListenerInitiating() {
         sendMessageToJniListener(IUMtcCall.INITIATING);
 
@@ -1053,7 +1133,7 @@ public class MtcCallTest extends ImsStackTest {
 
     @Test
     public void testJniListenerReplacedBy() {
-        sendMessageToJniListener(IUMtcCall.REPLACED_BY);
+        sendMessageToJniListener(IUMtcCall.REPLACED_BY, 0, IUMtcCall.REPLACED_BY_TYPE_ECT);
 
         verify(mListener, times(1)).onCallTransferReceived(eq(mTestMtcCallWithMockJniProxy), any(),
                 any(), any(), any());

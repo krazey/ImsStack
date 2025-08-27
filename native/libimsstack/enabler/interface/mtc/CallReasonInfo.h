@@ -214,6 +214,9 @@ enum
     EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED = 9,
 };
 
+// used internally only between native MTC and java MTC
+const AString EXTRA_MESSAGE_AOS_DISCONNECTED = "AOS_DISCONNECTED";
+
 struct CallReasonInfo
 {
 public:

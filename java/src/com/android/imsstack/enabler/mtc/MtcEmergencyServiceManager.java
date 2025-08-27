@@ -177,7 +177,7 @@ public class MtcEmergencyServiceManager {
 
         if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)) {
             onEsOpened(emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
-                    ? IUMtcCall.SERVICETYPE_NORMAL : IUMtcCall.SERVICETYPE_EMERGENCY);
+                    ? IUMtcCall.SERVICETYPE_NORMAL : IUMtcCall.SERVICETYPE_EMERGENCY, true);
             return;
         }
 
@@ -210,7 +210,7 @@ public class MtcEmergencyServiceManager {
                 onEsOpening();
                 break;
             case IUMtcService.ES_OPENED:
-                onEsOpened(serviceType);
+                onEsOpened(serviceType, false);
                 break;
             case IUMtcService.ES_UNAVAILABLE:
                 onEsUnavailable();
@@ -229,8 +229,9 @@ public class MtcEmergencyServiceManager {
         log("onEsOpening");
     }
 
-    private void onEsOpened(int serviceType) {
-        log("onEsOpened :: serviceType=" + serviceType);
+    private void onEsOpened(int serviceType, boolean usingAlreadyOpenedEmergencyService) {
+        log("onEsOpened :: serviceType=" + serviceType + ", usingAlreadyOpenedEmergencyService="
+                + usingAlreadyOpenedEmergencyService);
         mIsStopEmergencyServiceRequired = false;
 
         if (mCall == null) {
@@ -238,7 +239,7 @@ public class MtcEmergencyServiceManager {
         }
 
         mCall.createNativeCallObject();
-        mCall.open(serviceType, mEmergencyType, false, false);
+        mCall.open(serviceType, mEmergencyType, false, false, usingAlreadyOpenedEmergencyService);
     }
 
     private void onEsUnavailable() {

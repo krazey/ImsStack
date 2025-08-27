@@ -34,6 +34,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.telecom.Connection.RttModifyStatus;
 import android.telephony.PreciseCallState;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsReasonInfo;
@@ -1684,6 +1685,26 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testGetImsConferenceState() {
         assertNotNull(mImsCallSession.getImsConferenceState());
+    }
+
+    @Test
+    public void testOnEmergencyCallFailedByAlreadyOpenedServiceClosed() {
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+        when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
+        when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
+        when(mMockImsCallManager.getMtcApp()).thenReturn(mMockMtcApp);
+        when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY))
+                .thenReturn(false);
+
+        mImsCallSession.getEmergencyCallFailureListener()
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+
+        verify(mMockMtcApp).openEmergencyService(mMockMtcCall,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
     }
 
     private TestImsCallSessionImpl createImsCallSession(String callId) {

@@ -151,6 +151,18 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     }
 
     @Test
+    public void testOpenEmergencyServiceWhenAlreadyRegistered() {
+        mTestMtcEmergencyServiceManager.setNativeObject(1);
+        when(mServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY))
+                .thenReturn(true);
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+        processAllMessages();
+        verify(mMockMtcCall, times(1)).open(IUMtcCall.SERVICETYPE_EMERGENCY,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, false, false, true);
+    }
+
+    @Test
     public void testOpenEmergencyServiceOverWiFi() {
         when(mMockMtcCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false))
                 .thenReturn(true);
@@ -211,7 +223,8 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         mTestMtcEmergencyServiceManager.onEmergencyServiceStateChanged(
                 IUMtcService.ES_OPENED, 0, 0);
         verify(mMockMtcCall, times(1)).createNativeCallObject();
-        verify(mMockMtcCall, times(1)).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall, times(1)).open(anyInt(), anyInt(), anyBoolean(), anyBoolean(),
+                anyBoolean());
     }
 
     @Test

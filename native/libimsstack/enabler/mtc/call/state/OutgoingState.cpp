@@ -696,7 +696,8 @@ PROTECTED VIRTUAL const CallReasonInfo OutgoingState::GetCallReasonInfoByAosDisc
 {
     if (m_objContext.GetCallInfo().IsEmergency())
     {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY,
+                EXTRA_MESSAGE_AOS_DISCONNECTED);
     }
 
     return MtcCallState::GetCallReasonInfoByAosDisconnection(nAosReason, nDataFailureReason);

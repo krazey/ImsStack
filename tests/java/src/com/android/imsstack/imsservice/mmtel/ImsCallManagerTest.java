@@ -204,7 +204,8 @@ public class ImsCallManagerTest {
         verify(mMockCallContext).getECallStateTracker();
         verify(mMockMtcApp).createMtcCallAndAttach((MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_MO));
         verify(mMockMtcCall).isEmergencyCall();
-        verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean(),
+                anyBoolean());
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcCall);
 
@@ -215,7 +216,7 @@ public class ImsCallManagerTest {
         when(mMockMtcCall.isEmergencyCall()).thenReturn(false);
         result = mImsCallManager.createSession(profile);
         verify(mMockMtcCall).isEmergencyCall();
-        verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcCall);
 
@@ -270,7 +271,7 @@ public class ImsCallManagerTest {
         verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         verify(mMockCallContext).getSrvccStateTracker();
         verify(mMockMtcCall).isEmergencyCall();
-        verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         Assert.assertNotNull(result);
 
         // case2 Normal call voice and rtt

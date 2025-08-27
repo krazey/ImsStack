@@ -161,6 +161,9 @@ public class CallReasonInfo implements Parcelable {
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_488 = 2;
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_606 = 3;
 
+    // used internally only between native MTC and java MTC
+    public static final String EXTRA_MESSAGE_AOS_DISCONNECTED = "AOS_DISCONNECTED";
+
     public int mCode;
     public int mExtraCode;
     public String mExtraMessage;

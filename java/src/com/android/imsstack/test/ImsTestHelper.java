@@ -277,7 +277,7 @@ public final class ImsTestHelper {
                 // 1 : serviceType, 2 : emergencyType, 3 : offline, 4 : ussi
                 ImsLog.d("sendMtcTestCommand :: open call");
                 sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
-                sTempCall.open(extras[1], extras[2], extras[3] != 0, extras[4] != 0);
+                sTempCall.open(extras[1], extras[2], extras[3] != 0, extras[4] != 0, false);
                 return;
             } else if (command == 102) {
                 ImsLog.d("sendMtcTestCommand :: start call");
