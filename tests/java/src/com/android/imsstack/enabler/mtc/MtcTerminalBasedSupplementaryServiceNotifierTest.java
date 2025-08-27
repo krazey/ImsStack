@@ -53,6 +53,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
@@ -188,5 +189,66 @@ public class MtcTerminalBasedSupplementaryServiceNotifierTest extends ImsStackTe
         verify(mMockMtcAppHandler, never()).sendMessage(any());
         assertTrue(mTbSscSender.isOutgoingCallBarringActivated(
                 IUMtcCall.CALLTYPE_VOIP, "+8279281327"));
+    }
+
+    @Test
+    public void testOnSupplementaryServiceConfigurationChanged_withInvalidObjectType()
+            throws Exception {
+        // This test verifies that the handler gracefully handles messages where the object
+        // is not a List, which is an edge case the new code explicitly checks for.
+
+        // Setup: Initialize the notifier and set a mock handler to capture notifications.
+        mTbSscSender.setHandler(mMockMtcAppHandler);
+
+        // Action: Send a message with an invalid object type (a String instead of a List)
+        // to the internal handler using a test-only helper method. This simulates an
+        // unexpected message format.
+        mTbSscSender.sendMessageToTbssHandler(
+                MtcTerminalBasedSupplementaryServiceNotifier.MSG_ON_TBTIR_TBCB_CHANGED,
+                "This is not a list");
+        processAllMessages();
+
+        // Verification: Ensure that no notification was sent to the native layer, as the
+        // invalid message should be ignored.
+        verify(mMockMtcAppHandler, never()).sendMessage(any());
+    }
+
+    @Test
+    public void testOnSupplementaryServiceConfigurationChanged_withMixedList() throws Exception {
+        // This test verifies that the handler can process a list containing a mix of valid
+        // and invalid object types, correctly filtering out the invalid ones. This validates
+        // the type check inside the loop.
+
+        // Setup: Initialize the notifier and set a mock handler.
+        mTbSscSender.setHandler(mMockMtcAppHandler);
+
+        // Action: Create a raw list with mixed object types and send it to the internal handler
+        // using a test-only helper method.
+        List<Object> mixedList = new ArrayList<>();
+        mixedList.add(new TirData(SupplementaryServiceConfiguration.STATUS_ENABLED)); // Valid item
+        mixedList.add("Invalid item"); // Invalid item
+
+        mTbSscSender.sendMessageToTbssHandler(
+                MtcTerminalBasedSupplementaryServiceNotifier.MSG_ON_TBTIR_TBCB_CHANGED,
+                mixedList);
+        processAllMessages();
+
+        // Verification:
+        // Ensure that a notification was sent, but only once, for the valid item in the list.
+        verify(mMockMtcAppHandler, times(1)).sendMessage(mMessageCaptor.capture());
+
+        // Inspect the captured message to confirm it contains the correct data from the valid item.
+        Message capturedMessage = mMessageCaptor.getValue();
+        assertNotNull(capturedMessage);
+        assertEquals(MtcApp.MSG_SEND_NOTIFICATION, capturedMessage.what);
+
+        Parcel parcel = (Parcel) capturedMessage.obj;
+        parcel.setDataPosition(0);
+        // Check that the parcel contains the expected PERMANENT_SUPP_CHANGED code.
+        assertEquals(IUMtcService.PERMANENT_SUPP_CHANGED, parcel.readInt());
+        // Check that there is 1 service update in the parcel.
+        assertEquals(1, parcel.readInt());
+        // Check that the service type is the one from the valid TirData object.
+        assertEquals(PermanentSuppInfo.SUPP_TYPE_TB_TIR, parcel.readInt());
     }
 }
