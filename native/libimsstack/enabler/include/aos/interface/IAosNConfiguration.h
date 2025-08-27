@@ -873,7 +873,7 @@ public:
      *        Possible values are,
      *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_DEFAULT
      *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NONE
-     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NO_IMSI
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_AUTHORIZED_IMPU
      *
      * @return IMS_SINT32 Return the policy of setting the user info
      * @see {@code ims.contact_user_info_policy_for_non_reg_message_int}

@@ -772,6 +772,33 @@ AosNetworkType AosUtil::GetAosNetworkType(IN IMS_UINT32 nNetworkType) const
 }
 
 PUBLIC
+void AosUtil::GetUserInfo(IN const AString& strSipAddress, OUT AString& strUserInfo)
+{
+    strUserInfo = AString::ConstNull();
+    if (strSipAddress.GetLength() == 0)
+    {
+        return;
+    }
+
+    SipAddress objSipAddress;
+    if (!objSipAddress.Create(strSipAddress))
+    {
+        return;
+    }
+
+    if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips())
+    {
+        strUserInfo = objSipAddress.GetUser();
+    }
+    else if (objSipAddress.IsSchemeTel())
+    {
+        strUserInfo = objSipAddress.GetHost();
+    }
+
+    IMS_TRACE_D("GetUserInfo :: %s", strUserInfo.GetStr(), 0, 0);
+}
+
+PUBLIC
 void AosUtil::SetISipConfigV(IN ISipConfigV* piSipConfigV)
 {
     m_piSipConfigV = piSipConfigV;

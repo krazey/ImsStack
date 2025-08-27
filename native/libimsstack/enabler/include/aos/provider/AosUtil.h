@@ -107,6 +107,8 @@ public:
 
     AosNetworkType GetAosNetworkType(IN IMS_UINT32 nNetworkType) const;
 
+    void GetUserInfo(IN const AString& strSipAddress, OUT AString& strUserInfo);
+
     // Test
     void SetISipConfigV(IN ISipConfigV* piSipConfigV);
     void SetWifiTest(IN IMS_BOOL bEnabled);
