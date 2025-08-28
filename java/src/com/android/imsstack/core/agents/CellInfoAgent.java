@@ -341,7 +341,7 @@ public class CellInfoAgent implements CellInfoInterface {
 
         // If NR is not supported, then remove the updated access network type
         // because NR cell information will not be used by the ImsStack.
-        if (!CapabilityConfigs.isVoNrEnabled(mSlotId)) {
+        if (!CapabilityConfigs.isNgranSupported(mSlotId)) {
             updatedAccessNetworkTypes.remove(Integer.valueOf(AccessNetworkType.NGRAN));
         }
 

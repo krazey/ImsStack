@@ -16,6 +16,7 @@
 
 package com.android.imsstack.core;
 
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -113,27 +114,27 @@ public final class CapabilityConfigs {
     }
 
     /**
-     * Checks if the carrier supports VoNR or not.
+     * Checks if the carrier supports NGRAN or not for IMS.
      *
      * @param slotId The slot-id to be checked.
-     * @return {@code true} if the carrier supports VoNR, {@code false} otherwise.
+     * @return {@code true} if the carrier supports NGRAN, {@code false} otherwise.
      */
-    public static boolean isVoNrEnabled(int slotId) {
+    public static boolean isNgranSupported(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
 
         if (cc == null) {
             return false;
         }
 
-        int[] nrAvailabilities = cc.getIntArray(
-                CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY);
+        int[] supportedRats = cc.getIntArray(
+                CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
 
-        if (nrAvailabilities == null) {
+        if (supportedRats == null) {
             return false;
         }
 
-        return Arrays.stream(nrAvailabilities)
-                .anyMatch(nra -> nra == CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA);
+        return Arrays.stream(supportedRats)
+                .anyMatch(sr -> sr == AccessNetworkConstants.AccessNetworkType.NGRAN);
     }
 
     /**
