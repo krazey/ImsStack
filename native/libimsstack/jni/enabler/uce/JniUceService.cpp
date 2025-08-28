@@ -234,7 +234,6 @@ void JniUceService::SendOptionsRespCmd(IUceJni* pJniUce, const Parcel& pParcel)
 {
     IMS_TRACE_D("SendOptionsRespCmd", 0, 0, 0);
 
-    // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 key = pParcel.readInt32();
     IMS_SINT32 responseCode = pParcel.readInt32();
 
