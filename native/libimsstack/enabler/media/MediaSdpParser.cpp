@@ -16,6 +16,7 @@
 
 #include "ServiceTrace.h"
 #include "MediaSdpParser.h"
+#include "MediaProfileFactory.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -244,4 +245,42 @@ IMS_BOOL MediaSdpParser::ParsePcfg(
 
     IMS_TRACE_I("ParsePcfg() - media[%d]", m_eType, 0, 0);
     return IMS_TRUE;
+}
+
+PROTECTED
+void MediaSdpParser::ParsePayloadTypeNumber(
+        IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "ParsePayloadTypeNumber(): invalid arguments", 0, 0, 0);
+        return;
+    }
+
+    const SdpMedia* pSdpMedia = pDescriptor->GetMediaDescriptionEx();
+    if (pSdpMedia == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "ParsePayloadTypeNumber(): SdpMedia is null", 0, 0, 0);
+        return;
+    }
+
+    const AStringArray& formats = pSdpMedia->GetFormats();
+    IMS_TRACE_I("ParsePayloadTypeNumber(): format size[%d]", formats.GetCount(), 0, 0);
+
+    for (IMS_SINT32 i = 0; i < formats.GetCount(); ++i)
+    {
+        AString strPayload = formats.GetElementAt(i);
+        IMS_SINT32 nPayloadNum = strPayload.ToInt32();
+
+        MediaBaseProfile::BasePayload* pPayload =
+                MediaProfileFactory::GetInstance()->CreatePayload(m_eType);
+        if (pPayload == IMS_NULL)
+        {
+            continue;
+        }
+
+        pPayload->GetRtpMap().SetPayloadNumber(nPayloadNum);
+        IMS_TRACE_I("ParsePayloadTypeNumber(): Parsed payload type number[%d]", nPayloadNum, 0, 0);
+        pProfile->AddPayload(std::shared_ptr<MediaBaseProfile::BasePayload>(pPayload));
+    }
 }

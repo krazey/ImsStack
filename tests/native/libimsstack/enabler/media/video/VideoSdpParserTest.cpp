@@ -20,9 +20,16 @@
 #include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "video/VideoDef.h"
-#include "video/VideoSdpParser.h"
 #include "video/VideoProfile.h"
+#include "video/VideoSdpParser.h"
+#include "SdpMedia.h"
+#include "core/media/MockIMediaDescriptor.h"
+#include "SdpBandwidth.h"
+#include "core/MockISessionDescriptor.h"
 
+using ::testing::_;
+using ::testing::An;
+using ::testing::Return;
 using ::testing::ReturnRef;
 
 class VideoSdpParserTest : public VideoSdpParser, public ::testing::Test
@@ -30,9 +37,10 @@ class VideoSdpParserTest : public VideoSdpParser, public ::testing::Test
 protected:
     std::unique_ptr<VideoProfile> m_pProfile;
     MockIMediaDescriptor m_objMockMediaDescriptor;
+    std::unique_ptr<VideoSdpParser> mVideoSdpParser;
 
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp() override { mVideoSdpParser = std::make_unique<VideoSdpParser>(); }
+    void TearDown() override { mVideoSdpParser.reset(); }
 };
 
 // Test case for parsing resolution from 'imageattr'
@@ -210,4 +218,45 @@ TEST_F(VideoSdpParserTest, ParsePayloads_InvalidPayloadType)
 
     // Expect no payloads to be added because the payload type is not dynamic.
     EXPECT_EQ(profile.GetPayloadList().GetSize(), 0);
+}
+
+TEST_F(VideoSdpParserTest, testParsePayloadTypeNumber)
+{
+    MockISessionDescriptor sessionDescriptor;
+    MockIMediaDescriptor mediaDescriptor;
+    VideoProfile videoProfile;
+
+    SdpMedia sdpMedia;
+    AStringArray formats;
+    formats.AddElement("96");
+    formats.AddElement("97");
+    sdpMedia.SetFormats(formats);
+
+    ImsList<SdpMediaFormat*> emptyMediaFormats;
+
+    ON_CALL(mediaDescriptor, GetMediaDescriptionEx()).WillByDefault(Return(&sdpMedia));
+    ON_CALL(mediaDescriptor, GetMediaFormats()).WillByDefault(ReturnRef(emptyMediaFormats));
+    ON_CALL(mediaDescriptor, GetAttributes(_, _)).WillByDefault(Return(ImsList<AString>()));
+    ON_CALL(mediaDescriptor, GetAttributeInt(_, _))
+            .WillByDefault(Return(IMediaDescriptor::INVALID_VALUE));
+    ON_CALL(mediaDescriptor, GetRemoteAddress()).WillByDefault(Return(IpAddress::NONE));
+    ON_CALL(mediaDescriptor, GetRemotePort()).WillByDefault(Return(0));
+    ON_CALL(mediaDescriptor, GetBandwidth(An<IMS_SINT32>(), _)).WillByDefault(Return(0));
+    ON_CALL(mediaDescriptor, GetDirection()).WillByDefault(Return(MEDIA_DIRECTION_INVALID));
+    ON_CALL(sessionDescriptor, GetDirection()).WillByDefault(Return(MEDIA_DIRECTION_INVALID));
+
+    IMS_BOOL result = mVideoSdpParser->Parse(&sessionDescriptor, &mediaDescriptor, &videoProfile);
+
+    ASSERT_TRUE(result);
+    ASSERT_EQ(videoProfile.GetPayloadList().GetSize(), 2);
+
+    VideoProfile::Payload* payload1 = videoProfile.GetPayloadAt(0);
+    ASSERT_NE(payload1, nullptr);
+    EXPECT_EQ(payload1->GetRtpMap().GetPayloadNumber(), 96);
+    EXPECT_EQ(payload1->GetFmtp(), nullptr);
+
+    VideoProfile::Payload* payload2 = videoProfile.GetPayloadAt(1);
+    ASSERT_NE(payload2, nullptr);
+    EXPECT_EQ(payload2->GetRtpMap().GetPayloadNumber(), 97);
+    EXPECT_EQ(payload2->GetFmtp(), nullptr);
 }
