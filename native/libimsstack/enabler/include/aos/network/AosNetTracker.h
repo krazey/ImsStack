@@ -135,7 +135,6 @@ protected:
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsWlanEnabled() const;
     IMS_BOOL IsWifiConnected() const;
-    IMS_BOOL IsVonrSupported();
     IMS_BOOL IsRoamingAccessPolicyRequired() const;
 
     void SetDataConnected(IN IMS_BOOL bConnected);

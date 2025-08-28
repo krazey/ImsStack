@@ -169,8 +169,6 @@ TEST_F(AosNetTrackerTest, Init_ImsType)
     EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsSupported()).WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled()).WillOnce(Return(IMS_TRUE));
 
     m_pAosNetTracker->Init();
 
@@ -694,8 +692,6 @@ TEST_F(AosNetTrackerTest, NConfiguration_NotifyConfigChanged)
     EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsSupported()).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled()).WillOnce(Return(IMS_FALSE));
 
     m_pAosNetTracker->SetCnxPolicy(NW_REPORT_SRV_SRV);
     m_pAosNetTracker->SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_FALSE);
