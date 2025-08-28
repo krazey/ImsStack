@@ -461,18 +461,7 @@ void AosNetTracker::InitConfig()
     if (IsCnxTypeEqual(NetworkPolicy::APN_IMS))
     {
         m_nCnxPolicy |= NW_REPORT_SRV_SRV;
-
         InitCnxPolicy(m_piAosNConfig->GetSupportedRats());
-
-        if (m_piAosNConfig->IsSmsOverImsSupported())
-        {
-            InitCnxPolicy(m_piAosNConfig->GetSmsOverImsSupportedRats());
-        }
-
-        if (IsVonrSupported())
-        {
-            m_nCnxPolicy |= NW_REPORT_RADIO_NR;
-        }
 
         if (IsRoamingAccessPolicyRequired())
         {
@@ -520,21 +509,25 @@ void AosNetTracker::InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats)
 {
     for (IMS_UINT32 i = 0; i < objRats.GetSize(); i++)
     {
-        if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)
+        switch (objRats.GetAt(i))
         {
-            m_nCnxPolicy |= NW_REPORT_RADIO_LTE;
-        }
-        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN)
-        {
-            m_nCnxPolicy |= NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA;
-        }
-        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN)
-        {
-            m_nCnxPolicy |= NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE;
-        }
-        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN)
-        {
-            m_nCnxPolicy |= NW_REPORT_RADIO_WLAN;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN:
+                m_nCnxPolicy |= NW_REPORT_RADIO_NR;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN:
+                m_nCnxPolicy |= NW_REPORT_RADIO_LTE;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN:
+                m_nCnxPolicy |= NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN:
+                m_nCnxPolicy |= NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN:
+                m_nCnxPolicy |= NW_REPORT_RADIO_WLAN;
+                break;
+            default:
+                break;
         }
     }
 }
@@ -544,25 +537,25 @@ void AosNetTracker::InitRoamingCnxPolicy(IN ImsVector<IMS_SINT32>& objRoamingRat
 {
     for (IMS_UINT32 i = 0; i < objRoamingRats.GetSize(); i++)
     {
-        if (objRoamingRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN)
+        switch (objRoamingRats.GetAt(i))
         {
-            m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_NR;
-        }
-        else if (objRoamingRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)
-        {
-            m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_LTE;
-        }
-        else if (objRoamingRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN)
-        {
-            m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA;
-        }
-        else if (objRoamingRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN)
-        {
-            m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE;
-        }
-        else if (objRoamingRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN)
-        {
-            m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_WLAN;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN:
+                m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_NR;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN:
+                m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_LTE;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN:
+                m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN:
+                m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE;
+                break;
+            case CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN:
+                m_nCnxPolicyInRoaming |= NW_REPORT_RADIO_WLAN;
+                break;
+            default:
+                break;
         }
     }
 }
@@ -879,12 +872,6 @@ PRIVATE
 IMS_BOOL AosNetTracker::IsWifiConnected() const
 {
     return m_bIsWifiConnected;
-}
-
-PRIVATE
-IMS_BOOL AosNetTracker::IsVonrSupported()
-{
-    return m_piAosNConfig->IsImsOverNrEnabled();
 }
 
 PRIVATE
