@@ -191,7 +191,7 @@ PROTECTED void BaseSession::SetRemoteEndPoint(
     {
         if (!objRemoteAddr.ToString().IsNULL())
         {
-            m_pRtpConfig->setRemoteAddress(android::String8(objRemoteAddr.ToString().GetStr()));
+            m_pRtpConfig->setRemoteAddress(objRemoteAddr.ToString().GetStr());
         }
 
         m_pRtpConfig->setRemotePort(nPort);

@@ -172,7 +172,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
             pVideoConfig->getMaxMtuBytes(), 0);
 
     RtcpConfig objRtcpConfig;
-    objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));
+    objRtcpConfig.setCanonicalName("Canonical_Name");
     objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
 
     if (pNegoProfile->GetBandwidthRs() == 0 && pNegoProfile->GetBandwidthRr() == 0)
@@ -246,13 +246,11 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
     if (pPeerPayload->GetFmtp() != IMS_NULL &&
             !pPeerPayload->GetFmtp()->GetSpropParam().EqualsIgnoreCase(""))
     {
-        pVideoConfig->setCodecSprop(
-                android::String8(pPeerPayload->GetFmtp()->GetSpropParam().GetStr()));
+        pVideoConfig->setCodecSprop(pPeerPayload->GetFmtp()->GetSpropParam().GetStr());
     }
     else if (pNegoPayload->GetFmtp() != IMS_NULL)
     {
-        pVideoConfig->setCodecSprop(
-                android::String8(pNegoPayload->GetFmtp()->GetSpropParam().GetStr()));
+        pVideoConfig->setCodecSprop(pNegoPayload->GetFmtp()->GetSpropParam().GetStr());
     }
 
     pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
@@ -262,7 +260,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
     }
     pVideoConfig->setCameraId(m_nCameraId);
     pVideoConfig->setCameraZoom(m_nCameraZoom);
-    pVideoConfig->setPauseImagePath(android::String8("/image/path"));
+    pVideoConfig->setPauseImagePath("/image/path");
     pVideoConfig->setDeviceOrientationDegree(0);
     pVideoConfig->setCvoValue(pNegoProfile->GetCvoId());
 

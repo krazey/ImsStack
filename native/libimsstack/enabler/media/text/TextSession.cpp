@@ -97,7 +97,7 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
             pTextConfig->getRemoteAddress().c_str(), pTextConfig->getRemotePort(), 0);
 
     RtcpConfig objRtcpConfig;
-    objRtcpConfig.setCanonicalName(android::String8("Canonical_Name")); /** TODO_MEDIA */
+    objRtcpConfig.setCanonicalName("Canonical_Name");
     objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
     objRtcpConfig.setIntervalSec(pNegoProfile->GetRtcpInterval());
     objRtcpConfig.setRtcpXrBlockTypes(0);
