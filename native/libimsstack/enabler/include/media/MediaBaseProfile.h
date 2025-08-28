@@ -118,6 +118,7 @@ public:
         }
 
         virtual ~BasePayload() {}
+        virtual std::shared_ptr<BasePayload> clone() const = 0;
 
         BasePayload& operator=(IN const BasePayload& obj)
         {
@@ -137,12 +138,12 @@ public:
         bool operator!=(IN const BasePayload& obj) const { return !(*this == obj); }
 
         void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
-                IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 m_nChannel = 0)
+                IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 nChannel = 0)
         {
             m_objRtpMap.SetPayloadNumber(payloadNum);
             m_objRtpMap.SetPayloadType(payloadType);
             m_objRtpMap.SetSamplingRate(samplingRate);
-            m_objRtpMap.SetChannel(m_nChannel);
+            m_objRtpMap.SetChannel(nChannel);
         }
 
         inline void SetRtpMap(IN const RtpMap& objRtpMap) { m_objRtpMap = objRtpMap; }
@@ -222,7 +223,7 @@ public:
             m_eDirection(direction),
             m_objCapaNego(CapaNego()),
             m_nNegotiatedPayloadIndex(-1),
-            m_lstPayload(ImsList<BasePayload*>())
+            m_lstPayload(ImsList<std::shared_ptr<BasePayload>>())
     {
     }
 
@@ -239,11 +240,10 @@ public:
             m_objCapaNego(obj.m_objCapaNego),
             m_nNegotiatedPayloadIndex(obj.m_nNegotiatedPayloadIndex)
     {
-        DeletePayloads();
         CopyPayloads(obj.m_lstPayload);
     }
 
-    virtual ~MediaBaseProfile() { DeletePayloads(); }
+    virtual ~MediaBaseProfile() {}
 
     MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
     {
@@ -261,7 +261,7 @@ public:
             m_objCapaNego = obj.m_objCapaNego;
             m_nNegotiatedPayloadIndex = obj.m_nNegotiatedPayloadIndex;
 
-            DeletePayloads();
+            m_lstPayload.Clear();
             CopyPayloads(obj.m_lstPayload);
         }
         return (*this);
@@ -281,12 +281,36 @@ public:
 
     virtual BasePayload* GetPayloadAt(IN IMS_UINT32 nIndex)
     {
-        return (m_lstPayload.GetSize() > nIndex) ? m_lstPayload.GetAt(nIndex) : IMS_NULL;
+        return (m_lstPayload.GetSize() > nIndex) ? m_lstPayload.GetAt(nIndex).get() : IMS_NULL;
     }
 
-    void DeletePayloads();
-    void CopyPayloads(IN ImsList<BasePayload*> payloadList);
-    bool ComparePayloadList(const ImsList<BasePayload*>& payloadList) const;
+    void CopyPayloads(IN const ImsList<std::shared_ptr<BasePayload>>& objPayloadList)
+    {
+        for (IMS_UINT32 i = 0; i < objPayloadList.GetSize(); ++i)
+        {
+            const auto& pPayload = objPayloadList.GetAt(i);
+            if (pPayload)
+            {
+                m_lstPayload.Append(pPayload->clone());
+            }
+        }
+    }
+
+    bool ComparePayloadList(const ImsList<std::shared_ptr<BasePayload>>& objPayloadList) const
+    {
+        if (m_lstPayload.GetSize() != objPayloadList.GetSize())
+            return false;
+
+        for (IMS_UINT32 i = 0; i < m_lstPayload.GetSize(); ++i)
+        {
+            if (*(m_lstPayload.GetAt(i).get()) != *(objPayloadList.GetAt(i).get()))
+                return false;
+        }
+
+        return true;
+    }
+
+    void DeletePayloads() { m_lstPayload.Clear(); }
 
     inline void SetIpAddress(IN const IpAddress objIpAddress) { m_objIpAddress = objIpAddress; }
     inline IpAddress& GetIpAddress() { return m_objIpAddress; }
@@ -318,7 +342,8 @@ public:
         m_nNegotiatedPayloadIndex = nNegotiatedPayloadIndex;
     }
     inline IMS_SINT32 GetNegotiatedPayloadIndex() { return m_nNegotiatedPayloadIndex; }
-    inline ImsList<BasePayload*>& GetPayloadList() { return m_lstPayload; }
+    inline ImsList<std::shared_ptr<BasePayload>>& GetPayloadList() { return m_lstPayload; }
+    inline void AddPayload(std::shared_ptr<BasePayload> pPayload) { m_lstPayload.Append(pPayload); }
 
 private:
     IpAddress m_objIpAddress;
@@ -332,7 +357,7 @@ private:
     MEDIA_DIRECTION m_eDirection;
     CapaNego m_objCapaNego;
     IMS_SINT32 m_nNegotiatedPayloadIndex;
-    ImsList<BasePayload*> m_lstPayload;
+    ImsList<std::shared_ptr<BasePayload>> m_lstPayload;
 };
 
 #endif

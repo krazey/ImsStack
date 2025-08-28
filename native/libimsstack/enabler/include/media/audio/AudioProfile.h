@@ -515,6 +515,11 @@ public:
 
         virtual ~Payload() override {}
 
+        std::shared_ptr<BasePayload> clone() const override
+        {
+            return std::make_shared<Payload>(*this);
+        }
+
         bool operator==(IN const Payload& obj) const
         {
             if (!BasePayload::operator==(obj))
@@ -527,29 +532,24 @@ public:
                 return m_pFmtp == obj.m_pFmtp;
             }
 
-            if (*m_pFmtp != *obj.m_pFmtp)
-            {
-                return false;
-            }
-
             if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
                     m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
             {
-                return *std::static_pointer_cast<AmrFmtp>(m_pFmtp) ==
-                        *std::static_pointer_cast<AmrFmtp>(obj.m_pFmtp);
+                return *std::static_pointer_cast<const AmrFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const AmrFmtp>(obj.m_pFmtp);
             }
             else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
             {
-                return *std::static_pointer_cast<EvsFmtp>(m_pFmtp) ==
-                        *std::static_pointer_cast<EvsFmtp>(obj.m_pFmtp);
+                return *std::static_pointer_cast<const EvsFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const EvsFmtp>(obj.m_pFmtp);
             }
             else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
             {
-                return *std::static_pointer_cast<TelephoneEventFmtp>(m_pFmtp) ==
-                        *std::static_pointer_cast<TelephoneEventFmtp>(obj.m_pFmtp);
+                return *std::static_pointer_cast<const TelephoneEventFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const TelephoneEventFmtp>(obj.m_pFmtp);
             }
 
-            return true;
+            return *m_pFmtp == *obj.m_pFmtp;
         }
 
         bool operator!=(IN const Payload& obj) const { return !(*this == obj); }
@@ -709,6 +709,16 @@ public:
     {
         BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
         return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
+    }
+
+    inline void AddPayload(Payload* pPayload)
+    {
+        MediaBaseProfile::AddPayload(std::shared_ptr<Payload>(pPayload));
+    }
+
+    inline void AddPayload(std::shared_ptr<Payload> pPayload)
+    {
+        MediaBaseProfile::AddPayload(pPayload);
     }
 
     inline void SetPtime(IN const IMS_SINT32 nPtime) { m_nPtime = nPtime; }

@@ -134,8 +134,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateNullInputsReturnsFalse)
 TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferReceivedReturnsTrue)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6004);
 
@@ -160,9 +160,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferReceivedReturnsTrue)
 TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(
-            CreateAmrWbPayload(kLocalPayload, 0xFF));  // Local PT kLocalPayload
-    m_pPeerProfile->GetPayloadList().Append(
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));  // Local PT kLocalPayload
+    m_pPeerProfile->AddPayload(
             CreateAmrWbPayload(kPeerPayload, 0xFF));  // Peer PT kPeerPayload (in Answer)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6004);
@@ -188,9 +187,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
 TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(
-            CreateEvsPayload(98, 0x0F, 0xFFF));  // Supports all BW/BR
-    m_pPeerProfile->GetPayloadList().Append(
+    m_pLocalProfile->AddPayload(CreateEvsPayload(98, 0x0F, 0xFFF));  // Supports all BW/BR
+    m_pPeerProfile->AddPayload(
             CreateEvsPayload(101, 0x07, 0x0FF));  // Supports NB/WB/SWB, lower BR set
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6006);
@@ -221,8 +219,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
 TEST_F(AudioProfileNegotiatorTest, NegotiatePcmOfferReceivedReturnsTrue)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreatePcmuPayload(0));
-    m_pPeerProfile->GetPayloadList().Append(CreatePcmuPayload(0));  // PCMU often uses PT 0
+    m_pLocalProfile->AddPayload(CreatePcmuPayload(0));
+    m_pPeerProfile->AddPayload(CreatePcmuPayload(0));  // PCMU often uses PT 0
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6008);
 
@@ -244,14 +242,11 @@ TEST_F(AudioProfileNegotiatorTest, NegotiatePcmOfferReceivedReturnsTrue)
 TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEventMatchingRateAppended)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(
-            CreateAmrWbPayload(kLocalPayload, 0xFF));  // AMR-WB (16k)
-    m_pLocalProfile->GetPayloadList().Append(CreateTelephoneEventPayload(101, 16000));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));  // AMR-WB (16k)
+    m_pLocalProfile->AddPayload(CreateTelephoneEventPayload(101, 16000));
 
-    m_pPeerProfile->GetPayloadList().Append(
-            CreateAmrWbPayload(kPeerPayload, 0xFF));  // Peer AMR-WB (16k)
-    m_pPeerProfile->GetPayloadList().Append(
-            CreateTelephoneEventPayload(106, 16000));  // Peer TE (16k)
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));   // Peer AMR-WB (16k)
+    m_pPeerProfile->AddPayload(CreateTelephoneEventPayload(106, 16000));  // Peer TE (16k)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6010);
 
@@ -275,15 +270,11 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEventMatchingRateAppended)
 TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEvent8kAcceptedAppended)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(
-            CreateAmrWbPayload(kLocalPayload, 0xFF));  // AMR-WB (16k)
-    m_pLocalProfile->GetPayloadList().Append(
-            CreateTelephoneEventPayload(101, 8000));  // Local supports 8k TE
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));  // AMR-WB (16k)
+    m_pLocalProfile->AddPayload(CreateTelephoneEventPayload(101, 8000));   // Local supports 8k TE
 
-    m_pPeerProfile->GetPayloadList().Append(
-            CreateAmrWbPayload(kPeerPayload, 0xFF));  // Peer AMR-WB (16k)
-    m_pPeerProfile->GetPayloadList().Append(
-            CreateTelephoneEventPayload(106, 8000));  // Peer offers 8k TE
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));  // Peer AMR-WB (16k)
+    m_pPeerProfile->AddPayload(CreateTelephoneEventPayload(106, 8000));  // Peer offers 8k TE
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6012);
 
@@ -308,9 +299,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEvent8kAcceptedAppended)
 TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingAudioPayloadReturnsFalse)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(
-            CreateAmrWbPayload(kLocalPayload, 0xFF));  // Local only AMR-WB
-    m_pPeerProfile->GetPayloadList().Append(CreateEvsPayload(101, 0x07, 0x0FF));  // Peer only EVS
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));  // Local only AMR-WB
+    m_pPeerProfile->AddPayload(CreateEvsPayload(101, 0x07, 0x0FF));        // Peer only EVS
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6014);
 
@@ -329,8 +319,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingAudioPayloadReturnsFalse)
 TEST_F(AudioProfileNegotiatorTest, NegotiateEmptyPeerPayloadListCopiesLocal)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pLocalProfile->GetPayloadList().Append(CreateTelephoneEventPayload(101, 16000));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateTelephoneEventPayload(101, 16000));
     // m_pPeerProfile has empty payload list (default from SetUp)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);  // Direction might still be set
     m_pPeerProfile->SetDataPort(6016);
@@ -354,9 +344,9 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeRe
 {
     // Arrange: Setup compatible EVS profiles (e.g., both Category A)
     // This should succeed on the first pass using CompareEvsBwBrMode.
-    m_pLocalProfile->GetPayloadList().Append(
+    m_pLocalProfile->AddPayload(
             CreateEvsPayload(98, 0x0F, 0xFFF));  // Local: EVS NB/WB/SWB/FB, Full BR
-    m_pPeerProfile->GetPayloadList().Append(
+    m_pPeerProfile->AddPayload(
             CreateEvsPayload(101, 0x07, 0x0FF));  // Peer: EVS NB/WB/SWB, Lower BR set
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6020);
@@ -383,9 +373,9 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeLe
     // Arrange: Setup EVS profiles where CompareEvsBwBrMode fails but Legacy succeeds.
     // Example: Local is Cat B (SWB only), Peer offers Cat A (NB/WB/SWB/FB).
     // CompareEvsBwBrMode (IR.92 rel15) should reject this in MT case initially.
-    m_pLocalProfile->GetPayloadList().Append(
+    m_pLocalProfile->AddPayload(
             CreateEvsPayload(99, 0x04, 0x01F));  // Local: EVS SWB only (Cat B1/B2), ~13.2k BR
-    m_pPeerProfile->GetPayloadList().Append(
+    m_pPeerProfile->AddPayload(
             CreateEvsPayload(102, 0x0F, 0xFFF));  // Peer: EVS NB/WB/SWB/FB (Cat A), Full BR
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6022);
@@ -412,8 +402,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeLe
 TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND);  // Peer offers to send only
     m_pPeerProfile->SetDataPort(6030);
 
@@ -433,8 +423,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive
 TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_RECEIVE);  // Peer offers to receive only
     m_pPeerProfile->SetDataPort(6032);
 
@@ -454,8 +444,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend
 TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionInactiveReturnsTrue)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
     m_pPeerProfile->SetDataPort(0);  // Inactive often has port 0
 
@@ -475,12 +465,12 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionInactiveReturnsTrue)
 TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthRemoteOption)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0x02));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0x02));
     m_pLocalProfile->SetBandwidthRs(300);
     m_pLocalProfile->SetBandwidthRr(300);
     m_pLocalProfile->SetBandwidthAs(32);
 
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0x02));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0x02));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6040);
     m_pPeerProfile->SetBandwidthRs(500);  // Different from local
@@ -506,12 +496,12 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthRemoteOption)
 TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthLocalOption)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0x02));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0x02));
     m_pLocalProfile->SetBandwidthRs(350);  // Use distinct local values
     m_pLocalProfile->SetBandwidthRr(450);
     m_pLocalProfile->SetBandwidthAs(32);
 
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0x02));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0x02));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6042);
     m_pPeerProfile->SetBandwidthRs(500);
@@ -539,8 +529,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthLocalOption)
 TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalActive)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);  // Active direction
     m_pPeerProfile->SetDataPort(6044);
 
@@ -558,8 +548,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalActive)
 TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalHold)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(
             MEDIA_DIRECTION_SEND);  // Not SEND_RECEIVE, triggers hold interval logic
     m_pPeerProfile->SetDataPort(6046);
@@ -578,11 +568,11 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalHold)
 TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalDisabledWhenRsRrZero)
 {
     // Arrange
-    m_pLocalProfile->GetPayloadList().Append(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
     m_pLocalProfile->SetBandwidthRs(300);  // Local has non-zero RS/RR
     m_pLocalProfile->SetBandwidthRr(300);
 
-    m_pPeerProfile->GetPayloadList().Append(CreateAmrWbPayload(kPeerPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0xFF));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(6048);
     m_pPeerProfile->SetBandwidthRs(0);  // Peer has zero RS/RR

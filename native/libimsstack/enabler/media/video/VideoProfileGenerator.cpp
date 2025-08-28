@@ -120,7 +120,7 @@ void VideoProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, I
 
         if (pTempPayload != IMS_NULL)
         {
-            static_cast<VideoProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
+            static_cast<VideoProfile*>(pProfile)->AddPayload(pTempPayload);
         }
     }
 }

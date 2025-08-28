@@ -112,7 +112,7 @@ protected:
         pFmtp->SetVisibleProfileLevelId(IMS_TRUE);
 
         pPayload->SetFmtp(pFmtp);
-        pProfile->GetPayloadList().Append(pPayload);
+        pProfile->AddPayload(pPayload);
         return pPayload;
     }
 
@@ -139,7 +139,7 @@ protected:
         pFmtp->SetVisibleLevel(IMS_TRUE);
 
         pPayload->SetFmtp(pFmtp);
-        pProfile->GetPayloadList().Append(pPayload);
+        pProfile->AddPayload(pPayload);
         return pPayload;
     }
 

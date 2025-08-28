@@ -106,6 +106,11 @@ public:
 
         virtual ~Payload() override {}
 
+        std::shared_ptr<BasePayload> clone() const override
+        {
+            return std::make_shared<Payload>(*this);
+        }
+
         Payload& operator=(IN const Payload& obj)
         {
             if (this != &obj)
@@ -128,7 +133,7 @@ public:
                 return false;
             }
 
-            if (m_pFmtp == nullptr || obj.m_pFmtp == nullptr)
+            if (m_pFmtp == IMS_NULL || obj.m_pFmtp == IMS_NULL)
             {
                 return m_pFmtp == obj.m_pFmtp;
             }
@@ -182,6 +187,16 @@ public:
     {
         BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
         return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
+    }
+
+    inline void AddPayload(Payload* pPayload)
+    {
+        MediaBaseProfile::AddPayload(std::shared_ptr<Payload>(pPayload));
+    }
+
+    inline void AddPayload(std::shared_ptr<Payload> pPayload)
+    {
+        MediaBaseProfile::AddPayload(pPayload);
     }
 
     inline void SetKeepRedundantLevel(IN const IMS_BOOL bKeepRedLevel)

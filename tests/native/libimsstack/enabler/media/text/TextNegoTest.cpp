@@ -86,7 +86,7 @@ protected:
         pT140->SetRtpMap(99, "t140", 1000);
         auto pRedFmtp = std::make_shared<TextProfile::RedFmtp>();
         pT140->SetFmtp(pRedFmtp);
-        m_pBaseProfile->GetPayloadList().Append(pT140);
+        m_pBaseProfile->AddPayload(pT140);
         m_pBaseProfile->SetDataPort(LOCAL_PORT);
 
         ON_CALL(*m_pMockProfileGenerator, Generate(_, _, _, _))
@@ -150,7 +150,7 @@ TEST_F(TextNegoTest, testIsMediaCodecFromSdpSupported)
     pT140->SetFmtp(pRedFmtp);
 
     std::shared_ptr<TextProfile> pProfile = std::make_shared<TextProfile>();
-    pProfile->GetPayloadList().Append(pT140);
+    pProfile->AddPayload(pT140);
     pProfile->SetDataPort(LOCAL_PORT);
 
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
@@ -309,7 +309,7 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     pT140->SetFmtp(pRedFmtp);
 
     auto pLocalProfile = std::make_shared<TextProfile>();
-    pLocalProfile->GetPayloadList().Append(pT140);
+    pLocalProfile->AddPayload(pT140);
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
@@ -358,7 +358,7 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferSentSuccess)
     pT140->SetFmtp(pRedFmtp);
 
     auto pLocalProfile = std::make_shared<TextProfile>();
-    pLocalProfile->GetPayloadList().Append(pT140);
+    pLocalProfile->AddPayload(pT140);
     pLocalProfile->SetDataPort(LOCAL_PORT);
     pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND);
 

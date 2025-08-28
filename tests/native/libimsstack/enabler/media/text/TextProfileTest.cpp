@@ -218,12 +218,12 @@ TEST_F(TextProfileTest, testTextProfileGetPayloadAt)
     TextProfile::Payload* pPayload1 = new TextProfile::Payload();
     pPayload1->GetRtpMap().SetPayloadType(RED_PAYLOAD_TYPE);
     pPayload1->GetRtpMap().SetPayloadNumber(nPayload1);
-    pProfile->GetPayloadList().Append(pPayload1);
+    pProfile->AddPayload(pPayload1);
 
     TextProfile::Payload* pPayload2 = new TextProfile::Payload();
     pPayload2->GetRtpMap().SetPayloadType(RED_PAYLOAD_TYPE);
     pPayload2->GetRtpMap().SetPayloadNumber(nPayload2);
-    pProfile->GetPayloadList().Append(pPayload2);
+    pProfile->AddPayload(pPayload2);
 
     EXPECT_EQ(pProfile->GetPayloadList().GetSize(), 2);
 
