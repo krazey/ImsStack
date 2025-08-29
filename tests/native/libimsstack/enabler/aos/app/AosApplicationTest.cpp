@@ -3629,6 +3629,14 @@ TEST_F(AosApplicationTest, Callback)
     m_pAosApplication->ServicePhone_LocationInfoChanged(LocationInfo::AVAILABLE);
 }
 
+TEST_F(AosApplicationTest, SetDisconnectingStateWhenControlRegistrationCalledWithStop)
+{
+    m_pAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
+            AosPcscfOrder::CURRENT, AosControlCause::RADIO_ALLOWED_NETWORK_TYPES_CHANGED);
+
+    EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
+}
+
 TEST_F(AosApplicationTest,
         SetAirplaneModeReasonWhenControlRegistrationCalledWithStopIfAirplaneModeReasonIsPreviouslySet)
 {
@@ -3638,6 +3646,7 @@ TEST_F(AosApplicationTest,
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
 
     EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
+    EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
 }
 
 TEST_F(AosApplicationTest,
@@ -3660,6 +3669,7 @@ TEST_F(AosApplicationTest,
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REMOVED);
 
     EXPECT_TRUE(m_pAosApplication->IsPdnDeactivationRequired());
+    EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
 }
 
 TEST_F(AosApplicationTest,

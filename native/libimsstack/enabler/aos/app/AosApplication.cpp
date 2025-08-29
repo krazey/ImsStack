@@ -3662,6 +3662,10 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
             ProcessDisconnectingState(nFinalOffReason);
         }
+        else
+        {
+            ProcessDisconnectingState();
+        }
 
         PostMessage(MSG_REG_STOP, 0, 0);
         return;
