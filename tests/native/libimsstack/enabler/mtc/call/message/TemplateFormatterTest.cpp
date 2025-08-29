@@ -130,6 +130,49 @@ TEST_F(TemplateFormatterTest, FormatWithImsi)
     EXPECT_STREQ("<123456789012345>", TemplateFormatter::Format("<#IMSI#>", objContext).GetStr());
 }
 
+TEST_F(TemplateFormatterTest, FormatWithImsiAsAddrRefId)
+{
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSubscriberId(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strImsi)
+                    {
+                        strImsi = "123456789012345";
+                        return IMS_TRUE;
+                    }));
+    EXPECT_STREQ("<1234:5678:9012:3450>",
+            TemplateFormatter::Format("<#IMSIASADDRREFID#>", objContext).GetStr());
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSubscriberId(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strImsi)
+                    {
+                        strImsi = "1234567890123456";
+                        return IMS_TRUE;
+                    }));
+    EXPECT_STREQ("<1234:5678:9012:3450>",
+            TemplateFormatter::Format("<#IMSIASADDRREFID#>", objContext).GetStr());
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSubscriberId(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strImsi)
+                    {
+                        strImsi = "1234567890";
+                        return IMS_TRUE;
+                    }));
+    EXPECT_STREQ("<1234:5678:9000:0000>",
+            TemplateFormatter::Format("<#IMSIASADDRREFID#>", objContext).GetStr());
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSubscriberId(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strImsi)
+                    {
+                        strImsi = AString::ConstNull();
+                        return IMS_TRUE;
+                    }));
+    EXPECT_STREQ("<0000:0000:0000:0000>",
+            TemplateFormatter::Format("<#IMSIASADDRREFID#>", objContext).GetStr());
+}
+
 TEST_F(TemplateFormatterTest, FormatWithMacAddress)
 {
     ON_CALL(objNetworkService.GetMockConnection(), GetExtraInfo(AString("mac_address"), _))
