@@ -4464,6 +4464,17 @@ TEST_F(AosRegistrationTest, ProcessIpVersionChangeReturnsTrueIfSucceedToUpdatePc
     EXPECT_TRUE(bResult);
 }
 
+TEST_F(AosRegistrationTest, NotifyRegEventStateWhenRegEventChangeIfConfiguredAsConditional)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD));
+
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, ImsList<AString>()));
+
+    m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
+}
+
 TEST_F(AosRegistrationTest, NotifyRegEventStateWhenRegEventChange)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
@@ -4495,6 +4506,16 @@ TEST_F(AosRegistrationTest, DoNothingIfRegTypeIsNotNormalWhenRegEventChange)
     EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(_, _)).Times(0);
 
     m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfStatusCodeIsInvalidWhenRegEventChange)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_INVALID);
 }
 
 TEST_F(AosRegistrationTest, DoNothingIfConfiguredPolicyIsNotDownloadEventWhenRegEventChange)

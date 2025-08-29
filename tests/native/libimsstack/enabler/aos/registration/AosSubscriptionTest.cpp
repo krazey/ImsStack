@@ -1480,6 +1480,22 @@ TEST_F(AosSubscriptionTest, NotifyRegEventWithImpuWhenRegEventChangedWithUncondi
     m_pAosSubscription->ProcessRegEventChange(200);
 }
 
+TEST_F(AosSubscriptionTest, NotifyRegEventWithImpuWhenRegEventChangedWithConditionalDownload)
+{
+    ON_CALL(m_objMockIAosConfig, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD));
+
+    const SipAddress objSipAddress = SipAddress("");
+    ON_CALL(m_objMockIRegInfoRegistration, GetAor()).WillByDefault(ReturnRef(objSipAddress));
+    ImsList<IRegInfoRegistration*> objRegInfoRegistrations;
+    objRegInfoRegistrations.Append(&m_objMockIRegInfoRegistration);
+    ON_CALL(m_objMockIRegInfo, GetRegistrations()).WillByDefault(Return(objRegInfoRegistrations));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(200, _));
+
+    m_pAosSubscription->ProcessRegEventChange(200);
+}
+
 /// RegSubscription_NotifyReceived()
 TEST_F(AosSubscriptionTest, NothingWhenNotifyReceivedWithoutBody)
 {

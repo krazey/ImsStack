@@ -5179,9 +5179,14 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessIpVersionChange()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessRegEventChange(IN IMS_UINT32 nStatusCode)
+PROTECTED VIRTUAL void AosRegistration::ProcessRegEventChange(IN IMS_SINT32 nStatusCode)
 {
     if (!IsRegTypeEqual(AosRegistrationType::NORMAL))
+    {
+        return;
+    }
+
+    if (!SipStatusCode::IsFinalFailure(nStatusCode))
     {
         return;
     }
@@ -5198,14 +5203,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegEventChange(IN IMS_UINT32 nSta
         return;
     }
 
-    if (nPolicy == CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD)
-    {
-        piService->NotifyRegEventState((nStatusCode <= SipStatusCode::SC_INVALID)
-                        ? SipStatusCode::SC_INVALID
-                        : nStatusCode);
-    }
-
-    // Notice : Handling for USAT_REG_EVENT_CONDITIONAL_DOWNLOAD has not yet been considered.
+    piService->NotifyRegEventState(static_cast<IMS_UINT32>(nStatusCode));
 }
 
 PROTECTED VIRTUAL void AosRegistration::RecordImpu()
@@ -5530,12 +5528,12 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     IMS_SINT32 nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
     NotifyFailureWithImsReason(nReason, nStatusCode);
     ProcessRequiredWfcErrMessage(nStatusCode);
-    ProcessRegEventChange(nStatusCode);
 
     switch (nReason)
     {
         case IRegistration::REASON_STATUS_CODE:
             ProcessStartFailed_StatusCode(nStatusCode);
+            ProcessRegEventChange(nStatusCode);
             break;
 
         case IRegistration::REASON_TRANSACTION_TIMEOUT:

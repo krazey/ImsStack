@@ -1077,12 +1077,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessRegEventChange(IN IMS_UINT32 nSta
         }
     }
 
-    if (nPolicy == CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD)
-    {
-        piService->NotifyRegEventState(nStatusCode, objImpus);
-    }
-
-    // Notice : Handling for USAT_REG_EVENT_CONDITIONAL_DOWNLOAD has not yet been considered.
+    piService->NotifyRegEventState(nStatusCode, objImpus);
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(

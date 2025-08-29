@@ -336,7 +336,7 @@ protected:
 
     virtual void ProcessStandardPcscfSelection(IN IMS_UINT32 nRetryAfter = 0);
     virtual IMS_BOOL ProcessIpVersionChange();
-    virtual void ProcessRegEventChange(IN IMS_UINT32 nStatusCode);
+    virtual void ProcessRegEventChange(IN IMS_SINT32 nStatusCode);
 
     virtual void RecordImpu();
 
