@@ -18,10 +18,6 @@
 package com.android.imsstack.imsservice.mmtel.sms;
 
 import com.android.imsstack.util.ImsLog;
-import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
-import com.android.internal.telephony.cdma.sms.CdmaSmsSubaddress;
-import com.android.internal.telephony.cdma.sms.SmsEnvelope;
-import com.android.internal.util.BitwiseInputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -46,6 +42,8 @@ public class CdmaSmsMessageHelper {
     private final static byte CAUSE_CODES                               = 0x07;
     private final static byte BEARER_DATA                               = 0x08;
 
+    private static final int TELESERVICE_NOT_SET = 0x0000;
+
     /**
      * Provides the type of a SMS message like point to point, broadcast or acknowledge
      */
@@ -56,7 +54,7 @@ public class CdmaSmsMessageHelper {
      * or receiving the message.
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.1)
      */
-    public int mTeleService = SmsEnvelope.TELESERVICE_NOT_SET;
+    public int mTeleService = TELESERVICE_NOT_SET;
 
     /**
      * The 16-bit service category parameter identifies the type of service provided
@@ -94,6 +92,11 @@ public class CdmaSmsMessageHelper {
     public SmsAddress mSmsAddr;
 
     public static class SmsAddress {
+        public static final int DIGIT_MODE_4BIT_DTMF = 0x00;
+        public static final int DIGIT_MODE_8BIT_CHAR = 0x01;
+        public static final int NUMBER_MODE_NOT_DATA_NETWORK = 0x00;
+        public static final int NUMBER_MODE_DATA_NETWORK = 0x01;
+
         /**
          * Digit Mode Indicator is a 1-bit value that indicates whether
          * the address digits are 4-bit DTMF codes or 8-bit codes.  (See
@@ -131,13 +134,19 @@ public class CdmaSmsMessageHelper {
         public byte[] origBytes;
     }
 
+    public static class SmsSubaddress {
+        public int type;
+        public byte odd;
+        public byte[] origBytes;
+    }
+
     /**
      * Decodes 3GPP2 As per 3GPP2 C.S0015-0
      */
     public void parseCdmaPdu(byte[] pdu) {
         ByteArrayInputStream bais = new ByteArrayInputStream(pdu);
         DataInputStream dis = new DataInputStream(bais);
-        CdmaSmsSubaddress subAddr = new CdmaSmsSubaddress();
+        SmsSubaddress subAddr = new SmsSubaddress();
         mSmsAddr = new SmsAddress();
 
         try {
@@ -171,12 +180,13 @@ public class CdmaSmsMessageHelper {
                         mSmsAddr.digitMode = addrBis.read(1);
                         mSmsAddr.numberMode = addrBis.read(1);
                         int numberType = 0;
-                        if (mSmsAddr.digitMode == CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR) {
+                        if (mSmsAddr.digitMode == SmsAddress.DIGIT_MODE_8BIT_CHAR) {
                             numberType = addrBis.read(3);
                             mSmsAddr.ton = numberType;
 
-                            if (mSmsAddr.numberMode == CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK)
+                            if (mSmsAddr.numberMode == SmsAddress.NUMBER_MODE_NOT_DATA_NETWORK) {
                                 mSmsAddr.numberPlan = addrBis.read(4);
+                            }
                         }
 
                         mSmsAddr.numberOfDigits = addrBis.read(8);
@@ -184,7 +194,7 @@ public class CdmaSmsMessageHelper {
                         byte[] data = new byte[mSmsAddr.numberOfDigits];
                         byte b = 0x00;
 
-                        if (mSmsAddr.digitMode == CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF) {
+                        if (mSmsAddr.digitMode == SmsAddress.DIGIT_MODE_4BIT_DTMF) {
                             /* As per 3GPP2 C.S0005-0 Table 2.7.1.3.2.4-4 */
                             for (int index = 0; index < mSmsAddr.numberOfDigits; index++) {
                                 b = (byte) (0xF & addrBis.read(4));
@@ -192,14 +202,14 @@ public class CdmaSmsMessageHelper {
                                 // bit
                                 data[index] = convertDtmfToAscii(b);
                             }
-                        } else if (mSmsAddr.digitMode == CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR) {
-                            if (mSmsAddr.numberMode == CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK) {
+                        } else if (mSmsAddr.digitMode == SmsAddress.DIGIT_MODE_8BIT_CHAR) {
+                            if (mSmsAddr.numberMode == SmsAddress.NUMBER_MODE_NOT_DATA_NETWORK) {
                                 for (int index = 0; index < mSmsAddr.numberOfDigits; index++) {
                                     b = (byte) (0xFF & addrBis.read(8));
                                     data[index] = b;
                                 }
 
-                            } else if (mSmsAddr.numberMode == CdmaSmsAddress.NUMBER_MODE_DATA_NETWORK) {
+                            } else if (mSmsAddr.numberMode == SmsAddress.NUMBER_MODE_DATA_NETWORK) {
                                 if (numberType == 2)
                                     loge("TODO: Addr is email id");
                                 else
