@@ -15,6 +15,7 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <boolean name="ims.request_uri_validation_required_in_mid_dialog_bool" value="false"/>
     <!-- Aos -->
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="3"/>
 </carrier_config>
