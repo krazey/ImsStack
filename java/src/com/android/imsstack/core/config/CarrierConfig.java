@@ -672,6 +672,11 @@ public class CarrierConfig {
         public static final int GEODETIC_SHAPE_CIRCLE = 0;
         public static final int GEODETIC_SHAPE_ELLIPSOID = 1;
 
+        // Indicates the policy of USAT Registration event download.
+        public static final int USAT_REG_EVENT_NOT_DOWNLOAD = 0;
+        public static final int USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1;
+        public static final int USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2;
+
         private Ims() {}
     }
 

@@ -53,6 +53,8 @@ import java.util.Set;
 public class UsatAgentTest {
     private static final byte[] USIM_SERVICE_TABLE =
             ImsUtils.hexStringToBytes("000000FF00000000000000F0FF");
+    private static final byte[] ISIM_SERVICE_TABLE =
+            ImsUtils.hexStringToBytes("00000000000000000000000000");
     private static final String SEND_ENVELOPE_OK = "9000";
     private static final String SEND_ENVELOPE_ERROR = "9300";
     /** MO SMS control */
@@ -63,7 +65,6 @@ public class UsatAgentTest {
     private static final String ORIGIN_ADDRESS = "995588443322";
     /** Call control */
     private static final String DIALED_STRING = "1234567890";
-
     @Mock private SimInterface mSimInterface;
     @Mock private Usat.Listener mListener;
 
@@ -95,11 +96,20 @@ public class UsatAgentTest {
 
         mUsatAgent = null;
         mTelephonyManagerProxy = null;
-        mListener = null;
-        mSimInterface = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
         mTestableLooper = null;
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateSetupEventList() {
+        int[] updatedList = {Usat.SETUP_EVENT_IMS_REGISTRATION};
+
+        mUsatAgent.updateSetupEventList(updatedList);
+        processAllMessages();
+
+        assertTrue(mUsatAgent.isInSetupEventList(Usat.SETUP_EVENT_IMS_REGISTRATION));
     }
 
     @Test
@@ -197,6 +207,24 @@ public class UsatAgentTest {
         assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
         assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
         assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS));
+    }
+
+    @Test
+    @SmallTest
+    public void testIsUiccImsAccessEnabled_enabled() {
+        when(mSimInterface.getUsimServiceTable()).thenReturn(USIM_SERVICE_TABLE);
+        when(mSimInterface.getIsimServiceTable()).thenReturn(ISIM_SERVICE_TABLE);
+
+        assertTrue(mUsatAgent.isUiccImsAccessEnabled());
+    }
+
+    @Test
+    @SmallTest
+    public void testIsUiccImsAccessEnabled_notEnabled() {
+        when(mSimInterface.getUsimServiceTable()).thenReturn(new byte[] { (byte) 0 });
+        when(mSimInterface.getIsimServiceTable()).thenReturn(ISIM_SERVICE_TABLE);
+
+        assertFalse(mUsatAgent.isUiccImsAccessEnabled());
     }
 
     @Test

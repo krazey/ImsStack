@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -269,6 +270,33 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     public List<String> getImsPcscfAddresses() {
         TelephonyManager tm = getTelephonyManager();
         return tm != null ? tm.getImsPcscfAddresses() : Collections.emptyList();
+    }
+
+    @Override
+    public Set<String> requestUiccIari() {
+        TelephonyManager tm = getTelephonyManager();
+        if (tm == null) {
+            return Collections.emptySet();
+        }
+        CompletableFuture<Set<String>> future = new CompletableFuture<>();
+        OutcomeReceiver<Set<String>, Exception> callback = new OutcomeReceiver<>() {
+            @Override
+            public void onResult(Set<String> iariSet) {
+                future.complete(iariSet);
+            }
+            @Override
+            public void onError(@NonNull Exception ex) {
+                future.complete(Collections.emptySet());
+            }
+        };
+
+        tm.requestUiccIari(ExecutorHolder.sExecutor, callback);
+
+        try {
+            return future.get(1, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            return Collections.emptySet();
+        }
     }
 
     @Override

@@ -19,6 +19,7 @@ package com.android.imsstack.core.agents;
 import android.annotation.NonNull;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This interface provides the SIM related operations to get the SIM related information
@@ -166,6 +167,13 @@ public interface SimInterface extends IAgent {
      * @return A list of P-CSCF address or empty list if not present or not loaded.
      */
     @NonNull List<String> getIsimPcscf();
+
+    /**
+     * Returns the IMS Application Reference Identifier(IARI) that were loaded from the UICC.
+     *
+     * @return A set of IARI or empty set if not present or not loaded.
+     */
+    @NonNull Set<String> getUiccIari();
 
     /**
      * Checks if GBA is available in the ISIM service table.

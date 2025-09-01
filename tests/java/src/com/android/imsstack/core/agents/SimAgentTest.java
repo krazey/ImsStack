@@ -60,13 +60,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class SimAgentTest {
     private static final String UST = "86EF112C27FE01744200FF040100001E01";
     private static final byte[] UST_BYTES = ImsUtils.hexStringToBytes(UST);
-    private static final String IST = "E300";
+    private static final String IST = "E302";
     private static final byte[] IST_BYTES = ImsUtils.hexStringToBytes(IST);
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
     private static final String IMPI = "1234@test.ims.com";
@@ -76,6 +77,7 @@ public class SimAgentTest {
             List.of(Uri.parse("sip:1234@test.ims.com"), Uri.parse("tel:1234"));
     private static final String[] PCSCF_ARRAY = { "test.pcscf.com", "11.22.33.44" };
     private static final List<String> PCSCF_LIST = List.of("test.pcscf.com", "11.22.33.44");
+    private static final Set<String> IARI_SET = Set.of("urn:apn-id.ims.mnc001.mcc001.gprs");
     private static final String ISIM_LOADED = "LOADED";
 
     @Mock private Sim.Listener mSimListener;
@@ -106,6 +108,7 @@ public class SimAgentTest {
         when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(DOMAIN);
         when(mTelephonyManagerProxy.getImsPublicUserIdentities()).thenReturn(IMPU_LIST);
         when(mTelephonyManagerProxy.getImsPcscfAddresses()).thenReturn(PCSCF_LIST);
+        when(mTelephonyManagerProxy.requestUiccIari()).thenReturn(IARI_SET);
         when(mTelephonyManagerProxy.isApplicationOnUicc(eq(TelephonyManager.APPTYPE_ISIM)))
                 .thenReturn(true);
 
@@ -259,6 +262,7 @@ public class SimAgentTest {
         assertEquals(DOMAIN, mSimAgent.getIsimDomain());
         assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
         assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
+        assertEquals(IARI_SET, mSimAgent.getUiccIari());
         assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
 
         // ISIM_STATE_ABSENT
@@ -268,6 +272,7 @@ public class SimAgentTest {
         assertNull(mSimAgent.getIsimDomain());
         assertTrue(mSimAgent.getIsimImpu().isEmpty());
         assertTrue(mSimAgent.getIsimPcscf().isEmpty());
+        assertTrue(mSimAgent.getUiccIari().isEmpty());
         assertArrayEquals(EMPTY_BYTE_ARRAY, mSimAgent.getIsimServiceTable());
 
         // ISIM_STATE_LOADED and throw RuntimeException for IMPI/IMPU/P-CSCF
@@ -283,6 +288,7 @@ public class SimAgentTest {
         assertEquals(DOMAIN, mSimAgent.getIsimDomain());
         assertTrue(mSimAgent.getIsimImpu().isEmpty());
         assertTrue(mSimAgent.getIsimPcscf().isEmpty());
+        assertEquals(IARI_SET, mSimAgent.getUiccIari());
         assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
     }
 

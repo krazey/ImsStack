@@ -26,6 +26,22 @@ import java.util.Set;
  */
 public interface UsatInterface {
     /**
+     * Updates the set up event list that is received through proactive command from the UICC.
+     *
+     * @param setupEventList The event list to be updated.
+     */
+    void updateSetupEventList(@NonNull int[] setupEventList);
+
+    /**
+     * Checks if the specified event is included or not in UICC setup event list.
+     *
+     * @param event The event to be evaluated.
+     *              Please refer to ETSI 102.223 for the defined values for each event.
+     * @return true if the specified event is included or false otherwise.
+     */
+    boolean isInSetupEventList(int event);
+
+    /**
      * Checks if the specified service is available or not in the USIM service table.
      *
      * @param serviceType The service type to be evaluated. Valid values are
@@ -39,6 +55,15 @@ public interface UsatInterface {
      * @return true if the specified service is available or false otherwise.
      */
     boolean isServiceAvailable(@Usat.ServiceType int serviceType);
+
+    /**
+     * Checks if the "support of UICC access to IMS" is available in the USIM or ISIM service table.
+     * 95th bit in USIM service table and 10th bit in ISIM service table indicates this service.
+     * Please refer to the 3GPP TS 31.102 and TS 31.103.
+     *
+     * @return true if the support of UICC access to IMS is enabled or false otherwise.
+     */
+    boolean isUiccImsAccessEnabled();
 
     /**
      * Creates a USAT command for call control.

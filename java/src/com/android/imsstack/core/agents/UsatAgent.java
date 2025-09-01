@@ -37,8 +37,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * This class provides the implementation of USAT functions to interwork with the UICC.
@@ -145,10 +147,12 @@ public class UsatAgent extends Handler implements UsatInterface {
     private static final int MAX_CID = Integer.MAX_VALUE;
 
     private static final int EVENT_SEND_COMMAND = 1;
+    private static final int EVENT_UPDATE_SETUP_EVENT_LIST = 2;
 
     private final Object mLock = new Object();
     private final SimInterface mSim;
     private final SparseArray<Usat.Command> mCommands;
+    private List<Integer> mSetupEventList = Collections.emptyList();
     private int mGlobalCommandId = 1;
 
     UsatAgent(SimInterface sim) {
@@ -158,9 +162,26 @@ public class UsatAgent extends Handler implements UsatInterface {
     }
 
     @Override
+    public void updateSetupEventList(@NonNull int[] setupEventList) {
+        Message.obtain(this, EVENT_UPDATE_SETUP_EVENT_LIST, setupEventList).sendToTarget();
+    }
+
+    @Override
+    public boolean isInSetupEventList(int event) {
+        return mSetupEventList.contains(event);
+    }
+
+    @Override
     public boolean isServiceAvailable(@Usat.ServiceType int serviceType) {
         byte[] ust = mSim.getUsimServiceTable();
         return ust.length != 0 && isServiceAvailable(ust, serviceType);
+    }
+
+    @Override
+    public boolean isUiccImsAccessEnabled() {
+        byte[] ist = mSim.getIsimServiceTable();
+        return isServiceAvailable(ist, Usat.ISIM_SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS)
+                || isServiceAvailable(Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS);
     }
 
     @Override
@@ -231,6 +252,11 @@ public class UsatAgent extends Handler implements UsatInterface {
             case EVENT_SEND_COMMAND: {
                 Usat.Command cmd = (Usat.Command) msg.obj;
                 handleUsatCommand(cmd);
+                break;
+            }
+            case EVENT_UPDATE_SETUP_EVENT_LIST : {
+                int[] setupEventList = (int[]) msg.obj;
+                mSetupEventList = IntStream.of(setupEventList).boxed().toList();
                 break;
             }
             default:

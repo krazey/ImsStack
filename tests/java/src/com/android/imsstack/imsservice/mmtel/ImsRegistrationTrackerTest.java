@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.SharedPreferences;
@@ -48,7 +49,11 @@ import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.Usat;
+import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
@@ -70,6 +75,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -77,6 +83,8 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class ImsRegistrationTrackerTest {
+    private static final int SIP_STATUS_CODE_200_OK = 200;
+    private static final Set<Uri> URI_SET = Set.of(Uri.parse("1111@test.ims.com"));
     private TestAppContext mTestAppContext;
     private ImsRegistrationTracker mRegTracker;
     private MmTelFeature.MmTelCapabilities mMmTelCapabilities;
@@ -97,6 +105,8 @@ public class ImsRegistrationTrackerTest {
     @Mock MessageExecutor mExecutor;
     @Mock SharedPreferences mSp;
     @Mock SharedPreferences.Editor mSpEditor;
+    @Mock SimInterface mMockSimInterface;
+    @Mock UsatInterface mMockUsatInterface;
 
     @Before
     public void setUp() {
@@ -104,6 +114,9 @@ public class ImsRegistrationTrackerTest {
         mContextFixture = new ContextFixture();
         mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
         mTestAppContext.setUp();
+
+        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT0);
+        when(mMockSimInterface.getUsatInterface()).thenReturn(mMockUsatInterface);
 
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mSettingsProxy);
@@ -147,6 +160,7 @@ public class ImsRegistrationTrackerTest {
         mRegTracker.dispose();
         mSettingsProxy = null;
         mContextFixture = null;
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         mTestAppContext.tearDown();
         mTestAppContext = null;
     }
@@ -602,6 +616,71 @@ public class ImsRegistrationTrackerTest {
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
         verify(mMockFeatureCapabilityListener, never())
                 .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_simInterfaceIsNull() {
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verifyNoInteractions(mMockUsatInterface);
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_configInterfaceIsNull() {
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(null);
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verifyNoInteractions(mMockUsatInterface);
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_configIsInvalidValue() {
+        when(mMockCarrierConfig.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT))
+                .thenReturn(-1);
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verifyNoInteractions(mMockUsatInterface);
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_configIsNotDownload() {
+        when(mMockCarrierConfig.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT))
+                .thenReturn(CarrierConfig.Ims.USAT_REG_EVENT_NOT_DOWNLOAD);
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verifyNoInteractions(mMockUsatInterface);
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_configIsConditional() {
+        when(mMockCarrierConfig.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT))
+                .thenReturn(CarrierConfig.Ims.USAT_REG_EVENT_CONDITIONAL_DOWNLOAD);
+        when(mMockUsatInterface.isInSetupEventList(anyInt())).thenReturn(true);
+        Set<String> iariSet = Set.of("urn::3gpp-application.ims.iari.ttc-iss");
+        when(mMockSimInterface.getUiccIari()).thenReturn(iariSet);
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verify(mMockUsatInterface).createRegEventDownloadCommand(
+                eq(SIP_STATUS_CODE_200_OK), eq(URI_SET), any(Usat.Listener.class));
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_configIsUnconditional() {
+        when(mMockCarrierConfig.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT))
+                .thenReturn(CarrierConfig.Ims.USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD);
+        when(mMockUsatInterface.isInSetupEventList(anyInt())).thenReturn(false);
+        when(mMockSimInterface.getUiccIari()).thenReturn(Collections.emptySet());
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verify(mMockUsatInterface).createRegEventDownloadCommand(
+                eq(SIP_STATUS_CODE_200_OK), eq(URI_SET), any(Usat.Listener.class));
     }
 
     @Test

@@ -253,6 +253,11 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
+    public Set<String> requestUiccIari() {
+        return mSimInfoRecord.requestUiccIari();
+    }
+
+    @Override
     public String getIccAuthentication(@UiccAppType int appType, @AuthType int authType,
             String data) {
         // This is not supported yet in the test environment.
@@ -554,6 +559,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         final String impuTel = String.format("sip:%s@%s", phoneNumber, domain);
         final List<Uri> impus = List.of(Uri.parse(impuSip), Uri.parse(impuTel));
         final List<String> pcscfs = List.of("1.1.1.1", "2.2.2.2");
+        final Set<String> iaris = Set.of("urn:3gpp-access:apn-id.ims.mnc001.mcc001.gprs");
 
         mSimInfoRecord.setIsimAppType(TelephonyManager.APPTYPE_ISIM);
         mSimInfoRecord.setIsimDomain(domain);
@@ -561,6 +567,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setIsimPublicUserIdentities(impus);
         mSimInfoRecord.setImsPcscfAddresses(pcscfs);
         mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, new byte[0]);
+        mSimInfoRecord.setUiccIaris(iaris);
     }
 
     /**
@@ -583,6 +590,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setIsimPublicUserIdentities(null);
         mSimInfoRecord.setImsPcscfAddresses(null);
         mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, new byte[0]);
+        mSimInfoRecord.setUiccIaris(null);
     }
 
     /**
@@ -754,6 +762,15 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void setImsPcscfAddresses(List<String> pcscfs) {
         mSimInfoRecord.setImsPcscfAddresses(pcscfs);
+    }
+
+    /**
+     * Sets the IARIs of UICC.
+     *
+     * @param iaris The set of IMS Application Reference Identifier(IARI).
+     */
+    public void setUiccIaris(Set<String> iaris) {
+        mSimInfoRecord.setUiccIaris(iaris);
     }
 
     /**
@@ -1037,6 +1054,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         private String mIsimPrivateUserIdentity;
         private List<Uri> mIsimPublicUserIdentities = Collections.emptyList();
         private List<String> mIsimPcscfAddresses = Collections.emptyList();
+        private Set<String> mUiccIaris = Collections.emptySet();
 
         boolean hasIccCard() {
             return mState != TelephonyManager.SIM_STATE_UNKNOWN
@@ -1122,6 +1140,10 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             return mIsimPcscfAddresses;
         }
 
+        Set<String> requestUiccIari() {
+            return mUiccIaris;
+        }
+
         void setUsimAppType(@UiccAppType int appType) {
             mUsimAppType = appType;
         }
@@ -1205,6 +1227,13 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
                     ? Collections.unmodifiableList(pcscfs)
                     : Collections.emptyList();
         }
+
+        void setUiccIaris(Set<String> iaris) {
+            mUiccIaris = iaris != null
+                    ? Collections.unmodifiableSet(iaris)
+                    : Collections.emptySet();
+        }
+
     }
 
     private static final class NetworkInfoRecord {
