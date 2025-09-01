@@ -26,6 +26,7 @@ cc_defaults {
     ],
     test_suites: [
         "general-tests",
+        "device-tests",
     ],
     static_libs: [
         "libgmock",
