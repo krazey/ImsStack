@@ -104,7 +104,7 @@ UceSubscribe::UceSubscribe(IN ICoreService* piCoreService, IN const AString& str
     m_strXMLDocumentHelperThreadName =
             AString().Sprintf("UceXmlDocumentHelperThread%d", GetSlotId());
     LoadConfigValue();
-    SetState(ON);
+    UpdateState(ON);
 }
 
 PUBLIC VIRTUAL UceSubscribe::~UceSubscribe()
@@ -609,7 +609,7 @@ IMS_BOOL UceSubscribe::StateON_SingleSubscribeRequested(IN IMSMSG& objMsg)
         SubscribeTerminated();
         return IMS_TRUE;
     }
-    SetState(SUBSCRIBING);
+    UpdateState(SUBSCRIBING);
     CreateXMLDocumentHelperThread();
     return IMS_TRUE;
 }
@@ -665,7 +665,7 @@ IMS_BOOL UceSubscribe::StateON_ListSubscribeRequested(IN IMSMSG& objMsg)
         return IMS_TRUE;
     }
     IMS_TRACE_I("Send list users size [%d]", m_objRemoteUsers.GetSize(), 0, 0);
-    SetState(SUBSCRIBING);
+    UpdateState(SUBSCRIBING);
     CreateXMLDocumentHelperThread();
     return IMS_TRUE;
 }
@@ -685,7 +685,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_Subscribed(IN IMSMSG& objMsg)
     (void)objMsg;
     IMS_TRACE_I("StateSUBSCRIBING_Subscribed", 0, 0, 0);
     StopRetryAfterTimer();
-    SetState(SUBSCRIBED);
+    UpdateState(SUBSCRIBED);
     IMessage* piMessage = IMS_NULL;
     if (m_eQueryType == QUERY_CAPABILITY_TYPE_LIST)
     {
@@ -726,7 +726,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_Subscribed(IN IMSMSG& objMsg)
         SendSubscribeResponseInd(SipStatusCode::SC_200, "OK", 0, "");
     }
     StartWaitingNotifyMessageTimer(m_nWaitNotiTimerValue);
-    SetState(SUBSCRIBED);
+    UpdateState(SUBSCRIBED);
     return IMS_TRUE;
 }
 
@@ -921,12 +921,12 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg)
     return IMS_TRUE;
 }
 
-void UceSubscribe::SetState(IMS_UINT32 _eState)
+void UceSubscribe::UpdateState(IMS_UINT32 _eState)
 {
-    IMS_TRACE_I(
-            "SetState:State [ %s ] -> [ %s ]", StateToString(m_eState), StateToString(_eState), 0);
+    IMS_TRACE_I("UpdateState:State [ %s ] -> [ %s ]", StateToString(m_eState),
+            StateToString(_eState), 0);
     m_eState = _eState;
-    ImsStateMachine::SetState(m_eState);
+    SetState(m_eState);
 }
 
 PRIVATE
@@ -1018,7 +1018,7 @@ void UceSubscribe::SubscribeTerminated()
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_DELETED_IND, 0, reinterpret_cast<IMS_UINTP>(this));
     MessageService::PostMessage(m_strUceSubscribeManagerName, objUIMsg);
-    SetState(ON);
+    UpdateState(ON);
 }
 
 const IMS_CHAR* UceSubscribe::StateToString(IMS_UINT32 _eState)
@@ -1431,7 +1431,7 @@ IMS_BOOL UceSubscribe::Handle423FailureResponse(const ISipMessage* piSIPMessage)
     {
         IMS_TRACE_I("Handle423FailureResponse:list subscribe.min Expire Value [%s]",
                 m_strExpireValueInListSub.GetStr(), 0, 0);
-        SetState(ON);
+        UpdateState(ON);
         return QueryMultiCapability(m_objRemoteUsers, m_nKey);
     }
 }
@@ -1583,13 +1583,13 @@ void UceSubscribe::HandleRetryAfterTimer()
     if (m_eQueryType == QUERY_CAPABILITY_TYPE_SINGLE)
     {
         IMS_TRACE_I("HandleRetryAfterTimer:send single request", 0, 0, 0);
-        SetState(ON);
+        UpdateState(ON);
         QuerySingleCapability(m_strRemoteUser, m_nKey);
     }
     else
     {
         IMS_TRACE_I("HandleRetryAfterTimer:send list request", 0, 0, 0);
-        SetState(ON);
+        UpdateState(ON);
         QueryMultiCapability(m_objRemoteUsers, m_nKey);
     }
 }

@@ -120,7 +120,7 @@ public:
     IMS_BOOL AosDisConnecting();                        // AoS-disconnecting
     IMS_BOOL ClosedService();                           // core service closed
 
-    void SetState(IMS_UINT32 _eState);
+    void UpdateState(IMS_UINT32 _eState);
 
 protected:
     virtual void Timer_TimerExpired(IN ITimer* piTimer) override;

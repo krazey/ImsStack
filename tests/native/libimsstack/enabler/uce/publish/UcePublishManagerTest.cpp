@@ -83,7 +83,7 @@ public:
     }
     virtual ~TestUcePublishManager() override {}
 
-    IMS_UINT32 GetState() const { return m_eState; }
+    IMS_UINT32 GetStateInternal() const { return m_eState; }
 
     void SetKey(IMS_UINT32 key) { m_nKey = key; }
     IMS_UINT32 GetKey() const { return m_nKey; }
@@ -348,7 +348,7 @@ TEST_F(UcePublishManagerTest, AosConnected)
 
     EXPECT_EQ(pUcePublishManager->AosConnected(conectedService), IMS_TRUE);
     EXPECT_EQ(pUcePublishManager->GetConectedService(), conectedService);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, AosDisConnected)
@@ -356,9 +356,9 @@ TEST_F(UcePublishManagerTest, AosDisConnected)
     IMS_TRACE_D("AosDisConnected", 0, 0, 0);
     EXPECT_EQ(pUcePublishManager->AosDisConnected(), IMS_FALSE);
     EXPECT_EQ(pUcePublishManager->GetConectedService(), 0);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 
-    pUcePublishManager->SetState(TestUcePublishManager::ON);
+    pUcePublishManager->UpdateState(TestUcePublishManager::ON);
     EXPECT_EQ(pUcePublishManager->AosDisConnected(), IMS_TRUE);
     EXPECT_EQ(pUcePublishManager->GetConectedService(), 0);
 }
@@ -367,9 +367,9 @@ TEST_F(UcePublishManagerTest, AosDisConnecting)
 {
     IMS_TRACE_D("AosDisConnecting", 0, 0, 0);
     EXPECT_EQ(pUcePublishManager->AosDisConnecting(), IMS_FALSE);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 
-    pUcePublishManager->SetState(TestUcePublishManager::PUBLISHING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::PUBLISHING);
     EXPECT_EQ(pUcePublishManager->AosDisConnecting(), IMS_TRUE);
 }
 
@@ -379,11 +379,11 @@ TEST_F(UcePublishManagerTest, ClosedService)
     EXPECT_EQ(pUcePublishManager->ClosedService(), IMS_TRUE);
 }
 
-TEST_F(UcePublishManagerTest, SetState)
+TEST_F(UcePublishManagerTest, UpdateState)
 {
-    IMS_TRACE_D("SetState", 0, 0, 0);
-    pUcePublishManager->SetState(TestUcePublishManager::TERMINATING);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::TERMINATING);
+    IMS_TRACE_D("UpdateState", 0, 0, 0);
+    pUcePublishManager->UpdateState(TestUcePublishManager::TERMINATING);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::TERMINATING);
 }
 
 TEST_F(UcePublishManagerTest, TimerExpired)
@@ -517,7 +517,7 @@ TEST_F(UcePublishManagerTest, StateIDLE_AoSConnected)
     IMSMSG objMsg(TestUcePublishManager::AOS_CONNECTED, 0, 0);
 
     pUcePublishManager->IdleAoSConnected(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StateON_PublishRequestedWithNoPulibcation)
@@ -575,7 +575,7 @@ TEST_F(UcePublishManagerTest, StateON_AoSDisConnected)
     IMSMSG objMsg(TestUcePublishManager::AOS_DISCONNECTED, 0, 0);
     EXPECT_TRUE(pUcePublishManager->OnAoSDisConnected(objMsg));
 
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_PublishRequested)
@@ -616,7 +616,7 @@ TEST_F(UcePublishManagerTest, PublishingAoSDisConnected)
     pUcePublishManager->PublishingAoSDisConnected(objMsg);
 
     EXPECT_EQ(pUcePublishManager->GetReceivedUnPublishRequest(), IMS_FALSE);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_Published)
@@ -646,7 +646,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Published)
     EXPECT_TRUE(pUcePublishManager->PublishingPublished(objMsg));
 
     EXPECT_EQ(pUcePublishManager->GetKey(), 0);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::PUBLISHED);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::PUBLISHED);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWithNoIMessage)
@@ -665,7 +665,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWithNoIMessage)
     pUcePublishManager->PublishingFailed(objMsg);
 
     EXPECT_EQ(pUcePublishManager->GetKey(), 0);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_Failed)
@@ -691,7 +691,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Failed)
     pUcePublishManager->PublishingFailed(objMsg);
 
     EXPECT_EQ(pUcePublishManager->GetKey(), 0);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWithNoKey)
@@ -716,7 +716,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWithNoKey)
     pUcePublishManager->PublishingFailed(objMsg);
 
     EXPECT_EQ(pUcePublishManager->GetKey(), 0);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHED_PublishRequested)
@@ -748,7 +748,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHED_PublishRequested)
             reinterpret_cast<IMS_UINTP>(pPublicationData));
 
     pUcePublishManager->PublishedPublishRequested(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::PUBLISHING);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::PUBLISHING);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHED_AoSDisconnecting)
@@ -762,7 +762,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHED_AoSDisconnecting)
     IMSMSG objMsg(TestUcePublishManager::AOS_DISCONNECTING, 0, 0);
     pUcePublishManager->PublishedAoSDisconnecting(objMsg);
 
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHED_AoSDisconnected)
@@ -773,7 +773,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHED_AoSDisconnected)
     IMSMSG objMsg(TestUcePublishManager::AOS_DISCONNECTED, 0, 0);
     pUcePublishManager->PublishedAoSDisconnected(objMsg);
 
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHED_RefreshStarted)
@@ -783,7 +783,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHED_RefreshStarted)
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_REFRESH_STARTED, 0, 0);
     pUcePublishManager->PublishedRefreshStarted(objMsg);
 
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::REFRESHING);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::REFRESHING);
 }
 
 TEST_F(UcePublishManagerTest, StateREFRESHING_PublishRequested)
@@ -830,13 +830,13 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_AoSDisConnecting)
 TEST_F(UcePublishManagerTest, StateREFRESHING_AoSDisConnected)
 {
     IMS_TRACE_D("StateREFRESHING_AoSDisConnected", 0, 0, 0);
-    pUcePublishManager->SetState(TestUcePublishManager::REFRESHING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::REFRESHING);
     pUcePublishManager->SetReceivedUnPublishRequest(IMS_TRUE);
     IMSMSG objMsg(TestUcePublishManager::AOS_DISCONNECTED, 0, 0);
 
     pUcePublishManager->RefreshingAoSDisConnected(objMsg);
     EXPECT_EQ(pUcePublishManager->GetReceivedUnPublishRequest(), IMS_FALSE);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 }
 
 TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshedFromPreviouslyReceivedUnpublish)
@@ -858,7 +858,7 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshedFromPreviouslyReceivedUnp
 
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_REFRESHED, 0, 0);
     pUcePublishManager->RefreshingRefreshed(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::TERMINATING);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::TERMINATING);
 }
 
 TEST_F(UcePublishManagerTest, StateREFRESHING_Refreshed)
@@ -867,7 +867,7 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_Refreshed)
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_REFRESHED, 0, 0);
 
     pUcePublishManager->RefreshingRefreshed(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::PUBLISHED);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::PUBLISHED);
 }
 
 TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailed)
@@ -902,7 +902,7 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailedWithNoResponse)
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_REFRESH_NO_RESPONSE, 0, 0);
 
     pUcePublishManager->RefreshingRefreshFailedWithNoResponse(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StateTERMINATING_PublishRequested)
@@ -928,51 +928,51 @@ TEST_F(UcePublishManagerTest, StateTERMINATING_PublishRequested)
 TEST_F(UcePublishManagerTest, StateTERMINATING_AoSDisconnected)
 {
     IMS_TRACE_D("StateTERMINATING_AoSDisconnected", 0, 0, 0);
-    pUcePublishManager->SetState(TestUcePublishManager::TERMINATING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::TERMINATING);
     IMSMSG objMsg(TestUcePublishManager::AOS_DISCONNECTING, 0, 0);
 
     pUcePublishManager->TerminatingAoSDisconnected(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
 }
 
 TEST_F(UcePublishManagerTest, StateTERMINATING_Published)
 {
     IMS_TRACE_D("StateTERMINATING_Published", 0, 0, 0);
-    pUcePublishManager->SetState(TestUcePublishManager::TERMINATING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::TERMINATING);
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_SUCCEEDED, 0, 0);
 
     pUcePublishManager->TerminatingPublished(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StateTERMINATING_Failed)
 {
     IMS_TRACE_D("StateTERMINATING_Failed", 0, 0, 0);
-    pUcePublishManager->SetState(TestUcePublishManager::TERMINATING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::TERMINATING);
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_FAILED, 0, 0);
 
     pUcePublishManager->TerminatingFailed(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
 TEST_F(UcePublishManagerTest, StateALL_Terminated)
 {
     IMS_TRACE_D("StateALL_Terminated", 0, 0, 0);
-    pUcePublishManager->SetState(TestUcePublishManager::PUBLISHING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::PUBLISHING);
 
     EXPECT_CALL(objMockIUceJniThread, PublishErrorInd(_, _)).Times(1);
 
     IMSMSG objMsg(TestUcePublishManager::PUBLISH_TERMINATED, 0, 0);
 
     pUcePublishManager->AllTerminated(objMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 
-    pUcePublishManager->SetState(TestUcePublishManager::TERMINATING);
+    pUcePublishManager->UpdateState(TestUcePublishManager::TERMINATING);
 
     EXPECT_CALL(objMockIUceJniThread, PublishUpdatedInd(_, _, _, _, _, _, _)).Times(1);
 
     IMSMSG objSecondMsg(TestUcePublishManager::PUBLISH_TERMINATED, 0, 0);
 
     pUcePublishManager->AllTerminated(objSecondMsg);
-    EXPECT_EQ(pUcePublishManager->GetState(), TestUcePublishManager::ON);
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }

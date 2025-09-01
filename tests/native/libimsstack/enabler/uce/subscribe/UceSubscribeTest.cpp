@@ -80,8 +80,8 @@ public:
     AString GetRemoteUser() const { return m_strRemoteUser; }
     void SetRemoteUsers(const ImsList<AString>& objUsers) { m_objRemoteUsers = objUsers; }
     ImsList<AString> GetRemoteUsers() const { return m_objRemoteUsers; }
-    IMS_UINT32 GetState() const { return m_eState; }
-    void setState(IMS_UINT32 state) { SetState(state); }
+    IMS_UINT32 GetStateInternal() const { return m_eState; }
+    void UpdateStateInternal(IMS_UINT32 state) { UpdateState(state); }
     void SetConectedService(IMS_UINT32 service) { m_nConnectedServices = service; }
     void SetWaitNotifyMsgTimer(ITimer* piTimer) { m_pWaitNotifyMsgTimer = piTimer; }
     void SetRetryAfterTimer(ITimer* piTimer) { m_pRetryAfterTimer = piTimer; }
@@ -353,29 +353,29 @@ TEST_F(UceSubscribeTest, TimerExpired)
     EXPECT_CALL(objMockIUceJniThread, SubscribeTerminatedInd(_, _, _)).Times(2);
 
     pUceSubscribe->SetKey(1);
-    pUceSubscribe->setState(UceSubscribe::SUBSCRIBING);
+    pUceSubscribe->UpdateStateInternal(UceSubscribe::SUBSCRIBING);
     pUceSubscribe->SetWaitNotifyMsgTimer(&objTimer);
     pUceSubscribe->TimerExpired(&objTimer);
     EXPECT_EQ(pUceSubscribe->GetKey(), 0);
 
     pUceSubscribe->SetKey(1);
-    pUceSubscribe->setState(UceSubscribe::SUBSCRIBED);
+    pUceSubscribe->UpdateStateInternal(UceSubscribe::SUBSCRIBED);
     pUceSubscribe->SetWaitNotifyMsgTimer(&objTimer);
     pUceSubscribe->TimerExpired(&objTimer);
     EXPECT_EQ(pUceSubscribe->GetKey(), 0);
 
-    pUceSubscribe->setState(UceSubscribe::SUBSCRIBED);
+    pUceSubscribe->UpdateStateInternal(UceSubscribe::SUBSCRIBED);
     pUceSubscribe->SetQueryType(TestUceSubscribe::QUERY_CAPABILITY_TYPE_SINGLE);
     pUceSubscribe->SetRetryAfterTimer(&objTimer);
     pUceSubscribe->TimerExpired(&objTimer);
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
-    pUceSubscribe->setState(UceSubscribe::SUBSCRIBED);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
+    pUceSubscribe->UpdateStateInternal(UceSubscribe::SUBSCRIBED);
     pUceSubscribe->SetQueryType(TestUceSubscribe::QUERY_CAPABILITY_TYPE_LIST);
     pUceSubscribe->SetRetryAfterTimer(&objTimer);
     pUceSubscribe->TimerExpired(&objTimer);
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 }
 
 TEST_F(UceSubscribeTest, sendMsg)
@@ -630,7 +630,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_AoSDisConnected)
     EXPECT_TRUE(pUceSubscribe->subscribingAoSDisConnected(objMsg));
 
     EXPECT_EQ(pUceSubscribe->GetKey(), 0);
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 }
 
 TEST_F(UceSubscribeTest, StateSUBSCRIBING_Subscribed)
@@ -646,7 +646,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_Subscribed)
 
     IMSMSG objMsg(TestUceSubscribe::SUBSCRIBE_SUCCEED, 0, 0);
     pUceSubscribe->subscribingSubscribed(objMsg);
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::SUBSCRIBED);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::SUBSCRIBED);
 
     pUceSubscribe->SetKey(key);
     pUceSubscribe->SetISubscription(&objMockISubscription);
@@ -684,7 +684,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_SubscribeFailed)
 
     IMSMSG objMsg(TestUceSubscribe::SUBSCRIBE_FAILED, 404, 0);
     EXPECT_TRUE(pUceSubscribe->subscribingSubscribeFailed(objMsg));
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 
     pUceSubscribe->SetKey(key);
     pUceSubscribe->SetISubscription(&objMockISubscription);
@@ -752,7 +752,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_SubscribeTerminated)
     IMSMSG objMsg(TestUceSubscribe::SUBSCRIBE_TERMINATED, 0, 0);
     pUceSubscribe->subscribingSubscribeTerminated(objMsg);
 
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 }
 
 TEST_F(UceSubscribeTest, StateSUBSCRIBING_NotifyReceived)
@@ -801,7 +801,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBED_AoSDisConnected)
     IMSMSG objMsg(TestUceSubscribe::AOS_DISCONNECTED, 0, 0);
     pUceSubscribe->subscribedAoSDisConnected(objMsg);
 
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 }
 
 TEST_F(UceSubscribeTest, StateSUBSCRIBED_SubscribeTerminated)
@@ -815,7 +815,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBED_SubscribeTerminated)
     IMSMSG objMsg(TestUceSubscribe::SUBSCRIBE_TERMINATED, 0, 0);
     pUceSubscribe->subscribedSubscribeTerminated(objMsg);
 
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 }
 
 TEST_F(UceSubscribeTest, StateSUBSCRIBED_NotifyReceived)
@@ -858,9 +858,9 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBED_NotifyReceivedWithNotifyBody)
     pUceSubscribe->subscribedNotifyReceived(objMsg);
 }
 
-TEST_F(UceSubscribeTest, setState)
+TEST_F(UceSubscribeTest, UpdateState)
 {
-    IMS_TRACE_D("setState", 0, 0, 0);
-    pUceSubscribe->setState(UceSubscribe::ON);
-    EXPECT_EQ(pUceSubscribe->GetState(), UceSubscribe::ON);
+    IMS_TRACE_D("UpdateState", 0, 0, 0);
+    pUceSubscribe->UpdateStateInternal(UceSubscribe::ON);
+    EXPECT_EQ(pUceSubscribe->GetStateInternal(), UceSubscribe::ON);
 }

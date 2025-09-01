@@ -106,7 +106,7 @@ protected:
     virtual IMS_BOOL StateSUBSCRIBED_SubscribeTerminated(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg);
 
-    void SetState(IMS_UINT32 _eState);
+    void UpdateState(IMS_UINT32 _eState);
 
 private:
     IUceJniThread* GetJniThread();
