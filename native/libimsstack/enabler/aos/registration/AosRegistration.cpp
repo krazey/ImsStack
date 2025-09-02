@@ -3366,7 +3366,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
     }
     else
     {
-        IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+        const IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
         if (piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested())
         {
             ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_NO_PCSCF_AVAILABLE);
@@ -5807,7 +5807,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStopRetryTimerExpired()
 
     if (IsImsCall())
     {
-        IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+        const IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
         if (piHandleMtc == IMS_NULL || !piHandleMtc->IsRegToNextPcscfRequested())
         {
             SetHeldByCall(IMS_TRUE);
