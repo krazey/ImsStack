@@ -28,6 +28,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -737,7 +739,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         DataSpecificRegistrationInfo dsrInfo =
                 new DataSpecificRegistrationInfo(2, false, true, true, vsi);
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
-        replaceInstance(DcNetWatcher.class, "mImsVops", mDcNetWatcher, true);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
         when(mMockTelephonyInterface.getNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
@@ -758,6 +761,63 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnServiceStateChanged_handleImsNetworkFeature_VopsTrueIfNetWorkNotRegistered()
+            throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        LteVopsSupportInfo vsi = new LteVopsSupportInfo(LteVopsSupportInfo.LTE_STATUS_NOT_SUPPORTED,
+                LteVopsSupportInfo.LTE_STATUS_SUPPORTED);
+        DataSpecificRegistrationInfo dsrInfo =
+                new DataSpecificRegistrationInfo(2, false, true, true, vsi);
+        replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
+        when(mMockTelephonyInterface.getNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+        when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
+        when(mServiceState.getOperatorNumeric()).thenReturn("123456");
+        when(mMockDcSetting.isVopsIgnored()).thenReturn(false);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        verify(mMockSystem, never())
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE), anyInt(), eq(0));
+        verify(mNetWatherListener, never()).onVopsStateChanged(anyInt(), anyString());
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
+    public void testOnServiceStateChanged_handleImsNetworkFeature_VopsTrueOnNon4G5G()
+            throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_UMTS, false);
+        DataSpecificRegistrationInfo dsrInfo =
+                new DataSpecificRegistrationInfo(2, false, true, true, null);
+        replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
+        when(mMockTelephonyInterface.getNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        verify(mMockSystem, never())
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE), anyInt(), eq(0));
+        verify(mNetWatherListener, never()).onVopsStateChanged(anyInt(), anyString());
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
     public void testOnServiceStateChanged_handleImsNetworkFeature_PlmnChanged() throws Exception {
         NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
@@ -768,7 +828,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         DataSpecificRegistrationInfo dsrInfo =
                 new DataSpecificRegistrationInfo(2, false, true, true, vsi);
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
-        replaceInstance(DcNetWatcher.class, "mImsVops", mDcNetWatcher, false);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
         replaceInstance(DcNetWatcher.class, "mImsVopsPlmn", mDcNetWatcher, "111111");
         when(mMockTelephonyInterface.getNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
@@ -1030,6 +1091,27 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
         assertTrue(mDcNetWatcher.isVoiceRat5G());
+    }
+
+    @Test
+    public void testIsVopsSupported_VopsSupported() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
+    public void testIsVopsSupported_VopsInvalid() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_INVALID);
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
+    public void testIsVopsSupported_VopsNotSupported() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+        assertFalse(mDcNetWatcher.isVopsSupported());
     }
 
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,

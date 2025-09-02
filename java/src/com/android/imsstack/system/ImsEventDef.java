@@ -108,6 +108,8 @@ public interface ImsEventDef {
     /**
      * Parameter (param1) of {@link #IMS_EVENT_IMS_VOICE_OVER_PS_STATE}.
      */
+    // Indicates that the voice over PS indication is invalid.
+    int IMS_VOICE_OVER_PS_INVALID = -1;
     // Indicates that the voice over PS indication is not enabled.
     int IMS_VOICE_OVER_PS_NOT_SUPPORTED = 0;
     // Indicates that the voice over PS indication is enabled.
