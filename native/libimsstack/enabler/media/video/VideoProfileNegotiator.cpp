@@ -293,9 +293,6 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
         }
     }
 
-    IMS_TRACE_D(
-            "NegotiatePayload(): size[%d]", pNegotiatedProfile->GetPayloadList().GetSize(), 0, 0);
-
     VideoProfile::Payload* pNegotiatedPayload = IMS_NULL;
 
     if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
@@ -304,13 +301,19 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
     }
     else  // negotiated payload is not exist, use temporary payload
     {
-        pNegotiatedPayload = SetClosestPayload(
-                pLocalProfile, pNegotiatedProfile, pTempPayload, pMatchedPeerPayload);
-    }
-
-    if (pNegotiatedPayload == IMS_NULL)
-    {
-        return IMS_FALSE;
+        pNegotiatedPayload = new VideoProfile::Payload();
+        if (MakeNegotiatedPayload(pTempPayload, pMatchedPeerPayload, &pNegotiatedPayload))
+        {
+            pNegotiatedProfile->AddPayload(pNegotiatedPayload);
+            pNegotiatedProfile->SetNegotiatedPayloadIndex(0);
+        }
+        else
+        {
+            delete pNegotiatedPayload;
+            IMS_TRACE_E(0, "NegotiatePayload(): fail to negotiate payload, size[%d]",
+                    pNegotiatedProfile->GetPayloadList().GetSize(), 0, 0);
+            return IMS_FALSE;
+        }
     }
 
     NegotiateRtcpFb(pNegotiatedProfile, pLocalPayload, pPeerPayload, pNegotiatedPayload);
@@ -524,96 +527,6 @@ IMS_BOOL VideoProfileNegotiator::NegotiateHevc(IN VideoProfile::Payload* pLocalP
 
     // make nego payload
     return MakeNegotiatedPayload(pLocalPayload, pPeerPayload, &pNegoPayload);
-}
-
-PRIVATE
-VideoProfile::Payload* VideoProfileNegotiator::SetClosestPayload(IN VideoProfile* pLocalProfile,
-        IN VideoProfile* pNegotiatedProfile, IN VideoProfile::Payload* pTempPayload,
-        IN VideoProfile::Payload* pMatchedPeerPayload)
-{
-    if (pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL || pTempPayload == IMS_NULL ||
-            pMatchedPeerPayload == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    IMS_TRACE_D("SetClosestPayload(): payload[%s]",
-            pMatchedPeerPayload->GetRtpMap().GetPayloadType().GetStr(), 0, 0);
-
-    VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
-
-    if (MakeNegotiatedPayload(pTempPayload, pMatchedPeerPayload, &pNegoPayload))
-    {
-        IMS_BOOL bFoundMatched = IMS_FALSE;
-
-        if (pMatchedPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
-        {
-            bFoundMatched = SetClosestAvc(pLocalProfile, pNegoPayload);
-        }
-        else if (pMatchedPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
-        {
-            bFoundMatched = pNegoPayload->GetFmtp() != IMS_NULL ? IMS_TRUE : IMS_FALSE;
-        }
-
-        if (bFoundMatched)
-        {
-            pNegotiatedProfile->AddPayload(pNegoPayload);
-            pNegotiatedProfile->SetNegotiatedPayloadIndex(0);
-
-            return pNegoPayload;
-        }
-    }
-
-    delete pNegoPayload;
-    return IMS_NULL;
-}
-
-PRIVATE
-IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
-        IN VideoProfile* pLocalProfile, OUT VideoProfile::Payload* pNegoPayload)
-{
-    if (pLocalProfile == IMS_NULL || pNegoPayload == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    std::shared_ptr<VideoProfile::VideoFmtp> pAvcFmtp = pNegoPayload->GetFmtp();
-
-    if (pAvcFmtp == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    // if the set resolution is invalid or too big with level, decide resolution via
-    // payload pre-set and negotatied level
-    IMS_BOOL bFoundResol = IMS_FALSE;
-
-    // first decide with source profile payload
-    for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->GetPayloadList().GetSize();
-            nLocalIndex++)
-    {
-        VideoProfile::Payload* pPayload = pLocalProfile->GetPayloadAt(nLocalIndex);
-        auto pTempLocalFmtp = pPayload->GetFmtp();
-
-        if (pTempLocalFmtp->GetLevel() <= pAvcFmtp->GetLevel())
-        {
-            pAvcFmtp->SetResolution(pTempLocalFmtp->GetResolution());
-            bFoundResol = IMS_TRUE;
-            break;
-        }
-    }
-
-    // decide by level
-    if (!bFoundResol)
-    {
-        VIDEO_RESOLUTION eProperResolution = GetAvcMaxResolutionFromLevel(pAvcFmtp->GetLevel());
-        pAvcFmtp->SetResolution(eProperResolution);
-    }
-
-    IMS_TRACE_D("SetClosestAvc(): payload[%d], resolution[%d]",
-            pNegoPayload->GetRtpMap().GetPayloadNumber(), pAvcFmtp->GetResolution(), 0);
-
-    return IMS_TRUE;
 }
 
 PRIVATE
@@ -1055,7 +968,7 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedPayload(
         IN VideoProfile::Payload* pLocalPayload, IN VideoProfile::Payload* pPeerPayload,
         OUT VideoProfile::Payload** pNegoPayload)
 {
-    if (pLocalPayload == IMS_NULL || pPeerPayload == IMS_NULL)
+    if (pLocalPayload == IMS_NULL || pPeerPayload == IMS_NULL || *pNegoPayload == IMS_NULL)
     {
         IMS_TRACE_E(0, "MakeNegotiatedPayload(): invalid payload", 0, 0, 0);
         return IMS_FALSE;
@@ -1075,6 +988,18 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedPayload(
             pNegoFmtp->SetProfileLevelId(pPeerFmtp->GetProfileLevelId());
             pNegoFmtp->SetLevel(pPeerFmtp->GetLevel());
         }
+
+        if (pPeerFmtp->GetResolution() != VIDEO_RESOLUTION_NOT_USED)
+        {
+            if (VideoProfileUtil::CompareResolution(
+                        pNegoFmtp->GetResolution(), pPeerFmtp->GetResolution()) > 0)
+            {
+                pNegoFmtp->SetResolution(pPeerFmtp->GetResolution());
+            }
+        }
+
+        IMS_TRACE_I("MakeNegotiatedPayload(): AVC profile[%d], level[%d], resolution[%d]",
+                pNegoFmtp->GetProfile(), pNegoFmtp->GetLevel(), pNegoFmtp->GetResolution());
     }
     else if (pLocalPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
@@ -1086,41 +1011,12 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedPayload(
         {
             pNegoFmtp->SetLevel(pPeerFmtp->GetLevel());
         }
+
+        IMS_TRACE_I("MakeNegotiatedPayload(): HEVC profile[%d], level[%d], resolution[%d]",
+                pNegoFmtp->GetProfile(), pNegoFmtp->GetLevel(), pNegoFmtp->GetResolution());
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-VIDEO_RESOLUTION VideoProfileNegotiator::GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel)
-{
-    IMS_TRACE_D("GetAvcMaxResolutionFromLevel(): Level[%d]", nLevel, 0, 0);
-
-    if (nLevel > 31)
-    {
-        nLevel = 31;
-    }
-
-    // default resoltuion is portrait
-    switch (nLevel)
-    {
-        case 31:
-            return VIDEO_RESOLUTION_HD_PR;
-        case 30:
-        case 22:
-            return VIDEO_RESOLUTION_VGA_PR;
-        case 21:
-        case 20:
-        case 14:
-        case 13:
-        case 12:
-            return VIDEO_RESOLUTION_CIF_PR;
-        case 11:
-        case 10:
-            return VIDEO_RESOLUTION_QCIF_PR;
-        default:
-            return VIDEO_RESOLUTION_VGA_PR;
-    }
 }
 
 PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(

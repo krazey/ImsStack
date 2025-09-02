@@ -69,7 +69,7 @@ IMS_BOOL VideoSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseTransportType(
         IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile)
 {
@@ -89,7 +89,7 @@ void VideoSdpParser::ParseTransportType(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::SetAvpfSupport(OUT VideoProfile* pProfile)
 {
     if (pProfile == IMS_NULL)
@@ -113,7 +113,7 @@ void VideoSdpParser::SetAvpfSupport(OUT VideoProfile* pProfile)
             pProfile->IsAvpfSupported(), pProfile->IsCapaNegoForAvpfSupported(), 0);
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParsePayloads(
         IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile)
 {
@@ -173,7 +173,7 @@ void VideoSdpParser::ParsePayloads(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseRtpMap(
         IN const SdpAvCodec* pSdpCodec, OUT VideoProfile::Payload* pPayload)
 {
@@ -192,7 +192,7 @@ void VideoSdpParser::ParseRtpMap(
             strCodecName.GetStr(), nSamplingRate);
 }
 
-PRIVATE
+PROTECTED
 VIDEO_CODEC VideoSdpParser::SetCodec(IN VideoProfile::Payload* pPayload)
 {
     VIDEO_CODEC eVideoCodec = VIDEO_CODEC_NONE;
@@ -221,14 +221,14 @@ VIDEO_CODEC VideoSdpParser::SetCodec(IN VideoProfile::Payload* pPayload)
     return eVideoCodec;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::IsValidCodec(IN const VIDEO_CODEC eVideoCodec)
 {
     return (eVideoCodec == VIDEO_CODEC_AVC || eVideoCodec == VIDEO_CODEC_HEVC) ? IMS_TRUE
                                                                                : IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 AString VideoSdpParser::ParseImageAttr(IN const SdpAvCodec* pSdpCodec,
         IN const ImsList<AString>& objImageAttributes, OUT VideoProfile::Payload* pPayload)
 {
@@ -253,7 +253,7 @@ AString VideoSdpParser::ParseImageAttr(IN const SdpAvCodec* pSdpCodec,
     return strImageAttr;
 }
 
-PRIVATE
+PROTECTED
 AString VideoSdpParser::ParseFrameSize(IN const SdpAvCodec* pSdpCodec,
         IN const ImsList<AString>& objFrameSizes, OUT VideoProfile::Payload* pPayload)
 {
@@ -278,7 +278,7 @@ AString VideoSdpParser::ParseFrameSize(IN const SdpAvCodec* pSdpCodec,
     return strFrameSize;
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseCvo(IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -321,7 +321,7 @@ void VideoSdpParser::ParseCvo(IN const IMediaDescriptor* pDescriptor, OUT VideoP
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         OUT VideoProfile::Payload* pPayload, IN const VIDEO_CODEC eVideoCodec)
 {
@@ -414,7 +414,7 @@ IMS_BOOL VideoSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseVideoFmtp(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
@@ -432,7 +432,7 @@ IMS_BOOL VideoSdpParser::ParseVideoFmtp(IN const ImsList<AString>& objSplitEqual
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseAvcFmtp(IN const ImsList<AString>& objSplitEqual,
         IN const AString& strSpropParam, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp)
 {
@@ -452,7 +452,7 @@ void VideoSdpParser::ParseAvcFmtp(IN const ImsList<AString>& objSplitEqual,
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps,
         OUT AString& strSps, OUT AString& strPps, OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp)
 {
@@ -484,7 +484,7 @@ void VideoSdpParser::ParseHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParsePacketizationMode(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
@@ -508,7 +508,7 @@ IMS_BOOL VideoSdpParser::ParsePacketizationMode(IN const ImsList<AString>& objSp
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseProfileLevelId(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp)
 {
@@ -538,7 +538,7 @@ IMS_BOOL VideoSdpParser::ParseProfileLevelId(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseSpropParameterSets(IN const ImsList<AString>& objSplitEqual,
         IN const AString& strSpropParam, OUT std::shared_ptr<VideoProfile::AvcFmtp> pFmtp)
 {
@@ -576,7 +576,7 @@ IMS_BOOL VideoSdpParser::ParseSpropParameterSets(IN const ImsList<AString>& objS
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseProfileId(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp)
 {
@@ -600,7 +600,7 @@ IMS_BOOL VideoSdpParser::ParseProfileId(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseLevelId(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<VideoProfile::HevcFmtp> pFmtp)
 {
@@ -624,7 +624,7 @@ IMS_BOOL VideoSdpParser::ParseLevelId(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseVps(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps)
 {
     if (objSplitEqual.GetAt(0).Equals("sprop-vps"))
@@ -639,7 +639,7 @@ IMS_BOOL VideoSdpParser::ParseVps(IN const ImsList<AString>& objSplitEqual, OUT 
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParseSps(IN const ImsList<AString>& objSplitEqual, OUT AString& strSps)
 {
     if (objSplitEqual.GetAt(0).Equals("sprop-sps"))
@@ -654,7 +654,7 @@ IMS_BOOL VideoSdpParser::ParseSps(IN const ImsList<AString>& objSplitEqual, OUT 
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpParser::ParsePps(IN const ImsList<AString>& objSplitEqual, OUT AString& strPps)
 {
     if (objSplitEqual.GetAt(0).Equals("sprop-pps"))
@@ -669,7 +669,7 @@ IMS_BOOL VideoSdpParser::ParsePps(IN const ImsList<AString>& objSplitEqual, OUT 
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseSpropParam(IN const AString& strVps, IN const AString& strSps,
         IN const AString& strPps, OUT std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
@@ -696,7 +696,7 @@ void VideoSdpParser::ParseSpropParam(IN const AString& strVps, IN const AString&
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseResolution(OUT VideoProfile::Payload* pPayload,
         const AString& strImageAttr, const AString& strFrameSize, VIDEO_CODEC eVideoCodec)
 {
@@ -713,13 +713,12 @@ void VideoSdpParser::ParseResolution(OUT VideoProfile::Payload* pPayload,
         return;
     }
 
-    pFmtp->SetResolution(
-            GetResolutionFromSdp(eVideoCodec, strImageAttr, strFrameSize, pFmtp->GetSpropParam()));
+    pFmtp->SetResolution(GetResolutionFromSdp(eVideoCodec, strImageAttr, strFrameSize, pFmtp));
 
     IMS_TRACE_I("ParseResolution(): resolution[%d]", pFmtp->GetResolution(), 0, 0);
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpParser::ParseAvpfAttribute(IN const SdpAvCodec* pSdpCodec,
         IN VideoProfile::Payload* pPayload, OUT VideoProfile* pProfile)
 {
@@ -740,7 +739,7 @@ void VideoSdpParser::ParseAvpfAttribute(IN const SdpAvCodec* pSdpCodec,
     }
 }
 
-PRIVATE IMS_BOOL VideoSdpParser::IsAvpfSupported(IN VideoProfile* pProfile)
+PROTECTED IMS_BOOL VideoSdpParser::IsAvpfSupported(IN VideoProfile* pProfile)
 {
     if (pProfile == IMS_NULL)
     {
@@ -766,7 +765,7 @@ PRIVATE IMS_BOOL VideoSdpParser::IsAvpfSupported(IN VideoProfile* pProfile)
     return IMS_FALSE;
 }
 
-PRIVATE IMS_BOOL VideoSdpParser::GetCorrectImageIndex(
+PROTECTED IMS_BOOL VideoSdpParser::GetCorrectImageIndex(
         IN IMS_SINT32 nPayloadTypeNum, IN ImsList<AString> objAttributes, OUT IMS_UINT32* nIndex)
 {
     for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); i++)
@@ -799,47 +798,47 @@ PRIVATE IMS_BOOL VideoSdpParser::GetCorrectImageIndex(
     return IMS_FALSE;
 }
 
-PRIVATE VIDEO_RESOLUTION VideoSdpParser::GetResolutionFromSdp(IN VIDEO_CODEC /*codecType*/,
+PROTECTED VIDEO_RESOLUTION VideoSdpParser::GetResolutionFromSdp(IN VIDEO_CODEC eCodecType,
         IN const AString& strImageAttr, IN const AString& strFrameSize,
-        IN const AString& /*strSpropParam*/, IN IMS_SINT32 nQcif)
+        IN std::shared_ptr<VideoProfile::VideoFmtp> pFmtp)
 {
     IMS_UINT32 nWidth, nHeight;
 
     // Get nWidth, nHeight From Image Attribute
     if (strImageAttr.GetLength() != 0 &&
-            (GetWidthHeightFromSdpImageAttr(strImageAttr, &nWidth, &nHeight) != IMS_FALSE))
+            GetWidthHeightFromSdpImageAttr(strImageAttr, &nWidth, &nHeight))
     {
-        return GetResolutionFromWidthHeight(nWidth, nHeight);
+        return VideoProfileUtil::GetResolutionFromWidthHeight(nWidth, nHeight);
     }
-
-    /** TODO: parse the video sprop */
-    // // - Get nWidth, nHeight From SpropParam
-    // if (strSpropParam.GetLength() != 0 &&
-    //        (GetWidthHeightFromSdp_SpropParam(
-    //                 codecType, strSpropParam.GetStr(), &nWidth, &nHeight) != IMS_FALSE))
-    // {
-    //    return GetResolutionFromWidthHeight(nWidth, nHeight);
-    // }
 
     if (strFrameSize.GetLength() != 0 &&
-            (GetWidthHeightFromSdpFrameSize(strFrameSize, &nWidth, &nHeight) != IMS_FALSE))
+            GetWidthHeightFromSdpFrameSize(strFrameSize, &nWidth, &nHeight))
     {
-        return GetResolutionFromWidthHeight(nWidth, nHeight);
+        return VideoProfileUtil::GetResolutionFromWidthHeight(nWidth, nHeight);
     }
 
-    // Check if nQcif exist
-    else if (nQcif != -1)
+    if (pFmtp != IMS_NULL)
     {
-        return VIDEO_RESOLUTION_QCIF_LS;
+        // Get nWidth, nHeight From SpropParam
+        if (pFmtp->GetSpropParam().GetLength() != 0 &&
+                VideoProfileUtil::GetWidthHeightFromSpropParam(
+                        eCodecType, pFmtp->GetSpropParam(), &nWidth, &nHeight))
+        {
+            return VideoProfileUtil::GetResolutionFromWidthHeight(nWidth, nHeight);
+        }
+
+        if (eCodecType == VIDEO_CODEC_AVC)
+        {
+            return VideoProfileUtil::GetAvcMaxResolutionFromLevel(pFmtp->GetLevel());
+        }
+        // TODO: add the logic to parse the resolution from the level for HEVC
     }
-    else
-    {
-        IMS_TRACE_D("GetResolutionFromSdp(): no preferred resolution from SDP", 0, 0, 0);
-        return VIDEO_RESOLUTION_NOT_USED;
-    }
+
+    IMS_TRACE_D("GetResolutionFromSdp(): no preferred resolution from SDP", 0, 0, 0);
+    return VIDEO_RESOLUTION_NOT_USED;
 }
 
-PRIVATE IMS_BOOL VideoSdpParser::GetAvpfFromAttributes(IN const SdpMediaFormat* pMediaFormat,
+PROTECTED IMS_BOOL VideoSdpParser::GetAvpfFromAttributes(IN const SdpMediaFormat* pMediaFormat,
         IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr)
 {
     if (pMediaFormat == IMS_NULL || pRtcpFbAttr == IMS_NULL || pCapaNego == IMS_NULL)
@@ -934,7 +933,7 @@ PRIVATE IMS_BOOL VideoSdpParser::GetAvpfFromAttributes(IN const SdpMediaFormat* 
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL VideoSdpParser::GetAvpfFromAttributesEx(
+PROTECTED IMS_BOOL VideoSdpParser::GetAvpfFromAttributesEx(
         IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr)
 {
     if (pRtcpFbAttr == IMS_NULL || pCapaNego == IMS_NULL)
@@ -978,7 +977,7 @@ PRIVATE IMS_BOOL VideoSdpParser::GetAvpfFromAttributesEx(
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL VideoSdpParser::GetWidthHeightFromSdpImageAttr(
+PROTECTED IMS_BOOL VideoSdpParser::GetWidthHeightFromSdpImageAttr(
         IN const AString& strImageAttr, OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight)
 {
     IMS_UINT32 nImagePayloadNum = 0;  // Payload Number in Image Attr
@@ -1166,49 +1165,7 @@ PRIVATE IMS_BOOL VideoSdpParser::GetWidthHeightFromSdpImageAttr(
     return IMS_FALSE;
 }
 
-PRIVATE VIDEO_RESOLUTION VideoSdpParser::GetResolutionFromWidthHeight(
-        IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight)
-{
-    IMS_TRACE_D("GetResolutionFromWidthHeight(): width[%d], height[%d]", nWidth, nHeight, 0);
-    if (nWidth == 480 && nHeight == 640)
-        return VIDEO_RESOLUTION_VGA_PR;
-    else if (nWidth == 640 && nHeight == 480)
-        return VIDEO_RESOLUTION_VGA_LS;
-    else if (nWidth == 240 && nHeight == 320)
-        return VIDEO_RESOLUTION_QVGA_PR;
-    else if (nWidth == 320 && nHeight == 240)
-        return VIDEO_RESOLUTION_QVGA_LS;
-    else if (nWidth == 144 && nHeight == 176)
-        return VIDEO_RESOLUTION_QCIF_PR;
-    else if (nWidth == 176 && nHeight == 144)
-        return VIDEO_RESOLUTION_QCIF_LS;
-    else if (nWidth == 352 && nHeight == 288)
-        return VIDEO_RESOLUTION_CIF_LS;
-    else if (nWidth == 288 && nHeight == 352)
-        return VIDEO_RESOLUTION_CIF_PR;
-    else if (nWidth == 240 && nHeight == 352)
-        return VIDEO_RESOLUTION_SIF_PR;
-    else if (nWidth == 352 && nHeight == 240)
-        return VIDEO_RESOLUTION_SIF_LS;
-    else if (nWidth == 128 && nHeight == 96)
-        return VIDEO_RESOLUTION_SQCIF_LS;
-    else if (nWidth == 96 && nHeight == 128)
-        return VIDEO_RESOLUTION_SQCIF_PR;
-    else if (nWidth == 720 && nHeight == 1280)
-        return VIDEO_RESOLUTION_HD_PR;
-    else if (nWidth == 1280 && nHeight == 720)
-        return VIDEO_RESOLUTION_HD_LS;
-    else if (nWidth == 1080 && nHeight == 1920)
-        return VIDEO_RESOLUTION_FHD_PR;
-    else if (nWidth == 1920 && nHeight == 1080)
-        return VIDEO_RESOLUTION_FHD_LS;
-    else
-        IMS_TRACE_E(0, "GetResolutionFromWidthHeight(): not supported width[%d], height[%d]",
-                nWidth, nHeight, 0);
-    return VIDEO_RESOLUTION_QCIF_PR;
-}
-
-PRIVATE IMS_BOOL VideoSdpParser::GetWidthHeightFromSdpFrameSize(
+PROTECTED IMS_BOOL VideoSdpParser::GetWidthHeightFromSdpFrameSize(
         IN AString strFrameSize, OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight)
 {
     IMS_UINT32 nFrameSizePayloadNum = 0;

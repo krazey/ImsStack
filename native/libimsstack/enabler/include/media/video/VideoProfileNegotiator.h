@@ -83,10 +83,6 @@ private:
             IN VideoProfile* pLocalProfile, OUT VideoProfile* pNegotiatedProfile,
             OUT VideoProfile::Payload** pTempPayload,
             OUT VideoProfile::Payload** pMatchedPeerPayload);
-    VideoProfile::Payload* SetClosestPayload(IN VideoProfile* pLocalProfile,
-            IN VideoProfile* pNegotiatedProfile, IN VideoProfile::Payload* pTempPayload,
-            IN VideoProfile::Payload* pMatchedPeerPayload);
-    IMS_BOOL SetClosestAvc(IN VideoProfile* pLocalProfile, OUT VideoProfile::Payload* pNegoPayload);
     void NegotiateRtcpFb(OUT VideoProfile* pNegotiatedProfile,
             IN VideoProfile::Payload* pLocalPayload, IN VideoProfile::Payload* pPeerPayload,
             OUT VideoProfile::Payload* pNegoPayload);
@@ -104,7 +100,6 @@ private:
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
     IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload** pNegoPayload);
-    VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
     IMS_BOOL MakeNegotiatedBandwidth(IN const VideoConfiguration* pConfig,
             IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);

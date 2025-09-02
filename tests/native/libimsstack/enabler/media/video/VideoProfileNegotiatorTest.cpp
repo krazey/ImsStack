@@ -33,7 +33,14 @@ const AString kAvcProfileID = "42e01f";
 const IMS_UINT32 kLocalPayload = 97;
 const IMS_UINT32 kPeerPayload = 100;
 
-// Test fixture for VideoProfileNegotiator tests
+/**
+ * @brief Test fixture for the VideoProfileNegotiator class.
+ *
+ * This class sets up a common environment for testing video profile negotiation logic.
+ * It initializes local, peer, and negotiated VideoProfile objects, along with a
+ * mock VideoConfiguration. Helper methods are provided to easily create and add
+ * AVC and HEVC payloads to the profiles for various test scenarios.
+ */
 class VideoProfileNegotiatorTest : public ::testing::Test
 {
 protected:
@@ -541,12 +548,41 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
     auto pNegoFmtp = pNegoPayload->GetFmtp();
     ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
-    // Check that the eResolution was set based on GetAvcMaxResolutionFromLevel or highest local
-    // In this case, local VGA (index 0) was the temp pPayload. SetClosestAvc uses nLevel 31 ->
-    // VGA_LS
-    EXPECT_EQ(pNegoFmtp->GetResolution(),
-            VIDEO_RESOLUTION_VGA_LS);  // SetClosestAvc logic based on nLevel
+    // When no exact resolution match is found, the negotiator falls back to the first
+    // compatible local payload. The final resolution is the lower of the two.
+    // Here, local candidate is VGA_LS and peer is HD_LS, so the result is VGA_LS.
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
     EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
+    EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
+    EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosestCIFAndQVGA)
+{
+    // Arrange: No exact eResolution match, but levels match. Local has QVGA, Peer offers CIF.
+    // Expect negotiation to succeed using the closest available local eResolution (QVGA).
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_QVGA_PR, 12,
+            "42000C");  // Local QVGA
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_CIF_PR, 11,
+            "42000B");  // Peer offers CIF (mismatch)
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
+    auto pNegoFmtp = pNegoPayload->GetFmtp();
+    ASSERT_NE(pNegoFmtp, nullptr) << "Assert by the no fmtp";
+    // When resolutions mismatch, the negotiator uses the first compatible local payload
+    // as a candidate. The final resolution is the lower of the two.
+    // Here, local is QVGA_PR and peer is CIF_PR, so the result is QVGA_PR.
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_QVGA_PR);
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 11);
     EXPECT_EQ(m_pLocalProfile->GetNegotiatedPayloadIndex(), 0);  // 1st index
     EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // 1st index
 }

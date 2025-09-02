@@ -47,7 +47,7 @@ public:
     virtual IMS_BOOL Parse(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
 
-private:
+protected:
     void ParseTransportType(IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
     void SetAvpfSupport(OUT VideoProfile* pProfile);
     void ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
@@ -90,16 +90,14 @@ private:
     IMS_BOOL IsAvpfSupported(IN VideoProfile* pProfile);
     IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN ImsList<AString> objAttributes,
             OUT IMS_UINT32* nIndex);
-    VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC codecType,
-            IN const AString& strImageAttrFromSdp, IN const AString& strFrameSizeFromSdp,
-            IN const AString& strSpropParam, IN IMS_SINT32 nQcif = -1);
+    VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC eCodecType, IN const AString& strImageAttr,
+            IN const AString& strFrameSize, IN std::shared_ptr<VideoProfile::VideoFmtp> pFmtp);
     IMS_BOOL GetAvpfFromAttributes(IN const SdpMediaFormat* pMediaFormat,
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
     IMS_BOOL GetAvpfFromAttributesEx(
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
     IMS_BOOL GetWidthHeightFromSdpImageAttr(IN const AString& strImageAttrFromSdp,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
-    VIDEO_RESOLUTION GetResolutionFromWidthHeight(IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight);
     IMS_BOOL GetWidthHeightFromSdpFrameSize(IN AString strFrameSizeFromSdp,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
 };
