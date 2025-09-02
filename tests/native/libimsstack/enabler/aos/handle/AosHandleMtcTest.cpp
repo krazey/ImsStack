@@ -638,8 +638,6 @@ TEST_F(AosHandleMtcTest, ReportSsacBarredWhenPlmnBlockDueToHoldingSsac)
     // GIVEN
     ON_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -887,10 +885,6 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
     m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
@@ -925,10 +919,6 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test2)
     m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
             .Times(1);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
@@ -1022,10 +1012,6 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosConnection, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
@@ -1060,10 +1046,6 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test6)
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosConnection, GetState())
             .Times(AnyNumber())
@@ -2580,10 +2562,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     m_pAosHandleMtc->ProcessNetworkChanged();
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
 }
@@ -2623,9 +2601,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
     m_pAosHandleMtc->ProcessNetworkChanged();
     EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_VOWIFI_CAPABILITY));
 }
@@ -2653,10 +2628,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test3)
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -2727,48 +2698,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    m_pAosHandleMtc->ProcessNetworkChanged();
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
-}
-
-TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test7)
-{
-    // Test7: Capa=(LTE:voice,video / IWLAN:video / NR:none), unavailable policy, network=2G
-    // Expectation: No block network
-
-    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-
-    m_pAosHandleMtc->SetCapabilities(objCapabilities);
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_GSM);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -2800,10 +2729,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test8)
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -2845,10 +2770,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test9)
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -2895,10 +2816,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test10)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -2938,10 +2855,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_CallComposer)
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -2987,9 +2900,6 @@ TEST_F(AosHandleMtcTest, ShouldBlockTextCapabilityIfUeMovesToTheNetworkHasNoText
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
-
     // WHEN
     m_pAosHandleMtc->ProcessNetworkChanged();
 
@@ -3022,9 +2932,6 @@ TEST_F(AosHandleMtcTest, ShouldUnblockTextCapabilityIfUeMovesToTheNetworkHasText
 
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .WillByDefault(Return(IMS_FALSE));
 
     // WHEN
@@ -3064,13 +2971,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_RefreshSsacInfoOnLte)
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
     m_pAosHandleMtc->SetEpdgEnabled(IMS_FALSE);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
-
     m_pAosHandleMtc->Init();
 
     m_pAosHandleMtc->ProcessNetworkChanged();
@@ -3412,10 +3313,6 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test2)
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -3468,10 +3365,6 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test6)
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -3520,10 +3413,6 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_VolteHysTimerRunning_by_Ssac)
             .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -3578,8 +3467,6 @@ TEST_F(AosHandleMtcTest, ShouldNotStartVolteHysTimeWhenVopsChanged_Plmn1_Off_Plm
     ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -3610,8 +3497,6 @@ TEST_F(AosHandleMtcTest, ShouldNotStartVolteHysTimeWhenVopsChanged_Plmn1_Off_Plm
     ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -3647,8 +3532,6 @@ TEST_F(AosHandleMtcTest, ShouldStartVolteHysTimeWhenVopsChanged_Plmn1_Off_Plmn2_
     ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -3685,8 +3568,6 @@ TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimeWhenVopsChanged_Plmn1_Off_Plmn1_O
     ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -3724,8 +3605,6 @@ TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimeWhenVopsChanged_Plmn1_Off_Plmn1_O
     ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -3765,8 +3644,6 @@ TEST_F(AosHandleMtcTest, ShouldNotStartVolteHysTimeWhenVopsChanged_Plmn1_Off_Plm
     ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .WillByDefault(Return(IMS_FALSE));
@@ -4741,10 +4618,6 @@ TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_VolteHysTimerRunning_by_Vops)
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -4874,10 +4747,6 @@ TEST_F(AosHandleMtcTest, Timer_TimerExpired_Test)
 
 TEST_F(AosHandleMtcTest, StopVolteHysTimer_PdnLost_Then_UmtsGsm)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
@@ -4921,10 +4790,6 @@ TEST_F(AosHandleMtcTest, StopVolteHysTimer_PdnLost_Then_UmtsGsm)
 
 TEST_F(AosHandleMtcTest, StopVolteHysTimer_UmtsGsm_Then_PdnLost)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
