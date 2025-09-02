@@ -733,14 +733,6 @@ public:
     virtual IMS_BOOL IsRegRequiredAfterImsECallEndOnRegHeld() const = 0;
 
     /**
-     * @brief Flag indicating reg includes feature tag even though the feature is not available.
-     *
-     * @return IMS_BOOL Return whether the feature tag is included.
-     * @see {@code ims.support_reg_with_feature_tag_unavailable_bool}
-     */
-    virtual IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const = 0;
-
-    /**
      * @brief Flag specifying if verstat is supported for registration or not
      *
      * @return IMS_BOOL Return whether to be supported or not

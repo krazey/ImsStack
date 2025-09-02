@@ -504,11 +504,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsECallEndOnRegHel
     return m_objAsset.bRequiredInitRegAfterImsECallEndOnRegHeld;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupported() const
-{
-    return m_objAsset.bSupportRegWithFeatureTagUnavailable;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() const
 {
     return m_objAsset.bSupportVerstatForReg;
@@ -1593,8 +1588,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportGibaForERegInRoaming = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL);
-    m_objAsset.bSupportRegWithFeatureTagUnavailable =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatBasedOnNetworkForReg =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL);
     m_objAsset.bSupportVerstatForReg =

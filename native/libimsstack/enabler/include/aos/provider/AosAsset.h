@@ -69,7 +69,6 @@ public:
             bSupportERegWhenEAttachWithValidSim(IMS_FALSE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportGibaForERegInRoaming(IMS_FALSE),
-            bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatBasedOnNetworkForReg(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
             bSupportVideoForEmergencyReg(IMS_FALSE),
@@ -184,7 +183,6 @@ public:
     IMS_BOOL bSupportERegWhenEAttachWithValidSim;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportGibaForERegInRoaming;
-    IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatBasedOnNetworkForReg;
     IMS_BOOL bSupportVerstatForReg;
     IMS_BOOL bSupportVideoForEmergencyReg;

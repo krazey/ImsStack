@@ -704,10 +704,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -1022,7 +1018,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
     EXPECT_FALSE(m_pAosNConfiguration->IsAnonymousECallActionSupported());
-    EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatSupportedBasedOnNetworkForReg());
     EXPECT_TRUE(m_pAosNConfiguration->IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry());

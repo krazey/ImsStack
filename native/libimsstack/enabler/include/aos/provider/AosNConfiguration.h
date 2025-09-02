@@ -116,7 +116,6 @@ public:
     IMS_BOOL IsRegRetryWithIpVerFallback() const override;
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegRequiredAfterImsECallEndOnRegHeld() const override;
-    IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
     IMS_BOOL IsVerstatSupportedBasedOnNetworkForReg() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;

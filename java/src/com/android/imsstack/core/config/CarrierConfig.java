@@ -464,8 +464,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "required_init_reg_after_ims_ecall_end_on_reg_held_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 KEY_PREFIX + "sip_over_ipsec_enabled_in_roaming_bool";
-        public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
-                KEY_PREFIX + "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL =
                 KEY_PREFIX + "support_verstat_based_on_network_for_reg_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
