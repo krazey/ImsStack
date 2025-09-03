@@ -600,13 +600,18 @@ PRIVATE IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
 PRIVATE
 IMS_BOOL VideoSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 {
-    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+    auto param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+    auto pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
-    if (param != IMS_NULL)
+    if (param != IMS_NULL && pVideoConfig != IMS_NULL)
     {
         IMS_TRACE_I("OnSelectCameraCmd() - state[%d], camera id[%d]", m_nState, param->nValue, 0);
 
-        VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
+        if (pVideoConfig->getCameraId() == param->nValue)
+        {
+            IMS_TRACE_I("OnSelectCameraCmd() - same camera id[%d]", m_nCameraId, 0, 0);
+            return IMS_TRUE;
+        }
 
         m_nCameraId = param->nValue;
 
@@ -654,7 +659,7 @@ IMS_BOOL VideoSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 PRIVATE
 IMS_BOOL VideoSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
 {
-    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+    auto param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
     if (param != IMS_NULL)
     {
@@ -676,17 +681,24 @@ IMS_BOOL VideoSession::OnSetPauseImageCmd(IN IMS_UINTP /*pParam*/)
 PRIVATE
 IMS_BOOL VideoSession::OnChangeOrientation(IN IMS_UINTP pParam)
 {
-    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+    auto param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+    auto pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
-    if (param != IMS_NULL)
+    if (param != IMS_NULL && pVideoConfig != IMS_NULL)
     {
         IMS_TRACE_I(
                 "OnChangeOrientation() - state[%d], orientation[%d]", m_nState, param->nValue, 0);
 
+        if (pVideoConfig->getDeviceOrientationDegree() == param->nValue)
+        {
+            IMS_TRACE_I("OnChangeOrientation() - same orientation[%d]", param->nValue, 0, 0);
+            return IMS_TRUE;
+        }
+
         if (m_nState != STATE_PREVIEW)
         {
-            REINTERPRET_CAST(VideoConfig*, m_pRtpConfig)->setDeviceOrientationDegree(param->nValue);
-            this->Modify();
+            pVideoConfig->setDeviceOrientationDegree(param->nValue);
+            Modify();
         }
 
         return IMS_TRUE;
