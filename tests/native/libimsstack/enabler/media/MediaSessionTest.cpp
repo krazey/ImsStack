@@ -26,9 +26,9 @@
 #include "MockMediaNego.h"
 #include "MockMediaNegoHandler.h"
 #include "audio/MockAudioController.h"
-#include "video/MockVideoController.h"
-#include "text/MockTextController.h"
 #include "audio/MockAudioNego.h"
+#include "text/MockTextController.h"
+#include "video/MockVideoController.h"
 #include "video/MockVideoNego.h"
 
 using ::testing::_;
@@ -40,10 +40,8 @@ using ::testing::SetArgPointee;
 
 const AString LOCAL_IP = "127.0.0.1";
 const AString REMOTE_IP = "127.0.0.1";
-const IMS_UINT32 LOCAL_PORT = 20000;
 const IMS_UINT32 REMOTE_PORT = 40000;
 const IMS_UINT32 NEGO_ID = 1234567;
-const IMS_UINT32 NEGO_ID_2 = 7654321;
 
 class MockMediaSession : public MediaSession
 {
@@ -222,6 +220,32 @@ TEST_F(MediaSessionTest, testFormSdpSuccess)
     // Call the method under test
     EXPECT_TRUE(m_pSession->FormSdp(
             nNegoId, m_pIsession.get(), eType, nAudioDir, nVideoDir, nTextDir, bReoffer));
+}
+
+TEST_F(MediaSessionTest, testFormSdpSuccessVideoOpen)
+{
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FormSdp(_, _, _, _, _, _, _)).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pMockVideoController, UpdateLocalAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockVideoController, OpenSession()).Times(1);
+    m_pSession->FormSdp(NEGO_ID, m_pIsession.get(), MEDIA_TYPE_VIDEO, 0, 0, 0, false);
+}
+
+TEST_F(MediaSessionTest, testFormSdpClosesVideoSession)
+{
+    // Arrange: Simulate that the video session is one time opened.
+    // This is necessary for CloseMediaSessions to actually attempt to close it.
+    EXPECT_CALL(*m_pMockVideoController, IsSessionOpened())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    // Expect CloseSession to be called on the video controller.
+    EXPECT_CALL(*m_pMockVideoController, CloseSession()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    // Act: Call FormSdp with a media type that does NOT include MEDIA_TYPE_VIDEO (e.g.,
+    // MEDIA_TYPE_AUDIO).
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FormSdp(_, _, _, _, _, _, _)).WillOnce(Return(IMS_TRUE));
+    m_pSession->FormSdp(NEGO_ID, m_pIsession.get(), MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND_RECEIVE,
+            MEDIA_DIRECTION_INACTIVE, MEDIA_DIRECTION_INACTIVE, false);
 }
 
 TEST_F(MediaSessionTest, testFormSdpFailure)

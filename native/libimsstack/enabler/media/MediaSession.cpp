@@ -163,7 +163,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession
         return IMS_FALSE;
     }
 
-    if (GetNegotiatedMediaType(nNegoId) & MEDIA_TYPE_VIDEO)
+    if (eType & MEDIA_TYPE_VIDEO)
     {
         // open the video session for preview
         OpenMediaSessions(nNegoId, m_pMediaNegoHandler->FindMediaNego(nNegoId), MEDIA_TYPE_VIDEO);
