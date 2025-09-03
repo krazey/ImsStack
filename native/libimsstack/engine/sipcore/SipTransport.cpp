@@ -324,7 +324,8 @@ IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /*pSipMsg
 PUBLIC
 void SipTransport::NotifyTransactionTimeout()
 {
-    if (!IsFlowControlPortConfigured() && !IsTcpConnectionOnlyRequired() && m_pSocket != IMS_NULL &&
+    if (!IsFlowControlPortConfigured() && !IsTcpConnectionOnlyRequired() &&
+            GetTransportHelper()->IsSocketPresent(m_pSocket) &&
             m_pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT)
     {
         // If SIP transaction timeout occurs and a client-initiated TCP connection exists,
@@ -347,7 +348,7 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
     // Find a socket to send an SIP message, and if not found, try to create a new socket.
     m_pSocket = (m_pSocket == IMS_NULL) ? LookupSocket() : m_pSocket;
 
-    if (m_pSocket != IMS_NULL && m_pSocket->IsClosedOrBeingClosed())
+    if (GetTransportHelper()->IsSocketPresent(m_pSocket) && m_pSocket->IsClosedOrBeingClosed())
     {
         IMS_TRACE_D("Socket is already closed or being closed", 0, 0, 0);
         ReleaseSocket();
@@ -869,7 +870,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
     }
 
     // If the transport has already the connected socket, do not reserve the socket again.
-    if (m_pSocket != IMS_NULL)
+    if (GetTransportHelper()->IsSocketPresent(m_pSocket))
     {
         // Check if the port is same or not...
         if (m_nType != TYPE_CLIENT)
