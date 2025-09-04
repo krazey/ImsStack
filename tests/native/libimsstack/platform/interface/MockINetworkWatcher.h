@@ -50,6 +50,8 @@ public:
     MOCK_METHOD(AString, GetNetworkOperator, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsEmergencyCallSupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsImsVoiceCallSupported, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsImsServiceContinuitySupported,
+            (IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyOnly, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyAttachSupported, (), (override));
     MOCK_METHOD(IMS_SINT32, GetMocnPlmnInfo, (), (override));

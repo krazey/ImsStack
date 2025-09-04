@@ -508,6 +508,34 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
     return PlatformContext::GetInstance()->GetSystem()->IsImsVoiceCallSupported(GetSlotId());
 }
 
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsServiceContinuitySupported(
+        IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork) const
+{
+    if (ePreviousNetwork == RADIOTECH_TYPE_NR)
+    {
+        switch (eCurrentNetwork)
+        {
+            // 2G networks
+            case RADIOTECH_TYPE_GPRS:
+            case RADIOTECH_TYPE_EDGE:
+            case RADIOTECH_TYPE_IDEN:
+            case RADIOTECH_TYPE_GSM:
+            // 3G networks
+            case RADIOTECH_TYPE_UMTS:
+            case RADIOTECH_TYPE_HSDPA:
+            case RADIOTECH_TYPE_HSUPA:
+            case RADIOTECH_TYPE_HSPA:
+            case RADIOTECH_TYPE_HSPAP:
+            case RADIOTECH_TYPE_TD_SCDMA:
+                return IMS_FALSE;
+            default:
+                break;
+        }
+    }
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyOnly()
 {
     return PlatformContext::GetInstance()->GetSystem()->IsEmergencyOnly(GetSlotId());
