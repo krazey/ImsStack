@@ -321,8 +321,6 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
         if (bind(hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
                     sizeof(stSockAddr)) < 0)
         {
-            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)", errno,
-                    strerror(errno), 0);
             close(hSocket);
             return IMS_FALSE;
         }
@@ -348,8 +346,6 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
         if (bind(hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
                     sizeof(stSockAddr)) < 0)
         {
-            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)", errno,
-                    strerror(errno), 0);
             close(hSocket);
             return IMS_FALSE;
         }
