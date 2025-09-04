@@ -100,6 +100,9 @@ protected:
     {
         delete pDialingPlan;
         delete pConfigurationProxy;
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_NETWORK, IMS_NULL);
     }
 };
 
