@@ -230,6 +230,7 @@ private:
     IMS_SINT32 GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession);
     IMS_BOOL IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession);
     AudioConfiguration* GetConfiguration();
+    IMS_SINT32 UpdateEarlyMediaDirection(IMS_SINT32 mediaDirection);
 
 protected:
     ImsList<IMS_UINTP> m_listNegoId;
