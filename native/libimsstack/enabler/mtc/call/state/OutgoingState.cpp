@@ -652,6 +652,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
 PUBLIC VIRTUAL CallStateName OutgoingState::OnRatChanged(
         IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
+    if (MtcCallState::OnRatChanged(eOldRatType, eRatType) == CallStateName::TERMINATING)
+    {
+        return CallStateName::TERMINATING;
+    }
+
     if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_NR &&
             (eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE ||
                     eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE_CA))

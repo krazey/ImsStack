@@ -24,6 +24,7 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
@@ -494,8 +495,18 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnIpcanChanged(IN [[maybe_unused]] IM
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnRatChanged(
-        IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN [[maybe_unused]] IMS_SINT32 eRatType)
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
+    if (!PhoneInfoService::GetPhoneInfoService()
+                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                    ->IsImsServiceContinuitySupported(eOldRatType, eRatType))
+    {
+        IMS_TRACE_I("IMS service continuity is not supported", 0, 0, 0);
+        const CallReasonInfo objReason(CODE_LOCAL_NETWORK_NO_SERVICE);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+        return CallStateName::TERMINATING;
+    }
     return GetStateName();
 }
 

@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "INetworkWatcher.h"
 #include "ISession.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
@@ -90,6 +91,12 @@ PUBLIC VIRTUAL CallStateName TerminatingState::OnTimerExpired(IN IMS_SINT32 nTyp
     {
         HandleCallSessionReleased();
     }
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName TerminatingState::OnRatChanged(
+        IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN [[maybe_unused]] IMS_SINT32 eRatType)
+{
     return GetStateName();
 }
 

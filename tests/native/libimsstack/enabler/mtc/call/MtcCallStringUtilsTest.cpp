@@ -243,6 +243,9 @@ TEST_F(MtcCallStringUtilsTest, ConvertRatType)
     eRatType = INetworkWatcher::RADIOTECH_TYPE_HSPAP;
     EXPECT_STREQ(MtcCallStringUtils::ConvertRatType(eRatType), "HSPAP");
 
+    eRatType = INetworkWatcher::RADIOTECH_TYPE_GSM;
+    EXPECT_STREQ(MtcCallStringUtils::ConvertRatType(eRatType), "GSM");
+
     eRatType = INetworkWatcher::RADIOTECH_TYPE_TD_SCDMA;
     EXPECT_STREQ(MtcCallStringUtils::ConvertRatType(eRatType), "TD_SCDMA");
 

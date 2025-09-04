@@ -176,10 +176,22 @@ PRIVATE GLOBAL IMS_SINT32 MtcNetworkWatcher::ConvertCellularRatType(
 {
     switch (eRatType)
     {
-        case NETRADIO_ENTYPE::NW_REPORT_RADIO_NR:
-            return INetworkWatcher::RADIOTECH_TYPE_NR;
+        // See OsNetworkWatcher#GetNetRadioTechType
+        case NETRADIO_ENTYPE::NW_REPORT_RADIO_EHRPD:
+            return INetworkWatcher::RADIOTECH_TYPE_EHRPD;
         case NETRADIO_ENTYPE::NW_REPORT_RADIO_LTE:
             return INetworkWatcher::RADIOTECH_TYPE_LTE;
+        case NETRADIO_ENTYPE::NW_REPORT_RADIO_NR:
+            return INetworkWatcher::RADIOTECH_TYPE_NR;
+        case NETRADIO_ENTYPE::NW_REPORT_RADIO_WCDMA:
+            return INetworkWatcher::RADIOTECH_TYPE_UMTS;
+        case NETRADIO_ENTYPE::NW_REPORT_RADIO_HSPA:
+            return INetworkWatcher::RADIOTECH_TYPE_HSPA;
+        case NETRADIO_ENTYPE::NW_REPORT_RADIO_GSM:
+            return INetworkWatcher::RADIOTECH_TYPE_GSM;
+        case NETRADIO_ENTYPE::NW_REPORT_RADIO_EDGE:
+            return INetworkWatcher::RADIOTECH_TYPE_EDGE;
+        // Other cases
         case NETRADIO_ENTYPE::NW_REPORT_RADIO_INVALID:
         case NETRADIO_ENTYPE::NW_REPORT_RADIO_NOSRV:
             return INetworkWatcher::RADIOTECH_TYPE_INVALID;

@@ -162,6 +162,7 @@ public:
                 {INetworkWatcher::RADIOTECH_TYPE_LTE,      "LTE"        },
                 {INetworkWatcher::RADIOTECH_TYPE_EHRPD,    "EHRPD"      },
                 {INetworkWatcher::RADIOTECH_TYPE_HSPAP,    "HSPAP"      },
+                {INetworkWatcher::RADIOTECH_TYPE_GSM,      "GSM"        },
                 {INetworkWatcher::RADIOTECH_TYPE_TD_SCDMA, "TD_SCDMA"   },
                 {INetworkWatcher::RADIOTECH_TYPE_IWLAN,    "IWLAN"      },
                 {INetworkWatcher::RADIOTECH_TYPE_LTE_CA,   "LTE_CA"     },
