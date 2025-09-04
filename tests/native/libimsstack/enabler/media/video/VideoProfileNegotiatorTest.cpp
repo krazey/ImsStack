@@ -845,6 +845,42 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionOfferPeerReceive)
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND);
 }
 
+TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthASPeerLower)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetBandwidthAs(1000);
+    m_pPeerProfile->SetBandwidthAs(800);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // AS should be the lower of the two values
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 800);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthASLocalLower)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetBandwidthAs(800);
+    m_pPeerProfile->SetBandwidthAs(1000);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // AS should be the lower of the two values
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 800);
+}
+
 TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionAnswerPeerReceive)
 {
     // Arrange

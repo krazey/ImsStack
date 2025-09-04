@@ -60,10 +60,9 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
     NegotiateTransportType(pNegotiatedProfile);
 
     IMS_SINT32 nNegotiatedMaxFrameRate = 0;
-    IMS_SINT32 nNegotiatedMaxAs = 0;
 
-    IMS_BOOL bNegotiatedPayload = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile,
-            &nNegotiatedMaxFrameRate, &nNegotiatedMaxAs);
+    IMS_BOOL bNegotiatedPayload = NegotiatePayload(
+            pLocalProfile, pPeerProfile, pNegotiatedProfile, &nNegotiatedMaxFrameRate);
 
     if (bNegotiatedPayload)
     {
@@ -84,7 +83,7 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
 
         // Setting bandwidth AS/RS/RR
         MakeNegotiatedBandwidth(static_cast<VideoConfiguration*>(pConfig), pLocalProfile,
-                pPeerProfile, m_bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
+                pPeerProfile, m_bIsOfferReceived, pNegotiatedProfile);
 
         // Setting framerate
         pNegotiatedProfile->SetFrameRate(nNegotiatedMaxFrameRate);
@@ -214,7 +213,7 @@ void VideoProfileNegotiator::NegotiateTransportType(OUT VideoProfile* pNegotiate
 PRIVATE
 IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, OUT VideoProfile* pNegotiatedProfile,
-        OUT IMS_SINT32* nNegotiatedMaxFrameRate, OUT IMS_SINT32* nNegotiatedMaxAs)
+        OUT IMS_SINT32* nNegotiatedMaxFrameRate)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -331,7 +330,6 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
     if (pNegotiatedFmtp != IMS_NULL)
     {
         SetMaxFrameRate(pNegotiatedFmtp->GetFramerate(), nNegotiatedMaxFrameRate);
-        SetMaxAs(pNegotiatedFmtp->GetAs(), nNegotiatedMaxAs);
     }
 
     return IMS_TRUE;
@@ -761,15 +759,6 @@ void VideoProfileNegotiator::SetMaxFrameRate(
 }
 
 PRIVATE
-void VideoProfileNegotiator::SetMaxAs(IN IMS_SINT32 nAS, OUT IMS_SINT32* nNegotiatedMaxAs)
-{
-    if (nAS > *nNegotiatedMaxAs)
-    {
-        *nNegotiatedMaxAs = nAS;
-    }
-}
-
-PRIVATE
 IMS_SINT32 VideoProfileNegotiator::FindPayloadIndexFromProfile(
         IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload)
 {
@@ -1137,20 +1126,18 @@ VIDEO_RESOLUTION VideoProfileNegotiator::GetAvcMaxResolutionFromLevel(IN IMS_UIN
 PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(
         IN const VideoConfiguration* pConfig, IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
-        IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT VideoProfile* pNegotiatedProfile)
+        OUT VideoProfile* pNegotiatedProfile)
 {
-    if (bIsOfferReceived == IMS_FALSE)
+    // Negotiate AS: Choose the less value
+    pNegotiatedProfile->SetBandwidthAs(
+            (pPeerProfile->GetBandwidthAs() > pLocalProfile->GetBandwidthAs())
+                    ? pLocalProfile->GetBandwidthAs()
+                    : pPeerProfile->GetBandwidthAs());
+
+    // Negotiate RS/RR Value
+    if (!bIsOfferReceived)
     {
-        // MO's Bandwidth Setting
-        // 1. Set AS Value
-        // Exception Handling (b= AS line is not included in Answer SDP)
-
-        pNegotiatedProfile->SetBandwidthAs((pPeerProfile->GetBandwidthAs() > 0)
-                        ? pPeerProfile->GetBandwidthAs()
-                        : pLocalProfile->GetBandwidthAs());
-
-        // 2. Set RS/RR Value
-        // 2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
+        // Exception Handling (b=RS/RR line is not included in Answer SDP)
         if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
         {
             pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
@@ -1163,7 +1150,7 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(
             return IMS_TRUE;
         }
 
-        // 2.2 Normal Case
+        // Normal Case
         // if RS/RR is used for RTCP remote value
         if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE)
         {
@@ -1178,42 +1165,18 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(
     }
     else
     {
-        // MT's Bandwidth Setting
-        // 1. Set Negotiated AS Value
-        if (nAsValueOfNegotiatedCodec > 0)
-        {
-            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE &&
-                    nAsValueOfNegotiatedCodec > pPeerProfile->GetBandwidthAs() &&
-                    pPeerProfile->GetBandwidthAs() > 0)
-            {
-                pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
-            }
-            else
-            {
-                pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegotiatedCodec);
-            }
-        }
-        else
-        {
-            pNegotiatedProfile->SetBandwidthAs(
-                    (pPeerProfile->GetBandwidthAs() > pLocalProfile->GetBandwidthAs())
-                            ? pLocalProfile->GetBandwidthAs()
-                            : pPeerProfile->GetBandwidthAs());
-        }
-
-        // 3. Set RS/RR Value
+        // Set RS/RR Value
         if (pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND_RECEIVE &&
                 pPeerProfile->GetDirection() != MEDIA_DIRECTION_RECEIVE &&
                 pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND)
         {
-            // 3.1 Hold Case
-            /* bDirHold is not proper for video stream */
+            // Hold Case
             MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig, IMS_FALSE);
         }
         else
         {
-            // 3.2 Active Call Case
-            // 3.2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
+            // Active Call Case
+            // Exception Handling (b=RS/RR line is not included in Answer SDP)
             if (pNegotiatedProfile->GetBandwidthRs() < 0 ||
                     pNegotiatedProfile->GetBandwidthRr() < 0)
             {

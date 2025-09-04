@@ -72,8 +72,7 @@ private:
             OUT VideoProfile* pNegotiatedProfile);
     void NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile);
     IMS_BOOL NegotiatePayload(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            OUT VideoProfile* pNegotiatedProfile, OUT IMS_SINT32* nNegotiatedMaxFrameRate,
-            OUT IMS_SINT32* nNegotiatedMaxAs);
+            OUT VideoProfile* pNegotiatedProfile, OUT IMS_SINT32* nNegotiatedMaxFrameRate);
     IMS_BOOL NegotiateAvc(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,
             IN IMS_UINT32 nLocalIndex, IN VideoProfile* pLocalProfile,
@@ -98,7 +97,6 @@ private:
     void NegotiateCvo(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             OUT VideoProfile* pNegotiatedProfile);
     void SetMaxFrameRate(IN IMS_SINT32 nFrameRate, OUT IMS_SINT32* nNegotiatedMaxFrameRate);
-    void SetMaxAs(IN IMS_SINT32 nAS, OUT IMS_SINT32* nNegotiatedMaxAs);
     IMS_SINT32 FindPayloadIndexFromProfile(
             IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload);
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pLocalCapaNego,
@@ -109,8 +107,7 @@ private:
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
     IMS_BOOL MakeNegotiatedBandwidth(IN const VideoConfiguration* pConfig,
             IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegotiatedCodec,
-            OUT VideoProfile* pNegotiatedProfile);
+            IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);
 };
 
 #endif
