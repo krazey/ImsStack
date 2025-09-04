@@ -95,6 +95,8 @@ protected:
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
 
+    void Process3G();
+    void ProcessCallTerminated();
     void ProcessVolteHysTimerExpired();
     void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn);
     void ClearVolteHysTimerBlocks();
