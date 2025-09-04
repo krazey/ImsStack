@@ -386,6 +386,7 @@ TEST_F(VideoSessionTest, testOnSelectCameraCmdInRecordingStateSendRecv)
     // preset
     m_pSession->SetState(VideoSession::STATE_RECORDING);
     m_pSession->GetRtpConfig()->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+    reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig())->setCameraId(1);
 
     CONST IMS_UINT32 CAMERA_ID = VideoSession::CAMERA_ID_NONE;
     EXPECT_CALL(m_objMockListener,
@@ -406,6 +407,7 @@ TEST_F(VideoSessionTest, testOnSelectCameraCmdInRecordingStateSendOnly)
     m_pSession->SetState(VideoSession::STATE_RECORDING);
     m_pSession->GetRtpConfig()->setMediaDirection(VideoConfig::VIDEO_MODE_RECORDING);
     m_pSession->GetRtpConfig()->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
+    reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig())->setCameraId(1);
 
     CONST IMS_UINT32 CAMERA_ID = VideoSession::CAMERA_ID_NONE;
     EXPECT_CALL(m_objMockListener,
