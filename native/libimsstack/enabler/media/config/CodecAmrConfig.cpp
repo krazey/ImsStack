@@ -150,7 +150,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             else
             {
                 SetModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
-                SetVisibleModeChangeCapability(IMS_FALSE);
+                SetVisibleModeChangeCapability(IMS_TRUE);
             }
 
             IMS_SINT32 nModeChangePeriod = piCcSubBundle->GetInt(
@@ -230,7 +230,7 @@ PUBLIC VIRTUAL void CodecAmrConfig::CreateDefaultAmrCodec()
                                       : SetModeSetList(CodecAudioConfig::FULL_MODESET_AMRWB);
 
     SetModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
-    SetVisibleModeChangeCapability(IMS_FALSE);
+    SetVisibleModeChangeCapability(IMS_TRUE);
 
     SetModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
     SetVisibleModeChangePeriod(IMS_FALSE);

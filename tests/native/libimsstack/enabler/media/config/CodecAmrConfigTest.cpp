@@ -228,13 +228,13 @@ TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
     ASSERT_EQ(codecConfig.GetDefaultModeSetList(), FULL_MODESET_AMRWB);
     ASSERT_EQ(codecConfig.GetOctetAlign(), nOctetAlign);
     ASSERT_EQ(codecConfig.GetModeSetList(), nModeSetList);
-    // Values should be defaults from CodecAudioConfig as they were not in sub-bundle
     ASSERT_EQ(codecConfig.GetModeChangeCapability(), DEFAULT_MODECHANGE_CAPABILITY);
+    // Values should be defaults from CodecAudioConfig as they were not in sub-bundle
     ASSERT_EQ(codecConfig.GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
     ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
     EXPECT_EQ(codecConfig.GetDtx(), DEFAULT_DTX);
+    EXPECT_EQ(codecConfig.GetVisibleModeChangeCapability(), IMS_TRUE);
     // Visibility should be false as they were not in sub-bundle
-    EXPECT_EQ(codecConfig.GetVisibleModeChangeCapability(), IMS_FALSE);
     EXPECT_EQ(codecConfig.GetVisibleModeChangePeriod(), IMS_FALSE);
     EXPECT_EQ(codecConfig.GetVisibleModeChangeNeighbor(), IMS_FALSE);
 }
@@ -264,13 +264,13 @@ TEST_F(CodecAmrConfigTest, Create_NullBundle)
     ASSERT_EQ(codecConfig.GetDefaultModeSetList(), FULL_MODESET_AMRNB);
     ASSERT_EQ(codecConfig.GetOctetAlign(), DEFAULT_PAYLOAD_FORMAT);
     ASSERT_EQ(codecConfig.GetModeSetList(), FULL_MODESET_AMRNB);
-    // Values should be defaults from CodecAudioConfig as they were not in sub-bundle
     ASSERT_EQ(codecConfig.GetModeChangeCapability(), DEFAULT_MODECHANGE_CAPABILITY);
+    // Values should be defaults from CodecAudioConfig as they were not in sub-bundle
     ASSERT_EQ(codecConfig.GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
     ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
     EXPECT_EQ(codecConfig.GetDtx(), DEFAULT_DTX);
+    EXPECT_EQ(codecConfig.GetVisibleModeChangeCapability(), IMS_TRUE);
     // Visibility should be false as they were not in sub-bundle
-    EXPECT_EQ(codecConfig.GetVisibleModeChangeCapability(), IMS_FALSE);
     EXPECT_EQ(codecConfig.GetVisibleModeChangePeriod(), IMS_FALSE);
     EXPECT_EQ(codecConfig.GetVisibleModeChangeNeighbor(), IMS_FALSE);
 }
@@ -303,13 +303,13 @@ TEST_F(CodecAmrConfigTest, Create_NullSubBundle)
     ASSERT_EQ(codecConfig.GetDefaultModeSetList(), FULL_MODESET_AMRNB);
     ASSERT_EQ(codecConfig.GetOctetAlign(), DEFAULT_PAYLOAD_FORMAT);
     ASSERT_EQ(codecConfig.GetModeSetList(), FULL_MODESET_AMRNB);
-    // Values should be defaults from CodecAudioConfig as they were not in sub-bundle
     ASSERT_EQ(codecConfig.GetModeChangeCapability(), DEFAULT_MODECHANGE_CAPABILITY);
+    // Values should be defaults from CodecAudioConfig as they were not in sub-bundle
     ASSERT_EQ(codecConfig.GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
     ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
     EXPECT_EQ(codecConfig.GetDtx(), DEFAULT_DTX);
+    EXPECT_EQ(codecConfig.GetVisibleModeChangeCapability(), IMS_TRUE);
     // Visibility should be false as they were not in sub-bundle
-    EXPECT_EQ(codecConfig.GetVisibleModeChangeCapability(), IMS_FALSE);
     EXPECT_EQ(codecConfig.GetVisibleModeChangePeriod(), IMS_FALSE);
     EXPECT_EQ(codecConfig.GetVisibleModeChangeNeighbor(), IMS_FALSE);
 }
