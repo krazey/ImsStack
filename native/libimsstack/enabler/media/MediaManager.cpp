@@ -141,6 +141,10 @@ PUBLIC VIRTUAL IMediaSession* MediaManager::CreateSession(IN MEDIA_NETWORK_TYPE 
         IMS_TRACE_E(0, "CreateSession() - fail to update pdn", 0, 0, 0);
     }
 
+    auto* resourceManager = this->GetResourceManager();
+    IMS_UINT32 nAccessNetwork =
+            (resourceManager != nullptr) ? resourceManager->GetNetworkType() : 0;
+    pSession->SetCurrentAccessNetwork(nAccessNetwork);
     IMS_TRACE_D("CreateSession() - ListSize[%d]", m_lstSessionNode.GetSize(), 0, 0);
 
     return pSession;
