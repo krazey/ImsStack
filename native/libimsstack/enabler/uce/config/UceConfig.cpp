@@ -272,7 +272,7 @@ void UceConfig::SetConfig(IN IMS_SINT32 nSimSlot, IN UceAssetItems* pAssetItems)
 
 PUBLIC VIRTUAL void UceConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
     Update(piCc, nSlotId);
 }
 

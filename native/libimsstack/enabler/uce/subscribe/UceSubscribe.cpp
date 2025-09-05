@@ -449,7 +449,7 @@ IMS_BOOL UceSubscribe::OnMessage(IN IMSMSG& objMsg)
     }
 
     m_nThreadRunningCompleted--;
-    UceNonCapabilityUsers* pNonCapabilities =
+    const UceNonCapabilityUsers* pNonCapabilities =
             reinterpret_cast<UceNonCapabilityUsers*>(objMsg.nWparam);
 
     const UcePidfXmls* pPidfXmls = reinterpret_cast<UcePidfXmls*>(objMsg.nLparam);
@@ -699,9 +699,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_Subscribed(IN IMSMSG& objMsg)
     ISubscribeResponseData* pResponseData = IMS_NULL;
     if (piMessage != IMS_NULL)
     {
-        ISipMessage* piSIPMessage = IMS_NULL;
-        /* get sip message */
-        piSIPMessage = piMessage->GetMessage();
+        const ISipMessage* piSIPMessage = piMessage->GetMessage();
         if (piSIPMessage != IMS_NULL)
         {
             AString strExpireHeader = piSIPMessage->GetHeader(ISipHeader::EXPIRES_ANY);
@@ -753,7 +751,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_SubscribeFailed(IN IMSMSG& objMsg)
         SubscribeTerminated();
         return IMS_TRUE;
     }
-    ISipMessage* piSIPMessage = piMessage->GetMessage();
+    const ISipMessage* piSIPMessage = piMessage->GetMessage();
     if (piSIPMessage == IMS_NULL)
     {
         IMS_TRACE_I("StateSUBSCRIBING_SubscribeFailed:ISipMessage is null", 0, 0, 0);
@@ -838,7 +836,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_NotifyReceived(IN IMSMSG& objMsg)
         return IMS_TRUE;
     }
 
-    ISipMessage* piSIPMessage = piNotify->GetMessage();
+    const ISipMessage* piSIPMessage = piNotify->GetMessage();
     if (piSIPMessage == IMS_NULL)
     {
         IMS_TRACE_I("StateSUBSCRIBING_NotifyReceived:piSIPMessage is null", 0, 0, 0);
@@ -905,7 +903,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg)
         return IMS_TRUE;
     }
 
-    ISipMessage* piSIPMessage = piNotify->GetMessage();
+    const ISipMessage* piSIPMessage = piNotify->GetMessage();
     if (piSIPMessage == IMS_NULL)
     {
         IMS_TRACE_I("StateSUBSCRIBED_NotifyReceived:piSIPMessage is null", 0, 0, 0);

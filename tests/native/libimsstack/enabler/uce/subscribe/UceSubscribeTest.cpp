@@ -175,6 +175,7 @@ public:
     MockICoreService objMockICoreService;
     MockIJniEnabler objMockJniEnabler;
     MockIUceJniThread objMockIUceJniThread;
+    // cppcheck-suppress unusedStructMember
     MockISubscription objMockISubscription;
 
 protected:
