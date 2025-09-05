@@ -747,7 +747,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Published(IN IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_I("StatePUBLISHING_Published", 0, 0, 0);
-    ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("StatePUBLISHING_Published:ISipMessage is null", 0, 0, 0);
@@ -792,7 +792,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_I("StatePUBLISHING_Failed", 0, 0, 0);
-    ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("StatePUBLISHING_Failed:No response case.", 0, 0, 0);
@@ -1047,7 +1047,7 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg)
 
     StopTimer(TIMER_ALL);
 
-    ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     IMS_SINT32 nResponseCode = 0;
     if (piMessage == IMS_NULL)
     {
