@@ -83,32 +83,12 @@
         <int-array name="imsvt.hevc_payload_type_int_array" num="1">
             <item value="115"/>
         </int-array>
-        <int-array name="imsvt.h264_payload_type_int_array" num="3">
+        <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="116"/>
-            <item value="117"/>
-            <item value="118"/>
         </int-array>
     </pbundle_as_map>
     <pbundle_as_map name="imsvt.h264_payload_description_bundle">
         <pbundle_as_map name="116">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">640C1F</string>
-            <int name="imsvt.video_codec_attribute_frame_rate_int" value="24"/>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
-            </int-array>
-        </pbundle_as_map>
-        <pbundle_as_map name="117">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C01F</string>
-            <int name="imsvt.video_codec_attribute_frame_rate_int" value="24"/>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
-            </int-array>
-        </pbundle_as_map>
-        <pbundle_as_map name="118">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="20"/>
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
