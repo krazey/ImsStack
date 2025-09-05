@@ -217,6 +217,16 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
         return "";
     }
 
+    /**
+     * Sends a message to the internal handler. For testing purposes only.
+     * @param what The message code.
+     * @param obj The message object.
+     */
+    @VisibleForTesting
+    void sendMessageToTbssHandler(int what, Object obj) {
+        Message.obtain(mTbssHandler, what, obj).sendToTarget();
+    }
+
     private void updateTbssInfo(@PermanentSuppInfo.PermanentSuppType int type, Object value) {
         PermanentSuppInfo targetInfo;
 
