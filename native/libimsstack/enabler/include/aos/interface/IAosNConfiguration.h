@@ -759,6 +759,7 @@ public:
 
     /**
      * @brief Flag specifying if service fallback is required when voice call is unavailable.
+     *        This flag is only applicable for VoPS NOT SUPPORTED and SSAC barring cases.
      *
      * @return IMS_TRUE if required, else IMS_FALSE
      * @see {@code imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool}
