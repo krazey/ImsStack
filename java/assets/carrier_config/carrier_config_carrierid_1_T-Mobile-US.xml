@@ -339,7 +339,6 @@
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
-    <boolean name="imsemergency.release_emergency_pdn_on_failure_after_100_bool" value="true"/>
 
     <!-- Media -->
     <pbundle_as_map name="imsvt.hevc_payload_description_bundle">
