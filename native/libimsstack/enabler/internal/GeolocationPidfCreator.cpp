@@ -274,11 +274,16 @@ ILocationProperties* GeolocationPidfCreator::GetLocationProperties(IN IMS_SINT32
 {
     ILocationInfo* piLocationInfo =
             PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(GetSlotId());
-    ILocationProperties* piLocationProperties = piLocationInfo->GetLocationProperties(nType);
-
-    if (piLocationInfo == IMS_NULL || piLocationProperties == IMS_NULL)
+    if (piLocationInfo == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Location is not available", 0, 0, 0);
+        IMS_TRACE_E(0, "Location info is not available", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    ILocationProperties* piLocationProperties = piLocationInfo->GetLocationProperties(nType);
+    if (piLocationProperties == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "Location property is not available", 0, 0, 0);
         return IMS_NULL;
     }
 
