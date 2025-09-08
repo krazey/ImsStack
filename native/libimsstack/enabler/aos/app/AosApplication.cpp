@@ -2750,12 +2750,6 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 
 PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlock(IN AosReasonCode eReason)
 {
-    if (eReason == AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT &&
-            !GET_N_CONFIG(m_nSlotId)->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
-    {
-        return;
-    }
-
     if (!IsRegTypeNormal() || m_piContext->GetConnection()->IsEpdgEnabled())
     {
         return;

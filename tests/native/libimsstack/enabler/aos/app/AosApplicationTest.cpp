@@ -1520,9 +1520,6 @@ TEST_F(AosApplicationTest, ProcessMessage)
 
     // MSG_PLMN_BLOCK_WITH_TIMEOUT
     // TEST_F : ProcessPlmnBlock
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
     m_pAosApplication->SetNetTrackerListener();
     objMessage.nMSG = MSG_PLMN_BLOCK_WITH_TIMEOUT;
     EXPECT_CALL(m_objMockIAosService,
@@ -2486,15 +2483,6 @@ TEST_F(AosApplicationTest, Process)
     m_pAosApplication->StopTimer(TIMER_PDN_BLOCKED);
 
     // TEST_F : ProcessPlmnBlock
-    // IsPlmnBlockWithTimeoutOnVoiceCallUnavailable false
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
-                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT, _))
-            .Times(0);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
-    m_pAosApplication->ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     // reg type not normal
     m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
     m_pAosApplication->ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
@@ -4177,8 +4165,6 @@ TEST_F(AosApplicationTest, ReportDataFailureReasonWhenConnectionDeactiviated)
 TEST_F(AosApplicationTest, NotifyDeregisteredWhenPlmnBlockDueToVopsNotSupported)
 {
     ImsMessage objMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED, 0);
-    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
-            .WillByDefault(Return(IMS_TRUE));
     m_pAosApplication->SetNetTrackerListener();
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
@@ -4191,8 +4177,6 @@ TEST_F(AosApplicationTest, NotifyDeregisteredWhenPlmnBlockDueToVopsNotSupported)
 TEST_F(AosApplicationTest, NotifyDeregisteredWhenPlmnBlockDueToSsacBarred)
 {
     ImsMessage objMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED, 0);
-    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
-            .WillByDefault(Return(IMS_TRUE));
     m_pAosApplication->SetNetTrackerListener();
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,

@@ -73,7 +73,6 @@
         </int-array>
     </pbundle_as_map>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
 
     <!-- Uce -->
     <int name="imsuce.anonymous_fetch_method_int" value="0"/>
