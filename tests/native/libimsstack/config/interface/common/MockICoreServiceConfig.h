@@ -27,7 +27,7 @@ class ServiceIdentifier;
 class MockICoreServiceConfig : public ICoreServiceConfig
 {
 public:
-    inline virtual ~MockICoreServiceConfig() {}
+    ~MockICoreServiceConfig() override = default;
 
     MOCK_METHOD(const AString&, GetServiceId, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIariSupported, (), (const, override));

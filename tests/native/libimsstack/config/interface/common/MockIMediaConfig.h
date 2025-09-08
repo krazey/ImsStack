@@ -26,7 +26,7 @@ class AStringArray;
 class MockIMediaConfig : public IMediaConfig
 {
 public:
-    inline virtual ~MockIMediaConfig() {}
+    ~MockIMediaConfig() override = default;
 
     MOCK_METHOD(const AStringArray&, GetMediaCapabilities, (IN IMS_SINT32), (const, override));
     MOCK_METHOD(const AStringArray&, GetMediaProfile, (IN const AString&, IN IMS_SINT32),

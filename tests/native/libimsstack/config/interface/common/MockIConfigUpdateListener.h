@@ -24,7 +24,7 @@ class MockIConfigUpdateListener : public IConfigUpdateListener
 {
 public:
     inline MockIConfigUpdateListener() {}
-    inline virtual ~MockIConfigUpdateListener() {}
+    ~MockIConfigUpdateListener() override = default;
 
     MOCK_METHOD(void, ConfigUpdate_NotifyUpdate,
             (IN IMS_SINT32 nCpi, IN const AString& strConfName, IN const AString& strExtraParam),
