@@ -79,8 +79,4 @@
 //// enabler -> media
 #define __IMS_TRACE_TAG_MEDIA__        __IMS_TRACE_TAG__(MEDIA)
 
-//// SIP_DELEGATE
-//// enabler -> sipdelegate
-#define __IMS_TRACE_TAG_SIP_DELEGATE__ __IMS_TRACE_TAG__(SIP_DELEGATE)
-
 #endif

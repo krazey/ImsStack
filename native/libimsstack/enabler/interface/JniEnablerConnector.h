@@ -31,8 +31,7 @@ enum class EnablerType
     MTC_CALL,
     MTS,
     MEDIA_SESSION,
-    UCE,
-    SIP_DELEGATE
+    UCE
 };
 
 class JniEnablerConnector final

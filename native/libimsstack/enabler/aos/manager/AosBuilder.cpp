@@ -124,8 +124,7 @@ PUBLIC VIRTUAL IAosHandle* AosBuilder::BuildHandle(
 
         return new AosHandleUce(piAppContext, strAppId, strSrvId, nType);
     }
-    else if (strSrvId.EqualsIgnoreCase(
-            ImsServiceConfig::GetServiceName(ImsServiceId::SIP_DELEGATE)))
+    else if (strSrvId.EqualsIgnoreCase("ims.service.sip_delegate"))
     {
         nType = ImsAosService::SIP_CONTROLLER;
         IMS_TRACE_D("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandleSipController)",

@@ -39,8 +39,6 @@ public:
     static const IMS_SINT32 MTS = 13;
     /** Indicates the identifier of UCE (User Capability Exchange) enabler. */
     static const IMS_SINT32 UCE = 14;
-    /** Indicates the identifier of SIP delegate (for RCS single registration) enabler. */
-    static const IMS_SINT32 SIP_DELEGATE = 15;
 
     /** Indicates the identifier of the MTC enabler's call. */
     static const IMS_SINT32 MTC_CALL = 21;

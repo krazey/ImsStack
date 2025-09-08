@@ -31,8 +31,6 @@ public interface JniObjectId {
     int MTS = 13;
     /** Indicates the identifier of UCE (User Capability Exchange) enabler. */
     int UCE = 14;
-    /** Indicates the identifier of SIP delegate (for RCS single registration) enabler. */
-    int SIP_DELEGATE = 15;
 
     /** Indicates the identifier of the MTC enabler's call. */
     int MTC_CALL = 21;

@@ -27,9 +27,7 @@ enum class ImsAppId
     /// MTS (Multimedia Telephony SMS)
     MTS = 2,
     /// UCE (User Capability Exchange)
-    UCE = 3,
-    /// SipDelegate (used for RCS Single Registration)
-    SIP_DELEGATE = 4
+    UCE = 3
 };
 
 /// Defines a service identifier for IMS service.
@@ -47,10 +45,7 @@ enum class ImsServiceId
     MTS_EMERGENCY = 22,
 
     /// UCE
-    UCE = 31,
-
-    /// SIP_DELEGATE
-    SIP_DELEGATE = 41
+    UCE = 31
 };
 
 // Data type for carrying the identifiers for IMS service.
