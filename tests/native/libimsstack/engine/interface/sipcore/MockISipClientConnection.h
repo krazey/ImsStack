@@ -58,6 +58,7 @@ public:
             (IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
                     IN IMS_SINT32 nPortFc, IN IMS_SINT32 nTransportExt),
             (override));
+    MOCK_METHOD(void, RetransmitAck, (), (override));
 
     MOCK_METHOD(IMS_RESULT, AddHeader, (IN const AString& strName, IN const AString& strValue),
             (override));

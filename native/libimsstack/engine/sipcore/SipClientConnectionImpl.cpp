@@ -351,6 +351,11 @@ PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransportTuple(IN const IpAddre
     m_pScc->SetTransportTuple(objIp, nPortS, nPortC, nPortFc, nTransportExt);
 }
 
+PRIVATE VIRTUAL void SipClientConnectionImpl::RetransmitAck()
+{
+    m_pScc->RetransmitAck();
+}
+
 PRIVATE VIRTUAL void SipClientConnectionImpl::OnError_NotifyError(
         IN SipConnection* pSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
