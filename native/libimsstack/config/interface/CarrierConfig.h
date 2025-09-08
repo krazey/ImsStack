@@ -656,7 +656,6 @@ public:
         static const IMS_CHAR KEY_NUMBER_NEED_OIR_STRING_ARRAY[];
         static const IMS_CHAR
                 KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[];
-        static const IMS_CHAR KEY_CLEAR_REGISTRATION_ON_DOMAIN_RESELECTION_BOOL[];
         static const IMS_CHAR KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY[];
 
         // Preferred Emergency Registration Type

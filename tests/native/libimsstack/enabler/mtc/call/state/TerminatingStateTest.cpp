@@ -16,8 +16,6 @@
 
 #include "CarrierConfig.h"
 #include "ISession.h"
-#include "ImsAosParameter.h"
-#include "MockIMtcService.h"
 #include "MockISession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -27,7 +25,6 @@
 #include "call/state/TerminatingState.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
-#include "helper/MockIMtcAosConnector.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "media/MockIMtcMediaManager.h"
 #include <gtest/gtest.h>
@@ -66,7 +63,6 @@ public:
     MockISession objSession;
     CallInfo objCallInfo;
     MockIMtcRadioChecker objMtcRadioChecker;
-    MockIMtcService objService;
 
     TerminatingState objTerminatingState;
 
@@ -87,7 +83,6 @@ protected:
         ON_CALL(objCallContext, GetCallKey).WillByDefault(Return(ANY_CALL_KEY));
         ON_CALL(objCallContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
         ON_CALL(objCallContext, GetRadioChecker).WillByDefault(ReturnRef(objMtcRadioChecker));
-        ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
     }
 
     virtual void TearDown() override {}
@@ -188,48 +183,4 @@ TEST_F(TerminatingStateTest, OnEnterInvokesOnTerminatedBeforeCreatingSession)
     EXPECT_CALL(objMtcRadioChecker, OnTerminatedBeforeCreatingSession(_)).Times(1);
 
     objTerminatingState.OnEnter();
-}
-
-TEST_F(TerminatingStateTest, SessionStartFailedRequestRegisterStop)
-{
-    ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_FALSE));
-
-    MockIMtcAosConnector objAosConnector;
-    ON_CALL(objCallContext, GetAosConnector(ServiceType::EMERGENCY))
-            .WillByDefault(Return(&objAosConnector));
-
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_CLEAR_REGISTRATION_ON_DOMAIN_RESELECTION_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
-
-    objCallInfo.eEmergencyType = EmergencyType::NONE;
-    CallReasonInfo objReasonInfo(CODE_UNSPECIFIED);
-    ON_CALL(objUiNotifier, GetStartFailedReason).WillByDefault(Return(objReasonInfo));
-
-    TerminatingState objNormalCallState(objCallContext);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
-    objNormalCallState.SessionStartFailed(&objSession);
-
-    TerminatingState objNormalServiceState(objCallContext);
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
-    objNormalServiceState.SessionStartFailed(&objSession);
-
-    TerminatingState objShouldNotClearConfigState(objCallContext);
-    ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
-    objShouldNotClearConfigState.SessionStartFailed(&objSession);
-
-    TerminatingState objShouldNotClearReasonState(objCallContext);
-    ON_CALL(objConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_CLEAR_REGISTRATION_ON_DOMAIN_RESELECTION_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
-    objShouldNotClearReasonState.SessionStartFailed(&objSession);
-
-    TerminatingState objRequestRegisterStopState(objCallContext);
-    objReasonInfo.nCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-    ON_CALL(objUiNotifier, GetStartFailedReason).WillByDefault(Return(objReasonInfo));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
-    objRequestRegisterStopState.SessionStartFailed(&objSession);
 }

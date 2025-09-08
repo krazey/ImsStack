@@ -16,7 +16,6 @@
 
 #include "CarrierConfig.h"
 #include "ISession.h"
-#include "ImsAosParameter.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcUiNotifier.h"
@@ -25,7 +24,6 @@
 #include "call/state/TerminatingState.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
-#include "helper/IMtcAosConnector.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 
@@ -111,7 +109,6 @@ void TerminatingState::HandleCallSessionReleased()
     if (m_objContext.GetCallInfo().IsEmergency())
     {
         m_objContext.GetUiNotifier().OnCallSessionReleased();
-        MaybeRequestRegisterStop();
     }
 }
 
@@ -121,47 +118,4 @@ void TerminatingState::NotifyCallSessionReleased()
     IMS_TRACE_D("NotifyCallSessionReleased", 0, 0, 0);
     m_objContext.GetCallStateProxy().NotifyCallSessionReleased(m_objContext.GetCallKey(),
             m_objContext.GetCallInfo().IsEmergency(), m_objContext.IsEstablished());
-}
-
-PRIVATE
-void TerminatingState::MaybeRequestRegisterStop()
-{
-    IMS_TRACE_D("MaybeRequestRegisterStop", 0, 0, 0);
-
-    if (!m_objContext.GetService().IsEmergency())
-    {
-        return;
-    }
-
-    if (!m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigEmergency::KEY_CLEAR_REGISTRATION_ON_DOMAIN_RESELECTION_BOOL))
-    {
-        return;
-    }
-
-    if (!IsEmergencyDomainReselectionRequired(m_objContext.GetUiNotifier().GetStartFailedReason()))
-    {
-        return;
-    }
-
-    IMS_TRACE_I("Request REGISTER_STOP", 0, 0, 0);
-    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
-    if (pAosConnector != IMS_NULL)
-    {
-        pAosConnector->Control(ImsAosControl::REGISTER_STOP);
-    }
-}
-
-PRIVATE GLOBAL IMS_BOOL TerminatingState::IsEmergencyDomainReselectionRequired(
-        IN const CallReasonInfo& objReason)
-{
-    if (objReason.nCode == CODE_LOCAL_CALL_CS_RETRY_REQUIRED ||
-            objReason.nCode == CODE_LOCAL_INTERNAL_ERROR ||
-            objReason.nCode == CODE_LOCAL_NOT_REGISTERED ||
-            objReason.nCode == CODE_SIP_ALTERNATE_EMERGENCY_CALL)
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
 }

@@ -38,8 +38,6 @@ public:
 private:
     void HandleCallSessionReleased();
     void NotifyCallSessionReleased();
-    void MaybeRequestRegisterStop();
-    static IMS_BOOL IsEmergencyDomainReselectionRequired(IN const CallReasonInfo& objReason);
 
     IMS_BOOL m_bSessionReleasedNotified;
 };
