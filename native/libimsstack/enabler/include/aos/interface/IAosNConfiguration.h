@@ -733,14 +733,6 @@ public:
     virtual IMS_BOOL IsRegRequiredAfterImsECallEndOnRegHeld() const = 0;
 
     /**
-     * @brief Flag indicating reg includes feature tag even though the feature is not available.
-     *
-     * @return IMS_BOOL Return whether the feature tag is included.
-     * @see {@code ims.support_reg_with_feature_tag_unavailable_bool}
-     */
-    virtual IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const = 0;
-
-    /**
      * @brief Flag specifying if verstat is supported for registration or not
      *
      * @return IMS_BOOL Return whether to be supported or not
@@ -1881,6 +1873,20 @@ public:
      * @see {@code ims.extra_reg_err_wait_time_sec_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
+
+    /**
+     * @brief Returns the list of policies that are needed to keep the IMS registration with mmtel
+     *        feature tag.
+     *
+     *        Possible values are,
+     *        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS
+     *        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_SSAC
+     *        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_3G
+     *
+     * @return vector policy list that needs to keep the IMS registration with mmtel feature tag.
+     * @see {@code ims.keep_reg_with_mmtel_feature_tag_policy_int_array}
+     */
+    virtual ImsVector<IMS_SINT32>& GetKeepRegWithMmtelFeatureTagPolicy() = 0;
 
     /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF

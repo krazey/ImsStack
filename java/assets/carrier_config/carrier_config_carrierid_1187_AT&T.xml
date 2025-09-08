@@ -35,7 +35,6 @@
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <boolean name="ims.support_verstat_based_on_network_for_reg_bool" value="true"/>
     <boolean name="ims.support_verstat_for_reg_bool" value="true"/>
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
@@ -49,6 +48,10 @@
     <int name="ims.sub_retry_503_policy_int" value="0"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="0"/>
+    </int-array>
+    <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="2">
+        <item value="1"/>
+        <item value="3"/>
     </int-array>
     <int-array name="ims.permanent_pdn_failure_int_array" num="2">
         <item value="28"/>

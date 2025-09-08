@@ -464,8 +464,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "required_init_reg_after_ims_ecall_end_on_reg_held_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 KEY_PREFIX + "sip_over_ipsec_enabled_in_roaming_bool";
-        public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
-                KEY_PREFIX + "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL =
                 KEY_PREFIX + "support_verstat_based_on_network_for_reg_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
@@ -536,6 +534,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sub_retry_503_policy_int";
         public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
                 KEY_PREFIX + "usat_reg_event_download_policy_int";
+        public static final String KEY_KEEP_REG_WITH_MMTEL_FEATURE_TAG_POLICY_INT_ARRAY =
+                KEY_PREFIX + "keep_reg_with_mmtel_feature_tag_policy_int_array";
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
                 KEY_PREFIX + "permanent_pdn_failure_int_array";
         public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =

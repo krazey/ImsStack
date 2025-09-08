@@ -504,11 +504,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsECallEndOnRegHel
     return m_objAsset.bRequiredInitRegAfterImsECallEndOnRegHeld;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupported() const
-{
-    return m_objAsset.bSupportRegWithFeatureTagUnavailable;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() const
 {
     return m_objAsset.bSupportVerstatForReg;
@@ -971,6 +966,11 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetExtraReregErrCode()
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime()
 {
     return m_objExtraRegErr.objExtraRegErrWaitTimeSec;
+}
+
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetKeepRegWithMmtelFeatureTagPolicy()
+{
+    return m_objAsset.objKeepRegWithMmtelFeatureTagPolicy;
 }
 
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>&
@@ -1588,8 +1588,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportGibaForERegInRoaming = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL);
-    m_objAsset.bSupportRegWithFeatureTagUnavailable =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatBasedOnNetworkForReg =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL);
     m_objAsset.bSupportVerstatForReg =
@@ -1673,7 +1671,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::ImsVoice::KEY_VOLTE_HYS_TIME_SEC_INT);
     m_objAsset.nSubConsecutiveRetryCntForRegForbiddenInWifi = piCc->GetInt(
             CarrierConfig::ImsWfc::KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT);
-
+    m_objAsset.objKeepRegWithMmtelFeatureTagPolicy = piCc->GetIntArray(
+            CarrierConfig::Ims::KEY_KEEP_REG_WITH_MMTEL_FEATURE_TAG_POLICY_INT_ARRAY);
     m_objAsset.objRegErrCodeForPcscfDiscovery =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);
     m_objAsset.objRegPermanentErrMaxCnt =

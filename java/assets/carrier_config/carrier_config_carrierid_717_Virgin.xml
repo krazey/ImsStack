@@ -15,6 +15,11 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Aos -->
+    <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="1">
+        <item value="3"/>
+    </int-array>
+
     <!-- Mts -->
     <int-array name="imssms.sms_fallback_error_codes_int_array" num="41">
         <item value="380"/>

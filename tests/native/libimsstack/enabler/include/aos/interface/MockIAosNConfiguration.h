@@ -106,7 +106,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsReleaseEPdnUponECallEndInFakeMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsCallEndOnRegHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsECallEndOnRegHeld, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsRegWithFeatureTagUnavailableSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVerstatForRegistrationSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVerstatSupportedBasedOnNetworkForReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable, (), (const, override));
@@ -200,6 +199,7 @@ public:
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetExtraRegErrCode, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetExtraReregErrCode, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetExtraRegErrWaitTime, (), (override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetKeepRegWithMmtelFeatureTagPolicy, (), (override));
     MOCK_METHOD(
             ImsVector<IMS_SINT32>&, GetReregRetryErrCodeForInitRegWithSamePcscf, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetRegPermanentErrCode, (), (override));

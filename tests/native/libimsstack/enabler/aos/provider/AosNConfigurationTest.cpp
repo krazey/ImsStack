@@ -704,10 +704,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -843,6 +839,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                             KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT,
                     -1))
             .WillOnce(Return(0));
+
+    ImsVector<IMS_SINT32> objKeepRegWithMmtelFeatureTagPolicy;
+    objKeepRegWithMmtelFeatureTagPolicy.Clear();
+    objKeepRegWithMmtelFeatureTagPolicy.Add(CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_3G);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(
+                    CarrierConfig::Ims::KEY_KEEP_REG_WITH_MMTEL_FEATURE_TAG_POLICY_INT_ARRAY, _))
+            .WillOnce(Return(objKeepRegWithMmtelFeatureTagPolicy));
 
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Clear();
@@ -1014,7 +1018,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
     EXPECT_FALSE(m_pAosNConfiguration->IsAnonymousECallActionSupported());
-    EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatSupportedBasedOnNetworkForReg());
     EXPECT_TRUE(m_pAosNConfiguration->IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry());
@@ -1083,6 +1086,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             m_pAosNConfiguration->GetRegTempPlmnBlockRatsOnAllPcscfsFail();
     EXPECT_EQ(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN, objNetworkTypes.GetAt(0));
 
+    ImsVector<IMS_SINT32> objPolicy = m_pAosNConfiguration->GetKeepRegWithMmtelFeatureTagPolicy();
+    EXPECT_EQ(CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_3G, objPolicy.GetAt(0));
     ImsVector<IMS_SINT32> objErrCode = m_pAosNConfiguration->GetRegErrCodeForPcscfDiscovery();
     EXPECT_EQ(408, objErrCode.GetAt(0));
     ImsVector<IMS_SINT32> objCount = m_pAosNConfiguration->GetRegPermanentErrMaxCount();

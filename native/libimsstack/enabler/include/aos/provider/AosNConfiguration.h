@@ -116,7 +116,6 @@ public:
     IMS_BOOL IsRegRetryWithIpVerFallback() const override;
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegRequiredAfterImsECallEndOnRegHeld() const override;
-    IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
     IMS_BOOL IsVerstatSupportedBasedOnNetworkForReg() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
@@ -213,6 +212,7 @@ public:
     ImsVector<IMS_SINT32>& GetExtraRegErrCode() override;
     ImsVector<IMS_SINT32>& GetExtraReregErrCode() override;
     ImsVector<IMS_SINT32>& GetExtraRegErrWaitTime() override;
+    ImsVector<IMS_SINT32>& GetKeepRegWithMmtelFeatureTagPolicy() override;
     ImsVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() override;
     ImsVector<IMS_SINT32>& GetRegPermanentErrCode() override;
     ImsVector<IMS_SINT32>& GetRegPermanentErrMaxCount() override;
