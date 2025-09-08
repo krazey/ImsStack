@@ -262,7 +262,7 @@ void JniAttachNativeThread(const char* threadName)
     args.group = NULL;
 
     JNIEnv* env;
-    jint result = jvm->AttachCurrentThread(&env, (void*)&args);
+    jint result = jvm->AttachCurrentThread(&env, static_cast<void*>(&args));
 
     if (result != JNI_OK)
     {

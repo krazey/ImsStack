@@ -34,7 +34,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     JNIEnv* env = NULL;
 
-    if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK)
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_4) != JNI_OK)
     {
         ALOGE("JNI_OnLoad: GetEnv failed");
         return (-1);
