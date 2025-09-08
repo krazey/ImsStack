@@ -117,8 +117,8 @@ public:
     IMS_BOOL Parse(IN const AString& str3gppIms);
 
 private:
-    void CreateAlternativeService(IN INode* piNode);
-    void CreateServiceInfo(IN INode* piNode);
+    void CreateAlternativeService(IN const INode* piNode);
+    void CreateServiceInfo(IN const INode* piNode);
 
 public:
     /// "alternative-service" or "service-info"

@@ -1966,7 +1966,7 @@ void SubscriberConfig::ToDebugString()
 }
 
 PRIVATE
-IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
+IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN const ICarrierConfig* piCc)
 {
     IMS_SINT32 nSubsAttributes = SUBSCRIPTION_ATTRIBUTE_IMS;
 
@@ -1997,7 +1997,7 @@ IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
 }
 
 PRIVATE GLOBAL ImsVector<IMS_SINT32> SubscriberConfig::ReadPcscfDiscoveryMethods(
-        IN ICarrierConfig* piCc)
+        IN const ICarrierConfig* piCc)
 {
     ImsVector<IMS_SINT32> objPcscfDiscoveryMethods =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY);

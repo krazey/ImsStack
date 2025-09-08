@@ -189,8 +189,8 @@ private:
     void StoreSubscriberInfo();
     void ToDebugString();
 
-    IMS_SINT32 ReadSubscriptionAttributes(IN ICarrierConfig* piCc);
-    static ImsVector<IMS_SINT32> ReadPcscfDiscoveryMethods(IN ICarrierConfig* piCc);
+    IMS_SINT32 ReadSubscriptionAttributes(IN const ICarrierConfig* piCc);
+    static ImsVector<IMS_SINT32> ReadPcscfDiscoveryMethods(IN const ICarrierConfig* piCc);
     static ImsList<IMS_SINT32> GetListenEvents(IN IMS_SINT32 nEvents);
 
     static const IMS_CHAR* IsimStateToString(IN IMS_SINT32 nState);

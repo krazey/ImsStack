@@ -146,7 +146,7 @@ private:
     void UpdateAllConfigs();
 
     static IMS_SINT32 GetTimerValue(
-            IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue);
+            IN const ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue);
 
 public:
     enum

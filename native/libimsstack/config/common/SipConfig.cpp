@@ -432,7 +432,7 @@ void SipConfig::UpdateTcpTimerValues()
             m_objTcpTimerValues.m_nTvConnectionWaiting, m_objTcpTimerValues.m_nTvWouldblockWaiting);
 }
 
-PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
+PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN const ICarrierConfig* piCc)
 {
     IMS_SINT32 nSipFeatureCaps = SIP_FEATURE_CAPS_RPORT;
 

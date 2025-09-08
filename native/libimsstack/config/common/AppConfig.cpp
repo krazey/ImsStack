@@ -57,7 +57,7 @@ public:
     static IMS_BOOL AddCoreServiceProperty(
             IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddCoreServiceRelatedProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
+            IN const AStringArray& objProperty, IN const AppConfigPrivate* pConfigPrivate);
 
 private:
     friend class AppConfig;
@@ -565,7 +565,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceRelatedProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
+        IN const AStringArray& objProperty, IN const AppConfigPrivate* pConfigPrivate)
 {
     if (objProperty.GetCount() < 2)
     {

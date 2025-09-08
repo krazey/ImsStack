@@ -224,7 +224,7 @@ private:
     IMS_BOOL GetTimerValueForUpdate(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue,
             IN const AString& strUpdateTimerValue, OUT IMS_SINT32& nTimerValue);
     void UpdateTcpTimerValues();
-    static IMS_SINT32 ReadSipFeatureCaps(IN ICarrierConfig* piCc);
+    static IMS_SINT32 ReadSipFeatureCaps(IN const ICarrierConfig* piCc);
 
 public:
     enum

@@ -125,7 +125,7 @@ IMS_BOOL Ims3gpp::Parse(IN const AString& str3gppIms)
 }
 
 PRIVATE
-void Ims3gpp::CreateAlternativeService(IN INode* piNode)
+void Ims3gpp::CreateAlternativeService(IN const INode* piNode)
 {
     // Value of type
     const IMS_CHAR VALUE_EMERGENCY[] = "emergency";
@@ -211,7 +211,7 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
 }
 
 PRIVATE
-void Ims3gpp::CreateServiceInfo(IN INode* piNode)
+void Ims3gpp::CreateServiceInfo(IN const INode* piNode)
 {
     if (piNode == IMS_NULL)
     {

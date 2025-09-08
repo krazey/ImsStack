@@ -551,7 +551,7 @@ void SipConfigV::UpdateAllConfigs()
 }
 
 PRIVATE GLOBAL IMS_SINT32 SipConfigV::GetTimerValue(
-        IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue)
+        IN const ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue)
 {
     IMS_SINT32 nTimerValue = piCc->GetInt(pszKey, nDefaultValue);
 
