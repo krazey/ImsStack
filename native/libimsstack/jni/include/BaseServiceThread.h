@@ -25,7 +25,7 @@ class BaseServiceThread : public BaseThread
 {
 public:
     BaseServiceThread();
-    inline virtual ~BaseServiceThread() {}
+    ~BaseServiceThread() override = default;
 
 public:
     void SetCallback(IN IMS_SINTP nNativeObject, Jni_SendDataToJava pfnSendDataToJava);

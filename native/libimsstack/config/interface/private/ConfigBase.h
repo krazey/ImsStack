@@ -31,7 +31,7 @@ class ConfigBase : public ImsSlot, public ICarrierConfigListener
 {
 public:
     explicit ConfigBase(IN IMS_SINT32 nSlotId);
-    virtual ~ConfigBase() = 0;
+    ~ConfigBase() override = 0;
 
     ConfigBase(IN const ConfigBase&) = delete;
     ConfigBase& operator=(IN const ConfigBase&) = delete;

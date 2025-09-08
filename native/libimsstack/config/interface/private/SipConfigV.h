@@ -57,7 +57,7 @@ private:
 
 public:
     explicit SipConfigV(IN IMS_SINT32 nSlotId);
-    virtual ~SipConfigV();
+    ~SipConfigV() override;
 
     SipConfigV(IN const SipConfigV&) = delete;
     SipConfigV& operator=(IN const SipConfigV&) = delete;

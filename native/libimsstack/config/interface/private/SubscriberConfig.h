@@ -32,7 +32,7 @@ class SubscriberConfig : public ConfigBase, public ISubscriberConfig, public IIs
 {
 public:
     explicit SubscriberConfig(IN IMS_SINT32 nSlotId, IN const AString& strConfName);
-    virtual ~SubscriberConfig();
+    ~SubscriberConfig() override;
 
     SubscriberConfig(IN const SubscriberConfig&) = delete;
     SubscriberConfig& operator=(IN const SubscriberConfig&) = delete;

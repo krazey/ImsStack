@@ -22,7 +22,7 @@ class ImsSubscriberInfo : public IImsSubscriberInfo
 {
 public:
     ImsSubscriberInfo();
-    inline virtual ~ImsSubscriberInfo() {}
+    ~ImsSubscriberInfo() override = default;
 
     ImsSubscriberInfo(IN const ImsSubscriberInfo&) = delete;
     ImsSubscriberInfo& operator=(IN const ImsSubscriberInfo&) = delete;

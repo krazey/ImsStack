@@ -27,7 +27,7 @@ class AppConfig : public IAppConfig
 public:
     explicit AppConfig(IN const AString& strAppId);
     AppConfig(IN const AppConfig& other);
-    virtual ~AppConfig();
+    ~AppConfig() override;
 
 public:
     AppConfig& operator=(IN const AppConfig& other);

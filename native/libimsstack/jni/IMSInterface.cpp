@@ -295,7 +295,7 @@ class NativeThreadMethods : public INativeThreadMethods
 {
 public:
     inline NativeThreadMethods() {}
-    inline virtual ~NativeThreadMethods() {}
+    ~NativeThreadMethods() override = default;
 
     NativeThreadMethods(const NativeThreadMethods&) = delete;
     NativeThreadMethods& operator=(const NativeThreadMethods&) = delete;
