@@ -30,7 +30,6 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCodeMap;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.imsservice.mmtel.reg.IRegistrationNotifier;
-import com.android.imsstack.imsservice.sipcontroller.ISipTransportBaseRegistrationListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -40,8 +39,6 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
         implements IRegistrationNotifier {
 
     ImsRegistrationTracker mRegTracker;
-
-    private ISipTransportBaseRegistrationListener mSipTransportBaseRegListener;
 
     public ImsRegistrationImpl() {
     }
@@ -166,13 +163,6 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
     @Override
     public void updateSipDelegateRegistration() {
         logi("updateSipDelegateRegistration");
-        //TODO communicate with sip transport for requesting the network registration
-        if (mSipTransportBaseRegListener != null) {
-            mSipTransportBaseRegListener.triggerSipTransportDelegateRegistration();
-        } else {
-            logi("updateSipDelegateRegistration: mSipTransportBaseRegListener is not set");
-        }
-
         if (mRegTracker != null) {
             mRegTracker.updateSipDelegateRegistration();
         }
@@ -181,12 +171,6 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
     @Override
     public void triggerSipDelegateDeregistration() {
         logi("triggerSipDelegateDeregistration");
-        if (mSipTransportBaseRegListener != null) {
-            mSipTransportBaseRegListener.triggerSipTransportDelegateDeregistration();
-        } else {
-            logi("triggerSipDelegateDeregistration: mSipTransportBaseRegListener is not set");
-        }
-
         if (mRegTracker != null) {
             mRegTracker.triggerSipDelegateDeregistration();
         }
@@ -206,11 +190,6 @@ public class ImsRegistrationImpl extends ImsRegistrationImplBase
         if (mRegTracker != null) {
             mRegTracker.onDeregistrationTriggered(convertToAosReasonCause(reason));
         }
-    }
-
-    public void setSipTransportBaseRegListener(
-            ISipTransportBaseRegistrationListener sipTransportImplListener) {
-        mSipTransportBaseRegListener = sipTransportImplListener;
     }
 
     private int convertToAosReasonCause(int reason) {

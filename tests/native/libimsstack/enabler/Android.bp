@@ -25,7 +25,6 @@ cc_library_headers {
         "interface/mtc",
         "interface/mts",
         "interface/uce",
-        "interface/sipcontroller",
     ],
 }
 

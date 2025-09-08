@@ -205,20 +205,8 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public @Nullable SipTransportImplBase getSipTransport(int slotId) {
-        logi(this, "getSipTransport: slotId=" + slotId);
-
-        if (!ImsServiceController.isReady()) {
-            logi(this, "getSipTransport: not-ready, slotId=" + slotId);
-            return null;
-        }
-
-        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
-
-        if (isr == null) {
-            logi(this, "getSipTransport: Service is down for phone" + slotId);
-            return null;
-        }
-        return isr.getSipTransport();
+        logi(this, "getSipTransport: slotId=" + slotId + ", not-support");
+        return null;
     }
 
     @Override

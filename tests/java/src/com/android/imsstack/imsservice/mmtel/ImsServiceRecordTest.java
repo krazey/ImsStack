@@ -24,8 +24,6 @@ import android.content.Context;
 import android.test.mock.MockContentResolver;
 
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
-import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -43,7 +41,6 @@ public class ImsServiceRecordTest {
     private MessageExecutor mExecutor;
     private ImsMmTelService mImsMmTelService;
     private TestImsServiceRecord mImsServiceRecord;
-    private SipControllerAgent mSipControllerAgent;
 
     @Before
     public void setUp() {
@@ -58,7 +55,6 @@ public class ImsServiceRecordTest {
         int phoneId = 1;
         mImsServiceRecord = new TestImsServiceRecord(mMockContext, mExecutor, phoneId);
         mImsServiceRecord.setListener(mImsMmTelService);
-        mSipControllerAgent = Mockito.mock(SipControllerAgent.class);
     }
 
     @Test
@@ -98,12 +94,6 @@ public class ImsServiceRecordTest {
         ImsConfigImpl Config = mImsServiceRecord.getConfig();
         Assert.assertNotNull(Config);
         mImsServiceRecord.reconfigure();
-    }
-
-    @Test
-    public void getSipTransportTest() {
-        ImsSipTransport Config = mImsServiceRecord.getSipTransport();
-        Assert.assertNotNull(Config);
     }
 
     @Test
@@ -148,21 +138,10 @@ public class ImsServiceRecordTest {
 
     class TestImsServiceRecord extends ImsServiceRecord {
         private final Object mLock = new Object();
-        ImsSipTransport mSipTransport;
         int mPhoneId = -1;
         TestImsServiceRecord(Context context, MessageExecutor executor, int phoneId) {
             super(context, executor, phoneId);
             mPhoneId = phoneId;
-        }
-
-        public ImsSipTransport getSipTransport() {
-            synchronized (mLock) {
-                if (mSipTransport == null) {
-                    mSipTransport = ImsSipTransport.createImsSipTransport(mPhoneId,
-                            mMockContext, mExecutor, getRegistration(), mSipControllerAgent);
-                }
-                return mSipTransport;
-            }
         }
     }
 

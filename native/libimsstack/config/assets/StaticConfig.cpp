@@ -16,7 +16,6 @@
 #include "ConfigMedia.h"
 #include "ConfigMtc.h"
 #include "ConfigMts.h"
-#include "ConfigSipDelegate.h"
 #include "ConfigUce.h"
 #include "StaticConfig.h"
 
@@ -37,9 +36,7 @@ LOCAL const ConfigMap s_objConfigMap[] = {
         // Mts
         {ConfigMts::APP_NAME,                  ConfigMts::APP_CONFIG                 },
         // Uce
-        {ConfigUce::APP_NAME,                  ConfigUce::APP_CONFIG                 },
-        // SipDelegate
-        {ConfigSipDelegate::APP_NAME,          ConfigSipDelegate::APP_CONFIG         }
+        {ConfigUce::APP_NAME,                  ConfigUce::APP_CONFIG                 }
 };
 
 PUBLIC GLOBAL const IMS_CHAR* StaticConfig::GetConfig(IN const AString& strName)
