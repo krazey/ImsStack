@@ -412,7 +412,7 @@ PROTECTED VIRTUAL void SubscriberConfig::HandleMessage(
 
 PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
 {
-    ICarrierConfig* piCc = GetCarrierConfig();
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     m_nSubscriptionAttributes = ReadSubscriptionAttributes(piCc);
     m_objPcscfDiscoveryMethods = ReadPcscfDiscoveryMethods(piCc);
@@ -504,7 +504,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
         case IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ALL:
         {
-            ICarrierConfig* piCc = GetCarrierConfig();
+            const ICarrierConfig* piCc = GetCarrierConfig();
 
             m_nSubscriptionAttributes = ReadSubscriptionAttributes(piCc);
             m_objPcscfDiscoveryMethods = ReadPcscfDiscoveryMethods(piCc);
@@ -1185,7 +1185,7 @@ PROTECTED VIRTUAL void SubscriberConfig::CarrierConfig_NotifyConfigChanged(IN IM
     IMS_TRACE_D(
             "SubscriberConfig: CarrierConfigChanged(%d) on %s", nSlotId, m_strConfName.GetStr(), 0);
 
-    ICarrierConfig* piCc = GetCarrierConfig();
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     m_objPcscfDiscoveryMethods = ReadPcscfDiscoveryMethods(piCc);
     ClearPcscfAddresses();

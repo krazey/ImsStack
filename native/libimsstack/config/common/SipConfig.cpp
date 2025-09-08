@@ -167,7 +167,7 @@ IMS_SINT32 SipConfig::GetTimerValueT2() const
 
 PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
 {
-    ICarrierConfig* piCc = GetCarrierConfig();
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     m_bCompactFormConfigured =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SIP_COMPACT_FORM_ENABLED_BOOL);
