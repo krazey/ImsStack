@@ -71,7 +71,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Register_defaultConfig() throws Exception {
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -93,7 +92,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Register_CapabilityVoice() throws Exception {
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -127,7 +125,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Register_CapabilityVoiceVideo() throws Exception {
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -160,13 +157,39 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_CapabilitySms() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_CapabilityVoiceSms() throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addNotContainRule("video")
+                                .addContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .addConfig(config)
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setEnableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build());
+
+        mRegistration.expect().registered();
     }
 
     @Test
     public void testCarrierDefaultLte_Register_ResponseWith423() throws Exception {
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -231,7 +254,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Subscribe_defaultConfig() throws Exception {
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<200-REGISTER");
@@ -253,7 +275,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Deregister_ByNotifyUnregistered() throws Exception {
-
         logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
                 + "NOTIFY(Unregistered)");
 
@@ -292,7 +313,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Deregister_ByNotifyRejected() throws Exception {
-
         logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
                 + "NOTIFY(Rejected)");
 
@@ -331,7 +351,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultLte_Deregister_ByNotifyDeactivated() throws Exception {
-
         logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
                 + "NOTIFY(Deactivated)");
 
@@ -370,50 +389,160 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Test
     public void testCarrierDefaultNr_Register_defaultConfig() throws Exception {
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
-        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
-        generator.addMessages("<200-REGISTER");
-        generator.addMessage(MessageBuildUtils.getDefaultSubscribe()
-                .addRuleSet(new RuleSet.Builder("SUBSCRIBE : Valid P-Access-Network-Info header")
-                        .addRule(new RuleSet.Rule.RuleBuilder("P-Access-Network-Info")
-                                .addContainRule("3GPP-NR")
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addContainRule("video")
+                                .addContainRule("+g.3gpp.smsip")
                                 .build())
                         .build())
                 .build());
-        generator.addMessages("<200-SUBSCRIBE");
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForNrCs()
-                .addNetworkRegistrationInfoForNr()
-                .build();
-
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .setServiceState(ss)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
                 .build());
 
         mRegistration.expect().registered();
-
-        mRegistration.expect(1000).nothing();
     }
 
     @Test
     public void testCarrierDefaultNr_Register_CapabilityVoice() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addNotContainRule("video")
+                                .addNotContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .addConfig(config)
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build());
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultNr_Register_CapabilityVoiceVideo() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addContainRule("video")
+                                .addNotContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .addConfig(config)
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setEnableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build());
+
+        mRegistration.expect().registered();
     }
+
     @Test
-    public void testCarrierDefaultNr_Register_CapabilitySms() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_CapabilityVoiceSms() throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addNotContainRule("video")
+                                .addContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .addConfig(config)
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setEnableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build());
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith423() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages(
+                "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build());
+        mRegistration.expect().registering();
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith403() throws Exception {
         // TODO
@@ -454,10 +583,36 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     public void testCarrierDefaultNr_Register_HandoverToWlan() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Subscribe_defaultConfig() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<200-REGISTER");
+        generator.addMessage(MessageBuildUtils.getDefaultSubscribe()
+                .addRuleSet(new RuleSet.Builder("SUBSCRIBE : Valid P-Access-Network-Info header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("P-Access-Network-Info")
+                                .addContainRule("3GPP-NR")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .setServiceState(ss)
+                .build());
+
+        mRegistration.expect().registered();
+
+        mRegistration.expect(1000).nothing();
     }
+
     @Test
     public void testCarrierDefaultNr_Deregister_ByNotifyUnregistered() throws Exception {
         // TODO
@@ -483,7 +638,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         // TODO
     }
     @Test
-    public void testCarrierDefaultWlan_Register_CapabilitySms() throws Exception {
+    public void testCarrierDefaultWlan_Register_CapabilityVoiceSms() throws Exception {
         // TODO
     }
     @Test
