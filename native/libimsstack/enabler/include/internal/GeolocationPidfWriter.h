@@ -320,7 +320,7 @@ private:
 class CivicAddress : public Element
 {
 public:
-    inline CivicAddress(IN const AString& strCountry,
+    explicit inline CivicAddress(IN const AString& strCountry,
             IN const AString& strState = AString::ConstNull(),
             IN const AString& strCity = AString::ConstNull(),
             IN const AString& strPostal = AString::ConstNull()) :
