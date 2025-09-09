@@ -143,94 +143,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
 
     if (eState == CallState::IDLE)
     {
-        IMS_BOOL bIsHoldingVopsChanged = IMS_FALSE;
-        IMS_BOOL bIsHoldingSsacChanged = IMS_FALSE;
-        IMS_BOOL bIsVopsBlockRequired = IMS_FALSE;
-        IMS_BOOL bIsSsacBlockRequired = IMS_FALSE;
-
-        if (!m_bVopsIgnoredForVolteEnabled &&
-                m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
-        {
-            A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: handle vops block, state(%d)",
-                    m_nHoldingVopsState, 0, 0);
-
-            m_nVopsState = m_nHoldingVopsState;
-            m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
-            bIsHoldingVopsChanged = IMS_TRUE;
-
-            if (!GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
-                        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS))
-            {
-                bIsVopsBlockRequired = IMS_TRUE;
-            }
-        }
-
-        if (m_bSsacHeld)
-        {
-            A_IMS_TRACE_D(APPPROFILE,
-                    "CallTracker_StateChanged :: handle ssac voice block, state(%s)",
-                    _TRACE_B_(m_bSsacHeld), 0, 0);
-
-            m_bSsacBarred = IMS_TRUE;
-            m_bSsacHeld = IMS_FALSE;
-            bIsHoldingSsacChanged = IMS_TRUE;
-
-            if (!GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
-                        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_SSAC))
-            {
-                bIsSsacBlockRequired = IMS_TRUE;
-            }
-        }
-
-        // Reevaluating Unavailable Features
-        if ((bIsHoldingVopsChanged && !bIsVopsBlockRequired) ||
-                (bIsHoldingSsacChanged && !bIsSsacBlockRequired))
-        {
-            ReevaluateUnavailableFeature();
-        }
-
-        // Plmn block
-        if (IsPlmnBlockCondition())
-        {
-            if (bIsHoldingVopsChanged && bIsVopsBlockRequired)
-            {
-                A_IMS_TRACE_I(APPPROFILE, "CallTracker_StateChanged :: PLMN is blocked due to VoPS",
-                        0, 0, 0);
-                m_piAppContext->GetApp()->RequestCmd(
-                        ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::VOPS_NOT_SUPPORTED);
-            }
-            else if (bIsHoldingSsacChanged && bIsSsacBlockRequired)
-            {
-                A_IMS_TRACE_I(APPPROFILE, "CallTracker_StateChanged :: PLMN is blocked due to SSAC",
-                        0, 0, 0);
-                m_piAppContext->GetApp()->RequestCmd(
-                        ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, AosReason::SSAC_BARRED);
-            }
-        }
-
-        // Feature block
-        if (bIsVopsBlockRequired)
-        {
-            ProcessBlock(BLOCK_VOPS, IMS_TRUE);
-        }
-
-        if (bIsSsacBlockRequired)
-        {
-            ProcessBlock(BLOCK_SSAC, IMS_TRUE);
-        }
-
-        if (Is3G(m_nNetworkType))
-        {
-            if (GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
-                        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_3G))
-            {
-                ReevaluateUnavailableFeature();
-            }
-            else
-            {
-                ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
-            }
-        }
+        ProcessCallTerminated();
     }
 
     if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() &&
@@ -667,15 +580,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
                     AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
             if (piCallTracker == IMS_NULL || !piCallTracker->IsNormalCallActive())
             {
-                if (GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
-                            CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_3G))
-                {
-                    ReevaluateUnavailableFeature();
-                }
-                else
-                {
-                    ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
-                }
+                Process3G();
             }
         }
         else
@@ -1097,6 +1002,93 @@ IMS_BOOL AosHandleMtc::ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVo
     }
 
     return IMS_FALSE;
+}
+
+PROTECTED
+void AosHandleMtc::Process3G()
+{
+    if (GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
+                CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_3G))
+    {
+        ReevaluateUnavailableFeature();
+    }
+    else
+    {
+        ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
+    }
+}
+
+PROTECTED
+void AosHandleMtc::ProcessCallTerminated()
+{
+    IMS_BOOL bIsHoldingVopsChanged = IMS_FALSE;
+    IMS_BOOL bIsHoldingSsacChanged = IMS_FALSE;
+    IMS_BOOL bIsVopsBlockRequired = IMS_FALSE;
+    IMS_BOOL bIsSsacBlockRequired = IMS_FALSE;
+
+    // Process Holding VOPS State
+    if (!m_bVopsIgnoredForVolteEnabled && m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+    {
+        A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: handle vops block, state(%d)",
+                m_nHoldingVopsState, 0, 0);
+
+        m_nVopsState = m_nHoldingVopsState;
+        m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
+        bIsHoldingVopsChanged = IMS_TRUE;
+        bIsVopsBlockRequired =
+                !GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
+                        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS);
+    }
+
+    // Process Holding SSAC State
+    if (m_bSsacHeld)
+    {
+        A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: handle ssac voice block, state(%s)",
+                _TRACE_B_(m_bSsacHeld), 0, 0);
+
+        m_bSsacBarred = IMS_TRUE;
+        m_bSsacHeld = IMS_FALSE;
+        bIsHoldingSsacChanged = IMS_TRUE;
+        bIsSsacBlockRequired =
+                !GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
+                        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_SSAC);
+    }
+
+    // Reevaluating Unavailable Features
+    if ((bIsHoldingVopsChanged && !bIsVopsBlockRequired) ||
+            (bIsHoldingSsacChanged && !bIsSsacBlockRequired))
+    {
+        ReevaluateUnavailableFeature();
+    }
+
+    // Plmn block
+    if (IsPlmnBlockCondition())
+    {
+        if (bIsVopsBlockRequired || bIsSsacBlockRequired)
+        {
+            A_IMS_TRACE_I(
+                    APPPROFILE, "ProcessCallTerminated :: PLMN is blocked with timeout", 0, 0, 0);
+            m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT,
+                    bIsVopsBlockRequired ? AosReason::VOPS_NOT_SUPPORTED : AosReason::SSAC_BARRED);
+        }
+    }
+
+    // Feature block
+    if (bIsVopsBlockRequired)
+    {
+        ProcessBlock(BLOCK_VOPS, IMS_TRUE);
+    }
+
+    if (bIsSsacBlockRequired)
+    {
+        ProcessBlock(BLOCK_SSAC, IMS_TRUE);
+    }
+
+    // 3G handling
+    if (Is3G(m_nNetworkType))
+    {
+        Process3G();
+    }
 }
 
 PROTECTED
