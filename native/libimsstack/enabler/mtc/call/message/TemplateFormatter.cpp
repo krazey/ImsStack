@@ -33,6 +33,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 LOCAL const AString ALL_ZERO_ADDRESS("0000:0000:0000:0000");
 LOCAL const IMS_UINT8 IMEI_INSERT_INDEX_1 = 8;
 LOCAL const IMS_UINT8 IMEI_INSERT_INDEX_2 = 15;
+LOCAL const IMS_UINT8 ADDRESS_REF_ID_START_INDEX = 4;
+LOCAL const IMS_UINT8 ADDRESS_REF_ID_INTERVAL = 5;
 
 PUBLIC GLOBAL AString TemplateFormatter::Format(
         IN const AString& strFormatString, IN IMtcCallContext& objContext)
@@ -43,6 +45,7 @@ PUBLIC GLOBAL AString TemplateFormatter::Format(
     Replace(strResult, "#IMEIWITHHYPHEN#", [&]() { return GetImeiWithHyphen(objContext); });
     Replace(strResult, "#IMEIASADDRREFID#", [&]() { return GetImeiAsAddressRefId(objContext); });
     Replace(strResult, "#IMSI#", [&]() { return GetImsi(objContext); });
+    Replace(strResult, "#IMSIASADDRREFID#", [&]() { return GetImsiAsAddressRefId(objContext); });
     Replace(strResult, "#MAC#", [&]() { return GetMacAddress(objContext); });
     Replace(strResult, "#IP#", [&]() { return GetIpAddress(objContext); });
     Replace(strResult, "#PORT#", [&]() { return GetPort(objContext); });
@@ -96,13 +99,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImeiAsAddressRefId(IN const IMtcCal
 
     AString strImeiAsAddrRefId;
     strImeiAsAddrRefId.Sprintf("%-15.15s0", strDeviceId.GetStr()).Replace(' ', '0');
-
-    for (IMS_UINT8 i = 4; i < strImeiAsAddrRefId.GetLength(); i += 5)
-    {
-        strImeiAsAddrRefId.Insert(i, TextParser::CHAR_COLON);
-    }
-
-    return strImeiAsAddrRefId;
+    return FormAddressRefId(strImeiAsAddrRefId);
 }
 
 PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN const IMtcCallContext& objContext)
@@ -113,6 +110,22 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN const IMtcCallContext& objC
     AString strImsi;
     pSubscriberInfo->GetSubscriberId(strImsi);
     return strImsi;
+}
+
+/**
+* This function formats value of IMSI adding a padding of “0”
+* to a 16 digit MAC address.
+* For example:
+* IMSI: 123456789012345
+* address-ref-id: 1234:5678:9012:3450
+*/
+PRIVATE GLOBAL AString TemplateFormatter::GetImsiAsAddressRefId(IN const IMtcCallContext& objContext)
+{
+    AString strImsi = GetImsi(objContext);
+
+    AString strImsiAsAddrRefId;
+    strImsiAsAddrRefId.Sprintf("%-15.15s0", strImsi.GetStr()).Replace(' ', '0');
+    return FormAddressRefId(strImsiAsAddrRefId);
 }
 
 PRIVATE GLOBAL AString TemplateFormatter::GetMacAddress(IN const IMtcCallContext& objContext)
@@ -304,4 +317,15 @@ PRIVATE GLOBAL IMS_BOOL TemplateFormatter::IsInUnknownCountry(IN IMS_SINT32 nSlo
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE GLOBAL AString& TemplateFormatter::FormAddressRefId(IN AString& strAsAddrRefId)
+{
+    for (IMS_UINT8 i = ADDRESS_REF_ID_START_INDEX; i < strAsAddrRefId.GetLength();
+         i += ADDRESS_REF_ID_INTERVAL)
+    {
+        strAsAddrRefId.Insert(i, TextParser::CHAR_COLON);
+    }
+
+    return strAsAddrRefId;
 }

@@ -42,6 +42,7 @@ private:
     static AString GetImeiWithHyphen(IN const IMtcCallContext& objContext);
     static AString GetImeiAsAddressRefId(IN const IMtcCallContext& objContext);
     static AString GetImsi(IN const IMtcCallContext& objContext);
+    static AString GetImsiAsAddressRefId(IN const IMtcCallContext& objContext);
     static AString GetMacAddress(IN const IMtcCallContext& objContext);
     static AString GetIpAddress(IN IMtcCallContext& objContext);
     static AString GetPort(IN IMtcCallContext& objContext);
@@ -52,6 +53,7 @@ private:
     static AString GetUniqueId();
     static AString GetMcc(IN const IMtcCallContext& objContext);
     static AString GetMnc(IN const IMtcCallContext& objContext, IN IMS_UINT32 nLength);
+    static AString& FormAddressRefId(IN AString& strAsAddrRefId);
 
     static void Replace(IN_OUT AString& strText, IN const AString& strTemplateLiteral,
             IN const std::function<AString()>& objSubstitution);
