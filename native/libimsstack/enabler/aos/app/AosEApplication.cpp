@@ -90,11 +90,6 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             ProcessFakeRegRequest(IAosRegistration::REASON_FAKE_MODE_SAME_PCSCF);
             break;
 
-        case ImsAosControl::RETRY_COUNT_INCREASE:  // FALL-THROUGH
-        case ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION:
-            AosApplication::RequestCmd(nCmdType);
-            break;
-
         case CMD_ECALL_INIT:  // FALL-THROUGH
         case CMD_ESMS_INIT:
             SetRegBlockInCbm(IMS_FALSE);
@@ -249,10 +244,6 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
 
         case MSG_DESTROY:
             ProcessDestroy(objMsg);
-            break;
-
-        case MSG_RETRY_COUNT_INCREASE:
-            ProcessRegRetryCount(objMsg);
             break;
 
         case MSG_IPCAN_CHANGED:
