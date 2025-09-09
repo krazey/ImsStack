@@ -69,8 +69,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
      * UE supports ISIM application and USIM application.
      */
     @Test
-    public void testTriggerRegistration_modeIsimUsim_priorityIsimUsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIsimUsim_PriorityIsimUsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_BOTH_ISIM_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -79,8 +79,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeIsimUsim_priorityIsimAndIsimImsi() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIsimUsim_PriorityIsimImsi()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ISIM_ISIMIMSI);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -89,8 +89,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeIsimUsim_priorityIsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIsimUsim_PriorityIsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_ISIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -99,8 +99,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeIsimUsim_priorityUsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIsimUsim_PriorityUsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -115,8 +115,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
      *                   cannot be obtained from the ISIM.
      */
     @Test
-    public void testTriggerRegistration_modeIncompIsimUsim_priorityIsimUsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIncompIsimUsim_PriorityIsimUsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_BOTH_ISIM_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -125,9 +125,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeIncompIsimUsim_priorityIsimAndIsimImsi()
+    public void testCarrierDefaultLte_Provisioning_SupportIncompIsimUsim_PriorityIsimIsimImsi()
             throws Exception {
-
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ISIM_ISIMIMSI);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -136,8 +135,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeIncompIsimUsim_priorityIsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIncompIsimUsim_PriorityIsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_ISIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -146,8 +145,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeIncompIsimUsim_priorityUsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportIncompIsimUsim_PriorityUsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -160,8 +159,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
      * UE only supports a USIM application.
      */
     @Test
-    public void testTriggerRegistration_modeUsim_priorityIsimUsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportUsim_PriorityIsimUsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_BOTH_ISIM_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
@@ -170,8 +169,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeUsim_priorityIsimAndIsimImsi() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportUsim_PriorityIsimImsi()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ISIM_ISIMIMSI);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
@@ -180,8 +179,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeUsim_priorityIsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportUsim_PriorityIsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_ISIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
@@ -190,8 +189,8 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testTriggerRegistration_modeUsim_priorityUsim() throws Exception {
-
+    public void testCarrierDefaultLte_Provisioning_SupportUsim_PriorityUsim()
+            throws Exception {
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
