@@ -122,7 +122,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipConfigV::GetTimerValue(IN IMS_SINT32 nType) const
 
 PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 {
-    ICarrierConfig* piCc = GetCarrierConfig();
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     IMS_SINT32 nRequestUriType = piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
 

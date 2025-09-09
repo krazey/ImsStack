@@ -96,7 +96,7 @@ IMS_BOOL Ims3gpp::Parse(IN const AString& str3gppIms)
     IMS_TRACE_D("'ims-3gpp' version is %s", strVersion.GetStr(), 0, 0);
 
     // "service-info" / "alternative-service" element
-    INode* piNode = piElement->GetFirstChild();
+    const INode* piNode = piElement->GetFirstChild();
 
     if (piNode != IMS_NULL)
     {
