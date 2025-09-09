@@ -1257,8 +1257,65 @@ TEST_F(MtcPreconditionManagerTest, SetsRemoteResourceAsAvailableOnFinalSuccessRe
     pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
 }
 
-TEST_F(MtcPreconditionManagerTest, UpdatesSupportingPreconditionOnInviteReceivedRegardlessOfSdp)
+TEST_F(MtcPreconditionManagerTest,
+        SetsSupportingPreconditionOnInviteReceivedIfNoSdpAndSupportsPrecondition)
 {
+    // Supported: precondition
+    // Require: no precondition
+    // SDP: no SDP
+    // -> Precondition is supported
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_INVALID));
+    SipMethod objInviteMethod = SipMethod::INVITE;
+    ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    AString strPrecondition = "precondition";
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_TRUE)).Times(1);
+    pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        UnsetsSupportingPreconditionOnInviteReceivedIfSupportedTagButNoAttributeIsIncluded)
+{
+    // Supported: precondition
+    // Require: no precondition
+    // SDP: SDP exists but no QoS attribute exists
+    // -> Precondition is not supported
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_INVALID));
+    SipMethod objInviteMethod = SipMethod::INVITE;
+    ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    AString strPrecondition = "precondition";
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
+    pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        SetsSupportingPreconditionOnInviteReceivedIfNoSdpAndRequiresPrecondition)
+{
+    // Supported: no precondition
+    // Require: precondition
+    // SDP: no SDP
+    // -> Precondition is supported
     SetUpMockQosInfo();
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_INVALID));
@@ -1271,11 +1328,89 @@ TEST_F(MtcPreconditionManagerTest, UpdatesSupportingPreconditionOnInviteReceived
     ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_TRUE));
 
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_TRUE)).Times(1);
     pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
 }
 
-TEST_F(MtcPreconditionManagerTest, UpdatesSupportingPreconditionOn183ReliableResponseReceived)
+TEST_F(MtcPreconditionManagerTest,
+        UnsetsSupportingPreconditionOnInviteReceivedIfPreconditionSdpIsIncludedButNoPreconditionTag)
+{
+    // Supported: no precondition
+    // Require: no precondition
+    // SDP: SDP and QoS attribute exist
+    // -> Precondition is not supported
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_INVALID));
+    SipMethod objInviteMethod = SipMethod::INVITE;
+    ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    AString strPrecondition = "precondition";
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
+    pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        UnsetsSupportingPreconditionOnInviteReceivedIfNoPreconditionTagAndNoSdpIsIncluded)
+{
+    // Supported: no precondition
+    // Require: no precondition
+    // SDP: no SDP
+    // -> Precondition is not supported
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_INVALID));
+    SipMethod objInviteMethod = SipMethod::INVITE;
+    ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    AString strPrecondition = "precondition";
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
+    pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        UnsetsSupportingPreconditionToFalseOnInviteReceivedIfNoPreconditionTagAndNoAttributeIsIncluded)
+{
+    // Supported: no precondition
+    // Require: no precondition
+    // SDP: SDP exists but no QoS attribute exists
+    // -> Precondition is not supported
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_INVALID));
+    SipMethod objInviteMethod = SipMethod::INVITE;
+    ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    AString strPrecondition = "precondition";
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
+    pPreconditionManager->OnMessageReceived(&objISession, &objIMessage);
+}
+
+TEST_F(MtcPreconditionManagerTest, UnsetsSupportingPreconditionOn183ReliableResponseReceived)
 {
     SetUpMockQosInfo();
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
@@ -1311,7 +1446,7 @@ TEST_F(MtcPreconditionManagerTest, DoNotUpdateSupportingPreconditionOnInviteRece
     ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(0);
+    EXPECT_CALL(*pInfo, SetSupportingPrecondition(_)).Times(0);
     pPreconditionManager->OnMessageReceived(nullptr, &objIMessage);
 }
 

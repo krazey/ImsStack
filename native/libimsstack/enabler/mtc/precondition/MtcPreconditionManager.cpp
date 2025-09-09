@@ -329,7 +329,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnMessageReceived(
     // sets bCheckSdp as true if UE receives RPR, PRACK, early UPDATE and 200 OK to INVITE.
     IMS_BOOL bCheckSdp = !(piMessage->GetMethod().Equals(SipMethod::INVITE) &&
             piMessage->GetMessage()->GetType() == ISipMessage::TYPE_REQUEST);
-    if (bCheckSdp && !m_objContext.GetMessageUtils().HasSdp(piMessage))
+    IMS_BOOL bSdpIncluded = m_objContext.GetMessageUtils().HasSdp(piMessage);
+    if (bCheckSdp && !bSdpIncluded)
     {
         return;
     }
@@ -340,7 +341,10 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnMessageReceived(
             piMessage, MessageUtil::STR_PRECONDITION, ISipHeader::REQUIRE);
 
     IMS_BOOL bRemoteSupported = (bHasSupportedHeader || bHasRequireHeader) &&
-            (!bCheckSdp || m_pSdpPreconditionHelper->IsPreconditionIncludedInSdp(piSession));
+            (!bSdpIncluded || m_pSdpPreconditionHelper->IsPreconditionIncludedInSdp(piSession));
+
+    IMS_TRACE_D("OnMessageReceived supported[%s] required[%s] sdp[%s]",
+            _TRACE_B_(bHasSupportedHeader), _TRACE_B_(bHasRequireHeader), _TRACE_B_(bSdpIncluded));
 
     UpdateSupportingPrecondition(piSession, bRemoteSupported);
 }
