@@ -23,7 +23,7 @@ class MtsEnabler final : public Enabler
 {
 public:
     explicit MtsEnabler(IN IMS_SINT32 nSlotId);
-    ~MtsEnabler();
+    ~MtsEnabler() override;
 
     MtsEnabler(IN const MtsEnabler&) = delete;
     MtsEnabler& operator=(IN const MtsEnabler&) = delete;

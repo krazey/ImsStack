@@ -27,7 +27,7 @@ class AppConfigPrivate : public RcObject
 {
 public:
     explicit AppConfigPrivate(IN const AString& strAppId);
-    ~AppConfigPrivate();
+    ~AppConfigPrivate() override;
 
     AppConfigPrivate(IN const AppConfigPrivate&) = delete;
     AppConfigPrivate& operator=(IN const AppConfigPrivate&) = delete;
@@ -110,7 +110,7 @@ AppConfigPrivate::AppConfigPrivate(IN const AString& strAppId) :
 {
 }
 
-PUBLIC VIRTUAL AppConfigPrivate::~AppConfigPrivate()
+PUBLIC AppConfigPrivate::~AppConfigPrivate()
 {
     if (!m_objCoreServiceConfigs.IsEmpty())
     {

@@ -33,7 +33,7 @@ class BaseService : public IJniEnabler
 {
 public:
     BaseService(IN IMS_SINT32 nSlotId);
-    virtual ~BaseService();
+    ~BaseService() override;
     virtual void Destroy();
     virtual int SendData(IN const android::Parcel& objParcel) = 0;
     inline virtual int SendData(IN const android::Parcel& /*in*/, android::Parcel& /*out*/)

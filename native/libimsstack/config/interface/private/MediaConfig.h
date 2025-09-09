@@ -25,7 +25,7 @@ class MediaConfig : public ConfigBase, public IMediaConfig
 {
 public:
     explicit MediaConfig(IN IMS_SINT32 nSlotId);
-    virtual ~MediaConfig();
+    ~MediaConfig() override;
 
     MediaConfig(IN const MediaConfig&) = delete;
     MediaConfig& operator=(IN const MediaConfig&) = delete;

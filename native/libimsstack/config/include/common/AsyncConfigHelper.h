@@ -25,7 +25,7 @@ class AsyncConfigHelper : public ImsActivityEx
 {
 public:
     AsyncConfigHelper();
-    virtual ~AsyncConfigHelper();
+    ~AsyncConfigHelper() override;
 
 public:
     void Register(IN IAsyncConfig* piConfig);

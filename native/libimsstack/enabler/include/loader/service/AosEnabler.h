@@ -22,7 +22,7 @@ class AosEnabler : public Enabler
 {
 public:
     explicit AosEnabler(IN IMS_SINT32 nSlotId);
-    virtual ~AosEnabler();
+    ~AosEnabler() override;
 
     AosEnabler(IN const AosEnabler&) = delete;
     AosEnabler& operator=(IN const AosEnabler&) = delete;

@@ -25,7 +25,7 @@ public:
             m_nSlotId(nSlotId)
     {
     }
-    inline virtual ~Enabler() {}
+    ~Enabler() override = default;
 
 public:
     inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }

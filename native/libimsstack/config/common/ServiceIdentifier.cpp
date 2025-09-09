@@ -32,7 +32,7 @@ public:
             m_bRequire(IMS_FALSE)
     {
     }
-    inline virtual ~ServiceIdentifierPrivate() {}
+    ~ServiceIdentifierPrivate() override = default;
 
     ServiceIdentifierPrivate(IN const ServiceIdentifierPrivate&) = delete;
     ServiceIdentifierPrivate& operator=(IN const ServiceIdentifierPrivate&) = delete;

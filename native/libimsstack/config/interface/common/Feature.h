@@ -27,7 +27,7 @@ public:
     explicit Feature(IN const AString& strFeature);
     Feature(IN const AString& strTag, IN const AString& strValue);
     Feature(IN const Feature& other);
-    virtual ~Feature();
+    ~Feature() override;
 
 public:
     Feature& operator=(IN const Feature& other);

@@ -24,7 +24,7 @@ class IJniEnablerThread;
 class IJniEnabler : public ImsMessage::IMessageCallback
 {
 public:
-    virtual ~IJniEnabler() {}
+    ~IJniEnabler() override = default;
 
     virtual void NotifyNativeEnablerSet() = 0;
     virtual IJniEnablerThread* GetJniThread() const = 0;

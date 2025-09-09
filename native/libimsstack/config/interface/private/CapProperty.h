@@ -26,7 +26,7 @@ public:
     CapProperty();
     CapProperty(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType);
     CapProperty(IN const CapProperty& other);
-    virtual ~CapProperty();
+    ~CapProperty() override;
 
 public:
     CapProperty& operator=(IN const CapProperty& other);

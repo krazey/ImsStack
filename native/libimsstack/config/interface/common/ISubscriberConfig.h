@@ -29,7 +29,7 @@ class ServerAddress;
 class ISubscriberConfig : public IAsyncConfig
 {
 protected:
-    virtual ~ISubscriberConfig() = default;
+    ~ISubscriberConfig() override = default;
 
 public:
     /**

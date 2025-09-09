@@ -25,7 +25,7 @@ class EnablerThread : public ImsAppThread
 {
 public:
     EnablerThread(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId);
-    inline virtual ~EnablerThread() {}
+    ~EnablerThread() override = default;
 
 public:
     inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }

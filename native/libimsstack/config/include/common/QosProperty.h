@@ -36,7 +36,7 @@ public:
     QosProperty();
     explicit QosProperty(IN const AString& strContentType);
     QosProperty(IN const QosProperty& other);
-    inline virtual ~QosProperty() {}
+    ~QosProperty() override = default;
 
 public:
     QosProperty& operator=(IN const QosProperty& other);

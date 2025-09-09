@@ -24,7 +24,7 @@ class ConfigEnabler : public Enabler
 {
 public:
     explicit ConfigEnabler(IN IMS_SINT32 nSlotId);
-    virtual ~ConfigEnabler();
+    ~ConfigEnabler() override;
 
     ConfigEnabler(IN const ConfigEnabler&) = delete;
     ConfigEnabler& operator=(IN const ConfigEnabler&) = delete;
