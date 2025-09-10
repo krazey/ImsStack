@@ -111,6 +111,10 @@ PROTECTED TextProfile::Payload* TextProfileGenerator::CreateT140Payload(
     else
     {
         strCodecName.Sprintf("%s", "t140");
+        auto pT140Fmtp = std::make_shared<TextProfile::T140Fmtp>();
+        IMS_TRACE_I("CreateT140Payload(): T140 CPS[%d], visible CPS[%d]", pT140Fmtp->GetCps(),
+                pT140Fmtp->IsCpsVisible(), 0);
+        pTextPayload->SetFmtp(pT140Fmtp);
     }
 
     pTextPayload->SetRtpMap(

@@ -27,36 +27,107 @@ class TextProfile : public MediaBaseProfile
 {
 public:
     /**
+     * TextFmtp is a base class for text-related format-specific parameters.
+     */
+    class TextFmtp
+    {
+    public:
+        TextFmtp() {}
+        virtual ~TextFmtp() {}
+    };
+
+    /**
+     * T140Fmtp attributes are used within the SDP to carry T140 parameters.
+     */
+    class T140Fmtp : public TextFmtp
+    {
+    public:
+        T140Fmtp() :
+                m_nCps(30),
+                m_bIsCpsVisible(IMS_FALSE)
+        {
+        }
+
+        T140Fmtp(IN IMS_SINT32 nCps, IN IMS_BOOL bIsCpsVisible) :
+                m_nCps(nCps),
+                m_bIsCpsVisible(bIsCpsVisible)
+        {
+        }
+
+        T140Fmtp(IN const T140Fmtp& obj) :
+                TextFmtp(obj),
+                m_nCps(obj.m_nCps),
+                m_bIsCpsVisible(obj.m_bIsCpsVisible)
+        {
+        }
+
+        ~T140Fmtp() override {}
+
+        T140Fmtp& operator=(IN const T140Fmtp& obj)
+        {
+            if (this != &obj)
+            {
+                m_nCps = obj.m_nCps;
+                m_bIsCpsVisible = obj.m_bIsCpsVisible;
+            }
+            return (*this);
+        }
+
+        bool operator==(IN const T140Fmtp& obj) const
+        {
+            return (m_nCps == obj.m_nCps && m_bIsCpsVisible == obj.m_bIsCpsVisible);
+        }
+
+        bool operator!=(IN const T140Fmtp& obj) const { return !(*this == obj); }
+
+        inline void SetCps(IN const IMS_SINT32 nCps) { m_nCps = nCps; }
+        inline IMS_SINT32 GetCps() { return m_nCps; }
+        inline void SetVisibleCps(IN const IMS_BOOL bIsCpsVisible)
+        {
+            m_bIsCpsVisible = bIsCpsVisible;
+        }
+        inline IMS_BOOL IsCpsVisible() { return m_bIsCpsVisible; }
+
+    private:
+        IMS_SINT32 m_nCps;
+        IMS_BOOL m_bIsCpsVisible;
+    };
+
+    /**
      * RedFmtp attributes are used within the SDP to carry RED parameters that provide
      * extra configuration details about a specific RED codec used in the RTP stream.
      */
-    class RedFmtp
+    class RedFmtp : public TextFmtp
     {
     public:
         RedFmtp() :
+                TextFmtp(),
                 m_nRedLevel(-1),
                 m_nRedPayload(-1)
         {
         }
 
         RedFmtp(IN IMS_SINT32 nRedLevel, IN IMS_SINT32 nRedPayload) :
+                TextFmtp(),
                 m_nRedLevel(nRedLevel),
                 m_nRedPayload(nRedPayload)
         {
         }
 
         RedFmtp(IN const RedFmtp& obj) :
+                TextFmtp(obj),
                 m_nRedLevel(obj.m_nRedLevel),
                 m_nRedPayload(obj.m_nRedPayload)
         {
         }
 
-        ~RedFmtp() {}
+        ~RedFmtp() override {}
 
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
             if (this != &obj)
             {
+                TextFmtp::operator=(obj);
                 m_nRedLevel = obj.m_nRedLevel;
                 m_nRedPayload = obj.m_nRedPayload;
             }
@@ -96,11 +167,21 @@ public:
         }
 
         Payload(IN const Payload& obj) :
-                BasePayload(obj)
+                BasePayload(obj),
+                m_pFmtp(IMS_NULL)
         {
-            if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.m_pFmtp != IMS_NULL)
+            if (obj.m_pFmtp != IMS_NULL)
             {
-                m_pFmtp = std::make_shared<RedFmtp>(*obj.m_pFmtp);
+                if (obj.m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
+                {
+                    m_pFmtp = std::make_shared<RedFmtp>(
+                            *std::static_pointer_cast<RedFmtp>(obj.m_pFmtp));
+                }
+                else if (obj.m_objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
+                {
+                    m_pFmtp = std::make_shared<T140Fmtp>(
+                            *std::static_pointer_cast<T140Fmtp>(obj.m_pFmtp));
+                }
             }
         }
 
@@ -116,10 +197,20 @@ public:
             if (this != &obj)
             {
                 BasePayload::operator=(obj);
+                m_pFmtp.reset();
 
-                if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.m_pFmtp != IMS_NULL)
+                if (obj.m_pFmtp != IMS_NULL)
                 {
-                    m_pFmtp = std::make_shared<RedFmtp>(*obj.m_pFmtp);
+                    if (obj.m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
+                    {
+                        m_pFmtp = std::make_shared<RedFmtp>(
+                                *std::static_pointer_cast<RedFmtp>(obj.m_pFmtp));
+                    }
+                    else if (obj.m_objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
+                    {
+                        m_pFmtp = std::make_shared<T140Fmtp>(
+                                *std::static_pointer_cast<T140Fmtp>(obj.m_pFmtp));
+                    }
                 }
             }
 
@@ -138,16 +229,27 @@ public:
                 return m_pFmtp == obj.m_pFmtp;
             }
 
-            return *m_pFmtp == *obj.m_pFmtp;
+            if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
+            {
+                return *std::static_pointer_cast<const RedFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const RedFmtp>(obj.m_pFmtp);
+            }
+            else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
+            {
+                return *std::static_pointer_cast<const T140Fmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const T140Fmtp>(obj.m_pFmtp);
+            }
+
+            return false;
         }
 
         bool operator!=(IN const Payload& obj) const { return !(*this == obj); }
 
-        inline std::shared_ptr<RedFmtp> GetFmtp() { return m_pFmtp; }
-        inline void SetFmtp(std::shared_ptr<RedFmtp> pFmtp) { m_pFmtp = pFmtp; }
+        inline std::shared_ptr<TextFmtp> GetFmtp() { return m_pFmtp; }
+        inline void SetFmtp(std::shared_ptr<TextFmtp> pFmtp) { m_pFmtp = pFmtp; }
 
     protected:
-        std::shared_ptr<RedFmtp> m_pFmtp;
+        std::shared_ptr<TextFmtp> m_pFmtp;
     };
 
 public:

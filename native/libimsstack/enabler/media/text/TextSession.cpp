@@ -119,7 +119,7 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
 
         if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            std::shared_ptr<TextProfile::RedFmtp> pFmtp = pPayload->GetFmtp();
+            auto pFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pPayload->GetFmtp());
 
             if (pFmtp == IMS_NULL)
             {

@@ -504,16 +504,13 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
     }
 
     // Text nego result
-    if (pNegotiatedTextDescriptor != IMS_NULL &&
-            (m_pTextNego->GetNegotiatedRtpPort() <= 0 ||
-                    GetNegotiatedTextQuality() == TEXT_CODEC_NOT_USED))
+    if (pNegotiatedTextDescriptor != IMS_NULL)
     {
-        IMS_TRACE_I("NegotiateSdp(): disable text", 0, 0, 0);
-        nTextDirection = MEDIA_DIRECTION_INVALID;
+        nTextDirection = GetNegotiatedTextDirection();
     }
 
     if (nAudioDirection == MEDIA_DIRECTION_INVALID && nVideoDirection == MEDIA_DIRECTION_INVALID &&
-            nTextDirection == MEDIA_DIRECTION_INVALID)
+            GetNegotiatedTextQuality() == TEXT_CODEC_NOT_USED)
     {
         IMS_TRACE_E(0, "NegotiateSdp(): no negotiated media", 0, 0, 0);
         errorReason = ERROR_NO_CODEC_MATCHED;

@@ -160,14 +160,23 @@ IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
 PRIVATE
 TextProfile::Payload* TextProfileNegotiator::CreatePayload(
         IN const MediaBaseProfile::RtpMap& objRtpMap,
-        IN std::shared_ptr<TextProfile::RedFmtp> pFmtp)
+        IN std::shared_ptr<TextProfile::TextFmtp> pFmtp)
 {
     TextProfile::Payload* pPayload = new TextProfile::Payload();
     pPayload->SetRtpMap(objRtpMap);
 
-    if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && pFmtp != IMS_NULL)
+    if (pFmtp != IMS_NULL)
     {
-        pPayload->SetFmtp(std::make_shared<TextProfile::RedFmtp>(*pFmtp));
+        if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
+        {
+            pPayload->SetFmtp(std::make_shared<TextProfile::RedFmtp>(
+                    *std::static_pointer_cast<TextProfile::RedFmtp>(pFmtp)));
+        }
+        else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
+        {
+            pPayload->SetFmtp(std::make_shared<TextProfile::T140Fmtp>(
+                    *std::static_pointer_cast<TextProfile::T140Fmtp>(pFmtp)));
+        }
     }
 
     return pPayload;
@@ -183,16 +192,8 @@ void TextProfileNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
         return;
     }
 
-    if (pNegotiatedProfile->GetDataPort() != 0 && pPeerProfile->GetDataPort() != 0)
-    {
-        pNegotiatedProfile->SetDirection(
-                UpdateDirectionToMine(pPeerProfile->GetDirection(), pLocalProfile->GetDirection()));
-    }
-    else
-    {
-        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
-    }
-
+    pNegotiatedProfile->SetDirection(
+            UpdateDirectionToMine(pPeerProfile->GetDirection(), pLocalProfile->GetDirection()));
     IMS_TRACE_D("NegotiateDirection(): direction[%d]", pNegotiatedProfile->GetDirection(), 0, 0);
 }
 
@@ -351,8 +352,10 @@ PRIVATE TextProfile::Payload* TextProfileNegotiator::FindT140InProfile(
                     pComparedPayload->GetRtpMap().GetSamplingRate() ==
                             pPayload->GetRtpMap().GetSamplingRate())
             {
-                std::shared_ptr<TextProfile::RedFmtp> pComparedFmtp = pComparedPayload->GetFmtp();
-                std::shared_ptr<TextProfile::RedFmtp> pReceivedFmtp = pPayload->GetFmtp();
+                auto pComparedFmtp =
+                        std::static_pointer_cast<TextProfile::RedFmtp>(pComparedPayload->GetFmtp());
+                auto pReceivedFmtp =
+                        std::static_pointer_cast<TextProfile::RedFmtp>(pPayload->GetFmtp());
 
                 if (pComparedFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                 {

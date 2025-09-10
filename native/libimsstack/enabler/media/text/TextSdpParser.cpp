@@ -75,7 +75,11 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
         {
             ParseFmtp(pSdpCodec, pPayload, lstMediaFormat);
         }
-        else if (!strCodecName.EqualsIgnoreCase("t140"))
+        else if (strCodecName.EqualsIgnoreCase("t140"))
+        {
+            ParseT140Fmtp(pSdpCodec, pPayload);
+        }
+        else
         {
             IMS_TRACE_E(0, "ParsePayloads(): Invalid codec[%s]", strCodecName.GetStr(), 0, 0);
             delete pPayload;
@@ -127,6 +131,39 @@ IMS_BOOL TextSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
 
     pPayload->SetFmtp(pRedFmtp);
 
+    return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL TextSdpParser::ParseT140Fmtp(
+        IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload)
+{
+    if (pPayload == IMS_NULL || pSdpCodec == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
+    auto pT140Fmtp = std::make_shared<TextProfile::T140Fmtp>();
+
+    if (pT140Fmtp == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    ImsList<AString> objSplitColon = strFmtp.Split(';');
+    for (IMS_UINT32 i = 0; i < objSplitColon.GetSize(); i++)
+    {
+        ImsList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
+        if (objSplitEqual.GetSize() == 2 && objSplitEqual.GetAt(0).Equals("cps"))
+        {
+            pT140Fmtp->SetCps(objSplitEqual.GetAt(1).ToInt32());
+            pT140Fmtp->SetVisibleCps(IMS_TRUE);
+            IMS_TRACE_D("ParseT140Fmtp(): cps[%d]", pT140Fmtp->GetCps(), 0, 0);
+        }
+    }
+
+    pPayload->SetFmtp(pT140Fmtp);
     return IMS_TRUE;
 }
 

@@ -74,7 +74,7 @@ void TextSdpGenerator::CheckRedPayloadSubTypeValidity(OUT TextProfile* pProfile)
 
         if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            std::shared_ptr<TextProfile::RedFmtp> pRedFmtp = pPayload->GetFmtp();
+            auto pRedFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pPayload->GetFmtp());
             if (pRedFmtp == IMS_NULL)
             {
                 continue;
@@ -160,7 +160,7 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
 
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
     {
-        std::shared_ptr<TextProfile::RedFmtp> pRedFmtp = pPayload->GetFmtp();
+        auto pRedFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pPayload->GetFmtp());
 
         if (pRedFmtp == IMS_NULL)
         {
@@ -185,6 +185,17 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
 
         IMS_TRACE_I("GenerateFmtp(): Redundancy[%d], RED Payload[%d], Fmtp[%s]",
                 pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), strFmtp.GetStr());
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
+    {
+        auto pT140Fmtp = std::static_pointer_cast<TextProfile::T140Fmtp>(pPayload->GetFmtp());
+
+        if (pT140Fmtp != IMS_NULL && pT140Fmtp->IsCpsVisible())
+        {
+            strFmtp.Sprintf("cps=%d", pT140Fmtp->GetCps());
+            IMS_TRACE_I("GenerateFmtp(): T140 CPS[%d], Fmtp[%s]", pT140Fmtp->GetCps(),
+                    strFmtp.GetStr(), 0);
+        }
     }
 
     return IMS_TRUE;

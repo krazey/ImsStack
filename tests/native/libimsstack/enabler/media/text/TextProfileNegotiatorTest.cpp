@@ -199,7 +199,7 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
     ASSERT_NE(pNegoRed->GetFmtp(), nullptr);
-    std::shared_ptr<TextProfile::RedFmtp> pNegoFmtp = pNegoRed->GetFmtp();
+    auto pNegoFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pNegoRed->GetFmtp());
     // Check if the FMTP string reflects the peer's primary payload type
     EXPECT_EQ(pNegoFmtp->GetRedPayload(), kPeerT140Payload);
 
@@ -370,4 +370,66 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRtcpIntervalDisabledWhenRsRrZero)
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), 0);
     // RTCP interval should be forced to 0 when RS and RR are 0
     EXPECT_EQ(m_pNegotiatedProfile->GetRtcpInterval(), 0);
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerRedFirst)
+{
+    // Arrange
+    // Local: T140, RED
+    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
+
+    // Peer: RED, T140 (RED has higher priority)
+    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(7014);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(
+            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
+
+    // Check that negotiated order matches peer's priority
+    TextProfile::Payload* pNegoRed = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+
+    TextProfile::Payload* pNegoT140 = m_pNegotiatedProfile->GetPayloadAt(1);
+    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadType(), "t140");
+    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerT140First)
+{
+    // Arrange
+    // Local: RED, T140
+    m_pLocalProfile->AddPayload(CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
+    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+
+    // Peer: T140, RED (T140 has higher priority)
+    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(7016);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(
+            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
+
+    // Check that negotiated order matches peer's priority
+    TextProfile::Payload* pNegoT140 = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadType(), "t140");
+    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+
+    TextProfile::Payload* pNegoRed = m_pNegotiatedProfile->GetPayloadAt(1);
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
 }

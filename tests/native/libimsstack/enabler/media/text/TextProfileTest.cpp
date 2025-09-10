@@ -22,6 +22,8 @@ const AString RED_PAYLOAD_TYPE = "RED";
 const IMS_SINT32 RED_LEVEL = 1;
 const IMS_SINT32 RED_PAYLOAD = 111;
 const IMS_BOOL KEEP_REDUNDANT_LEVEL = IMS_FALSE;
+const IMS_SINT32 T140_CPS = 30;
+const IMS_BOOL T140_CPS_VISIBLE = IMS_TRUE;
 
 class TextProfileTest : public ::testing::Test
 {
@@ -31,6 +33,47 @@ protected:
 
     virtual void TearDown() override {}
 };
+
+TEST_F(TextProfileTest, testT140FmtpCps)
+{
+    auto pT140Fmtp = std::make_shared<TextProfile::T140Fmtp>();
+    EXPECT_EQ(pT140Fmtp->GetCps(), T140_CPS);
+
+    pT140Fmtp->SetCps(T140_CPS + 1);
+    EXPECT_EQ(pT140Fmtp->GetCps(), T140_CPS + 1);
+}
+
+TEST_F(TextProfileTest, testT140FmtpCpsVisible)
+{
+    auto pT140Fmtp = std::make_shared<TextProfile::T140Fmtp>();
+    EXPECT_EQ(pT140Fmtp->IsCpsVisible(), IMS_FALSE);
+
+    pT140Fmtp->SetVisibleCps(T140_CPS_VISIBLE);
+    EXPECT_EQ(pT140Fmtp->IsCpsVisible(), T140_CPS_VISIBLE);
+}
+
+TEST_F(TextProfileTest, testT140FmtpCreation)
+{
+    auto pT140Fmtp1 = std::make_shared<TextProfile::T140Fmtp>();
+    EXPECT_EQ(pT140Fmtp1->GetCps(), T140_CPS);
+    EXPECT_EQ(pT140Fmtp1->IsCpsVisible(), IMS_FALSE);
+
+    auto pT140Fmtp2 = std::make_shared<TextProfile::T140Fmtp>(T140_CPS + 1, T140_CPS_VISIBLE);
+    EXPECT_EQ(pT140Fmtp2->GetCps(), T140_CPS + 1);
+    EXPECT_EQ(pT140Fmtp2->IsCpsVisible(), T140_CPS_VISIBLE);
+
+    auto pT140Fmtp3 = std::make_shared<TextProfile::T140Fmtp>(*pT140Fmtp2);
+    EXPECT_EQ(pT140Fmtp3->GetCps(), T140_CPS + 1);
+    EXPECT_EQ(pT140Fmtp3->IsCpsVisible(), T140_CPS_VISIBLE);
+}
+
+TEST_F(TextProfileTest, testT140FmtpAssign)
+{
+    auto pT140Fmtp1 = std::make_shared<TextProfile::T140Fmtp>();
+    auto pT140Fmtp2 = std::make_shared<TextProfile::T140Fmtp>(T140_CPS + 1, T140_CPS_VISIBLE);
+    *pT140Fmtp1 = *pT140Fmtp2;
+    EXPECT_EQ(*pT140Fmtp1, *pT140Fmtp2);
+}
 
 TEST_F(TextProfileTest, testRedFmtpRedLevel)
 {
@@ -95,8 +138,9 @@ TEST_F(TextProfileTest, testTextPayload)
     TextProfile::Payload* pPayload3 = new TextProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    pPayload3->GetFmtp()->SetRedLevel(RED_LEVEL);
-    EXPECT_EQ(pPayload3->GetFmtp()->GetRedLevel(), RED_LEVEL);
+    auto pFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pPayload3->GetFmtp());
+    pFmtp->SetRedLevel(RED_LEVEL);
+    EXPECT_EQ(pFmtp->GetRedLevel(), RED_LEVEL);
 
     delete pPayload1;
     delete pPayload2;
@@ -119,8 +163,9 @@ TEST_F(TextProfileTest, testTextPayloadAssign)
     TextProfile::Payload* pPayload3 = new TextProfile::Payload(*pPayload1);
     EXPECT_NE(pPayload3->GetFmtp(), nullptr);
 
-    pPayload3->GetFmtp()->SetRedLevel(RED_LEVEL);
-    EXPECT_EQ(pPayload3->GetFmtp()->GetRedLevel(), RED_LEVEL);
+    auto pFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pPayload3->GetFmtp());
+    pFmtp->SetRedLevel(RED_LEVEL);
+    EXPECT_EQ(pFmtp->GetRedLevel(), RED_LEVEL);
 
     delete pPayload1;
     delete pPayload2;

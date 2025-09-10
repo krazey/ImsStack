@@ -92,8 +92,11 @@ IMS_SINT32 MediaSdpGenerator::GenerateDirection(
 
     IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
 
-    pDescriptor->SetDirection(nDirection);
-    IMS_TRACE_D("GenerateDirection() - media[%d], direction[%d]", m_eType, nDirection, 0);
+    if (nDirection >= 0)
+    {
+        pDescriptor->SetDirection(nDirection);
+        IMS_TRACE_D("GenerateDirection() - media[%d], direction[%d]", m_eType, nDirection, 0);
+    }
 
     return nDirection;
 }

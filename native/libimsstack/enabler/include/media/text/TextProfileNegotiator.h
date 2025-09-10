@@ -52,7 +52,7 @@ private:
     IMS_BOOL NegotiatePayload(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
     TextProfile::Payload* CreatePayload(IN const MediaBaseProfile::RtpMap& objRtpMap,
-            IN std::shared_ptr<TextProfile::RedFmtp> pFmtp);
+            IN std::shared_ptr<TextProfile::TextFmtp> pFmtp);
     void NegotiateDirection(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
     void NegotiateBandwidth(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,

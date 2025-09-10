@@ -166,18 +166,12 @@ IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
 }
 
 PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION /*eDirection*/, IN IMS_BOOL bDisable)
 {
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpGenerator == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormAnswer(): invalid arguments", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (eDirection == MEDIA_DIRECTION_INVALID && !bDisable)
-    {
-        IMS_TRACE_E(0, "FormAnswer(): invalid direction", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -187,79 +181,28 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d]", eDirection, bDisable, 0);
-
     // Getting OaModel from list
-    std::shared_ptr<OaModel> pNewOaModel = GetNegotiatedOaModel();
+    std::shared_ptr<OaModel> pNegotiatedOaModel = GetNegotiatedOaModel();
 
-    if (pNewOaModel == IMS_NULL)
+    if (pNegotiatedOaModel == IMS_NULL || !pNegotiatedOaModel->IsAllProfileExist())
     {
         IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (!pNewOaModel->IsAllProfileExist())
-    {
-        IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    // Modify a Rtp/RTCP port if text is not supported
+    // Modify a RTP/RTCP port if text is not supported
     if (bDisable)
     {
-        // copy the dest profile as nego profile
-        if (pNewOaModel->pPeerProfile->GetPayloadList().GetSize() > 0)
-        {
-            IMS_TRACE_D("FormAnswer(): use peer profile", 0, 0, 0);
-            *pNewOaModel->pNegotiatedProfile = *GetPeerProfile(*pNewOaModel);
-        }
-        else
-        {
-            // If the peer profile lacks payloads, try using previously negotiated ones. (Unusual
-            // case.)
-            if (pNewOaModel->pLocalProfile->GetPayloadList().GetSize() == 0)
-            {
-                std::shared_ptr<OaModel> pPrevOaModel = IMS_NULL;
-                // get negotiated OA model which is previou nego result
-                pPrevOaModel = GetNegotiatedOaModel();
-
-                if (pPrevOaModel != IMS_NULL &&
-                        pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() > 0)
-                {
-                    IMS_TRACE_D("FormAnswer(): use previous nego payloads", 0, 0, 0);
-                    *pNewOaModel->pNegotiatedProfile = *GetNegotiatedProfile(*pPrevOaModel);
-                }
-                else
-                {
-                    IMS_TRACE_D("FormAnswer(): use local payloads", 0, 0, 0);
-                    *pNewOaModel->pNegotiatedProfile = *GetLocalProfile(*pNewOaModel);
-                }
-            }
-            else
-            {
-                IMS_TRACE_D("FormAnswer(): use local payloads", 0, 0, 0);
-                *pNewOaModel->pNegotiatedProfile = *GetLocalProfile(*pNewOaModel);
-            }
-        }
-
-        pNewOaModel->pNegotiatedProfile->SetIpAddress(pSessionDescriptor->GetLocalAddress());
-        pNewOaModel->pNegotiatedProfile->SetBandwidthAs(0);
-        pNewOaModel->pNegotiatedProfile->SetBandwidthRs(0);
-        pNewOaModel->pNegotiatedProfile->SetBandwidthRr(0);
-        pNewOaModel->pNegotiatedProfile->SetDataPort(0);
-        pNewOaModel->pNegotiatedProfile->SetControlPort(0);
-        pNewOaModel->pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
+        pNegotiatedOaModel->pNegotiatedProfile->SetDataPort(0);
+        pNegotiatedOaModel->pNegotiatedProfile->SetControlPort(0);
     }
 
-    // Modify a direction
-    if (eDirection > MEDIA_DIRECTION_INVALID && eDirection <= MEDIA_DIRECTION_SEND_RECEIVE)
-    {
-        pNewOaModel->pNegotiatedProfile->SetDirection(eDirection);
-    }
+    IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d]",
+            GetNegotiatedProfile(*pNegotiatedOaModel)->GetDirection(), bDisable, 0);
 
     // Make the SDP from profile
     return m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(*pNewOaModel));
+            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(*pNegotiatedOaModel));
 }
 
 PROTECTED
