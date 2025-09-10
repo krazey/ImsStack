@@ -75,17 +75,22 @@ public:
     /**
      * @brief Update the MediaQualityThreshold parameters and send it to the java
      *
+     * @param bIsConference A boolean flag indicating if the session is a conference call.
+     *                      If true, the video bitrate (setVideoBitrateBps) will be disabled (set to
+     * 0).
+     *
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
-    IMS_BOOL UpdateMediaQualityThreshold();
+    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsConference);
 
     /**
      * @brief Handles the message from the telecom
      *
      * @param nMsg The message type
      * @param pParam The message parameter
-     * @return IMS_BOOL Returns IMS_TRUE when the parameter is valid, IMS_FALSE when it is invalid
+     * @return IMS_BOOL Returns IMS_TRUE when the parameter is valid, IMS_FALSE when it is
+     * invalid
      */
     IMS_BOOL OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 

@@ -499,7 +499,7 @@ TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
     pVideoConfig->setRtcpConfig(objRtcpConfig);
     pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_NO_FLOW);
 
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE));
     MediaQualityThreshold* pThreshold = m_pSession->GetMediaQualityThreshold();
     EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
     EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
@@ -509,7 +509,7 @@ TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
     objRtcpConfig.setIntervalSec(5);
     pVideoConfig->setRtcpConfig(objRtcpConfig);
     pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE));
     pThreshold = m_pSession->GetMediaQualityThreshold();
     EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
     EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
@@ -519,7 +519,7 @@ TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
     objRtcpConfig.setIntervalSec(0);
     pVideoConfig->setRtcpConfig(objRtcpConfig);
     pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE));
     pThreshold = m_pSession->GetMediaQualityThreshold();
     EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
     EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
@@ -529,7 +529,7 @@ TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
     objRtcpConfig.setIntervalSec(0);
     pVideoConfig->setRtcpConfig(objRtcpConfig);
     pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE));
     pThreshold = m_pSession->GetMediaQualityThreshold();
     EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
     EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
@@ -539,9 +539,33 @@ TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
     objRtcpConfig.setIntervalSec(5);
     pVideoConfig->setRtcpConfig(objRtcpConfig);
     pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE));
     pThreshold = m_pSession->GetMediaQualityThreshold();
     EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
     EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getVideoBitrateBps(), 0);
+}
+
+TEST_F(VideoSessionTest, testUpdateMediaQualityThresholdConference)
+{
+    MockVideoConfiguration objMockConfiguration(MEDIA_TYPE_VIDEO);
+    m_pSession->SetConfiguration(&objMockConfiguration);
+
+    const IMS_SINT32 BIT_RATE = 100000;
+    const IMS_SINT32 INACTIVITY_TIME_MS = 100000;
+
+    ON_CALL(objMockConfiguration, GetRtpInactivityTimerMillis())
+            .WillByDefault(Return(INACTIVITY_TIME_MS));
+    ON_CALL(objMockConfiguration, GetVideoLowestBitrateBps()).WillByDefault(Return(BIT_RATE));
+
+    VideoConfig* pVideoConfig = reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig());
+    pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+
+    // Act: Call with conference mode enabled
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_TRUE));
+
+    // Assert: videoBitrateBps should be 0 for conference calls
+    MediaQualityThreshold* pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
     EXPECT_EQ(pThreshold->getVideoBitrateBps(), 0);
 }

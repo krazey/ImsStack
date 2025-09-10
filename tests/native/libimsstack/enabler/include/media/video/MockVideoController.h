@@ -42,7 +42,7 @@ public:
             (override));
     MOCK_METHOD(void, UpdateAccessNetwork, (IN IMS_UINT32 nAccessNetwork), (override));
     MOCK_METHOD(void, SetMtu, (IN IMS_SINT32 nMtu), (override));
-    MOCK_METHOD(IMS_BOOL, ApplyQualityThreshold, (), (override));
+    MOCK_METHOD(IMS_BOOL, ApplyQualityThreshold, (IN IMS_BOOL bIsConference), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionOpened, (), (override));
     MOCK_METHOD(void, SetMediaPemType, (IN MEDIA_PEM_TYPE ePemType), (override));
 };

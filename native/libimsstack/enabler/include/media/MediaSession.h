@@ -160,6 +160,7 @@ protected:
     IMS_BOOL m_bSessionConfirmed;
     std::mutex m_objMutex;
     MEDIA_CONTENT_TYPE m_eCurMediaType;
+    IMS_BOOL m_bIsConference;
 };
 
 #endif

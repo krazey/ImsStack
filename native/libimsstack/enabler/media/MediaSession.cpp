@@ -42,7 +42,8 @@ MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServ
         m_pVideoController(std::make_shared<VideoController>()),
         m_pTextController(std::make_shared<TextController>()),
         m_bSessionConfirmed(IMS_FALSE),
-        m_eCurMediaType(MEDIA_TYPE_INVALID)
+        m_eCurMediaType(MEDIA_TYPE_INVALID),
+        m_bIsConference(IMS_FALSE)
 {
     IMS_TRACE_D(
             "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
@@ -550,8 +551,14 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             m_bSessionConfirmed = (param1 > 0);
             IMS_TRACE_I("SetOptions() - Confirmed flag[%d]", m_bSessionConfirmed, 0, 0);
             break;
-        case SET_DIRECTION:
         case SET_CONFERENCE_ENABLE:
+            if (m_pVideoController != IMS_NULL)
+            {
+                m_bIsConference = IMS_TRUE;
+                m_pVideoController->ApplyQualityThreshold(m_bIsConference);
+            }
+            break;
+        case SET_DIRECTION:
         case SEND_FAST_VIDEO_UPDATE:
             /** TODO: add implementation*/
         default:
@@ -1208,7 +1215,7 @@ void MediaSession::UpdateMediaSessions(
 
         if (m_pVideoController->UpdateSession())
         {
-            m_pVideoController->ApplyQualityThreshold();
+            m_pVideoController->ApplyQualityThreshold(m_bIsConference);
         }
     }
 

@@ -125,11 +125,14 @@ public:
 
     /**
      * @brief Update MediaQualityThreshold and send message to java
+     * This method calculates the appropriate media quality thresholds and sends them
+     * to the media framework.
      *
-     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
-     * failed to send
+     * @param bIsConference A flag to indicate if the session is a conference call.
+     * @return IMS_BOOL Returns IMS_TRUE if the quality threshold was applied successfully,
+     * IMS_FALSE if it failed to send
      */
-    virtual IMS_BOOL ApplyQualityThreshold();
+    virtual IMS_BOOL ApplyQualityThreshold(IN IMS_BOOL bIsConference);
 
     /**
      * @brief Check there is a session opened
