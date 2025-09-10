@@ -38,9 +38,9 @@ public:
     virtual void RemovePreconditionSdp(IN ISession* piSession);
     virtual void FormFailurePreconditionSdp(IN ISession* piSession);
     virtual IMS_UINT32 GetMediaType(IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState);
-    virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession);
+    virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession) const;
     virtual IMS_BOOL IsLocalResourceReservedInSdp(
-            IN ISession* piSession, IN IMS_SINT32 nServiceMethod);
+            IN ISession* piSession, IN IMS_SINT32 nServiceMethod) const;
 
 private:
     static void FormCurrentAttribute(

@@ -287,7 +287,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
 
 PUBLIC VIRTUAL void MtcPreconditionManager::OnSdpReceived(IN ISession* piSession)
 {
-    IMS_TRACE_D("OnSdpReceived", 0, 0, 0);
+    IMS_TRACE_D("OnSdpReceived QoS[%s]", _TRACE_B_(IsPreconditionIncludedInSdp(piSession)), 0, 0);
     UpdateQosAttributesFromRemoteSdp(piSession);
 
     if (IsNeedToStartWaitAudioDedicatedBearerTimer(piSession, IMS_FALSE))

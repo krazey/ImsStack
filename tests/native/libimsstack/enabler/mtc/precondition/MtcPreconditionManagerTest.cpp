@@ -737,6 +737,15 @@ TEST_F(MtcPreconditionManagerTest,
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
 }
 
+TEST_F(MtcPreconditionManagerTest, IsPreconditionIncludedInSdpInvokesSdpPreconditionHelperApi)
+{
+    EXPECT_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_TRUE(pPreconditionManager->IsPreconditionIncludedInSdp(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsPreconditionIncludedInSdp(&objISession));
+}
+
 TEST_F(MtcPreconditionManagerTest, RemovePreconditionSdpWhenQosInfoDoesNotExist)
 {
     EXPECT_CALL(*pSdpPreconditionHelper, RemovePreconditionSdp(&objISession));

@@ -182,7 +182,8 @@ PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
     return eMediaType;
 }
 
-PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISession* piSession)
+PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(
+        IN ISession* piSession) const
 {
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -221,7 +222,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN IS
 }
 
 PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
-        IN ISession* piSession, IN IMS_SINT32 nServiceMethod)
+        IN ISession* piSession, IN IMS_SINT32 nServiceMethod) const
 {
     if (piSession == IMS_NULL)
     {

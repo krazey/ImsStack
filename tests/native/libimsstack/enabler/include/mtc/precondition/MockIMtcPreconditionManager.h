@@ -42,6 +42,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAvailableToSendLocalResourceConfirmation, (IN ISession * piSession),
             (const, override));
     MOCK_METHOD(
+            IMS_BOOL, IsPreconditionIncludedInSdp, (IN ISession * piSession), (const, override));
+    MOCK_METHOD(
             void, FormPreconditionSdp, (IN ISession* piSession, IN IMS_BOOL bFailure), (override));
     MOCK_METHOD(void, OnSdpReceived, (IN ISession * piSession), (override));
     MOCK_METHOD(void, OnSdpSent, (IN ISession * piSession, IN IMS_BOOL bInitialInvite), (override));

@@ -110,6 +110,15 @@ public:
     virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(IN ISession* piSession) const = 0;
 
     /**
+     * @brief Checks if QoS precondition attributes are included in the SDP media information that
+     *        was last negotiated for the given @ISession at the current time.
+     *
+     * @param piSession ISession instance to examine.
+     * @return IMS_TRUE if QoS precondition attributes are included, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession) const = 0;
+
+    /**
      * @brief To form the precondition attributes of SDP.
      * @param piSession ISession instance to get the QosStatusTable and the SDP body of the
      *                  specific session.

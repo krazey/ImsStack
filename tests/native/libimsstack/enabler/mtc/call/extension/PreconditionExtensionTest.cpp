@@ -24,6 +24,7 @@
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
 #include "media/MockIMtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -45,6 +46,7 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objSession;
     MockIMtcMediaManager objMediaManager;
+    MockIMtcPreconditionManager objPreconditionManager;
 
 protected:
     virtual void SetUp() override
@@ -60,15 +62,18 @@ protected:
                 .WillByDefault(Return(IMS_TRUE));
 
         pExtension = new PreconditionExtension(objContext);
+
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objContext, GetPreconditionManager)
+                .WillByDefault(ReturnRef(objPreconditionManager));
     }
 
     virtual void TearDown() override { delete pExtension; }
 
     void SetUpMediaNegoState(IN NegotiationState eNegoState)
     {
-        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
         ON_CALL(objMediaManager, GetNegotiationState(_)).WillByDefault(Return(eNegoState));
     }
 };
@@ -292,9 +297,35 @@ TEST_F(PreconditionExtensionTest, HandleRequestForRequiringMessageWithoutSdpDoes
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
+TEST_F(PreconditionExtensionTest,
+        HandleRequestForRequiringMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Require: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleRequest(RequestType::PRACK, objMessageRequiresExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+
+    pExtension->HandleRequest(RequestType::EARLY_UPDATE, objMessageRequiresExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
 TEST_F(PreconditionExtensionTest, HandleRequestForRequiringMessageWithSdpUpdatesAvailability)
 {
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Require: precondition
+    // -> Update extension
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageRequiresExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
@@ -314,7 +345,30 @@ TEST_F(PreconditionExtensionTest, HandleRequestForRequiringStartMessageUpdatesAv
 
 TEST_F(PreconditionExtensionTest, HandleRequestForSupportingMessageWithoutSdpDoesNothing)
 {
+    // SDP: not exist
+    // Supported: precondition
+    // -> Not update extension
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleRequest(RequestType::PRACK, objMessageSupportsExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+
+    pExtension->HandleRequest(RequestType::EARLY_UPDATE, objMessageSupportsExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleRequestForSupportingMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Supported: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageSupportsExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -327,7 +381,13 @@ TEST_F(PreconditionExtensionTest, HandleRequestForSupportingMessageWithoutSdpDoe
 
 TEST_F(PreconditionExtensionTest, HandleRequestForSupportingMessageWithSdpUpdatesAvailability)
 {
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Supported: precondition
+    // -> Update Supported extension only
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageSupportsExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
@@ -370,7 +430,26 @@ TEST_F(PreconditionExtensionTest, HandleResponseForSomeMessageDoesNothing)
 
 TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithoutSdpDoesNothing)
 {
+    // SDP: not exist
+    // Require: precondition
+    // -> Not update extension
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleResponseForRequiringPrMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Require: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -379,7 +458,13 @@ TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithoutSdpD
 
 TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithSdpUpdatesAvailability)
 {
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Require: precondition
+    // -> Update extension
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
@@ -388,7 +473,26 @@ TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithSdpUpda
 
 TEST_F(PreconditionExtensionTest, HandleResponseForSupportingPrMessageWithoutSdpDoesNothing)
 {
+    // SDP: not exist
+    // Supported: precondition
+    // -> Update Supported extension only
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleResponseForSupportingPrMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Supported: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -397,7 +501,13 @@ TEST_F(PreconditionExtensionTest, HandleResponseForSupportingPrMessageWithoutSdp
 
 TEST_F(PreconditionExtensionTest, HandleResponseForSupportingPrMessageWithSdpUpdatesAvailability)
 {
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Supported: precondition
+    // -> Update Supported extension only
     ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());

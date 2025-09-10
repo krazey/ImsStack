@@ -105,6 +105,10 @@ public:
     virtual IMS_BOOL IsLocalResourceConfirmationRequired(IN ISession* piSession) const override;
     virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(
             IN ISession* piSession) const override;
+    inline IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession) const override
+    {
+        return m_pSdpPreconditionHelper->IsPreconditionIncludedInSdp(piSession);
+    }
     virtual void FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure) override;
     virtual void OnSdpReceived(IN ISession* piSession) override;
     virtual void OnSdpSent(IN ISession* piSession, IN IMS_BOOL bInitialInvite = IMS_FALSE) override;

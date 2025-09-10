@@ -43,6 +43,7 @@ public:
 
 private:
     IMS_BOOL IsRequestIncludingOffer() const;
+    IMS_BOOL HasSdpWithPrecondition(IN const IMessage& objMessage) const;
 };
 
 #endif

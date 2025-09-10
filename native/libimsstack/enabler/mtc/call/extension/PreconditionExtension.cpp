@@ -21,9 +21,11 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
+#include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
 #include "media/IMtcMediaManager.h"
+#include "precondition/IMtcPreconditionManager.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -115,7 +117,7 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
 PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
         IN RequestType eType, IN const IMessage& objRequest)
 {
-    if (eType != RequestType::START && !m_objContext.GetMessageUtils().HasSdp(&objRequest))
+    if (eType != RequestType::START && !HasSdpWithPrecondition(objRequest))
     {
         IMS_TRACE_D("HandleRequest : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
@@ -127,7 +129,7 @@ PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
 PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
         IN ResponseType eType, IN const IMessage& objResponse)
 {
-    if (!m_objContext.GetMessageUtils().HasSdp(&objResponse))
+    if (!HasSdpWithPrecondition(objResponse))
     {
         IMS_TRACE_D("HandleResponse : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
@@ -140,4 +142,11 @@ PRIVATE IMS_BOOL PreconditionExtension::IsRequestIncludingOffer() const
 {
     return m_objContext.GetMediaManager().GetNegotiationState(
                    &m_objContext.GetSession()->GetISession()) == NegotiationState::STATE_OFFER_SENT;
+}
+
+PRIVATE IMS_BOOL PreconditionExtension::HasSdpWithPrecondition(IN const IMessage& objMessage) const
+{
+    return m_objContext.GetMessageUtils().HasSdp(&objMessage) &&
+            m_objContext.GetPreconditionManager().IsPreconditionIncludedInSdp(
+                    &m_objContext.GetSession()->GetISession());
 }
