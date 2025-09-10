@@ -15,6 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Ims General -->
+    <int name="ims.registration_contact_user_info_part_int" value="1"/>
+
     <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b;i-wlan-node-id=#IMEIASADDRREFID#</string>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->

@@ -16,6 +16,8 @@
 -->
 <carrier_config>
     <!-- Carrier configurations -->
+    <!-- Ims General -->
+    <int name="ims.registration_contact_user_info_part_int" value="1"/>
 
     <!-- Aos -->
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
