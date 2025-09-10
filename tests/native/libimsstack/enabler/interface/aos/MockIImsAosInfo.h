@@ -44,7 +44,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (override));
     MOCK_METHOD(void, NotifyEmergencyCallState, (IN IMS_BOOL bIsInitialized), (override));
     MOCK_METHOD(void, NotifyPublishState, (IN IMS_BOOL bIsStarted), (override));
-    MOCK_METHOD(void, NotifyEmergencySmsState, (IN IMS_BOOL bIsInitialized), (override));
+    MOCK_METHOD(void, NotifyEmergencySmsState,
+            (IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType), (override));
     MOCK_METHOD(void, NotifyEpsfbCallState, (IN IMS_UINT32 nState), (override));
 };
 
