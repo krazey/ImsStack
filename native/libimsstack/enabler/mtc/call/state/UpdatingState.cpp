@@ -250,6 +250,11 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
                 RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
     }
 
+    if (m_objContext.GetCallInfo().bConference)
+    {
+        m_objContext.GetMediaManager().SetConferenceCall();
+    }
+
     if (HandleSdpAnswer() == IMS_FAILURE)
     {
         IMS_TRACE_E(0, "SessionUpdated : SDP negotiation failed", 0, 0, 0);

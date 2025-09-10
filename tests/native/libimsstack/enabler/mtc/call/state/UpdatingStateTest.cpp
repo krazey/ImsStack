@@ -715,6 +715,22 @@ TEST_F(UpdatingStateTest, SessionUpdatedNotifiesResumedBy)
     pUpdatingState->SessionUpdated(&objSession);
 }
 
+TEST_F(UpdatingStateTest, SessionUpdatedSetsConferenceCallToMediaManagerIfConferenceCall)
+{
+    objCallInfo.bConference = IMS_TRUE;
+
+    EXPECT_CALL(objMediaManager, SetConferenceCall());
+    pUpdatingState->SessionUpdated(&objSession);
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedNotSetConferenceCallToMediaManagerIfNotConferenceCall)
+{
+    objCallInfo.bConference = IMS_FALSE;
+
+    EXPECT_CALL(objMediaManager, SetConferenceCall()).Times(0);
+    pUpdatingState->SessionUpdated(&objSession);
+}
+
 TEST_F(UpdatingStateTest,
         SessionUpdatedInvokesSendIncomingUpdateIfModificationOccurredWithoutIntentionAsModifier)
 {
