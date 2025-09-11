@@ -16,13 +16,12 @@
 #include "SipDatatypes.h"
 #include "SipDebug.h"
 #include "SipStackError.h"
+#include "SipUtil.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
 #include "txn/SipTxnUtil.h"
-
-extern SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
 
 static SIP_BOOL HandleInvalidStateEvent(
         IN SipTxn* pTxn, IN SIP_VOID* pvData, OUT SIP_UINT16* pnError)
@@ -37,8 +36,14 @@ static SIP_BOOL HandleInvalidStateEvent(
 static SIP_BOOL HandleFailureResponse(IN SipTxn* pTxn, IN_OUT SipTxnFsmData* pFsmData,
         OUT SIP_UINT16* pNewTxnState, OUT SIP_UINT16* pnError)
 {
-    SipMessage* pSipAckMsg = reinterpret_cast<SipMessage*>(
-            Sip_Cbk_CreateAckRequest(pFsmData->m_pSipMsgIn, pTxn->GetUserData()));
+    SipMessage* pSipAckMsg = SIP_NULL;
+
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        pSipAckMsg = pCallback->CreateAckRequest(pFsmData->m_pSipMsgIn, pTxn->GetUserData());
+    }
 
     if (pSipAckMsg == SIP_NULL)
     {
@@ -96,8 +101,15 @@ static SIP_BOOL IdleState_SendInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, SIP_
         return SIP_FALSE;
     }
 
-    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), SipTxn::OPT_CREATE,
-                SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    SIP_BOOL bStatus = SIP_FALSE;
+
+    if (pCallback != SIP_NULL)
+    {
+        bStatus = pCallback->FetchTransaction(pNewTxnKey, SipTxn::OPT_CREATE, pTxn);
+    }
+
+    if (bStatus == SIP_FALSE)
     {
         pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "IdleState_SendInviteRequest: Adding txn to DB failed",
@@ -554,8 +566,13 @@ static SIP_BOOL AcceptedState_ReceiveFailureResponse(
 
     pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
-    SipMessage* pSipAckMsg =
-            reinterpret_cast<SipMessage*>(Sip_Cbk_CreateAckRequest(pMsgIn, pTxn->GetUserData()));
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    SipMessage* pSipAckMsg = SIP_NULL;
+
+    if (pCallback != SIP_NULL)
+    {
+        pSipAckMsg = pCallback->CreateAckRequest(pMsgIn, pTxn->GetUserData());
+    }
 
     if (pSipAckMsg == SIP_NULL)
     {

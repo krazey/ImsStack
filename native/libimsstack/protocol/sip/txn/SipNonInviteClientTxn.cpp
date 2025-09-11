@@ -16,6 +16,7 @@
 #include "SipDatatypes.h"
 #include "SipDebug.h"
 #include "SipStackError.h"
+#include "SipUtil.h"
 #include "platform/SipString.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsmData.h"
@@ -163,8 +164,15 @@ static SIP_BOOL IdleState_SendNonInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, S
         return SIP_FALSE;
     }
 
-    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), SipTxn::OPT_CREATE,
-                SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
+    SIP_BOOL bStatus = SIP_FALSE;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        bStatus = pCallback->FetchTransaction(pNewTxnKey, SipTxn::OPT_CREATE, pTxn);
+    }
+
+    if (bStatus == SIP_FALSE)
     {
         pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,

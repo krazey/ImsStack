@@ -25,11 +25,6 @@
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
 
-extern SIP_BOOL Sip_Cbk_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
-        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
-extern SIP_BOOL Sip_Cbk_ReleaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
-        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
-
 class SipTxn : public SipRefBase
 {
 public:

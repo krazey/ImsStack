@@ -15,6 +15,7 @@
  */
 #include "SipDebug.h"
 #include "SipStackError.h"
+#include "SipUtil.h"
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
@@ -465,17 +466,16 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name         : GetTxnObjFromDb
- * Description            : Fetches object from Database[Utility func within txn]
- * Preconditions/        :
- * Side Effects            :
- *****************************************************************************/
 PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb(IN SipTxnKey* pTxnKey, OUT SipTxn** ppTxn,
         OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
-            SipTxn::OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->FetchTransaction(pTxnKey, SipTxn::OPT_FETCH, *ppTxn);
+    }
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
