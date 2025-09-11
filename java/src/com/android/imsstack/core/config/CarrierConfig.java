@@ -1545,9 +1545,6 @@ public class CarrierConfig {
 
     // PAYLOAD_DESCRIPTION_BUNDLE is excluded from this list because it has a nested bundle.
     private static final List<String> IMS_BUNDLE_KEYS = List.of(
-            CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-            CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-            CarrierConfigManager.ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
             Ims.KEY_EXTRA_REG_ERR_BUNDLE,
             Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
             Ims.KEY_REG_RETRY_INTERVAL_BUNDLE,
@@ -1811,8 +1808,6 @@ public class CarrierConfig {
                 overrideConfig.putPersistableBundle(key, newBundle);
             }
         }
-
-        overridePayloadDescriptionBundles(defaultConfig, overrideConfig);
     }
 
     private void adjustSpecialKeys(int slotId) {
@@ -1917,81 +1912,5 @@ public class CarrierConfig {
         }
 
         return imei + sv;
-    }
-
-    private static void overridePayloadDescriptionBundles(PersistableBundle defaultConfig,
-            PersistableBundle overrideConfig) {
-        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
-                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
-
-        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
-                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
-
-        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
-                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE);
-
-        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
-                CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
-    }
-
-    private static void overridePayloadDescriptionBundle(PersistableBundle defaultConfig,
-            PersistableBundle overrideConfig, String payloadTypesBundleKey, String payloadTypesKey,
-            String payloadDescriptionBundleKey) {
-        PersistableBundle defaultPayloadDescriptionBundle =
-                defaultConfig.getPersistableBundle(payloadDescriptionBundleKey);
-
-        if (defaultPayloadDescriptionBundle == null || defaultPayloadDescriptionBundle.isEmpty()) {
-            // Use a prioritized configuration (overrideConfig) if present
-            return;
-        }
-
-        PersistableBundle overridePayloadTypesBundle =
-                overrideConfig.getPersistableBundle(payloadTypesBundleKey);
-        int[] overridePayloadTypes = (overridePayloadTypesBundle != null)
-                ? overridePayloadTypesBundle.getIntArray(payloadTypesKey) : null;
-
-        if (overridePayloadTypes == null || overridePayloadTypes.length == 0) {
-            // Use a default configuration
-            return;
-        }
-
-        PersistableBundle newPayloadDescriptionBundle = new PersistableBundle();
-        PersistableBundle overridePayloadDescriptionBundle =
-                overrideConfig.getPersistableBundle(payloadDescriptionBundleKey);
-
-        if (overridePayloadDescriptionBundle == null
-                || overridePayloadDescriptionBundle.isEmpty()) {
-            newPayloadDescriptionBundle.putAll(defaultPayloadDescriptionBundle);
-        } else {
-            for (int i = 0; i < overridePayloadTypes.length; ++i) {
-                final String payloadKey = String.valueOf(overridePayloadTypes[i]);
-                PersistableBundle newPayloadBundle = new PersistableBundle();
-                PersistableBundle defaultPayloadBundle =
-                        defaultPayloadDescriptionBundle.getPersistableBundle(payloadKey);
-                PersistableBundle overridePayloadBundle =
-                        overridePayloadDescriptionBundle.getPersistableBundle(payloadKey);
-
-                if (defaultPayloadBundle != null) {
-                    newPayloadBundle.putAll(defaultPayloadBundle);
-                }
-
-                if (overridePayloadBundle != null) {
-                    newPayloadBundle.putAll(overridePayloadBundle);
-                }
-
-                newPayloadDescriptionBundle.putPersistableBundle(payloadKey, newPayloadBundle);
-            }
-        }
-
-        overrideConfig.putPersistableBundle(
-                payloadDescriptionBundleKey, newPayloadDescriptionBundle);
     }
 }
