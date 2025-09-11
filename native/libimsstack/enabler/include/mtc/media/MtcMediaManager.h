@@ -92,7 +92,7 @@ public:
 
     void SetRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort) override;
     IMS_SINT32 GetRemoteRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    void SetConferenceCall(IN IMS_BOOL bConference) override;
+    void SetConferenceCall() override;
     void SetConfirmedSession(IN ISession* piSession) override;
 
     NegotiationState GetNegotiationState(IN ISession* piSession) override;

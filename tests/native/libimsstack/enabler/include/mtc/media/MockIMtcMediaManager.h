@@ -64,7 +64,7 @@ public:
             (IN ISession * piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(IMS_SINT32, GetRemoteRtpPort, (IN ISession * piSession, IN IMS_UINT32 eMediaTypes),
             (override));
-    MOCK_METHOD(void, SetConferenceCall, (IN IMS_BOOL bConference), (override));
+    MOCK_METHOD(void, SetConferenceCall, (), (override));
     MOCK_METHOD(void, SetConfirmedSession, (IN ISession * piSession), (override));
     MOCK_METHOD(NegotiationState, GetNegotiationState, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedDirection,

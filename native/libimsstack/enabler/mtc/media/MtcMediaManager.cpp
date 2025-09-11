@@ -468,9 +468,9 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetRemoteRtpPort(
             GetMediaNegoId(piSession), MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType));
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
+PUBLIC VIRTUAL void MtcMediaManager::SetConferenceCall()
 {
-    IMS_TRACE_D("SetConferenceCall : %d", bConference, 0, 0);
+    IMS_TRACE_D("SetConferenceCall", 0, 0, 0);
 
     // check the params for SetOptions()
     // check if negoId is necessary or not by the Media side.

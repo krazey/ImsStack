@@ -195,7 +195,11 @@ public:
      */
     virtual IMS_SINT32 GetRemoteRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
-    virtual void SetConferenceCall(/* IN ISession* piSession, */ IN IMS_BOOL bConference) = 0;
+    /**
+     * @brief Sets the conference mode to the MediaSession.
+     *        This method is to be called when the call is a conference host or participant.
+     */
+    virtual void SetConferenceCall() = 0;
     virtual void SetConfirmedSession(IN ISession* piSession) = 0;
 
     /**

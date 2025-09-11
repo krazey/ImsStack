@@ -148,7 +148,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
     if (m_objContext.GetCallInfo().bConference)
     {
-        m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
+        m_objContext.GetMediaManager().SetConferenceCall();
     }
 
     if (HasNotRespondedQosConfirmation(*piSession))

@@ -669,7 +669,10 @@ void MtcCallState::InitMediaSession()
 
     objMediaManager.CreateMediaProfile(
             &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE);
-    objMediaManager.SetConferenceCall(m_objContext.GetCallInfo().bConference);
+    if (m_objContext.GetCallInfo().bConference)
+    {
+        objMediaManager.SetConferenceCall();
+    }
 
     if (objMediaManager.GetMediaInfo().eVideoQuality == VIDEO_QUALITY_NOTUSED)
     {

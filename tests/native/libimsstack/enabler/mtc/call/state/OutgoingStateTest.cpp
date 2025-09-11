@@ -970,7 +970,7 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesStartWatchdogIfSupportedAndSdpAns
 TEST_F(OutgoingStateTest, SessionStartedSetsConferenceCallToMediaManagerIfConferenceCall)
 {
     objCallInfo.bConference = IMS_TRUE;
-    EXPECT_CALL(objMediaManager, SetConferenceCall(IMS_TRUE));
+    EXPECT_CALL(objMediaManager, SetConferenceCall());
 
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
