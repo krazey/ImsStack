@@ -22,15 +22,23 @@
 
 enum class UpdateType
 {
+    /** No ongoing update */
     NONE,
+    /** Update that doesn't change the call type (e.g. early updates or the RAT change) */
     NORMAL,
+    /** Hold operation */
     HOLD,
+    /** Resume operation */
     RESUME,
+    /** Media change during a confirmed session */
     SESSION,
-    CONF,
+    /** Session refresh by the session timer */
     REFRESH,
+    /** Recovery when the SRVCC is cancelled */
     SRVCC_RECOVERED_CANCEL,
+    /** Recovery when the SRVCC is failed */
     SRVCC_RECOVERED_FAILURE,
+    /** Current location discovery during an emergency call */
     LOCATION,
 };
 
