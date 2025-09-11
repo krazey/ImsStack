@@ -156,15 +156,14 @@ TEST_F(MtcRadioCheckerTest, InitAddsListenersAndDeInitRemovesListeners)
 
 TEST_F(MtcRadioCheckerTest, CheckMtcTrafficInfoAlreadyAddedReturnsUnblockedAndUpdatesRatType)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MO, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
                     IImsRadio::DIRECTION_MO, _))
-            .Times(0);
+            .Times(1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_EQ(CheckResult::UNBLOCKED,
+    EXPECT_EQ(CheckResult::PENDING,
             m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
                     INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 
@@ -175,7 +174,7 @@ TEST_F(MtcRadioCheckerTest, CheckMtcTrafficInfoAlreadyAddedReturnsUnblockedAndUp
 
     EXPECT_EQ(CheckResult::UNBLOCKED,
             m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
-                    INetworkWatcher::RADIOTECH_TYPE_NR, IMS_FALSE, CALL_KEY1));
+                    INetworkWatcher::RADIOTECH_TYPE_NR, IMS_FALSE, CALL_KEY2));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckMtReturnsUnblocked)
@@ -188,8 +187,7 @@ TEST_F(MtcRadioCheckerTest, CheckMtReturnsUnblocked)
 TEST_F(MtcRadioCheckerTest, CheckNotAllowedTrafficReturnsBlocked)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
-            .Times(1)
-            .WillOnce(Return(IMS_FALSE));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_EQ(CheckResult::BLOCKED,
             m_pMtcRadioChecker->Check(CallType::VOIP, IMS_TRUE, PeerType::MO,
@@ -199,8 +197,7 @@ TEST_F(MtcRadioCheckerTest, CheckNotAllowedTrafficReturnsBlocked)
 TEST_F(MtcRadioCheckerTest, CheckAllowedTrafficReturnsPending)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_EQ(CheckResult::PENDING,
             m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
@@ -232,31 +229,10 @@ TEST_F(MtcRadioCheckerTest, CheckInvokesStartImsTrafficAndReturnsPending)
                     INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
-TEST_F(MtcRadioCheckerTest, CheckInvokesAddingCallKey)
-{
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
-                    IImsRadio::DIRECTION_MO, _))
-            .Times(1);
-
-    EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
-                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
-
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
-}
-
 TEST_F(MtcRadioCheckerTest, CheckWithEmergencyInvokesStartImsTrafficWithEmergency)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
@@ -292,8 +268,9 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficBecauseNoMtcTra
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficForEpsFbSilentRedial)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_NR, CALL_KEY1);
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
     ON_CALL(m_objCall, GetKey).WillByDefault(Return(CALL_KEY1));
     ON_CALL(m_objEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
@@ -309,50 +286,44 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficForEpsFbSilentR
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForNormalServiceWithLte)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VIDEO,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_NR, IMS_FALSE, CALL_KEY1));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_NR, IMS_FALSE, CALL_KEY2));
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
-                    IImsRadio::DIRECTION_MT, _))
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
             .Times(1);
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
-                    IImsRadio::DIRECTION_MT, _))
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
             .Times(1);
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
-                    IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, IImsRadio::DIRECTION_MT, _))
-            .Times(0);
 
     m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
-            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_NR);
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
 }
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForNormalServiceWithNr)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VIDEO,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
-                    IImsRadio::DIRECTION_MT, _))
-            .Times(1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_TRUE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
-                    IImsRadio::DIRECTION_MT, _))
+                    IImsRadio::DIRECTION_MO, _))
             .Times(1);
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
-                    IImsRadio::DIRECTION_MT, _))
+                    IImsRadio::DIRECTION_MO, _))
             .Times(0);
 
     m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
@@ -361,25 +332,22 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForNormalServiceWi
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForNormalServiceWithWifi)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VIDEO,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_IWLAN,
-                    IImsRadio::DIRECTION_MT, _))
+                    IImsRadio::DIRECTION_MO, _))
             .Times(1);
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_IWLAN,
-                    IImsRadio::DIRECTION_MT, _))
+                    IImsRadio::DIRECTION_MO, _))
             .Times(1);
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_IWLAN,
-                    IImsRadio::DIRECTION_MT, _))
-            .Times(0);
 
     m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
             INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
@@ -387,17 +355,12 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForNormalServiceWi
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForEmergencyService)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VIDEO,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
-            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
-                    IImsRadio::DIRECTION_MT, _))
-            .Times(0);
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_TRUE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
                     IImsRadio::DIRECTION_MT, _))
@@ -411,24 +374,51 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForEmergencyServic
             INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_NR);
 }
 
-TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTraffic)
+TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTrafficForMo)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MO, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
-
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
     m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
+
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY2);
+}
+
+TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTrafficForMt)
+{
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
+
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
+
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY2);
 }
 
 TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedDoesNotInvokeStopImsTrafficDuringSilentRedial)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MO, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 
     // Call is silent redialing, so not in TERMINATING state
     ON_CALL(m_objCall, GetKey).WillByDefault(Return(CALL_KEY1));
@@ -458,8 +448,11 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyWithOutMtcTrafficInfoNo
 
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyInvokesOnConnectionFailed)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MO, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
@@ -471,8 +464,11 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyInvokesOnConnectionFail
 
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedTemporarilyInvokesOnConnectionSetupPrepared)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MO, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
@@ -521,8 +517,9 @@ TEST_F(MtcRadioCheckerTest, CheckResetsRegistrationThrottlingTime)
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesListener)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
@@ -542,11 +539,12 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesListener)
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT);
 }
 
-TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesToAllListeners)
+TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesAllListeners)
 {
     MockIMtcRadioCheckerListener m_objIMtcRadioCheckerListener2;
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener2);
 
@@ -563,8 +561,9 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesToAllListeners)
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesOnceIfSameListenerIsAdded)
 {
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_LTE, CALL_KEY1);
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
@@ -578,10 +577,8 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesOnceIfSameListenerI
 TEST_F(MtcRadioCheckerTest, MtcTrafficInfoNotifiesListenerForImsRadioOnConnectionFailed)
 {
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
-
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
@@ -610,8 +607,7 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoNotifiesListenerForImsRadioOnConnectio
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener2);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,

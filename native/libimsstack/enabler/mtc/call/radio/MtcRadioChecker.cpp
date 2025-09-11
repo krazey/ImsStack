@@ -109,32 +109,31 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
         return CheckResult::UNBLOCKED;
     }
 
-    if (IsTrafficActivated(eCallType, bEmergency, ePeerType))
-    {
-        UpdateTrafficIfRatChanged(
-                *GetCallTrafficInfo(ConvertCallTypeToTrafficType(eCallType, bEmergency),
-                        static_cast<CallDirection>(ePeerType)),
-                eRatType);
+    IMS_UINT32 eCallDirection =
+            ePeerType == PeerType::MO ? IImsRadio::DIRECTION_MO : IImsRadio::DIRECTION_MT;
+    TrafficType eTrafficType = ConvertCallTypeToTrafficType(eCallType, bEmergency);
 
-        IMS_TRACE_D("Check : unblocked - StartImsTraffic is already activated", 0, 0, 0);
-        return CheckResult::UNBLOCKED;
-    }
-
-    if (ePeerType == PeerType::MT)
-    {
-        StartTrafficChecking(eCallType, bEmergency, ePeerType, eRatType, nCallKey);
-        return CheckResult::UNBLOCKED;
-    }
-
-    if (IsTrafficAllowed(eCallType, bEmergency) == IMS_FALSE)
+    if (eCallDirection == IImsRadio::DIRECTION_MO &&
+            !m_piImsRadio->IsImsTrafficAllowed(eTrafficType))
     {
         IMS_TRACE_D("Check : blocked - traffic hasn't been allowed", 0, 0, 0);
         return CheckResult::BLOCKED;
     }
 
-    StartTrafficChecking(eCallType, bEmergency, ePeerType, eRatType, nCallKey);
-    IMS_TRACE_D("Check pending", 0, 0, 0);
-    return CheckResult::PENDING;
+    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+    if (!pMtcTrafficInfo)
+    {
+        pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection, eRatType);
+        AddCallKey(*pMtcTrafficInfo, nCallKey);
+        StartTrafficChecking(*pMtcTrafficInfo, eRatType);
+
+        return eCallDirection == IImsRadio::DIRECTION_MO ? CheckResult::PENDING
+                                                         : CheckResult::UNBLOCKED;
+    }
+
+    AddCallKey(*pMtcTrafficInfo, nCallKey);
+    UpdateTrafficIfRatChanged(*pMtcTrafficInfo, eRatType);
+    return CheckResult::UNBLOCKED;
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(IN CallKey nKey)
@@ -221,22 +220,6 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnRatChanged(IN ServiceType eServiceType,
         }
 
         UpdateTrafficIfRatChanged(*pMtcTrafficInfo, eRatType);
-    }
-}
-
-PUBLIC void MtcRadioChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
-        IN CallDirection eCallDirection, IN IMS_SINT32 eRat, IN CallKey nCallKeyIn)
-{
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
-
-    if (pMtcTrafficInfo == IMS_NULL)
-    {
-        pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection, eRat);
-    }
-
-    if (nCallKeyIn != IMtcCall::CALL_KEY_INVALID)
-    {
-        pMtcTrafficInfo->m_objCallKeys.Append(nCallKeyIn);
     }
 }
 
@@ -328,6 +311,8 @@ PRIVATE void MtcRadioChecker::AddCallKey(IN MtcTrafficInfo& objMtcTrafficInfo, I
     }
 
     objMtcTrafficInfo.m_objCallKeys.Append(nCallKey);
+    IMS_TRACE_D("AddCallKey TrafficType[%d] CallKey[%d]", objMtcTrafficInfo.m_eTrafficType,
+            nCallKey, 0);
 }
 
 PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn)
@@ -403,43 +388,14 @@ PRIVATE MtcTrafficInfo* MtcRadioChecker::CreateCallTrafficInfo(
     return pMtcTrafficInfo;
 }
 
-PRIVATE IMS_BOOL MtcRadioChecker::IsTrafficActivated(
-        IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const
+PRIVATE void MtcRadioChecker::StartTrafficChecking(
+        IN_OUT MtcTrafficInfo& objTrafficInfo, IN IMS_SINT32 eRat)
 {
-    const MtcTrafficInfo* pMtcTrafficInfo =
-            GetCallTrafficInfo(ConvertCallTypeToTrafficType(eCallType, bEmergency),
-                    static_cast<CallDirection>(ePeerType));
+    m_piImsRadio->StartImsTraffic(objTrafficInfo.m_eTrafficType, ConvertRatType(eRat),
+            objTrafficInfo.m_eCallDirection, &objTrafficInfo);
 
-    return pMtcTrafficInfo == IMS_NULL ? IMS_FALSE : IMS_TRUE;
-}
-
-PRIVATE IMS_BOOL MtcRadioChecker::IsTrafficAllowed(
-        IN CallType eCallType, IN IMS_BOOL bEmergency) const
-{
-    return m_piImsRadio->IsImsTrafficAllowed(ConvertCallTypeToTrafficType(eCallType, bEmergency));
-}
-
-PRIVATE void MtcRadioChecker::StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency,
-        IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN CallKey nCallKey)
-{
-    TrafficType eTrafficType = ConvertCallTypeToTrafficType(eCallType, bEmergency);
-    const IMS_UINT32 eCallDirection =
-            ePeerType == PeerType::MO ? IImsRadio::DIRECTION_MO : IImsRadio::DIRECTION_MT;
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
-
-    if (pMtcTrafficInfo == IMS_NULL)
-    {
-        pMtcTrafficInfo = CreateCallTrafficInfo(
-                ConvertCallTypeToTrafficType(eCallType, bEmergency), eCallDirection, eRatType);
-    }
-
-    AddCallKey(*pMtcTrafficInfo, nCallKey);
-
-    m_piImsRadio->StartImsTraffic(
-            eTrafficType, ConvertRatType(eRatType), eCallDirection, pMtcTrafficInfo);
-
-    IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d] CallKey[%d]", eTrafficType,
-            eCallDirection, nCallKey);
+    IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d] CallKey[%d]",
+            objTrafficInfo.m_eTrafficType, objTrafficInfo.m_eCallDirection, 0);
 }
 
 PRIVATE void MtcRadioChecker::StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo)
@@ -467,8 +423,7 @@ PRIVATE void MtcRadioChecker::UpdateTrafficIfRatChanged(
 
     objTrafficInfo.m_eRat = eRat;
 
-    m_piImsRadio->StartImsTraffic(objTrafficInfo.m_eTrafficType, ConvertRatType(eRat),
-            objTrafficInfo.m_eCallDirection, &objTrafficInfo);
+    StartTrafficChecking(objTrafficInfo, eRat);
 }
 
 PRIVATE IMS_BOOL MtcRadioChecker::IsInEpsfbSilentRedial(ImsList<CallKey>& objCallKeys) const
@@ -493,7 +448,7 @@ PRIVATE IMS_BOOL MtcRadioChecker::IsInEpsfbSilentRedial(ImsList<CallKey>& objCal
     return IMS_FALSE;
 }
 
-PRIVATE void MtcTrafficInfo::ImsRadio_OnConnectionFailed(
+PUBLIC void MtcTrafficInfo::ImsRadio_OnConnectionFailed(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
 {
     m_objMtcRadioConnectionListener.OnConnectionFailed(

@@ -114,10 +114,6 @@ public:
     void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
             IN IMS_SINT32 eRatType) override;
 
-    // for test
-    void CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
-            IN CallDirection eCallDirection, IN IMS_SINT32 eRat, IN CallKey nCallKeyIn);
-
     static IMS_BOOL IsReasonToIgnore(IN IMS_UINT32 nFailureReason);
 
 private:
@@ -132,11 +128,7 @@ private:
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
     MtcTrafficInfo* CreateCallTrafficInfo(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN IMS_SINT32 eRatType);
-    IMS_BOOL IsTrafficActivated(
-            IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const;
-    IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
-    void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_SINT32 eRatType, IN CallKey nCallKey);
+    void StartTrafficChecking(IN_OUT MtcTrafficInfo& objTrafficInfo, IN IMS_SINT32 eRat);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
     IMS_BOOL IsCallTerminated(IN CallKey nKey);
     void UpdateTrafficIfRatChanged(IN_OUT MtcTrafficInfo& objTrafficInfo, IN IMS_SINT32 m_eRat);
