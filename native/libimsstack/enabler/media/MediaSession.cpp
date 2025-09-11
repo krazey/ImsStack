@@ -387,21 +387,11 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
     if (m_pVideoController->IsSessionOpened())
     {
         m_pVideoController->UpdateAccessNetwork(nAccessNetwork);
-
-        if (m_pVideoController->UpdateSession())
-        {
-            m_pVideoController->ApplyQualityThreshold();
-        }
     }
 
     if (m_pTextController->IsSessionOpened())
     {
         m_pTextController->UpdateAccessNetwork(nAccessNetwork);
-
-        if (m_pTextController->UpdateSession())
-        {
-            m_pTextController->ApplyQualityThreshold();
-        }
     }
 
     return IMS_TRUE;

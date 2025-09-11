@@ -108,6 +108,11 @@ IMS_BOOL VideoController::UpdateSession()
     {
         IMS_TRACE_D("UpdateSession() - state[%d]", m_pSession->GetState(), 0, 0);
 
+        if (m_pSession->GetRemotePort() < 0)
+        {
+            return IMS_FALSE;
+        }
+
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
         {
             return CloseSession();

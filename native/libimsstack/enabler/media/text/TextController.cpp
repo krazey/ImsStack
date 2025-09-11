@@ -88,6 +88,11 @@ IMS_BOOL TextController::UpdateSession()
 {
     if (m_pSession != IMS_NULL && m_pSession->GetState() != TextSession::STATE_NONE)
     {
+        if (m_pSession->GetRemotePort() < 0)
+        {
+            return IMS_FALSE;
+        }
+
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
         {
             return CloseSession();

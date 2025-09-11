@@ -185,6 +185,14 @@ TEST_F(TextControllerTest, testModifySession)
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
 
+TEST_F(TextControllerTest, testUpdateSessionBeforeUpdateRtpConfig)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
 TEST_F(TextControllerTest, testUpdateSessionAfterCloseSession)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
