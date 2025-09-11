@@ -19,7 +19,7 @@
 #include "ServiceUtil.h"
 
 #include "ISipNetworkUtil.h"
-#include "ISipTxnListener.h"
+#include "SipClientTransactionState.h"
 #include "SipConfigProxy.h"
 #include "SipHeader.h"
 #include "SipHeaderName.h"
@@ -27,15 +27,12 @@
 #include "SipMessageBodyPart.h"
 #include "SipMessageBuffer.h"
 #include "SipStack.h"
-#include "SipClientTransactionState.h"
+#include "SipTransactionCallback.h"
 #include "SipUtils.h"
 #include "msg/SipMsgUtil.h"
 #include "txn/SipTimeoutData.h"
 
 __IMS_TRACE_TAG_SIP_CORE__;
-
-extern void SipStackTxnLayer_Initialize();
-extern SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 eTimerType);
 
 class SipNetworkUtil : public ISipNetworkUtil
 {
@@ -75,60 +72,12 @@ SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
     return SIP_TRUE;
 }
 
-class SipTxnListenerProxy : public ISipTxnListener
-{
-public:
-    SipTxnListenerProxy() {}
-    virtual ~SipTxnListenerProxy() {}
-
-    SIP_BOOL TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType) override;
-    SIP_BOOL TxnTerminated(ISipUserData* pUserData) override;
-};
-
-SIP_BOOL SipTxnListenerProxy::TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType)
-{
-    IMS_TRACE_I("TxnTimeout", 0, 0, 0);
-    Sip_Cbk_OnTimerExpired(pUserData, eTimerType);
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipTxnListenerProxy::TxnTerminated(ISipUserData* pUserData)
-{
-    IMS_TRACE_I("TxnTerminated", 0, 0, 0);
-
-    if (pUserData != SIP_NULL)
-    {
-        if (pUserData->GetDeleteFlag() == SIP_TRUE)
-        {
-            SipTransactionState* pTState = IMS_NULL;
-            SipStack::GetTransactionState(*pUserData, pTState);
-
-            if (pTState != IMS_NULL && pTState->GetType() == SipTransactionState::TYPE_CLIENT)
-            {
-                SipClientTransactionState* pCtState =
-                        static_cast<SipClientTransactionState*>(pTState);
-                pCtState->ClearAllForkedTransactions();
-            }
-
-            SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-
-            if (pTxnContext != SIP_NULL)
-            {
-                IMS_TRACE_D("Destroy::SipTxnContext", 0, 0, 0);
-                SipStack::DestroyTxnContext(pTxnContext);
-                pUserData->SetUserData(SIP_NULL);
-            }
-        }
-    }
-
-    return SIP_TRUE;
-}
-
 namespace SipStack
 {
 
 // SIP stack last error storage -- starts
 LOCAL SipEn_ErrorTypes s_eError;
+LOCAL SipTransactionCallback* s_pCallback = IMS_NULL;
 
 LOCAL inline void SIPStackError(IN SipEn_ErrorTypes eError)
 {
@@ -220,11 +169,13 @@ GLOBAL void Initialize()
     if (pStackMngr != IMS_NULL)
     {
         pStackMngr->RegisterNetwork(new SipNetworkUtil());
-        pStackMngr->RegisterTransactionListener(new SipTxnListenerProxy());
+        if (s_pCallback == IMS_NULL)
+        {
+            s_pCallback = new SipTransactionCallback();
+        }
+        // Register SIP transaction layer's callback functions
+        pStackMngr->RegisterTransactionCallback(s_pCallback);
     }
-
-    // Register SIP transaction layer's callback functions
-    SipStackTxnLayer_Initialize();
 }
 
 GLOBAL void SetTransactionTimerValues(
