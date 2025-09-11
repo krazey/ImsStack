@@ -19,11 +19,13 @@
 #include "IJniEnablerThread.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
+class SuppService;
+enum class OipType;
 struct CallReasonInfo;
 struct ConfUser;
 struct JniCallInfo;
+struct MediaInfo;
 
 class IJniMtcCallThread : public IJniEnablerThread
 {

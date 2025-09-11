@@ -59,6 +59,7 @@
 #include "helper/MtcAosEventHandler.h"
 #include "helper/MtcCapabilityQueryHandler.h"
 #include "helper/MtcNetworkWatcher.h"
+#include "helper/MtcPermanentSupplementaryService.h"
 #include "helper/SrvccStateManager.h"
 #include "helper/SsacTimerHandler.h"
 
