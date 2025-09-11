@@ -68,6 +68,7 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.Log;
 
 import org.junit.After;
 import org.junit.Before;
@@ -82,6 +83,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -92,6 +94,7 @@ public class ConfigAgentTest {
     private static final String TEST_ICCID = "1234";
     private static final String CACHED_CONFIG_FILE =
             "carrier_config_slot0_" + TEST_ICCID + "_" + TEST_CARRIER_ID + ".xml";
+    private static final String IMS_CONFIG_OVERRIDE_FILE = "ims-config-override.xml";
 
     private static final String KEY_TEST_BOOL = "ims.test_bool";
     private static final String KEY_TEST_INT = "ims.test_int";
@@ -103,6 +106,7 @@ public class ConfigAgentTest {
     private static final String KEY_TEST_DOUBLE_ARRAY = "ims.test_double_array";
     private static final String KEY_TEST_STRING_ARRAY = "ims.test_string_array";
     private static final String KEY_TEST_FLOAT = "ims.test_float";
+    private static final String KEY_TEST_BUNDLE = "ims.test_bundle";
 
     private static final boolean VALUE_TEST_BOOL = true;
     private static final int VALUE_TEST_INT = 10;
@@ -519,6 +523,42 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
+    public void testConfigCommandSetConfigFromXml() {
+        BroadcastReceiver receiver = setUpConfigCommand();
+
+        testSetConfig(receiver);
+        String configOverrideFile = createImsConfigOverrideFile();
+
+        assertNotNull(configOverrideFile);
+
+        Bundle extras = new Bundle();
+        extras.putString(ConfigAgent.KEY_CONFIG_FROM_XML, configOverrideFile);
+
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_SET_CONFIG);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getBooleanExtra(eq(ConfigAgent.KEY_COMMITTABLE), anyBoolean()))
+                .thenReturn(true);
+        when(intent.getExtras()).thenReturn(extras);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_COMMITTABLE_OK, receiver.getResultCode());
+
+        PersistableBundle config = mConfigAgent.getCarrierConfig().getConfig();
+        assertEquals(VALUE_TEST_INT, config.getInt(KEY_TEST_INT));
+        assertEquals(VALUE_TEST_STRING, config.getString(KEY_TEST_STRING));
+
+        PersistableBundle bundleConfig = config.getPersistableBundle(KEY_TEST_BUNDLE);
+        assertNotNull(bundleConfig);
+        assertEquals(VALUE_TEST_INT, bundleConfig.getInt(KEY_TEST_INT));
+        assertEquals(VALUE_TEST_STRING, bundleConfig.getString(KEY_TEST_STRING));
+        assertTrue(Arrays.equals(
+                VALUE_TEST_INT_ARRAY, bundleConfig.getIntArray(KEY_TEST_INT_ARRAY)));
+    }
+
+    @Test
+    @SmallTest
     public void testConfigCommandGetConfig() {
         BroadcastReceiver receiver = setUpConfigCommand();
 
@@ -677,6 +717,8 @@ public class ConfigAgentTest {
         extras.putStringArray(KEY_TEST_STRING_ARRAY, VALUE_TEST_STRING_ARRAY);
         extras.putFloat(KEY_TEST_FLOAT, VALUE_TEST_FLOAT);
         extras.putString(KEY_CONFIG_IMPI, VALUE_CONFIG_IMPI);
+        extras.putString(ConfigAgent.KEY_CONFIG_FROM_XML,
+                "/product/etc/" + IMS_CONFIG_OVERRIDE_FILE);
 
         SharedPreferences sharedPref = mock(SharedPreferences.class);
         SharedPreferences.Editor spEditor = mock(SharedPreferences.Editor.class);
@@ -694,8 +736,10 @@ public class ConfigAgentTest {
 
         assertEquals(ConfigAgent.RESULT_COMMITTABLE_OK, receiver.getResultCode());
         assertNotNull(receiver.getResultData());
-        // unknown key: ims.test_float
+        // unprocessed key: ims.test_float
         assertTrue(receiver.getResultData().contains(KEY_TEST_FLOAT));
+        // unprocessed key: ConfigAgent#KEY_CONFIG_FROM_XML because the file doesn't exist.
+        assertTrue(receiver.getResultData().contains(ConfigAgent.KEY_CONFIG_FROM_XML));
         verify(spEditor).putString(eq(KEY_CONFIG_IMPI), eq(VALUE_CONFIG_IMPI));
 
         PersistableBundle config = mConfigAgent.getCarrierConfig().getConfig();
@@ -710,6 +754,29 @@ public class ConfigAgentTest {
                 VALUE_TEST_DOUBLE_ARRAY, config.getDoubleArray(KEY_TEST_DOUBLE_ARRAY)));
         assertTrue(Arrays.equals(
                 VALUE_TEST_STRING_ARRAY, config.getStringArray(KEY_TEST_STRING_ARRAY)));
+    }
+
+    private String createImsConfigOverrideFile() {
+        Context c = InstrumentationRegistry.getInstrumentation().getContext();
+        c.deleteFile(IMS_CONFIG_OVERRIDE_FILE);
+
+        PersistableBundle bundleConfig = new PersistableBundle();
+        bundleConfig.putInt(KEY_TEST_INT, VALUE_TEST_INT);
+        bundleConfig.putString(KEY_TEST_STRING, VALUE_TEST_STRING);
+        bundleConfig.putIntArray(KEY_TEST_INT_ARRAY, VALUE_TEST_INT_ARRAY);
+
+        PersistableBundle config = new PersistableBundle();
+        config.putInt(KEY_TEST_INT, VALUE_TEST_INT);
+        config.putString(KEY_TEST_STRING, VALUE_TEST_STRING);
+        config.putPersistableBundle(KEY_TEST_BUNDLE, bundleConfig);
+
+        try (OutputStream os = c.openFileOutput(IMS_CONFIG_OVERRIDE_FILE, Context.MODE_APPEND)) {
+            config.writeToStream(os);
+            return c.getFilesDir().getAbsolutePath() + "/" + IMS_CONFIG_OVERRIDE_FILE;
+        } catch (IOException e) {
+            Log.dc(this, "createImsConfigOverride: " + e.toString());
+            return null;
+        }
     }
 
     private void processAllMessages() {

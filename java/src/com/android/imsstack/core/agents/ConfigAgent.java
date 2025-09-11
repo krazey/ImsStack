@@ -51,6 +51,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,6 +81,8 @@ public class ConfigAgent implements ConfigInterface {
     protected static final String KEY_COMMITTABLE = "committable";
     @VisibleForTesting
     protected static final String KEY_CONFIG_KEYS = "config_keys";
+    @VisibleForTesting
+    protected static final String KEY_CONFIG_FROM_XML = "config_from_xml";
     // Command is successfully executed.
     @VisibleForTesting
     protected static final int RESULT_OK = 1;
@@ -850,9 +853,9 @@ public class ConfigAgent implements ConfigInterface {
                 intent.removeExtra(KEY_COMMITTABLE);
                 Bundle config = intent.getExtras();
                 if (config != null) {
-                    Set<String> unknownKeys = setConfig(config);
-                    if (!unknownKeys.isEmpty()) {
-                        setResultData("unknown-keys=" + unknownKeys.toString());
+                    Set<String> unprocessedKeys = setConfig(config);
+                    if (!unprocessedKeys.isEmpty()) {
+                        setResultData("unprocessed-keys=" + unprocessedKeys.toString());
                     }
                 }
             } else if (ACTION_CLEAR_CONFIG.equals(action)) {
@@ -1001,10 +1004,10 @@ public class ConfigAgent implements ConfigInterface {
          * Sets the test configs.
          *
          * @param config The {@link Bundle} contains the configs.
-         * @return A set of unknown keys.
+         * @return A set of unprocessed keys.
          */
         private @NonNull Set<String> setConfig(@NonNull Bundle config) {
-            Set<String> unknownKeys = new ArraySet<String>();
+            Set<String> unprocessedKeys = new ArraySet<String>();
 
             for (String key : config.keySet()) {
                 if (ImsPrivateProperties.Persistent.isConfigProperty(key)) {
@@ -1023,7 +1026,13 @@ public class ConfigAgent implements ConfigInterface {
                 } else if (value instanceof Long) {
                     mTestConfig.putLong(key, (Long) value);
                 } else if (value instanceof String) {
-                    mTestConfig.putString(key, (String) value);
+                    if (KEY_CONFIG_FROM_XML.equals(key)) {
+                        if (!setConfigFromXml((String) value)) {
+                            unprocessedKeys.add(key);
+                        }
+                    } else {
+                        mTestConfig.putString(key, (String) value);
+                    }
                 } else if (value instanceof int[]) {
                     mTestConfig.putIntArray(key, (int[]) value);
                 } else if (value instanceof long[]) {
@@ -1035,11 +1044,32 @@ public class ConfigAgent implements ConfigInterface {
                 } else if (value instanceof double[]) {
                     mTestConfig.putDoubleArray(key, (double[]) value);
                 } else {
-                    unknownKeys.add(key);
+                    unprocessedKeys.add(key);
                 }
             }
 
-            return unknownKeys;
+            return unprocessedKeys;
+        }
+
+        private boolean setConfigFromXml(@NonNull String filePath) {
+            ImsLog.d(this, mSlotId, "setConfigFromXml: " + filePath);
+
+            PersistableBundle config = null;
+
+            try (InputStream is = new FileInputStream(filePath)) {
+                config = PersistableBundle.readFromStream(is);
+            } catch (FileNotFoundException e) {
+                ImsLog.d(this, mSlotId, "setConfigFromXml: not found");
+            } catch (Exception e) {
+                ImsLog.d(this, mSlotId, "setConfigFromXml: " + e.toString());
+            }
+
+            if (config == null) {
+                return false;
+            }
+
+            mTestConfig.putAll(config);
+            return true;
         }
 
         private void setConfigProperty(@NonNull String key, @NonNull Bundle config) {
