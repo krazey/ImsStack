@@ -49,14 +49,13 @@ public:
     // EngineActivity class
     IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
-    // Only SipConnectionNotifier
-    void Clear();
     SipSocket* Create(IN const SipSocketAddress& objSockAddr);
     SipSocket* CreateStreamSocket(
             IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
     void Destroy(IN SipSocket*& pSocket, IN ISipSocketListener* piListener);
     void DestroyStreamSocket(
             IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
+    IMS_BOOL IsSocketPresent(IN SipSocket* pSocket) const;
     SipSocket* Open(IN const SipSocketAddress& objSockAddr);
     SipSocket* OpenStreamSocket(
             IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
@@ -99,7 +98,7 @@ private:
     void StreamSocket_PassiveClosed(IN SipSocket* pSocket) override;
 
     IMS_BOOL AttachSocket(IN SipSocket* pSocket);
-    IMS_BOOL IsSocketPresent(IN const SipSocket* pSocket) const;
+    void ClearSockets(IN ImsList<SipSocket*>& objSockets);
     SipSocket* LookupSocket(
             IN const SipSocketAddress& objSockAddr, IN IMS_BOOL bDetach = IMS_FALSE);
     SipSocket* LookupSocket(IN const SipSocket& objSocket, IN IMS_BOOL bDetach = IMS_FALSE);

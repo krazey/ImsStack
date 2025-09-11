@@ -123,24 +123,6 @@ PUBLIC VIRTUAL IMS_BOOL SipTransportHelper::DispatchMessage(IN ImsMessage& objMs
 }
 
 PUBLIC
-void SipTransportHelper::Clear()
-{
-    while (m_objSockets.GetSize() > 0)
-    {
-        SipSocket* pSocket = m_objSockets.GetAt(0);
-
-        if (pSocket != IMS_NULL)
-        {
-            delete pSocket;
-        }
-
-        m_objSockets.RemoveAt(0);
-    }
-
-    m_objClientInitiatedConnections.Clear();
-}
-
-PUBLIC
 SipSocket* SipTransportHelper::Create(IN const SipSocketAddress& objSockAddr)
 {
     SipSocket* pSocket = Open(objSockAddr);
@@ -399,6 +381,12 @@ void SipTransportHelper::DestroyStreamSocket(
 }
 
 PUBLIC
+IMS_BOOL SipTransportHelper::IsSocketPresent(IN SipSocket* pSocket) const
+{
+    return pSocket != IMS_NULL ? m_objSockets.Contains(pSocket) : IMS_FALSE;
+}
+
+PUBLIC
 SipSocket* SipTransportHelper::Open(IN const SipSocketAddress& objSockAddr)
 {
     return LookupSocket(objSockAddr);
@@ -518,36 +506,47 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
 {
     if (nMethod == 0)
     {
-        IMS_TRACE_D("DestroyAllSockets (S) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+        IMS_TRACE_D("DestroyAllSockets(S): Sockets(%d)", m_objSockets.GetSize(), 0, 0);
 
         ImsList<SipSocket*> objTmpSockets = m_objSockets;
 
-        for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
+        // If the local IP address is not specified, clear all the sockets.
+        // Otherwise, clear all matched sockets that have the same local IP address.
+        if (objLocalIp.IsNoneAddress())
         {
-            SipSocket* pSocket = objTmpSockets.GetAt(i);
-
-            if (pSocket != IMS_NULL)
+            for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
             {
-                if (!objLocalIp.IsNoneAddress())
+                SipSocket* pSocket = objTmpSockets.GetAt(i);
+                pSocket->NotifyForceClosed();
+            }
+
+            ClearSockets(objTmpSockets);
+        }
+        else
+        {
+            ImsList<SipSocket*> objSocketsToClear;
+
+            for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
+            {
+                SipSocket* pSocket = objTmpSockets.GetAt(i);
+                IpAddress objIp(IpAddress::NONE);
+                IMS_UINT32 nPort = 0;
+
+                pSocket->GetSockName(objIp, nPort);
+
+                if (!objIp.IsNoneAddress() && !objLocalIp.Equals(objIp))
                 {
-                    IpAddress objIp(IpAddress::NONE);
-                    IMS_UINT32 nPort = 0;
-
-                    pSocket->GetSockName(objIp, nPort);
-
-                    if (!objLocalIp.Equals(objIp) && !objIp.IsNoneAddress())
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 pSocket->NotifyForceClosed();
+                objSocketsToClear.Append(pSocket);
             }
+
+            ClearSockets(objSocketsToClear);
         }
 
-        Clear();
-
-        IMS_TRACE_D("DestroyAllSockets (E) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+        IMS_TRACE_D("DestroyAllSockets(E): Sockets(%d)", m_objSockets.GetSize(), 0, 0);
     }
     else
     {
@@ -918,22 +917,18 @@ IMS_BOOL SipTransportHelper::AttachSocket(IN SipSocket* pSocket)
 }
 
 PRIVATE
-IMS_BOOL SipTransportHelper::IsSocketPresent(IN const SipSocket* pSocket) const
+void SipTransportHelper::ClearSockets(IN ImsList<SipSocket*>& objSockets)
 {
-    if (pSocket != IMS_NULL)
+    for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        for (IMS_UINT32 i = 0; i < m_objSockets.GetSize(); ++i)
-        {
-            SipSocket* pTmpSocket = m_objSockets.GetAt(i);
+        SipSocket* pSocket = objSockets.GetAt(i);
+        DetachClientInitiatedConnection(pSocket);
 
-            if (pSocket == pTmpSocket)
-            {
-                return IMS_TRUE;
-            }
+        if (m_objSockets.Remove(pSocket))
+        {
+            delete pSocket;
         }
     }
-
-    return IMS_FALSE;
 }
 
 PRIVATE
