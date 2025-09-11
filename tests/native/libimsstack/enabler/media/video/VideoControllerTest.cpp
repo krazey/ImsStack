@@ -127,6 +127,14 @@ TEST_F(VideoControllerTest, testUpdateSessionBeforeOpenSession)
     EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
 }
 
+TEST_F(VideoControllerTest, testUpdateSessionBeforeUpdateRtpConfig)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
 TEST_F(VideoControllerTest, testUpdateQualityThresholdBeforeOpenSession)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
