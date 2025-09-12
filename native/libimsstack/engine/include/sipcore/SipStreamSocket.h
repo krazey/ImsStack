@@ -36,7 +36,7 @@ public:
     SipStreamSocket& operator=(IN const SipStreamSocket&) = delete;
 
 public:
-    void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL) override;
+    void ApplyIpSec(IN SipSocket* pAcceptedSocket = IMS_NULL) override;
     IMS_BOOL Connect() override;
     IMS_BOOL Create(IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0,
             IN IMS_BOOL bSecure = IMS_FALSE) override;

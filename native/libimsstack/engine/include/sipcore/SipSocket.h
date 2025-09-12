@@ -36,9 +36,9 @@ public:
 
 public:
     inline virtual SipSocket* Accept() { return IMS_NULL; }
-    inline virtual void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL)
+    inline virtual void ApplyIpSec(IN SipSocket* pAcceptedSocket = IMS_NULL)
     {
-        ApplyIpSecInternal(m_objSockAddr.GetSocketAddress(), IMS_NULL, piAcceptedSocket);
+        ApplyIpSecInternal(m_objSockAddr.GetSocketAddress(), IMS_NULL, pAcceptedSocket);
     }
     inline virtual IMS_BOOL Connect() { return IMS_TRUE; }
     virtual IMS_BOOL Create(
@@ -89,7 +89,7 @@ protected:
             IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
     void ApplyIpSecInternal(IN const SocketAddress& objLocal,
-            IN const SocketAddress* pRemote = IMS_NULL, IN ISocket* piAcceptedSocket = IMS_NULL);
+            IN const SocketAddress* pRemote = IMS_NULL, IN SipSocket* pAcceptedSocket = IMS_NULL);
     void CloseSocket();
     void NotifyPongReceived();
     inline void SetForcinglyClosed(IN IMS_BOOL bClosed) { m_bForcinglyClosed = bClosed; }
