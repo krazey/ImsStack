@@ -30,7 +30,7 @@ public:
     explicit SdpOaState(IN IMS_BOOL bSdpVersionCheck = IMS_TRUE,
             IN IMS_BOOL bAlwaysIncreaseSdpVersion = IMS_FALSE);
     SdpOaState(IN const SdpOaState& other);
-    virtual ~SdpOaState();
+    ~SdpOaState() override;
 
 public:
     SdpOaState& operator=(IN const SdpOaState&) = delete;

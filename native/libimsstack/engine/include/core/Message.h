@@ -26,7 +26,7 @@ class Message : public IMessage
 {
 public:
     Message(IN AppConfig* pAppConfig, IN IMS_SINT32 nState);
-    virtual ~Message();
+    ~Message() override;
 
     Message(IN const Message&) = delete;
     Message& operator=(IN const Message&) = delete;

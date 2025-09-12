@@ -30,7 +30,7 @@ class RegInfoManager : public IRegInfoManager, public IRegInfoParserListener
 {
 public:
     RegInfoManager();
-    virtual ~RegInfoManager();
+    ~RegInfoManager() override;
 
 public:
     RegInfoManager(IN const RegInfoManager&) = delete;

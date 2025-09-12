@@ -25,7 +25,7 @@ public:
             MediaProposal(piOaState)
     {
     }
-    inline virtual ~FramedMediaProposal() {}
+    ~FramedMediaProposal() override = default;
 
     FramedMediaProposal(IN const FramedMediaProposal&) = delete;
     FramedMediaProposal& operator=(IN const FramedMediaProposal&) = delete;

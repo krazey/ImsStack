@@ -35,7 +35,7 @@ class TestCoreBase : public ::testing::Test
 {
 public:
     TestCoreBase();
-    virtual ~TestCoreBase();
+    ~TestCoreBase() override;
 
 public:
     virtual void SetUpClientConnection(IN IMS_BOOL bMidDialog = IMS_FALSE);

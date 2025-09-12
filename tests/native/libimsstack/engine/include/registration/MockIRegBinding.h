@@ -23,8 +23,8 @@
 class MockIRegBinding : public IRegBinding
 {
 public:
-    inline MockIRegBinding() {}
-    inline virtual ~MockIRegBinding() {}
+    MockIRegBinding() = default;
+    ~MockIRegBinding() override = default;
 
     MOCK_METHOD(const AStringArray&, GetAssociatedUris, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetAuthorizedAor, (), (const, override));

@@ -26,7 +26,7 @@ class RegInfoRegistration : public IRegInfoRegistration
 {
 public:
     RegInfoRegistration();
-    virtual ~RegInfoRegistration();
+    ~RegInfoRegistration() override;
 
 public:
     // IRegInfoRegistration interface

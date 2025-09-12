@@ -31,7 +31,7 @@ class RegStateTracker : public RcObject
 public:
     RegStateTracker();
     RegStateTracker(IN const RegStateTracker& other);
-    virtual ~RegStateTracker();
+    ~RegStateTracker() override;
 
     RegStateTracker& operator=(IN const RegStateTracker&) = delete;
 

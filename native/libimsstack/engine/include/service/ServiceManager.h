@@ -25,7 +25,7 @@ class ServiceManager : public IServiceManager
 {
 public:
     ServiceManager();
-    virtual ~ServiceManager();
+    ~ServiceManager() override;
 
     ServiceManager(IN const ServiceManager&) = delete;
     ServiceManager& operator=(IN const ServiceManager&) = delete;

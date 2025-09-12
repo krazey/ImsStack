@@ -30,7 +30,7 @@ class RegistrationManager : public IRegistrationManager
 {
 public:
     RegistrationManager();
-    virtual ~RegistrationManager();
+    ~RegistrationManager() override;
 
 public:
     RegistrationManager(IN const RegistrationManager&) = delete;

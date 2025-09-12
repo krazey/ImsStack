@@ -27,7 +27,7 @@ class SessionRefreshHelper : public RefreshHelper
 {
 public:
     SessionRefreshHelper(IN Service* pService, IN IRefreshable* piRefreshable);
-    virtual ~SessionRefreshHelper();
+    ~SessionRefreshHelper() override;
 
 public:
     IMS_BOOL AddSpecificHeader(IN ISipConnection* piSc) override;

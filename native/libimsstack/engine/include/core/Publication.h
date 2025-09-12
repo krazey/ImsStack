@@ -29,7 +29,7 @@ class Publication : public ServiceMethod, public IRefreshable
 public:
     Publication(IN Service* pService, IN const AString& strEvent,
             IN IMS_BOOL bImplicitRoutingRequired = IMS_TRUE);
-    virtual ~Publication();
+    ~Publication() override;
 
     Publication(IN const Publication&) = delete;
     Publication& operator=(IN const Publication&) = delete;

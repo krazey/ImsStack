@@ -35,7 +35,7 @@ public:
             m_objStatusCode(objStatusCode)
     {
     }
-    inline ~ReasonInfo() {}
+    ~ReasonInfo() override = default;
 
     ReasonInfo(IN const ReasonInfo&) = delete;
     ReasonInfo& operator=(IN const ReasonInfo&) = delete;

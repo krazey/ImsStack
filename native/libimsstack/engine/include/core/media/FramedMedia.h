@@ -26,7 +26,7 @@ class FramedMedia : public Media
 {
 public:
     FramedMedia(IN Service* pService, IN ISdpOaState* piOaState);
-    virtual ~FramedMedia();
+    ~FramedMedia() override;
 
     FramedMedia(IN const FramedMedia&) = delete;
     FramedMedia& operator=(IN const FramedMedia&) = delete;

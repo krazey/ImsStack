@@ -24,7 +24,7 @@ class SipConnectionNotifierManager : public ISipConnectionNotifierManager
 {
 public:
     SipConnectionNotifierManager();
-    virtual ~SipConnectionNotifierManager();
+    ~SipConnectionNotifierManager() override;
 
     SipConnectionNotifierManager(IN const SipConnectionNotifierManager&) = delete;
     SipConnectionNotifierManager& operator=(IN const SipConnectionNotifierManager&) = delete;

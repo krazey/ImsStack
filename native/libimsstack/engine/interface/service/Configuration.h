@@ -25,7 +25,7 @@ class Configuration : public IConfiguration
 {
 public:
     Configuration() = default;
-    virtual ~Configuration() = default;
+    ~Configuration() override = default;
 
     Configuration(IN const Configuration&) = delete;
     Configuration& operator=(IN const Configuration&) = delete;

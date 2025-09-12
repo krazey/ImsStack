@@ -24,7 +24,7 @@ class PublicationRefreshHelper : public RefreshHelper
 {
 public:
     PublicationRefreshHelper(IN IRefreshable* piRefreshable, IN const PubState* pPubState);
-    virtual ~PublicationRefreshHelper();
+    ~PublicationRefreshHelper() override;
 
     PublicationRefreshHelper(IN const PublicationRefreshHelper&) = delete;
     PublicationRefreshHelper& operator=(IN const PublicationRefreshHelper&) = delete;

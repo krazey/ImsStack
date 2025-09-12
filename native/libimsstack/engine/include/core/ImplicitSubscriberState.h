@@ -25,7 +25,7 @@ class ImplicitSubscriberState : public SubState
 {
 public:
     ImplicitSubscriberState();
-    inline virtual ~ImplicitSubscriberState() {}
+    ~ImplicitSubscriberState() override = default;
 
     ImplicitSubscriberState(IN const ImplicitSubscriberState&) = delete;
     ImplicitSubscriberState& operator=(IN const ImplicitSubscriberState&) = delete;

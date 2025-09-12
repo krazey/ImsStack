@@ -34,7 +34,7 @@ class RegParameter final : public ImsSlot, public IRegParameter
 {
 public:
     explicit RegParameter(IN IMS_SINT32 nSlotId);
-    virtual ~RegParameter();
+    ~RegParameter() override;
 
     RegParameter(IN const RegParameter&) = delete;
     RegParameter& operator=(IN const RegParameter&) = delete;

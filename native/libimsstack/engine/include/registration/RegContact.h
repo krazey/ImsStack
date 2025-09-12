@@ -31,7 +31,7 @@ public:
     RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nUserInfoPart, IN IRegCapabilityChangeListener* piListener,
             IN IMS_SINT32 nRegId = (-1));
-    virtual ~RegContact();
+    ~RegContact() override;
 
     RegContact(IN const RegContact&) = delete;
     RegContact& operator=(IN const RegContact&) = delete;

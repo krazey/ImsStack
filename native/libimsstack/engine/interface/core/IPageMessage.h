@@ -32,7 +32,7 @@ class IPageMessageListener;
 class IPageMessage : public IServiceMethod
 {
 protected:
-    virtual ~IPageMessage() = default;
+    ~IPageMessage() override = default;
 
 public:
     /**

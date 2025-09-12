@@ -33,7 +33,7 @@ class FakeRegistration :
 {
 public:
     FakeRegistration();
-    virtual ~FakeRegistration();
+    ~FakeRegistration() override;
 
     FakeRegistration(IN const FakeRegistration& other) = delete;
     FakeRegistration& operator=(IN const FakeRegistration& other) = delete;

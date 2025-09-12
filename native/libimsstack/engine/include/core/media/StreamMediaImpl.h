@@ -26,7 +26,7 @@ class StreamMediaImpl : public MediaImpl, public IMedia, public IOnMediaListener
 {
 public:
     explicit StreamMediaImpl(IN StreamMedia* pStreamMedia);
-    virtual ~StreamMediaImpl();
+    ~StreamMediaImpl() override;
 
     StreamMediaImpl(IN const StreamMediaImpl&) = delete;
     StreamMediaImpl& operator=(IN const StreamMediaImpl&) = delete;

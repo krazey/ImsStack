@@ -26,7 +26,7 @@ class Capabilities : public ServiceMethod
 {
 public:
     explicit Capabilities(IN Service* pService);
-    virtual ~Capabilities();
+    ~Capabilities() override;
 
     Capabilities(IN const Capabilities&) = delete;
     Capabilities& operator=(IN const Capabilities&) = delete;

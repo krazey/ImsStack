@@ -24,7 +24,7 @@ class PageMessageImpl : public IPageMessage, public IOnPageMessageListener
 {
 public:
     explicit PageMessageImpl(IN PageMessage* pPageMessage);
-    virtual ~PageMessageImpl();
+    ~PageMessageImpl() override;
 
     PageMessageImpl(IN const PageMessageImpl&) = delete;
     PageMessageImpl& operator=(IN const PageMessageImpl&) = delete;

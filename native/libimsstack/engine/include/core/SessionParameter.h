@@ -27,7 +27,7 @@ class SessionParameter : public ISessionParameter
 public:
     SessionParameter();
     SessionParameter(IN const SessionParameter& other);
-    virtual ~SessionParameter();
+    ~SessionParameter() override;
 
 public:
     SessionParameter& operator=(IN const SessionParameter& other);

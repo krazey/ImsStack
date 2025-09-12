@@ -55,7 +55,7 @@ class Session :
 {
 public:
     explicit Session(IN Service* pService);
-    virtual ~Session();
+    ~Session() override;
 
     Session(IN const Session&) = delete;
     Session& operator=(IN const Session&) = delete;

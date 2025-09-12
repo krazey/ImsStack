@@ -25,7 +25,7 @@ class ReferenceImpl : public IReference, public IOnReferenceListener, public IOn
 {
 public:
     explicit ReferenceImpl(IN Reference* pReference);
-    virtual ~ReferenceImpl();
+    ~ReferenceImpl() override;
 
     ReferenceImpl(IN const ReferenceImpl&) = delete;
     ReferenceImpl& operator=(IN const ReferenceImpl&) = delete;

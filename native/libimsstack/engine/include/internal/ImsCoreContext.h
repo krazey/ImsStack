@@ -34,7 +34,7 @@ class ImsCoreContext : public IImsCoreContext
 {
 private:
     ImsCoreContext();
-    virtual ~ImsCoreContext();
+    ~ImsCoreContext() override;
 
 public:
     ImsCoreContext(IN const ImsCoreContext&) = delete;

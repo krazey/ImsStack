@@ -56,7 +56,7 @@ class Service : public Connection, public IConfigUpdateListener, public IRegBind
 public:
     Service(IN const AString& strScheme, IN const AString& strAppId, IN const AString& strServiceId,
             IN const SipAddress* pImpu = IMS_NULL);
-    virtual ~Service();
+    ~Service() override;
 
     Service(IN const Service&) = delete;
     Service& operator=(IN const Service&) = delete;

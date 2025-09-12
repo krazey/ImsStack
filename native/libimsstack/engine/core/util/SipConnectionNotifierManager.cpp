@@ -56,7 +56,7 @@ class SipServerConnectionListenerProxy : public EngineActivity, public ISipServe
 public:
     SipServerConnectionListenerProxy(
             IN const AString& strName, IN ISipServerConnectionListener* piListener);
-    virtual ~SipServerConnectionListenerProxy();
+    ~SipServerConnectionListenerProxy() override = default;
 
     SipServerConnectionListenerProxy(IN const SipServerConnectionListenerProxy&) = delete;
     SipServerConnectionListenerProxy& operator=(
@@ -87,8 +87,6 @@ SipServerConnectionListenerProxy::SipServerConnectionListenerProxy(
         m_piListener(piListener)
 {
 }
-
-PUBLIC VIRTUAL SipServerConnectionListenerProxy::~SipServerConnectionListenerProxy() {}
 
 PRIVATE VIRTUAL IMS_BOOL SipServerConnectionListenerProxy::DispatchMessage(IN ImsMessage& objMsg)
 {
@@ -128,7 +126,7 @@ class SipConnectionNotifierManagerPrivate : public ISipServerConnectionListener
 {
 public:
     SipConnectionNotifierManagerPrivate();
-    virtual ~SipConnectionNotifierManagerPrivate();
+    ~SipConnectionNotifierManagerPrivate() override;
 
     SipConnectionNotifierManagerPrivate(IN const SipConnectionNotifierManagerPrivate&) = delete;
     SipConnectionNotifierManagerPrivate& operator=(

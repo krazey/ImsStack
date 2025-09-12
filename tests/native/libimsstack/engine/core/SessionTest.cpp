@@ -93,7 +93,7 @@ public:
             m_pSession(IMS_NULL)
     {
     }
-    inline virtual ~SessionTest()
+    inline ~SessionTest() override
     {
         if (m_pSession != IMS_NULL)
         {

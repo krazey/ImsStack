@@ -35,7 +35,7 @@ class Subscription :
 public:
     Subscription(IN Service* pService, IN const AString& strEvent,
             IN IMS_BOOL bImplicitRoutingRequired = IMS_TRUE);
-    virtual ~Subscription();
+    ~Subscription() override;
 
     Subscription(IN const Subscription&) = delete;
     Subscription& operator=(IN const Subscription&) = delete;

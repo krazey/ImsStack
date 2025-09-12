@@ -52,7 +52,7 @@ class Replaces;
 class ISession : public IServiceMethod
 {
 protected:
-    virtual ~ISession() = default;
+    ~ISession() override = default;
 
 public:
     /**

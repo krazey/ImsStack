@@ -26,7 +26,7 @@ public:
             m_pMediaProposal(pMediaProposal)
     {
     }
-    inline virtual ~StreamMediaProposalImpl() {}
+    ~StreamMediaProposalImpl() override = default;
 
     StreamMediaProposalImpl(IN const StreamMediaProposalImpl&) = delete;
     StreamMediaProposalImpl& operator=(IN const StreamMediaProposalImpl&) = delete;

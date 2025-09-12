@@ -27,7 +27,7 @@ class VirtualSessionImpl : public ISession
 {
 public:
     explicit VirtualSessionImpl(IN ISession* piOwnerSession, IN VirtualSession* pSession);
-    virtual ~VirtualSessionImpl();
+    ~VirtualSessionImpl() override;
 
     VirtualSessionImpl(IN const VirtualSessionImpl&) = delete;
     VirtualSessionImpl& operator=(IN const VirtualSessionImpl&) = delete;

@@ -52,7 +52,7 @@ class Registration :
 {
 public:
     Registration();
-    virtual ~Registration();
+    ~Registration() override;
 
     Registration(IN const Registration&) = delete;
     Registration& operator=(IN const Registration&) = delete;

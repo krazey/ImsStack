@@ -34,7 +34,7 @@ class SipAddress;
 class ISipConnectionFactory : public IMethod
 {
 protected:
-    virtual ~ISipConnectionFactory() = default;
+    ~ISipConnectionFactory() override = default;
 
 public:
     /**

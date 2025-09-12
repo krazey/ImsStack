@@ -25,7 +25,7 @@ class SubscriberState : public SubState
 {
 public:
     SubscriberState();
-    inline virtual ~SubscriberState() {}
+    ~SubscriberState() override = default;
 
     SubscriberState(IN const SubscriberState&) = delete;
     SubscriberState& operator=(IN const SubscriberState&) = delete;

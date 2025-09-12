@@ -42,7 +42,7 @@ public:
     {
     }
 
-    inline virtual ~ExtraHeader()
+    inline ~ExtraHeader() override
     {
         if (m_piHeader != IMS_NULL)
         {

@@ -24,7 +24,7 @@ class CallState
 {
 public:
     CallState();
-    inline ~CallState() {}
+    ~CallState() = default;
 
     CallState(IN const CallState&) = delete;
     CallState& operator=(IN const CallState&) = delete;

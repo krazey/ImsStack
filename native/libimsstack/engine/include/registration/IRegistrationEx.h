@@ -26,7 +26,7 @@ class RegStateTracker;
 class IRegistrationEx : public IRegistration, public ISipConnectionNotifierErrorListener
 {
 protected:
-    virtual ~IRegistrationEx() = default;
+    ~IRegistrationEx() override = default;
 
 public:
     /**

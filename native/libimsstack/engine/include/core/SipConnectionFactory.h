@@ -32,7 +32,7 @@ class SipConnectionFactory :
 public:
     explicit SipConnectionFactory(IN Service* pService);
     SipConnectionFactory(IN Service* pService, IN ISipServerConnection* piSsc);
-    virtual ~SipConnectionFactory();
+    ~SipConnectionFactory() override;
 
     SipConnectionFactory(IN const SipConnectionFactory&) = delete;
     SipConnectionFactory& operator=(IN const SipConnectionFactory&) = delete;

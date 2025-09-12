@@ -24,7 +24,7 @@ class ServiceFilterCriteria final : public IServiceFilterCriteria
 {
 public:
     ServiceFilterCriteria();
-    virtual ~ServiceFilterCriteria();
+    ~ServiceFilterCriteria() override;
 
     ServiceFilterCriteria(IN const ServiceFilterCriteria&) = delete;
     ServiceFilterCriteria& operator=(IN const ServiceFilterCriteria&) = delete;

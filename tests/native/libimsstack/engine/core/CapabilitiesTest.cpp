@@ -31,7 +31,7 @@ public:
             m_pCapabilities(IMS_NULL)
     {
     }
-    inline virtual ~CapabilitiesTest()
+    inline ~CapabilitiesTest() override
     {
         if (m_pCapabilities != IMS_NULL)
         {

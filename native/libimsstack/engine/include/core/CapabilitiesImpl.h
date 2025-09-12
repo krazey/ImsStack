@@ -24,7 +24,7 @@ class CapabilitiesImpl : public ICapabilities, public IOnCapabilitiesListener
 {
 public:
     explicit CapabilitiesImpl(IN Capabilities* pCapabilities);
-    virtual ~CapabilitiesImpl();
+    ~CapabilitiesImpl() override;
 
     CapabilitiesImpl(IN const CapabilitiesImpl&) = delete;
     CapabilitiesImpl& operator=(IN const CapabilitiesImpl&) = delete;

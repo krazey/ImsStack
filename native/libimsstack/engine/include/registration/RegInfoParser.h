@@ -26,7 +26,7 @@ class RegInfoParser
 {
 public:
     explicit RegInfoParser(IN const RegKey& objRegKey);
-    inline virtual ~RegInfoParser() {}
+    virtual ~RegInfoParser() = default;
 
 public:
     inline const RegKey& GetRegKey() const { return m_objRegKey; }

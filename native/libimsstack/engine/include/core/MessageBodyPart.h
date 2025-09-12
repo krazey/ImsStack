@@ -29,7 +29,7 @@ class MessageBodyPart : public IMessageBodyPart
 {
 public:
     MessageBodyPart(IN IMessage* piMessage, IN ISipMessageBodyPart* piBodyPart);
-    inline virtual ~MessageBodyPart() {}
+    ~MessageBodyPart() override = default;
 
     MessageBodyPart(IN const MessageBodyPart&) = delete;
     MessageBodyPart& operator=(IN const MessageBodyPart&) = delete;

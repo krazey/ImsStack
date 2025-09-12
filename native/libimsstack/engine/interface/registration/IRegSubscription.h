@@ -27,7 +27,7 @@ class IRegSubscriptionListener;
 class IRegSubscription : public IRegBase
 {
 protected:
-    virtual ~IRegSubscription() = default;
+    ~IRegSubscription() override = default;
 
 public:
     /**

@@ -29,7 +29,7 @@ class Service;
 class IServiceManager : public IServiceCloseListener
 {
 protected:
-    virtual ~IServiceManager() = default;
+    ~IServiceManager() override = default;
 
 public:
     /**

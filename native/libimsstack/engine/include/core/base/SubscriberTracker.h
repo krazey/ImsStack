@@ -30,7 +30,7 @@ private:
     SubscriberTracker();
 
 public:
-    virtual ~SubscriberTracker();
+    ~SubscriberTracker() override;
 
     SubscriberTracker(IN const SubscriberTracker&) = delete;
     SubscriberTracker& operator=(IN const SubscriberTracker&) = delete;

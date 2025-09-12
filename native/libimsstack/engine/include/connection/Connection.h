@@ -24,7 +24,7 @@ class Connection : public EngineActivity
 {
 public:
     Connection();
-    inline virtual ~Connection() {}
+    ~Connection() override = default;
 
     Connection(IN const Connection&) = delete;
     Connection& operator=(IN const Connection&) = delete;

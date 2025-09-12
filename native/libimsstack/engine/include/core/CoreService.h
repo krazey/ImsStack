@@ -31,7 +31,7 @@ class CoreService : public Service
 public:
     CoreService(IN const AString& strAppId, IN const AString& strServiceId,
             IN const SipAddress* pImpu = IMS_NULL);
-    virtual ~CoreService();
+    ~CoreService() override;
 
     CoreService(IN const CoreService&) = delete;
     CoreService& operator=(IN const CoreService&) = delete;

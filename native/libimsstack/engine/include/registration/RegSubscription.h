@@ -40,7 +40,7 @@ class RegSubscription :
 public:
     RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker* pRegStateTracker,
             IN IMS_UINT32 nExpiresValue = 0, IN const SipTimerValues* pTimerValues = IMS_NULL);
-    virtual ~RegSubscription();
+    ~RegSubscription() override;
 
     RegSubscription(IN const RegSubscription&) = delete;
     RegSubscription& operator=(IN const RegSubscription&) = delete;

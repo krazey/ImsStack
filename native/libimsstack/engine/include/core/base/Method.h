@@ -34,7 +34,7 @@ class Method : public EngineActivity, public ISipClientConnectionListener, publi
 {
 public:
     Method();
-    virtual ~Method();
+    ~Method() override;
 
     Method(IN const Method&) = delete;
     Method& operator=(IN const Method&) = delete;
@@ -119,7 +119,7 @@ public:
     {
     public:
         SccListener();
-        virtual ~SccListener();
+        ~SccListener() override;
 
     protected:
         void Error_NotifyError(IN ISipConnection* piSc, IN IMS_SINT32 nCode,

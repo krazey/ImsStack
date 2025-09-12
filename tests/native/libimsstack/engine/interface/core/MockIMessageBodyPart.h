@@ -24,7 +24,7 @@
 class MockIMessageBodyPart : public IMessageBodyPart
 {
 public:
-    virtual ~MockIMessageBodyPart() {}
+    ~MockIMessageBodyPart() override = default;
 
     MOCK_METHOD(const ByteArray&, GetContent, (), (const, override));
     MOCK_METHOD(AString, GetHeader, (IN const AString& strName), (const, override));

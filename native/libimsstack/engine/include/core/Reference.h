@@ -53,7 +53,7 @@ public:
     Reference(IN Service* pService, IN const AString& strReferToUri,
             IN const AString& strReferMethod, IN const Replaces& objReplaces,
             IN IMS_BOOL bImplicitRoutingRequired = IMS_TRUE);
-    virtual ~Reference();
+    ~Reference() override;
 
     Reference(IN const Reference&) = delete;
     Reference& operator=(IN const Reference&) = delete;

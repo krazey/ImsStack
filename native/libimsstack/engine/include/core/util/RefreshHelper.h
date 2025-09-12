@@ -32,7 +32,7 @@ class RefreshHelper :
 {
 public:
     RefreshHelper(IN IRefreshable* piRefreshable, IN IMS_BOOL bRepeatable);
-    virtual ~RefreshHelper();
+    ~RefreshHelper() override;
 
 public:
     void AbortConnection();

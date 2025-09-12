@@ -38,7 +38,7 @@ class ISubscriptionListener;
 class ISubscription : public IServiceMethod
 {
 protected:
-    virtual ~ISubscription() = default;
+    ~ISubscription() override = default;
 
 public:
     /**

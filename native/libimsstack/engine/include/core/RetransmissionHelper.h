@@ -25,7 +25,7 @@ class RetransmissionHelper : public ITimerListener
 {
 public:
     explicit RetransmissionHelper(IN Service* pService, IN IMS_BOOL bIntervalCap = IMS_TRUE);
-    virtual ~RetransmissionHelper();
+    ~RetransmissionHelper() override;
 
     RetransmissionHelper(IN const RetransmissionHelper&) = delete;
     RetransmissionHelper& operator=(IN const RetransmissionHelper&) = delete;

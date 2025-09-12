@@ -41,7 +41,7 @@ class Replaces;
 class MockISession : public ISession
 {
 public:
-    virtual ~MockISession() {}
+    ~MockISession() override = default;
 
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));

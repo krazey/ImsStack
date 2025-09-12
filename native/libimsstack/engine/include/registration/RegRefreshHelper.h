@@ -25,7 +25,7 @@ class RegRefreshHelper : public RefreshHelper
 {
 public:
     explicit RegRefreshHelper(IN IRefreshable* piRefreshable);
-    virtual ~RegRefreshHelper();
+    ~RegRefreshHelper() override;
 
     RegRefreshHelper(IN const RegRefreshHelper&) = delete;
     RegRefreshHelper& operator=(IN const RegRefreshHelper&) = delete;

@@ -24,7 +24,7 @@ class SessionDescriptor : public ISessionDescriptor
 {
 public:
     explicit SessionDescriptor(IN ISessionState* piSessionState);
-    virtual ~SessionDescriptor();
+    ~SessionDescriptor() override;
 
     SessionDescriptor(IN const SessionDescriptor&) = delete;
     SessionDescriptor& operator=(IN const SessionDescriptor&) = delete;

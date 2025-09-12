@@ -26,7 +26,7 @@ class TestCoreService : public CoreService
 {
 public:
     TestCoreService();
-    virtual ~TestCoreService();
+    ~TestCoreService() override;
 
     inline ISipClientConnection* CreateConnection(IN const SipAddress* /*pFrom*/,
             IN const SipAddress* /*pTo*/, IN const SipMethod& /*objMethod*/,

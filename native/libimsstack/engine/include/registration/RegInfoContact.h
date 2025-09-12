@@ -25,7 +25,7 @@ class RegInfoContact : public IRegInfoContact
 {
 public:
     RegInfoContact();
-    virtual ~RegInfoContact();
+    ~RegInfoContact() override;
 
 public:
     // IRegInfoContact interface

@@ -26,7 +26,7 @@ class FeatureCaps : public IFeatureCaps
 {
 public:
     FeatureCaps();
-    virtual ~FeatureCaps();
+    ~FeatureCaps() override;
 
     FeatureCaps(IN const FeatureCaps&) = delete;
     FeatureCaps& operator=(IN const FeatureCaps&) = delete;

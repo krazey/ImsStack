@@ -25,7 +25,7 @@ class ImplicitNotifierState : public SubState
 {
 public:
     ImplicitNotifierState();
-    inline virtual ~ImplicitNotifierState() {}
+    ~ImplicitNotifierState() override = default;
 
     ImplicitNotifierState(IN const ImplicitNotifierState&) = delete;
     ImplicitNotifierState& operator=(IN const ImplicitNotifierState&) = delete;

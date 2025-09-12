@@ -26,7 +26,7 @@ class SessionEx : public Session, public ITimerListener
 {
 public:
     explicit SessionEx(IN Service* pService);
-    virtual ~SessionEx();
+    ~SessionEx() override;
 
     SessionEx(IN const SessionEx&) = delete;
     SessionEx& operator=(IN const SessionEx&) = delete;

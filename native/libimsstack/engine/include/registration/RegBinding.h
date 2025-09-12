@@ -30,7 +30,7 @@ public:
     RegBinding();
 
 protected:
-    virtual ~RegBinding();
+    ~RegBinding() override;
 
     RegBinding(IN const RegBinding&) = delete;
     RegBinding& operator=(IN const RegBinding&) = delete;

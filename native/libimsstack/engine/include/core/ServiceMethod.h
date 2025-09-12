@@ -28,7 +28,7 @@ class ServiceMethod : public Method
 {
 public:
     explicit ServiceMethod(IN Service* pService);
-    virtual ~ServiceMethod();
+    ~ServiceMethod() override;
 
     ServiceMethod(IN const ServiceMethod&) = delete;
     ServiceMethod& operator=(IN const ServiceMethod&) = delete;

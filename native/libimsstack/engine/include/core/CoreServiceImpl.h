@@ -28,7 +28,7 @@ class CoreServiceImpl :
 {
 public:
     explicit CoreServiceImpl(IN CoreService* pCoreService);
-    virtual ~CoreServiceImpl();
+    ~CoreServiceImpl() override;
 
     CoreServiceImpl(IN const CoreServiceImpl&) = delete;
     CoreServiceImpl& operator=(IN const CoreServiceImpl&) = delete;

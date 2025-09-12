@@ -25,7 +25,7 @@ public:
             MediaProposal(piOaState)
     {
     }
-    inline virtual ~StreamMediaProposal() {}
+    ~StreamMediaProposal() override = default;
 
     StreamMediaProposal(IN const StreamMediaProposal&) = delete;
     StreamMediaProposal& operator=(IN const StreamMediaProposal&) = delete;

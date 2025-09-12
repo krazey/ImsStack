@@ -21,8 +21,8 @@
 class RegObserver
 {
 public:
-    inline RegObserver() {}
-    inline virtual ~RegObserver() {}
+    RegObserver() = default;
+    virtual ~RegObserver() = default;
 
 public:
     virtual void Update(IN IMS_SINT32 nWhat) = 0;

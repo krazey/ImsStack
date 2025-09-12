@@ -26,7 +26,7 @@ class MethodManager : public RcObject
 public:
     MethodManager();
     MethodManager(IN const MethodManager& other);
-    virtual ~MethodManager();
+    ~MethodManager() override;
 
     MethodManager& operator=(IN const MethodManager&) = delete;
 

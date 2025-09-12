@@ -29,7 +29,7 @@ class RegInfo : public IRegInfo
 {
 public:
     RegInfo();
-    virtual ~RegInfo();
+    ~RegInfo() override;
 
 public:
     // IRegInfo interface

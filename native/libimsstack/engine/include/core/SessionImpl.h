@@ -34,7 +34,7 @@ class SessionImpl : public ISession, public IOnSessionListener, public IOnSessio
 {
 public:
     explicit SessionImpl(IN SessionEx* pSession);
-    virtual ~SessionImpl();
+    ~SessionImpl() override;
 
     SessionImpl(IN const SessionImpl&) = delete;
     SessionImpl& operator=(IN const SessionImpl&) = delete;

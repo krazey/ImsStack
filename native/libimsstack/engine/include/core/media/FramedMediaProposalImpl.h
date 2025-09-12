@@ -26,7 +26,7 @@ public:
             m_pMediaProposal(pMediaProposal)
     {
     }
-    inline virtual ~FramedMediaProposalImpl() {}
+    ~FramedMediaProposalImpl() override = default;
 
     FramedMediaProposalImpl(IN const FramedMediaProposalImpl&) = delete;
     FramedMediaProposalImpl& operator=(IN const FramedMediaProposalImpl&) = delete;

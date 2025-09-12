@@ -33,7 +33,7 @@ class ISubscription;
 class MockICoreService : public ICoreService
 {
 public:
-    virtual ~MockICoreService() {}
+    ~MockICoreService() override = default;
 
     // IConnection
     MOCK_METHOD(void, Close, (), (override));

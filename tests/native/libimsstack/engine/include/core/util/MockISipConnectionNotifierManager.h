@@ -24,7 +24,7 @@ class MockISipConnectionNotifierManager : public ISipConnectionNotifierManager
 {
 public:
     MockISipConnectionNotifierManager() = default;
-    virtual ~MockISipConnectionNotifierManager() = default;
+    ~MockISipConnectionNotifierManager() override = default;
 
     MOCK_METHOD(ISipConnectionNotifier*, CreateConnectionNotifier,
             (IN const AString& strScheme, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
