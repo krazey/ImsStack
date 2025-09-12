@@ -43,7 +43,8 @@ public:
     IIpSecPolicy* GetPolicy(IN IMS_SINT32 nId) const override;
     IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN const SocketAddress& objLocal,
             IN const SocketAddress* pRemote = IMS_NULL) override;
-    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket) override;
+    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket,
+            IN const SocketAddress& objRemote) override;
     void RemoveIpSecTransforms(IN IMS_SINT32 nSocketId) override;
 
 private:

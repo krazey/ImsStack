@@ -261,7 +261,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
-        IN ISocket* piSocket, IN ISocket* piServerSocket)
+        IN ISocket* piSocket, IN ISocket* piServerSocket, IN const SocketAddress& objRemote)
 {
     if (piSocket == IMS_NULL || piServerSocket == IMS_NULL)
     {
@@ -283,7 +283,9 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
                     const_cast<IpSecSaParameter::Policy&>(objPolicys.GetAt(j));
 
             if (objPolicy.GetSocketId() == piServerSocket->GetSocketId() &&
-                    !objPolicy.HasAcceptedSocketId(piSocket->GetSocketId()))
+                    !objPolicy.HasAcceptedSocketId(piSocket->GetSocketId()) &&
+                    (objRemote.Equals(objPolicy.GetRemoteAddress()) ||
+                            objRemote.Equals(objPolicy.GetLocalAddress())))
             {
                 if (PlatformContext::GetInstance()->GetSystem()->ApplyIpSecSa(
                             objSaParam.GetIpSecId(), objPolicy.GetSpi(), piSocket->GetSocketId(),

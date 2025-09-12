@@ -40,7 +40,8 @@ public:
             (IN ISocket * piSocket, IN const SocketAddress& objLocal,
                     IN const SocketAddress* pRemote),
             (override));
-    MOCK_METHOD(IMS_BOOL, ApplyIpSecTransform, (IN ISocket * piSocket, IN ISocket* piServerSocket),
+    MOCK_METHOD(IMS_BOOL, ApplyIpSecTransform,
+            (IN ISocket * piSocket, IN ISocket* piServerSocket, IN const SocketAddress& objRemote),
             (override));
     MOCK_METHOD(void, RemoveIpSecTransforms, (IN IMS_SINT32 nSocketId), (override));
 };
