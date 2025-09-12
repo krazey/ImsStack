@@ -128,7 +128,7 @@ protected:
     void NotifyPublishState(IN IMS_BOOL bIsStarted) { m_pAosInfo->NotifyPublishState(bIsStarted); }
     void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
     {
-        m_pAosInfo->NotifyEmergencySmsState(bIsInitialized);
+        m_pAosInfo->NotifyEmergencySmsState(bIsInitialized, EmergencyServicePdn::EMERGENCY);
     }
     void NotifyEpsfbCallState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyEpsfbCallState(nState); }
     IMS_BOOL IsForbiddenBlock() { return m_pAosInfo->IsForbiddenBlock(); }

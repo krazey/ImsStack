@@ -18,6 +18,15 @@
 
 #include "AString.h"
 
+/// Indicated the pdn info when emergency service is in progress.
+enum class EmergencyServicePdn
+{
+    /// emergency service with emergency pdn
+    EMERGENCY = 1,
+    /// emergency service with ims pdn
+    IMS
+};
+
 /**
  * @brief This class provides an interface to get and notify the information for AoS.
  *
@@ -164,8 +173,10 @@ public:
      * @brief Notify the emergency sms state.
      *
      * @param bIsInitialized Indicated whether emergency sms is initialized or done.
+     * @param ePdnType Indicated the pdn type used for the emergency sms.
      */
-    virtual void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) = 0;
+    virtual void NotifyEmergencySmsState(
+            IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) = 0;
 
     /**
      * @brief Notify the call state to be EPS fallback.
@@ -215,5 +226,4 @@ public:
         EPSFB_CALL_FAILED = 2
     };
 };
-
 #endif  // INTERFACE_IMS_AOS_INFO_H_

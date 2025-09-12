@@ -47,7 +47,8 @@ protected:
     IMS_BOOL IsCrossSimConnected() override;
     void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override;
     void NotifyPublishState(IN IMS_BOOL bIsStarted) override;
-    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) override;
+    void NotifyEmergencySmsState(
+            IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) override;
     void NotifyEpsfbCallState(IN IMS_UINT32 nState) override;
 
     IMS_BOOL IsForbiddenBlock();
