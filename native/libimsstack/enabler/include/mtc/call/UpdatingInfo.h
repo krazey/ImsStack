@@ -44,6 +44,26 @@ public:
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
     inline void SetPendingUpdate() { m_bHasPendingUpdate = IMS_TRUE; }
 
+    /**
+     * @brief Updates its requesting UpdateType based on the current states.
+     *
+     * Following states must be updated before using this method.
+     * - Original info
+     * - Alerting info
+     * - MediaManager#NegotiateSdp
+     */
+    void UpdateRequestingTypeForIncomingUpdate();
+
+    /**
+     * @brief Updates its requesting UpdateType based on the current states.
+     *
+     * Following states must be updated before using this method.
+     * - Original info
+     * - Modifying info
+     * - Target call type
+     */
+    void UpdateRequestingTypeForOfferlessReInvite();
+
     IMS_BOOL IsHeld() const;
     IMS_BOOL IsHeldBy() const;
     IMS_BOOL IsResumed() const;

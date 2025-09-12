@@ -433,6 +433,173 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSendReceive)
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForIncomingUpdateSetsTypeToSessionIfCallTypeIsChanged)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetAlertingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForIncomingUpdate();
+
+    EXPECT_EQ(UpdateType::SESSION, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest,
+        UpdateRequestingTypeForIncomingUpdateSetsTypeToSessionIfCallTypeIsChangedAndHeldBy)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetAlertingInfo().eAudioDirection = DIRECTION_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForIncomingUpdate();
+
+    EXPECT_EQ(UpdateType::SESSION, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest,
+        UpdateRequestingTypeForIncomingUpdateSetsTypeToSessionIfCallTypeIsChangedAndResumedBy)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_RECEIVE;
+    objUpdatingInfo.GetAlertingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForIncomingUpdate();
+
+    EXPECT_EQ(UpdateType::SESSION, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForIncomingUpdateSetsTypeToHoldIfHeldBy)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetAlertingInfo().eAudioDirection = DIRECTION_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForIncomingUpdate();
+
+    EXPECT_EQ(UpdateType::HOLD, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForIncomingUpdateSetsTypeToResumeIfResumedBy)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_RECEIVE;
+    objUpdatingInfo.GetAlertingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForIncomingUpdate();
+
+    EXPECT_EQ(UpdateType::RESUME, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForIncomingUpdateSetsTypeToNormalIfNoChanges)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetAlertingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForIncomingUpdate();
+
+    EXPECT_EQ(UpdateType::NORMAL, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest,
+        UpdateRequestingTypeForOfferlessReInviteSetsTypeToSessionIfCallTypeIsChanged)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForOfferlessReInvite();
+
+    EXPECT_EQ(UpdateType::SESSION, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest,
+        UpdateRequestingTypeForOfferlessReInviteSetsTypeToSessionIfCallTypeIsChangedAndHeld)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+
+    objUpdatingInfo.UpdateRequestingTypeForOfferlessReInvite();
+
+    EXPECT_EQ(UpdateType::SESSION, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest,
+        UpdateRequestingTypeForOfferlessReInviteSetsTypeToSessionIfCallTypeIsChangedAndResumed)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
+    objUpdatingInfo.GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForOfferlessReInvite();
+
+    EXPECT_EQ(UpdateType::SESSION, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForOfferlessReInviteSetsTypeToHoldIfHeld)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VT);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+
+    objUpdatingInfo.UpdateRequestingTypeForOfferlessReInvite();
+
+    EXPECT_EQ(UpdateType::HOLD, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForOfferlessReInviteSetsTypeToResumeIfResumed)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VT);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
+    objUpdatingInfo.GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForOfferlessReInvite();
+
+    EXPECT_EQ(UpdateType::RESUME, objUpdatingInfo.GetRequestingType());
+}
+
+TEST_F(UpdatingInfoTest, UpdateRequestingTypeForOfferlessReInviteSetsTypeToNormalIfNoChanges)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VT);
+    objUpdatingInfo.GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objUpdatingInfo.GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objUpdatingInfo.UpdateRequestingTypeForOfferlessReInvite();
+
+    EXPECT_EQ(UpdateType::NORMAL, objUpdatingInfo.GetRequestingType());
+}
+
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
 {
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
@@ -574,65 +741,102 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsInval
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedHoldResume());
 }
 
-TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfModifyingInfoIsInvalid)
+TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfNewAudioDirectionIsInvalid)
 {
-    pUpdatingInfo = new UpdatingInfo(objCallContext);
-    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    objOriginalInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
     objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
-    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
+    EXPECT_FALSE(objUpdatingInfo.IsRequestedModifying());
 }
 
-TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfAudioDirectionIsChanging)
+TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfHold)
 {
-    pUpdatingInfo = new UpdatingInfo(objCallContext);
-    MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
-    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    objOriginalInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objOriginalInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND;
+    objModifyingInfo.eVideoDirection = DIRECTION_INVALID;
 
+    EXPECT_FALSE(objUpdatingInfo.IsRequestedModifying());
+}
+
+TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfResume)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
     objOriginalInfo.eAudioDirection = DIRECTION_SEND;
+    objOriginalInfo.eVideoDirection = DIRECTION_INVALID;
     objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objModifyingInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
+    EXPECT_FALSE(objUpdatingInfo.IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfVideoDirectionIsChanging)
 {
-    pUpdatingInfo = new UpdatingInfo(objCallContext);
-    MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
-    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
     objModifyingInfo.eAudioDirection = objOriginalInfo.eAudioDirection = DIRECTION_SEND;
-
     objOriginalInfo.eVideoDirection = DIRECTION_SEND;
     objModifyingInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedModifying());
+    EXPECT_TRUE(objUpdatingInfo.IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfVideoDirectionIsNotChanging)
 {
-    pUpdatingInfo = new UpdatingInfo(objCallContext);
-    MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
-    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
     objOriginalInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
-
     objOriginalInfo.eVideoDirection = objModifyingInfo.eVideoDirection = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
+    EXPECT_FALSE(objUpdatingInfo.IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfCallTypeIsChanged)
 {
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
-    pUpdatingInfo = new UpdatingInfo(objCallContext);
-    MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
-    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
     objOriginalInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
-
     objOriginalInfo.eVideoDirection = objModifyingInfo.eVideoDirection = DIRECTION_SEND;
 
-    pUpdatingInfo->SetTargetCallType(CallType::VOIP);
+    EXPECT_TRUE(objUpdatingInfo.IsRequestedModifying());
+}
 
-    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedModifying());
+TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfCallTypeIsChangedAndHold)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    UpdatingInfo objUpdatingInfo(objCallContext);
+    objUpdatingInfo.SetTargetCallType(CallType::VOIP);
+    MediaInfo& objOriginalInfo = objUpdatingInfo.GetOriginalInfo();
+    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    objOriginalInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objOriginalInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND;
+    objModifyingInfo.eVideoDirection = DIRECTION_INVALID;
+
+    EXPECT_TRUE(objUpdatingInfo.IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfCallTypeIsChanged)
