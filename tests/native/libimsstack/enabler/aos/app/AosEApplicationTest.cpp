@@ -440,17 +440,6 @@ TEST_F(AosEApplicationTest, ShouldNotRequestFakeModeWithNextPcscfIfPdnNotActive)
     m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0);
 }
 
-TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithCountIncrease)
-{
-    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::RETRY_COUNT_INCREASE, 0));
-}
-
-TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithCountIncreaseWithInitialRegistration)
-{
-    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(
-            ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION, 0));
-}
-
 TEST_F(AosEApplicationTest, ReturnsFalseWhenRequestCmdWithNotCoveredCommands)
 {
     IMS_UINT32 nCmdNotCovered = 999;
@@ -530,10 +519,6 @@ TEST_F(AosEApplicationTest, ProcessMessage)
 {
     // MSG_DESTROY
     ImsMessage objMessage(MSG_DESTROY, 0, 0);
-    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
-
-    // MSG_RETRY_COUNT_INCREASE
-    objMessage.nMSG = MSG_RETRY_COUNT_INCREASE;
     EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
 
     // MSG_OTHERS
