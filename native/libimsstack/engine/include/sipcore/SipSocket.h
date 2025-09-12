@@ -29,7 +29,7 @@ class SipSocket : public ImsSlot, public ISocketListener
 {
 public:
     explicit SipSocket(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType = SipSocketAddress::SOCKET_UDP);
-    virtual ~SipSocket();
+    ~SipSocket() override;
 
     SipSocket(IN const SipSocket&) = delete;
     SipSocket& operator=(IN const SipSocket&) = delete;

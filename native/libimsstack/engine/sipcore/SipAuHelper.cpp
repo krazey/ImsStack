@@ -30,7 +30,7 @@ class SipGenericChallenge : public ISipGenericChallenge
 public:
     explicit SipGenericChallenge(IN IMS_SINT32 nType = ISipHeader::WWW_AUTHENTICATE);
     SipGenericChallenge(IN const SipGenericChallenge& other);
-    virtual ~SipGenericChallenge();
+    ~SipGenericChallenge() override;
 
 public:
     SipGenericChallenge& operator=(IN const SipGenericChallenge& other);

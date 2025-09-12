@@ -32,8 +32,8 @@ class ISipGenericChallenge;
 class MockISipClientConnection : public ISipClientConnection
 {
 public:
-    inline MockISipClientConnection() {}
-    inline virtual ~MockISipClientConnection() {}
+    MockISipClientConnection() = default;
+    ~MockISipClientConnection() override = default;
 
     MOCK_METHOD(IMS_RESULT, InitAck, (), (override));
     MOCK_METHOD(ISipClientConnection*, InitCancel, (), (override));

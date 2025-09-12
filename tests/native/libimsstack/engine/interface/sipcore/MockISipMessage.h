@@ -28,8 +28,8 @@
 class MockISipMessage : public ISipMessage
 {
 public:
-    inline MockISipMessage() {}
-    inline virtual ~MockISipMessage() {}
+    MockISipMessage() = default;
+    ~MockISipMessage() override = default;
 
     MOCK_METHOD(void, Destroy, (), (override));
 

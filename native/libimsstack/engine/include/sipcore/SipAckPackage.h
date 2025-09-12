@@ -33,7 +33,7 @@ private:
     explicit SipAckPackage(IN const AString& strCallId);
 
 public:
-    virtual ~SipAckPackage();
+    ~SipAckPackage() override;
 
 public:
     void AddAck(IN SipClientTransactionState* pCtState, IN IMS_SINT32 nAliveInterval);

@@ -28,7 +28,7 @@ class SipParameter;
 class ISipHeader : public ISipObject
 {
 protected:
-    virtual ~ISipHeader() = default;
+    ~ISipHeader() override = default;
 
 public:
     /**

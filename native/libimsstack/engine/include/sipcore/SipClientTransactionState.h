@@ -26,7 +26,7 @@ class SipClientTransactionState : public SipTransactionState
 {
 public:
     explicit SipClientTransactionState(IN IMS_SINT32 nSlotId);
-    virtual ~SipClientTransactionState();
+    ~SipClientTransactionState() override;
 
     SipClientTransactionState& operator=(IN const SipClientTransactionState&) = delete;
 

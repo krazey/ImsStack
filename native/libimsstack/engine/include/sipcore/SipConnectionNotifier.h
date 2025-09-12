@@ -41,7 +41,7 @@ class SipConnectionNotifier :
 public:
     SipConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS_SINT32 nPort, IN const AString& strParams,
             IN IMS_BOOL bSharedMode = IMS_FALSE);
-    virtual ~SipConnectionNotifier();
+    ~SipConnectionNotifier() override;
 
     SipConnectionNotifier(IN const SipConnectionNotifier&) = delete;
     SipConnectionNotifier& operator=(IN const SipConnectionNotifier&) = delete;

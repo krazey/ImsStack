@@ -30,7 +30,7 @@ public:
     explicit SipMessage(IN IMS_SINT32 nType = ISipMessage::TYPE_REQUEST);
     explicit SipMessage(IN ::SipMessage* pSipMsg);
     explicit SipMessage(IN ::SipMessage* pSipMsg, IN IMS_BOOL bMessageClone);
-    virtual ~SipMessage();
+    ~SipMessage() override;
 
     SipMessage(IN const SipMessage&) = delete;
 

@@ -26,7 +26,7 @@ private:
     SipMessageHandler();
 
 public:
-    ~SipMessageHandler();
+    ~SipMessageHandler() override;
 
     SipMessageHandler(IN const SipMessageHandler&) = delete;
     SipMessageHandler& operator=(IN const SipMessageHandler&) = delete;

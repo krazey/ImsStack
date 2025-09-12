@@ -24,8 +24,8 @@
 class MockISipMessageBodyPart : public ISipMessageBodyPart
 {
 public:
-    inline MockISipMessageBodyPart() {}
-    inline virtual ~MockISipMessageBodyPart() {}
+    MockISipMessageBodyPart() = default;
+    ~MockISipMessageBodyPart() override = default;
 
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(ISipMessageBodyPart*, Clone, (), (const, override));

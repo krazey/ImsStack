@@ -81,7 +81,7 @@ public:
             m_nConfigValue(other.m_nConfigValue)
     {
     }
-    inline virtual ~SipProfile() {}
+    ~SipProfile() override = default;
 
 public:
     SipProfile& operator=(IN const SipProfile&) = delete;

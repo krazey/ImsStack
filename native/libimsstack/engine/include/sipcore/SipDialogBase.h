@@ -35,7 +35,7 @@ public:
             m_pDState(other.m_pDState)
     {
     }
-    inline virtual ~SipDialogBase() {}
+    ~SipDialogBase() override = default;
 
 public:
     inline SipDialogBase& operator=(IN const SipDialogBase& other)

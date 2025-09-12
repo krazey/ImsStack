@@ -37,7 +37,7 @@ public:
     SipTransactionState();
     explicit SipTransactionState(IN SipDialogEx* pDialogEx);
     SipTransactionState(IN const SipTransactionState& other);
-    virtual ~SipTransactionState();
+    ~SipTransactionState() override;
 
     SipTransactionState& operator=(IN const SipTransactionState&) = delete;
 

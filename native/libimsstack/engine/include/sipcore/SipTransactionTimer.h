@@ -22,7 +22,7 @@ class SipTransactionTimer : public ITimerListener
 {
 public:
     SipTransactionTimer(IN SipTimeoutData* pData, IN SipTimerCallback pfnTimerCallback);
-    virtual ~SipTransactionTimer();
+    ~SipTransactionTimer() override;
 
     SipTransactionTimer(IN const SipTransactionTimer&) = delete;
     SipTransactionTimer& operator=(IN const SipTransactionTimer&) = delete;

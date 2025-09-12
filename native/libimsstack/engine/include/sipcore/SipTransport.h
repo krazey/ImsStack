@@ -33,7 +33,7 @@ class SipTransport : public ImsSlot, public ISipSocketListener
 {
 public:
     SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType);
-    virtual ~SipTransport();
+    ~SipTransport() override;
 
     SipTransport(IN const SipTransport&) = delete;
     SipTransport& operator=(IN const SipTransport&) = delete;

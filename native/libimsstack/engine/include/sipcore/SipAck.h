@@ -24,7 +24,7 @@ class SipAck : public ITimerListener
 {
 public:
     SipAck(IN SipClientTransactionState* pCtState, IN IMS_SINT32 nAliveInterval);
-    virtual ~SipAck();
+    ~SipAck() override;
 
     SipAck(IN const SipAck&) = delete;
     SipAck& operator=(IN const SipAck&) = delete;

@@ -28,7 +28,7 @@ class SipClientTransmissionProxy : public EngineActivity, public ISipSocketListe
 {
 public:
     SipClientTransmissionProxy();
-    virtual ~SipClientTransmissionProxy();
+    ~SipClientTransmissionProxy() override;
 
     SipClientTransmissionProxy(IN const SipClientTransmissionProxy&) = delete;
     SipClientTransmissionProxy& operator=(IN const SipClientTransmissionProxy&) = delete;

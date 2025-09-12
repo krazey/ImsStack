@@ -24,7 +24,7 @@ class SipRtConfigHelper : public ISipRtConfigHelper
 {
 public:
     SipRtConfigHelper();
-    virtual ~SipRtConfigHelper();
+    ~SipRtConfigHelper() override;
 
     SipRtConfigHelper(IN const SipRtConfigHelper&) = delete;
     SipRtConfigHelper& operator=(IN const SipRtConfigHelper&) = delete;

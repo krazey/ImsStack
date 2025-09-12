@@ -86,8 +86,8 @@ public:
     class Base
     {
     public:
-        inline Base() {}
-        inline virtual ~Base() {}
+        Base() = default;
+        virtual ~Base() = default;
 
     public:
         inline virtual IMS_BOOL Equals(IN const Base& /*other*/) const { return IMS_TRUE; }
@@ -99,7 +99,7 @@ public:
     {
     public:
         LogMask();
-        virtual ~LogMask();
+        ~LogMask() override;
 
     public:
         enum
@@ -122,7 +122,7 @@ public:
     public:
         SocketOption();
         SocketOption(IN const SocketOption& other);
-        virtual ~SocketOption();
+        ~SocketOption() override;
 
     public:
         SocketOption& operator=(IN const SocketOption& other);
@@ -133,7 +133,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN const Base& other) const;
+        IMS_BOOL Equals(IN const Base& other) const override;
 
         /**
          * @brief Checks if this option is not dedicated to a specific IP or/and port.
@@ -165,7 +165,7 @@ public:
     public:
         IpQos();
         IpQos(IN const IpQos& other);
-        virtual ~IpQos();
+        ~IpQos() override;
 
     public:
         IpQos& operator=(IN const IpQos& other);
@@ -176,7 +176,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN const Base& other) const;
+        IMS_BOOL Equals(IN const Base& other) const override;
 
     public:
         /// M (SET) : 1 byte value (IPv4)
@@ -193,7 +193,7 @@ public:
     public:
         Header();
         Header(IN const Header& other);
-        virtual ~Header();
+        ~Header() override;
 
     public:
         Header& operator=(IN const Header& other);
@@ -204,7 +204,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN const Base& other) const;
+        IMS_BOOL Equals(IN const Base& other) const override;
 
     public:
         /// M (SET/REMOVE) : header name
@@ -221,7 +221,7 @@ public:
     public:
         IpSecSa();
         IpSecSa(IN const IpSecSa& other);
-        virtual ~IpSecSa();
+        ~IpSecSa() override;
 
     public:
         IpSecSa& operator=(IN const IpSecSa& other);
@@ -232,7 +232,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN const Base& other) const;
+        IMS_BOOL Equals(IN const Base& other) const override;
 
         /**
          * @brief Gets the port-c for P-CSCF.
@@ -306,7 +306,7 @@ public:
     public:
         TcpPortRange();
         TcpPortRange(IN const TcpPortRange& other);
-        virtual ~TcpPortRange();
+        ~TcpPortRange() override;
 
     public:
         TcpPortRange& operator=(IN const TcpPortRange& other);
@@ -317,7 +317,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN const Base& other) const;
+        IMS_BOOL Equals(IN const Base& other) const override;
 
         /**
          * @brief Gets the starting port number of the provisioned port range.
@@ -346,7 +346,7 @@ public:
     public:
         RegContactAddress();
         RegContactAddress(IN const RegContactAddress& other);
-        virtual ~RegContactAddress();
+        ~RegContactAddress() override;
 
     public:
         RegContactAddress& operator=(IN const RegContactAddress& other);
@@ -357,7 +357,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN const Base& other) const;
+        IMS_BOOL Equals(IN const Base& other) const override;
 
         /**
          * @brief Gets the call-id string which is used for IMS registration.

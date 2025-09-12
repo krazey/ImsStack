@@ -37,8 +37,8 @@ __IMS_TRACE_TAG_SIP_CORE__;
 class SipNetworkUtil : public ISipNetworkUtil
 {
 public:
-    SipNetworkUtil() {}
-    virtual ~SipNetworkUtil() {}
+    SipNetworkUtil() = default;
+    ~SipNetworkUtil() override = default;
 
     SIP_BOOL SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
             IN SipTransportParameter* pTransportParam, ISipUserData* pUserData) override;

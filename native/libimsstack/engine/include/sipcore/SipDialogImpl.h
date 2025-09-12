@@ -44,7 +44,7 @@ class SipDialogImpl : public ISipDialog
 {
 public:
     explicit SipDialogImpl(IN SipDialog* pDialog);
-    virtual ~SipDialogImpl();
+    ~SipDialogImpl() override;
 
     SipDialogImpl() = delete;
     SipDialogImpl(IN const SipDialogImpl&) = delete;

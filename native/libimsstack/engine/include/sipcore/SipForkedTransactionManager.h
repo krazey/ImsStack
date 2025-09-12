@@ -37,7 +37,7 @@ public:
             m_nStatusCode(other.m_nStatusCode)
     {
     }
-    inline virtual ~SipForkedTransactionManager() {}
+    ~SipForkedTransactionManager() override = default;
 
     SipForkedTransactionManager& operator=(IN const SipForkedTransactionManager&) = delete;
 

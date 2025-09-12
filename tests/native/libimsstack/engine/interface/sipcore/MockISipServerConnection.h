@@ -33,8 +33,8 @@ class SipProfile;
 class MockISipServerConnection : public ISipServerConnection
 {
 public:
-    inline MockISipServerConnection() {}
-    inline virtual ~MockISipServerConnection() {}
+    MockISipServerConnection() = default;
+    ~MockISipServerConnection() override = default;
 
     MOCK_METHOD(IMS_RESULT, InitResponse, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SetReasonPhrase, (IN const AString& strReasonPhrase), (override));

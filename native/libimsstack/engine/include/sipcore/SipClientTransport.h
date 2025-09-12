@@ -22,7 +22,7 @@ class SipClientTransport : public SipTransport
 {
 public:
     explicit SipClientTransport(IN IMS_SINT32 nSlotId);
-    virtual ~SipClientTransport();
+    ~SipClientTransport() override;
 
     SipClientTransport(IN const SipClientTransport&) = delete;
     SipClientTransport& operator=(IN const SipClientTransport&) = delete;

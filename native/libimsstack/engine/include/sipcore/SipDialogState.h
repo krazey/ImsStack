@@ -55,7 +55,7 @@ public:
 public:
     explicit SipDialogState(IN IMS_BOOL bIsCaller = IMS_TRUE);
     SipDialogState(IN const SipDialogState& other);
-    virtual ~SipDialogState();
+    ~SipDialogState() override;
 
     SipDialogState& operator=(IN const SipDialogState&) = delete;
 

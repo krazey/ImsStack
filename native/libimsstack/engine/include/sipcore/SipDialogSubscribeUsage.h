@@ -37,7 +37,7 @@ class SipDialogSubscribeUsage : public SipDialogUsage
 public:
     explicit SipDialogSubscribeUsage(IN SipDialogBase* pDialog);
     SipDialogSubscribeUsage(IN const SipDialogSubscribeUsage& other);
-    inline virtual ~SipDialogSubscribeUsage() {}
+    ~SipDialogSubscribeUsage() override = default;
 
     SipDialogSubscribeUsage() = delete;
     SipDialogSubscribeUsage& operator=(IN const SipDialogSubscribeUsage&) = delete;

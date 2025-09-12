@@ -36,7 +36,7 @@ class SipProfile;
 class ISipConnectionNotifier : public IConnection
 {
 protected:
-    virtual ~ISipConnectionNotifier() = default;
+    ~ISipConnectionNotifier() override = default;
 
 public:
     /**

@@ -34,7 +34,7 @@ public:
     {
     }
 
-    inline ~SipMessageInfo() {}
+    ~SipMessageInfo() = default;
 
     SipMessageInfo(IN const SipMessageInfo&) = delete;
     SipMessageInfo& operator=(IN const SipMessageInfo&) = delete;

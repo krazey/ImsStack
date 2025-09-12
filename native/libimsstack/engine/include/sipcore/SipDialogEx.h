@@ -31,7 +31,7 @@ public:
     SipDialogEx() = delete;
     explicit SipDialogEx(IN SipDialogState* pDState);
     SipDialogEx(IN const SipDialogEx& other);
-    virtual ~SipDialogEx();
+    ~SipDialogEx() override;
 
 public:
     SipDialogEx& operator=(IN const SipDialogEx& other);

@@ -24,7 +24,7 @@ class SipDatagramSocket : public SipSocket
 {
 public:
     explicit SipDatagramSocket(IN IMS_SINT32 nSlotId);
-    virtual ~SipDatagramSocket();
+    ~SipDatagramSocket() override;
 
 public:
     IMS_BOOL Create(IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0,
