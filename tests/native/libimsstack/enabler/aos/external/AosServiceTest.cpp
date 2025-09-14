@@ -1054,6 +1054,16 @@ TEST_F(AosServiceTest, NotifyEmergencyRegistrationStateChangedIfEmergencyAttache
     m_pAosService->NotifyEmergencyRegistrationStateChanged(0);
 }
 
+TEST_F(AosServiceTest, NotifySimStateChangedIfSimStateChanged)
+{
+    MockIAosServicePhoneListener objMockListener;
+    m_pAosService->AddListener(&objMockListener);
+
+    EXPECT_CALL(objMockListener, ServicePhone_SimStateChanged(_));
+
+    m_pAosService->NotifySimStateChanged(0);
+}
+
 TEST_F(AosServiceTest, NotifyRegistered)
 {
     const ImsList<AString> objFeatureTags;

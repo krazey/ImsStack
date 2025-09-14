@@ -516,6 +516,21 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyEmergencyRegistrationS
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifySimStateChanged)
+{
+    // GIVEN
+    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_SIM_STATE_CHANGED);
+    m_objParcel.writeInt32(10);
+    m_objParcel.setDataPosition(0);
+
+    EXPECT_CALL(m_objMockIAosService, NotifySimStateChanged(_));
+
+    // WHEN
+    m_pJniAosService->SendData(m_objParcel);
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyEmergencyCallbackModeChanged)
 {
     // GIVEN

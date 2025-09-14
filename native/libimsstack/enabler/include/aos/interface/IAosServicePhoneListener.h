@@ -22,6 +22,7 @@ enum class IsimState;
 enum class LocationInfo;
 enum class PhoneNumberState;
 enum class PreciseCallState;
+enum class SimState;
 
 class IAosServicePhoneListener
 {
@@ -51,7 +52,7 @@ public:
      * Called to notify the change of ISIM state.
      * Called by AosService (Java).
      *
-     * @param nState is type of IsimState.
+     * @param eState is type of IsimState.
      * @see enum class {@link #IsimState}
      */
     virtual void ServicePhone_IsimStateChanged(IN IsimState eState) = 0;
@@ -60,7 +61,7 @@ public:
      * Called to notify the change of location information.
      * Called by AosService (Java)
      *
-     * @param nState is type of LocationInfo.
+     * @param eState is type of LocationInfo.
      * @see enum class {@link #LocationInfo}
      */
     virtual void ServicePhone_LocationInfoChanged(IN LocationInfo eState) = 0;
@@ -86,7 +87,7 @@ public:
      * Called by AosService (Java)
      *
      * @param bIsRefresh {@code IMS_TRUE} if refresh action, {@code IMS_FALSE} if initial action.
-     * @param nState is type of PhoneNumberState.
+     * @param eState is type of PhoneNumberState.
      * @see enum class {@link #PhoneNumberState}
      */
     virtual void ServicePhone_PhoneNumberStateChanged(
@@ -120,7 +121,7 @@ public:
      * Called to notify the change of precise call state.
      * Called by AosService (Java).
      *
-     * @param nState is type of PreciseCallState.
+     * @param eState is type of PreciseCallState.
      * @see enum class {@link #PreciseCallState}
      */
     virtual void ServicePhone_PreciseCallStateChanged(IN PreciseCallState eState) = 0;
@@ -151,13 +152,22 @@ public:
     virtual void ServicePhone_AllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) = 0;
 
     /**
-     * Called to notify the change of emergency registration state
-     * Called by AosService (JAVA)
+     * Called to notify the change of emergency registration state.
+     * Called by AosService (JAVA).
      *
      * @param bEmergencyAttached {@code IMS_TRUE} if emergency state, {@code IMS_FALSE} if not
      * emergency attached.
      */
     virtual void ServicePhone_EmergencyRegistrationStateChanged(IN IMS_BOOL bEmergencyAttached) = 0;
+
+    /**
+     * Called to notify the change of SIM state.
+     * Called by AosService (JAVA).
+     *
+     * @param eState is type of SimState.
+     * @see enum class {@link #SimState}.
+     */
+    virtual void ServicePhone_SimStateChanged(IN SimState eState) = 0;
 };
 
 /**
@@ -212,6 +222,26 @@ enum class PreciseCallState
     DISCONNECTING = 8
 };
 
+/**
+ * SIM State. See {@code Sim#State}.
+ */
+enum class SimState
+{
+    INVALID = -1,
+    UNKNOWN = 0,
+    ABSENT = 1,
+    PIN_REQUIRED = 2,
+    PUK_REQUIRED = 3,
+    NETWORK_LOCKED = 4,
+    READY = 5,
+    NOT_READY = 6,
+    PERM_DISABLED = 7,
+    CARD_IO_ERROR = 8,
+    CARD_RESTRICTED = 9,
+    LOADED = 10,
+    PRESENT = 11
+};
+
 class AosServicePhoneListener : public IAosServicePhoneListener
 {
 public:
@@ -237,6 +267,7 @@ public:
             IN IMS_ULONG /*nNetworkTypesBitMask*/) override {};
     inline void ServicePhone_EmergencyRegistrationStateChanged(
             IN IMS_BOOL /*bEmergencyAttached*/) override {};
+    inline void ServicePhone_SimStateChanged(IN SimState /*eState*/) override {};
 };
 
 #endif  // INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_
