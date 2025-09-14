@@ -31,6 +31,7 @@ class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
 class ISsacTimerHandler;
 class SuppService;
+enum class PermanentSuppType;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;

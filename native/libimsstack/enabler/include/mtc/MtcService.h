@@ -24,7 +24,6 @@
 #include "IMtcService.h"
 #include "ImsService.h"
 #include "ImsTypeDef.h"
-#include "helper/MtcPermanentSupplementaryService.h"
 #include "helper/SrvccStateManager.h"
 #include "helper/SsacTimerHandler.h"
 #include <memory>
@@ -39,6 +38,7 @@ class IReference;
 class ISsacTimerHandler;
 class MtcAosEventHandler;
 class MtcNetworkWatcher;
+class MtcPermanentSupplementaryService;
 class MtcRoutingRejectHandler;
 
 class MtcService :

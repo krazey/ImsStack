@@ -21,11 +21,13 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
-#include "MtcDef.h"
 
+class SuppService;
+enum class OipType;
 struct CallReasonInfo;
 struct JniCallInfo;
 struct JniExternalCall;
+struct MediaInfo;
 
 class IJniMtcServiceThread : public IJniEnablerThread
 {

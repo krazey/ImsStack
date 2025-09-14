@@ -23,6 +23,9 @@
 #include "IJniMtcServiceThread.h"
 #include "ImsList.h"
 
+enum class OipType;
+struct MediaInfo;
+
 class MockIJniMtcServiceThread : public IJniMtcServiceThread
 {
 public:

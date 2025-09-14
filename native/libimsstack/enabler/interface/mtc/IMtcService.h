@@ -18,8 +18,8 @@
 #define INTERFACE_MTC_SERVICE_H_
 
 #include "INativeEnabler.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
 class AString;
 class ICoreService;
@@ -29,6 +29,8 @@ class IMtcAosStateListener;
 class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
 class ISsacTimerHandler;
+class SuppService;
+enum class PermanentSuppType;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
