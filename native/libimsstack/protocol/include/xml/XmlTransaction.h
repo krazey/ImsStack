@@ -27,7 +27,7 @@ class XmlTransaction : public IXmlTransaction
 {
 public:
     explicit XmlTransaction(IN XmlApp* pXmlApp);
-    virtual ~XmlTransaction();
+    ~XmlTransaction() override;
 
     XmlTransaction(IN const XmlTransaction&) = delete;
     XmlTransaction& operator=(IN const XmlTransaction&) = delete;

@@ -22,7 +22,7 @@ class CharacterDataImpl : public ICharacterData
 {
 public:
     CharacterDataImpl();
-    virtual ~CharacterDataImpl();
+    ~CharacterDataImpl() override;
 
     CharacterDataImpl(IN const CharacterDataImpl&) = delete;
     CharacterDataImpl& operator=(IN const CharacterDataImpl&) = delete;

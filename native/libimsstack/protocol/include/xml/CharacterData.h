@@ -23,7 +23,7 @@ class CharacterData : public Node
 public:
     CharacterData();
     explicit CharacterData(IN xmlNodePtr pstNode);
-    virtual ~CharacterData();
+    ~CharacterData() override;
 
     CharacterData(IN const CharacterData&) = delete;
     CharacterData& operator=(IN const CharacterData&) = delete;

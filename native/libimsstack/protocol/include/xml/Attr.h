@@ -24,7 +24,7 @@ class Attr : public Node
 {
 public:
     Attr(IN xmlAttrPtr pstAttr, IN IElement* piOwnerElement);
-    virtual ~Attr();
+    ~Attr() override;
 
     Attr(IN const Attr&) = delete;
     Attr& operator=(IN const Attr&) = delete;

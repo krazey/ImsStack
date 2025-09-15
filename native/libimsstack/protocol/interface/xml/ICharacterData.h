@@ -32,7 +32,7 @@
 class ICharacterData : public INode
 {
 protected:
-    virtual ~ICharacterData() = default;
+    ~ICharacterData() override = default;
 
 public:
     /**

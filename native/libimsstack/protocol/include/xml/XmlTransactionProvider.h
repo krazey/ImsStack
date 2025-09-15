@@ -26,7 +26,7 @@ class XmlTransactionProvider final : public ImsActivityEx, public IXmlTransactio
 {
 public:
     XmlTransactionProvider();
-    virtual ~XmlTransactionProvider();
+    ~XmlTransactionProvider() override;
 
     XmlTransactionProvider(IN const XmlTransactionProvider&) = delete;
     XmlTransactionProvider& operator=(IN const XmlTransactionProvider&) = delete;

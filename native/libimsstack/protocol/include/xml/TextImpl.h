@@ -27,7 +27,7 @@ class TextImpl : public IText
 public:
     TextImpl();
     explicit TextImpl(IN xmlNodePtr pstNode);
-    virtual ~TextImpl();
+    ~TextImpl() override;
 
     TextImpl(IN const TextImpl&) = delete;
     TextImpl& operator=(IN const TextImpl&) = delete;

@@ -32,7 +32,7 @@ public:
     explicit Node(IN xmlNodePtr pstNode);
     explicit Node(IN xmlDocPtr pstDoc);
     explicit Node(IN xmlAttrPtr pstAttr);
-    virtual ~Node();
+    ~Node() override;
 
     Node(IN const Node&) = delete;
     Node& operator=(IN const Node&) = delete;

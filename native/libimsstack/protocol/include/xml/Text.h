@@ -25,7 +25,7 @@ class Text : public CharacterData
 public:
     Text();
     explicit Text(IN xmlNodePtr pstNode);
-    virtual ~Text();
+    ~Text() override;
 
     Text(IN const Text&) = delete;
     Text& operator=(IN const Text&) = delete;

@@ -29,7 +29,7 @@ class INodeList;
 class IElement : public INode
 {
 protected:
-    virtual ~IElement() = default;
+    ~IElement() override = default;
 
 public:
     /**

@@ -23,7 +23,7 @@ class NamedNodeMap : public INamedNodeMap
 {
 public:
     NamedNodeMap();
-    virtual ~NamedNodeMap();
+    ~NamedNodeMap() override;
 
     NamedNodeMap(IN const NamedNodeMap&) = delete;
     NamedNodeMap& operator=(IN const NamedNodeMap&) = delete;

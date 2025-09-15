@@ -28,7 +28,7 @@ public:
             DocumentBuilder()
     {
     }
-    inline virtual ~DomDocumentBuilder() {}
+    ~DomDocumentBuilder() override = default;
 
     DomDocumentBuilder(IN const DomDocumentBuilder&) = delete;
     DomDocumentBuilder& operator=(IN const DomDocumentBuilder&) = delete;

@@ -30,7 +30,7 @@ private:
                 m_strUri(strUri)
         {
         }
-        inline ~XmlPrefix() {}
+        ~XmlPrefix() = default;
         XmlPrefix(IN const XmlPrefix&) = delete;
         XmlPrefix& operator=(IN const XmlPrefix&) = delete;
 
@@ -51,7 +51,7 @@ private:
                 m_strPrefix(strPrefix)
         {
         }
-        inline ~XmlElement() {}
+        ~XmlElement() = default;
         XmlElement(IN const XmlElement&) = delete;
         XmlElement& operator=(IN const XmlElement&) = delete;
 
@@ -66,7 +66,7 @@ private:
 
 public:
     XmlStreamWriter();
-    virtual ~XmlStreamWriter();
+    ~XmlStreamWriter() override;
 
     XmlStreamWriter(IN const XmlStreamWriter&) = delete;
     XmlStreamWriter& operator=(IN const XmlStreamWriter&) = delete;

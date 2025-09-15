@@ -27,7 +27,7 @@ class DomDocumentBuilderFactory : public DocumentBuilderFactory
 {
 private:
     DomDocumentBuilderFactory();
-    virtual ~DomDocumentBuilderFactory();
+    ~DomDocumentBuilderFactory() override;
 
     DomDocumentBuilderFactory(IN const DomDocumentBuilderFactory&) = delete;
     DomDocumentBuilderFactory& operator=(IN const DomDocumentBuilderFactory&) = delete;

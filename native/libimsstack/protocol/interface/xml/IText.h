@@ -27,7 +27,7 @@
 class IText : public ICharacterData
 {
 protected:
-    virtual ~IText() = default;
+    ~IText() override = default;
 
 public:
     /**

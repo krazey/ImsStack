@@ -28,7 +28,7 @@ class IElement;
 class IAttr : public INode
 {
 protected:
-    virtual ~IAttr() = default;
+    ~IAttr() override = default;
 
 public:
     /**

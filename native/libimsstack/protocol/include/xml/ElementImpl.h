@@ -26,7 +26,7 @@ class ElementImpl : public IElement
 {
 public:
     explicit ElementImpl(IN xmlNodePtr pstNode);
-    virtual ~ElementImpl();
+    ~ElementImpl() override;
 
     ElementImpl(IN const ElementImpl&) = delete;
     ElementImpl& operator=(IN const ElementImpl&) = delete;

@@ -25,7 +25,7 @@ public:
             m_strRawXml(AString::ConstNull())
     {
     }
-    inline virtual ~XmlRequest() {}
+    ~XmlRequest() override = default;
 
     XmlRequest(IN const XmlRequest&) = delete;
     XmlRequest& operator=(IN const XmlRequest&) = delete;

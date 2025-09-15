@@ -27,7 +27,7 @@ class AttrImpl : public IAttr
 {
 public:
     AttrImpl(IN xmlAttrPtr pstAttr, IN IElement* piOwnerElement);
-    virtual ~AttrImpl();
+    ~AttrImpl() override;
 
     AttrImpl(IN const AttrImpl&) = delete;
     AttrImpl& operator=(IN const AttrImpl&) = delete;

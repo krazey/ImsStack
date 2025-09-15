@@ -26,7 +26,7 @@ class DocumentImpl : public IDocument
 {
 public:
     DocumentImpl(IN xmlDocPtr pstDoc, IN xmlXPathContextPtr pstXpathContext);
-    virtual ~DocumentImpl();
+    ~DocumentImpl() override;
 
     DocumentImpl(IN const DocumentImpl&) = delete;
     DocumentImpl& operator=(IN const DocumentImpl&) = delete;

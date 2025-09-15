@@ -25,7 +25,7 @@ class Element : public Node
 {
 public:
     Element(IN xmlNodePtr pstNode, IN IElement* piElement);
-    virtual ~Element();
+    ~Element() override;
 
     Element(IN const Element&) = delete;
     Element& operator=(IN const Element&) = delete;

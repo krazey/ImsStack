@@ -26,7 +26,7 @@ class Document : public Node
 {
 public:
     Document(IN xmlDocPtr pstDoc, IN xmlXPathContextPtr pstXpathContext);
-    virtual ~Document();
+    ~Document() override;
 
     Document(IN const Document&) = delete;
     Document& operator=(IN const Document&) = delete;
