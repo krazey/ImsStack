@@ -69,7 +69,7 @@ public:
 public:
     SdpTimezone();
     SdpTimezone(IN const SdpTimezone& other);
-    virtual ~SdpTimezone();
+    ~SdpTimezone() override;
 
 public:
     SdpTimezone& operator=(IN const SdpTimezone& other);

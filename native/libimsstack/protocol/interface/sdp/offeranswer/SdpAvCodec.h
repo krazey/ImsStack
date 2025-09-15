@@ -23,7 +23,7 @@ class SdpAvCodec : public SdpMediaFormat
 public:
     SdpAvCodec();
     SdpAvCodec(IN const SdpAvCodec& other);
-    virtual ~SdpAvCodec();
+    ~SdpAvCodec() override;
 
 public:
     SdpAvCodec& operator=(IN const SdpAvCodec& other);

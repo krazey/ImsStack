@@ -23,7 +23,7 @@ class SdpUri : public SdpLine
 public:
     SdpUri();
     SdpUri(IN const SdpUri& other);
-    virtual ~SdpUri();
+    ~SdpUri() override;
 
 public:
     SdpUri& operator=(IN const SdpUri& other);

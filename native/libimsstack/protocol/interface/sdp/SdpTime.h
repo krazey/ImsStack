@@ -23,7 +23,7 @@ class SdpTime : public SdpLine
 public:
     SdpTime();
     SdpTime(IN const SdpTime& other);
-    virtual ~SdpTime();
+    ~SdpTime() override;
 
 public:
     SdpTime& operator=(IN const SdpTime& other);

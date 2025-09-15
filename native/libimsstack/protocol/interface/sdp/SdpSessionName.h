@@ -23,7 +23,7 @@ class SdpSessionName : public SdpLine
 public:
     SdpSessionName();
     SdpSessionName(IN const SdpSessionName& other);
-    virtual ~SdpSessionName();
+    ~SdpSessionName() override;
 
 public:
     SdpSessionName& operator=(IN const SdpSessionName& other);

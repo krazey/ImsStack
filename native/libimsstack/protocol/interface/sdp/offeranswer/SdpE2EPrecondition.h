@@ -23,7 +23,7 @@ class SdpE2EPrecondition : public SdpPrecondition
 public:
     explicit SdpE2EPrecondition(IN IMS_SINT32 nType = TYPE_QOS);
     SdpE2EPrecondition(IN const SdpE2EPrecondition& other);
-    virtual ~SdpE2EPrecondition();
+    ~SdpE2EPrecondition() override;
 
 public:
     SdpE2EPrecondition& operator=(IN const SdpE2EPrecondition& other);

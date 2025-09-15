@@ -23,7 +23,7 @@ class SdpConnection : public SdpLine
 public:
     SdpConnection();
     SdpConnection(IN const SdpConnection& other);
-    virtual ~SdpConnection();
+    ~SdpConnection() override;
 
 public:
     SdpConnection& operator=(IN const SdpConnection& other);

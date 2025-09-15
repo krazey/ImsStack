@@ -23,7 +23,7 @@ class SdpOrigin : public SdpLine
 public:
     SdpOrigin();
     SdpOrigin(IN const SdpOrigin& other);
-    virtual ~SdpOrigin();
+    ~SdpOrigin() override;
 
 public:
     SdpOrigin& operator=(IN const SdpOrigin& other);

@@ -23,7 +23,7 @@ class SdpSegmentedPrecondition : public SdpPrecondition
 public:
     explicit SdpSegmentedPrecondition(IN IMS_SINT32 nType = TYPE_QOS);
     SdpSegmentedPrecondition(IN const SdpSegmentedPrecondition& other);
-    virtual ~SdpSegmentedPrecondition();
+    ~SdpSegmentedPrecondition() override;
 
 public:
     SdpSegmentedPrecondition& operator=(IN const SdpSegmentedPrecondition& other);

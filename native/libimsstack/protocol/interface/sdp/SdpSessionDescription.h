@@ -32,7 +32,7 @@ class SdpSessionDescription : public SdpDescription
 public:
     SdpSessionDescription();
     SdpSessionDescription(IN const SdpSessionDescription& other);
-    virtual ~SdpSessionDescription();
+    ~SdpSessionDescription() override;
 
 public:
     SdpSessionDescription& operator=(IN const SdpSessionDescription& other);

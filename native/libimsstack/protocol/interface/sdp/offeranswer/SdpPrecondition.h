@@ -43,7 +43,7 @@ public:
                 m_nStrength(other.m_nStrength)
         {
         }
-        inline ~DetailInfo() {}
+        ~DetailInfo() = default;
 
     public:
         DetailInfo& operator=(IN const DetailInfo& other)

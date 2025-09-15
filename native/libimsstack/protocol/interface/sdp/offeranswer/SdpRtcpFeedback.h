@@ -26,7 +26,7 @@ public:
             IN const AString& strParamName = AString::ConstNull(),
             IN const AString& strParamValue = AString::ConstNull());
     SdpRtcpFeedback(IN const SdpRtcpFeedback& other);
-    virtual ~SdpRtcpFeedback();
+    ~SdpRtcpFeedback() override;
 
 public:
     SdpRtcpFeedback& operator=(IN const SdpRtcpFeedback& other);

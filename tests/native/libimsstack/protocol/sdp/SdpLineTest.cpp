@@ -27,13 +27,13 @@ public:
             SdpLine()
     {
     }
-    inline ~TestSdpLine() {}
+    ~TestSdpLine() override = default;
 };
 
 class SdpLineTest : public ::testing::Test
 {
 public:
-    inline SdpLineTest() {}
+    SdpLineTest() = default;
 
 protected:
     TestSdpLine m_objSdpLine;

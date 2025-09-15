@@ -23,7 +23,7 @@ class SdpAttribute : public SdpLine
 public:
     SdpAttribute();
     SdpAttribute(IN const SdpAttribute& other);
-    virtual ~SdpAttribute();
+    ~SdpAttribute() override;
 
 public:
     SdpAttribute& operator=(IN const SdpAttribute& other);

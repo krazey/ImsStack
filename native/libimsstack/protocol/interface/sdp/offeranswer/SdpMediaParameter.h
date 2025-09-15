@@ -29,7 +29,7 @@ class SdpMediaParameter : public SdpParameter
 public:
     explicit SdpMediaParameter(IN IMS_SINT32 nMid);
     SdpMediaParameter(IN const SdpMediaParameter& other);
-    virtual ~SdpMediaParameter();
+    ~SdpMediaParameter() override;
 
 public:
     SdpMediaParameter& operator=(IN const SdpMediaParameter& other);

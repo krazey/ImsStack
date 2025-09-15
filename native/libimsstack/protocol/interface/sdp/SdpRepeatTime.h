@@ -23,7 +23,7 @@ class SdpRepeatTime : public SdpLine
 public:
     SdpRepeatTime();
     SdpRepeatTime(IN const SdpRepeatTime& other);
-    virtual ~SdpRepeatTime();
+    ~SdpRepeatTime() override;
 
 public:
     SdpRepeatTime& operator=(IN const SdpRepeatTime& other);

@@ -24,7 +24,7 @@ class SdpSessionParameter : public SdpParameter
 public:
     SdpSessionParameter();
     SdpSessionParameter(IN const SdpSessionParameter& other);
-    virtual ~SdpSessionParameter();
+    ~SdpSessionParameter() override;
 
 public:
     SdpSessionParameter& operator=(IN const SdpSessionParameter& other);

@@ -23,7 +23,7 @@ class SdpEncryptionKey : public SdpLine
 public:
     SdpEncryptionKey();
     SdpEncryptionKey(IN const SdpEncryptionKey& other);
-    virtual ~SdpEncryptionKey();
+    ~SdpEncryptionKey() override;
 
 public:
     SdpEncryptionKey& operator=(IN const SdpEncryptionKey& other);

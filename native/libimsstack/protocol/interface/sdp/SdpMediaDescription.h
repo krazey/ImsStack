@@ -24,7 +24,7 @@ class SdpMediaDescription : public SdpDescription
 public:
     SdpMediaDescription();
     SdpMediaDescription(IN const SdpMediaDescription& other);
-    virtual ~SdpMediaDescription();
+    ~SdpMediaDescription() override;
 
 public:
     SdpMediaDescription& operator=(IN const SdpMediaDescription& other);

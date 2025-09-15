@@ -23,7 +23,7 @@ class SdpBandwidth : public SdpLine
 public:
     SdpBandwidth();
     SdpBandwidth(IN const SdpBandwidth& other);
-    virtual ~SdpBandwidth();
+    ~SdpBandwidth() override;
 
 public:
     SdpBandwidth& operator=(IN const SdpBandwidth& other);

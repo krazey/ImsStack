@@ -23,7 +23,7 @@ class SdpVersion : public SdpLine
 public:
     SdpVersion();
     SdpVersion(IN const SdpVersion& other);
-    virtual ~SdpVersion();
+    ~SdpVersion() override;
 
 public:
     SdpVersion& operator=(IN const SdpVersion& other);
