@@ -33,8 +33,6 @@ public:
     MOCK_METHOD(void, AddMediaSessionConfig,
             (IMS_SINT32 nSlotId, MediaSessionConfig* mediaSessionConfig), (override));
     MOCK_METHOD(void, DestroyListSessionConfig, (IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(
-            ImsList<MediaSessionConfig*>*, GetListSessionConfig, (IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(MediaSessionConfig*, FindMediaSessionConfig,
             (IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE eServiceType), (override));
     MOCK_METHOD(void, DestroySessionConfig, (const MediaSessionConfig* pMediaSessionConfig),

@@ -76,7 +76,7 @@ private:
     IMS_BOOL NegotiateAvc(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,
             IN IMS_UINT32 nLocalIndex, IN VideoProfile* pLocalProfile,
-            OUT VideoProfile* pNegotiatedProfile, OUT VideoProfile::Payload** pTempPayload,
+            OUT VideoProfile::Payload** pTempPayload,
             OUT VideoProfile::Payload** pMatchedPeerPayload);
     IMS_BOOL NegotiateHevc(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,

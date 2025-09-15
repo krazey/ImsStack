@@ -508,7 +508,6 @@ PUBLIC VIRTUAL void CodecEvsConfig::CreateDefaultEvsCodec()
     m_bVisibleChAwRecv = IMS_FALSE;
 
     m_nChAwRecv = DEFAULT_CH_AW_RECV;
-    m_bVisibleChAwRecv = IMS_FALSE;
 
     SetModeSetList(CodecAudioConfig::FULL_MODESET_AMRWB);
 

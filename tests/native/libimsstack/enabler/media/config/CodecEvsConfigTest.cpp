@@ -148,9 +148,8 @@ TEST_F(CodecEvsConfigTest, Create_NullEvsSubBundle)
     IMS_SINT32 nBrList = (1 << CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_24_4_KBPS);
     EXPECT_EQ(m_pCodecEvsConfig->GetBrList(), nBrList);
 
-    IMS_SINT32 nBwList = CodecEvsConfig::DEFAULT_BW_LIST;
-    nBwList = (1 << CodecEvsConfig::EVS_BANDWIDTH_NB) | (1 << CodecEvsConfig::EVS_BANDWIDTH_WB) |
-            (1 << CodecEvsConfig::EVS_BANDWIDTH_SWB);
+    IMS_SINT32 nBwList = (1 << CodecEvsConfig::EVS_BANDWIDTH_NB) |
+            (1 << CodecEvsConfig::EVS_BANDWIDTH_WB) | (1 << CodecEvsConfig::EVS_BANDWIDTH_SWB);
     EXPECT_EQ(m_pCodecEvsConfig->GetBwList(), nBwList);
 
     EXPECT_EQ(m_pCodecEvsConfig->GetCmr(), DEFAULT_CMR);

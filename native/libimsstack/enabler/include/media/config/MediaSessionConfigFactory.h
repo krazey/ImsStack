@@ -60,7 +60,7 @@ public:
      * @param nSlotId SIM Slot id - default : 0.
      * @return ImsList<MediaSessionConfig*>* A mediasession config list.
      */
-    virtual ImsList<MediaSessionConfig*>* GetListSessionConfig(IN IMS_SINT32 nSlotId);
+    ImsList<MediaSessionConfig*>* GetListSessionConfig(IN IMS_SINT32 nSlotId);
 
     /**
      * @brief Find a media session config.

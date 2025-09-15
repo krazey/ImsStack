@@ -71,7 +71,7 @@ void AudioSdpParser::ParsePayloads(
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
-        SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
+        const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
         ParsePayload(pSdpCodec, pProfile);
     }
 }

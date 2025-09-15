@@ -56,8 +56,7 @@ using ::testing::StrictMock;
 class MediaNegoHandlerTest : public ::testing::Test
 {
 protected:
-    const IMS_UINT32 kSlotId = 1;
-    const IMS_UINTP kInvalidNegoId = 0xFFFF;
+    static constexpr IMS_UINT32 kSlotId = 1;
 
     // Class under test and its dependencies
     MockICoreService m_objMockICoreService;
@@ -164,15 +163,15 @@ TEST_F(MediaNegoHandlerTest, CreateMediaNegoForkInstance)
 
 TEST_F(MediaNegoHandlerTest, CreateMediaNegoForkInvalidId)
 {
-    IMS_UINTP nNegoId = m_pHandler->CreateMediaNego(kInvalidNegoId);  // Try to fork from invalid ID
+    IMS_UINTP nNegoId = m_pHandler->CreateMediaNego(9999);  // Try to fork from invalid ID
     EXPECT_EQ(nNegoId, 0);
 }
 
 TEST_F(MediaNegoHandlerTest, FindMediaNegoNotFound)
 {
     // Create one to ensure map isn't empty, but search for a different one
-    SetupMockNegoForTest(m_pMockMediaNego1);
-    EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(kInvalidNegoId));
+    IMS_UINTP nValidNegoId = SetupMockNegoForTest(m_pMockMediaNego1);
+    EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(nValidNegoId + 1));
 }
 
 TEST_F(MediaNegoHandlerTest, DeleteMediaNegoFailed)
@@ -185,8 +184,8 @@ TEST_F(MediaNegoHandlerTest, DeleteMediaNegoFailed)
 
 TEST_F(MediaNegoHandlerTest, DeleteMediaNegoNotFound)
 {
-    SetupMockNegoForTest(m_pMockMediaNego1);
-    EXPECT_EQ(IMS_FALSE, m_pHandler->DeleteMediaNego(kInvalidNegoId));
+    IMS_UINTP nValidNegoId = SetupMockNegoForTest(m_pMockMediaNego1);
+    EXPECT_EQ(IMS_FALSE, m_pHandler->DeleteMediaNego(nValidNegoId + 1));
 }
 
 TEST_F(MediaNegoHandlerTest, DeleteMediaNegoUndefinedId)
@@ -235,7 +234,7 @@ TEST_F(MediaNegoHandlerTest, FormSdpSuccess)
 TEST_F(MediaNegoHandlerTest, FormSdpNegoNotFound)
 {
     EXPECT_EQ(IMS_FALSE,
-            m_pHandler->FormSdp(kInvalidNegoId, &m_objMockSession, MEDIA_TYPE_AUDIO,
+            m_pHandler->FormSdp(9999, &m_objMockSession, MEDIA_TYPE_AUDIO,
                     MEDIA_DIRECTION_SEND_RECEIVE, MEDIA_DIRECTION_INACTIVE,
                     MEDIA_DIRECTION_INACTIVE, IMS_FALSE));
 }
@@ -254,8 +253,8 @@ TEST_F(MediaNegoHandlerTest, GetSupportedMediaTypesFromSdpSuccess)
 
 TEST_F(MediaNegoHandlerTest, GetSupportedMediaTypesFromSdpNegoNotFound)
 {
-    EXPECT_EQ(MEDIA_TYPE_INVALID,
-            m_pHandler->GetSupportedMediaTypesFromSdp(kInvalidNegoId, &m_objMockSession));
+    EXPECT_EQ(
+            MEDIA_TYPE_INVALID, m_pHandler->GetSupportedMediaTypesFromSdp(9999, &m_objMockSession));
 }
 
 TEST_F(MediaNegoHandlerTest, NegotiateSdpSuccess)
@@ -312,8 +311,8 @@ TEST_F(MediaNegoHandlerTest, NegotiateSdpNegoNotFound)
     IMS_SINT32 nAudioDirOut, nVideoDirOut, nTextDirOut;
     MediaNego::MediaNegoResult eReasonOut;
     EXPECT_EQ(IMS_FALSE,
-            m_pHandler->NegotiateSdp(kInvalidNegoId, &m_objMockSession, &nAudioDirOut,
-                    &nVideoDirOut, &nTextDirOut, eReasonOut));
+            m_pHandler->NegotiateSdp(9999, &m_objMockSession, &nAudioDirOut, &nVideoDirOut,
+                    &nTextDirOut, eReasonOut));
     EXPECT_EQ(MediaNego::ERROR_INVALID_DESCRIPTOR, eReasonOut);  // Check specific error reason
     EXPECT_EQ(MEDIA_DIRECTION_INVALID,
             nAudioDirOut);  // Check output params are set on handler failure
@@ -351,7 +350,7 @@ TEST_F(MediaNegoHandlerTest, FinalizeSdpSuccess)
 TEST_F(MediaNegoHandlerTest, FinalizeSdpNegoNotFound)
 {
     // No EXPECT_CALL needed, just verify it doesn't crash and returns
-    m_pHandler->FinalizeSdp(kInvalidNegoId, &m_objMockSession);
+    m_pHandler->FinalizeSdp(9999, &m_objMockSession);
 }
 
 // == Getters for Negotiated Information (using Mock Injection) ==
@@ -366,7 +365,7 @@ TEST_F(MediaNegoHandlerTest, GetNegoStateSuccess)
 
 TEST_F(MediaNegoHandlerTest, GetNegoStateNegoNotFound)
 {
-    EXPECT_EQ(STATE_NOTUSED, m_pHandler->GetNegoState(kInvalidNegoId));
+    EXPECT_EQ(STATE_NOTUSED, m_pHandler->GetNegoState(9999));
 }
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedMediaTypeAudioVideo)
@@ -412,7 +411,7 @@ TEST_F(MediaNegoHandlerTest, GetNegotiatedMediaTypeNone)
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedMediaTypeNegoNotFound)
 {
-    EXPECT_EQ(MEDIA_TYPE_INVALID, m_pHandler->GetNegotiatedMediaType(kInvalidNegoId));
+    EXPECT_EQ(MEDIA_TYPE_INVALID, m_pHandler->GetNegotiatedMediaType(9999));
 }
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedQualityAudio)
@@ -454,7 +453,7 @@ TEST_F(MediaNegoHandlerTest, GetNegotiatedQualityInvalidType)
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedQualityNegoNotFound)
 {
-    EXPECT_EQ(0, m_pHandler->GetNegotiatedQuality(kInvalidNegoId, MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(0, m_pHandler->GetNegotiatedQuality(9999, MEDIA_TYPE_AUDIO));
 }
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedCodecBitrateAudio)
@@ -517,7 +516,7 @@ TEST_F(MediaNegoHandlerTest, GetNegotiatedCodecBitrateInvalidType)
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedCodecBitrateNegoNotFound)
 {
-    EXPECT_EQ(0, m_pHandler->GetNegotiatedCodecBitrate(kInvalidNegoId, MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(0, m_pHandler->GetNegotiatedCodecBitrate(9999, MEDIA_TYPE_AUDIO));
 }
 
 TEST_F(MediaNegoHandlerTest, GetRemotePortAudio)
@@ -579,7 +578,7 @@ TEST_F(MediaNegoHandlerTest, GetRemotePortInvalidType)
 
 TEST_F(MediaNegoHandlerTest, GetRemotePortNegoNotFound)
 {
-    EXPECT_EQ(MEDIA_PORT_INVALID, m_pHandler->GetRemotePort(kInvalidNegoId, MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(MEDIA_PORT_INVALID, m_pHandler->GetRemotePort(9999, MEDIA_TYPE_AUDIO));
 }
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedDirectionAudio)
@@ -619,8 +618,7 @@ TEST_F(MediaNegoHandlerTest, GetNegotiatedDirectionInvalidType)
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedDirectionNegoNotFound)
 {
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID,
-            m_pHandler->GetNegotiatedDirection(kInvalidNegoId, MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(MEDIA_DIRECTION_INVALID, m_pHandler->GetNegotiatedDirection(9999, MEDIA_TYPE_AUDIO));
 }
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedRemoteAddressAudio)
@@ -686,8 +684,7 @@ TEST_F(MediaNegoHandlerTest, GetNegotiatedRemoteAddressInvalidType)
 
 TEST_F(MediaNegoHandlerTest, GetNegotiatedRemoteAddressNegoNotFound)
 {
-    EXPECT_EQ(IpAddress::NONE,
-            m_pHandler->GetNegotiatedRemoteAddress(kInvalidNegoId, MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(IpAddress::NONE, m_pHandler->GetNegotiatedRemoteAddress(9999, MEDIA_TYPE_AUDIO));
 }
 
 // == Options ==
@@ -760,5 +757,5 @@ TEST_F(MediaNegoHandlerTest, SetRtpPortOneIsNull)
 
 TEST_F(MediaNegoHandlerTest, SetRtpPortNegoNotFound)
 {
-    EXPECT_EQ(IMS_FALSE, m_pHandler->SetRtpPort(kInvalidNegoId, MEDIA_TYPE_AUDIO, 5004));
+    EXPECT_EQ(IMS_FALSE, m_pHandler->SetRtpPort(9999, MEDIA_TYPE_AUDIO, 5004));
 }

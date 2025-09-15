@@ -262,8 +262,7 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
             {
                 pNegoPayload = new VideoProfile::Payload();
                 bVideoPayloadNegotiated = NegotiateAvc(pLocalPayload, pPeerPayload, pNegoPayload,
-                        nLocalIndex, pLocalProfile, pNegotiatedProfile, &pTempPayload,
-                        &pMatchedPeerPayload);
+                        nLocalIndex, pLocalProfile, &pTempPayload, &pMatchedPeerPayload);
             }
             else if (pPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265") &&
                     pLocalPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
@@ -342,11 +341,10 @@ PRIVATE
 IMS_BOOL VideoProfileNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPayload,
         IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,
         IN IMS_UINT32 nLocalIndex, IN VideoProfile* pLocalProfile,
-        OUT VideoProfile* pNegotiatedProfile, OUT VideoProfile::Payload** pTempPayload,
-        OUT VideoProfile::Payload** pMatchedPeerPayload)
+        OUT VideoProfile::Payload** pTempPayload, OUT VideoProfile::Payload** pMatchedPeerPayload)
 {
     if (pLocalPayload == IMS_NULL || pPeerPayload == IMS_NULL || pNegoPayload == IMS_NULL ||
-            pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+            pLocalProfile == IMS_NULL)
     {
         return IMS_FALSE;
     }

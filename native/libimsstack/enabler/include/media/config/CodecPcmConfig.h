@@ -46,7 +46,7 @@ public:
      * @brief Print debug string
      *
      */
-    virtual void ToDebugString() const;
+    virtual void ToDebugString() const override;
 };
 
 #endif
