@@ -18,8 +18,6 @@
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
 
-static const IMS_SINT32 NOT_PRESENT = -1;
-
 static MediaProfileFactory* g_pMediaProfileFactory = IMS_NULL;
 
 __IMS_TRACE_TAG_MEDIA__;
