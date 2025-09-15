@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
 #include "MediaProfileNegotiator.h"
+#include "MediaBaseProfile.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

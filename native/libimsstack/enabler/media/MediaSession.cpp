@@ -19,12 +19,18 @@
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MediaEnvironment.h"
+#include "MediaNego.h"
+#include "MediaNegoHandler.h"
 #include "MediaManager.h"
 #include "MediaNegoUtil.h"
 #include "MediaResourceManager.h"
 #include "ServiceTrace.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfigUtil.h"
+#include "audio/AudioController.h"
+#include "audio/AudioSession.h"
+#include "text/TextController.h"
+#include "video/VideoController.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

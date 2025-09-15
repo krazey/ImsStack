@@ -20,13 +20,15 @@
 #include <mutex>
 
 #include "IMediaSession.h"
-#include "MediaNego.h"
-#include "MediaNegoHandler.h"
-#include "audio/AudioController.h"
-#include "text/TextController.h"
-#include "video/VideoController.h"
+#include "IMediaSessionListener.h"
 
 class IService;
+class MediaNego;
+class MediaNegoHandler;
+class AudioController;
+class VideoController;
+class TextController;
+class AudioSession;
 
 class MediaSession : public IMediaSessionListener, public IMediaSession
 {

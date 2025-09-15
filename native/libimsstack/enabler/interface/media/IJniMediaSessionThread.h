@@ -18,7 +18,14 @@
 
 #include "BaseServiceThread.h"
 #include "IJniEnablerThread.h"
-#include "IJniMedia.h"
+
+class ImsMediaMsgAnbrNegotiationParam;
+class ImsMediaMsgConfigParam;
+class ImsMediaMsgDtmfParam;
+class ImsMediaMsgOpenConfigParam;
+class ImsMediaMsgParamBase;
+class ImsMediaMsgQosParam;
+class ImsMediaMsgSetMediaQualityParam;
 
 class IJniMediaSessionThread : public IJniEnablerThread
 {
