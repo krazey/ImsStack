@@ -29,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -51,7 +52,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Before
     public void setUp() throws Exception {
-
         setRegistrationBaseConfig();
 
         setUpBase(SLOT0);
@@ -435,11 +435,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .addConfig(config)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
                         .build())
-                .addConfig(config)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -472,11 +472,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .addConfig(config)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
                         .build())
-                .addConfig(config)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VIDEO,
@@ -508,11 +508,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         PersistableBundle config = new PersistableBundle();
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+                .addConfig(config)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
                         .build())
-                .addConfig(config)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -547,38 +547,47 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     public void testCarrierDefaultNr_Register_ResponseWith403() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith404() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith500() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith503() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith503WithRetryAfter() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith504() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_ResponseWith504WithRetryAfter() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_NoResponse() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_HandoverToLte() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Register_HandoverToWlan() throws Exception {
         // TODO
@@ -617,88 +626,297 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     public void testCarrierDefaultNr_Deregister_ByNotifyUnregistered() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Deregister_ByNotifyRejected() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultNr_Deregister_ByNotifyDeactivated() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_defaultConfig() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addContainRule("video")
+                                .addContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        RegistrationInfo info = mInfoBuilder
+                .addConfig(config)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+        mRegistrationHelper.triggerRegistration(this, info);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), info);
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_CapabilityVoice() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addNotContainRule("video")
+                                .addNotContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        RegistrationInfo info = mInfoBuilder
+                .addConfig(config)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, info);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), info);
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_CapabilityVoiceVideo() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addContainRule("video")
+                                .addNotContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        RegistrationInfo info = mInfoBuilder
+                .addConfig(config)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setEnableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build();
+        mRegistrationHelper.triggerRegistration(this, info);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), info);
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_CapabilityVoiceSms() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addNotContainRule("video")
+                                .addContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        RegistrationInfo info = mInfoBuilder
+                .addConfig(config)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setEnableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .build();
+        mRegistrationHelper.triggerRegistration(this, info);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), info);
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith423() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages(
+                "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        RegistrationInfo info = mInfoBuilder
+                .addConfig(config)
+                .setServiceState(new ServiceStateBuilder()
+                                .addNetworkRegistrationInfoForUmts()
+                                .addNetworkRegistrationInfoForIwlan()
+                                .build())
+                .build();
+        mRegistrationHelper.triggerRegistration(this, info);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), info);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().registered();
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith403() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith404() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith500() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith503() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith503WithRetryAfter() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith504() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_ResponseWith504WithRetryAfter() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_NoResponse() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_HandoverToLte() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Register_HandoverToNr() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Subscribe_defaultConfig() throws Exception {
-        // TODO
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | >SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        RegistrationInfo info = mInfoBuilder
+                .addConfig(config)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, info);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), info);
+
+        mRegistration.expect().registered();
+
+        mRegistration.expect(1000).nothing();
     }
+
     @Test
     public void testCarrierDefaultWlan_Deregister_ByNotifyUnregistered() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Deregister_ByNotifyRejected() throws Exception {
         // TODO
     }
+
     @Test
     public void testCarrierDefaultWlan_Deregister_ByNotifyDeactivated() throws Exception {
         // TODO
     }
+
 }
