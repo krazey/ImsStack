@@ -15,14 +15,22 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 
+#include "media/MockIMediaDescriptor.h"
+#include "offeranswer/SdpAvCodec.h"
 #include "video/VideoDef.h"
 #include "video/VideoSdpParser.h"
 #include "video/VideoProfile.h"
 
+using ::testing::ReturnRef;
+
 class VideoSdpParserTest : public VideoSdpParser, public ::testing::Test
 {
 protected:
+    std::unique_ptr<VideoProfile> m_pProfile;
+    MockIMediaDescriptor m_objMockMediaDescriptor;
+
     void SetUp() override {}
     void TearDown() override {}
 };
@@ -180,4 +188,26 @@ TEST_F(VideoSdpParserTest, testGetResolutionFromHevc)
     VIDEO_RESOLUTION result = GetResolutionFromSdp(VIDEO_CODEC_HEVC, imageAttr, frameSize, pFmtp);
 
     EXPECT_EQ(result, VIDEO_RESOLUTION_NOT_USED);
+}
+
+TEST_F(VideoSdpParserTest, ParsePayloads_InvalidPayloadType)
+{
+    VideoProfile profile;
+    ImsList<SdpMediaFormat*> lstMediaFormats;
+
+    // Mock a codec with a static payload type (8), which should be rejected.
+    // Dynamic payload types are in the range [96, 127].
+    SdpAvCodec* pStaticCodec = new SdpAvCodec();
+    pStaticCodec->SetParameters("8 PCMA/8000", "");
+    lstMediaFormats.Append(pStaticCodec);
+
+    const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
+    ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
+            .WillByDefault(ReturnRef(constListMediaFormats));
+
+    // Call the method under test
+    ParsePayloads(&m_objMockMediaDescriptor, &profile);
+
+    // Expect no payloads to be added because the payload type is not dynamic.
+    EXPECT_EQ(profile.GetPayloadList().GetSize(), 0);
 }

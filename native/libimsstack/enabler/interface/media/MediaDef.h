@@ -229,14 +229,12 @@ public:
 #define MEDIA_PORT_INVALID                       (-1)
 #define MEDIA_IS_CONTAINED_THIS_TYPE(eDst, eSrc) (((eDst) & (eSrc)) != 0)
 #define MEDIA_TYPE_WITHOUT_TEXT(eSrc)            ((eSrc) & (~MEDIA_TYPE_TEXT))
-
 #define MEDIA_DIRECTION_INVOLVED_RECV(eDir) \
     (((eDir) == MEDIA_DIRECTION_SEND_RECEIVE) || ((eDir) == MEDIA_DIRECTION_RECEIVE))
 #define MEDIA_DIRECTION_INVOLVED_SEND(eDir) \
     (((eDir) == MEDIA_DIRECTION_SEND_RECEIVE) || ((eDir) == MEDIA_DIRECTION_SEND))
 #define IS_VALID_MEDIA_DIRECTION(eDir) \
     (((eDir) >= MEDIA_DIRECTION_INACTIVE) && ((eDir) <= MEDIA_DIRECTION_SEND_RECEIVE))
-
 #define MEDIA_DIRECTION_IS_AUDIO_RUNNABLE(eDir)                                         \
     (((eDir) == MEDIA_DIRECTION_RECEIVE) || ((eDir) == MEDIA_DIRECTION_SEND_RECEIVE) || \
             ((eDir) == MEDIA_DIRECTION_SEND))
@@ -244,11 +242,10 @@ public:
     ((MEDIA_DIRECTION_RECEIVE <= (eDir)) && ((eDir) <= MEDIA_DIRECTION_SEND_RECEIVE))
 #define MEDIA_DIRECTION_IS_TEXT_RUNNABLE(eDir) \
     (((eDir) == MEDIA_DIRECTION_RECEIVE) || ((eDir) == MEDIA_DIRECTION_SEND_RECEIVE))
-
 #define MEDIA_DIRECTION_IS_AUDIO_HOLD(eDir) ((eDir) != MEDIA_DIRECTION_SEND_RECEIVE)
 #define MEDIA_DIRECTION_IS_VIDEO_HOLD(eDir) \
     ((eDir) == MEDIA_DIRECTION_INACTIVE || (eDir) == MEDIA_DIRECTION_INVALID)
 #define MEDIA_DIRECTION_IS_TEXT_HOLD(eDir) \
     (((eDir) == MEDIA_DIRECTION_SEND) || ((eDir) == MEDIA_DIRECTION_INACTIVE))
-
+#define IS_DYNAMIC_PAYLOAD_TYPE(pt) (((pt) >= 96) && ((pt) <= 127))
 #endif
