@@ -30,7 +30,7 @@ class SipStreamSocket : public SipSocket, public ITimerListener
 public:
     explicit SipStreamSocket(IN IMS_SINT32 nSlotId);
     SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket);
-    virtual ~SipStreamSocket();
+    ~SipStreamSocket() override;
 
     SipStreamSocket(IN const SipStreamSocket&) = delete;
     SipStreamSocket& operator=(IN const SipStreamSocket&) = delete;

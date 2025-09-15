@@ -36,7 +36,7 @@ class ISipGenericChallenge;
 class ISipClientConnection : public ISipConnection
 {
 protected:
-    virtual ~ISipClientConnection() = default;
+    ~ISipClientConnection() override = default;
 
 public:
     /**

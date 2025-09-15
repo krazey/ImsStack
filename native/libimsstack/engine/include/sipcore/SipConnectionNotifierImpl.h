@@ -30,7 +30,7 @@ class SipConnectionNotifierImpl :
 {
 public:
     explicit SipConnectionNotifierImpl(IN SipConnectionNotifier* pScn);
-    virtual ~SipConnectionNotifierImpl();
+    ~SipConnectionNotifierImpl() override;
 
     SipConnectionNotifierImpl(IN const SipConnectionNotifierImpl&) = delete;
     SipConnectionNotifierImpl& operator=(IN const SipConnectionNotifierImpl&) = delete;

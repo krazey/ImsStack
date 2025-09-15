@@ -40,7 +40,7 @@ public:
             SipDialogUsage(other)
     {
     }
-    inline virtual ~SipDialogInviteUsage() {}
+    ~SipDialogInviteUsage() override = default;
 
     SipDialogInviteUsage() = delete;
     SipDialogInviteUsage& operator=(IN const SipDialogInviteUsage&) = delete;

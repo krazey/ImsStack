@@ -26,7 +26,7 @@ class SipServerConnectionImpl : public ISipServerConnection, public IOnSipErrorL
 {
 public:
     explicit SipServerConnectionImpl(IN SipServerConnection* pSsc);
-    virtual ~SipServerConnectionImpl();
+    ~SipServerConnectionImpl() override;
 
     SipServerConnectionImpl() = delete;
     SipServerConnectionImpl(IN const SipServerConnectionImpl&) = delete;

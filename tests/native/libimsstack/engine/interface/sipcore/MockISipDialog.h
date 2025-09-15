@@ -28,8 +28,8 @@
 class MockISipDialog : public ISipDialog
 {
 public:
-    inline MockISipDialog() = default;
-    inline virtual ~MockISipDialog() = default;
+    MockISipDialog() = default;
+    ~MockISipDialog() override = default;
 
     MOCK_METHOD(void, Destroy, (), (override));
 

@@ -28,7 +28,7 @@ public:
     SipTxnKey(IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
             IN const AString& strViaBranch, IN IMS_UINT32 nCSeq);
     SipTxnKey(IN const SipTxnKey& other);
-    inline ~SipTxnKey() {}
+    ~SipTxnKey() = default;
 
 public:
     SipTxnKey& operator=(IN const SipTxnKey& other);

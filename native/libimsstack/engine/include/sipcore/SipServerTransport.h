@@ -23,7 +23,7 @@ class SipServerTransport : public SipTransport
 public:
     SipServerTransport(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd);
-    virtual ~SipServerTransport();
+    ~SipServerTransport() override;
 
     SipServerTransport(IN const SipServerTransport&) = delete;
     SipServerTransport& operator=(IN const SipServerTransport&) = delete;

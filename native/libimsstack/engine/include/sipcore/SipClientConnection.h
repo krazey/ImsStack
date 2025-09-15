@@ -42,7 +42,7 @@ public:
     SipClientConnection();
     explicit SipClientConnection(IN const AString& strTargetUri);
     explicit SipClientConnection(IN SipClientTransactionState* pCtState);
-    virtual ~SipClientConnection();
+    ~SipClientConnection() override;
 
     SipClientConnection(IN const SipClientConnection&) = delete;
     SipClientConnection& operator=(IN const SipClientConnection&) = delete;

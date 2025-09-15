@@ -26,7 +26,7 @@ class SipServerConnection : public SipConnection, public ITimerListener
 {
 public:
     explicit SipServerConnection(IN SipServerTransactionState* pStState);
-    virtual ~SipServerConnection();
+    ~SipServerConnection() override;
 
     SipServerConnection(IN const SipServerConnection&) = delete;
     SipServerConnection& operator=(IN const SipServerConnection&) = delete;

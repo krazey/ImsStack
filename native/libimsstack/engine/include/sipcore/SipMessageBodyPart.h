@@ -25,7 +25,7 @@ class SipMessageBodyPart : public ISipMessageBodyPart
 public:
     explicit SipMessageBodyPart(IN IMS_BOOL bSdpBody = IMS_FALSE);
     explicit SipMessageBodyPart(IN SipMsgBody* pMsgBody, IN IMS_BOOL bSdpBody = IMS_FALSE);
-    virtual ~SipMessageBodyPart();
+    ~SipMessageBodyPart() override;
 
     SipMessageBodyPart(IN const SipMessageBodyPart&) = delete;
 

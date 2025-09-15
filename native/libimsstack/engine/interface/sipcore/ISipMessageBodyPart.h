@@ -27,7 +27,7 @@
 class ISipMessageBodyPart : public ISipObject
 {
 protected:
-    virtual ~ISipMessageBodyPart() = default;
+    ~ISipMessageBodyPart() override = default;
 
 public:
     /**

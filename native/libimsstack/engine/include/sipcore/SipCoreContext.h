@@ -29,7 +29,7 @@ class SipCoreContext : public ISipCoreContext
 {
 private:
     SipCoreContext();
-    virtual ~SipCoreContext();
+    ~SipCoreContext() override;
 
 public:
     SipCoreContext(IN const SipCoreContext&) = delete;

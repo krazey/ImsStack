@@ -30,7 +30,7 @@ class SipClientConnectionImpl :
 {
 public:
     explicit SipClientConnectionImpl(IN SipClientConnection* pScc);
-    virtual ~SipClientConnectionImpl();
+    ~SipClientConnectionImpl() override;
 
     SipClientConnectionImpl() = delete;
     SipClientConnectionImpl(IN const SipClientConnectionImpl&) = delete;

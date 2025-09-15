@@ -28,7 +28,7 @@ class ISipKeepAliveHelperListener;
 class MockISipKeepAliveHelper : public ISipKeepAliveHelper
 {
 public:
-    inline virtual ~MockISipKeepAliveHelper() {}
+    ~MockISipKeepAliveHelper() override = default;
 
     // ISipObject
     MOCK_METHOD(void, Destroy, (), (override));

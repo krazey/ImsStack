@@ -24,7 +24,7 @@
 class ISipAckPackage : public ISipObject
 {
 protected:
-    virtual ~ISipAckPackage() = default;
+    ~ISipAckPackage() override = default;
 
 public:
     /**

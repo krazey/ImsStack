@@ -26,8 +26,8 @@ class ISipServerConnection;
 class SipRoutingRejectNotifier : public ISipRoutingRejectNotifier
 {
 public:
-    inline SipRoutingRejectNotifier() {}
-    inline virtual ~SipRoutingRejectNotifier() {}
+    SipRoutingRejectNotifier() = default;
+    ~SipRoutingRejectNotifier() override = default;
 
     SipRoutingRejectNotifier(IN const SipRoutingRejectNotifier&) = delete;
     SipRoutingRejectNotifier& operator=(IN const SipRoutingRejectNotifier&) = delete;

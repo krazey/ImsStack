@@ -26,7 +26,7 @@ public:
             m_piListener(IMS_NULL)
     {
     }
-    inline virtual ~SipPacketTracker() {}
+    ~SipPacketTracker() override = default;
 
     SipPacketTracker(IN const SipPacketTracker&) = delete;
     SipPacketTracker& operator=(IN const SipPacketTracker&) = delete;

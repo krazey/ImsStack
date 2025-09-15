@@ -33,7 +33,7 @@ class SipConnection :
 {
 protected:
     SipConnection();
-    virtual ~SipConnection();
+    ~SipConnection() override;
 
     SipConnection(IN const SipConnection&) = delete;
     SipConnection& operator=(IN const SipConnection&) = delete;

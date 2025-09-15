@@ -29,7 +29,7 @@
 class ISipMessage : public ISipObject
 {
 protected:
-    virtual ~ISipMessage() = default;
+    ~ISipMessage() override = default;
 
 public:
     /**

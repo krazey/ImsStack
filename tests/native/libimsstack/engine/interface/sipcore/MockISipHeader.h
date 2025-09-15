@@ -25,8 +25,8 @@
 class MockISipHeader : public ISipHeader
 {
 public:
-    inline MockISipHeader() {};
-    inline virtual ~MockISipHeader() {};
+    MockISipHeader() = default;
+    ~MockISipHeader() override = default;
 
     // ISipObject
     MOCK_METHOD(void, Destroy, (), (override));

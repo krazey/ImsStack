@@ -28,7 +28,7 @@ class ISipKeepAliveHelperListener;
 class ISipKeepAliveHelper : public ISipObject
 {
 protected:
-    virtual ~ISipKeepAliveHelper() = default;
+    ~ISipKeepAliveHelper() override = default;
 
 public:
     /**

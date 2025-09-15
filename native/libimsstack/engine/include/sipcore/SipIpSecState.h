@@ -90,7 +90,7 @@ private:
 
 public:
     SipIpSecState();
-    virtual ~SipIpSecState();
+    ~SipIpSecState() override;
 
     SipIpSecState(IN const SipIpSecState&) = delete;
     SipIpSecState& operator=(IN const SipIpSecState&) = delete;

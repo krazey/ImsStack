@@ -40,7 +40,7 @@ class SipTransportHelper :
 {
 public:
     SipTransportHelper();
-    virtual ~SipTransportHelper();
+    ~SipTransportHelper() override;
 
     SipTransportHelper(IN const SipTransportHelper&) = delete;
     SipTransportHelper& operator=(IN const SipTransportHelper&) = delete;

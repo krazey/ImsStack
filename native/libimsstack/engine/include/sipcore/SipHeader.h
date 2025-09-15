@@ -39,7 +39,7 @@ public:
     explicit SipHeader(IN IMS_SINT32 nType);
     explicit SipHeader(IN const AString& strName);
     explicit SipHeader(IN const SipHeaderBase* pSipHdr);
-    virtual ~SipHeader();
+    ~SipHeader() override;
 
     SipHeader(IN const SipHeader&) = delete;
     // To ignore an assignment operator of object

@@ -26,7 +26,7 @@ class SipServerTransactionState : public SipTransactionState, public ITimerListe
 public:
     SipServerTransactionState(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd);
-    virtual ~SipServerTransactionState();
+    ~SipServerTransactionState() override;
 
     SipServerTransactionState& operator=(IN const SipServerTransactionState&) = delete;
 
