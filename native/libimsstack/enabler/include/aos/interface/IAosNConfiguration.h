@@ -605,7 +605,8 @@ public:
      *        If the value is true, the UE updates ongoing reg retry timer.
      *        If the value is false, the UE follows ongoing reg retry timer.
      *
-     * @return IMS_BOOL Return whether to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not.
+     * @see {@code ims.update_ongoing_reg_retry_timer_on_ims_est_timer_expiry_bool}
      */
     virtual IMS_BOOL IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry() const = 0;
 
