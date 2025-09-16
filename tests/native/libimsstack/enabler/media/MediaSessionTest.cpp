@@ -268,7 +268,7 @@ TEST_F(MediaSessionTest, testFormSdpFailure)
             nNegoId, m_pIsession.get(), eType, nAudioDir, nVideoDir, nTextDir, bReoffer));
 }
 
-TEST_F(MediaSessionTest, testNegotiateSdpSuccess)
+TEST_F(MediaSessionTest, testNegotiateSdpSuccessAudioVideo)
 {
     IMS_UINTP nNegoId = NEGO_ID;
     IMS_SINT32 nAudioDir = MEDIA_DIRECTION_INACTIVE;
@@ -286,7 +286,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccess)
 
     // Expect GetNegotiatedMediaType to determine which sessions to open
     EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
-            .Times(2)
+            .Times(3)
             .WillRepeatedly(Return(eNegotiatedType));
 
     // Expect OpenMediaSessions to be triggered for Audio and Video
@@ -297,6 +297,41 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccess)
     // TextController methods should not be called if eNegotiatedType doesn't include TEXT
     EXPECT_CALL(*m_pMockTextController, UpdateLocalAddress(_)).Times(0);
     EXPECT_CALL(*m_pMockTextController, OpenSession()).Times(0);
+
+    EXPECT_TRUE(m_pSession->NegotiateSdp(
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
+}
+
+TEST_F(MediaSessionTest, testNegotiateSdpSuccessAudioText)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    IMS_SINT32 nAudioDir = MEDIA_DIRECTION_INACTIVE;
+    IMS_SINT32 nVideoDir = MEDIA_DIRECTION_INACTIVE;
+    IMS_SINT32 nTextDir = MEDIA_DIRECTION_INACTIVE;
+    MediaNego::MediaNegoResult errorReason = MediaNego::NO_ERROR;
+    MEDIA_CONTENT_TYPE eNegotiatedType = MEDIA_TYPE_AUDIOTEXT;
+
+    // Expect the negotiation call to the handler
+    EXPECT_CALL(*m_pMockMediaNegoHandler,
+            NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _,
+                    ::testing::An<MediaNego::MediaNegoResult&>()))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));  // Simulate successful negotiation
+
+    // Expect GetNegotiatedMediaType to determine which sessions to open
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
+            .Times(3)
+            .WillRepeatedly(Return(eNegotiatedType));
+
+    // Expect OpenMediaSessions to be triggered for Audio
+    EXPECT_CALL(*m_pMockAudioController, UpdateLocalAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockAudioController, OpenSession(nNegoId)).Times(1);
+    // VideoController methods should not be called if eNegotiatedType not included Video
+    EXPECT_CALL(*m_pMockVideoController, UpdateLocalAddress(_)).Times(0);
+    EXPECT_CALL(*m_pMockVideoController, OpenSession()).Times(0);
+    // TextController methods should be called if eNegotiatedType includes TEXT
+    EXPECT_CALL(*m_pMockTextController, UpdateLocalAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockTextController, OpenSession()).Times(1);
 
     EXPECT_TRUE(m_pSession->NegotiateSdp(
             nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
@@ -385,7 +420,7 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccessOpenTextOnly)
     EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(nNegoId))
             .WillRepeatedly(Return(m_pMediaNego));
     EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
-            .Times(2)
+            .Times(3)
             .WillRepeatedly(Return(eNegotiatedType));
 
     // Expect OpenMediaSessions for Text only
@@ -400,6 +435,70 @@ TEST_F(MediaSessionTest, testNegotiateSdpSuccessOpenTextOnly)
             nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
     // Verify direction was updated
     EXPECT_EQ(nTextDir, MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(MediaSessionTest, testNegotiateSdpDowngradeToAudioOnlyFromAudioVideo)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    IMS_SINT32 nAudioDir, nVideoDir, nTextDir;
+    MediaNego::MediaNegoResult errorReason;
+
+    // Simulate successful negotiation
+    EXPECT_CALL(*m_pMockMediaNegoHandler, NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _, _))
+            .WillOnce(Return(IMS_TRUE));
+
+    // After negotiation, only audio is active.
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
+            .WillRepeatedly(Return(MEDIA_TYPE_AUDIO));
+
+    // Expect OpenMediaSessions to be called for audio
+    EXPECT_CALL(*m_pMockAudioController, UpdateLocalAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockAudioController, OpenSession(nNegoId)).Times(1);
+
+    // Video was active, so it should be closed.
+    // IsSessionOpened() is called twice: once in NegotiateSdp (returns true)
+    // and once in the destructor (returns false, as it's now closed).
+    EXPECT_CALL(*m_pMockVideoController, IsSessionOpened())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pMockVideoController, CloseSession()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    ON_CALL(*m_pMockTextController, IsSessionOpened()).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pMockTextController, CloseSession()).Times(0);
+
+    EXPECT_TRUE(m_pSession->NegotiateSdp(
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
+}
+
+TEST_F(MediaSessionTest, testNegotiateSdpDowngradeToAudioOnlyFromAudioText)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    IMS_SINT32 nAudioDir, nVideoDir, nTextDir;
+    MediaNego::MediaNegoResult errorReason;
+
+    // Simulate successful negotiation
+    EXPECT_CALL(*m_pMockMediaNegoHandler, NegotiateSdp(nNegoId, m_pIsession.get(), _, _, _, _))
+            .WillOnce(Return(IMS_TRUE));
+
+    // After negotiation, only audio is active.
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId))
+            .WillRepeatedly(Return(MEDIA_TYPE_AUDIO));
+
+    // Expect OpenMediaSessions to be called for audio
+    EXPECT_CALL(*m_pMockAudioController, UpdateLocalAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockAudioController, OpenSession(nNegoId)).Times(1);
+
+    ON_CALL(*m_pMockVideoController, IsSessionOpened()).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pMockVideoController, CloseSession()).Times(0);
+
+    // Text was active, so it should be closed.
+    EXPECT_CALL(*m_pMockTextController, IsSessionOpened())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pMockTextController, CloseSession()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pSession->NegotiateSdp(
+            nNegoId, m_pIsession.get(), &nAudioDir, &nVideoDir, &nTextDir, errorReason));
 }
 
 // --- Getter Tests ---
