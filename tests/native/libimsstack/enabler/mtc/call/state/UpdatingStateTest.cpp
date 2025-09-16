@@ -638,9 +638,6 @@ TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredDoesNotRetryUpdateIfInvali
     pUpdatingInfo->SetRequestingType(UpdateType::NORMAL);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
-    pUpdatingInfo->SetRequestingType(UpdateType::CONF);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
-
     pUpdatingInfo->SetRequestingType(UpdateType::REFRESH);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 }

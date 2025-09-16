@@ -18,6 +18,7 @@
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
@@ -74,7 +75,8 @@ IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const ImsList<IMtcCal
         if (eState == IMtcCall::State::IDLE || eState == IMtcCall::State::OUTGOING ||
                 eState == IMtcCall::State::INCOMING || eState == IMtcCall::State::ALERTING)
         {
-            IMS_TRACE_I("IsCallSetupProcessing : Call in [%d] state exists", eState, 0, 0);
+            IMS_TRACE_I("IsCallSetupProcessing : Call in [%s] state exists",
+                    MtcCallStringUtils::ConvertCallState(eState), 0, 0);
             return IMS_TRUE;
         }
     }
@@ -91,7 +93,8 @@ IMS_BOOL ProcessingCallBlockRule::IsCallConverting(IN const ImsList<IMtcCall*>& 
         {
             const UpdateType eType =
                     lstCalls.GetAt(nIndex)->GetCallContext().GetUpdatingInfo().GetRequestingType();
-            IMS_TRACE_I("IsCallConverting : Converting call exists eType[%d]", eType, 0, 0);
+            IMS_TRACE_I("IsCallConverting : Converting call exists eType[%s]",
+                    MtcCallStringUtils::ConvertUpdateType(eType), 0, 0);
             if (eType == UpdateType::SESSION)
             {
                 return IMS_TRUE;

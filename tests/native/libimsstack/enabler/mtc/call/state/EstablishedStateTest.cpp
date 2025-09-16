@@ -451,8 +451,7 @@ TEST_F(EstablishedStateTest, OnIpcanChangedNotHandledIfConfigurationIsOff)
     pEstablishedState->OnIpcanChanged(IIpcan::CATEGORY_ANY);
 }
 
-TEST_F(EstablishedStateTest,
-        OnIpcanChangedDoesNotPushPendingOperationIfNoSessionRefreshingAndTimerForDelayingUpdateIsNotActive)
+TEST_F(EstablishedStateTest, OnIpcanChangedSendsUpdateIfNoNeedToPendAndConfigurationIsOn)
 {
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL))
@@ -466,7 +465,7 @@ TEST_F(EstablishedStateTest,
             .WillByDefault(ReturnRef(objPendingOperationHolder));
 
     EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(_)).Times(0);
-    EXPECT_CALL(objMockMtcSession, Update(_, _, _));
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::NORMAL, _, _));
     EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
             .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _));

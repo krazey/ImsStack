@@ -68,7 +68,6 @@ public:
                 {UpdateType::HOLD,                    "hold"                   },
                 {UpdateType::RESUME,                  "resume"                 },
                 {UpdateType::SESSION,                 "session"                },
-                {UpdateType::CONF,                    "conf"                   },
                 {UpdateType::REFRESH,                 "refresh"                },
                 {UpdateType::SRVCC_RECOVERED_CANCEL,  "srvcc recovered cancel" },
                 {UpdateType::SRVCC_RECOVERED_FAILURE, "srvcc recovered failure"},

@@ -85,9 +85,6 @@ TEST_F(MtcCallStringUtilsTest, ConvertUpdateType)
     eUpdateType = UpdateType::SESSION;
     EXPECT_STREQ(MtcCallStringUtils::ConvertUpdateType(eUpdateType), "session");
 
-    eUpdateType = UpdateType::CONF;
-    EXPECT_STREQ(MtcCallStringUtils::ConvertUpdateType(eUpdateType), "conf");
-
     eUpdateType = UpdateType::REFRESH;
     EXPECT_STREQ(MtcCallStringUtils::ConvertUpdateType(eUpdateType), "refresh");
 

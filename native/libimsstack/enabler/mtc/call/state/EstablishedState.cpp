@@ -473,7 +473,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
         return GetStateName();
     }
 
-    if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
+    if (HandleUpdate(UpdateType::NORMAL, m_objContext.GetSession()->GetCallType(),
                 m_objContext.GetMediaManager().GetMediaInfo()) == IMS_FAILURE)
     {
         return GetStateName();
