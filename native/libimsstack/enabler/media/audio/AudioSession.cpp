@@ -243,7 +243,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             pAudioConfig->getAccessNetwork(), 0);
 
     RtcpConfig objRtcpConfig;
-    objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));  // TODO_MEDIA
+    objRtcpConfig.setCanonicalName("Canonical_Name");
     objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
 
     if (pNegoProfile->GetBandwidthRs() == 0 && pNegoProfile->GetBandwidthRr() == 0)
