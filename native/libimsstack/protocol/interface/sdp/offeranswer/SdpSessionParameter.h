@@ -37,6 +37,11 @@ public:
     const AString& GetConnectionAddress() const override;
 
     /**
+     * @brief Returns the SDP message from the session-level parameter.
+     */
+    AString ToSdp() const override;
+
+    /**
      * @brief Negotiates the session-level parameters through the SDP offer/answer exchange.
      */
     IMS_SINT32 Compare(
@@ -81,11 +86,6 @@ public:
      * @brief Sets the connection line to the media-level parameter.
      */
     IMS_BOOL SetConnectionAddress(IN const AString& strAddress);
-
-    /**
-     * @brief Returns the SDP message from the session-level parameter.
-     */
-    AString ToSdp() const;
 
     /**
      * @brief Updates the properties from the specified session-level parameter.

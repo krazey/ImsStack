@@ -136,6 +136,52 @@ SdpParameter& SdpParameter::operator=(IN const SdpParameter& other)
     return (*this);
 }
 
+PUBLIC VIRTUAL AString SdpParameter::ToSdp() const
+{
+    AStringBuffer objSdp(256);
+
+    if (m_bDirectionPresent && IsDirectionAttributeRequired())
+    {
+        SdpAttribute objAttr;
+
+        objAttr.SetValue(
+                SdpAttribute::ConvertDirectionToAttribute(GetDirection()), AString::ConstNull());
+        objSdp.Append(objAttr.Encode());
+    }
+
+#ifdef __IMS_SETUP_CONNECTION__
+    if (m_abAttributeContains[ATTR_SETUP])
+    {
+        SdpAttribute objAttr;
+        AString strAttrValue(Sdp::STR_A_SETUP[m_nAttrSetup]);
+
+        objAttr.SetValue(SdpAttribute::SETUP, strAttrValue);
+        objSdp.Append(objAttr.Encode());
+    }
+
+    if (m_abAttributeContains[ATTR_CONNECTION])
+    {
+        SdpAttribute objAttr;
+        AString strAttrValue(Sdp::STR_A_CONNECTION[m_nAttrConnection]);
+
+        objAttr.SetValue(SdpAttribute::CONNECTION, strAttrValue);
+        objSdp.Append(objAttr.Encode());
+    }
+#endif  // __IMS_SETUP_CONNECTION__
+
+    if (m_abLineContains[Sdp::TYPE_A])
+    {
+        for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize(); ++i)
+        {
+            const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
+
+            objSdp.Append(objAttribute.Encode());
+        }
+    }
+
+    return static_cast<const AStringBuffer&>(objSdp).GetString();
+}
+
 PUBLIC
 IMS_BOOL SdpParameter::AddAttribute(IN const SdpAttribute& objAttribute)
 {
@@ -682,53 +728,6 @@ void SdpParameter::SetAttributeSetup(IN IMS_SINT32 nAttrSetup)
     {
         m_abAttributeContains[ATTR_SETUP] = IMS_TRUE;
     }
-}
-
-PUBLIC
-AString SdpParameter::ToSdp() const
-{
-    AStringBuffer objSdp(256);
-
-    if (m_bDirectionPresent && IsDirectionAttributeRequired())
-    {
-        SdpAttribute objAttr;
-
-        objAttr.SetValue(
-                SdpAttribute::ConvertDirectionToAttribute(GetDirection()), AString::ConstNull());
-        objSdp.Append(objAttr.Encode());
-    }
-
-#ifdef __IMS_SETUP_CONNECTION__
-    if (m_abAttributeContains[ATTR_SETUP])
-    {
-        SdpAttribute objAttr;
-        AString strAttrValue(Sdp::STR_A_SETUP[m_nAttrSetup]);
-
-        objAttr.SetValue(SdpAttribute::SETUP, strAttrValue);
-        objSdp.Append(objAttr.Encode());
-    }
-
-    if (m_abAttributeContains[ATTR_CONNECTION])
-    {
-        SdpAttribute objAttr;
-        AString strAttrValue(Sdp::STR_A_CONNECTION[m_nAttrConnection]);
-
-        objAttr.SetValue(SdpAttribute::CONNECTION, strAttrValue);
-        objSdp.Append(objAttr.Encode());
-    }
-#endif  // __IMS_SETUP_CONNECTION__
-
-    if (m_abLineContains[Sdp::TYPE_A])
-    {
-        for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize(); ++i)
-        {
-            const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
-
-            objSdp.Append(objAttribute.Encode());
-        }
-    }
-
-    return static_cast<const AStringBuffer&>(objSdp).GetString();
 }
 
 PUBLIC

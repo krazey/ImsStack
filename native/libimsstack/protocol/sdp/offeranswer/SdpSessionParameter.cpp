@@ -121,6 +121,80 @@ PUBLIC VIRTUAL const AString& SdpSessionParameter::GetConnectionAddress() const
     return m_pConnection->GetAddress();
 }
 
+PUBLIC VIRTUAL AString SdpSessionParameter::ToSdp() const
+{
+    // SDP line order: v, o, s, i, u, e, p, c, b, t, r, z, k, a, m
+    AStringBuffer objSdp(256);
+
+    if (m_abLineContains[Sdp::TYPE_V])
+    {
+        objSdp.Append(m_objVersion.Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_O])
+    {
+        objSdp.Append(m_objOrigin.Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_S])
+    {
+        objSdp.Append(m_objSessionName.Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_I])
+    {
+        objSdp.Append(GetInformation()->Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_U])
+    {
+        objSdp.Append(m_pUri->Encode());
+    }
+
+    // Skip 'e' & 'p'
+
+    if (m_abLineContains[Sdp::TYPE_C])
+    {
+        objSdp.Append(m_pConnection->Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_B])
+    {
+        const ImsList<SdpBandwidth>& objBLines = GetBandwidths();
+
+        for (IMS_UINT32 i = 0; i < objBLines.GetSize(); ++i)
+        {
+            const SdpBandwidth& objBandwidth = objBLines.GetAt(i);
+
+            objSdp.Append(objBandwidth.Encode());
+        }
+    }
+
+    if (m_abLineContains[Sdp::TYPE_T])
+    {
+        for (IMS_UINT32 i = 0; i < m_objTimeDescriptions.GetSize(); ++i)
+        {
+            const SdpTimeDescription& objTimeDescription = m_objTimeDescriptions.GetAt(i);
+
+            objSdp.Append(objTimeDescription.Encode());
+        }
+    }
+
+    if (m_abLineContains[Sdp::TYPE_Z])
+    {
+        objSdp.Append(m_pTimezone->Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_K])
+    {
+        objSdp.Append(GetEncryptionKey()->Encode());
+    }
+
+    objSdp.Append(SdpParameter::ToSdp());
+
+    return static_cast<const AStringBuffer&>(objSdp).GetString();
+}
+
 PUBLIC
 IMS_SINT32 SdpSessionParameter::Compare(
         IN const SdpSessionParameter& objPeerParam, OUT SdpSessionParameter& objProposalParam)
@@ -250,81 +324,6 @@ IMS_BOOL SdpSessionParameter::SetConnectionAddress(IN const AString& strAddress)
     {
         return m_pConnection->SetValue(Sdp::ADDR_TYPE_IP4, objIpAddr.ToString());
     }
-}
-
-PUBLIC
-AString SdpSessionParameter::ToSdp() const
-{
-    // SDP line order: v, o, s, i, u, e, p, c, b, t, r, z, k, a, m
-    AStringBuffer objSdp(256);
-
-    if (m_abLineContains[Sdp::TYPE_V])
-    {
-        objSdp.Append(m_objVersion.Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_O])
-    {
-        objSdp.Append(m_objOrigin.Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_S])
-    {
-        objSdp.Append(m_objSessionName.Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_I])
-    {
-        objSdp.Append(GetInformation()->Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_U])
-    {
-        objSdp.Append(m_pUri->Encode());
-    }
-
-    // Skip 'e' & 'p'
-
-    if (m_abLineContains[Sdp::TYPE_C])
-    {
-        objSdp.Append(m_pConnection->Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_B])
-    {
-        const ImsList<SdpBandwidth>& objBLines = GetBandwidths();
-
-        for (IMS_UINT32 i = 0; i < objBLines.GetSize(); ++i)
-        {
-            const SdpBandwidth& objBandwidth = objBLines.GetAt(i);
-
-            objSdp.Append(objBandwidth.Encode());
-        }
-    }
-
-    if (m_abLineContains[Sdp::TYPE_T])
-    {
-        for (IMS_UINT32 i = 0; i < m_objTimeDescriptions.GetSize(); ++i)
-        {
-            const SdpTimeDescription& objTimeDescription = m_objTimeDescriptions.GetAt(i);
-
-            objSdp.Append(objTimeDescription.Encode());
-        }
-    }
-
-    if (m_abLineContains[Sdp::TYPE_Z])
-    {
-        objSdp.Append(m_pTimezone->Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_K])
-    {
-        objSdp.Append(GetEncryptionKey()->Encode());
-    }
-
-    objSdp.Append(SdpParameter::ToSdp());
-
-    return static_cast<const AStringBuffer&>(objSdp).GetString();
 }
 
 PUBLIC

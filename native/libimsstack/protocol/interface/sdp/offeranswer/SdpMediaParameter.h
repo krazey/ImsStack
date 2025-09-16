@@ -43,6 +43,11 @@ public:
     const AString& GetConnectionAddress() const override;
 
     /**
+     * @brief Returns the SDP message from the media-level parameter.
+     */
+    AString ToSdp() const override;
+
+    /**
      * @brief Negotiates the media-level parameters through the SDP offer/answer exchange.
      */
     IMS_SINT32 Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIsOffer,
@@ -144,11 +149,6 @@ public:
      * @brief Sets mid if it's changed.
      */
     void SetMid(IN IMS_SINT32 nMid);
-
-    /**
-     * @brief Returns the SDP message from the media-level parameter.
-     */
-    AString ToSdp() const;
 
     /**
      * @brief Updates the properties from the specified media-level parameter.

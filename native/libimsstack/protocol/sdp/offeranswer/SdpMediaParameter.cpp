@@ -132,6 +132,140 @@ PUBLIC VIRTUAL const AString& SdpMediaParameter::GetConnectionAddress() const
     return objConnection.GetAddress();
 }
 
+PUBLIC VIRTUAL AString SdpMediaParameter::ToSdp() const
+{
+    // SDP order: m, i, c, b, k, *(a)
+    AStringBuffer objSdp(512);
+
+    objSdp.Append(m_objMedia.Encode());
+
+    if (m_objMedia.GetPort() == 0)
+    {
+        // If the media type or codec does not support,
+        // we don't need to set the other lines (b, a, ...).
+        // So, if the m-line is not supported by the endpoint, m-line only will be set.
+
+        // BRUCE :: because of 'file-transfer-id', all SDP will be formed.
+        // return strSDP;
+    }
+
+    if (m_abLineContains[Sdp::TYPE_I])
+    {
+        objSdp.Append(GetInformation()->Encode());
+    }
+
+    if (m_abLineContains[Sdp::TYPE_C])
+    {
+        for (IMS_UINT32 i = 0; i < m_objConnections.GetSize(); ++i)
+        {
+            const SdpConnection& objConnection = m_objConnections.GetAt(i);
+
+            objSdp.Append(objConnection.Encode());
+        }
+    }
+
+    if (m_abLineContains[Sdp::TYPE_B])
+    {
+        const ImsList<SdpBandwidth>& objBLines = GetBandwidths();
+
+        for (IMS_UINT32 i = 0; i < objBLines.GetSize(); ++i)
+        {
+            const SdpBandwidth& objBandwidth = objBLines.GetAt(i);
+
+            objSdp.Append(objBandwidth.Encode());
+        }
+    }
+
+    if (m_abLineContains[Sdp::TYPE_K])
+    {
+        objSdp.Append(GetEncryptionKey()->Encode());
+    }
+
+    // Attribute: rtpmap & fmtp if present
+    for (IMS_UINT32 i = 0; i < m_objMediaFormats.GetSize(); ++i)
+    {
+        const SdpMediaFormat* pMediaFormat = m_objMediaFormats.GetAt(i);
+
+        if (pMediaFormat->HasAttribute())
+        {
+            objSdp.Append(pMediaFormat->ToSdp());
+        }
+    }
+
+    // Extra parameters : rtcp-fb (wildcard), framesize (non-standard)
+    for (IMS_UINT32 i = 0; i < m_objMediaFormats.GetSize(); ++i)
+    {
+        const SdpMediaFormat* pMediaFormat = m_objMediaFormats.GetAt(i);
+
+        if (pMediaFormat->HasAttribute())
+        {
+            const ImsList<SdpMediaFormatParameter*>& objExtraParameters =
+                    pMediaFormat->GetExtraParameters();
+
+            for (IMS_UINT32 j = 0; j < objExtraParameters.GetSize(); ++j)
+            {
+                const SdpMediaFormatParameter* pParameter = objExtraParameters.GetAt(j);
+
+                if (pParameter == IMS_NULL)
+                {
+                    continue;
+                }
+
+                IMS_SINT32 nPayloadType = pParameter->GetPayloadTypeNumber();
+
+                if ((nPayloadType == SdpMediaFormatParameter::PT_WILDCARD) ||
+                        (nPayloadType == SdpMediaFormatParameter::PT_NOT_SPECIFIED))
+                {
+                    objSdp.Append(pParameter->ToSdp());
+                }
+            }
+            // Wildcard attribute will be included all the media format.
+            // so, just add wildcard attribute one time.
+            break;
+        }
+    }
+
+    if (m_abAttributeContains[ATTR_MID])
+    {
+        SdpAttribute objAttr;
+
+        objAttr.SetValue(SdpAttribute::MID, m_strAttrMid);
+        objSdp.Append(objAttr.Encode());
+    }
+
+#if defined(__IMS_SDP_PRECONDITION__)
+    {
+        if (m_abAttributeContains[ATTR_QOS_CURR])
+        {
+            if (m_pCurrentStatus != IMS_NULL)
+            {
+                objSdp.Append(m_pCurrentStatus->ToSdp(SdpAttribute::CURR));
+            }
+        }
+
+        if (m_abAttributeContains[ATTR_QOS_DES])
+        {
+            if (m_pDesiredStatus != IMS_NULL)
+            {
+                objSdp.Append(m_pDesiredStatus->ToSdp(SdpAttribute::DES));
+            }
+        }
+
+        if (m_abAttributeContains[ATTR_QOS_CONF])
+        {
+            if (m_pConfirmedStatus != IMS_NULL)
+            {
+                objSdp.Append(m_pConfirmedStatus->ToSdp(SdpAttribute::CONF));
+            }
+        }
+    }
+#endif
+
+    objSdp.Append(SdpParameter::ToSdp());
+
+    return static_cast<const AStringBuffer&>(objSdp).GetString();
+}
+
 PUBLIC
 IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIsOffer,
         IN const SdpMediaParameter* pPeerParam, OUT SdpMediaParameter*& pNegotiatedPeerParam,
@@ -831,141 +965,6 @@ void SdpMediaParameter::SetMid(IN IMS_SINT32 nMid)
         IMS_TRACE_I("SetMid :: %d >> %d", m_nMid, nMid, 0);
         m_nMid = nMid;
     }
-}
-
-PUBLIC
-AString SdpMediaParameter::ToSdp() const
-{
-    // SDP order: m, i, c, b, k, *(a)
-    AStringBuffer objSdp(512);
-
-    objSdp.Append(m_objMedia.Encode());
-
-    if (m_objMedia.GetPort() == 0)
-    {
-        // If the media type or codec does not support,
-        // we don't need to set the other lines (b, a, ...).
-        // So, if the m-line is not supported by the endpoint, m-line only will be set.
-
-        // BRUCE :: because of 'file-transfer-id', all SDP will be formed.
-        // return strSDP;
-    }
-
-    if (m_abLineContains[Sdp::TYPE_I])
-    {
-        objSdp.Append(GetInformation()->Encode());
-    }
-
-    if (m_abLineContains[Sdp::TYPE_C])
-    {
-        for (IMS_UINT32 i = 0; i < m_objConnections.GetSize(); ++i)
-        {
-            const SdpConnection& objConnection = m_objConnections.GetAt(i);
-
-            objSdp.Append(objConnection.Encode());
-        }
-    }
-
-    if (m_abLineContains[Sdp::TYPE_B])
-    {
-        const ImsList<SdpBandwidth>& objBLines = GetBandwidths();
-
-        for (IMS_UINT32 i = 0; i < objBLines.GetSize(); ++i)
-        {
-            const SdpBandwidth& objBandwidth = objBLines.GetAt(i);
-
-            objSdp.Append(objBandwidth.Encode());
-        }
-    }
-
-    if (m_abLineContains[Sdp::TYPE_K])
-    {
-        objSdp.Append(GetEncryptionKey()->Encode());
-    }
-
-    // Attribute: rtpmap & fmtp if present
-    for (IMS_UINT32 i = 0; i < m_objMediaFormats.GetSize(); ++i)
-    {
-        const SdpMediaFormat* pMediaFormat = m_objMediaFormats.GetAt(i);
-
-        if (pMediaFormat->HasAttribute())
-        {
-            objSdp.Append(pMediaFormat->ToSdp());
-        }
-    }
-
-    // Extra parameters : rtcp-fb (wildcard), framesize (non-standard)
-    for (IMS_UINT32 i = 0; i < m_objMediaFormats.GetSize(); ++i)
-    {
-        const SdpMediaFormat* pMediaFormat = m_objMediaFormats.GetAt(i);
-
-        if (pMediaFormat->HasAttribute())
-        {
-            const ImsList<SdpMediaFormatParameter*>& objExtraParameters =
-                    pMediaFormat->GetExtraParameters();
-
-            for (IMS_UINT32 j = 0; j < objExtraParameters.GetSize(); ++j)
-            {
-                const SdpMediaFormatParameter* pParameter = objExtraParameters.GetAt(j);
-
-                if (pParameter == IMS_NULL)
-                {
-                    continue;
-                }
-
-                IMS_SINT32 nPayloadType = pParameter->GetPayloadTypeNumber();
-
-                if ((nPayloadType == SdpMediaFormatParameter::PT_WILDCARD) ||
-                        (nPayloadType == SdpMediaFormatParameter::PT_NOT_SPECIFIED))
-                {
-                    objSdp.Append(pParameter->ToSdp());
-                }
-            }
-            // Wildcard attribute will be included all the media format.
-            // so, just add wildcard attribute one time.
-            break;
-        }
-    }
-
-    if (m_abAttributeContains[ATTR_MID])
-    {
-        SdpAttribute objAttr;
-
-        objAttr.SetValue(SdpAttribute::MID, m_strAttrMid);
-        objSdp.Append(objAttr.Encode());
-    }
-
-#if defined(__IMS_SDP_PRECONDITION__)
-    {
-        if (m_abAttributeContains[ATTR_QOS_CURR])
-        {
-            if (m_pCurrentStatus != IMS_NULL)
-            {
-                objSdp.Append(m_pCurrentStatus->ToSdp(SdpAttribute::CURR));
-            }
-        }
-
-        if (m_abAttributeContains[ATTR_QOS_DES])
-        {
-            if (m_pDesiredStatus != IMS_NULL)
-            {
-                objSdp.Append(m_pDesiredStatus->ToSdp(SdpAttribute::DES));
-            }
-        }
-
-        if (m_abAttributeContains[ATTR_QOS_CONF])
-        {
-            if (m_pConfirmedStatus != IMS_NULL)
-            {
-                objSdp.Append(m_pConfirmedStatus->ToSdp(SdpAttribute::CONF));
-            }
-        }
-    }
-#endif
-
-    objSdp.Append(SdpParameter::ToSdp());
-
-    return static_cast<const AStringBuffer&>(objSdp).GetString();
 }
 
 PUBLIC

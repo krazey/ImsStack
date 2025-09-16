@@ -36,6 +36,11 @@ public:
     inline virtual const AString& GetConnectionAddress() const { return AString::ConstNull(); }
 
     /**
+     * @brief Returns the SDP message from the current SDP parameter.
+     */
+    virtual AString ToSdp() const;
+
+    /**
      * @brief Adds the attribute line to the SDP parameter.
      */
     IMS_BOOL AddAttribute(IN const SdpAttribute& objAttribute);
@@ -210,11 +215,6 @@ public:
      *                   #Sdp#SETUP_HOLDCONN
      */
     void SetAttributeSetup(IN IMS_SINT32 nAttrSetup);
-
-    /**
-     * @brief Returns the SDP message from the current SDP parameter.
-     */
-    AString ToSdp() const;
 
     /**
      * @brief Updates the direction of the current SDP parameter.
