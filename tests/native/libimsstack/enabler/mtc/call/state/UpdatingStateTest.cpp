@@ -735,6 +735,42 @@ TEST_F(UpdatingStateTest,
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdated(&objSession));
 }
 
+TEST_F(UpdatingStateTest, SessionUpdatedDoesNotInvokeSendIncomingUpdateIfImplicitlyDowngradedBefore)
+{
+    // AcceptResume changes call type to VOIP from VT - implicitly downgraded
+    delete pUpdatingInfo;
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objContext);
+    pUpdatingInfo->SetTargetCallType(CallType::VT);
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_RECEIVE;
+    pUpdatingInfo->GetOriginalInfo().eVideoDirection = DIRECTION_INACTIVE;
+    pUpdatingInfo->GetAlertingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetAlertingInfo().eVideoDirection = DIRECTION_RECEIVE;
+    ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    MediaInfo objMediaInfo;
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objMediaInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+    ON_CALL(objSession, GetPreviousRequest(_)).WillByDefault(Return(&objMessage));
+    SipMethod objInviteMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
+    pUpdatingState->AcceptResume(CallType::VOIP, objMediaInfo);
+
+    // Receives ACK
+    SipMethod objAckMethod(SipMethod::ACK);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objAckMethod));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(objMediaManager, Run(_, _, IMS_FALSE));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(_));
+    EXPECT_CALL(objUiNotifier, SendResumedBy());
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
+}
+
 TEST_F(UpdatingStateTest, SessionUpdatedReturnsEstablishedStateIfResumedAsModifier)
 {
     delete pUpdatingInfo;
@@ -860,8 +896,11 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedIfAlerted)
 
 TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendIncomingUpdateIfNotAlertedAndModified)
 {
-    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_UPDATE))
             .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    SipMethod objMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 

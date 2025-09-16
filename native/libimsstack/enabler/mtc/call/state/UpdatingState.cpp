@@ -190,7 +190,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
 
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
     pSession->SetCallType(eCallType);
-
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
 
@@ -795,7 +794,7 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
         return CallStateName::ESTABLISHED;
     }
 
-    if (m_objContext.GetUpdatingInfo().IsModified())
+    if (WasTriggeredByOfferlessReinvite() && m_objContext.GetUpdatingInfo().IsModified())
     {
         SendIncomingUpdateToUi(m_objContext.GetMediaManager().GetNegotiatedCallType(
                 &m_objContext.GetSession()->GetISession()));
@@ -886,6 +885,21 @@ IMessage* UpdatingState::GetUpdateResponse(const IN ISession* piSession) const
         eServiceMethod = IMessage::SESSION_UPDATE;
     }
     return m_objContext.GetMessageUtils().GetPreviousResponse(piSession, eServiceMethod);
+}
+
+PRIVATE
+IMS_BOOL UpdatingState::WasTriggeredByOfferlessReinvite() const
+{
+    const IMessage* piMessage =
+            m_objContext.GetSession()->GetISession().GetPreviousRequest(IMessage::SESSION_UPDATE);
+    IMS_ASSERT(piMessage != IMS_NULL);
+    if (piMessage == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return piMessage->GetMethod().Equals(SipMethod::INVITE) &&
+            !m_objContext.GetMessageUtils().HasSdp(piMessage);
 }
 
 PRIVATE

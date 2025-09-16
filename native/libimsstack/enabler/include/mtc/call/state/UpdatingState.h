@@ -92,6 +92,7 @@ private:
     CallStateName HandleReceivedModificationSucceeded();
     CallStateName HandleRetry();
     IMessage* GetUpdateResponse(const IN ISession* piSession) const;
+    IMS_BOOL WasTriggeredByOfferlessReinvite() const;
     void RecoverModificationFailure();
     void NotifyFailure();
     void StopTimer();
