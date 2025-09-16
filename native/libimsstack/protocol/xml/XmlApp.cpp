@@ -63,7 +63,7 @@ IMS_RESULT XmlApp::Parse(IN XmlTransaction* pTransaction)
         return IMS_FAILURE;
     }
 
-    IXmlRequest* piRequest = pTransaction->GetRequest();
+    const IXmlRequest* piRequest = pTransaction->GetRequest();
 
     if (piRequest == IMS_NULL)
     {

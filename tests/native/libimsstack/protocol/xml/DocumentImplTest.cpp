@@ -113,7 +113,7 @@ TEST_F(DocumentImplTest, GetNodeInfo)
     ASSERT_NE(m_piDocument, nullptr);
 
     // Element Info
-    IElement* piElement = m_piDocument->GetDocumentElement();
+    const IElement* piElement = m_piDocument->GetDocumentElement();
     EXPECT_NE(piElement, nullptr);
 
     EXPECT_EQ(m_piDocument->GetElementById("category"), nullptr);
@@ -142,7 +142,7 @@ TEST_F(DocumentImplTest, GetNodeInfo)
     ASSERT_NE(piNodeList, nullptr);
     m_piDocument->DestroyNodeList(piNodeList);
 
-    INode* piNode = m_piDocument->GetFirstChild();
+    const INode* piNode = m_piDocument->GetFirstChild();
     EXPECT_NE(piNode, nullptr);
     EXPECT_NE(m_piDocument->GetLastChild(), nullptr);
 

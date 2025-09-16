@@ -80,7 +80,7 @@ TEST_F(TextImplTest, DocumentInfo)
     INodeList* piNodeList = piElement->GetChildNodes();
     ASSERT_NE(piNodeList, nullptr);
 
-    INode* piNodeEvent = piNodeList->Item(0);
+    const INode* piNodeEvent = piNodeList->Item(0);
     ASSERT_NE(piNodeEvent, nullptr);
 
     INode* piNode = piNodeEvent->GetFirstChild();
