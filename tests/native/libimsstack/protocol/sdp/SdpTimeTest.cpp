@@ -65,8 +65,8 @@ TEST_F(SdpTimeTest, OperatorAssignment)
 
     SdpTime objNewTime;
     objNewTime = objTime;
-    EXPECT_EQ(objNewTime.GetStartTime(), objTime.GetStartTime());
-    EXPECT_EQ(objNewTime.GetStopTime(), objTime.GetStopTime());
+    EXPECT_EQ(objNewTime.GetStartTime(), m_nTestStartTime);
+    EXPECT_EQ(objNewTime.GetStopTime(), m_nTestStopTime);
 }
 
 TEST_F(SdpTimeTest, Decode)

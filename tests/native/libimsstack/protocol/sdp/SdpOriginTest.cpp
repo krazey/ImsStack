@@ -192,21 +192,18 @@ TEST_F(SdpOriginTest, CopyConstructor)
 TEST_F(SdpOriginTest, OperatorAssignment)
 {
     SdpOrigin objOrigin;
-    ASSERT_TRUE(objOrigin.SetValue(m_objTestOrigin.m_strUsername, m_objTestOrigin.m_strAddress));
+    ASSERT_TRUE(objOrigin.SetValue(m_objTestOrigin.m_strUsername, m_objTestOrigin.m_strSessionId,
+            m_objTestOrigin.m_strSessionVersion, m_objTestOrigin.m_nAddrType,
+            m_objTestOrigin.m_strAddress, m_objTestOrigin.m_strAddrTypeString));
 
     SdpOrigin objNewOrigin;
     objNewOrigin = objOrigin;
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewOrigin.GetUsername(), objOrigin.GetUsername());
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewOrigin.GetSessionId(), objOrigin.GetSessionId());
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewOrigin.GetSessionVersion(), objOrigin.GetSessionVersion());
-    EXPECT_EQ(objNewOrigin.GetAddressType(), objOrigin.GetAddressType());
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewOrigin.GetAddressTypeToString(), objOrigin.GetAddressTypeToString());
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewOrigin.GetAddress(), objOrigin.GetAddress());
+    EXPECT_EQ(objNewOrigin.GetUsername(), m_objTestOrigin.m_strUsername);
+    EXPECT_EQ(objNewOrigin.GetSessionId(), m_objTestOrigin.m_strSessionId);
+    EXPECT_EQ(objNewOrigin.GetSessionVersion(), m_objTestOrigin.m_strSessionVersion);
+    EXPECT_EQ(objNewOrigin.GetAddressType(), m_objTestOrigin.m_nAddrType);
+    EXPECT_EQ(objNewOrigin.GetAddressTypeToString(), m_objTestOrigin.m_strAddrTypeString);
+    EXPECT_EQ(objNewOrigin.GetAddress(), m_objTestOrigin.m_strAddress);
 }
 
 TEST_F(SdpOriginTest, Decode)

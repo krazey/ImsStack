@@ -165,17 +165,16 @@ TEST_F(SdpRepeatTimeTest, OperatorAssignment)
 
     SdpRepeatTime objNewRepeatTime;
     objNewRepeatTime = objRepeatTime;
-    EXPECT_EQ(objNewRepeatTime.GetRepeatInterval(), objRepeatTime.GetRepeatInterval());
-    EXPECT_EQ(objNewRepeatTime.GetActiveDuration(), objRepeatTime.GetActiveDuration());
-    EXPECT_EQ(objNewRepeatTime.GetFirstOffset(), objRepeatTime.GetFirstOffset());
+    EXPECT_EQ(objNewRepeatTime.GetRepeatInterval(), m_objTestRepeatTime.m_nInterval);
+    EXPECT_EQ(objNewRepeatTime.GetActiveDuration(), m_objTestRepeatTime.m_nActiveDuration);
+    EXPECT_EQ(objNewRepeatTime.GetFirstOffset(), m_objTestRepeatTime.m_nFirstOffset);
     EXPECT_EQ(objNewRepeatTime.GetAdditionalOffsets().GetSize(),
-            objRepeatTime.GetAdditionalOffsets().GetSize());
+            m_objTestRepeatTime.m_objAdditionalOffsets.GetSize());
 
-    for (IMS_UINT32 i = 0; i < objRepeatTime.GetAdditionalOffsets().GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTestRepeatTime.m_objAdditionalOffsets.GetSize(); ++i)
     {
-        // cppcheck-suppress knownConditionTrueFalse
         EXPECT_EQ(objNewRepeatTime.GetAdditionalOffsets().GetAt(i),
-                objRepeatTime.GetAdditionalOffsets().GetAt(i));
+                m_objTestRepeatTime.m_objAdditionalOffsets.GetAt(i));
     }
 }
 
