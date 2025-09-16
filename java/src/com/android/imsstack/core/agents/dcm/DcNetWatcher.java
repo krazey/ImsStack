@@ -127,7 +127,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     protected int mVoiceRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
     // IMS voice over PS Session Supported
-    private boolean mImsVops = false;
+    private int mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
     private String mImsVopsPlmn = "";
     // Emergency bearer support capability
     private boolean mEmcbs = false;
@@ -244,7 +244,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         mAirplaneMode = false;
         mRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mVoiceRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-        mImsVops = false;
+        mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
         mEmcbs = false;
         mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
         mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
@@ -474,7 +474,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         if (dcSettings == null || dcSettings.isVopsIgnored()) {
             return true;
         } else {
-            return mImsVops;
+            return mImsVopsState != ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
         }
     }
 
@@ -959,6 +959,11 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private boolean updateVopsState(ServiceState serviceState) {
+        if (!is4G() && !is5G()) {
+            mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
+            return false;
+        }
+
         NetworkRegistrationInfo regInfo =
                 serviceState.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_PS,
@@ -985,13 +990,22 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
 
         // VoPS
-        boolean isVopsSupported = vsi.isVopsSupported() || mDcSettings == null
-                || mDcSettings.isVopsIgnored();
-        if (mImsVops != isVopsSupported || !mImsVopsPlmn.equals(mNetworkOperator)) {
-            ImsLog.d(mSlotId, "VoPS supported indication is updated as = " + isVopsSupported
-                    + " on PLMN(" + mNetworkOperator + ")");
+        if (!regInfo.isNetworkRegistered()) {
+            mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
+            return false;
+        }
 
-            mImsVops = isVopsSupported;
+        int newVopsState =
+                (vsi.isVopsSupported() || mDcSettings == null || mDcSettings.isVopsIgnored())
+                ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
+                : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
+        if (mImsVopsState != newVopsState || !mImsVopsPlmn.equals(mNetworkOperator)) {
+            ImsLog.d(mSlotId, "VoPS support indication is updated to ["
+                    + (newVopsState == ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
+                            ? "SUPPORTED" : "NOT_SUPPORTED") + "] on PLMN(" + mNetworkOperator
+                    + ")");
+
+            mImsVopsState = newVopsState;
             mImsVopsPlmn = mNetworkOperator;
 
             return true;
@@ -1115,15 +1129,14 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private void notifyImsNetworkVopsChanged() {
-        int state =
-                (mImsVops)
-                        ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
-                        : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
+        if (mImsVopsState == ImsEventDef.IMS_VOICE_OVER_PS_INVALID) {
+            return;
+        }
 
-        mSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, state, 0);
+        mSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, mImsVopsState, 0);
 
         for (Listener l : mListeners) {
-            l.onVopsStateChanged(state, mImsVopsPlmn);
+            l.onVopsStateChanged(mImsVopsState, mImsVopsPlmn);
         }
     }
 
@@ -1273,10 +1286,8 @@ public class DcNetWatcher implements IDcNetWatcher {
                 changedStates.add(NetworkServiceState.ROAMING_STATE);
             }
 
-            if (is4G() || is5G()) {
-                if (updateVopsState(serviceState)) {
-                    changedStates.add(NetworkServiceState.VOPS_STATE);
-                }
+            if (updateVopsState(serviceState)) {
+                changedStates.add(NetworkServiceState.VOPS_STATE);
             }
 
             if (is4G()) {
