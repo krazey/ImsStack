@@ -78,6 +78,7 @@ using ::testing::SetArgReferee;
     using Base::IsPlmnBlockCondition;               \
     using Base::IsVoiceCapableOnWiFiCalling;        \
     using Base::IsVolteHysTimerRunning;             \
+    using Base::IsVolteHysTimerStartingCondition;   \
     using Base::ImsRadio_OnSsacChanged;             \
     using Base::NConfiguration_NotifyConfigChanged; \
     using Base::ProcessBlockChanged;                \
@@ -4466,80 +4467,72 @@ TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_Test4)
     EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
 }
 
-TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_Test5)
+TEST_F(AosHandleMtcTest, NotStartVolteHysTimerIfSsacUnbarredOnVopsNotSupported)
 {
-    // Test5: Barring factor is 100, BLOCK_SSAC blocked, Not Volte_hys timer conditions
-    // Expectation: m_SsacBarred is set to false, BLOCK_SSAC is not blocked
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetVolteHysTime())
-            .Times(3)
-            .WillOnce(Return(0))
-            .WillOnce(Return(60))
-            .WillOnce(Return(60));
-
+    // GIVEN
     SsacInfo objSsacInfo;
     objSsacInfo.nBarringFactorForVoice = 100;
-
-    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
-    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
-
-    m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
-    EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
-
-    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
-    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_NR);
-
-    m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
-    EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
-
-    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
-    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOPS);
 
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
     m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
+
+    // THEN
     EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
 }
 
-TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_Test6)
+TEST_F(AosHandleMtcTest, NotStartVolteHysTimerIfSsacUnbarredOnNonLte)
 {
-    // Test6: Barring factor is 100, BLOCK_SSAC blocked, Volte_hys timer conditions
-    // Expectation: m_SsacBarred is set to false, BLOCK_SSAC is blocked, the timer is running.
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).Times(1).WillOnce(Return(60));
-
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
-
+    // GIVEN
     SsacInfo objSsacInfo;
     objSsacInfo.nBarringFactorForVoice = 100;
-
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_NR);
     m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
 
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
     m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
+}
+
+TEST_F(AosHandleMtcTest, StartVolteHysTimerIfSsacUnbarredOnLte)
+{
+    // GIVEN
+    SsacInfo objSsacInfo;
+    objSsacInfo.nBarringFactorForVoice = 100;
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
+
+    // THEN
     EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
     EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
     EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerRunning());
-
-    m_pAosHandleMtc->StopVolteHysTimer();
 }
 
 TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_VolteHysTimerRunning_by_Vops)

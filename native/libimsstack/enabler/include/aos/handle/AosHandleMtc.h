@@ -54,6 +54,12 @@ protected:
         SSAC = 0x2
     };
 
+    enum class VolteHysTimerCheckReason
+    {
+        VOPS_CHANGED = 1,
+        SSAC_CHANGED
+    };
+
 protected:
     void InitializeHoldingBlocksPolicy() override;
     void InitializeServiceBlock() override;
@@ -98,8 +104,8 @@ protected:
     IMS_BOOL IsInvalidMobileNetwork() const;
     IMS_BOOL IsPlmnBlockCondition() const;
     IMS_BOOL IsVoiceCapableOnWiFiCalling() const;
-    IMS_BOOL IsVolteHysTimerStartingCondition() const;
     IMS_BOOL IsVolteHysTimerBlocked(IN VolteHysTimerBlock eBlock) const;
+    IMS_BOOL IsVolteHysTimerStartingCondition(IN VolteHysTimerCheckReason eReason) const;
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);

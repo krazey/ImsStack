@@ -936,48 +936,90 @@ IMS_BOOL AosHandleMtc::IsVoiceCapableOnWiFiCalling() const
 }
 
 PROTECTED
-IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition() const
+IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition(IN VolteHysTimerCheckReason eReason) const
 {
-    IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
-
-    if (nVolteHysTime <= 0)
+    if (GET_N_CONFIG(m_nSlotId)->GetVolteHysTime() <= 0)
     {
         return IMS_FALSE;
     }
 
-    if (m_bVopsIgnoredForVolteEnabled)
+    if (eReason == VolteHysTimerCheckReason::VOPS_CHANGED)
     {
-        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Vops Ignored", 0, 0, 0);
-        return IMS_FALSE;
+        if (m_bVopsIgnoredForVolteEnabled)
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Vops Ignored", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "IsVolteHysTimerStartingCondition :: VoLTE_Hys timer blocked by VoPS", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (!AosHandle::IsHandleBlocked(BLOCK_VOPS))
+        {
+            A_IMS_TRACE_D(
+                    APPPROFILE, "IsVolteHysTimerStartingCondition :: VoPS not blocked", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Not supported network",
+                    0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (AosHandle::IsHandleBlocked(BLOCK_SSAC))
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: SSAC blocked", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        return IMS_TRUE;
     }
 
-    if (IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS))
+    if (eReason == VolteHysTimerCheckReason::SSAC_CHANGED)
     {
-        A_IMS_TRACE_D(
-                APPPROFILE, "IsVolteHysTimerStartingCondition :: VoLTE_Hys timer blocked", 0, 0, 0);
-        return IMS_FALSE;
+        if (!GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Ssac Ignored", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "IsVolteHysTimerStartingCondition :: VoLTE_Hys timer blocked by SSAC", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (!AosHandle::IsHandleBlocked(BLOCK_SSAC))
+        {
+            A_IMS_TRACE_D(
+                    APPPROFILE, "IsVolteHysTimerStartingCondition :: SSAC not barred", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (m_nNetworkType != NW_REPORT_RADIO_LTE)
+        {
+            A_IMS_TRACE_D(
+                    APPPROFILE, "IsVolteHysTimerStartingCondition :: Network is not LTE", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (AosHandle::IsHandleBlocked(BLOCK_VOPS))
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: VoPS blocked", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        return IMS_TRUE;
     }
 
-    if (!AosHandle::IsHandleBlocked(BLOCK_VOPS))
-    {
-        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: VoPS not blocked", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
-    {
-        A_IMS_TRACE_D(
-                APPPROFILE, "IsVolteHysTimerStartingCondition :: Not supported network", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (AosHandle::IsHandleBlocked(BLOCK_SSAC))
-    {
-        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: SSAC blocked", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
+    return IMS_FALSE;
 }
 
 PROTECTED
@@ -1199,7 +1241,7 @@ void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState, IN const AStrin
     }
     else
     {
-        if (IsVolteHysTimerStartingCondition())
+        if (IsVolteHysTimerStartingCondition(VolteHysTimerCheckReason::VOPS_CHANGED))
         {
             IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
 
@@ -1367,27 +1409,23 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
             return;
         }
 
-        IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
-
-        if (nVolteHysTime > 0)
+        if (IsVolteHysTimerStartingCondition(VolteHysTimerCheckReason::SSAC_CHANGED))
         {
-            if (AosHandle::IsHandleBlocked(BLOCK_SSAC) && m_nNetworkType == NW_REPORT_RADIO_LTE &&
-                    !AosHandle::IsHandleBlocked(BLOCK_VOPS))
-            {
-                A_IMS_TRACE_I(APPPROFILE,
-                        "ImsRadio_OnSsacChanged :: Start VoLTE_Hys timer for (%d) secs",
-                        nVolteHysTime, 0, 0);
-                StartVolteHysTimer(nVolteHysTime);
-                return;
-            }
+            IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
 
-            if (IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC))
-            {
-                A_IMS_TRACE_D(APPPROFILE,
-                        "ImsRadio_OnSsacChanged :: The block consumed. Unblock VoLTE_Hys timer.", 0,
-                        0, 0);
-                ResetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
-            }
+            A_IMS_TRACE_I(APPPROFILE,
+                    "ImsRadio_OnSsacChanged :: Start VoLTE_Hys timer for (%d) secs", nVolteHysTime,
+                    0, 0);
+            StartVolteHysTimer(nVolteHysTime);
+            return;
+        }
+
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "ImsRadio_OnSsacChanged :: The block consumed. Unblock VoLTE_Hys timer.", 0, 0,
+                    0);
+            ResetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
         }
 
         ProcessBlock(BLOCK_SSAC, IMS_FALSE);
