@@ -325,7 +325,7 @@ void VideoSession::SetMtu(IN IMS_SINT32 nMtu)
 }
 
 PUBLIC
-IMS_BOOL VideoSession::UpdateMediaQualityThreshold()
+IMS_BOOL VideoSession::UpdateMediaQualityThreshold(IN IMS_BOOL bIsConference)
 {
     if (GetConfiguration() == IMS_NULL)
     {
@@ -337,8 +337,15 @@ IMS_BOOL VideoSession::UpdateMediaQualityThreshold()
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
                 std::vector<int32_t>{GetConfiguration()->GetRtpInactivityTimerMillis()});
-        m_objMediaQualityThreshold.setVideoBitrateBps(
-                GetConfiguration()->GetVideoLowestBitrateBps());
+        if (bIsConference)
+        {
+            m_objMediaQualityThreshold.setVideoBitrateBps(0);
+        }
+        else
+        {
+            m_objMediaQualityThreshold.setVideoBitrateBps(
+                    GetConfiguration()->GetVideoLowestBitrateBps());
+        }
     }
     else
     {

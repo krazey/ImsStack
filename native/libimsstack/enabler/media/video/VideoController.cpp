@@ -202,7 +202,7 @@ void VideoController::SetMtu(IN IMS_SINT32 nMtu)
 }
 
 PUBLIC
-IMS_BOOL VideoController::ApplyQualityThreshold()
+IMS_BOOL VideoController::ApplyQualityThreshold(IN IMS_BOOL bIsConference)
 {
     if (m_pSession == IMS_NULL || m_pSession->GetState() == VideoSession::STATE_NONE)
     {
@@ -210,7 +210,7 @@ IMS_BOOL VideoController::ApplyQualityThreshold()
         return IMS_FALSE;
     }
 
-    if (m_pSession->UpdateMediaQualityThreshold())
+    if (m_pSession->UpdateMediaQualityThreshold(bIsConference))
     {
         return m_pSession->SetMediaQuality();
     }
