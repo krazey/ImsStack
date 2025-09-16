@@ -943,6 +943,13 @@ IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition(IN VolteHysTimerCheckRea
         return IMS_FALSE;
     }
 
+    if (GetState() != STATE_DISCONNECTED)
+    {
+        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Service not disconnected", 0,
+                0, 0);
+        return IMS_FALSE;
+    }
+
     if (eReason == VolteHysTimerCheckReason::VOPS_CHANGED)
     {
         if (m_bVopsIgnoredForVolteEnabled)
