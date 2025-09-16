@@ -76,6 +76,7 @@ using ::testing::ReturnRef;
     using Base::IsFakeModeCondition;                                         \
     using Base::IsFakeRegistration;                                          \
     using Base::IsImsCall;                                                   \
+    using Base::IsInCallbackMode;                                            \
     using Base::IsRefreshRequiredByCbm;                                      \
     using Base::IsReinitiationRequested;                                     \
     using Base::IsReregFailureReportOnIpcanChangeRequired;                   \
@@ -688,20 +689,52 @@ TEST_F(AosERegistrationTest, RequestESmsCmd_HandleESmsState)
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
             .WillByDefault(Return(IMS_TRUE));
 
-    m_pAosERegistration->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+    m_pAosERegistration->NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::EMERGENCY);
 
     EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsESms());
+    EXPECT_EQ(m_pAosERegistration->GetEModeInfo()->GetESmsPdn(), EmergencyServicePdn::EMERGENCY);
 }
 
-TEST_F(AosERegistrationTest, RequestESmsCmdhenEmergencyCallbackModeNotSupported)
+TEST_F(AosERegistrationTest, RequestESmsCmdWhenEmergencyCallbackModeNotSupported)
 {
     m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
             .WillByDefault(Return(IMS_FALSE));
 
-    m_pAosERegistration->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+    m_pAosERegistration->NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::EMERGENCY);
 
     EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsESms());
+}
+
+TEST_F(AosERegistrationTest, ESmsPdnIsImsPdnWhenRequestESmsCmdWithImsPdn)
+{
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetESmsPdn(EmergencyServicePdn::EMERGENCY);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::IMS);
+
+    EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsESms());
+    EXPECT_EQ(m_pAosERegistration->GetEModeInfo()->GetESmsPdn(), EmergencyServicePdn::IMS);
+}
+
+TEST_F(AosERegistrationTest, InCallbackModeWhenScbmIsTrueWithEmergencyPdn)
+{
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetESmsPdn(EmergencyServicePdn::EMERGENCY);
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+
+    EXPECT_TRUE(m_pAosERegistration->IsInCallbackMode());
+}
+
+TEST_F(AosERegistrationTest, NotInCallbackModeWhenScbmIsTrueWithImsPdn)
+{
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetESmsPdn(EmergencyServicePdn::IMS);
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+
+    EXPECT_FALSE(m_pAosERegistration->IsInCallbackMode());
 }
 
 TEST_F(AosERegistrationTest, RequestUnspecifiedCmd_ProcessedByAosRegistration)
@@ -1718,6 +1751,11 @@ TEST_F(AosERegistrationTest, EcbmIsFalseWhenStoppingEcbmCalled)
     m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, IsActivationRequested()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
 
     m_pAosERegistration->CallbackModeChanged(
             EmergencyCallbackModeType::CALL, EmergencyCallbackMode::STOP, 300);
@@ -1729,7 +1767,7 @@ TEST_F(AosERegistrationTest, ScbmIsOnlyFalseWhenStoppingScbmCalledAfterBothEcbmA
 {
     m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
-    m_pAosERegistration->GetEModeInfo()->SetESms(IMS_TRUE);
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
@@ -1737,6 +1775,24 @@ TEST_F(AosERegistrationTest, ScbmIsOnlyFalseWhenStoppingScbmCalledAfterBothEcbmA
             EmergencyCallbackModeType::SMS, EmergencyCallbackMode::STOP, 300);
 
     EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
+}
+
+TEST_F(AosERegistrationTest, DoNotReportFailureWhenStoppingScbmCalledIfPdnIsNotActivated)
+{
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, IsActivationRequested()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE, _))
+            .Times(0);
+
+    m_pAosERegistration->CallbackModeChanged(
+            EmergencyCallbackModeType::SMS, EmergencyCallbackMode::STOP, 300);
+
     EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
 }
 

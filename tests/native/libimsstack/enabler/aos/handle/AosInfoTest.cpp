@@ -126,9 +126,9 @@ protected:
         m_pAosInfo->NotifyEmergencyCallState(bIsInitialized);
     }
     void NotifyPublishState(IN IMS_BOOL bIsStarted) { m_pAosInfo->NotifyPublishState(bIsStarted); }
-    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
+    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType)
     {
-        m_pAosInfo->NotifyEmergencySmsState(bIsInitialized, EmergencyServicePdn::EMERGENCY);
+        m_pAosInfo->NotifyEmergencySmsState(bIsInitialized, ePdnType);
     }
     void NotifyEpsfbCallState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyEpsfbCallState(nState); }
     IMS_BOOL IsForbiddenBlock() { return m_pAosInfo->IsForbiddenBlock(); }
@@ -556,22 +556,29 @@ TEST_F(AosInfoTest, NotifyPublishState_Test)
     NotifyPublishState(IMS_FALSE);
 }
 
-TEST_F(AosInfoTest, NotifyEmergencySmsState_Test)
+TEST_F(AosInfoTest, NotifyInitiatedWhenNotifyEmergencySmsStateWithInitiatedWithEmergencyPdn)
 {
-    // Expectation: Call AosRegistration::RequestCmd(IAosRegistration::CMD_ESMS_INIT)
-    //              if param is true
-    //              else Call AosRegistration::RequestCmd(IAosRegistration::CMD_ESMS_DONE)
-
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _)).Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_DONE, _)).Times(1);
+
+    EXPECT_CALL(objMockIAosRegistration,
+            NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::EMERGENCY));
     EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ESMS_INIT, _));
 
-    NotifyEmergencySmsState(IMS_TRUE);
-    NotifyEmergencySmsState(IMS_FALSE);
+    NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::EMERGENCY);
+}
+
+TEST_F(AosInfoTest, NotifyNotInitiatedWhenNotifyEmergencySmsStateWithNotInitiatedWithImsPdn)
+{
+    MockIAosRegistration objMockIAosRegistration;
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
+            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
+
+    EXPECT_CALL(
+            objMockIAosRegistration, NotifyEmergencySmsState(IMS_FALSE, EmergencyServicePdn::IMS));
+
+    NotifyEmergencySmsState(IMS_FALSE, EmergencyServicePdn::IMS);
 }
 
 TEST_F(AosInfoTest, NotifyEpsfbCallState_Test)

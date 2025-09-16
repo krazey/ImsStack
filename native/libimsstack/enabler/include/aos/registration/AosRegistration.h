@@ -86,6 +86,8 @@ public:
     void SetListener(IN IAosRegistrationListener* piRegListener) override;
 
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) override;
+    void NotifyEmergencySmsState(
+            IN IMS_BOOL /*bIsInitialized*/, IN EmergencyServicePdn /*ePdnType*/) override {};
 
     IMS_UINT32 GetMode() override;
     IMS_UINT32 GetProperty(

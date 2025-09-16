@@ -17,6 +17,7 @@
 #define AOS_E_REGISTRATION_H_
 
 #include "ServiceSystemTime.h"
+#include "IImsAosInfo.h"
 #include "interface/IAosEmergencyListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "registration/AosRegistration.h"
@@ -29,6 +30,7 @@ public:
             m_bEcbm(IMS_FALSE),
             m_bScbm(IMS_FALSE),
             m_bESms(IMS_FALSE),
+            m_eESmsPdn(EmergencyServicePdn::EMERGENCY),
             m_nCbmDurationSec(0),
             m_nCbmBeginTimeSec(0),
             m_nReregTryTimeSec(0)
@@ -40,6 +42,7 @@ public:
     inline IMS_BOOL IsEcbm() { return m_bEcbm; }
     inline IMS_BOOL IsScbm() { return m_bScbm; }
     inline IMS_BOOL IsESms() { return m_bESms; }
+    inline EmergencyServicePdn GetESmsPdn() { return m_eESmsPdn; }
     inline IMS_ULONG GetCbmDuration() { return m_nCbmDurationSec; }
     inline IMS_UINT32 GetCbmBeginTime() { return m_nCbmBeginTimeSec; }
     inline IMS_UINT32 GetReRegTryTime() { return m_nReregTryTimeSec; }
@@ -48,6 +51,7 @@ public:
     inline void SetEcbm(IN IMS_BOOL bEcbm) { m_bEcbm = bEcbm; }
     inline void SetScbm(IN IMS_BOOL bScbm) { m_bScbm = bScbm; }
     inline void SetESms(IN IMS_BOOL bESms) { m_bESms = bESms; }
+    inline void SetESmsPdn(IN EmergencyServicePdn eESmsPdn) { m_eESmsPdn = eESmsPdn; }
     inline void SetCbmDuration(IN IMS_ULONG nCbmDurationSec)
     {
         m_nCbmDurationSec = nCbmDurationSec;
@@ -66,6 +70,7 @@ private:
     IMS_BOOL m_bEcbm;
     IMS_BOOL m_bScbm;
     IMS_BOOL m_bESms;
+    EmergencyServicePdn m_eESmsPdn;
     IMS_ULONG m_nCbmDurationSec;
     IMS_UINT32 m_nCbmBeginTimeSec;
     IMS_UINT32 m_nReregTryTimeSec;
@@ -84,6 +89,7 @@ public:
     void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
             IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
+    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) final;
 
     IMS_BOOL IsInCallbackMode() final;
 

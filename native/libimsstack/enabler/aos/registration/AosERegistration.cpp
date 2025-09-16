@@ -146,6 +146,18 @@ PUBLIC VIRTUAL void AosERegistration::RequestCmd(
     }
 }
 
+PUBLIC VIRTUAL void AosERegistration::NotifyEmergencySmsState(
+        IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType)
+{
+    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
+    {
+        return;
+    }
+
+    m_pEModeInfo->SetESmsPdn(ePdnType);
+    m_pEModeInfo->SetESms(bIsInitialized);
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosERegistration::IsInCallbackMode()
 {
     if (m_pEModeInfo == IMS_NULL)
@@ -153,7 +165,9 @@ PUBLIC VIRTUAL IMS_BOOL AosERegistration::IsInCallbackMode()
         return IMS_FALSE;
     }
 
-    return m_pEModeInfo->IsEcbm() || m_pEModeInfo->IsScbm();
+    return m_pEModeInfo->IsEcbm() ||
+            (m_pEModeInfo->IsScbm() &&
+                    m_pEModeInfo->GetESmsPdn() == EmergencyServicePdn::EMERGENCY);
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
@@ -373,8 +387,7 @@ AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
 PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
         IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
 {
-    if (!IsImsCall() && m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsEcbm() &&
-            !m_pEModeInfo->IsScbm())
+    if (!IsImsCall() && m_pEModeInfo != IMS_NULL && !IsInCallbackMode())
     {
         ProcessUnpredictableFailure();
         return;
@@ -850,8 +863,8 @@ PROTECTED void AosERegistration::CallbackModeChanged(
         return;
     }
 
-    A_IMS_TRACE_I(REGID, "CallbackModeChanged eType (%d), eState(%d), nDuration(%d)", eType, eState,
-            nDuration);
+    A_IMS_TRACE_I(REGID, "CallbackModeChanged :: eType (%d), eState(%d), nDuration(%d)", eType,
+            eState, nDuration);
 
     if (eState == EmergencyCallbackMode::START)
     {
@@ -874,7 +887,10 @@ PROTECTED void AosERegistration::CallbackModeChanged(
         {
             if (!IsInCallbackMode())
             {
-                ProcessUnpredictableFailure();
+                if (m_piContext->GetConnection()->IsActivationRequested())
+                {
+                    ProcessUnpredictableFailure();
+                }
                 ClearCbm();
             }
             A_IMS_TRACE_I(REGID, "Current callback mode status:: Ecbm(%d), Scbm(%d)",
@@ -942,7 +958,7 @@ PROTECTED void AosERegistration::HandleFakeMode(IN IMS_UINT32 nReason)
 
 PROTECTED IMS_BOOL AosERegistration::IsRefreshRequiredByCbm()
 {
-    if (!m_pEModeInfo->IsEcbm() && !m_pEModeInfo->IsScbm())
+    if (!IsInCallbackMode())
     {
         return IMS_FALSE;
     }

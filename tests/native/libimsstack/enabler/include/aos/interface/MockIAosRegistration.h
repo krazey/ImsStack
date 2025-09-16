@@ -42,6 +42,8 @@ public:
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(void, SetListener, (IN IAosRegistrationListener* piRegListener), (override));
     MOCK_METHOD(void, RequestCmd, (IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason), (override));
+    MOCK_METHOD(void, NotifyEmergencySmsState,
+            (IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType), (override));
     MOCK_METHOD(IMS_UINT32, GetMode, (), (override));
     MOCK_METHOD(IMS_UINT32, GetProperty, (IN IMS_UINT32 nType, OUT IMS_UINT32& nValue,
             OUT AString& strValue), (override));
