@@ -56,8 +56,9 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
         m_bVopsIgnoredForVolteEnabled(IMS_TRUE),
         m_nVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
         m_nHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
+        m_nVolteHysTimerBlocks(static_cast<IMS_UINT32>(VolteHysTimerBlock::NONE)),
         m_strVopsPlmn(AString::ConstEmpty()),
-        m_nVolteHysTimerBlocks(VOLTE_HYS_TIMER_BLOCK_NONE)
+        m_strSsacPlmn(AString::ConstEmpty())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleMtc), this);
@@ -528,14 +529,22 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessDataConnectionChanged()
     if (!m_bDataConnected && !IsSupportedNetworkType(m_nNetworkType) &&
             m_nNetworkType != NW_REPORT_RADIO_NOSRV)
     {
-        SetVolteHysTimerBlock(VOLTE_HYS_TIMER_BLOCK_DATA_DISCONNECTED);
-
         if (IsVolteHysTimerRunning())
         {
             A_IMS_TRACE_D(APPPROFILE,
-                    "ProcessDataConnectionChanged :: Stop Volte_Hys timer due to PDN disconnection",
+                    "ProcessDataConnectionChanged :: Stop VoLTE_Hys timer due to PDN disconnection",
                     0, 0, 0);
             ProcessVolteHysTimerExpired();
+        }
+
+        if (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+        {
+            SetVolteHysTimerBlock(VolteHysTimerBlock::VOPS);
+        }
+
+        if (m_bSsacBarred)
+        {
+            SetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
         }
     }
 }
@@ -559,18 +568,8 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
         }
 
         ReevaluateCapabilities();
-
         UpdateVopsState();
-
-        if (GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac() &&
-                m_nNetworkType == NW_REPORT_RADIO_LTE)
-        {
-            SsacInfo objSsacInfo = m_piImsRadio->GetSsacInfo();
-            if (m_bSsacBarred != (objSsacInfo.nBarringFactorForVoice == 0))
-            {
-                ImsRadio_OnSsacChanged(objSsacInfo);
-            }
-        }
+        UpdateSsacState();
     }
     else
     {
@@ -597,7 +596,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             if (m_nNetworkType != NW_REPORT_RADIO_NOSRV && !m_bDataConnected)
             {
                 A_IMS_TRACE_D(APPPROFILE,
-                        "ProcessNetworkChanged :: Stop Volte_Hys timer due to PDN disconnection", 0,
+                        "ProcessNetworkChanged :: Stop VoLTE_Hys timer due to PDN disconnection", 0,
                         0, 0);
                 ProcessVolteHysTimerExpired();
             }
@@ -760,6 +759,35 @@ void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
 }
 
 PROTECTED
+void AosHandleMtc::UpdateSsacState()
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
+    {
+        return;
+    }
+
+    if (m_nNetworkType != NW_REPORT_RADIO_LTE)
+    {
+        return;
+    }
+
+    SsacInfo objSsacInfo = m_piImsRadio->GetSsacInfo();
+    if (m_bSsacBarred != (objSsacInfo.nBarringFactorForVoice == 0))
+    {
+        ImsRadio_OnSsacChanged(objSsacInfo);
+    }
+    else
+    {
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "UpdateSsacState :: Unblock VoLTE_Hys timer due to same SSAC state", 0, 0, 0);
+            ResetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
+        }
+    }
+}
+
+PROTECTED
 void AosHandleMtc::UpdateVopsState()
 {
     if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
@@ -771,7 +799,6 @@ void AosHandleMtc::UpdateVopsState()
     {
         if (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
         {
-            SetVolteHysTimerBlock(VOLTE_HYS_TIMER_BLOCK_VOPS_IGNORED);
             ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, m_strVopsPlmn);
         }
         return;
@@ -789,7 +816,12 @@ void AosHandleMtc::UpdateVopsState()
     }
     else
     {
-        ClearVolteHysTimerBlocks();
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "UpdateVopsState :: Unblock VoLTE_Hys timer due to same VoPS state", 0, 0, 0);
+            ResetVolteHysTimerBlock(VolteHysTimerBlock::VOPS);
+        }
     }
 }
 
@@ -904,12 +936,6 @@ IMS_BOOL AosHandleMtc::IsVoiceCapableOnWiFiCalling() const
 }
 
 PROTECTED
-IMS_BOOL AosHandleMtc::IsVolteHysTimerBlocked() const
-{
-    return m_nVolteHysTimerBlocks > VOLTE_HYS_TIMER_BLOCK_NONE;
-}
-
-PROTECTED
 IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition() const
 {
     IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
@@ -919,10 +945,16 @@ IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition() const
         return IMS_FALSE;
     }
 
-    if (IsVolteHysTimerBlocked())
+    if (m_bVopsIgnoredForVolteEnabled)
     {
-        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: VolteHysTimerBlocks(0x%x)",
-                m_nVolteHysTimerBlocks, 0, 0);
+        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Vops Ignored", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS))
+    {
+        A_IMS_TRACE_D(
+                APPPROFILE, "IsVolteHysTimerStartingCondition :: VoLTE_Hys timer blocked", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -946,6 +978,12 @@ IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition() const
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL AosHandleMtc::IsVolteHysTimerBlocked(IN VolteHysTimerBlock eBlock) const
+{
+    return (m_nVolteHysTimerBlocks & static_cast<IMS_UINT32>(eBlock)) > 0;
 }
 
 PROTECTED
@@ -1096,7 +1134,6 @@ void AosHandleMtc::ProcessVolteHysTimerExpired()
             (AosHandle::IsHandleBlocked(BLOCK_VOPS) ||
                     AosHandle::IsHandleBlocked(m_nHoldingBlocksForMobile, BLOCK_VOPS)))
     {
-        ClearVolteHysTimerBlocks();
         ProcessBlock(BLOCK_VOPS, IMS_FALSE);
         return;
     }
@@ -1137,7 +1174,13 @@ void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState, IN const AStrin
 
     if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
-        ClearVolteHysTimerBlocks();
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "ProcessVopsStateChanged :: Unblock VoLTE_Hys timer due to VoPS not support", 0,
+                    0, 0);
+            ResetVolteHysTimerBlock(VolteHysTimerBlock::VOPS);
+        }
 
         if (IsPlmnBlockCondition())
         {
@@ -1167,24 +1210,37 @@ void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState, IN const AStrin
             return;
         }
 
-        ClearVolteHysTimerBlocks();
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "ProcessVopsStateChanged :: The block consumed. Unblock VoLTE_Hys timer.", 0, 0,
+                    0);
+            ResetVolteHysTimerBlock(VolteHysTimerBlock::VOPS);
+        }
+
         ProcessBlock(BLOCK_VOPS, IMS_FALSE);
     }
 }
 
 PROTECTED
-void AosHandleMtc::ClearVolteHysTimerBlocks()
+void AosHandleMtc::SetVolteHysTimerBlock(IN VolteHysTimerBlock eBlock)
 {
-    A_IMS_TRACE_D(APPPROFILE, "ClearVolteHysTimerBlocks", 0, 0, 0);
-    m_nVolteHysTimerBlocks = VOLTE_HYS_TIMER_BLOCK_NONE;
+    IMS_UINT32 nBlock = static_cast<IMS_UINT32>(eBlock);
+
+    m_nVolteHysTimerBlocks |= nBlock;
+
+    A_IMS_TRACE_D(APPPROFILE, "SetVolteHysTimerBlock :: Block(0x%x), VolteHysTimerBlocks(0x%x)",
+            nBlock, m_nVolteHysTimerBlocks, 0);
 }
 
 PROTECTED
-void AosHandleMtc::SetVolteHysTimerBlock(IN IMS_UINT32 nBlock)
+void AosHandleMtc::ResetVolteHysTimerBlock(IN VolteHysTimerBlock eBlock)
 {
-    m_nVolteHysTimerBlocks |= nBlock;
+    IMS_UINT32 nBlock = static_cast<IMS_UINT32>(eBlock);
 
-    A_IMS_TRACE_D(APPPROFILE, "SetVolteHysTimerBlock :: Block(0x%x), VolteHysTimeBlocks(0x%x)",
+    m_nVolteHysTimerBlocks &= ~nBlock;
+
+    A_IMS_TRACE_D(APPPROFILE, "ResetVolteHysTimerBlock :: Block(0x%x), VolteHysTimerBlocks(0x%x)",
             nBlock, m_nVolteHysTimerBlocks, 0);
 }
 
@@ -1267,12 +1323,21 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
         }
 
         m_bSsacBarred = IMS_TRUE;
+        m_strSsacPlmn = m_piAppContext->GetNetTracker()->GetNetworkOperator();
 
         if (GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
                     CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_SSAC))
         {
             ReevaluateUnavailableFeature();
             return;
+        }
+
+        if (IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC))
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "ImsRadio_OnSsacChanged :: Unblock VoLTE_Hys timer due to SSAC barring", 0, 0,
+                    0);
+            ResetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
         }
 
         if (IsPlmnBlockCondition())
@@ -1293,6 +1358,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
     else
     {
         m_bSsacBarred = IMS_FALSE;
+        m_strSsacPlmn = m_piAppContext->GetNetTracker()->GetNetworkOperator();
 
         if (GET_N_CONFIG(m_nSlotId)->GetKeepRegWithMmtelFeatureTagPolicy().Contains(
                     CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_SSAC))
@@ -1314,6 +1380,14 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
                 StartVolteHysTimer(nVolteHysTime);
                 return;
             }
+
+            if (IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC))
+            {
+                A_IMS_TRACE_D(APPPROFILE,
+                        "ImsRadio_OnSsacChanged :: The block consumed. Unblock VoLTE_Hys timer.", 0,
+                        0, 0);
+                ResetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
+            }
         }
 
         ProcessBlock(BLOCK_SSAC, IMS_FALSE);
@@ -1329,15 +1403,20 @@ PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged(IN const AString& 
         return;
     }
 
-    if (!m_strVopsPlmn.Equals(strPlmn))
-    {
-        SetVolteHysTimerBlock(VOLTE_HYS_TIMER_BLOCK_VOPS_PLMN_CHANGED);
-    }
-
     if (IsVolteHysTimerRunning())
     {
         A_IMS_TRACE_I(APPPROFILE, "ServicePhone_PlmnChanged :: Stop VoLTE_Hys timer", 0, 0, 0);
         ProcessVolteHysTimerExpired();
+    }
+
+    if (!m_strVopsPlmn.Equals(strPlmn) && m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+    {
+        SetVolteHysTimerBlock(VolteHysTimerBlock::VOPS);
+    }
+
+    if (!m_strSsacPlmn.Equals(strPlmn) && m_bSsacBarred)
+    {
+        SetVolteHysTimerBlock(VolteHysTimerBlock::SSAC);
     }
 }
 

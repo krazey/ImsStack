@@ -126,15 +126,8 @@ public:
         m_bVopsIgnoredForVolteEnabled = bIgnored;
     }
     inline IMS_BOOL IsVopsIgnoredForVolteEnabled() { return m_bVopsIgnoredForVolteEnabled; }
-    inline IMS_BOOL IsVolteHysTimerBlockedByVopsPlmnChanged()
-    {
-        return (m_nVolteHysTimerBlocks & VOLTE_HYS_TIMER_BLOCK_VOPS_PLMN_CHANGED) > 0;
-    }
-    inline IMS_BOOL IsVolteHysTimerBlockedByDataDisconnected()
-    {
-        return (m_nVolteHysTimerBlocks & VOLTE_HYS_TIMER_BLOCK_DATA_DISCONNECTED) > 0;
-    }
     inline void SetVopsPlmn(IN const AString& strPlmn) { m_strVopsPlmn = strPlmn; }
+    inline void SetSsacPlmn(IN const AString& strPlmn) { m_strSsacPlmn = strPlmn; }
     inline void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_bEpdgEnabled = bEnabled; }
     inline IMS_BOOL GetNetSrvIn() { return m_bNetSrvIn; }
     inline void SetNetSrvIn(IMS_BOOL bNetSrvIn) { m_bNetSrvIn = bNetSrvIn; }
@@ -191,10 +184,15 @@ public:
     {
         AosHandle::AddBlock(nBlock, m_nHoldingBlocksForWifi);
     }
-    void SetVopsPlmnChanged() { SetVolteHysTimerBlock(VOLTE_HYS_TIMER_BLOCK_VOPS_PLMN_CHANGED); }
-    void SetDataDisconnectedOnNetworkChange()
+    void SetVolteHysTimerBlockedForVops() { SetVolteHysTimerBlock(VolteHysTimerBlock::VOPS); }
+    IMS_BOOL IsVolteHysTimerBlockedForVops()
     {
-        SetVolteHysTimerBlock(VOLTE_HYS_TIMER_BLOCK_DATA_DISCONNECTED);
+        return IsVolteHysTimerBlocked(VolteHysTimerBlock::VOPS);
+    }
+    void SetVolteHysTimerBlockedForSsac() { SetVolteHysTimerBlock(VolteHysTimerBlock::SSAC); }
+    IMS_BOOL IsVolteHysTimerBlockedForSsac()
+    {
+        return IsVolteHysTimerBlocked(VolteHysTimerBlock::SSAC);
     }
 };
 
@@ -4594,6 +4592,23 @@ TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_VolteHysTimerRunning_by_Vops)
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_VOPS));
 }
 
+TEST_F(AosHandleMtcTest, ShouldUnblockVolteHysTimerIfSsacBarred)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    SsacInfo objSsacInfo;
+    objSsacInfo.nBarringFactorForVoice = 0;
+    m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
+}
+
 TEST_F(AosHandleMtcTest, DoNothingWhenPlmnChangedIfVolteHysTimeIsEqualToZero)
 {
     // GIVEN
@@ -4603,44 +4618,105 @@ TEST_F(AosHandleMtcTest, DoNothingWhenPlmnChangedIfVolteHysTimeIsEqualToZero)
     m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("123456"));
 }
 
-TEST_F(AosHandleMtcTest, ShouldSetVopsPlmnChangedWhenPlmnChangedIfVopsPlmnNotChangedBefore)
+TEST_F(AosHandleMtcTest, ShouldBlockVolteHysTimerForVopsIfPlmnChangedOnVopsNotSupported)
 {
     // GIVEN
     m_pAosHandleMtc->SetVopsPlmn(AString("111111"));
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
 
     // WHEN
     m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("222222"));
 
     // THEN
-    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedByVopsPlmnChanged());
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedForVops());
 }
 
-TEST_F(AosHandleMtcTest, ShouldNotResetVopsPlmnChangedWhenPlmnChangedIfVopsPlmnChangedBefore)
+TEST_F(AosHandleMtcTest, ShouldNotBlockVolteHysTimerForVopsIfPlmnChangedOnVopsSupported)
 {
     // GIVEN
     m_pAosHandleMtc->SetVopsPlmn(AString("111111"));
-    m_pAosHandleMtc->SetVopsPlmnChanged();
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("222222"));
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForVops());
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotUnblockVolteHysTimerForVopsIfPlmnIsNotChanged)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsPlmn(AString("111111"));
+    m_pAosHandleMtc->SetVolteHysTimerBlockedForVops();
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
 
     // WHEN
     m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("111111"));
 
     // THEN
-    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedByVopsPlmnChanged());
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedForVops());
 }
 
-TEST_F(AosHandleMtcTest, ShouldNotSetVopsPlmnChangedWhenPlmnChangedIfSameWithVopsPlmn)
+TEST_F(AosHandleMtcTest, ShouldBlockVolteHysTimerForSsacIfPlmnChangedOnSsacBarred)
 {
     // GIVEN
-    m_pAosHandleMtc->SetVopsPlmn(AString("111111"));
+    m_pAosHandleMtc->SetSsacPlmn(AString("111111"));
+    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
+
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("222222"));
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotBlockVolteHysTimerForSsacIfPlmnChangedOnSsacNotBarred)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetSsacPlmn(AString("111111"));
+    m_pAosHandleMtc->SetSsacBarred(IMS_FALSE);
+
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("222222"));
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotUnblockVolteHysTimerForSsacIfPlmnIsNotChanged)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetSsacPlmn(AString("111111"));
+    m_pAosHandleMtc->SetVolteHysTimerBlockedForSsac();
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
 
     // WHEN
     m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("111111"));
 
     // THEN
-    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedByVopsPlmnChanged());
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotBlockVolteHysTimerForSsacIfPlmnIsNotChanged)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetSsacPlmn(AString("111111"));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ServicePhone_PlmnChanged(AString("111111"));
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
 }
 
 TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimerIfRunningWhenPlmnChanged)
@@ -4766,13 +4842,15 @@ TEST_F(AosHandleMtcTest, StopVolteHysTimer_UmtsGsm_Then_PdnLost)
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
 }
 
-TEST_F(AosHandleMtcTest, SetDataDisconnectedToVolteHysTimerBlocksIfPdnLostOnNetworkChangeToUmts)
+TEST_F(AosHandleMtcTest,
+        ShouldBlockVolteHysTimerForVopsIfPdnLostOnNetworkChangeToUmtsOnVopsNotSupported)
 {
     // GIVEN
     m_pAosHandleMtc->SetNetSrvIn(IMS_TRUE);
     m_pAosHandleMtc->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
 
     ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
     ON_CALL(m_objMockIAosConnection, GetState())
@@ -4790,17 +4868,45 @@ TEST_F(AosHandleMtcTest, SetDataDisconnectedToVolteHysTimerBlocksIfPdnLostOnNetw
     // THEN
     EXPECT_EQ(m_pAosHandleMtc->GetStoredNetworkType(), NW_REPORT_RADIO_WCDMA);
     EXPECT_FALSE(m_pAosHandleMtc->GetDataConnected());
-    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedByDataDisconnected());
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedForVops());
 }
 
 TEST_F(AosHandleMtcTest,
-        ResetDataDisconnectedFromVolteHysTimerBlocksIfVopsStillNotSupportedOnNetworkChange)
+        ShouldNotBlockVolteHysTimerForVopsIfPdnLostOnNetworkChangeToUmtsOnVopsSupported)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetSrvIn(IMS_TRUE);
+    m_pAosHandleMtc->SetHandleState(AosHandle::STATE_CONNECTED);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
+    ON_CALL(m_objMockIAosNetTracker, IsSuspended()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Moves to unsupported RAT(=WCDMA)
+
+    ON_CALL(m_objMockIAosConnection, GetState()).WillByDefault(Return(IAosConnection::STATE_IDLE));
+
+    // WHEN
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Data changed
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetStoredNetworkType(), NW_REPORT_RADIO_WCDMA);
+    EXPECT_FALSE(m_pAosHandleMtc->GetDataConnected());
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForVops());
+}
+
+TEST_F(AosHandleMtcTest, ShouldUnblockVolteHysTimerForVopsIfVopsStillNotSupportedOnNetworkChange)
 {
     // GIVEN
     m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
     m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     m_pAosHandleMtc->SetVopsPlmn(AString("123456"));
-    m_pAosHandleMtc->SetDataDisconnectedOnNetworkChange();
+    m_pAosHandleMtc->SetVolteHysTimerBlockedForVops();
     m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
     m_pAosHandleMtc->SetNetSrvIn(IMS_TRUE);
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
@@ -4817,5 +4923,101 @@ TEST_F(AosHandleMtcTest,
     m_pAosHandleMtc->NetTracker_StatusChanged();  // Network changed
 
     // THEN
-    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedByDataDisconnected());
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForVops());
+}
+
+TEST_F(AosHandleMtcTest, ShouldBlockVolteHysTimerForSsacIfPdnLostOnNetworkChangeToUmtsOnSsacBarred)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetSrvIn(IMS_TRUE);
+    m_pAosHandleMtc->SetHandleState(AosHandle::STATE_CONNECTED);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
+    ON_CALL(m_objMockIAosNetTracker, IsSuspended()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Moves to unsupported RAT(=WCDMA)
+
+    ON_CALL(m_objMockIAosConnection, GetState()).WillByDefault(Return(IAosConnection::STATE_IDLE));
+
+    // WHEN
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Data changed
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetStoredNetworkType(), NW_REPORT_RADIO_WCDMA);
+    EXPECT_FALSE(m_pAosHandleMtc->GetDataConnected());
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldNotBlockVolteHysTimerForSsacIfPdnLostOnNetworkChangeToUmtsOnSsacNotBarred)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetSrvIn(IMS_TRUE);
+    m_pAosHandleMtc->SetHandleState(AosHandle::STATE_CONNECTED);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetSsacBarred(IMS_FALSE);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
+    ON_CALL(m_objMockIAosNetTracker, IsSuspended()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Moves to unsupported RAT(=WCDMA)
+
+    ON_CALL(m_objMockIAosConnection, GetState()).WillByDefault(Return(IAosConnection::STATE_IDLE));
+
+    // WHEN
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Data changed
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetStoredNetworkType(), NW_REPORT_RADIO_WCDMA);
+    EXPECT_FALSE(m_pAosHandleMtc->GetDataConnected());
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
+}
+
+TEST_F(AosHandleMtcTest, ShouldUnblockVolteHysTimerForSsacIfSsacStillBarredOnNetworkChange)
+{
+    // GIVEN
+    SsacInfo objSsacInfoBarred;
+    objSsacInfoBarred.nBarringFactorForVoice = 0;
+    objSsacInfoBarred.nBarringFactorForVideo = 100;
+    objSsacInfoBarred.nBarringTimeSecForVoice = 60;
+    objSsacInfoBarred.nBarringTimeSecForVideo = 0;
+
+    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
+    m_pAosHandleMtc->SetSsacPlmn(AString("123456"));
+    m_pAosHandleMtc->SetVolteHysTimerBlockedForSsac();
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->SetNetSrvIn(IMS_TRUE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    m_pAosHandleMtc->Init();
+
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objTestImsRadioService.GetMockImsRadio(), GetSsacInfo())
+            .WillByDefault(ReturnRef(objSsacInfoBarred));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNetTracker, IsSuspended()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkOperator()).WillByDefault(Return(AString("123456")));
+
+    // WHEN
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Network changed
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerBlockedForSsac());
 }
