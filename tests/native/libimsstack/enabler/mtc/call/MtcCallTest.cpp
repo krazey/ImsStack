@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "CallReasonInfo.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
@@ -31,7 +34,9 @@
 #include "MockISipMessage.h"
 #include "MockISipServerConnection.h"
 #include "MtcDef.h"
+#include "PlatformContext.h"
 #include "SipStatusCode.h"
+#include "TestConfigService.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
@@ -78,6 +83,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Unused;
 
+const AString TEST_CALL_LOG_TAG = "TestCall";
+
 // SipMethod
 MATCHER_P(IsEqualSipMethod, method, "")
 {
@@ -97,6 +104,8 @@ public:
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MessageUtils objMessageUtils;
     MockIMtcCallManager objCallManager;
+    PlatformService* m_pOldConfigService;
+    TestConfigService* m_pConfigService;
 
 protected:
     virtual void SetUp() override
@@ -109,6 +118,12 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         ON_CALL(objCallStateProxy, UpdateCallState(_, _, _, _, _)).WillByDefault(Return());
+
+        m_pConfigService = new TestConfigService();
+        m_pConfigService->SetCarrierConfig(&(m_pConfigService->GetMockCarrierConfig()));
+        m_pOldConfigService = PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
 
         pSessionInterfaceHolder = new MockSessionInterfaceHolder();
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
@@ -129,6 +144,10 @@ protected:
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pOldConfigService);
+        delete m_pConfigService;
+
         delete pConfigurationProxy;
         delete pSessionInterfaceHolder;
     }
@@ -192,7 +211,8 @@ TEST_F(MtcCallTest, ConstructorAddsListeners)
     EXPECT_CALL(objRadioChecker, AddTrafficCheckerListener(_));
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 }
 
 TEST_F(MtcCallTest, DestructorRemovesListeners)
@@ -203,7 +223,8 @@ TEST_F(MtcCallTest, DestructorRemovesListeners)
     EXPECT_CALL(objRadioChecker, RemoveTrafficCheckerListener(_));
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 }
 
 TEST_F(MtcCallTest, AttachNotCallsStateForMo)
@@ -214,7 +235,8 @@ TEST_F(MtcCallTest, AttachNotCallsStateForMo)
     EXPECT_CALL(*pState, OnAttached).Times(0);
     EXPECT_CALL(*pState, OnUssiAttached).Times(0);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Attach();
 }
@@ -226,7 +248,8 @@ TEST_F(MtcCallTest, AttachCallsStateForMt)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnAttached).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Attach();
 }
@@ -239,7 +262,8 @@ TEST_F(MtcCallTest, AttachCallsStateForMtUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnUssiAttached).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Attach();
 }
@@ -254,7 +278,8 @@ TEST_F(MtcCallTest, StartCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Start(eCallType, strTarget, objMediaInfo, Ref(objSuppServices))).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 }
@@ -271,7 +296,8 @@ TEST_F(MtcCallTest, StartCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Start(eCallType, strTarget, objMediaInfo, Ref(objSuppServices))).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 }
@@ -290,7 +316,8 @@ TEST_F(MtcCallTest, StartConference5CallsState)
                     eCallType, strTarget, objMediaInfo, Ref(objSuppServices), Ref(lstUsers)))
             .Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.StartConference(eCallType, strTarget, objMediaInfo, objSuppServices, lstUsers);
 }
@@ -304,7 +331,8 @@ TEST_F(MtcCallTest, StartConference3CallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, StartConference(eCallType, strTarget, Ref(lstUsers))).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.StartConference(eCallType, strTarget, lstUsers);
 }
@@ -316,7 +344,8 @@ TEST_F(MtcCallTest, HandleIncomingCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, HandleIncoming(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.HandleIncoming(&objSession);
 }
@@ -342,7 +371,8 @@ TEST_F(MtcCallTest, HandleIncomingCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, HandleIncomingUssi(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.HandleIncoming(&objSession);
 }
@@ -353,7 +383,8 @@ TEST_F(MtcCallTest, HandleIncomingFailsIfSessionIsNull)
     EXPECT_CALL(*pState, HandleIncoming(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.HandleIncoming(IMS_NULL);
 }
@@ -363,7 +394,8 @@ TEST_F(MtcCallTest, HandleUserAlertCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, HandleUserAlert).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.HandleUserAlert();
 }
@@ -375,7 +407,8 @@ TEST_F(MtcCallTest, HandleUserAlertDoesNothingForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, HandleUserAlert).Times(0);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.HandleUserAlert();
 }
@@ -388,7 +421,8 @@ TEST_F(MtcCallTest, AcceptCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Accept(eCallType, objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Accept(eCallType, objMediaInfo);
 }
@@ -403,7 +437,8 @@ TEST_F(MtcCallTest, AcceptCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, AcceptUssi(eCallType, objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Accept(eCallType, objMediaInfo);
 }
@@ -415,7 +450,8 @@ TEST_F(MtcCallTest, RejectCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Reject(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Reject(objReason);
 }
@@ -427,7 +463,8 @@ TEST_F(MtcCallTest, HoldCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Hold(objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Hold(objMediaInfo);
 }
@@ -439,7 +476,8 @@ TEST_F(MtcCallTest, ResumeCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Resume(objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Resume(objMediaInfo);
 }
@@ -452,7 +490,8 @@ TEST_F(MtcCallTest, AcceptResumeCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, AcceptResume(eCallType, objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.AcceptResume(eCallType, objMediaInfo);
 }
@@ -464,7 +503,8 @@ TEST_F(MtcCallTest, RejectResumeCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, RejectResume(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.RejectResume(objReason);
 }
@@ -477,7 +517,8 @@ TEST_F(MtcCallTest, UpdateCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Update(eCallType, objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Update(eCallType, objMediaInfo);
 }
@@ -490,7 +531,8 @@ TEST_F(MtcCallTest, AcceptUpdateCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, AcceptUpdate(eCallType, objMediaInfo)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.AcceptUpdate(eCallType, objMediaInfo);
 }
@@ -502,7 +544,8 @@ TEST_F(MtcCallTest, RejectUpdateCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, RejectUpdate(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.RejectUpdate(objReason);
 }
@@ -514,7 +557,8 @@ TEST_F(MtcCallTest, CancelUpdateCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, CancelUpdate(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.CancelUpdate(objReason);
 }
@@ -526,7 +570,8 @@ TEST_F(MtcCallTest, TerminateCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Terminate(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Terminate(objReason);
 }
@@ -540,7 +585,8 @@ TEST_F(MtcCallTest, TerminateCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, TerminateUssi(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Terminate(objReason);
 }
@@ -552,14 +598,15 @@ TEST_F(MtcCallTest, SendUssdCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SendUssd(strUssd)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SendUssd(strUssd);
 }
 
 TEST_F(MtcCallTest, GetKeyReturnsValidKeyInitially)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     NullCall objNullCall;
 
     EXPECT_NE(objNullCall.GetKey(), objCall.GetKey());
@@ -567,8 +614,8 @@ TEST_F(MtcCallTest, GetKeyReturnsValidKeyInitially)
 
 TEST_F(MtcCallTest, GetKeyReturnsNotOverlappingKey)
 {
-    MtcCall objCall1(objContext, objService, objCallInfo, CreateStateFactory());
-    MtcCall objCall2(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall1(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+    MtcCall objCall2(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(objCall1.GetKey(), objCall2.GetKey());
 }
@@ -576,7 +623,7 @@ TEST_F(MtcCallTest, GetKeyReturnsNotOverlappingKey)
 TEST_F(MtcCallTest, GetCallTypeReturnsInitialCallTypeWhenNoSessionExists)
 {
     objCallInfo.eInitialCallType = CallType::VIDEO_RTT;
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(objCallInfo.eInitialCallType, objCall.GetCallType());
 }
@@ -587,7 +634,7 @@ TEST_F(MtcCallTest, GetCallTypeReturnsCallTypeOfLastSession)
     MockISession objSession2;
 
     objCallInfo.eInitialCallType = CallType::VOIP;
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
     IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
@@ -599,7 +646,7 @@ TEST_F(MtcCallTest, GetCallTypeReturnsCallTypeOfLastSession)
 
 TEST_F(MtcCallTest, GetStateReturnsIdleInitially)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(CallStateName::IDLE, objCall.GetState());
 }
@@ -612,7 +659,8 @@ TEST_F(MtcCallTest, GetStateReturnsChangedState)
     ON_CALL(*pState, GetStateName).WillByDefault(Return(eChangedState));
     ON_CALL(*pState, HandleUserAlert).WillByDefault(Return(eChangedState));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
     objCall.HandleUserAlert();
 
     EXPECT_EQ(eChangedState, objCall.GetState());
@@ -620,15 +668,15 @@ TEST_F(MtcCallTest, GetStateReturnsChangedState)
 
 TEST_F(MtcCallTest, GetCallContextReturnsThis)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(&objCall, &objCall.GetCallContext());
 }
 
 TEST_F(MtcCallTest, GetCallKeyReturnsKey)
 {
-    MtcCall objCall1(objContext, objService, objCallInfo, CreateStateFactory());
-    MtcCall objCall2(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall1(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+    MtcCall objCall2(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(objCall1.GetKey(), objCall1.GetCallKey());
     EXPECT_EQ(objCall2.GetKey(), objCall2.GetCallKey());
@@ -637,7 +685,8 @@ TEST_F(MtcCallTest, GetCallKeyReturnsKey)
 TEST_F(MtcCallTest, IsEstablishedReturnsTrueAfterEstablishedState)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_FALSE(objCall.IsEstablished());
 
@@ -668,7 +717,7 @@ TEST_F(MtcCallTest, IsEstablishedReturnsTrueAfterEstablishedState)
 
 TEST_F(MtcCallTest, IsHeldByMeInitiallyReturnsFalse)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(IMS_FALSE, objCall.IsHeldByMe());
 }
@@ -676,7 +725,7 @@ TEST_F(MtcCallTest, IsHeldByMeInitiallyReturnsFalse)
 TEST_F(MtcCallTest, IsUssiReturnsFalseIfNotUssi)
 {
     objCallInfo.bUssi = IMS_FALSE;
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(IMS_FALSE, objCall.IsUssi());
 }
@@ -684,19 +733,20 @@ TEST_F(MtcCallTest, IsUssiReturnsFalseIfNotUssi)
 TEST_F(MtcCallTest, IsUssiReturnsTrueIfUssi)
 {
     objCallInfo.bUssi = IMS_TRUE;
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(IMS_TRUE, objCall.IsUssi());
 }
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfOtherCallExists)
 {
-    MtcCall objExistingCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objExistingCall(
+            objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     ImsList<IMtcCall*> lstOtherCalls;
     lstOtherCalls.Append(&objExistingCall);
     ON_CALL(objCallManager, GetCallsExcluding(_)).WillByDefault(Return(lstOtherCalls));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_TRUE, IMS_FALSE,
             IMS_TRUE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
@@ -704,7 +754,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfOtherCallExists)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfEpsOnlyAttachBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_TRUE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
@@ -712,7 +762,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfEpsOnlyAttachBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInNrBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
@@ -720,7 +770,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInNrBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInWifiBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_TRUE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
@@ -728,7 +778,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInWifiBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInRoamingBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE,
             IMS_TRUE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
@@ -736,7 +786,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInRoamingBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInHomeBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_TRUE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
@@ -744,7 +794,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInHomeBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfNoBlockConditions)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
@@ -752,7 +802,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfNoBlockConditions)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfEpsOnlyAttachNotBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
@@ -764,7 +814,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfEpsOnlyAttachNotBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInNrNotBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
@@ -776,7 +826,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInNrNotBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInWifiNotBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
@@ -788,7 +838,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInWifiNotBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInRoamingNotBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE,
             IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
@@ -800,7 +850,7 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInRoamingNotBlocked)
 
 TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInHomeNotBlocked)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
             IMS_TRUE, IMS_TRUE);
     EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
@@ -809,21 +859,21 @@ TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInHomeNotBlocked)
 TEST_F(MtcCallTest, GetCallInfoReturnsCallInfo)
 {
     objCallInfo.bConference = !objCallInfo.bConference;
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(objCallInfo, objCall.GetCallInfo());
 }
 
 TEST_F(MtcCallTest, GetParticipantInfoReturnsNotNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, &objCall.GetParticipantInfo());
 }
 
 TEST_F(MtcCallTest, GetSessionWithISessionInitiallyReturnsNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     MockISession objSession;
 
     EXPECT_EQ(nullptr, objCall.GetSession(&objSession));
@@ -834,7 +884,7 @@ TEST_F(MtcCallTest, GetSessionWithISessionReturnsMatchingSession)
     MockISession objSession1;
     MockISession objSession2;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     const IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
     const IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
 
@@ -844,7 +894,7 @@ TEST_F(MtcCallTest, GetSessionWithISessionReturnsMatchingSession)
 
 TEST_F(MtcCallTest, GetSessionInitiallyReturnsNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(nullptr, objCall.GetSession());
 }
@@ -854,7 +904,7 @@ TEST_F(MtcCallTest, GetSessionReturnsLastSession)
     MockISession objSession1;
     MockISession objSession2;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     const IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
     const IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
 
@@ -867,7 +917,7 @@ TEST_F(MtcCallTest, GetSessionsReturnsAllSessions)
     MockISession objSession1;
     MockISession objSession2;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     const IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
     const IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
 
@@ -879,56 +929,56 @@ TEST_F(MtcCallTest, GetSessionsReturnsAllSessions)
 
 TEST_F(MtcCallTest, GetServiceReturnsGivenService)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(&objService, &objCall.GetService());
 }
 
 TEST_F(MtcCallTest, GetUiNotifierReturnsNotNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, &objCall.GetUiNotifier());
 }
 
 TEST_F(MtcCallTest, GetMediaManagerReturnsNotNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, &objCall.GetMediaManager());
 }
 
 TEST_F(MtcCallTest, GetPreconditionManagerReturnsNotNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, &objCall.GetPreconditionManager());
 }
 
 TEST_F(MtcCallTest, GetUssiControllerInitiallyReturnsNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(nullptr, objCall.GetUssiController());
 }
 
 TEST_F(MtcCallTest, GetPendingOperationHolderReturnsNotNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, &objCall.GetPendingOperationHolder());
 }
 
 TEST_F(MtcCallTest, GetOtherCallsReturnsExcludingMe)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     EXPECT_CALL(objCallManager, GetCallsExcluding(objCall.GetKey())).Times(1);
     objCall.GetOtherCalls();
 }
 
 TEST_F(MtcCallTest, GetUpdatingInfoReturnsSameNotNullInstance)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     const UpdatingInfo& objUpdatingInfo = objCall.GetUpdatingInfo();
 
@@ -938,7 +988,7 @@ TEST_F(MtcCallTest, GetUpdatingInfoReturnsSameNotNullInstance)
 
 TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     const EpsFallbackTrigger& objEpsFbTrigger = objCall.GetEpsFallbackTrigger();
 
@@ -948,7 +998,7 @@ TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
 
 TEST_F(MtcCallTest, GetCurrentLocationDiscoveryControllerCreatesInstance)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     const CurrentLocationDiscoveryController* pCurrentLocationDiscoveryController =
             &objCall.GetCurrentLocationDiscoveryController();
@@ -959,7 +1009,8 @@ TEST_F(MtcCallTest, GetCurrentLocationDiscoveryControllerCreatesInstance)
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(nullptr, objCall.CreateSession(IMS_NULL));
 }
@@ -969,7 +1020,8 @@ TEST_F(MtcCallTest, CreateSessionDoesNothingIfMtcSessionExists)
     MockISession objSession;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.CreateSession(&objSession);
 
@@ -985,7 +1037,8 @@ TEST_F(MtcCallTest, CreateSessionSetListenersOfSession)
     EXPECT_CALL(objSession, SetRefreshListener(_)).Times(2);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, objCall.CreateSession(&objSession));
 }
@@ -994,7 +1047,8 @@ TEST_F(MtcCallTest, CreateSessionCreatesMtcSession)
 {
     MockISession objSession;
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, objCall.CreateSession(&objSession));
 }
@@ -1004,14 +1058,15 @@ TEST_F(MtcCallTest, CreateSessionGetsISessionFromInterfaceFactory)
     EXPECT_CALL(*pSessionInterfaceHolder, GetISession(_, _, _, _));
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.CreateSession();
 }
 
 TEST_F(MtcCallTest, CreateBlockCheckerReturnsNotNull)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     ImsList<IMtcBlockRule*> lstSomeRules;
 
     EXPECT_NE(nullptr, objCall.CreateBlockChecker(lstSomeRules));
@@ -1025,7 +1080,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
     objCallInfo.bUssi = !objCallInfo.bUssi;
     objCallInfo.bConference = !objCallInfo.bConference;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(objService.GetServiceType(), objJniCallInfo.eServiceType);
@@ -1041,7 +1096,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeFalse)
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
             .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(IMS_FALSE, objJniCallInfo.bConferenceSubscriptionRequired);
@@ -1052,7 +1107,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfInDialog)
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
             .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(IMS_TRUE, objJniCallInfo.bConferenceSubscriptionRequired);
@@ -1063,7 +1118,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfOutDialog)
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
             .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(IMS_TRUE, objJniCallInfo.bConferenceSubscriptionRequired);
@@ -1071,7 +1126,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfOutDialog)
 
 TEST_F(MtcCallTest, CreateJniCallInfoInitiallyReturnsFalseCapability)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(IMS_FALSE, objJniCallInfo.bRttCapable);
@@ -1081,7 +1136,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoInitiallyReturnsFalseCapability)
 TEST_F(MtcCallTest, CreateJniCallInfoReturnsCapabilityOfSession)
 {
     MockISession objSession;
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     const IMtcSession* pSession = objCall.CreateSession(&objSession);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
@@ -1094,7 +1149,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCrossSim)
 {
     ON_CALL(objService, IsCrossSimConnected).WillByDefault(Return(IMS_TRUE));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
 
     EXPECT_EQ(objService.IsCrossSimConnected(), objJniCallInfo.bCrossSim);
@@ -1109,7 +1164,7 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfNoSessionExists)
 {
     const SipMethod eAnyMethod = SipMethod::INVITE;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(nullptr, objCall.CreateClientConnection(eAnyMethod));
 }
@@ -1123,7 +1178,7 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfISessionReturnsNull)
             .Times(1)
             .WillOnce(Return(nullptr));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     objCall.CreateSession(&objSession);
 
     EXPECT_EQ(nullptr, objCall.CreateClientConnection(eAnyMethod));
@@ -1139,7 +1194,7 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsConnectionFromISession)
             .Times(1)
             .WillOnce(Return(&objClientConnection));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     objCall.CreateSession(&objSession);
 
     EXPECT_EQ(&objClientConnection, objCall.CreateClientConnection(eAnyMethod));
@@ -1147,7 +1202,7 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsConnectionFromISession)
 
 TEST_F(MtcCallTest, CreateUdpKeepAliveSenderReturnsInstance)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     UdpKeepAliveSender* pUdpKeepAliveSender = objCall.CreateUdpKeepAliveSender();
     EXPECT_NE(nullptr, pUdpKeepAliveSender);
@@ -1160,7 +1215,7 @@ TEST_F(MtcCallTest, RemoveSessionRemovesMatchingSession)
     MockISession objSession1;
     MockISession objSession2;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     objCall.CreateSession(&objSession1);
     IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
     objCall.RemoveSession(*piMtcSession2);
@@ -1174,7 +1229,7 @@ TEST_F(MtcCallTest, RemoveAllSessionsRemovesAllSessions)
     MockISession objSession1;
     MockISession objSession2;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     objCall.CreateSession(&objSession1);
     objCall.CreateSession(&objSession2);
     objCall.RemoveAllSessions();
@@ -1188,7 +1243,7 @@ TEST_F(MtcCallTest, DeleteUpdatingInfoDeletesPreviousOne)
 {
     const CallType eChangedCallType = CallType::VT;
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     objCall.GetUpdatingInfo().SetTargetCallType(eChangedCallType);
 
     objCall.DeleteUpdatingInfo();
@@ -1205,7 +1260,8 @@ TEST_F(MtcCallTest, RunPendingOperationIfPossibledRunsAllPendingOperationIfEstab
     };
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::ESTABLISHED));
 
@@ -1226,7 +1282,8 @@ TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunPendingOperationIfInDela
     };
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::ESTABLISHED));
 
@@ -1249,7 +1306,8 @@ TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunsAllPendingOperationIfUp
     };
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::ESTABLISHED));
     objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
@@ -1263,7 +1321,7 @@ TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunsAllPendingOperationIfUp
 
 TEST_F(MtcCallTest, GetTimerReturnsMember)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     const MtcTimerWrapper* pTimer = &objCall.GetTimer();
 
     EXPECT_NE(pTimer, nullptr);
@@ -1271,7 +1329,7 @@ TEST_F(MtcCallTest, GetTimerReturnsMember)
 
 TEST_F(MtcCallTest, GetSupplementaryServiceReturnsMember)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     const MtcSupplementaryService* pSuppService = &objCall.GetSupplementaryService();
 
     EXPECT_NE(pSuppService, nullptr);
@@ -1280,7 +1338,8 @@ TEST_F(MtcCallTest, GetSupplementaryServiceReturnsMember)
 TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetSlotId).Times(1);
     objCall.GetSlotId();
@@ -1289,7 +1348,8 @@ TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
 TEST_F(MtcCallTest, GetSubscriberConfigCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetSubscriberConfig).Times(1);
     objCall.GetSubscriberConfig();
@@ -1298,7 +1358,8 @@ TEST_F(MtcCallTest, GetSubscriberConfigCallsMtcContext)
 TEST_F(MtcCallTest, GetDialingPlanCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIMtcDialingPlan objDialingPlan;
     EXPECT_CALL(objContext, GetDialingPlan).Times(1).WillRepeatedly(ReturnRef(objDialingPlan));
@@ -1311,7 +1372,8 @@ TEST_F(MtcCallTest, GetServiceByTypeCallsMtcContext)
     ServiceType eServiceType = ServiceType::NORMAL;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetServiceByType(eServiceType)).Times(1);
 
@@ -1321,7 +1383,8 @@ TEST_F(MtcCallTest, GetServiceByTypeCallsMtcContext)
 TEST_F(MtcCallTest, GetCallManagerCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIMtcCallManager objCallManager;
     EXPECT_CALL(objContext, GetCallManager).Times(1).WillRepeatedly(ReturnRef(objCallManager));
@@ -1331,7 +1394,7 @@ TEST_F(MtcCallTest, GetCallManagerCallsMtcContext)
 
 TEST_F(MtcCallTest, GetRadioCheckerCallsMtcContext)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetRadioChecker).Times(2).WillRepeatedly(ReturnRef(objRadioChecker));
 
@@ -1341,7 +1404,8 @@ TEST_F(MtcCallTest, GetRadioCheckerCallsMtcContext)
 TEST_F(MtcCallTest, GetCallControllerCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIMtcCallController objCallController;
     EXPECT_CALL(objContext, GetCallController)
@@ -1354,7 +1418,8 @@ TEST_F(MtcCallTest, GetCallControllerCallsMtcContext)
 TEST_F(MtcCallTest, GetConfigurationProxyCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetConfigurationProxy).Times(1);
 
@@ -1364,7 +1429,8 @@ TEST_F(MtcCallTest, GetConfigurationProxyCallsMtcContext)
 TEST_F(MtcCallTest, GetCallStateProxyCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetCallStateProxy).Times(1);
 
@@ -1374,7 +1440,8 @@ TEST_F(MtcCallTest, GetCallStateProxyCallsMtcContext)
 TEST_F(MtcCallTest, GetImsEventReceiverCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIMtcImsEventReceiver objImsEventReceiver;
     EXPECT_CALL(objContext, GetImsEventReceiver)
@@ -1389,7 +1456,8 @@ TEST_F(MtcCallTest, GetAosConnectorCallsMtcContext)
     ServiceType eServiceType = ServiceType::NORMAL;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, GetAosConnector(eServiceType)).Times(1);
 
@@ -1399,7 +1467,8 @@ TEST_F(MtcCallTest, GetAosConnectorCallsMtcContext)
 TEST_F(MtcCallTest, GetSipInterfaceFactoryCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     EXPECT_CALL(objContext, GetSipInterfaceFactory)
@@ -1412,7 +1481,8 @@ TEST_F(MtcCallTest, GetSipInterfaceFactoryCallsMtcContext)
 TEST_F(MtcCallTest, GetConferenceManagerCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIConferenceManager objConferenceManager;
     EXPECT_CALL(objContext, GetConferenceManager)
@@ -1425,7 +1495,8 @@ TEST_F(MtcCallTest, GetConferenceManagerCallsMtcContext)
 TEST_F(MtcCallTest, GetEctManagerCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIEctManager objEctManager;
     EXPECT_CALL(objContext, GetEctManager).Times(1).WillOnce(ReturnRef(objEctManager));
@@ -1436,7 +1507,8 @@ TEST_F(MtcCallTest, GetEctManagerCallsMtcContext)
 TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     MockIMtcEmergencyServiceManager objEsm;
     EXPECT_CALL(objContext, GetEmergencyServiceManager).Times(1).WillOnce(ReturnRef(objEsm));
@@ -1447,7 +1519,8 @@ TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
 TEST_F(MtcCallTest, RunAsyncOperationCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
     std::function<void()> objAnyOperation;
 
     EXPECT_CALL(objContext, RunAsyncOperation(this, _)).Times(1);
@@ -1457,7 +1530,7 @@ TEST_F(MtcCallTest, RunAsyncOperationCallsMtcContext)
 
 TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     MockIMessageUtils objMessageUtils;
     EXPECT_CALL(objContext, GetMessageUtils).Times(1).WillRepeatedly(ReturnRef(objMessageUtils));
 
@@ -1466,7 +1539,7 @@ TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)
 
 TEST_F(MtcCallTest, GetPassiveTimerHolderCallsMtcContext)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     MockIPassiveTimerHolder objPassiveTimerHolder;
     EXPECT_CALL(objContext, GetPassiveTimerHolder)
             .Times(1)
@@ -1477,7 +1550,7 @@ TEST_F(MtcCallTest, GetPassiveTimerHolderCallsMtcContext)
 
 TEST_F(MtcCallTest, GetMultiEndpointManagerCallsMtcContext)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     EXPECT_CALL(objContext, GetMultiEndpointManager).Times(1);
 
     objCall.GetMultiEndpointManager();
@@ -1485,7 +1558,7 @@ TEST_F(MtcCallTest, GetMultiEndpointManagerCallsMtcContext)
 
 TEST_F(MtcCallTest, GetLastComeFirstServedHelperCallsMtcContext)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     MockILastComeFirstServedHelper objLastComeFirstServedHelper;
     EXPECT_CALL(objContext, GetLastComeFirstServedHelper)
             .WillOnce(ReturnRef(objLastComeFirstServedHelper));
@@ -1495,7 +1568,7 @@ TEST_F(MtcCallTest, GetLastComeFirstServedHelperCallsMtcContext)
 
 TEST_F(MtcCallTest, GetCallConnectionIdManagerCallsMtcContext)
 {
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
     MockCallConnectionIdManager objCallConnectionIdManager(objContext);
     EXPECT_CALL(objContext, GetCallConnectionIdManager)
             .Times(1)
@@ -1507,7 +1580,8 @@ TEST_F(MtcCallTest, GetCallConnectionIdManagerCallsMtcContext)
 TEST_F(MtcCallTest, GetWifiTestModeCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objContext, IsWifiTestMode).Times(1);
 
@@ -1517,7 +1591,8 @@ TEST_F(MtcCallTest, GetWifiTestModeCallsMtcContext)
 TEST_F(MtcCallTest, SetHeldByMeSetsHeldByMe)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SetHeldByMe(IMS_TRUE);
     EXPECT_EQ(IMS_TRUE, objCall.IsHeldByMe());
@@ -1529,7 +1604,8 @@ TEST_F(MtcCallTest, SetHeldByMeSetsHeldByMe)
 TEST_F(MtcCallTest, SetUnconfirmedRemoteHoldSetsUnconfirmedRemoteHold)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SetUnconfirmedRemoteHold(IMS_TRUE);
     EXPECT_TRUE(objCall.IsOnUnconfirmedRemoteHold());
@@ -1545,7 +1621,8 @@ TEST_F(MtcCallTest, SessionAlertingCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionAlerting(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionAlerting(&objSession);
 }
@@ -1556,7 +1633,8 @@ TEST_F(MtcCallTest, SessionAlertingFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionAlerting(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionAlerting(IMS_NULL);
 }
@@ -1569,7 +1647,8 @@ TEST_F(MtcCallTest, SessionReferenceReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionReferenceReceived(&objSession, &objReference)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionReferenceReceived(&objSession, &objReference);
 }
@@ -1583,7 +1662,8 @@ TEST_F(MtcCallTest, SessionReferenceReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionReferenceReceived(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionReferenceReceived(IMS_NULL, &objReference);
 }
@@ -1600,7 +1680,8 @@ TEST_F(MtcCallTest, SessionReferenceReceivedFailsIfReferenceIsNull)
     EXPECT_CALL(*pState, SessionReferenceReceived(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionReferenceReceived(&objSession, IMS_NULL);
 }
@@ -1612,7 +1693,8 @@ TEST_F(MtcCallTest, SessionStartedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionStarted(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionStarted(&objSession);
 }
@@ -1626,7 +1708,8 @@ TEST_F(MtcCallTest, SessionStartedCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, UssiStarted(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionStarted(&objSession);
 }
@@ -1637,7 +1720,8 @@ TEST_F(MtcCallTest, SessionStartedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionStarted(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionStarted(IMS_NULL);
 }
@@ -1649,7 +1733,8 @@ TEST_F(MtcCallTest, SessionStartFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionStartFailed(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionStartFailed(&objSession);
 }
@@ -1660,7 +1745,8 @@ TEST_F(MtcCallTest, SessionStartFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionStartFailed(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionStartFailed(IMS_NULL);
 }
@@ -1672,7 +1758,8 @@ TEST_F(MtcCallTest, SessionTerminatedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionTerminated(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionTerminated(&objSession);
 }
@@ -1686,7 +1773,8 @@ TEST_F(MtcCallTest, SessionTerminatedCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, UssiTerminated(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionTerminated(&objSession);
 }
@@ -1697,7 +1785,8 @@ TEST_F(MtcCallTest, SessionTerminatedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionTerminated(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionTerminated(IMS_NULL);
 }
@@ -1709,7 +1798,8 @@ TEST_F(MtcCallTest, SessionUpdatedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionUpdated(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionUpdated(&objSession);
 }
@@ -1720,7 +1810,8 @@ TEST_F(MtcCallTest, SessionUpdatedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionUpdated(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionUpdated(IMS_NULL);
 }
@@ -1732,7 +1823,8 @@ TEST_F(MtcCallTest, SessionUpdateFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionUpdateFailed(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionUpdateFailed(&objSession);
 }
@@ -1743,7 +1835,8 @@ TEST_F(MtcCallTest, SessionUpdateFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionUpdateFailed(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionUpdateFailed(IMS_NULL);
 }
@@ -1755,7 +1848,8 @@ TEST_F(MtcCallTest, SessionUpdateReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionUpdateReceived(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionUpdateReceived(&objSession);
 }
@@ -1766,7 +1860,8 @@ TEST_F(MtcCallTest, SessionUpdateReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionUpdateReceived(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionUpdateReceived(IMS_NULL);
 }
@@ -1778,7 +1873,8 @@ TEST_F(MtcCallTest, SessionCancelDeliveredCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionCancelDelivered(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionCancelDelivered(&objSession);
 }
@@ -1789,7 +1885,8 @@ TEST_F(MtcCallTest, SessionCancelDeliveredFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionCancelDelivered(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionCancelDelivered(IMS_NULL);
 }
@@ -1801,7 +1898,8 @@ TEST_F(MtcCallTest, SessionCancelDeliveryFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionCancelDeliveryFailed(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionCancelDeliveryFailed(&objSession);
 }
@@ -1812,7 +1910,8 @@ TEST_F(MtcCallTest, SessionCancelDeliveryFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionCancelDeliveryFailed(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionCancelDeliveryFailed(IMS_NULL);
 }
@@ -1824,7 +1923,8 @@ TEST_F(MtcCallTest, SessionEarlyMediaUpdatedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionEarlyMediaUpdated(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionEarlyMediaUpdated(&objSession);
 }
@@ -1835,7 +1935,8 @@ TEST_F(MtcCallTest, SessionEarlyMediaUpdatedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionEarlyMediaUpdated(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionEarlyMediaUpdated(IMS_NULL);
 }
@@ -1847,7 +1948,8 @@ TEST_F(MtcCallTest, SessionEarlyMediaUpdateFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionEarlyMediaUpdateFailed(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionEarlyMediaUpdateFailed(&objSession);
 }
@@ -1858,7 +1960,8 @@ TEST_F(MtcCallTest, SessionEarlyMediaUpdateFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionEarlyMediaUpdateFailed(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionEarlyMediaUpdateFailed(IMS_NULL);
 }
@@ -1870,7 +1973,8 @@ TEST_F(MtcCallTest, SessionEarlyMediaUpdateReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionEarlyMediaUpdateReceived(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionEarlyMediaUpdateReceived(&objSession);
 }
@@ -1881,7 +1985,8 @@ TEST_F(MtcCallTest, SessionEarlyMediaUpdateReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionEarlyMediaUpdateReceived(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionEarlyMediaUpdateReceived(IMS_NULL);
 }
@@ -1894,7 +1999,8 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionForkedResponseReceived(&objSession, &objForkedSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionForkedResponseReceived(&objSession, &objForkedSession);
 }
@@ -1911,7 +2017,8 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, HandleIncoming(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionForkedResponseReceived(IMS_NULL, &objForkedSession);
 }
@@ -1928,7 +2035,8 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfForkedSessionIsNull)
     EXPECT_CALL(*pState, HandleIncoming(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionForkedResponseReceived(&objSession, IMS_NULL);
 }
@@ -1940,7 +2048,8 @@ TEST_F(MtcCallTest, SessionPrackDeliveredCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionPrackDelivered(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionPrackDelivered(&objSession);
 }
@@ -1951,7 +2060,8 @@ TEST_F(MtcCallTest, SessionPrackDeliveredFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionPrackDelivered(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionPrackDelivered(IMS_NULL);
 }
@@ -1963,7 +2073,8 @@ TEST_F(MtcCallTest, SessionPrackDeliveryFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionPrackDeliveryFailed(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionPrackDeliveryFailed(&objSession);
 }
@@ -1974,7 +2085,8 @@ TEST_F(MtcCallTest, SessionPrackDeliveryFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionPrackDeliveryFailed(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionPrackDeliveryFailed(IMS_NULL);
 }
@@ -1986,7 +2098,8 @@ TEST_F(MtcCallTest, SessionPrackReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionPrackReceived(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionPrackReceived(&objSession);
 }
@@ -1997,7 +2110,8 @@ TEST_F(MtcCallTest, SessionPrackReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionPrackReceived(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionPrackReceived(IMS_NULL);
 }
@@ -2010,7 +2124,8 @@ TEST_F(MtcCallTest, SessionProvisionalResponseReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionProvisionalResponseReceived(&objSession, nIndex)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionProvisionalResponseReceived(&objSession, nIndex);
 }
@@ -2023,7 +2138,8 @@ TEST_F(MtcCallTest, SessionProvisionalResponseReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionProvisionalResponseReceived(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionProvisionalResponseReceived(IMS_NULL, nIndex);
 }
@@ -2035,7 +2151,8 @@ TEST_F(MtcCallTest, SessionRprDeliveryFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionRprDeliveryFailed(&objSession)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionRprDeliveryFailed(&objSession);
 }
@@ -2046,7 +2163,8 @@ TEST_F(MtcCallTest, SessionRprDeliveryFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionRprDeliveryFailed(_)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionRprDeliveryFailed(IMS_NULL);
 }
@@ -2059,7 +2177,8 @@ TEST_F(MtcCallTest, SessionRprReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionRprReceived(&objSession, nIndex)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionRprReceived(&objSession, nIndex);
 }
@@ -2072,7 +2191,8 @@ TEST_F(MtcCallTest, SessionRprReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionRprReceived(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionRprReceived(IMS_NULL, nIndex);
 }
@@ -2085,7 +2205,8 @@ TEST_F(MtcCallTest, SessionTransactionReceivedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionTransactionReceived(&objSession, &objServerConnection)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionTransactionReceived(&objSession, &objServerConnection);
 }
@@ -2100,7 +2221,8 @@ TEST_F(MtcCallTest, SessionTransactionReceivedCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, UssiInfoReceived(&objSession, &objServerConnection)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionTransactionReceived(&objSession, &objServerConnection);
 }
@@ -2113,7 +2235,8 @@ TEST_F(MtcCallTest, SessionTransactionReceivedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, SessionTransactionReceived(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.SessionTransactionReceived(IMS_NULL, &objServerConnection);
 }
@@ -2125,7 +2248,8 @@ TEST_F(MtcCallTest, OnRefreshCompletedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Refresh_NotifyCompleted(&objConnection)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Refresh_NotifyCompleted(&objConnection);
 }
@@ -2135,7 +2259,8 @@ TEST_F(MtcCallTest, OnRefreshTerminatedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Refresh_NotifyTerminated()).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Refresh_NotifyTerminated();
 }
@@ -2147,7 +2272,8 @@ TEST_F(MtcCallTest, OnRefreshTimerExpiredCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Refresh_NotifyTimerExpired(bDoImplicitRefresh)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Refresh_NotifyTimerExpired(bDoImplicitRefresh);
 }
@@ -2159,7 +2285,8 @@ TEST_F(MtcCallTest, OnTimerExpiredCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnTimerExpired(nType)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnTimerExpired(nType);
 }
@@ -2171,7 +2298,8 @@ TEST_F(MtcCallTest, OnBlockCheckedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnBlockChecked(objResult)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnBlockChecked(objResult);
 }
@@ -2184,7 +2312,8 @@ TEST_F(MtcCallTest, QosReservedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, QosReserved(&objSession, eMediaType)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.QosReserved(&objSession, eMediaType);
 }
@@ -2197,7 +2326,8 @@ TEST_F(MtcCallTest, QosReservedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, QosReserved(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.QosReserved(IMS_NULL, eMediaType);
 }
@@ -2210,7 +2340,8 @@ TEST_F(MtcCallTest, QosReserveFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, QosReserveFailed(&objSession, eNextAction)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.QosReserveFailed(&objSession, eNextAction);
 }
@@ -2223,7 +2354,8 @@ TEST_F(MtcCallTest, QosReserveFailedFailsIfSessionIsNull)
     EXPECT_CALL(*pState, QosReserveFailed(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.QosReserveFailed(IMS_NULL, eNextAction);
 }
@@ -2233,7 +2365,8 @@ TEST_F(MtcCallTest, OnStateTransitionUpdatesCallStateProxy)
     CallStateName eState = CallStateName::INCOMING;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     EXPECT_CALL(objCallStateProxy,
             UpdateCallState(
@@ -2252,7 +2385,8 @@ TEST_F(MtcCallTest, ClientConnection_NotifyResponseCallsState)
     EXPECT_CALL(*pState, ClientConnection_NotifyResponse(&objConnection, &objForkedConnection))
             .Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.ClientConnection_NotifyResponse(&objConnection, &objForkedConnection);
 }
@@ -2267,7 +2401,8 @@ TEST_F(MtcCallTest, ClientConnection_NotifyResponseCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, NotifyResponseToUssiInfo(&objConnection, &objForkedConnection)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.ClientConnection_NotifyResponse(&objConnection, &objForkedConnection);
 }
@@ -2280,7 +2415,8 @@ TEST_F(MtcCallTest, ClientConnection_NotifyResponseFailsIfConnectionIsNull)
     EXPECT_CALL(*pState, ClientConnection_NotifyResponse(_, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.ClientConnection_NotifyResponse(IMS_NULL, &objForkedConnection);
 }
@@ -2294,7 +2430,8 @@ TEST_F(MtcCallTest, Error_NotifyErrorCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, Error_NotifyError(&objConnection, nCode, strMessage)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Error_NotifyError(&objConnection, nCode, strMessage);
 }
@@ -2310,7 +2447,8 @@ TEST_F(MtcCallTest, Error_NotifyErrorCallsStateForUssi)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, NotifyErrorToUssiInfo(&objConnection, nCode, strMessage)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Error_NotifyError(&objConnection, nCode, strMessage);
 }
@@ -2324,7 +2462,8 @@ TEST_F(MtcCallTest, Error_NotifyErrorFailsIfConnectionIsNull)
     EXPECT_CALL(*pState, Error_NotifyError(_, _, _)).Times(0);
     EXPECT_CALL(*pState, OnInternalFailure).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.Error_NotifyError(IMS_NULL, nCode, strMessage);
 }
@@ -2337,7 +2476,8 @@ TEST_F(MtcCallTest, OnReceivingMediaDataStartedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnReceivingMediaDataStarted(eMediaType, eProtocolType)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnReceivingMediaDataStarted(eMediaType, eProtocolType);
 }
@@ -2350,7 +2490,8 @@ TEST_F(MtcCallTest, OnReceivingMediaDataFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnReceivingMediaDataFailed(eMediaType, eProtocolType)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnReceivingMediaDataFailed(eMediaType, eProtocolType);
 }
@@ -2360,7 +2501,8 @@ TEST_F(MtcCallTest, OnVideoLowestBitRateCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnVideoLowestBitRate).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnVideoLowestBitRate();
 }
@@ -2370,7 +2512,8 @@ TEST_F(MtcCallTest, OnReceivingNetworkToneStartedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnReceivingNetworkToneStarted).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnReceivingNetworkToneStarted();
 }
@@ -2380,7 +2523,8 @@ TEST_F(MtcCallTest, OnReceivingNetworkToneFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnReceivingNetworkToneFailed).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnReceivingNetworkToneFailed();
 }
@@ -2392,7 +2536,8 @@ TEST_F(MtcCallTest, OnMediaFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnMediaFailed(objReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnMediaFailed(objReason);
 }
@@ -2404,7 +2549,8 @@ TEST_F(MtcCallTest, OnSrvccStateUpdatedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnSrvccStateUpdated(eAnyState)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnSrvccStateUpdated(eAnyState);
 }
@@ -2417,7 +2563,8 @@ TEST_F(MtcCallTest, OnAosStateChangedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnAosStateChanged(eAnyState, eAnyReason, nDataFailureReason)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnAosStateChanged(objService, eAnyState, eAnyReason, nDataFailureReason);
 }
@@ -2427,7 +2574,8 @@ TEST_F(MtcCallTest, OnRatChangedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnIpcanChanged(IIpcan::CATEGORY_WLAN)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnRatChanged(objService.GetServiceType(), INetworkWatcher::RADIOTECH_TYPE_IWLAN,
             INetworkWatcher::RADIOTECH_TYPE_IWLAN);
@@ -2440,7 +2588,8 @@ TEST_F(MtcCallTest, OnRatChangedCallsStateOnRatChangedIfNoIpcanChanged)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnRatChanged(eOldRat, eNewRat)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnRatChanged(objService.GetServiceType(), eOldRat, eNewRat);
 }
@@ -2452,7 +2601,8 @@ TEST_F(MtcCallTest, OnConnectionFailedCallsState)
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnConnectionFailed(nFailureReason, nWaitTimeMillis)).Times(1);
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    MtcCall objCall(
+            objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
 
     objCall.OnConnectionFailed(nFailureReason, nWaitTimeMillis);
 }
@@ -2462,10 +2612,11 @@ TEST_F(MtcCallTest, ToString)
     MockIMtcCallState* pState = new MockIMtcCallState();
     ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::TERMINATING));
 
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+    const AString strLogTag = AString("MT_1x");
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState), strLogTag);
 
     AString strCall;
-    strCall.Sprintf("MtcCall[%lu][TERMINATING]", objCall.GetKey());
+    strCall.Sprintf("[%s][TERMINATING]", strLogTag.GetStr());
 
     EXPECT_EQ(objCall.ToString(), strCall);
 }

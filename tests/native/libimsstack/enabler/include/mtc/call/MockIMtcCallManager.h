@@ -28,7 +28,8 @@
 class MockIMtcCallManager : public IMtcCallManager
 {
 public:
-    MOCK_METHOD(IMtcCall*, CreateCall, (IN ServiceType eServiceType, IN CallInfo& objCallInfo),
+    MOCK_METHOD(IMtcCall*, CreateCall,
+            (IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag),
             (override));
     MOCK_METHOD(void, RemoveCall, (IN CallKey nCallKey), (override));
     MOCK_METHOD(IMtcCall*, GetCallByCallKey, (IN CallKey nCallKey), (override));
@@ -39,6 +40,7 @@ public:
             ImsList<IMtcCall*>, GetCallsByServiceType, (IN ServiceType eServiceType), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCallsInConference, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCallsByState, (IN State eState), (override));
+    MOCK_METHOD(IMS_UINT32, GetNextCallIndex, (), (override));
 };
 
 #endif

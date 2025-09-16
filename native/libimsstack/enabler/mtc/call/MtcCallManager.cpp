@@ -27,7 +27,9 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+static const IMS_UINT32 MAX_CALL_INDEX = 1000;
 NullCall* const MtcCallManager::s_pNullCall = new NullCall();
+IMS_UINT32 MtcCallManager::s_nNextCallIndex = 1;
 
 PUBLIC
 MtcCallManager::MtcCallManager(IN IMtcContext& objContext) :
@@ -55,7 +57,7 @@ void MtcCallManager::DeInit()
 }
 
 PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
-        IN ServiceType eServiceType, IN CallInfo& objCallInfo)
+        IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag)
 {
     IMtcService* pService = m_objContext.GetServiceByType(eServiceType);
     if (pService == IMS_NULL || pService->GetStatus() != ServiceStatus::SERVICE_ACTIVE)
@@ -65,8 +67,8 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
         return s_pNullCall;
     }
 
-    MtcCall* pCall =
-            new MtcCall(m_objContext, *pService, objCallInfo, std::make_unique<CallStateFactory>());
+    MtcCall* pCall = new MtcCall(
+            m_objContext, *pService, objCallInfo, std::make_unique<CallStateFactory>(), strLogTag);
     m_lstCalls.Append(pCall);
     IMS_TRACE_D("CreateCall : call count[%d]", m_lstCalls.GetSize(), 0, 0);
 
@@ -108,6 +110,17 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::GetCallByCallKey(IN CallKey nCallKey)
     {
         return s_pNullCall;
     }
+}
+
+PUBLIC VIRTUAL IMS_UINT32 MtcCallManager::GetNextCallIndex()
+{
+    if (s_nNextCallIndex >= MAX_CALL_INDEX)
+    {
+        s_nNextCallIndex = 1;
+    }
+
+    IMS_TRACE_D("GetNextCallIndex index[%d]", s_nNextCallIndex, 0, 0);
+    return s_nNextCallIndex++;
 }
 
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCalls()

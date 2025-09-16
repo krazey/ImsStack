@@ -129,15 +129,17 @@ TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniServiceThread->OnPreIncomingCallReceived(1);
+    pJniServiceThread->OnPreIncomingCallReceived(1, AString());
 }
 
 TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
 {
     IMS_UINT32 eType = IuMtcService::AUTO_REJECTED_CALL;
     CallKey nCallKey = 1;
+    AString strLogTag("some_log_tag");
     objParcel.writeInt32(eType);
     objParcel.writeInt64(nCallKey);
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
     objParcel.setDataPosition(0);
 
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
@@ -147,8 +149,8 @@ TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
     MediaInfo objMediaInfo;
     ImsList<SuppService*> objSuppServices;
     CallReasonInfo objReason(CODE_NONE);
-    pJniServiceThread->OnRejectedIncomingCall(
-            nCallKey, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", objReason);
+    pJniServiceThread->OnRejectedIncomingCall(nCallKey, objCallInfo, objMediaInfo, objSuppServices,
+            OipType::NONE, "", objReason, strLogTag);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnJniReady)

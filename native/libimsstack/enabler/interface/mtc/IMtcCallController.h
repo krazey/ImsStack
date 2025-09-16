@@ -43,9 +43,12 @@ public:
      * Creates a new outgoing call.
      *
      * @param eServiceType Service type of the new call.
+     * @param objCallInfo Call information.
+     * @param strLogTag Log tag for the call.
      * @return The key of the new call.
      */
-    virtual CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
+    virtual CallKey Open(
+            IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag) = 0;
 
     /**
      * Sets an interface to interact with the Java layer.

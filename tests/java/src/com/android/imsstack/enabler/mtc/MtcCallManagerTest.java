@@ -250,11 +250,10 @@ public class MtcCallManagerTest extends ImsStackTest {
     }
 
     @Test
-    public void testGetVacantCallIndex() {
-        doReturn(1).when(mMockMtcCall).getCallIndex();
-        mTestMtcCallManager.attachCall(mMockMtcCall);
+    public void testGetNextCallIndex() {
+        int currentIndex =  mTestMtcCallManager.getNextCallIndex();
 
-        assertEquals(2, mTestMtcCallManager.getVacantCallIndex());
+        assertEquals(currentIndex + 1, mTestMtcCallManager.getNextCallIndex());
     }
 
     @Test

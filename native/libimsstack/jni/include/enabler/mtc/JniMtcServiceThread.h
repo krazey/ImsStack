@@ -34,11 +34,11 @@ public:
     void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
             IN IuMtcService::EmergencyServiceUnavailableReason eReason,
             IN ServiceType eServiceType) override;
-    void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
+    void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey, IN const AString& strLogTag) override;
     void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN OipType eOipType, IN const AString& strRemoteNumber,
-            IN const CallReasonInfo& objReason) override;
+            IN const CallReasonInfo& objReason, IN const AString& strLogTag) override;
 
     void OnJniReady();
     void OnExternalCallsChanged(IN ImsList<const JniExternalCall*>& objJniExternalCalls) override;

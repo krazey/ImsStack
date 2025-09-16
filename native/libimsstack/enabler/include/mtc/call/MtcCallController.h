@@ -50,7 +50,8 @@ public:
 
     inline void NotifyJniEnablerSet() override {}
 
-    CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
+    CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo,
+            IN const AString& strLogTag) override;
     void Attach(IN CallKey nCallKey) override;
     void Detach(IN CallKey nCallKey) override;
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;

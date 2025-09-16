@@ -201,10 +201,22 @@ public class MtcApp implements Closeable {
      * Creates {@link MtcCall} according to received information and attaches it
      * to {@link MtcCallManager}.
      *
-     * @param callAttributes The information used when creates {@link MtcCall}.
+     * @param callAttributes The information used when creating {@link MtcCall}.
      * @return The created {@link MtcCall}.
      */
     public MtcCall createMtcCallAndAttach(int callAttributes) {
+        return createMtcCallAndAttach(callAttributes, "");
+    }
+
+    /**
+     * Creates {@link MtcCall} according to received information and attaches it
+     * to {@link MtcCallManager}.
+     *
+     * @param callAttributes The information used when creating {@link MtcCall}.
+     * @param logTag The log tag for the call.
+     * @return The created {@link MtcCall}.
+     */
+    private MtcCall createMtcCallAndAttach(int callAttributes, String logTag) {
         if (getJNIService() == 0) {
             bindJNIService();
 
@@ -214,7 +226,7 @@ public class MtcApp implements Closeable {
             }
         }
 
-        MtcCall call = createMtcCall(callAttributes);
+        MtcCall call = createMtcCall(callAttributes, logTag);
 
         if (call.isMO()) {
             mCM.attachCall(call);
@@ -236,12 +248,13 @@ public class MtcApp implements Closeable {
     /**
      * Creates {@link MtcCall} according to received information.
      *
-     * @param callAttributes The information used when creates {@link MtcCall}.
+     * @param callAttributes The information used when creating {@link MtcCall}.
+     * @param logTag The log tag for the call.
      * @return The created {@link MtcCall}.
      */
-    public MtcCall createMtcCall(int callAttributes) {
-        return new MtcCall(mContext, mCM.getCallTracker(), callAttributes,
-                mCM.getVacantCallIndex(), "");
+    public MtcCall createMtcCall(int callAttributes, String logTag) {
+        return new MtcCall(mContext, mCM.getCallTracker(), callAttributes, mCM.getNextCallIndex(),
+                logTag);
     }
 
     /**
@@ -488,9 +501,8 @@ public class MtcApp implements Closeable {
                 }
 
                 mIncomingCallKey = nativeCallKey;
-                parcel.readString();
 
-                MtcCall call = createMtcCallAndAttach(0);
+                MtcCall call = createMtcCallAndAttach(0, parcel.readString());
                 call.attach(nativeCallKey);
 
                 if (mCallListener != null) {
@@ -508,7 +520,7 @@ public class MtcApp implements Closeable {
                     call = getPendingCall(mPreIncomingNativeCallId);
                 } else {
                     // only AUTO_REJECTED_CALL for a differencet incoming call.
-                    call = createMtcCallAndAttach(0);
+                    call = createMtcCallAndAttach(0, parcel.readString());
                     call.attach(nativeCallKey);
 
                     if (mCallListener != null) {

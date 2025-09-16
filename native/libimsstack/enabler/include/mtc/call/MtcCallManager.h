@@ -31,6 +31,7 @@ enum class ServiceType;
 class MtcCallManager final : public IMtcCallManager
 {
 public:
+    static IMS_UINT32 s_nNextCallIndex;
     static NullCall* const s_pNullCall;
 
     explicit MtcCallManager(IN IMtcContext& objContext);
@@ -41,7 +42,8 @@ public:
     void Init();
     void DeInit();
 
-    IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
+    IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo,
+            IN const AString& strLogTag) override;
     void RemoveCall(IN CallKey nCallKey) override;
 
     IMtcCall* GetCallByCallKey(IN CallKey nCallKey) override;
@@ -52,6 +54,7 @@ public:
     ImsList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
     ImsList<IMtcCall*> GetCallsInConference() override;
     ImsList<IMtcCall*> GetCallsByState(IN State eState) override;
+    IMS_UINT32 GetNextCallIndex() override;
 
 private:
     IMS_SINT32 GetFirstIndexByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);

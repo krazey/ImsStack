@@ -60,9 +60,10 @@ PUBLIC VIRTUAL MtcCallController::~MtcCallController()
 }
 
 PUBLIC
-CallKey MtcCallController::Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo)
+CallKey MtcCallController::Open(
+        IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag)
 {
-    return m_objCallManager.CreateCall(eServiceType, objCallInfo)->GetKey();
+    return m_objCallManager.CreateCall(eServiceType, objCallInfo, strLogTag)->GetKey();
 }
 
 PUBLIC
@@ -90,7 +91,8 @@ void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* pi
     {
         objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     }
-    m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)->HandleIncoming(piSession);
+    m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo, AString::ConstNull())
+            ->HandleIncoming(piSession);
 }
 
 PUBLIC

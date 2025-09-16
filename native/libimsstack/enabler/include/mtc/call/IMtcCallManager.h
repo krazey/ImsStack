@@ -31,16 +31,16 @@ public:
 
     virtual ~IMtcCallManager(){};
 
-    // Creates a new call and starts to manage it. Returns the created call.
-
     /**
-     * @brief Creates
+     * @brief Creates a new call and starts to manage it.
      *
-     * @param eServiceType
-     * @param objCallInfo
-     * @return
+     * @param eServiceType The service type for the call.
+     * @param objCallInfo The initial information for the call.
+     * @param strLogTag A log tag for to call.
+     * @return The created call object. Returns a null call object if creation fails.
      */
-    virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
+    virtual IMtcCall* CreateCall(
+            IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag) = 0;
 
     /**
      * @brief Removes the call matching the given call key. Does nothing if the call doesn't exist.
@@ -124,6 +124,15 @@ public:
      * @return
      */
     virtual ImsList<IMtcCall*> GetCallsByState(IN State eState) = 0;
+
+    // Returns a next call index.
+
+    /**
+     * @brief Gets the next available call index.
+     *        The index cycles from 1 to a predefined maximum value.
+     * @return A next call index.
+     */
+    virtual IMS_UINT32 GetNextCallIndex() = 0;
 };
 
 #endif

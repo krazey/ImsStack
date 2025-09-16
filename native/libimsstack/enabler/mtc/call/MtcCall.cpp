@@ -61,10 +61,12 @@ PRIVATE GLOBAL IMutex* MtcCall::s_pKeyCreationLock = MutexService::GetMutexServi
 
 PUBLIC
 MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
-        IN const CallInfo& objCallInfo, IN std::unique_ptr<IMtcCallStateFactory> pStateFactory) :
+        IN const CallInfo& objCallInfo, IN std::unique_ptr<IMtcCallStateFactory> pStateFactory,
+        IN const AString& strLogTag) :
         m_objContext(objContext),
         m_objService(objService),
         m_nKey(CreateCallKey()),
+        m_strLogTag(CreateLogTag(strLogTag)),
         m_bEstablished(IMS_FALSE),
         m_bHeldByMe(IMS_FALSE),
         m_bUnconfirmedRemoteHold(IMS_FALSE),
@@ -86,7 +88,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_pEpsFallbackTrigger(IMS_NULL),
         m_pCurrentLocationDiscoveryController(IMS_NULL)
 {
-    IMS_TRACE_D("+MtcCall key[%lu]", m_nKey, 0, 0);
+    IMS_TRACE_D("%s - +MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
 
     m_pTimer->SetListener(this);
     m_objPreconditionManager.SetListener(this);
@@ -99,7 +101,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
-    IMS_TRACE_D("~MtcCall key[%lu]", m_nKey, 0, 0);
+    IMS_TRACE_I("%s - ~MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
 
     m_objService.RemoveAosStateListener(this);
     m_objService.RemoveSrvccStateListener(this);
@@ -1362,7 +1364,8 @@ PUBLIC VIRTUAL void MtcCall::OnConnectionFailed(
 PUBLIC const AString MtcCall::ToString() const
 {
     AString strCall;
-    strCall.Sprintf("MtcCall[%lu][%s]", GetKey(), MtcCallStringUtils::ConvertCallState(GetState()));
+    strCall.Sprintf(
+            "[%s][%s]", m_strLogTag.GetStr(), MtcCallStringUtils::ConvertCallState(GetState()));
     return strCall;
 }
 
@@ -1380,6 +1383,35 @@ CallKey MtcCall::CreateCallKey()
     return s_nKey;
 }
 
+PRIVATE
+AString MtcCall::CreateLogTag(IN const AString& strLogTag) const
+{
+    IMS_UINT32 nIndex = m_objContext.GetCallManager().GetNextCallIndex();
+    if (!strLogTag.IsNull())
+    {
+        // For MO calls, strLogTag is created in the Java layer and passed down.
+        return strLogTag;
+    }
+
+    // For MT calls, strLogTag is created here and passed up to the Java layer.
+    AString strNewLogTag;
+    strNewLogTag.Append("MT_");
+
+    AString strIndex;
+    strIndex.SetNumber(nIndex);
+    if (GetSlotId() == IMS_SLOT_0)
+    {
+        strNewLogTag.Append(strIndex);
+        strNewLogTag.Append("x");
+    }
+    else
+    {
+        strNewLogTag.Append("x");
+        strNewLogTag.Append(strIndex);
+    }
+
+    return strNewLogTag;
+}
 PRIVATE
 void MtcCall::OnInternalFailure()
 {

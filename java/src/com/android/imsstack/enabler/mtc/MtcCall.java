@@ -632,8 +632,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         sb.append("[ MtcCall: id=");
         sb.append(Long.toHexString(getNativeCallId()));
         sb.append(", state=");
-        sb.append(callStateToString(getCallState()));
-        sb.append(", index=");
         sb.append(getCallIndex());
         sb.append(", connectionid=");
         sb.append(getCallConnectionId() + "");
@@ -924,8 +922,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         mediaInfo.writeToParcel(parcel, 1);
         suppInfo.writeToParcel(parcel, 1);
 
-        parcel.writeString(getLogTag());
-
         // Update the call/media info.
         mCallInfo.setCallType(callType);
         MtcCallUtils.copyMediaInfo(mediaInfo, mMediaInfo);
@@ -1007,7 +1003,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcCall.USER_ALERT);
-        parcel.writeString(getLogTag());
 
         sendRequest(parcel);
 
@@ -1059,8 +1054,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                 setUpdateState(UPDATE_STATE_ACCEPTED);
             }
         }
-
-        parcel.writeString(getLogTag());
 
         sendRequest(parcel);
 
