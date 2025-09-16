@@ -35,6 +35,9 @@ private:
     void Stop() override;
 
 private:
+    static constexpr IMS_SINT32 SIP_TCP_CLIENT_PORT_START = 40000;
+    static constexpr IMS_SINT32 SIP_TCP_CLIENT_PORT_END = 50000;
+
     ConfigApp* m_pConfigApp;
 
     IMS_BOOL m_bUseResetWhenClosingSipTcpConnection;

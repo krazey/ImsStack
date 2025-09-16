@@ -86,10 +86,18 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
         }
 
         // It's based on the Verizon's requirement, but it will be applied for all the carriers.
-        SipRtConfig::TcpPortRange objTcpPortRange;
+        ImsVector<IMS_SINT32> objPortRange =
+                piCc->GetIntArray(CarrierConfig::Ims::KEY_SIP_TCP_CLIENT_PORT_RANGE_INT_ARRAY);
+        if (objPortRange.GetSize() < 2)
+        {
+            objPortRange.Clear();
+            objPortRange.Add(SIP_TCP_CLIENT_PORT_START);
+            objPortRange.Add(SIP_TCP_CLIENT_PORT_END);
+        }
 
-        objTcpPortRange.nPortStart = 40000;
-        objTcpPortRange.nPortEnd = 50000;
+        SipRtConfig::TcpPortRange objTcpPortRange;
+        objTcpPortRange.nPortStart = objPortRange.GetAt(0);
+        objTcpPortRange.nPortEnd = objPortRange.GetAt(1);
         piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, &objTcpPortRange);
     }
 
