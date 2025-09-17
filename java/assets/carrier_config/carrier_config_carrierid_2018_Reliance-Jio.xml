@@ -72,7 +72,7 @@
         <item value="422:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="423:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="430:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
-        <item value="480:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="481:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="482:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="483:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
