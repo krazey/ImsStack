@@ -205,9 +205,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::UPDATE, *piMessage);
-
-    m_objContext.GetUpdatingInfo().SetTargetCallType(
-            m_objContext.GetMessageUtils().GetCallType(piMessage, piSession, IMS_TRUE));
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     // TODO, conference
@@ -216,6 +213,9 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     CallReasonInfo objResultReason(CODE_NONE);
     if (m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
+        m_objContext.GetUpdatingInfo().SetTargetCallType(
+                m_objContext.GetMessageUtils().GetCallTypeFromSdp(piSession, IMS_FALSE, IMS_TRUE));
+
         auto pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
                 m_objContext.CreateBlockChecker(GetCallUpdateBlockRules()));
         IMtcBlockChecker::Result objResult = pBlockChecker->Check();
@@ -231,6 +231,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     }
     else
     {
+        m_objContext.GetUpdatingInfo().SetTargetCallType(pSession->GetCallType());
         objResultReason = HandleReceivedUpdateWithoutOffer(eStateName);
     }
 
@@ -567,6 +568,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
+    m_objContext.GetUpdatingInfo().UpdateRequestingTypeForIncomingUpdate();
     m_objContext.GetPreconditionManager().OnSdpReceived(&objSession);
 
     eStateName = CallStateName::UPDATING;
@@ -647,6 +649,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateN
                 m_objContext.GetSession()->GetCallType());
         m_objContext.GetUpdatingInfo().GetModifyingInfo() =
                 m_objContext.GetMediaManager().GetMediaInfo();
+        m_objContext.GetUpdatingInfo().UpdateRequestingTypeForOfferlessReInvite();
     }
 
     if (m_objContext.GetSession()->AcceptUpdate() == IMS_FAILURE)

@@ -46,6 +46,50 @@ PUBLIC VIRTUAL UpdatingInfo::~UpdatingInfo()
     IMS_TRACE_D("~UpdatingInfo", 0, 0, 0);
 }
 
+PUBLIC void UpdatingInfo::UpdateRequestingTypeForIncomingUpdate()
+{
+    if (IsNeedToAlert())
+    {
+        m_eRequestingType = UpdateType::SESSION;
+    }
+    else if (IsHeldBy())
+    {
+        m_eRequestingType = UpdateType::HOLD;
+    }
+    else if (IsResumedBy())
+    {
+        m_eRequestingType = UpdateType::RESUME;
+    }
+    else
+    {
+        m_eRequestingType = UpdateType::NORMAL;
+    }
+    IMS_TRACE_I(
+            "Requesting type [%s]", MtcCallStringUtils::ConvertUpdateType(m_eRequestingType), 0, 0);
+}
+
+PUBLIC void UpdatingInfo::UpdateRequestingTypeForOfferlessReInvite()
+{
+    if (IsRequestedModifying())
+    {
+        m_eRequestingType = UpdateType::SESSION;
+    }
+    else if (IsHeld())
+    {
+        m_eRequestingType = UpdateType::HOLD;
+    }
+    else if (IsResumed())
+    {
+        m_eRequestingType = UpdateType::RESUME;
+    }
+    else
+    {
+        m_eRequestingType = UpdateType::NORMAL;
+    }
+    IMS_TRACE_I(
+            "Requesting type [%s]", MtcCallStringUtils::ConvertUpdateType(m_eRequestingType), 0, 0);
+}
+
 PUBLIC
 IMS_BOOL UpdatingInfo::IsHeld() const
 {
@@ -183,19 +227,15 @@ IMS_BOOL UpdatingInfo::IsRequestedHoldResume() const
 PUBLIC
 IMS_BOOL UpdatingInfo::IsRequestedModifying() const
 {
-    if (IsRequestedHoldResume())
-    {
-        return IMS_FALSE;
-    }
-
     if (m_eOriginalCallType != GetTargetCallType())
     {
         return IMS_TRUE;
     }
 
-    if (m_objOriginalInfo.eVideoDirection != m_objModifyingInfo.eVideoDirection)
+    if (!IsRequestedHoldResume() &&
+            m_objOriginalInfo.eVideoDirection != m_objModifyingInfo.eVideoDirection)
     {
-        return IMS_TRUE;
+        return IMS_TRUE;  // 1-way <-> 2-way video
     }
 
     return IMS_FALSE;

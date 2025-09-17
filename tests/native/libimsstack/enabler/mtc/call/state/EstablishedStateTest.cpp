@@ -545,7 +545,8 @@ TEST_F(EstablishedStateTest, SendUpdateBySrvccHandlesFailure)
 
 TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
 {
-    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     SipMethod objSipMethod(SipMethod::INVITE);
@@ -586,7 +587,8 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSup
             .WillByDefault(
                     Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
 
-    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
@@ -613,7 +615,8 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsNotInvokedIfRprIsNotSuppor
             .WillByDefault(
                     Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
 
-    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
@@ -641,7 +644,8 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsNotInvokedIfPreconditionIs
             .WillByDefault(
                     Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
 
-    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
@@ -663,7 +667,8 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsNotInvokedIfPreconditionIs
 
 TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
 {
-    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     CallReasonInfo objAnyReason(CODE_UNSPECIFIED);
     ON_CALL(*pBlockChecker, Check)
