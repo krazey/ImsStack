@@ -25,7 +25,7 @@ __IMS_TRACE_TAG_SIP_CORE__;
 PRIVATE
 SipPortManager::SipPortManager() :
         m_nPortCStart(0),
-        m_nPortCEnd(CLIENT_PORT_END),
+        m_nPortCEnd(CLIENT_PORT_MAX),
         m_nNextPortC(0)
 {
 }
@@ -37,24 +37,25 @@ PUBLIC
 void SipPortManager::Clear()
 {
     m_nPortCStart = 0;
-    m_nPortCEnd = CLIENT_PORT_END;
-
+    m_nPortCEnd = CLIENT_PORT_MAX;
     m_nNextPortC = 0;
 }
 
 PUBLIC
 void SipPortManager::SetPortC(IN IMS_SINT32 nPortStart, IN IMS_SINT32 nPortEnd)
 {
-    IMS_TRACE_D("SetPortC :: Range (%d-%d)", nPortStart, nPortEnd, 0);
+    IMS_TRACE_D("SetPortC: Range (%d-%d)", nPortStart, nPortEnd, 0);
 
     m_nPortCStart = nPortStart;
     m_nPortCEnd = nPortEnd;
 
     if ((m_nPortCEnd <= 0) || (m_nPortCEnd > CLIENT_PORT_MAX))
     {
-        m_nPortCEnd = CLIENT_PORT_END;
+        m_nPortCEnd = CLIENT_PORT_MAX;
     }
-    else if (m_nPortCStart >= m_nPortCEnd)
+
+    // If the port range is set incorrectly, a random port number is used.
+    if (m_nPortCStart >= m_nPortCEnd)
     {
         m_nPortCStart = 0;
     }
@@ -88,7 +89,7 @@ IMS_SINT32 SipPortManager::SelectNextPortC(IN const IpAddress& objIp) const
 
     if (nCurrentPort <= 0)
     {
-        for (IMS_SINT32 i = (m_nPortCStart + 1); i < m_nPortCEnd; ++i)
+        for (IMS_SINT32 i = m_nPortCStart; i < m_nPortCEnd; ++i)
         {
             if (IsPortAvailable(objIp, i))
             {
@@ -123,12 +124,12 @@ void SipPortManager::SetNextPortC(IN IMS_SINT32 nPort) const
     if (m_nNextPortC != nPort)
     {
         // Round-robin
-        if (nPort == m_nPortCEnd || nPort == m_nPortCStart)
+        if (nPort == m_nPortCEnd)
         {
-            nPort = (m_nPortCStart + 1);
+            nPort = m_nPortCStart;
         }
 
-        IMS_TRACE_D("SetNextPortC :: %d >> %d", m_nNextPortC, nPort, 0);
+        IMS_TRACE_D("SetNextPortC: %d >> %d", m_nNextPortC, nPort, 0);
 
         m_nNextPortC = nPort;
     }
