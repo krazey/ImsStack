@@ -16,10 +16,10 @@
 
 #include <gtest/gtest.h>
 
+#include "MediaSession.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
-#include "MediaSession.h"
-
+#include "MediaEnvironment.h"
 #include "MockICoreService.h"
 #include "MockIMediaSessionClientListener.h"
 #include "MockISession.h"

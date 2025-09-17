@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+#include "BaseNego.h"
 #include "ISessionDescriptor.h"
 #include "ImsTypeDef.h"
-#include "ServiceTrace.h"
-
-#include "BaseNego.h"
+#include "MediaBaseProfile.h"
+#include "MediaEnvironment.h"
 #include "MediaNegoUtil.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileGenerator.h"
 #include "MediaProfileUtil.h"
+#include "ServiceTrace.h"
+#include "config/MediaConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

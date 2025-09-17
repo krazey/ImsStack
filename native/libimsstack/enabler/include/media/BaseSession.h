@@ -21,13 +21,13 @@
 #include <MediaQualityThreshold.h>
 
 #include "MediaDef.h"
-#include "config/MediaConfiguration.h"
 
 using namespace android::telephony::imsmedia;
 
 class IMediaSessionListener;
 class MediaBaseProfile;
 class MediaEnvironment;
+class MediaConfiguration;
 
 class BaseSession
 {

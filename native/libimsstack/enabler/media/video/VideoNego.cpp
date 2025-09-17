@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+#include "video/VideoNego.h"
 #include "ISessionDescriptor.h"
-#include "ServiceTrace.h"
-
+#include "MediaEnvironment.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
+#include "ServiceTrace.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
-#include "video/VideoNego.h"
 #include "video/VideoProfileGenerator.h"
 #include "video/VideoSdpGenerator.h"
 

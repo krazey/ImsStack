@@ -15,9 +15,14 @@
  */
 
 #include "MediaNegoHandler.h"
+#include "IMediaNegoFactory.h"
 #include "ImsTypeDef.h"
-#include "ServiceTrace.h"
 #include "ConcreteMediaNegoFactory.h"
+#include "MediaEnvironment.h"
+#include "ServiceTrace.h"
+#include "audio/AudioNego.h"
+#include "text/TextNego.h"
+#include "video/VideoNego.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

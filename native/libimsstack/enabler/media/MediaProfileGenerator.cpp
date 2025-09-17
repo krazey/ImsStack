@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
+#include "MediaProfileGenerator.h"
+#include "MediaBaseProfile.h"
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
-#include "MediaProfileGenerator.h"
 #include "MediaResourceManager.h"
+#include "ServiceTrace.h"
 #include "config/CodecConfig.h"
 #include "config/ImsCodec.h"
 #include "config/MediaConfiguration.h"

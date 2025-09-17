@@ -17,7 +17,10 @@
 #ifndef MEDIA_PROFILE_NEGOTIATOR_H_
 #define MEDIA_PROFILE_NEGOTIATOR_H_
 
-#include "MediaBaseProfile.h"
+#include "ImsTypeDef.h"
+#include "MediaDef.h"
+
+class MediaBaseProfile;
 
 /**
  * This class is to generate a negotiated profile by negotiating a local profile and a peer profile

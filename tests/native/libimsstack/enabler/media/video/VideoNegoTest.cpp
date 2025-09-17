@@ -16,11 +16,10 @@
 
 #include <gtest/gtest.h>
 
+#include "video/VideoNego.h"
 #include "ImsStrLib.h"
 #include "ImsTypeDef.h"
-
-#include "video/VideoNego.h"
-
+#include "MediaEnvironment.h"
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"

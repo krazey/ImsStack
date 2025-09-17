@@ -21,12 +21,11 @@
 
 #include "ImsSlot.h"
 #include "ISession.h"
-
 #include "MediaBaseProfile.h"
-#include "MediaEnvironment.h"
-#include "config/MediaConfiguration.h"
 #include "media/IMediaDescriptor.h"
 
+class MediaEnvironment;
+class MediaConfiguration;
 class MediaSdpGenerator;
 class MediaProfileGenerator;
 

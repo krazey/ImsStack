@@ -17,12 +17,21 @@
 #ifndef MEDIA_NEGO_H_
 #define MEDIA_NEGO_H_
 
+#include <memory>
+
 #include "ImsSlot.h"
 #include "MediaDef.h"
-#include "audio/AudioNego.h"
+#include "audio/AudioDef.h"
+#include "text/TextDef.h"
+#include "video/VideoDef.h"
 #include "media/IMedia.h"
-#include "video/VideoNego.h"
-#include "text/TextNego.h"
+
+class AudioNego;
+class TextNego;
+class VideoNego;
+class MediaEnvironment;
+class ISession;
+class IMediaDescriptor;
 
 class MediaNego : public ImsSlot
 {

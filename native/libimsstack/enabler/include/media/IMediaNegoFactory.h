@@ -17,8 +17,12 @@
 #ifndef I_MEDIA_NEGO_FACTORY_H_
 #define I_MEDIA_NEGO_FACTORY_H_
 
-#include "MediaNego.h"
-#include "MediaEnvironment.h"
+#include <memory>
+
+#include "ImsTypeDef.h"
+
+class MediaNego;
+class MediaEnvironment;
 
 class IMediaNegoFactory
 {

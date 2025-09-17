@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "BaseSession.h"
+#include "ServiceTrace.h"
+#include "config/MediaConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

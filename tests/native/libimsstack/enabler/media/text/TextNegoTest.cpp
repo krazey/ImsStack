@@ -16,9 +16,9 @@
 
 #include <gtest/gtest.h>
 
-#include "MediaDef.h"
 #include "text/TextNego.h"
-
+#include "MediaDef.h"
+#include "MediaEnvironment.h"
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"

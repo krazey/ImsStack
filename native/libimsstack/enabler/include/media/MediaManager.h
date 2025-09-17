@@ -22,12 +22,12 @@
 #include "ImsActivityEx.h"
 #include "ImsMap.h"
 #include "MediaDef.h"
-#include "MediaResourceManager.h"
 
 class IMediaSession;
 class MediaMsgHandler;
 class MediaSession;
 class IService;
+class MediaResourceManager;
 
 class MediaManager : public ImsActivityEx, public IJniMediaManager
 {

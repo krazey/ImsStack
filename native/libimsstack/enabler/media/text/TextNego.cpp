@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#include "text/TextNego.h"
 #include "ISessionDescriptor.h"
-#include "ServiceTrace.h"
-
+#include "MediaEnvironment.h"
 #include "MediaProfileFactory.h"
+#include "ServiceTrace.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
-#include "text/TextNego.h"
 #include "text/TextProfileGenerator.h"
 #include "text/TextSdpGenerator.h"
 

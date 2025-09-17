@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+#include "MediaManager.h"
 #include "EnablerUtils.h"
-#include "ServiceTrace.h"
-
 #include "IJniMedia.h"
 #include "IMediaSession.h"
-#include "MediaManager.h"
-#include "MediaSession.h"
-#include "MediaMsgHandler.h"
-#include "MediaResourceManager.h"
+#include "IService.h"
 #include "JniEnablerConnector.h"
+#include "MediaMsgHandler.h"
+#include "MediaNego.h"
+#include "MediaResourceManager.h"
+#include "MediaSession.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

@@ -16,10 +16,10 @@
 
 #include "ISessionDescriptor.h"
 #include "ImsTypeDef.h"
-#include "ServiceTrace.h"
-
+#include "MediaEnvironment.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
+#include "ServiceTrace.h"
 #include "audio/AudioNego.h"
 #include "audio/AudioProfileUtil.h"
 #include "audio/AudioSdpGenerator.h"

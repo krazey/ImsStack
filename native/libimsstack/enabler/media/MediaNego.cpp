@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-#include "MediaDef.h"
-#include "ServiceTrace.h"
+#include "MediaNego.h"
 #include "ICoreService.h"
 #include "ISdpReader.h"
 #include "ISession.h"
 #include "ISessionDescriptor.h"
 #include "ImsCore.h"
-
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaSessionConfig.h"
+#include "MediaDef.h"
+#include "MediaEnvironment.h"
+#include "ServiceTrace.h"
+#include "audio/AudioNego.h"
+#include "text/TextNego.h"
+#include "video/VideoNego.h"
 #include "config/MediaConfigUtil.h"
-#include "MediaNego.h"
+#include "config/MediaSessionConfig.h"
+#include "config/MediaSessionConfigFactory.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

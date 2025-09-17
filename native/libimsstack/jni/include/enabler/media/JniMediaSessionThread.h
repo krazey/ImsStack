@@ -18,7 +18,9 @@
 #define JNI_MEDIA_SESSION_THREAD_H_
 
 #include <MediaQualityThreshold.h>
+
 #include "BaseServiceThread.h"
+#include "IJniMedia.h"
 #include "IJniMediaSessionThread.h"
 
 class JniMediaSessionThread final : public BaseServiceThread, public IJniMediaSessionThread

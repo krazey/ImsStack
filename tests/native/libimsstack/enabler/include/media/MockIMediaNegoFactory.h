@@ -20,6 +20,8 @@
 #include <gmock/gmock.h>
 
 #include "IMediaNegoFactory.h"
+#include "MediaEnvironment.h"
+#include "MediaNego.h"
 
 /**
  * @brief Mocking the IMediaNegoFactory

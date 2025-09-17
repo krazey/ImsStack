@@ -16,9 +16,9 @@
 
 #include <gtest/gtest.h>
 
-#include "ImsStrLib.h"
 #include "audio/AudioNego.h"
-
+#include "ImsStrLib.h"
+#include "MediaEnvironment.h"
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"

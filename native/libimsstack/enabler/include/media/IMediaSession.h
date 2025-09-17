@@ -21,7 +21,8 @@
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MediaNego.h"
-#include "IMediaSessionClientListener.h"
+
+class IMediaSessionClientListener;
 
 class IMediaSession
 {
