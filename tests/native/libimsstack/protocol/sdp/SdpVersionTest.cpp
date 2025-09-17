@@ -41,7 +41,7 @@ TEST_F(SdpVersionTest, CopyConstructor)
     objVersion.SetVersion(TEST_SDP_VERSION);
 
     SdpVersion objNewVersion(objVersion);
-    EXPECT_EQ(objVersion.GetVersion(), objNewVersion.GetVersion());
+    EXPECT_EQ(objNewVersion.GetVersion(), objVersion.GetVersion());
 }
 
 TEST_F(SdpVersionTest, OperatorAssignment)
@@ -51,7 +51,7 @@ TEST_F(SdpVersionTest, OperatorAssignment)
 
     SdpVersion objNewVersion;
     objNewVersion = objVersion;
-    EXPECT_EQ(objVersion.GetVersion(), objNewVersion.GetVersion());
+    EXPECT_EQ(objNewVersion.GetVersion(), TEST_SDP_VERSION);
 }
 
 TEST_F(SdpVersionTest, Decode)
