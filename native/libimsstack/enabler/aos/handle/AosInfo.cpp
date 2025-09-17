@@ -61,7 +61,7 @@ PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetImsFeatures()
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
     {
         IAosHandle* piHandle = objHandles.GetValueAt(i);
-        AosHandle* pHandle = DYNAMIC_CAST(AosHandle*, piHandle);
+        const AosHandle* pHandle = DYNAMIC_CAST(AosHandle*, piHandle);
 
         if (pHandle->IsImsConnected())
         {
