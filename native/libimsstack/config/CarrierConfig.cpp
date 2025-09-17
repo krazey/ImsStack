@@ -226,6 +226,12 @@ const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL[]
         KEY_IMS_PREFIX "allow_cellular_network_info_header_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT[] =
         KEY_IMS_PREFIX "cellular_network_info_cache_expiration_sec_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_IPSEC_UE_CLIENT_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_PREFIX "ipsec_ue_client_port_range_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_IPSEC_UE_SERVER_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_PREFIX "ipsec_ue_server_port_range_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_SIP_TCP_CLIENT_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_PREFIX "sip_tcp_client_port_range_int_array";
 
 // Aos
 const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =

@@ -403,6 +403,12 @@ public class CarrierConfig {
                 KEY_PREFIX + "allow_cellular_network_info_header_bool";
         public static final String KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT =
                 KEY_PREFIX + "cellular_network_info_cache_expiration_sec_int";
+        public static final String KEY_IPSEC_UE_CLIENT_PORT_RANGE_INT_ARRAY =
+                KEY_PREFIX + "ipsec_ue_client_port_range_int_array";
+        public static final String KEY_IPSEC_UE_SERVER_PORT_RANGE_INT_ARRAY =
+                KEY_PREFIX + "ipsec_ue_server_port_range_int_array";
+        public static final String KEY_SIP_TCP_CLIENT_PORT_RANGE_INT_ARRAY =
+                KEY_PREFIX + "sip_tcp_client_port_range_int_array";
         // Aos
         public static final String KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "ims_identity_priority_int_array";

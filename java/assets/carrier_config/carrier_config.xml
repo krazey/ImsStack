@@ -39,6 +39,18 @@
     </int-array>
     <boolean name="ims.allow_cellular_network_info_header_bool" value="true"/>
     <int name="ims.cellular_network_info_cache_expiration_sec_int" value="7200"/>
+    <int-array name="ims.ipsec_ue_client_port_range_int_array" num="2">
+        <item value="38001"/> <!-- start of port range (inclusive) -->
+        <item value="39000"/> <!-- end of port range (non-inclusive) -->
+    </int-array>
+    <int-array name="ims.ipsec_ue_server_port_range_int_array" num="2">
+        <item value="39001"/> <!-- start of port range (inclusive) -->
+        <item value="40000"/> <!-- end of port range (non-inclusive) -->
+    </int-array>
+    <int-array name="ims.sip_tcp_client_port_range_int_array" num="2">
+        <item value="40000"/> <!-- start of port range (inclusive) -->
+        <item value="50000"/> <!-- end of port range (non-inclusive) -->
+    </int-array>
 
     <!-- Aos -->
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="false"/>
