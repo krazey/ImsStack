@@ -1127,7 +1127,7 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(
 
     if (pPrecondition->GetSubType() == SdpPrecondition::SUBTYPE_E2E)
     {
-        SdpE2EPrecondition* pE2E = DYNAMIC_CAST(SdpE2EPrecondition*, pPrecondition);
+        const SdpE2EPrecondition* pE2E = DYNAMIC_CAST(SdpE2EPrecondition*, pPrecondition);
 
         if (pE2E == IMS_NULL)
         {
@@ -1138,7 +1138,7 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(
     }
     else if (pPrecondition->GetSubType() == SdpPrecondition::SUBTYPE_SEGMENTED)
     {
-        SdpSegmentedPrecondition* pSegmented =
+        const SdpSegmentedPrecondition* pSegmented =
                 DYNAMIC_CAST(SdpSegmentedPrecondition*, pPrecondition);
 
         if (pSegmented == IMS_NULL)
@@ -1796,8 +1796,8 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyPrecondition(
         return IMS_TRUE;
     }
 
-    SdpE2EPrecondition* pE2E;
-    SdpSegmentedPrecondition* pSegmented;
+    const SdpE2EPrecondition* pE2E;
+    const SdpSegmentedPrecondition* pSegmented;
 
     if (objMediaParam.m_pCurrentStatus != IMS_NULL)
     {
