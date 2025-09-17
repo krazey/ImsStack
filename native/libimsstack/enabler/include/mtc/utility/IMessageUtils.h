@@ -311,6 +311,24 @@ public:
             IN const IMessage* piMessage, IN const AString& strProtocol = AString::ConstNull()) = 0;
 
     /**
+     * @brief Gets the highest-priority Reason header value from a SIP message.
+     *
+     * This function iterates through a prioritized list of protocols and searches
+     * the incoming SIP message for the first matching Reason header. The order of
+     * protocols in the input list determines their priority. An `AString::ConstNull()`
+     * in the list will match a Reason header with any protocol.
+     *
+     * @param piMessage The SIP message to inspect for Reason headers.
+     * @param lstPrioritizedProtocols A list of protocols to search for, in order
+     *                                of priority (e.g., SIP, Q.850).
+     * @return A ReasonHeaderValue struct containing the cause, text, and protocol
+     *         of the first matching Reason header found. If no matching header is
+     *         found, a default-constructed ReasonHeaderValue is returned.
+     */
+    virtual ReasonHeaderValue GetPrioritizedReasonHeader(IN const IMessage* piMessage,
+            IN const std::initializer_list<AString>& lstPrioritizedProtocols) = 0;
+
+    /**
      * @brief Gets
      *        This api is deprecated.
      *
@@ -554,12 +572,14 @@ struct ReasonHeaderValue
 {
 public:
     inline ReasonHeaderValue() :
+            strProtocol(AString::ConstNull()),
             nCause(-1),
             strText(AString::ConstNull())
     {
     }
     inline ~ReasonHeaderValue() {}
     inline ReasonHeaderValue(IN const ReasonHeaderValue& objRhs) :
+            strProtocol(objRhs.strProtocol),
             nCause(objRhs.nCause),
             strText(objRhs.strText)
     {
@@ -568,12 +588,14 @@ public:
     {
         if (this != &objRhs)
         {
+            strProtocol = objRhs.strProtocol;
             nCause = objRhs.nCause;
             strText = objRhs.strText;
         }
         return *this;
     }
 
+    AString strProtocol;
     IMS_SINT32 nCause;
     AString strText;
 };

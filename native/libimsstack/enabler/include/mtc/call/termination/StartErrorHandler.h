@@ -44,7 +44,6 @@ public:
      * @return See `CallReasonInfo.h` for the possible values.
      */
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
-
     static CallReasonInfo GetDefaultCallReasonInfo(
             IN IMtcCallContext& objContext, IN const IMessage& objMessage);
     static IMS_SINT32 GetDefaultReasonCode(
@@ -53,6 +52,8 @@ public:
             IN IMtcCallContext& objContext, IN const IMessage& objMessage);
 
 private:
+    static CallReasonInfo GetDefaultCallReasonInfoWithExtraMessage(
+            IN IMtcCallContext& objContext, IN const IMessage& objMessage);
     CallReasonInfo HandleTransactionTimeout() const;
     CallReasonInfo HandleCsfb(IN const IMessage& objMessage) const;
     CallReasonInfo HandleSilentReinvite(IN const IMessage& objMessage) const;

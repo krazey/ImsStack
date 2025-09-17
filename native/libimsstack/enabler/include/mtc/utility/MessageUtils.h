@@ -98,6 +98,8 @@ public:
             IN const AString& strProtocol = AString::ConstNull()) override;
     ReasonHeaderValue GetCauseAndTextFromReasonHeader(IN const IMessage* piMessage,
             IN const AString& strProtocol = AString::ConstNull()) override;
+    ReasonHeaderValue GetPrioritizedReasonHeader(IN const IMessage* piMessage,
+            IN const std::initializer_list<AString>& lstPrioritizedProtocols) override;
     Ims3gpp& GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp) override;
     Ims3gppData GetIms3gppData(IN const IMessage* piMessage) override;
     IMS_SINT32 GetStatusCodeInNotify(IN IMessage* piMessage) override;

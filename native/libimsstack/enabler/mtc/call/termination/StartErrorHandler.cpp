@@ -139,6 +139,15 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 PUBLIC GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfo(
         IN IMtcCallContext& objContext, IN const IMessage& objMessage)
 {
+    if (objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+    {
+        CallReasonInfo objResult = GetDefaultCallReasonInfoWithExtraMessage(objContext, objMessage);
+        if (objResult.nCode != CODE_NONE)
+        {
+            return objResult;
+        }
+    }
     IMS_SINT32 nReasonCode = GetDefaultReasonCode(objContext, objMessage.GetStatusCode());
     IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
     return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objContext, objMessage));
@@ -168,11 +177,31 @@ PUBLIC GLOBAL IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(
         IN IMtcCallContext& objContext, IN const IMessage& objMessage)
 {
     IMS_SINT32 nExtraCode = objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage);
-    if (nExtraCode == -1)
+    if (nExtraCode == CODE_NONE)
     {
         nExtraCode = objMessage.GetStatusCode();
     }
     return nExtraCode;
+}
+
+PRIVATE GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfoWithExtraMessage(
+        IN IMtcCallContext& objContext, IN const IMessage& objMessage)
+{
+    IMS_SINT32 nReasonCode = GetDefaultReasonCode(objContext, objMessage.GetStatusCode());
+
+    ReasonHeaderValue objReasonResult = objContext.GetMessageUtils().GetPrioritizedReasonHeader(
+            &objMessage, {REASON_SIP_PROTOCOL, REASON_Q850_PROTOCOL, AString::ConstNull()});
+
+    AString strExtraMessage =
+            CallReasonInfo::FormatExtraMessageFromReason(objReasonResult.strProtocol,
+                    objReasonResult.nCause, objReasonResult.strText, IMS_FALSE);
+
+    IMS_SINT32 nExtraCode = (objReasonResult.nCause != CODE_NONE) ? objReasonResult.nCause
+                                                                  : objMessage.GetStatusCode();
+    IMS_TRACE_I("GetDefaultCallReasonInfoWithExtraMessage [%d][%d][%s]", nReasonCode, nExtraCode,
+            strExtraMessage.GetStr());
+
+    return CallReasonInfo(nReasonCode, nExtraCode, strExtraMessage);
 }
 
 PRIVATE

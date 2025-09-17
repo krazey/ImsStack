@@ -23,6 +23,8 @@
 #include "MockISession.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/TerminationHandler.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -43,6 +45,7 @@ public:
     MockISession objSession;
     MockIMessage objMessage;
     MockIMessageUtils objMessageUtils;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     TerminationHandler objHandler;
 
 protected:
@@ -51,13 +54,23 @@ protected:
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
                 .WillByDefault(Return(&objMessage));
-
-        ReasonHeaderValue objValue;
-        ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
-                .WillByDefault(Return(objValue));
+        pConfigurationProxy = new MockMtcConfigurationProxy();
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        SetUpPrioritizedReasonHeader("", -1, "");
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override { delete pConfigurationProxy; }
+
+    void SetUpPrioritizedReasonHeader(
+            IN const AString& strProtocol, IN IMS_SINT32 nCause, IN const AString& strText)
+    {
+        ReasonHeaderValue objResult;
+        objResult.strProtocol = strProtocol;
+        objResult.nCause = nCause;
+        objResult.strText = strText;
+        ON_CALL(objMessageUtils, GetPrioritizedReasonHeader(&objMessage, _))
+                .WillByDefault(Return(objResult));
+    }
 };
 
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedInvalidReturnsTerminatedByRemote)
@@ -148,6 +161,9 @@ TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReason)
 
 TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReasonAndMessageHasReasonHeader)
 {
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_UNKNOWN;
     ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
@@ -157,7 +173,12 @@ TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReasonAndMessageHasRea
     objValue.strText = strReason;
     ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
             .WillByDefault(Return(objValue));
-
+    ReasonHeaderValue objResult;
+    objResult.nCause = objValue.nCause;
+    objResult.strText = objValue.strText;
+    objResult.strProtocol = REASON_SIP_PROTOCOL;
+    ON_CALL(objMessageUtils, GetPrioritizedReasonHeader(&objMessage, _))
+            .WillByDefault(Return(objResult));
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strReason),
             objHandler.Handle(objSession));
 }
@@ -168,9 +189,104 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminatedByCallPull)
     ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
     ReasonHeaderValue objValue;
+    objValue.nCause = 200;
     objValue.strText = "Call Has Been Pulled by Another Device";
-    ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
-            .WillByDefault(Return(objValue));
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, objValue.nCause, objValue.strText);
 
     EXPECT_EQ(CallReasonInfo(CODE_CALL_END_CAUSE_CALL_PULL), objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoWithSipReason)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 480, "\"Temporarily Unavailable\"");
+
+    AString strExpectedMessage = "Temporarily Unavailable";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoWithQ850Reason)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 18, "\"No User Responding\"");
+
+    AString strExpectedMessage = "q.850;18;No User Responding";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoWithQ850ReasonNoCause)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, -1, "\"No User Responding\"");
+
+    AString strExpectedMessage = "q.850;-1;No User Responding";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoWithQ850ReasonNoText)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 18, "");
+
+    AString strExpectedMessage = "q.850;18;null";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoWithQ850ReasonNoCauseNoText)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, -1, "");
+
+    AString strExpectedMessage = "q.850;-1;null";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoWithOtherReason)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader("other", 123, "\"some text\"");
+
+    AString strExpectedMessage = "some text";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoDisabledByConfig)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    // Use a termination reason that does not trigger enrichment by default
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_USER_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 18, "\"No User Responding\"");
+
+    // Expect no extra message
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED, nReason), objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, EnrichReasonInfoEnabledByConfig)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    // Use a termination reason that does not trigger enrichment by default
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_USER_ACTION;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    SetUpPrioritizedReasonHeader(REASON_Q850_PROTOCOL, 18, "\"No User Responding\"");
+
+    AString strExpectedMessage = "q.850;18;No User Responding";
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED, nReason, strExpectedMessage),
+            objHandler.Handle(objSession));
 }

@@ -18,14 +18,69 @@
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/termination/CancelHandler.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-LOCAL const AString SIP_PROTOCOL = "SIP";
+const LOCAL AString REASON_TEXT_CALL_BUSY_VZW = "another device sent all devices busy response";
+const LOCAL AString REASON_TEXT_CALL_COMPLETED_VZW = "call completion elsewhere";
 
-LOCAL const AString REASON_TEXT_CALL_BUSY_VZW = "another device sent all devices busy response";
-LOCAL const AString REASON_TEXT_CALL_COMPLETED_VZW = "call completion elsewhere";
+LOCAL IMS_SINT32 GetCodeFromReason(const ReasonHeaderValue& objReasonResult)
+{
+    if (objReasonResult.strProtocol.EqualsIgnoreCase(REASON_SIP_PROTOCOL))
+    {
+        const AString strNormalizedText = objReasonResult.strText.SimplifyWsp().MakeLower();
+        if (strNormalizedText.Contains(REASON_TEXT_CALL_BUSY_VZW))
+        {
+            return CODE_REJECTED_ELSEWHERE;
+        }
+        else if (strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED_VZW))
+        {
+            return CODE_ANSWERED_ELSEWHERE;
+        }
+
+        // Fallback to cause code for SIP protocol.
+        switch (objReasonResult.nCause)
+        {
+            case SipStatusCode::SC_200:
+                return CODE_ANSWERED_ELSEWHERE;
+            case SipStatusCode::SC_600:
+            case SipStatusCode::SC_603:
+                return CODE_REJECTED_ELSEWHERE;
+        }
+    }
+    return CODE_USER_TERMINATED_BY_REMOTE;
+}
+
+LOCAL void EnrichCallReasonInfo(IMtcCallContext& objContext, ReasonHeaderValue& objReasonResult,
+        CallReasonInfo& objReasonInfo)
+{
+    if (objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+    {
+        objReasonInfo.strExtraMessage =
+                CallReasonInfo::FormatExtraMessageFromReason(objReasonResult.strProtocol,
+                        objReasonResult.nCause, objReasonResult.strText, IMS_FALSE);
+        objReasonInfo.nExtraCode = objReasonResult.nCause;
+    }
+}
+
+LOCAL CallReasonInfo GetCallReasonInfo(IMtcCallContext& objContext, const IMessage& objMessage)
+{
+    ReasonHeaderValue objReasonResult = objContext.GetMessageUtils().GetPrioritizedReasonHeader(
+            &objMessage, {REASON_SIP_PROTOCOL, REASON_Q850_PROTOCOL, AString::ConstNull()});
+
+    const IMS_SINT32 nCode = GetCodeFromReason(objReasonResult);
+    CallReasonInfo objReasonInfo(nCode);
+
+    EnrichCallReasonInfo(objContext, objReasonResult, objReasonInfo);
+
+    IMS_TRACE_D("GetCallReasonInfo: code=[%d], cause=[%d], extraMessage=[%s]", objReasonInfo.nCode,
+            objReasonInfo.nExtraCode, objReasonInfo.strExtraMessage.GetStr());
+
+    return objReasonInfo;
+}
 
 PUBLIC
 CancelHandler::CancelHandler(IN IMtcCallContext& objContext) :
@@ -39,36 +94,5 @@ CancelHandler::~CancelHandler() {}
 PUBLIC
 CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 {
-    ReasonHeaderValue objValue = m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(
-            &objMessage, SIP_PROTOCOL);
-    IMS_TRACE_D("Handle : [%d] [%s]", objValue.nCause, objValue.strText.GetStr(), 0);
-
-    return GetCallReasonInfoFromReasonHeader(objValue.nCause, objValue.strText);
-}
-
-PRIVATE
-CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
-        IN IMS_SINT32 nCause, IN const AString& strText)
-{
-    const AString strNormalizedText = strText.SimplifyWsp().MakeLower();
-
-    if (strNormalizedText.Contains(REASON_TEXT_CALL_BUSY_VZW))
-    {
-        return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
-    }
-    else if (strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED_VZW))
-    {
-        return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
-    }
-
-    switch (nCause)
-    {
-        case SipStatusCode::SC_200:
-            return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
-        case SipStatusCode::SC_600:
-        case SipStatusCode::SC_603:
-            return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
-        default:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
-    }
+    return GetCallReasonInfo(m_objContext, objMessage);
 }

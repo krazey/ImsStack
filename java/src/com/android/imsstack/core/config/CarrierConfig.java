@@ -1304,6 +1304,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "restart_ringing_timer_by_sending_180_bool";
         public static final String KEY_CONTENT_ID_FOR_GEOLOCATION_STRING =
                 KEY_PREFIX + "content_id_for_geolocation_string";
+        public static final String KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL =
+                KEY_PREFIX + "enrich_callreasoninfo_with_reason_header_bool";
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "audio_rtp_port_range_int_array";

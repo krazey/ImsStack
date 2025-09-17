@@ -287,6 +287,8 @@
     <boolean name="imsvoice.restart_ringing_timer_by_sending_180_bool" value="true"/>
     <boolean name="imsvt.require_sip_signaling_on_multitasking_bool" value="false"/>
     <string name="imsvoice.content_id_for_geolocation_string">#UNIQUE_ID#@#HOME_DOMAIN#</string>
+    <boolean name="imsvoice.enrich_callreasoninfo_with_reason_header_bool" value="true"/>
+
 
     <!-- Media -->
     <int-array name="imsvoice.audio_jitter_buffer_size_int_array" num="3">

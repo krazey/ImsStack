@@ -19,6 +19,10 @@
 
 #include "AString.h"
 #include "ImsTypeDef.h"
+#include "TextParser.h"
+
+const LOCAL AString REASON_SIP_PROTOCOL = "SIP";
+const LOCAL AString REASON_Q850_PROTOCOL = "Q.850";
 
 enum
 {
@@ -308,6 +312,36 @@ public:
                 break;
         }
         return *this;
+    }
+    inline static AString FormatExtraMessageFromReason(IN const AString& strProtocol,
+            IN IMS_SINT32 nCause, IN const AString& strText, IN IMS_BOOL bIncludeCauseInQ850)
+    {
+        // For any protocol other than Q.850, simply return the trimmed text.
+        if (!strProtocol.EqualsIgnoreCase(REASON_Q850_PROTOCOL))
+        {
+            return strText.GetLength() > 0 ? TextParser::TrimDquot(strText) : AString::ConstNull();
+        }
+
+        // --- Format the special string for the Q.850 Protocol ---
+        AString strExtraMessage;
+        const AString strTrimmedText =
+                strText.GetLength() > 0 ? TextParser::TrimDquot(strText) : AString::ConstNull();
+        const AString strTextToAppend = strTrimmedText.GetLength() > 0 ? strTrimmedText : "null";
+
+        if (bIncludeCauseInQ850)
+        {
+            // Format for TerminationHandler: "q.850;<cause>;<text>"
+            strExtraMessage.Sprintf("%s;%d;%s", REASON_Q850_PROTOCOL.MakeLower().GetStr(), nCause,
+                    strTextToAppend.GetStr());
+        }
+        else
+        {
+            // Format for Cancel/StartErrorHandler: "q.850;<text>"
+            strExtraMessage.Sprintf(
+                    "%s;%s", REASON_Q850_PROTOCOL.MakeLower().GetStr(), strTextToAppend.GetStr());
+        }
+
+        return strExtraMessage;
     }
 
     IMS_SINT32 nCode;

@@ -1265,4 +1265,51 @@ TEST_F(StartErrorHandlerTest, HandleActionsProcessOneMatchedAction)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
+TEST_F(StartErrorHandlerTest, ExtraMessageIsSetBySipReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ReasonHeaderValue objResult;
+    objResult.nCause = -1;
+    objResult.strText = "Call Declined";
+    objResult.strProtocol = REASON_SIP_PROTOCOL;
+    ON_CALL(objMessageUtils, GetPrioritizedReasonHeader(pMessage, _))
+            .WillByDefault(Return(objResult));
+    AString strFormattedMessage = "Call Declined";
+    SetMessageCode(SipStatusCode::SC_603);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_USER_REJECTED, 603, strFormattedMessage));
+}
+
+TEST_F(StartErrorHandlerTest, ExtraMessageIsSetByQ850ReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ReasonHeaderValue objResult;
+    objResult.strProtocol = REASON_Q850_PROTOCOL;
+    objResult.nCause = 18;
+    objResult.strText = "No user responding";
+    ON_CALL(objMessageUtils, GetPrioritizedReasonHeader(pMessage, _))
+            .WillByDefault(Return(objResult));
+
+    AString strFormattedMessage = "q.850;No user responding";
+    SetMessageCode(SipStatusCode::SC_408);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_TIMEOUT, 18, strFormattedMessage));
+}
+
+TEST_F(StartErrorHandlerTest, ExtraMessageIsSetByQ850NoTextReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ReasonHeaderValue objResult;
+    objResult.strProtocol = REASON_Q850_PROTOCOL;
+    objResult.nCause = 18;
+    ON_CALL(objMessageUtils, GetPrioritizedReasonHeader(pMessage, _))
+            .WillByDefault(Return(objResult));
+    AString strFormattedMessage = "q.850;null";
+    SetMessageCode(SipStatusCode::SC_408);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_TIMEOUT, 18, strFormattedMessage));
+}
 }  // namespace android
