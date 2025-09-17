@@ -70,23 +70,34 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
         AString strCodecName = AString::ConstNull();
         ParseRtpMap(pSdpCodec, pPayload, strCodecName);
 
-        // check fmtp of t140 redundancy
-        if (strCodecName.EqualsIgnoreCase("red"))
+        IMS_BOOL bSuccess = IS_DYNAMIC_PAYLOAD_TYPE(pPayload->GetRtpMap().GetPayloadNumber());
+
+        if (bSuccess)
         {
-            ParseFmtp(pSdpCodec, pPayload, lstMediaFormat);
+            if (strCodecName.EqualsIgnoreCase("red"))
+            {
+                bSuccess = ParseFmtp(pSdpCodec, pPayload, lstMediaFormat);
+            }
+            else if (strCodecName.EqualsIgnoreCase("t140"))
+            {
+                bSuccess = IMS_TRUE;
+                ParseT140Fmtp(pSdpCodec, pPayload);
+            }
+            else
+            {
+                IMS_TRACE_E(0, "ParsePayloads(): Invalid codec[%s]", strCodecName.GetStr(), 0, 0);
+                bSuccess = IMS_FALSE;
+            }
         }
-        else if (strCodecName.EqualsIgnoreCase("t140"))
+
+        if (bSuccess)
         {
-            ParseT140Fmtp(pSdpCodec, pPayload);
+            pProfile->AddPayload(pPayload);
         }
         else
         {
-            IMS_TRACE_E(0, "ParsePayloads(): Invalid codec[%s]", strCodecName.GetStr(), 0, 0);
             delete pPayload;
-            continue;
         }
-
-        pProfile->AddPayload(pPayload);
     }
 }
 

@@ -210,7 +210,6 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
             m_pSdpGenerator == IMS_NULL)
     {
@@ -224,82 +223,49 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("FormReoffer(): direction[%d], OA model[%d], reOffer[%d]", eDirection,
+    IMS_TRACE_I("FormReoffer(): direction[%d], OA model[%d], enforceReofferMode[%d]", eDirection,
             m_listOaModel.GetSize(), bEnforceReofferMode);
 
-    // Make new Offer/Answer model, and copy source profile from previous negotiated profile
-    std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
-    IMS_BOOL bIsFullCapability = IMS_FALSE;
+    auto pNewOaModel = std::make_shared<OaModel>();
 
     if (m_listOaModel.IsEmpty())
     {
         pNewOaModel->pLocalProfile =
                 MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
-        bIsFullCapability = IMS_TRUE;
     }
     else
     {
-        std::shared_ptr<OaModel> pPrevOaModel = GetNegotiatedOaModel();
-
+        auto pPrevOaModel = GetNegotiatedOaModel();
         if (pPrevOaModel == IMS_NULL)
         {
             IMS_TRACE_E(0, "FormReoffer(): invalid OA model", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        const MediaSessionConfig* pMediaSessionConfig =
-                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                        GetSlotId(), m_pEnvironment->eServiceType);
-
-        if (pMediaSessionConfig == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        if (pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() == 0 ||
+        if ((pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0 && !bDisable) ||
                 bEnforceReofferMode)
         {
             pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
                     m_eType, m_pBaseProfile.get());
-            bIsFullCapability = IMS_TRUE;
         }
         else
         {
-            if (pMediaSessionConfig->IsSdpReofferFullCapability())
-            {
-                if (m_pBaseProfile->GetPayloadList().GetSize() > 0)
-                {
-                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, m_pBaseProfile.get());
-                    bIsFullCapability = IMS_TRUE;
-                }
-                else
-                {
-                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, GetNegotiatedProfile(*pPrevOaModel));
-                }
-            }
-            else
-            {
-                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                        m_eType, GetNegotiatedProfile(*pPrevOaModel));
-            }
+            pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                    m_eType, GetNegotiatedProfile(*pPrevOaModel));
         }
     }
 
     if (pNewOaModel->pLocalProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FormReoffer(): no valid local profile", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    // Modify a direction by Enabler
-    if (eDirection > MEDIA_DIRECTION_INVALID && eDirection <= MEDIA_DIRECTION_SEND_RECEIVE)
+    if (IS_VALID_MEDIA_DIRECTION(eDirection))
     {
         pNewOaModel->pLocalProfile->SetDirection(eDirection);
     }
 
-    // Modify a Rtp/RTCP port if text is not supported
-    // TODO : change "bDisable" naming to be more clear
     if (bDisable)
     {
         pNewOaModel->pLocalProfile->SetDataPort(0);
@@ -312,23 +278,13 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     {
         pNewOaModel->pLocalProfile->SetDataPort(m_pBaseProfile->GetDataPort());
         pNewOaModel->pLocalProfile->SetControlPort(m_pBaseProfile->GetControlPort());
-
-        if (bIsFullCapability)
-        {
-            // set default AS value when srcProfile AS value is 0 in ReOffer case
-            if (pNewOaModel->pLocalProfile->GetBandwidthAs() <= 0)
-            {
-                pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
-            }
-
-            pNewOaModel->pLocalProfile->SetBandwidthRs(m_pConfig->GetRsBandwidthBps());
-            pNewOaModel->pLocalProfile->SetBandwidthRr(m_pConfig->GetRrBandwidthBps());
-        }
+        pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
+        pNewOaModel->pLocalProfile->SetBandwidthRs(m_pConfig->GetRsBandwidthBps());
+        pNewOaModel->pLocalProfile->SetBandwidthRr(m_pConfig->GetRrBandwidthBps());
     }
 
     m_listOaModel.Append(pNewOaModel);
 
-    // Make the SDP from profile
     return m_pSdpGenerator->Generate(
             pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel));
 }

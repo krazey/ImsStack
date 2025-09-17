@@ -145,7 +145,8 @@ void VideoSdpParser::ParsePayloads(
         VIDEO_CODEC eVideoCodec = VIDEO_CODEC_NONE;
         eVideoCodec = SetCodec(pPayload);
 
-        if (IsValidCodec(eVideoCodec))
+        if (IsValidCodec(eVideoCodec) &&
+                IS_DYNAMIC_PAYLOAD_TYPE(pPayload->GetRtpMap().GetPayloadNumber()))
         {
             AString strImageAttr = AString::ConstNull();
             if (objImageAttributes.GetSize() > i)
