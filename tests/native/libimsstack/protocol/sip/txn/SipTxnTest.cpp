@@ -339,7 +339,7 @@ TEST_F(SipTxnTest, InvokeFsm_InviteServer)
     EXPECT_EQ(SipTxn::INV_SER_ACCEPTED_ST, pTxn->GetTxnState());
     pTxn->SetMaxDuration(140000);
 
-    EXPECT_EQ(SIP_FALSE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_ACK_REQ_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_ACK_REQ_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_SER_ACCEPTED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer L */

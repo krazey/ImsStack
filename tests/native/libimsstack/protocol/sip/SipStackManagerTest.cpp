@@ -79,11 +79,6 @@ protected:
                                 return SIP_FALSE;
                             }
 
-                            if (SipPf_Strcmp(pTxnKey->GetMethod(), "ACK") == 0)
-                            {
-                                return SIP_FALSE;
-                            }
-
                             pOutTxn = pTxn;
                             return SIP_TRUE;
                         }));
@@ -272,10 +267,10 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_TRUE, pAckSipMessage->Decode(pAckMsg, nLength));
 
     /* No matching Invite transaction for ACK, retransmission message */
-    EXPECT_EQ(SIP_TRUE,
+    EXPECT_EQ(SIP_FALSE,
             pSipStackManager->OnRecvMessage(pAckSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
-    EXPECT_EQ(SipTxn::STATUS_IGNORE_REQ, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_INVALID_MESSAGE, eTxnStatus);
 
     pAckSipMessage->SipDelete();
 
@@ -419,7 +414,7 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pAckSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
-    EXPECT_EQ(SipTxn::STATUS_NEW_REQ_RECVD, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
 
     pAckSipMessage->SipDelete();
 

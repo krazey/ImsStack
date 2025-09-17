@@ -301,16 +301,16 @@ TEST_F(SipInviteServerTxnTest, AcceptedState)
     EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
     EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
 
-    EXPECT_EQ(SIP_FALSE,
+    EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_RECV_ACK_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
     EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
     EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
 
+    SIP_INT32 nTransportError;
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_ACCEPTED_ST][SipTxn::INV_SER_TRANSP_ERROR_EVT](
-                    pTxn, pTxnFsmData, &nError));
-    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_ERROR_ON_SEND);
+                    pTxn, &nTransportError, &nError));
     EXPECT_EQ(pTxn->GetTxnState(), SipTxn::INV_SER_ACCEPTED_ST);
 
     EXPECT_EQ(SIP_TRUE,

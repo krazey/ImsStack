@@ -314,9 +314,21 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
     {
         if (SipPf_Stricmp(m_pszViaBranchParam, pGeneratedKey->m_pszViaBranchParam) != SIP_EQUALS)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "txn-comparison: not-match >> Via branch", SIP_ZERO,
-                    SIP_ZERO);
-            return SIP_NOT_MATCH;
+            SIP_BOOL isAckForSuccessfulInvite =
+                    ((SipPf_Strcmp(SipMsgUtil::METHOD_ACK, pGeneratedKey->m_pszMethod) ==
+                             SIP_EQUALS) &&
+                            (pGeneratedKey->m_eTxnType == SipTxn::INVITE_SERVER &&
+                                    m_eTxnType == SipTxn::INVITE_SERVER) &&
+                            SipMsgUtil::IsSuccessfulResponse(m_nRespCode))
+                    ? SIP_TRUE
+                    : SIP_FALSE;
+
+            if (isAckForSuccessfulInvite == SIP_FALSE)
+            {
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "txn-comparison: not-match >> Via branch",
+                        SIP_ZERO, SIP_ZERO);
+                return SIP_NOT_MATCH;
+            }
         }
     }
 
@@ -327,8 +339,6 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         return SIP_NOT_MATCH;
     }
 
-    SIP_BOOL bACKFor2xxSent = SIP_FALSE;
-
     if (SipPf_Strcmp(SipMsgUtil::METHOD_ACK, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
     {
         if (SipPf_Strcmp(m_pszMethod, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
@@ -338,24 +348,10 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
             return SIP_NOT_MATCH;
         }
     }
-    else
+    else if (SipPf_Strcmp(m_pszMethod, SipMsgUtil::METHOD_CANCEL) == SIP_EQUALS)
     {
         // 487 retransmission case
-        if (SipPf_Strcmp(m_pszMethod, SipMsgUtil::METHOD_CANCEL) == SIP_EQUALS)
-        {
-            return SIP_NOT_MATCH;
-        }
-
-        // Successful response & received ACK request : always new one
-        // Test equipment issue: same transaction key - cseq / via-branch / from-tag / to-tag
-        if (pGeneratedKey->m_eTxnType == SipTxn::INVITE_SERVER &&
-                m_eTxnType == SipTxn::INVITE_SERVER)
-        {
-            if (SipMsgUtil::IsSuccessfulResponse(m_nRespCode))
-            {
-                bACKFor2xxSent = SIP_TRUE;
-            }
-        }
+        return SIP_NOT_MATCH;
     }
 
     if (SipPf_Strcmp(m_pszCallId, pGeneratedKey->m_pszCallId) != SIP_EQUALS)
@@ -401,14 +397,6 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
                 return SIP_NOT_MATCH;
             }
         }
-    }
-
-    if (bACKFor2xxSent == SIP_TRUE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "txn-comparison: ACK for 2xx sent has same transaction identifiers", SIP_ZERO,
-                SIP_ZERO);
-        return SIP_NOT_MATCH;
     }
 
     return SIP_MATCHES;

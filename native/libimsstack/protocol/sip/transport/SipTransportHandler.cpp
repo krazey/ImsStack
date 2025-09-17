@@ -22,26 +22,6 @@
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
 
-/****************************************************************************
-  Member Function Implementations
- *****************************************************************************/
-
-/*!
- * @brief This API encode SIP message and fill transport params
- *
- * @param[in,out] pSipMsg        : SIP message object used for forming raw SIP message
- * @param[in]     pTranspParam   : For Request message it contains transport information where
- *    request to be send. For response, remote transport information is fetched from the Via header
- * @param[out]     ppTranspInfo    : Contains Encoder SIP message and final transport details.
- * @param[out]     pnError        : Appropriate error code as defined in SipEn_ErrorTypes in case
- * of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- */
 SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
         IN SipTransportParameter* pTranspParam, IN const SIP_CHAR* pSipBuffer,
         IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError)
@@ -89,29 +69,6 @@ SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
     return SIP_TRUE;
 }
 
-/*!
- * @brief This API validates via header, txn mandatory headers and check the validiaty of the
- * received message as per the txn state
- *
- * @param[in,out] pSipMsg        : Parsed SIP message object of the received SIP RAW message
- * @param[in]    pTranspParam   : Transport details from where SIP message is received
- * @param[out]    peTranspStatus   : return the status of transport layer after processing.
- * Caller shall take necessary actions based on this status
- * @param[out]    ppTxnKey   :  New instance key of txn to which the message belongs
- * @param[out]     ppTranspInfo    : transport details of the existing transaction, obj of same
- * ref as in txn obj
- * @param[out]     ppUserData    : It contains user data as given by the user. this data is
- * retrieve from the txn obj for txn not existing it contains NULL.
- * NOTE: User data that is return is of same ref as in txn obj
- * @param[out]     pnError        : Appropriate error code as defined in SipEn_ErrorTypes in case
- * of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- */
 SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
         IN SipTransportParameter* pTranspParam, OUT SIP_INT32* peTxnStatus,
         OUT SIP_BOOL* pbTxnExist, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
@@ -210,12 +167,6 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name    : OnRecvTanspError
- * Description      : If Error is occurred due to Mesg Constraint , swith back to UDP and transport
- * Preconditions/   :
- * Side Effects     :
- *****************************************************************************/
 SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey* pTxnKey,
         SIP_INT32* peTxnStatus, SipTransportInfo** ppTranspInfo, ISipUserData* pUserData,
         SIP_UINT16* pnError)
@@ -306,41 +257,6 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name         : IsInviteTxnPresentForAckTxn
- * Description            : Checks if INVITE server transaction is present which is matched
- *                         with the specified ACK transaction key.
- * Preconditions/        :
- * Side Effects            :
- *****************************************************************************/
-SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnKey)
-{
-    SIP_UINT16 nError = 0;
-    SipTxnKey* pInviteTxnKey = new SipTxnKey(pAckTxnKey, &nError);
-
-    pInviteTxnKey->SetMethod(SipMsgUtil::METHOD_INVITE);
-    pInviteTxnKey->RemoveRule(SipTxnKey::RULE_COMPARE_VIA_BRANCH);
-
-    SipTxn* pTxn = SIP_NULL;
-    SIP_BOOL bTxnExist = SIP_TRUE;
-    if (GetTxnObjFromDb(pInviteTxnKey, &pTxn, &bTxnExist, &nError) == SIP_FALSE)
-    {
-        bTxnExist = SIP_FALSE;
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP, "IsInviteTxnPresentForAckTxn: GetTxnObjFromDb fail",
-                SIP_ZERO, SIP_ZERO);
-    }
-
-    pInviteTxnKey->SipDelete();
-
-    return (bTxnExist == SIP_TRUE) ? SIP_TRUE : SIP_FALSE;
-}
-
-/*****************************************************************************
- * Function name         : UpdateViaSipMsg
- * Description            : Changing Transport with in VIA Header
- * Preconditions/        :
- * Side Effects            :
- *****************************************************************************/
 PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
         SipMessage* pSipMsg, SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
 {
@@ -426,12 +342,6 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name         : GetTxnKeyFromSipMsg
- * Description            : returns txn key from Sip message
- * Preconditions/        :
- * Side Effects            :
- *****************************************************************************/
 PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
         IN SipMessage* pSipMsg, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {

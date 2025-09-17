@@ -223,26 +223,7 @@ send to network
     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTransp, TxnStatus[%d]", *peTxnStatus, 0);
 
     /*
-CASE:2: Handling ACK for INVITE (txn not existing)
-Successful ACK Request for INVITE is received and No Txn exists,
-stack user must process this request and can decide whether to ignore or not
-     */
-    if ((*peTxnStatus == SipTxn::STATUS_NEW_REQ_RECVD) &&
-            (pSipMsg->GetMethodType() == SipMessage::METHOD_ACK))
-    {
-        if (objTranspHandler.IsInviteTxnPresentForAckTxn(pTxnKey) != SIP_TRUE)
-        {
-            *peTxnStatus = SipTxn::STATUS_IGNORE_REQ;
-        }
-
-        pTxnKey->SetTxnType(SipTxn::INVITE_SERVER);
-        pTxnKey->SetResponseCode(200);
-        *ppTxnKey = pTxnKey;
-        return SIP_TRUE;
-    }
-
-    /*
-       CASE-3 :: Handling 2xx resp for INVITE (Txn not existing)
+       CASE :: Handling 2xx resp for INVITE (Txn not existing)
        2xx Response for INVITE is received and No Txn exists. This might be re-transmitted 2xx.
        stack user must process this request and can decide whether to ignore or not, in case user
        process this response, user must re-transmit successful ACK

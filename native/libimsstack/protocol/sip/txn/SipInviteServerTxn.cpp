@@ -277,10 +277,10 @@ static SIP_BOOL ProceedingState_Send2xxResponse(SipTxn* pTxn, SIP_VOID* pvData, 
     return SIP_TRUE;
 }
 
-static SIP_BOOL ProceedingState_TransportError(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+static SIP_BOOL ProceedingState_TransportError(
+        SipTxn* /*pTxn*/, SIP_VOID* /*pvData*/, SIP_UINT16* /*pnError*/)
 {
-    (void)pvData;
-    (void)pnError;
+    /* Remain in same state */
     return SIP_TRUE;
 }
 
@@ -379,16 +379,21 @@ static SIP_BOOL AcceptedState_Send2xxResponse(SipTxn* pTxn, SIP_VOID* pvData, SI
     return SIP_TRUE;
 }
 
-static SIP_BOOL AcceptedState_TransportError(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+static SIP_BOOL AcceptedState_TransportError(
+        SipTxn* /*pTxn*/, SIP_VOID* /*pvData*/, SIP_UINT16* /*pnError*/)
 {
-    (void)pnError;
-    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+    /* Remain in same state*/
+    return SIP_TRUE;
+}
 
-    /* Fill FSM data for stack manager */
-    pFsmData->m_eTxnStatus = SipTxn::STATUS_ERROR_ON_SEND;
+static SIP_BOOL AcceptedState_ReceiveAckRequest(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* /*pnError*/)
+{
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
     pFsmData->m_pOutUserData = pTxn->GetUserData();
 
-    /* Remain in same state*/
+    /* Remain in same state */
     return SIP_TRUE;
 }
 
@@ -418,10 +423,9 @@ static SIP_BOOL CompletedState_ReceiveInviteRequest(
     return SIP_TRUE;
 }
 
-static SIP_BOOL CompletedState_TransportError(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+static SIP_BOOL CompletedState_TransportError(
+        SipTxn* /*pTxn*/, SIP_VOID* /*pvData*/, SIP_UINT16* /*pnError*/)
 {
-    (void)pvData;
-    (void)pnError;
     return SIP_TRUE;
 }
 
@@ -605,7 +609,7 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_FAILURE_RESP_EVT*/
         AcceptedState_Send2xxResponse, /* SipTxn::INV_SER_SEND_2XX_RESP_EVT */
         AcceptedState_TransportError, /* SipTxn::INV_SER_TRANSP_ERROR_EVT */
-        HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
+        AcceptedState_ReceiveAckRequest, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
         AcceptedState_Timer_L_Timeout, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
