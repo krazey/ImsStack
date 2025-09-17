@@ -30,25 +30,19 @@ public:
     RegistryLoader() = delete;
 
 public:
-    static IMS_BOOL AddStreamProperty(
+    static void AddStreamProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddFramedProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddBasicProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddEventProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddCoreServiceProperty(
             IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddFramedProperty(
-            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddBasicProperty(
-            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddEventProperty(
-            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddCoreServiceProperty(
-            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddQosProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddRegProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddWriteProperty(
-            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddReadProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddCapProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddMprofProperty(
-            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddConnectionProperty(
+    static void AddQosProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddRegProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddWriteProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddReadProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddCapProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddMprofProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static void AddConnectionProperty(
             IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL ValidateUniqueness(
             IN const IMS_SINT32 (&nPropertyCount)[ImsProperty::PKEY_MAX]);
@@ -94,7 +88,7 @@ PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_MESSAGE_TYPE[] = "message_typ
 PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_SDP[] = "sdp";
 PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_PROFILE[] = "profile";
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddStreamProperty(
+PUBLIC GLOBAL void RegistryLoader::AddStreamProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -105,11 +99,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddStreamProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_MEDIA_TYPES));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddFramedProperty(
+PUBLIC GLOBAL void RegistryLoader::AddFramedProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -132,11 +124,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddFramedProperty(
     }
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddBasicProperty(
+PUBLIC GLOBAL void RegistryLoader::AddBasicProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -147,11 +137,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddBasicProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_MEDIA_TYPES));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddEventProperty(
+PUBLIC GLOBAL void RegistryLoader::AddEventProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -162,11 +150,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddEventProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_PACKAGE_NAMES));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCoreServiceProperty(
+PUBLIC GLOBAL void RegistryLoader::AddCoreServiceProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -183,11 +169,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCoreServiceProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_FEATURE_TAG));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddQosProperty(
+PUBLIC GLOBAL void RegistryLoader::AddQosProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -204,11 +188,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddQosProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_RECEIVE_FLOW_SPEC));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddRegProperty(
+PUBLIC GLOBAL void RegistryLoader::AddRegProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -228,11 +210,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddRegProperty(
     }
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddWriteProperty(
+PUBLIC GLOBAL void RegistryLoader::AddWriteProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -243,11 +223,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddWriteProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_HEADER_NAMES));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddReadProperty(
+PUBLIC GLOBAL void RegistryLoader::AddReadProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -258,11 +236,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddReadProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_HEADER_NAMES));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCapProperty(
+PUBLIC GLOBAL void RegistryLoader::AddCapProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -283,11 +259,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCapProperty(
     }
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddMprofProperty(
+PUBLIC GLOBAL void RegistryLoader::AddMprofProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -301,11 +275,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddMprofProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_PROFILE));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddConnectionProperty(
+PUBLIC GLOBAL void RegistryLoader::AddConnectionProperty(
         IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
@@ -317,8 +289,6 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddConnectionProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_SERVICE_ID));
 
     objRegistry.Add(objProperty);
-
-    return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::ValidateUniqueness(
@@ -452,13 +422,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddStreamProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddStreamProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Stream property -- ends
@@ -473,13 +437,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddFramedProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddFramedProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Framed property -- ends
@@ -494,13 +452,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddBasicProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddBasicProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Basic property -- ends
@@ -515,13 +467,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddEventProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddEventProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Event property -- ends
@@ -536,13 +482,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddCoreServiceProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddCoreServiceProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// CoreService property -- ends
@@ -557,13 +497,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddQosProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddQosProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Qos property -- ends
@@ -580,13 +514,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
                 return IMS_FALSE;
             }
 
-            if (!RegistryLoader::AddRegProperty(piBuffer, objRegistry))
-            {
-                piBuffer->Destroy();
-
-                return IMS_FALSE;
-            }
-
+            RegistryLoader::AddRegProperty(piBuffer, objRegistry);
             piBuffer->ReleaseSection();
         }
     }
@@ -602,13 +530,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddWriteProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddWriteProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Write property -- ends
@@ -623,13 +545,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddReadProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddReadProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Read property -- ends
@@ -644,13 +560,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddCapProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddCapProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Cap property -- ends
@@ -665,13 +575,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddMprofProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddMprofProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Mprof property -- ends
@@ -686,13 +590,7 @@ PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistryFromContent(
             return IMS_FALSE;
         }
 
-        if (!RegistryLoader::AddConnectionProperty(piBuffer, objRegistry))
-        {
-            piBuffer->Destroy();
-
-            return IMS_FALSE;
-        }
-
+        RegistryLoader::AddConnectionProperty(piBuffer, objRegistry);
         piBuffer->ReleaseSection();
     }
     //// Connection property -- ends

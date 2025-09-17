@@ -40,7 +40,7 @@ public:
             m_objValues(other.m_objValues)
     {
     }
-    inline ~MediaProfileParameter() {}
+    ~MediaProfileParameter() = default;
 
     inline MediaProfileParameter& operator=(IN const MediaProfileParameter& other)
     {
@@ -54,12 +54,7 @@ public:
     }
 
 public:
-    inline IMS_BOOL AddValue(IN const AString& strValue)
-    {
-        m_objValues.AddElement(strValue);
-        return IMS_TRUE;
-    }
-
+    inline void AddValue(IN const AString& strValue) { m_objValues.AddElement(strValue); }
     inline IMS_SINT32 GetType() const { return m_nType; }
     inline const AStringArray& GetValues() const { return m_objValues; }
 
@@ -76,7 +71,7 @@ public:
             m_strConfName(strConfName)
     {
     }
-    inline ~MediaProfile() {}
+    ~MediaProfile() = default;
 
 public:
     IMS_BOOL AddValue(IN IMS_SINT32 nType, IN const AString& strValue);
@@ -99,18 +94,12 @@ IMS_BOOL MediaProfile::AddValue(IN IMS_SINT32 nType, IN const AString& strValue)
     {
         // Add a new parameter
         MediaProfileParameter objParameter(nType);
-
-        if (!objParameter.AddValue(strValue))
-        {
-            return IMS_FALSE;
-        }
-
+        objParameter.AddValue(strValue);
         return m_objParameters.Append(objParameter);
     }
-    else
-    {
-        return pParameter->AddValue(strValue);
-    }
+
+    pParameter->AddValue(strValue);
+    return IMS_TRUE;
 }
 
 PUBLIC
@@ -138,7 +127,7 @@ MediaProfileParameter* MediaProfile::GetParameter(IN IMS_SINT32 nType) const
 class MediaConfigPrivate
 {
 public:
-    inline MediaConfigPrivate() {}
+    MediaConfigPrivate() = default;
     inline ~MediaConfigPrivate() { Clear(); }
 
     MediaConfigPrivate(IN const MediaConfigPrivate&) = delete;
