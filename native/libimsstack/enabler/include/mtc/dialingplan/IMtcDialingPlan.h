@@ -38,6 +38,8 @@ public:
      */
     virtual AString GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
             IN Scheme eScheme = Scheme::UNKNOWN) = 0;
+    virtual AString GetToUriForEmergencyTestNumber(
+            IN const AString& strNumber, IN IMtcCallContext& objContext) = 0;
 };
 
 #endif

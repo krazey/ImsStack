@@ -97,7 +97,54 @@ protected:
         return NormalDialingPlan::GetTranslatedUri(objContext, strNumber, eScheme, objIdentityProxy)
                 .GetStr();
     }
+    IMS_CHAR* GetTranslatedUriForEmergencyTestNumber()
+    {
+        return NormalDialingPlan::GetTranslatedUriForEmergencyTestNumber(
+                objContext, strNumber, objIdentityProxy)
+                .GetStr();
+    }
 };
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForEmergencyTestNumberReturnsEmptyIfNumberIsEmpty)
+{
+    AString strExpectedUri;
+    EXPECT_STREQ(GetTranslatedUriForEmergencyTestNumber(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForEmergencyTestNumber)
+{
+    strNumber = "123";
+    AString strExpectedUri("sip:" + strNumber + "@any_domain_name");
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objIdentityProxy, CreateSipUserId(strNumber, SLOT_ID, IMS_FALSE, _))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUriForEmergencyTestNumber(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForEmergencyTestNumberWithUriParameters)
+{
+    strNumber = "123";
+    eScheme = Scheme::SIP;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUriWithUriParameters("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUriWithUriParameters));
+
+    EXPECT_STREQ(GetTranslatedUriForEmergencyTestNumber(), strExpectedUriWithUriParameters.GetStr());
+}
 
 TEST_F(NormalDialingPlanTest, GetTranslatedUriForDialStringReturnsUriWithDialString)
 {

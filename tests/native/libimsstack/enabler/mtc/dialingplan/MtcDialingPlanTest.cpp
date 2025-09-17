@@ -236,4 +236,19 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDialNumberWithPhone)
             pDialingPlan->GetToUri(strNumber, objContext, Scheme::SIP).GetStr());
 }
 
+TEST_F(MtcDialingPlanTest, GetToUriForEmergencyTestNumber)
+{
+    AString strNumber = "123";
+    AString strExpectedUri("sip:" + strNumber + "@any_domain_name");
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pIdentityProxy, CreateSipUserId(strNumber, _, IMS_FALSE, _))
+            .WillByDefault(Return(strExpectedUri));
+    EXPECT_STREQ(strExpectedUri.GetStr(),
+            pDialingPlan->GetToUriForEmergencyTestNumber(strNumber, objContext).GetStr());
+}
+
 }  // namespace android

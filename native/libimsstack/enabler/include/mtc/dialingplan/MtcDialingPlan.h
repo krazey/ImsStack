@@ -39,9 +39,11 @@ public:
     MtcDialingPlan(IN const MtcDialingPlan&) = delete;
     MtcDialingPlan& operator=(IN const MtcDialingPlan&) = delete;
 
-public:
     AString GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
             IN Scheme eScheme = Scheme::UNKNOWN) override;
+
+    AString GetToUriForEmergencyTestNumber(
+            IN const AString& strNumber, IN IMtcCallContext& objContext) override;
 
 private:
     static IMS_BOOL IsUriForm(IN const AString& strNumber);

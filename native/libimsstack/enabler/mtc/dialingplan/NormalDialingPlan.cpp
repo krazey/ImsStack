@@ -38,6 +38,29 @@ PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUri(IN IMtcContext& objCo
     return Translate(objContext, strNumber, eScheme, objIdentityProxy);
 }
 
+PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUriForEmergencyTestNumber(
+        IN IMtcContext& objContext, IN AString& strNumber,
+        IN const ImsIdentityProxy& objIdentityProxy)
+{
+    if (strNumber.GetLength() == 0)
+    {
+        IMS_TRACE_E(0, "Number is empty", 0, 0, 0);
+        return strNumber;
+    }
+
+    if (objContext.GetConfigurationProxy().GetBoolean(
+            ConfigEmergency::KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL))
+    {
+        strNumber = objIdentityProxy.CreateSipUserId(strNumber, objContext.GetSlotId());
+    }
+    else
+    {
+        FormSipUri(objContext, strNumber, objIdentityProxy);
+    }
+
+    return strNumber;
+}
+
 PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUriForDialString(
         IN const IMtcContext& objContext, IN AString& strNumber,
         IN const ImsIdentityProxy& objIdentityProxy)

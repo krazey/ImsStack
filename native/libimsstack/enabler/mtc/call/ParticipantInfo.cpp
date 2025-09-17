@@ -139,17 +139,16 @@ void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
         return;
     }
 
-    Scheme eScheme;
     if (m_objContext.GetService().IsEmergency())
     {
-        eScheme = Scheme::SIP;
+        m_strRemoteUri = m_objContext.GetDialingPlan().GetToUriForEmergencyTestNumber(
+                strRemoteNumber, m_objContext);
     }
     else
     {
-        eScheme = Scheme::UNKNOWN;
+        m_strRemoteUri = m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext);
     }
 
-    m_strRemoteUri = m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext, eScheme);
     IMS_TRACE_D("UpdateFromRemoteNumber : URI[%s]", m_strRemoteUri.GetStr(), 0, 0);
 }
 

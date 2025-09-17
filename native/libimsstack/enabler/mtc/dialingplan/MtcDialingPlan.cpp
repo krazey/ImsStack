@@ -53,6 +53,15 @@ MtcDialingPlan::~MtcDialingPlan()
 }
 
 PUBLIC
+AString MtcDialingPlan::GetToUriForEmergencyTestNumber(
+        IN const AString& strNumber, IN IMtcCallContext& objContext)
+{
+    AString strUri = strNumber;
+    return NormalDialingPlan::GetTranslatedUriForEmergencyTestNumber(
+            objContext, strUri, *m_pIdentityProxy);
+}
+
+PUBLIC
 AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
         IN Scheme eScheme /* = Scheme::Unknown*/)
 {

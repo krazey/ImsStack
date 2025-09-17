@@ -568,6 +568,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL
                 [] = KEY_IMS_EMERGENCY_PREFIX
         "emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "exclude_uri_parameters_for_emergency_test_number_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_tcall_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[] =
