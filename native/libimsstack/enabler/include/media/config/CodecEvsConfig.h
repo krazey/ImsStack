@@ -95,6 +95,8 @@ public:
     static const IMS_SINT32 DEFAULT_BW_LIST;
     static const IMS_SINT32 DEFAULT_CMR;
     static const IMS_SINT32 DEFAULT_CH_AW_RECV;
+    static const IMS_SINT32 CARRIERCONFIG_CH_AW_RECV_DISABLED;
+    static const IMS_SINT32 CH_AW_RECV_DISABLED;
     static const IMS_SINT32 NOT_DEFINED;
     static const IMS_SINT32 CMR_NOT_PRESENT;
 
