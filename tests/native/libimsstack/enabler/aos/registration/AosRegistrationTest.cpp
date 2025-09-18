@@ -30,6 +30,9 @@
 #include "MockIThread.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
+#include "SipFactory.h"
+#include "SipRtConfig.h"
+#include "SipRtConfigHelper.h"
 #include "SipStatusCode.h"
 #include "TestPhoneInfoService.h"
 #include "TestThreadService.h"
@@ -101,6 +104,7 @@ using ::testing::SetArgReferee;
     using Base::CleanUp;                                            \
     using Base::ClearCallingNumberVerification;                     \
     using Base::ClearIpsecBlock;                                    \
+    using Base::ClearSipRtConfig;                                   \
     using Base::ClearPcscf;                                         \
     using Base::ClearRetryCount;                                    \
     using Base::ClearRetryTimers;                                   \
@@ -1684,6 +1688,40 @@ TEST_F(AosRegistrationTest, IpsecIsSupportedWhenFeatureIsOnAndNoSetBlockReason)
     IMS_BOOL bResult = m_pAosRegistration->IsIpsecSupported();
 
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, RemoveSipPcniHeaderWhenClearSipRtConfigAfterSetPcniHeader)
+{
+    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(SLOT_ID);
+    SipRtConfig::Header objHeader = SipRtConfig::Header();
+    objHeader.strName = AosString::STR_P_CELLULAR_NETWORK_INFO;
+    piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objHeader);
+    m_pAosRegistration->ClearSipRtConfig();
+
+    EXPECT_EQ(piConfHelper->GetHeader(objHeader.strName), nullptr);
+}
+
+TEST_F(AosRegistrationTest, RemoveSipPlaniHeaderWhenClearSipRtConfigAfterSetPlaniHeader)
+{
+    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(SLOT_ID);
+    SipRtConfig::Header objHeader = SipRtConfig::Header();
+    objHeader.strName = AosString::STR_P_LAST_ACCESS_NETWORK_INFO;
+    piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objHeader);
+    m_pAosRegistration->ClearSipRtConfig();
+
+    EXPECT_EQ(piConfHelper->GetHeader(objHeader.strName), nullptr);
+}
+
+TEST_F(AosRegistrationTest, RemoveRegContactAddressWhenClearSipRtConfigAfterSetRegContactAddress)
+{
+    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(SLOT_ID);
+    SipRtConfigHelper* pConfigHelper = static_cast<SipRtConfigHelper*>(piConfHelper);
+    SipRtConfig::RegContactAddress objContactAddress;
+    objContactAddress.strCallId = "TestCallId";
+    piConfHelper->SetConfig(SipRtConfig::CONFIG_I_REG_CONTACT_ADDRESS, &objContactAddress);
+    m_pAosRegistration->ClearSipRtConfig();
+
+    EXPECT_EQ(pConfigHelper->GetRegContactUri(objContactAddress.strCallId), nullptr);
 }
 
 TEST_F(AosRegistrationTest, IgnoreUpdateIpsecSupportedIfIpsecFeatureIsNotOn)
