@@ -57,49 +57,48 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
 
-#define DECLARE_USING(Base)                                     \
-    using Base::CheckSuspended;                                 \
-    using Base::CleanUp;                                        \
-    using Base::GetFeatures;                                    \
-    using Base::GetVideoBlockReasonForIpcan;                    \
-    using Base::GetVoiceBlockReasonForIpcan;                    \
-    using Base::Init;                                           \
-    using Base::InitializeFeatureTags;                          \
-    using Base::InitializeHoldingBlocksPolicy;                  \
-    using Base::InitializeServiceBlock;                         \
-    using Base::InitializeServiceFeature;                       \
-    using Base::IsBlocked;                                      \
-    using Base::IsBlockForMobile;                               \
-    using Base::IsBlockForWifi;                                 \
-    using Base::IsCsFeatureTagRequired;                         \
-    using Base::IsFeatureBlocked;                               \
-    using Base::IsHandleBlocked;                                \
-    using Base::IsInvalidMobileNetwork;                         \
-    using Base::IsPlmnBlockCondition;                           \
-    using Base::IsVoiceCapableOnWiFiCalling;                    \
-    using Base::IsVolteHysTimerRunning;                         \
-    using Base::ImsRadio_OnSsacChanged;                         \
-    using Base::NConfiguration_NotifyConfigChanged;             \
-    using Base::ProcessBlockChanged;                            \
-    using Base::ProcessCapabilitiesChanged;                     \
-    using Base::ProcessFeatureBlock;                            \
-    using Base::ProcessHoldingSsacState;                        \
-    using Base::ProcessHoldingVopsState;                        \
-    using Base::ProcessNetworkChanged;                          \
-    using Base::ProcessVolteHysTimerExpired;                    \
-    using Base::ProcessVopsStateChanged;                        \
-    using Base::ReevaluateCapabilities;                         \
-    using Base::ReevaluateUnavailableFeature;                   \
-    using Base::Request;                                        \
-    using Base::ResetSuspendedReason;                           \
-    using Base::ServicePhone_EmergencyRegistrationStateChanged; \
-    using Base::ServicePhone_PlmnChanged;                       \
-    using Base::ServicePhone_VopsStateChanged;                  \
-    using Base::SetHandleState;                                 \
-    using Base::SetSuspendedReason;                             \
-    using Base::StartVolteHysTimer;                             \
-    using Base::StopVolteHysTimer;                              \
-    using Base::Timer_TimerExpired;                             \
+#define DECLARE_USING(Base)                         \
+    using Base::CheckSuspended;                     \
+    using Base::CleanUp;                            \
+    using Base::GetFeatures;                        \
+    using Base::GetVideoBlockReasonForIpcan;        \
+    using Base::GetVoiceBlockReasonForIpcan;        \
+    using Base::Init;                               \
+    using Base::InitializeFeatureTags;              \
+    using Base::InitializeHoldingBlocksPolicy;      \
+    using Base::InitializeServiceBlock;             \
+    using Base::InitializeServiceFeature;           \
+    using Base::IsBlocked;                          \
+    using Base::IsBlockForMobile;                   \
+    using Base::IsBlockForWifi;                     \
+    using Base::IsCsFeatureTagRequired;             \
+    using Base::IsFeatureBlocked;                   \
+    using Base::IsHandleBlocked;                    \
+    using Base::IsInvalidMobileNetwork;             \
+    using Base::IsPlmnBlockCondition;               \
+    using Base::IsVoiceCapableOnWiFiCalling;        \
+    using Base::IsVolteHysTimerRunning;             \
+    using Base::ImsRadio_OnSsacChanged;             \
+    using Base::NConfiguration_NotifyConfigChanged; \
+    using Base::ProcessBlockChanged;                \
+    using Base::ProcessCapabilitiesChanged;         \
+    using Base::ProcessFeatureBlock;                \
+    using Base::ProcessHoldingSsacState;            \
+    using Base::ProcessHoldingVopsState;            \
+    using Base::ProcessNetworkChanged;              \
+    using Base::ProcessVolteHysTimerExpired;        \
+    using Base::ProcessVopsStateChanged;            \
+    using Base::ReevaluateCapabilities;             \
+    using Base::ReevaluateUnavailableFeature;       \
+    using Base::Request;                            \
+    using Base::ResetSuspendedReason;               \
+    using Base::ServicePhone_PlmnChanged;           \
+    using Base::ServicePhone_VopsStateChanged;      \
+    using Base::SetHandleState;                     \
+    using Base::SetSuspendedReason;                 \
+    using Base::StartVolteHysTimer;                 \
+    using Base::StopVolteHysTimer;                  \
+    using Base::Timer_TimerExpired;                 \
     using Base::UpdateGGsmaRcsTelephonyFeatureTag;
 
 class TestAosHandleMtc : public AosHandleMtc
@@ -271,8 +270,6 @@ protected:
         m_objKeepRegWithMmtelFeatureTagPolicy.Clear();
         ON_CALL(m_objMockIAosNConfiguration, GetKeepRegWithMmtelFeatureTagPolicy())
                 .WillByDefault(ReturnRef(m_objKeepRegWithMmtelFeatureTagPolicy));
-
-        ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
 
         m_piAosService = AosProvider::GetInstance()->GetService();
         AosProvider::GetInstance()->SetService(&m_objMockIAosService);
@@ -3020,20 +3017,6 @@ TEST_F(AosHandleMtcTest, NoCheckVopsStateOnRatsOtherThanNeitherLteNorNr)
     // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosHandleMtcTest, NoCheckVopsStateOnEmergencyAttach)
-{
-    // GIVEN
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).Times(0);
-
-    // WHEN
-    m_pAosHandleMtc->ProcessNetworkChanged();
-
-    // THEN: The GIVEN condition should be met.
-}
-
 TEST_F(AosHandleMtcTest, NoVopsStateChangeIfNewStateIsSameWithOldStateOnLte)
 {
     // GIVEN
@@ -3664,55 +3647,6 @@ TEST_F(AosHandleMtcTest, ShouldNotStartVolteHysTimeWhenVopsChanged_Plmn1_Off_Plm
 
     // THEN
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_VOPS));
-    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
-}
-
-TEST_F(AosHandleMtcTest, ShouldIgnoreVopsChangeOnEmergencyAttach)
-{
-    // GIVEN
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
-
-    // WHEN
-    m_pAosHandleMtc->ServicePhone_VopsStateChanged(
-            IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("111111"));
-
-    // THEN
-    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
-}
-
-TEST_F(AosHandleMtcTest, ShouldUpdateVopsStateIfChangedToNormalAttach)
-{
-    // GIVEN
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
-
-    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNetTracker, GetNetworkOperator()).WillByDefault(Return("111111"));
-
-    // WHEN
-    m_pAosHandleMtc->ServicePhone_EmergencyRegistrationStateChanged(IMS_FALSE);
-
-    // THEN
-    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_VOPS));
-    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
-}
-
-TEST_F(AosHandleMtcTest, ShouldResetVopsStateToSupportedIfEmergencyAttached)
-{
-    // GIVEN
-    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
-    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
-    m_pAosHandleMtc->SetVopsPlmn(AString("111111"));
-    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOPS);
-
-    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNetTracker, GetNetworkOperator()).WillByDefault(Return("111111"));
-
-    // WHEN
-    m_pAosHandleMtc->ServicePhone_EmergencyRegistrationStateChanged(IMS_TRUE);
-
-    // THEN
-    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_VOPS));
-    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
 }
 
