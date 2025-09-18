@@ -474,6 +474,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             if (sim.isSimLoaded()) {
                 notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
             }
+
+            notifySimStateChanged(sim.getSimState());
         }
     }
 
@@ -750,6 +752,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         sendRequest(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
                 (networkType == NetworkType.CROSS_SIM
                 ? CrossSimStatus.DATA_CONNECTED : CrossSimStatus.DATA_DISCONNECTED).getValue());
+    }
+
+    private void notifySimStateChanged(@Sim.State int simState) {
+        sendRequest(IIAosService.J2N_NOTIFY_SIM_STATE_CHANGED, simState);
     }
 
     private void adjustCapabilities(CapabilityPairs pairs) {

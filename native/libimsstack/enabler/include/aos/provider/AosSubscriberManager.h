@@ -112,6 +112,7 @@ protected:
     IMS_BOOL ReconfigureFallback(IN IMS_BOOL bToUsim);
     IMS_BOOL ProcessPhoneNumberAvailable();
     IMS_BOOL ProcessIsimStateChange(IN IsimState eState);
+    IMS_BOOL ProcessSimStateChange(IN SimState eState);
 
     void ProcessPhoneRestarted();
     void ProcessIccLoadedWaitingTimerExpired();
@@ -178,6 +179,7 @@ protected:
     void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
     void ServicePhone_IsimStateChanged(IN IsimState eState) override;
+    void ServicePhone_SimStateChanged(IN SimState eState) override;
 
     // Log
     const IMS_CHAR* IdentityPriorityToString();

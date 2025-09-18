@@ -100,6 +100,7 @@ public:
     virtual void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo) = 0;
     virtual void NotifyAllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) = 0;
     virtual void NotifyEmergencyRegistrationStateChanged(IN IMS_UINT32 nIsEmergencyAttached) = 0;
+    virtual void NotifySimStateChanged(IN IMS_SINT32 nSimState) = 0;
 
     /**
      * Notify an emergency callback mode changed information by AosService (Java)

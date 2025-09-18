@@ -707,6 +707,21 @@ PUBLIC VIRTUAL void AosService::NotifyEmergencyRegistrationStateChanged(
     }
 }
 
+PUBLIC VIRTUAL void AosService::NotifySimStateChanged(IN IMS_SINT32 nSimState)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifySimStateChanged :: nSimState(%d)", nSimState, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
+    {
+        IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->ServicePhone_SimStateChanged(static_cast<SimState>(nSimState));
+        }
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
         IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
         IN const ImsList<AString>& objFeatureTags)

@@ -82,6 +82,7 @@ public:
             (override));
     MOCK_METHOD(void, NotifyEmergencyRegistrationStateChanged, (IN IMS_UINT32 nIsEmergencyAttached),
             (override));
+    MOCK_METHOD(void, NotifySimStateChanged, (IN IMS_SINT32 nSimState), (override));
 
     MOCK_METHOD(IMS_BOOL, NotifyRegistered,
             (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,

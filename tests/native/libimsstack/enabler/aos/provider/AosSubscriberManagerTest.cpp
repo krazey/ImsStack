@@ -65,11 +65,13 @@ const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 101;
     using Base::NotifyState;                             \
     using Base::PrintIdentity;                           \
     using Base::ProcessIsimStateChange;                  \
+    using Base::ProcessSimStateChange;                   \
     using Base::ProcessPhoneNumberAvailable;             \
     using Base::ProcessPhoneRestarted;                   \
     using Base::ProcessPhoneRestartRecoveryTimerExpired; \
     using Base::ReconfigureFallback;                     \
     using Base::ServicePhone_IsimStateChanged;           \
+    using Base::ServicePhone_SimStateChanged;            \
     using Base::ServicePhone_PhoneNumberStateChanged;    \
     using Base::SetIsim;                                 \
     using Base::SetProvisioned;                          \
@@ -126,6 +128,10 @@ public:
     inline IMS_BOOL GetUsimFallback() { return m_bUsimFallback; }
 
     inline void SetUsimFallback(IN IMS_BOOL bUsimFallback) { m_bUsimFallback = bUsimFallback; }
+
+    inline IMS_UINT32 GetNotifyState() { return m_nNotifyState; }
+
+    inline void SetNotifyState(IMS_UINT32 state) { m_nNotifyState = state; }
 
     inline ImsList<IAosSubscriberManagerListener*> getListeners() { return m_objListeners; }
 
@@ -1444,6 +1450,63 @@ TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithNotRea
     EXPECT_FALSE(bResult);
 }
 
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessSimStateChangeWithAbsentForUsim)
+{
+    // GIVEN
+    SimState state = SimState::ABSENT;
+
+    m_pSubscriberManager->SetUsim(IMS_TRUE);
+    m_pSubscriberManager->SetIsim(IMS_FALSE);
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessSimStateChange(state);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessSimStateChangeWithNotReadyForUsim)
+{
+    // GIVEN
+    SimState state = SimState::NOT_READY;
+
+    m_pSubscriberManager->SetUsim(IMS_TRUE);
+    m_pSubscriberManager->SetIsim(IMS_FALSE);
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessSimStateChange(state);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenProcessSimStateChangeWithAbsentForIsim)
+{
+    // GIVEN
+    SimState state = SimState::ABSENT;
+
+    m_pSubscriberManager->SetUsim(IMS_FALSE);
+    m_pSubscriberManager->SetIsim(IMS_TRUE);
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessSimStateChange(state);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenProcessSimStateChangeWithReady)
+{
+    // GIVEN
+    SimState state = SimState::READY;
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessSimStateChange(state);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
 TEST_F(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted)
 {
     // GIVEN
@@ -1907,6 +1970,24 @@ TEST_F(AosSubscriberManagerTest, DisableUsimFallbackValueWhenIsimStateChanged)
 
     // THEN
     EXPECT_FALSE(m_pSubscriberManager->GetUsimFallback());
+}
+
+TEST_F(AosSubscriberManagerTest, NotifyNotReadyStateWhenSimStateChangedToAbsent)
+{
+    // GIVEN
+    MockIAosSubscriberManagerListener objListener;
+
+    EXPECT_CALL(objListener, AosSubscriberManager_NotifyState(_)).Times(1);
+
+    m_pSubscriberManager->AddListener(&objListener);
+    m_pSubscriberManager->SetUsim(IMS_TRUE);
+    m_pSubscriberManager->SetNotifyState(IAosSubscriber::READY);
+
+    // WHEN
+    m_pSubscriberManager->ServicePhone_SimStateChanged(SimState::ABSENT);
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->GetNotifyState(), IAosSubscriber::NOT_READY);
 }
 
 TEST_F(AosSubscriberManagerTest, ReturnsEmptyWhenIdentityPriorityToStringWithEmpty)

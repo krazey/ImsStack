@@ -46,6 +46,7 @@ public:
             (override));
     MOCK_METHOD(void, ServicePhone_EmergencyRegistrationStateChanged,
             (IN IMS_BOOL bEmergencyAttached), (override));
+    MOCK_METHOD(void, ServicePhone_SimStateChanged, (IN SimState eState), (override));
 };
 
 #endif  // MOCK_I_AOS_SERVICE_PHONE_LISTENER_H_

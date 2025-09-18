@@ -599,22 +599,27 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onSimStateChanged_simLoaded() {
-        byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
+        byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED.getValue());
+        byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_SIM_STATE_CHANGED,
+                Sim.STATE_LOADED);
         when(mMockSimInterface.isSimLoaded()).thenReturn(true);
+        when(mMockSimInterface.getSimState()).thenReturn(Sim.STATE_LOADED);
 
         mAosService.onSimStateChanged();
 
+        verify(mMockJniIms).sendData(mNativeObject, phoneNumberStateData);
         verify(mMockJniIms).sendData(mNativeObject, simStateData);
     }
 
     @Test
-    public void onSimStateChanged_simNotLoaded() {
+    public void onSimStateChanged_simAbsent() {
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
+        when(mMockSimInterface.getSimState()).thenReturn(Sim.STATE_ABSENT);
 
         mAosService.onSimStateChanged();
 
-        verify(mMockJniIms, never()).sendData(eq(mNativeObject), any());
+        verify(mMockJniIms).sendData(eq(mNativeObject), any()); // Should trigger only once.
     }
 
     @Test

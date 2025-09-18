@@ -870,6 +870,22 @@ IMS_BOOL AosSubscriberManager::ProcessIsimStateChange(IN IsimState eState)
     return IMS_FALSE;
 }
 
+PROTECTED
+IMS_BOOL AosSubscriberManager::ProcessSimStateChange(IN SimState eState)
+{
+    // If m_bIsim, SubscriberConfig will trigger ISIM state change events.
+    // Handles ABSENT for PSIM, NOT_READY for ESIM.
+    if (m_bUsim && (eState == SimState::ABSENT || eState == SimState::NOT_READY))
+    {
+        ClearAll();
+        RequestStop();
+        NotifyState(IAosSubscriber::NOT_READY);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 // Currently Not used
 PROTECTED
 void AosSubscriberManager::ProcessPhoneRestarted()
@@ -1411,6 +1427,13 @@ void AosSubscriberManager::ServicePhone_IsimStateChanged(IN IsimState eState)
 {
     A_IMS_TRACE_I(AOSTAG, "ServicePhone_IsimStateChanged :: eState(%d)", eState, 0, 0);
     ProcessIsimStateChange(eState);
+}
+
+PROTECTED
+void AosSubscriberManager::ServicePhone_SimStateChanged(IN SimState eState)
+{
+    A_IMS_TRACE_I(AOSTAG, "ServicePhone_SimStateChanged :: eState(%d)", eState, 0, 0);
+    ProcessSimStateChange(eState);
 }
 
 PROTECTED const IMS_CHAR* AosSubscriberManager::IdentityPriorityToString()

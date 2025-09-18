@@ -83,6 +83,7 @@ public:
     void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo) override;
     void NotifyAllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) override;
     void NotifyEmergencyRegistrationStateChanged(IN IMS_UINT32 nIsEmergencyAttached) override;
+    void NotifySimStateChanged(IN IMS_SINT32 nState) override;
 
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,

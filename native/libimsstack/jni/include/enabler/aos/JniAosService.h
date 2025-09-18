@@ -73,6 +73,7 @@ private:
     void NotifyNasSecurityAlgorithmChanged(IN const android::Parcel& objParcel);
     void NotifyAllowedNetworkTypesChanged(IN const android::Parcel& objParcel);
     void NotifyEmergencyRegistrationStateChanged(IN const android::Parcel& objParcel);
+    void NotifySimStateChanged(IN const android::Parcel& objParcel);
 
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 
