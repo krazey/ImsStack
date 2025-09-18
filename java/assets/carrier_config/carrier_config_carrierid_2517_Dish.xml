@@ -44,6 +44,8 @@
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
     <!-- Mtc -->
+    <!-- This item must be aligned with ims.sip_timer_b_millis_int -->
+    <int name="imsvoice.18x_timer_millis_int" value="32000"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="0"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
@@ -77,4 +79,5 @@
         <item value="20000"/>
         <item value="20000"/>
     </int-array>
+    <string name="imsvoice.call_terminate_reason_header_sip_response_timeout_string">RELEASE_CAUSE;cause=6;text=&quot;Call-setup Time-out&quot;</string>
 </carrier_config>
