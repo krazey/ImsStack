@@ -29,7 +29,12 @@ const IMS_SINT32 CodecEvsConfig::DEFAULT_CMR = 0;
 const IMS_SINT32 CodecEvsConfig::DEFAULT_CH_AW_RECV = 0;
 const IMS_SINT32 CodecEvsConfig::CARRIERCONFIG_CH_AW_RECV_DISABLED = 255;
 const IMS_SINT32 CodecEvsConfig::CH_AW_RECV_DISABLED = -1;
-const IMS_SINT32 CodecEvsConfig::CMR_NOT_PRESENT = -2;
+const IMS_SINT32 CodecEvsConfig::CARRIERCONFIG_CMR_NOT_PRESENT = 0;
+const IMS_SINT32 CodecEvsConfig::CARRIERCONFIG_CMR_DISABLED = 1;
+const IMS_SINT32 CodecEvsConfig::CARRIERCONFIG_CMR_ALL_ENABLED = 2;
+const IMS_SINT32 CodecEvsConfig::CARRIERCONFIG_CMR_ENABLED = 3;
+const IMS_SINT32 CodecEvsConfig::CMR_DISABLED = -1;
+const IMS_SINT32 CodecEvsConfig::CMR_ENABLED = 1;
 const IMS_SINT32 CodecEvsConfig::NOT_DEFINED = -2;
 
 PUBLIC
@@ -156,6 +161,22 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 
         m_nCmr = piCcSubBundle->GetInt(
                 CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, NOT_DEFINED);
+
+        switch (m_nCmr)
+        {
+            case CARRIERCONFIG_CMR_DISABLED:
+            m_nCmr = CMR_DISABLED;
+            break;
+            case CARRIERCONFIG_CMR_ENABLED:
+            m_nCmr = CMR_ENABLED;
+            break;
+            case CARRIERCONFIG_CMR_ALL_ENABLED:
+            m_nCmr = DEFAULT_CMR;
+            break;
+            case CARRIERCONFIG_CMR_NOT_PRESENT:
+            m_nCmr = NOT_DEFINED;
+            break;
+        }
         if (m_nCmr != NOT_DEFINED)
         {
             m_bVisibleCmr = IMS_TRUE;
