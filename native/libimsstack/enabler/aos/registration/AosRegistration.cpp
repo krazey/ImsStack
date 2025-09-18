@@ -6777,12 +6777,6 @@ void AosRegistration::SetContactAddressConfiguration(IN IMS_BOOL bAdd)
     }
 
     ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(m_nSlotId);
-
-    if (piRtConfigHelper == IMS_NULL)
-    {
-        return;
-    }
-
     if (bAdd)
     {
         if (m_piRegistration == IMS_NULL)
@@ -6822,19 +6816,17 @@ void AosRegistration::SetPcniHeader()
         return;
     }
 
-    SipRtConfig::Header* pPcniHeader = new SipRtConfig::Header();
-    pPcniHeader->strName = AosString::STR_P_CELLULAR_NETWORK_INFO;
+    SipRtConfig::Header objPcniHeader = SipRtConfig::Header();
+    objPcniHeader.strName = AosString::STR_P_CELLULAR_NETWORK_INFO;
 
     if (bSet)
     {
-        piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, pPcniHeader);
+        piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPcniHeader);
     }
     else
     {
-        piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, pPcniHeader);
+        piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPcniHeader);
     }
-
-    delete pPcniHeader;
 }
 
 PRIVATE
@@ -6859,25 +6851,23 @@ void AosRegistration::SetPlaniHeader()
         }
     }
 
-    SipRtConfig::Header* pPlaniHeader = new SipRtConfig::Header();
-    pPlaniHeader->strName = AosString::STR_P_LAST_ACCESS_NETWORK_INFO;
+    SipRtConfig::Header objPlaniHeader = SipRtConfig::Header();
+    objPlaniHeader.strName = AosString::STR_P_LAST_ACCESS_NETWORK_INFO;
 
     if (bSet)
     {
-        pPlaniHeader->strParameter =
+        objPlaniHeader.strParameter =
                 SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetUtcFormat(IMS_TRUE);
-        pPlaniHeader->strParameter.Replace(':', "%3A");
-        pPlaniHeader->strParameter.Prepend('\"');
-        pPlaniHeader->strParameter.Append('\"');
+        objPlaniHeader.strParameter.Replace(':', "%3A");
+        objPlaniHeader.strParameter.Prepend('\"');
+        objPlaniHeader.strParameter.Append('\"');
 
-        piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, pPlaniHeader);
+        piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlaniHeader);
     }
     else
     {
-        piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, pPlaniHeader);
+        piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlaniHeader);
     }
-
-    delete pPlaniHeader;
 }
 
 PRIVATE
