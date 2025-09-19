@@ -2783,10 +2783,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
         }
 
-        private void start() {
-            start(mCallee);
-        }
-
         private int startCall(MtcServiceState ss) {
             if (ss == null) {
                 return RESULT_NOK;
@@ -3343,6 +3339,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return false;
             }
 
+            if (mCall == null) {
+                log("There is no MtcCall.");
+                return false;
+            }
+
             IServiceStateTracker sst = mCallContext.getServiceStateTracker();
             if (sst.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)) {
                 log("The emergency service is already registered.");
@@ -3353,7 +3354,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             callApp.getCallManager().getMtcApp().openEmergencyService(
                     mCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
             setState(ImsCallSessionImplBase.State.IDLE);
-            mMoPendingCall.start();
+            mMoPendingCall.start(mCall.getRemoteNumber());
 
             return true;
         }

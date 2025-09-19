@@ -203,6 +203,13 @@ enum
     EXTRA_CODE_METHOD_UPDATE = 2,
 };
 
+// CODE_LOCAL_INTERNAL_ERROR
+// used internally only between native MTC and java MTC
+enum
+{
+    EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY = 0,
+};
+
 enum
 {
     EXTRA_CODE_EMERGENCYSERVICE_INVALID = -1,

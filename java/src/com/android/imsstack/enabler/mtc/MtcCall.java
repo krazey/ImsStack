@@ -1636,11 +1636,35 @@ public class MtcCall extends Call implements ConferenceTracker {
         parcelText.recycle();
     }
 
-    private boolean isCallFailedByAlreadyOpenedServiceClosed(CallReasonInfo callReasonInfo) {
-        if (mUsingAlreadyOpenedEmergencyService
-                && callReasonInfo.mCode == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+    private CallReasonInfo updateCallReasonInfoOnInvalidCallKey(
+            final CallReasonInfo callReasonInfo) {
+        if (callReasonInfo.mCode != CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR) {
+            return callReasonInfo;
+        }
+        if (callReasonInfo.mExtraCode
+                != CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY) {
+            return callReasonInfo;
+        }
+        return new CallReasonInfo(CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                isEmergencyCall() ? CallReasonInfo.EXTRA_CODE_CALL_RETRY_EMERGENCY
+                : CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL, "");
+    }
+
+    private boolean isCallFailedByAlreadyOpenedServiceClosed(
+            final CallReasonInfo callReasonInfo) {
+        if (!mUsingAlreadyOpenedEmergencyService) {
+            return false;
+        }
+
+        if (callReasonInfo.mCode == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED
                 && CallReasonInfo.EXTRA_MESSAGE_AOS_DISCONNECTED.equals(
                         callReasonInfo.mExtraMessage)) {
+            return true;
+        }
+
+        if (callReasonInfo.mCode == CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR
+                && callReasonInfo.mExtraCode
+                        == CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY) {
             return true;
         }
 
@@ -2124,6 +2148,8 @@ public class MtcCall extends Call implements ConferenceTracker {
                     return;
                 }
             }
+
+            callReasonInfo = updateCallReasonInfoOnInvalidCallKey(callReasonInfo);
 
             setCallState(CallTracker.CALL_STATE_IDLE);
 

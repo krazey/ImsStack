@@ -904,7 +904,7 @@ public class MtcCallTest extends ImsStackTest {
     @Test
     public void testJniListenerStartFailedByAlreadyOpenedServiceClosed() {
         mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
-                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, true);
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, false, false, true);
         mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
         CallReasonInfo callReasonInfo = new CallReasonInfo(
                     CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
@@ -922,7 +922,7 @@ public class MtcCallTest extends ImsStackTest {
     @Test
     public void testJniListenerStartFailedWhenNewServiceClosed() {
         mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
-                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, false);
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, false, false, false);
         mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
         CallReasonInfo callReasonInfo = new CallReasonInfo(
                     CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
@@ -937,7 +937,7 @@ public class MtcCallTest extends ImsStackTest {
     @Test
     public void testJniListenerStartFailedByNotServiceClosed() {
         mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
-                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, true, true, true);
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, false, false, true);
         mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
         CallReasonInfo callReasonInfo = new CallReasonInfo(
                     CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
@@ -946,6 +946,62 @@ public class MtcCallTest extends ImsStackTest {
 
         verify(mEmergencyCallFailureListener, times(0))
                 .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+    }
+
+    @Test
+    public void testJniListenerStartFailedByInvalidCallKeyRequireReOpen() {
+        mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, false, false, true);
+        mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR,
+                    CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY, "");
+        sendMessageToJniListener(IUMtcCall.START_FAILED, callReasonInfo);
+
+        verify(mEmergencyCallFailureListener, times(1))
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+    }
+
+    @Test
+    public void testJniListenerStartFailedByInvalidCallKeyNotRequireReOpen() {
+        mTestMtcCallWithMockJniProxy.setCallExtraBoolean(Call.EXTRA_E_CALL, true);
+        mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_EMERGENCY,
+                IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, false, false, false);
+        mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR,
+                    CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY, "");
+        sendMessageToJniListener(IUMtcCall.START_FAILED, callReasonInfo);
+
+        verify(mEmergencyCallFailureListener, times(0))
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+        verify(mListener, times(1)).onCallStartFailed(eq(mTestMtcCallWithMockJniProxy), any());
+
+        CallReasonInfo terminationReason = mTestMtcCallWithMockJniProxy.getTerminationReason();
+        assertEquals(terminationReason.mCode, CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        assertEquals(terminationReason.mExtraCode, CallReasonInfo.EXTRA_CODE_CALL_RETRY_EMERGENCY);
+        mTestMtcCallWithMockJniProxy.removeCallExtra(Call.EXTRA_E_CALL);
+    }
+
+    @Test
+    public void testJniListenerStartFailedByInvalidCallKeyForNormalCall() {
+        mTestMtcCallWithMockJniProxy.removeCallExtra(Call.EXTRA_E_CALL);
+        mTestMtcCallWithMockJniProxy.open(IUMtcCall.SERVICETYPE_NORMAL,
+                IUMtcCall.EMERGENCYTYPE_NONE, false, false, false);
+        mTestMtcCallWithMockJniProxy.setCallState(CallTracker.CALL_STATE_RINGBACK);
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR,
+                    CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY, "");
+        sendMessageToJniListener(IUMtcCall.START_FAILED, callReasonInfo);
+
+        verify(mEmergencyCallFailureListener, times(0))
+                .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
+        verify(mListener, times(1)).onCallStartFailed(eq(mTestMtcCallWithMockJniProxy), any());
+
+        CallReasonInfo terminationReason = mTestMtcCallWithMockJniProxy.getTerminationReason();
+        assertEquals(terminationReason.mCode, CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        assertEquals(terminationReason.mExtraCode,
+                CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
     @Test

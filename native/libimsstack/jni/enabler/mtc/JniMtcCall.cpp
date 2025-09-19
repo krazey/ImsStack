@@ -298,9 +298,9 @@ void JniMtcCall::Start(
 {
     if (m_nCallKey == IMtcCall::CALL_KEY_INVALID)
     {
-        IMS_TRACE_E(0, "Invalid call key. Try CSFB.", 0, 0, 0);
+        IMS_TRACE_E(0, "Invalid call key.", 0, 0, 0);
         return m_pThread->OnStartFailed(CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+                CODE_LOCAL_INTERNAL_ERROR, EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY));
     }
 
     CallType eCallType = JniMtcUtils::ReadCallType(objParcel);
