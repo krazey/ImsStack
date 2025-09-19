@@ -405,6 +405,7 @@ void MessageFormatter::SetOirHeaders()
 
     SipAddress objSIPAddress(ImsIdentity::GetAnonymousUserId());
     objSIPAddress.SetDisplayName(MessageUtil::STR_ANONYMOUS);
+    objSIPAddress.SetDquotRequiredForDisplayName(IMS_TRUE);
     m_objContext.GetMessageUtils().SetHeader(
             m_piNextMessage, objSIPAddress.ToString(), ISipHeader::FROM);
 }

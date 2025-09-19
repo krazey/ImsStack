@@ -681,7 +681,9 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
             SetHeader(&objMessage, AString(MessageUtil::STR_HEADER), ISipHeader::PRIVACY,
                     AString::ConstNull()))
             .Times(1);
-    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, ISipHeader::FROM, AString::ConstNull()))
+    const AString strAnonymousFromHeader("\"Anonymous\" <sip:anonymous@anonymous.invalid>");
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, strAnonymousFromHeader, ISipHeader::FROM, AString::ConstNull()))
             .Times(1);
     pFormatter->FormStartMessage(CallType::VOIP);
 
