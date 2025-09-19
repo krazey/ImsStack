@@ -51,7 +51,7 @@ public:
 protected:
     void GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
-    void GenerateRtpMap(OUT AString& strRtpmap, OUT AString& strPayloadNum,
+    IMS_BOOL GenerateRtpMap(OUT AString& strRtpmap, OUT AString& strPayloadNum,
             IN MediaBaseProfile::RtpMap& objRtpMap);
     IMS_SINT32 GenerateDirection(OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
     void GenerateSessionLevelDirection(

@@ -82,38 +82,19 @@ void VideoSdpGenerator::GeneratePayload(
         AString strFmtp = AString::ConstNull();
 
         VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-
-        if (pPayload == IMS_NULL)
+        SdpAvCodec objSdpFormat;
+        if (pPayload != IMS_NULL &&
+                GenerateRtpMap(strRtpMap, strPayloadNum, pPayload->GetRtpMap()) &&
+                GenerateFmtp(strFmtp, pPayload) &&
+                GenerateCompletedFmtpRtpMap(strRtpMap, strPayloadNum, strFmtp, &objSdpFormat))
         {
-            continue;
+            GenerateImageAttribute(pDescriptor, pPayload);
+            GenerateFrameSize(pDescriptor, pPayload);
+            GenerateRtcpFb(pProfile, bTrrSupportedAll, bNackSupportedAll, bPliSupportedAll,
+                    bFirSupportedAll, bTmmbrSupportedAll, &objSdpFormat, i);
+
+            pDescriptor->SetMediaFormat(&objSdpFormat);
         }
-
-        GenerateRtpMap(strRtpMap, strPayloadNum, pPayload->GetRtpMap());
-
-        SdpAvCodec* pFormat = new SdpAvCodec();
-
-        if (!GenerateFmtp(strFmtp, pPayload))
-        {
-            IMS_TRACE_E(0, "GeneratePayload(): fail to generate fmtp", 0, 0, 0);
-            delete pFormat;
-            continue;
-        }
-
-        if (!GenerateCompletedFmtpRtpMap(strRtpMap, strPayloadNum, strFmtp, pFormat))
-        {
-            IMS_TRACE_E(0, "GeneratePayload(): fail to generate rtpmap", 0, 0, 0);
-            delete pFormat;
-            continue;
-        }
-
-        GenerateImageAttribute(pDescriptor, pPayload);
-        GenerateFrameSize(pDescriptor, pPayload);
-
-        GenerateRtcpFb(pProfile, bTrrSupportedAll, bNackSupportedAll, bPliSupportedAll,
-                bFirSupportedAll, bTmmbrSupportedAll, pFormat, i);
-
-        pDescriptor->SetMediaFormat(pFormat);
-        delete pFormat;
     }
 }
 

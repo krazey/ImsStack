@@ -58,16 +58,21 @@ void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessio
 }
 
 PROTECTED
-void MediaSdpGenerator::GenerateRtpMap(
+IMS_BOOL MediaSdpGenerator::GenerateRtpMap(
         OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
 {
-    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
     AString strPayloadType = objRtpMap.GetPayloadType();
+
+    if (strPayloadType.IsEmpty() || strPayloadType.IsNULL())
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
     IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
     IMS_SINT32 nChannel = objRtpMap.GetChannel();
 
     strPayloadNum.Sprintf("%d", nPayloadNumber);
-
     strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
 
     if (nChannel > 0)
@@ -79,6 +84,7 @@ void MediaSdpGenerator::GenerateRtpMap(
 
     IMS_TRACE_D("GenerateRtpMap() - media[%d], RtpMap[%d %s]", m_eType, nPayloadNumber,
             strRtpMap.GetStr());
+    return IMS_TRUE;
 }
 
 PROTECTED

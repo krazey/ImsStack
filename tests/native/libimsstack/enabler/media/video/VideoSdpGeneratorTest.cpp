@@ -280,3 +280,29 @@ TEST_F(VideoSdpGeneratorTest, TestGenerateCvoAttributeNotAddedForNegative)
     EXPECT_CALL(*m_pDescriptor, AddAttribute(_, _, _)).Times(0);
     GenerateCvo(m_pDescriptor.get(), m_pProfile.get());
 }
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateRtpMapNoPayload)
+{
+    AString rtpMap, payloadNum;
+    MediaBaseProfile::RtpMap rtpMapObj;
+    // No payload set, so it should be empty/zero
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
+{
+    AString rtpMap, payloadNum;
+    MediaBaseProfile::RtpMap rtpMapObj;
+
+    // Empty payload type
+    rtpMapObj.SetPayloadNumber(99);
+    rtpMapObj.SetPayloadType("");
+    rtpMapObj.SetSamplingRate(90000);
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+
+    // Null payload type
+    rtpMapObj.SetPayloadType(AString::ConstNull());
+    rtpMapObj.SetPayloadNumber(99);
+    rtpMapObj.SetSamplingRate(90000);
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}

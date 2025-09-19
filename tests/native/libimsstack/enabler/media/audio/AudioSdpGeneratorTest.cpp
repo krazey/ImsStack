@@ -762,3 +762,29 @@ TEST_F(AudioSdpGeneratorTest, TestGenerateFmtp)
     EXPECT_FALSE(result);
     EXPECT_EQ(strFmtp, "initial");
 }
+
+TEST_F(AudioSdpGeneratorTest, TestGenerateRtpMapNoPayload)
+{
+    AString rtpMap, payloadNum;
+    MediaBaseProfile::RtpMap rtpMapObj;
+    // No payload set, so it should be empty/zero
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}
+
+TEST_F(AudioSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
+{
+    AString rtpMap, payloadNum;
+    MediaBaseProfile::RtpMap rtpMapObj;
+
+    // Empty payload type
+    rtpMapObj.SetPayloadNumber(96);
+    rtpMapObj.SetPayloadType("");
+    rtpMapObj.SetSamplingRate(8000);
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+
+    // Null payload type
+    rtpMapObj.SetPayloadType(AString::ConstNull());
+    rtpMapObj.SetPayloadNumber(99);
+    rtpMapObj.SetSamplingRate(8000);
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}

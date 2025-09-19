@@ -79,14 +79,10 @@ void AudioSdpGenerator::GeneratePayload(
         AString strFmtp = AString::ConstNull();
 
         AudioProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
 
-        GenerateRtpMap(strRtpMap, strPayloadNum, pPayload->GetRtpMap());
-
-        if (GenerateFmtp(strFmtp, pPayload))
+        if (pPayload != IMS_NULL &&
+                GenerateRtpMap(strRtpMap, strPayloadNum, pPayload->GetRtpMap()) &&
+                GenerateFmtp(strFmtp, pPayload))
         {
             pDescriptor->SetMediaFormat(
                     SdpMediaFormat::TYPE_RTP, strPayloadNum, strRtpMap, strFmtp);

@@ -106,3 +106,29 @@ TEST_F(TextSdpGeneratorTest, TestGenerateNull)
     EXPECT_FALSE(
             Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), IMS_NULL));
 }
+
+TEST_F(TextSdpGeneratorTest, TestGenerateRtpMapNoPayload)
+{
+    AString rtpMap, payloadNum;
+    MediaBaseProfile::RtpMap rtpMapObj;
+    // No payload set, so it should be empty/zero
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}
+
+TEST_F(TextSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
+{
+    AString rtpMap, payloadNum;
+    MediaBaseProfile::RtpMap rtpMapObj;
+
+    // Empty payload type
+    rtpMapObj.SetPayloadNumber(101);
+    rtpMapObj.SetPayloadType("");
+    rtpMapObj.SetSamplingRate(1000);
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+
+    // Null payload type
+    rtpMapObj.SetPayloadType(AString::ConstNull());
+    rtpMapObj.SetPayloadNumber(99);
+    rtpMapObj.SetSamplingRate(1000);
+    EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}
