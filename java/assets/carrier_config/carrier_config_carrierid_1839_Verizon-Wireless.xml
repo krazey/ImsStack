@@ -15,9 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Specifies a flag for whether the carrier-config of last inserted SIM should be stored
-         and used in the no SIM case. -->
-    <boolean name="ims.use_config_of_last_inserted_sim_when_no_sim_bool" value="true"/>
     <!-- Ims General -->
     <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
     <boolean name="ims.allow_no_position_in_geolocation_pidf_bool" value="false"/>
