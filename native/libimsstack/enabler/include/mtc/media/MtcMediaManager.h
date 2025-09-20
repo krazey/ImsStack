@@ -89,13 +89,13 @@ public:
     void SetQosListener(IN IMediaQosEventListener* pListener) override;
 
     /* Media Info */
-    void SetMediaInfo(IN const ISession* piSession, IN const MediaInfo& objInfo) override;
+    void SetMediaInfo(IN const ISession& objISession, IN const MediaInfo& objInfo) override;
     void UpdateMediaInfo(IN const ISession* piSession) override;
     void UpdateMediaDirection(
-            IN const ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
+            IN const ISession& objISession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
     // using enum values defined in MtcDef.h
-    const MediaInfo& GetMediaInfo(IN const ISession* piSession) const override;
-    void RestoreMediaInfo(IN const ISession* piSession) override;
+    const MediaInfo& GetMediaInfo(IN const ISession& objISession) const override;
+    void RestoreMediaInfo(IN const ISession& objISession) override;
 
     /* MediaSession */
     void CreateMediaSession() override;
@@ -139,12 +139,13 @@ public:
     PemType GetPemType(IN ISession* piSession) override;  // remove..?
 
     IMS_BOOL IsAudioInactive() override;
-    void AdjustDirectionForAutoOffer(IN const ISession* piSession, IN CallType eCallType) override;
-    void AdjustDirectionForAutoAnswer(IN const ISession* piSession) override;
+    void AdjustDirectionForAutoOffer(
+            IN const ISession& objISession, IN CallType eCallType) override;
+    void AdjustDirectionForAutoAnswer(IN const ISession& objISession) override;
     void AdjustDirectionForLocalResourceConfirmation(
-            IN const ISession* piSession, IN CallType eCallType) override;
+            IN const ISession& objISession, IN CallType eCallType) override;
     void SetSrvccState(IN SrvccState eState) override;
-    IMS_BOOL IsOnHold(IN const ISession* piSession) override;
+    IMS_BOOL IsOnHold(IN const ISession& objISession) override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
     IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
 
@@ -162,9 +163,9 @@ private:
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
     IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
     void SetDirectionToActiveFromInactive(
-            IN const ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
+            IN const ISession& objISession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
 
-    SessionMedia* GetSessionMedia(IN const ISession* piSession) const;
+    SessionMedia* GetSessionMedia(IN const ISession& objISession) const;
     void DestroyAllSessionMedia();
 
 protected:

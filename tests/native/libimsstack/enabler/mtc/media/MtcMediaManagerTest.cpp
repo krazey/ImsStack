@@ -113,8 +113,8 @@ protected:
         pMediaManager = CreateMtcMediaManager();
 
         pMediaManager->SetMediaReportEventListener(pListener);
-        pMediaManager->SetMediaInfo(&objISession, MediaInfo());
-        pMediaManager->SetMediaInfo(&objISession1,
+        pMediaManager->SetMediaInfo(objISession, MediaInfo());
+        pMediaManager->SetMediaInfo(objISession1,
                 MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND, DIRECTION_RECEIVE,
                         AUDIO_QUALITY_AMR_NB, VIDEO_QUALITY_HD_PR, GTT_MODE_FULL));
     }
@@ -305,7 +305,7 @@ TEST_F(MtcMediaManagerTest,
 
     MediaInfo objInfo;
     objInfo.eAudioDirection = DIRECTION_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objInfo);
+    pMediaManager->SetMediaInfo(objISession, objInfo);
 
     MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService())
@@ -324,7 +324,7 @@ TEST_F(MtcMediaManagerTest,
 
     MediaInfo objInfo;
     objInfo.eAudioDirection = DIRECTION_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objInfo);
+    pMediaManager->SetMediaInfo(objISession, objInfo);
 
     MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService())
@@ -410,18 +410,18 @@ TEST_F(MtcMediaManagerTest, GetMediaInfoReturnsMediaInfoSetBySetMediaInfo)
     MediaInfo objMediaInfo2 = MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
             DIRECTION_SEND_RECEIVE, AUDIO_QUALITY_AMR_NB, VIDEO_QUALITY_HD_PR, GTT_MODE_FULL);
 
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo1);
-    pMediaManager->SetMediaInfo(&objISession1, objMediaInfo2);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo1);
+    pMediaManager->SetMediaInfo(objISession1, objMediaInfo2);
 
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession), objMediaInfo1);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession1), objMediaInfo2);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession), objMediaInfo1);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession1), objMediaInfo2);
 }
 
 TEST_F(MtcMediaManagerTest, GetMediaInfoReturnsEmptyMediaInfoWhenNotSet)
 {
     MediaInfo objMediaInfo;
 
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession), objMediaInfo);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession), objMediaInfo);
 }
 
 TEST_F(MtcMediaManagerTest, UpdateAudioMediaDirectionUpdatesMediaInfo)
@@ -430,8 +430,8 @@ TEST_F(MtcMediaManagerTest, UpdateAudioMediaDirectionUpdatesMediaInfo)
             DIRECTION_SEND, DIRECTION_SEND_RECEIVE};
     for (IMS_SINT32 eDirection : objDirections)
     {
-        pMediaManager->UpdateMediaDirection(&objISession, MEDIATYPE_AUDIO, eDirection);
-        EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, eDirection);
+        pMediaManager->UpdateMediaDirection(objISession, MEDIATYPE_AUDIO, eDirection);
+        EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, eDirection);
     }
 }
 
@@ -441,8 +441,8 @@ TEST_F(MtcMediaManagerTest, UpdateVideoMediaDirectionUpdatesMediaInfo)
             DIRECTION_SEND, DIRECTION_SEND_RECEIVE};
     for (IMS_SINT32 eDirection : objDirections)
     {
-        pMediaManager->UpdateMediaDirection(&objISession, MEDIATYPE_VIDEO, eDirection);
-        EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, eDirection);
+        pMediaManager->UpdateMediaDirection(objISession, MEDIATYPE_VIDEO, eDirection);
+        EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, eDirection);
     }
 }
 
@@ -452,8 +452,8 @@ TEST_F(MtcMediaManagerTest, UpdateTextMediaDirectionUpdatesMediaInfo)
             DIRECTION_SEND, DIRECTION_SEND_RECEIVE};
     for (IMS_SINT32 eDirection : objDirections)
     {
-        pMediaManager->UpdateMediaDirection(&objISession, MEDIATYPE_TEXT, eDirection);
-        EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, eDirection);
+        pMediaManager->UpdateMediaDirection(objISession, MEDIATYPE_TEXT, eDirection);
+        EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, eDirection);
     }
 }
 
@@ -490,7 +490,7 @@ TEST_F(MtcMediaManagerTest, UpdateMediaInfoUpdatesMediaInfoWithNegotiatedValues)
             .WillOnce(Return(eTextQuality));
     pMediaManager->UpdateMediaInfo(&objISession);
 
-    EXPECT_EQ(objMediaInfo, pMediaManager->GetMediaInfo(&objISession));
+    EXPECT_EQ(objMediaInfo, pMediaManager->GetMediaInfo(objISession));
 }
 
 TEST_F(MtcMediaManagerTest, FormSdpWhenNegotiationStateIsOfferSent)
@@ -734,7 +734,7 @@ TEST_F(MtcMediaManagerTest, RunForConfirmedDialogIfAudioDirectionIsReceiveOnly)
     ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_TRUE));
     MediaInfo objMediaInfo;
     objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
 
     EXPECT_CALL(objMediaSession,
             SetOptions(NEGO_ID, IMediaSession::OptionType::SET_CONFIRMED_SESSION, IMS_TRUE, 0))
@@ -1156,35 +1156,35 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoOfferSetsDirectionToSendReceiv
     objRefMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
     objRefMediaInfo.eTextDirection = DIRECTION_INACTIVE;
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::UNKNOWN);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::UNKNOWN);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::VOIP);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::VOIP);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::VT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::VT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::RTT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::RTT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::VIDEO_RTT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::VIDEO_RTT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
 }
 
 TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoOfferSetsDirectionToSendIfHeldByMe)
@@ -1196,35 +1196,35 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoOfferSetsDirectionToSendIfHeld
     objRefMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
     objRefMediaInfo.eTextDirection = DIRECTION_INACTIVE;
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::UNKNOWN);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::UNKNOWN);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::VOIP);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::VOIP);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::VT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::VT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::RTT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::RTT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND);
 
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
-    pMediaManager->AdjustDirectionForAutoOffer(&objISession, CallType::VIDEO_RTT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
+    pMediaManager->AdjustDirectionForAutoOffer(objISession, CallType::VIDEO_RTT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND);
 }
 
 TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerDoesNothingIfNotHeldByMe)
@@ -1235,12 +1235,12 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerDoesNothingIfNotHeldByMe
     objRefMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
     objRefMediaInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
     objRefMediaInfo.eTextDirection = DIRECTION_SEND_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
 
-    pMediaManager->AdjustDirectionForAutoAnswer(&objISession);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
+    pMediaManager->AdjustDirectionForAutoAnswer(objISession);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
 }
 
 TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerSetsDirectionToSendFromSendReceive)
@@ -1251,12 +1251,12 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerSetsDirectionToSendFromS
     objRefMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
     objRefMediaInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
     objRefMediaInfo.eTextDirection = DIRECTION_SEND_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
 
-    pMediaManager->AdjustDirectionForAutoAnswer(&objISession);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND);
+    pMediaManager->AdjustDirectionForAutoAnswer(objISession);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND);
 }
 
 TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerSetsDirectionToInactiveFromReceive)
@@ -1267,12 +1267,12 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerSetsDirectionToInactiveF
     objRefMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
     objRefMediaInfo.eVideoDirection = DIRECTION_RECEIVE;
     objRefMediaInfo.eTextDirection = DIRECTION_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objRefMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objRefMediaInfo);
 
-    pMediaManager->AdjustDirectionForAutoAnswer(&objISession);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INACTIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INACTIVE);
+    pMediaManager->AdjustDirectionForAutoAnswer(objISession);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INACTIVE);
 }
 
 TEST_F(MtcMediaManagerTest,
@@ -1280,12 +1280,12 @@ TEST_F(MtcMediaManagerTest,
 {
     MediaInfo objMediaInfo;
     objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
 
-    pMediaManager->AdjustDirectionForLocalResourceConfirmation(&objISession, CallType::VOIP);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_INVALID);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INVALID);
+    pMediaManager->AdjustDirectionForLocalResourceConfirmation(objISession, CallType::VOIP);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INVALID);
 }
 
 TEST_F(MtcMediaManagerTest,
@@ -1294,12 +1294,12 @@ TEST_F(MtcMediaManagerTest,
     MediaInfo objMediaInfo;
     objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     objMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
 
-    pMediaManager->AdjustDirectionForLocalResourceConfirmation(&objISession, CallType::VT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_INVALID);
+    pMediaManager->AdjustDirectionForLocalResourceConfirmation(objISession, CallType::VT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_INVALID);
 }
 
 TEST_F(MtcMediaManagerTest,
@@ -1309,12 +1309,12 @@ TEST_F(MtcMediaManagerTest,
     objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     objMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
     objMediaInfo.eTextDirection = DIRECTION_INACTIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
 
-    pMediaManager->AdjustDirectionForLocalResourceConfirmation(&objISession, CallType::VIDEO_RTT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
+    pMediaManager->AdjustDirectionForLocalResourceConfirmation(objISession, CallType::VIDEO_RTT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_SEND_RECEIVE);
 }
 
 TEST_F(MtcMediaManagerTest,
@@ -1324,39 +1324,39 @@ TEST_F(MtcMediaManagerTest,
     objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
     objMediaInfo.eVideoDirection = DIRECTION_SEND;
     objMediaInfo.eTextDirection = DIRECTION_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
 
-    pMediaManager->AdjustDirectionForLocalResourceConfirmation(&objISession, CallType::VIDEO_RTT);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eVideoDirection, DIRECTION_SEND);
-    EXPECT_EQ(pMediaManager->GetMediaInfo(&objISession).eTextDirection, DIRECTION_RECEIVE);
+    pMediaManager->AdjustDirectionForLocalResourceConfirmation(objISession, CallType::VIDEO_RTT);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eVideoDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession).eTextDirection, DIRECTION_RECEIVE);
 }
 
 TEST_F(MtcMediaManagerTest, IsOnHoldReturnsTrueIfAudioDirectionIsNotSendReceiveAndInvalid)
 {
     MediaInfo objMediaInfo;
     objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
-    EXPECT_TRUE(pMediaManager->IsOnHold(&objISession));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+    EXPECT_TRUE(pMediaManager->IsOnHold(objISession));
 
     objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
-    EXPECT_TRUE(pMediaManager->IsOnHold(&objISession));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+    EXPECT_TRUE(pMediaManager->IsOnHold(objISession));
 
     objMediaInfo.eAudioDirection = DIRECTION_SEND;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
-    EXPECT_TRUE(pMediaManager->IsOnHold(&objISession));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+    EXPECT_TRUE(pMediaManager->IsOnHold(objISession));
 }
 
 TEST_F(MtcMediaManagerTest, IsOnHoldReturnsFalseIfAudioDirectionIsSendReceiveOrInvalid)
 {
     MediaInfo objMediaInfo;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
-    EXPECT_FALSE(pMediaManager->IsOnHold(&objISession));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+    EXPECT_FALSE(pMediaManager->IsOnHold(objISession));
 
     objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
-    pMediaManager->SetMediaInfo(&objISession, objMediaInfo);
-    EXPECT_FALSE(pMediaManager->IsOnHold(&objISession));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+    EXPECT_FALSE(pMediaManager->IsOnHold(objISession));
 }
 
 TEST_F(MtcMediaManagerTest,

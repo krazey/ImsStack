@@ -67,7 +67,7 @@ void ConferenceEventNotifier::NotifyMerged(
 
         piThread->OnMerged(piConferenceCallContext->CreateJniCallInfo(),
                 piConferenceCallContext->GetMediaManager().GetMediaInfo(
-                        &piConferenceCallContext->GetSession()->GetISession()),
+                        piConferenceCallContext->GetSession()->GetISession()),
                 piConferenceCallContext->GetSupplementaryService().GetServices(),
                 bSubscribed ? objParticipantList.GetConfUsers() : ImsList<ConfUser*>());
     }

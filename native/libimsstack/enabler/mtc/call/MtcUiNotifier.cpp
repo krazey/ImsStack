@@ -79,7 +79,7 @@ void MtcUiNotifier::SendIncomingCallReceived()
     }
 
     piThread->OnIncomingCallReceived(m_objContext.GetCallKey(), m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
             m_objContext.GetParticipantInfo().GetRemoteNumber(),
@@ -100,7 +100,7 @@ void MtcUiNotifier::SendIncomingCallRejected(IN const CallReasonInfo& objReason)
 
     piServiceThread->OnRejectedIncomingCall(m_objContext.GetCallKey(),
             m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
             m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason);
@@ -118,7 +118,7 @@ void MtcUiNotifier::SendStarted()
     }
 
     piThread->OnStarted(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -163,7 +163,7 @@ void MtcUiNotifier::SendInitiating()
     }
 
     piThread->OnInitiating(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetService().GetRatType());
 }
 
@@ -179,7 +179,7 @@ void MtcUiNotifier::SendProgressing()
     }
 
     MediaInfo objRefinedMediaInfo =
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession());
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession());
     if (m_objContext.GetMediaManager().IsLocalTone())
     {
         objRefinedMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
@@ -215,7 +215,7 @@ void MtcUiNotifier::SendHeld()
     }
 
     piThread->OnHeld(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -245,7 +245,7 @@ void MtcUiNotifier::SendResumed()
     }
 
     piThread->OnResumed(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -275,7 +275,7 @@ void MtcUiNotifier::SendHeldBy()
     }
 
     piThread->OnHeldBy(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -336,7 +336,7 @@ void MtcUiNotifier::SendIncomingResume()
     }
 
     piThread->OnIncomingResume(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -403,7 +403,7 @@ void MtcUiNotifier::SendUpdatedBy()
     }
 
     piThread->OnUpdatedBy(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession()),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 

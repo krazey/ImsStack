@@ -52,6 +52,7 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -113,7 +114,8 @@ protected:
                 .WillByDefault(Return(pUdpKeepAliveSender));
 
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
-        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
 
         pUssiController = IMS_NULL;
         pAlertingState = new AlertingState(objCallContext);

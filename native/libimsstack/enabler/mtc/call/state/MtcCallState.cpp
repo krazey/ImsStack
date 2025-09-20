@@ -666,19 +666,19 @@ void MtcCallState::InitMediaSession(IN const MediaInfo& objMediaInfo)
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
     objMediaManager.CreateMediaSession();
-    ISession* piSession = &m_objContext.GetSession()->GetISession();
-    objMediaManager.SetMediaInfo(piSession, objMediaInfo);
-    objMediaManager.CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
+    ISession& objISession = m_objContext.GetSession()->GetISession();
+    objMediaManager.SetMediaInfo(objISession, objMediaInfo);
+    objMediaManager.CreateMediaProfile(&objISession, IMS_FALSE, IMS_TRUE);
     if (m_objContext.GetCallInfo().bConference)
     {
         objMediaManager.SetConferenceCall();
     }
 
-    if (objMediaManager.GetMediaInfo(piSession).eVideoQuality == VIDEO_QUALITY_NOTUSED)
+    if (objMediaManager.GetMediaInfo(objISession).eVideoQuality == VIDEO_QUALITY_NOTUSED)
     {
         // TODO: This will be verified and can be changed when Media Interface is ready.
         // Assumes VIDEO_QUALITY_NOTUSED used only in case of Call Pull
-        objMediaManager.SetRtpPort(piSession, MEDIATYPE_VIDEO, 0);
+        objMediaManager.SetRtpPort(&objISession, MEDIATYPE_VIDEO, 0);
     }
 }
 
