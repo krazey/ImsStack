@@ -37,7 +37,8 @@ class TerminationHandlerTest : public ::testing::Test
 {
 public:
     inline TerminationHandlerTest() :
-            objHandler(objContext)
+            objHandler(objContext),
+            pConfigurationProxy(IMS_NULL)
     {
     }
 
