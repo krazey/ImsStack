@@ -27,13 +27,19 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.net.Uri;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsUtils;
@@ -44,7 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,6 +65,14 @@ public class SmsRelayLayerTest {
     MtsController mMtsController;
     @Mock
     SmsRelayLayer.Listener mListener;
+    @Mock
+    Context mContext;
+    @Mock
+    SystemServiceProxy mMockSystemServiceProxy;
+    @Mock
+    SmsManagerProxy mMockSmsManagerProxySub1;
+    @Mock
+    SmsManagerProxy mMockSmsManagerProxySub2;
 
     private SmsRelayLayer mSmsRelayLayer;
     private SmsRelayLayer.MtsControllerListenerProxy mProxyListener;
@@ -75,15 +89,31 @@ public class SmsRelayLayerTest {
     private byte[] mMtRpData = ImsUtils.hexStringToBytes("010107919130079229"
                                                         + "F0001221110A81785634121000000666"
                                                         + "B2996C2603");
+    private static final int SUB_ID_1 = 1;
+    private static final int SUB_ID_2 = 2;
+    private static final Uri SMSC_IDENTITY_SUB1 = Uri.parse("tel:+1111111111");
+    private static final Uri SMSC_IDENTITY_SUB2 = Uri.parse("tel:+2222222222");
 
     @Before
     public void setUp() throws Exception {
-        mImsCallContext = Mockito.mock(ImsCallContext.class);
+        MockitoAnnotations.openMocks(this);
+
+        AppContext.init(mContext);
+        AppContext.getInstance().setSystemServiceProxy(mMockSystemServiceProxy);
+
+        SmsManagerProxy mockSmsManagerProxyDefault = mock(SmsManagerProxy.class);
+        when(mMockSystemServiceProxy.getSystemService(SmsManagerProxy.class))
+                .thenReturn(mockSmsManagerProxyDefault);
+
+        when(mockSmsManagerProxyDefault.createForSubscriptionId(eq(SUB_ID_1)))
+                .thenReturn(mMockSmsManagerProxySub1);
+        when(mockSmsManagerProxyDefault.createForSubscriptionId(eq(SUB_ID_2)))
+                .thenReturn(mMockSmsManagerProxySub2);
+        when(mMockSmsManagerProxySub1.getSmscIdentity()).thenReturn(SMSC_IDENTITY_SUB1);
+        when(mMockSmsManagerProxySub2.getSmscIdentity()).thenReturn(SMSC_IDENTITY_SUB2);
         //mImsCallHandler = Mockito.mock(Handler.class);
-        mMtsController = Mockito.mock(MtsController.class);
         mSmsRelayLayer = new SmsRelayLayer(mImsCallContext, mMtsController);
         mProxyListener = mSmsRelayLayer.new MtsControllerListenerProxy();
-        mListener = Mockito.mock(SmsRelayLayer.Listener.class);
         mSmsRelayLayer.setListener(mListener);
         //when(mImsCallContext.getCallHandler()).thenReturn(mImsCallHandler);
     }
@@ -315,11 +345,47 @@ public class SmsRelayLayerTest {
                 eq(SmsUtils.RP_DATA), eq(pdu));
     }
 
+    @Test
+    public void test_getPSIValue_usesCorrectSubId() {
+        // Test with SUB_ID_1
+        when(mImsCallContext.getSubId()).thenReturn(SUB_ID_1);
+        String psi1 = mSmsRelayLayer.getPSIValue();
+        assertEquals(SMSC_IDENTITY_SUB1.toString(), psi1);
+        verify(mMockSmsManagerProxySub1).getSmscIdentity();
+
+        // Test with SUB_ID_2
+        when(mImsCallContext.getSubId()).thenReturn(SUB_ID_2);
+        String psi2 = mSmsRelayLayer.getPSIValue();
+        assertEquals(SMSC_IDENTITY_SUB2.toString(), psi2);
+        verify(mMockSmsManagerProxySub2).getSmscIdentity();
+    }
+
+    @Test
+    public void test_sendRPMessage_usesPSIFromCorrectSubId() {
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(), anyInt(),
+                 anyBoolean())).thenReturn(true);
+
+        // Scenario 1: Send with SUB_ID_1
+        when(mImsCallContext.getSubId()).thenReturn(SUB_ID_1);
+        mSmsRelayLayer.sendRPMessage(mToken, mRpType, mSmsc, mDestinationAddress, mTpdu,
+                mStatusResultNA);
+        verify(mMtsController).sendMessage(anyInt(), any(), eq(SMSC_IDENTITY_SUB1.toString()),
+                eq(mDestinationAddress), anyInt(), eq(false));
+
+        // Scenario 2: Send with SUB_ID_2
+        when(mImsCallContext.getSubId()).thenReturn(SUB_ID_2);
+        mSmsRelayLayer.sendRPMessage(mToken + 1, mRpType, mSmsc, mDestinationAddress, mTpdu,
+                mStatusResultNA);
+        verify(mMtsController).sendMessage(anyInt(), any(), eq(SMSC_IDENTITY_SUB2.toString()),
+                eq(mDestinationAddress), anyInt(), eq(false));
+    }
+
     @After
     public void tearDown() throws Exception {
         mImsCallContext = null;
         mMtsController = null;
         mSmsRelayLayer = null;
         mProxyListener = null;
+        AppContext.deinit();
     }
 }

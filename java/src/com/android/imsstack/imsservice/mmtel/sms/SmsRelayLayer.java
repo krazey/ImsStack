@@ -281,9 +281,9 @@ public class SmsRelayLayer {
     protected String getPSIValue() {
         try {
             synchronized (mLock) {
-                SmsManagerProxy smp =
-                        AppContext.getInstance().getSystemServiceProxy(SmsManagerProxy.class);
+                SmsManagerProxy smp = AppContext.getSmsManagerProxy(mCallContext.getSubId());
                 Uri psi = smp.getSmscIdentity();
+                logi("getPSIValue: "+ psi.toString() + " subId: " + mCallContext.getSubId());
                 return psi.toString();
             }
         } catch (RuntimeException e) {
