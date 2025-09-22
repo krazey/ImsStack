@@ -40,6 +40,7 @@ PUBLIC
 MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServiceType,
         IService* pIService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
         m_nSlotId(nSlotId),
+        m_nCurrentAccessNetwork(MEDIA_NETWORK_NONE),
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(std::make_shared<MediaEnvironment>(eNetwork, eServiceType, pIService)),
@@ -81,6 +82,12 @@ MEDIA_NETWORK_TYPE MediaSession::GetNetworkType()
     }
 
     return MEDIA_NETWORK_NONE;
+}
+
+PUBLIC void MediaSession::SetCurrentAccessNetwork(IN IMS_UINT32 nAccessNetwork)
+{
+    m_nCurrentAccessNetwork = nAccessNetwork;
+    IMS_TRACE_I("SetCurrentAccessNetwork[%d]", m_nCurrentAccessNetwork, 0, 0);
 }
 
 PUBLIC void MediaSession::SetMediaNegoHandler(std::shared_ptr<MediaNegoHandler> pMediaNegoHandler)
@@ -391,6 +398,7 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
     }
 
     IMS_UINT32 nAccessNetwork = pMediaMsgParam->m_nValue;
+    m_nCurrentAccessNetwork = nAccessNetwork;
 
     if (m_pAudioController->IsSessionOpened())
     {
@@ -1200,14 +1208,8 @@ void MediaSession::UpdateMediaSessions(
     }
 
     // set Access Network
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-    IMS_SINT32 nAccessNetwork = 0;
-
-    if (pMediaManager != IMS_NULL)
-    {
-        nAccessNetwork = pMediaManager->GetResourceManager()->GetNetworkType();
-    }
+    IMS_UINT32 nAccessNetwork = m_nCurrentAccessNetwork;
+    IMS_TRACE_D("UpdateMediaSessions() - CurrentAccessNetwork[%d]", m_nCurrentAccessNetwork, 0, 0);
 
     // Update Audio Session
     if (eType & MEDIA_TYPE_AUDIO && m_pAudioController != IMS_NULL &&

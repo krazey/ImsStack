@@ -77,6 +77,13 @@ public:
     void SetVideoController(std::shared_ptr<VideoController> pVideoController);
 
     /**
+     * @brief Set the current access network.
+     *
+     * @param nAccessNetwork The current access network type.
+     */
+    void SetCurrentAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+
+    /**
      * @brief Set the TextController object
      */
     void SetTextController(std::shared_ptr<TextController> pTextController);
@@ -153,6 +160,7 @@ private:
 
 protected:
     IMS_UINT32 m_nSlotId;
+    IMS_UINT32 m_nCurrentAccessNetwork;
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;

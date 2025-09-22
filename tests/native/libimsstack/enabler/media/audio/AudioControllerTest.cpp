@@ -414,3 +414,29 @@ TEST_F(AudioControllerTest, testGetMediaDirection)
 
     EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
 }
+
+TEST_F(AudioControllerTest, testConcurrentWifiAndLteSession)
+{
+    const IMS_UINTP nNegoId1 = 1000;
+    const IMS_UINTP nNegoId2 = 2000;
+    const IMS_UINT32 nNetworkType1 = MediaNetworkConnectionWatcher::IWLAN;
+    const IMS_UINT32 nNetworkType2 = MediaNetworkConnectionWatcher::EUTRAN;
+
+    ASSERT_EQ(m_pController->CreateSession(
+                      &m_objListener, nNegoId1, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    ASSERT_EQ(m_pController->CreateSession(
+                      &m_objListener, nNegoId2, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    ASSERT_EQ(m_pController->GetAudioSessionSize(), 2);
+
+    m_pController->SetCallSessionState(IMS_TRUE);
+    ASSERT_EQ(m_pController->UpdateSession(nNegoId1, nNetworkType1, m_pAudioNego), IMS_TRUE);
+    ASSERT_EQ(m_pController->UpdateSession(nNegoId2, nNetworkType2, m_pAudioNego), IMS_TRUE);
+
+    ASSERT_EQ(m_pController->DeleteSession(nNegoId2), IMS_TRUE);
+    ASSERT_EQ(m_pController->GetAudioSessionSize(), 1);
+
+    EXPECT_EQ(m_pController->UpdateSession(nNegoId1, nNetworkType1, m_pAudioNego), IMS_TRUE);
+    m_pController->CloseSession();
+}
