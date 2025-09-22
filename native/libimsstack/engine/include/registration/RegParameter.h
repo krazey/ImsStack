@@ -55,7 +55,7 @@ public:
             IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker>& pStateTracker);
     IMS_RESULT FormRouteHeaders(
             IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker>& pStateTracker);
-    IMS_RESULT FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc);
+    IMS_RESULT FormSecurityHeaders(IN const ISipClientConnection* piScc);
     inline Credential& GetCredential() { return m_objCredential; }
     inline IMS_SINT32 GetFlowControlOption() const { return m_nFlowControlOption; }
     inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }

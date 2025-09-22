@@ -500,7 +500,7 @@ IMS_RESULT RegParameter::FormRouteHeaders(
 }
 
 PUBLIC
-IMS_RESULT RegParameter::FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc)
+IMS_RESULT RegParameter::FormSecurityHeaders(IN const ISipClientConnection* piScc)
 {
     if (piScc == IMS_NULL)
     {

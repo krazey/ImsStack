@@ -251,7 +251,7 @@ public:
     IMS_BOOL CalculateResponse();
     void Clear();
     IMS_BOOL FormCredentials(IN const SipMethod& objMethod, IN const AString& strUri,
-            IN const AString& strEntityBody, IN_OUT SipGenericResponse& objResponse,
+            IN const AString& strEntityBody, IN const SipGenericResponse& objResponse,
             OUT SipHeaderBase*& pSipHdr);
     ISipGenericChallenge* GetChallenge(IN IMS_SINT32 nIndex) const;
     inline IMS_BOOL IsChallengePresent() const { return !m_objChallenges.IsEmpty(); }
@@ -634,7 +634,7 @@ void SipAuHelperPrivate::Clear()
 PUBLIC
 IMS_BOOL SipAuHelperPrivate::FormCredentials(IN const SipMethod& objMethod,
         IN const AString& strUri, IN const AString& strEntityBody,
-        IN_OUT SipGenericResponse& objResponse, OUT SipHeaderBase*& pSipHdr)
+        IN const SipGenericResponse& objResponse, OUT SipHeaderBase*& pSipHdr)
 {
     if (!SipStack::SetChallengeScheme(objResponse.m_strScheme, pSipHdr))
     {

@@ -95,7 +95,7 @@ private:
             OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView);
     void RemoveMediaFromGroup(IN IMS_SINT32 nMid);
     void RemovePreconditionsIfNotSupport(
-            OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView);
+            IN const SessionParameter* pProposalView, IN const SessionParameter* pPeerView);
 
 private:
     AString m_strRemoteVersion;

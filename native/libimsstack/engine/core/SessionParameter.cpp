@@ -875,7 +875,7 @@ void SessionParameter::RemoveMediaFromGroup(IN IMS_SINT32 nMid)
 
 PRIVATE
 void SessionParameter::RemovePreconditionsIfNotSupport(
-        OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView)
+        IN const SessionParameter* pProposalView, IN const SessionParameter* pPeerView)
 {
 #if defined(__IMS_SDP_PRECONDITION__)
     const ImsList<SdpMediaParameter*>& objPeerMediaParams = pPeerView->GetMediaParameters();
