@@ -46,7 +46,7 @@ PUBLIC IMS_BOOL TextSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -104,7 +104,7 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
     }
 }
 
-PRIVATE
+PROTECTED
 void TextSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
         OUT AString& strCodecName)
 {
@@ -124,7 +124,7 @@ void TextSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT TextProfile:
             strCodecName.GetStr(), nSamplingRate);
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL TextSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         OUT TextProfile::Payload* pPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat)
 {
@@ -148,7 +148,7 @@ IMS_BOOL TextSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL TextSdpParser::ParseT140Fmtp(
         IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload)
 {
@@ -181,7 +181,7 @@ IMS_BOOL TextSdpParser::ParseT140Fmtp(
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL TextSdpParser::ParseRedFmtp(
+PROTECTED IMS_BOOL TextSdpParser::ParseRedFmtp(
         IN const AString& strFmtp, OUT std::shared_ptr<TextProfile::RedFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL || strFmtp.IsEmpty())
@@ -218,7 +218,7 @@ PRIVATE IMS_BOOL TextSdpParser::ParseRedFmtp(
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL TextSdpParser::ParseRedSubPtExist(
+PROTECTED IMS_BOOL TextSdpParser::ParseRedSubPtExist(
         IN const IMS_SINT32 nRedPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat)
 {
     IMS_BOOL bRedSubPtExist = IMS_FALSE;

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <memory>
+
+#include <gtest/gtest.h>
 
 #include "text/TextSdpParser.h"
 #include "text/TextProfile.h"
-#include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 
-using ::testing::_;
+#include "media/MockIMediaDescriptor.h"
+
 using ::testing::ReturnRef;
 
 class TextSdpParserTest : public ::testing::Test
@@ -49,20 +50,20 @@ public:
 
 TEST_F(TextSdpParserTest, ParsePayloads_ValidT140AndRed)
 {
-    TestableTextSdpParser parser;
-    TextProfile profile;
+    TestableTextSdpParser objParser;
+    TextProfile objProfile;
     ImsList<SdpMediaFormat*> lstMediaFormats;
 
     // Mock t140 codec
-    SdpAvCodec* pT140Codec = new SdpAvCodec();
+    auto pT140Codec = std::make_unique<SdpAvCodec>();
     pT140Codec->SetParameters("100 t140/1000", "100 cps=30");
 
     // Mock red codec
-    SdpAvCodec* pRedCodec = new SdpAvCodec();
+    auto pRedCodec = std::make_unique<SdpAvCodec>();
     pRedCodec->SetParameters("101 red/1000", "101 100/100");
 
-    lstMediaFormats.Append(pT140Codec);
-    lstMediaFormats.Append(pRedCodec);
+    lstMediaFormats.Append(pT140Codec.get());
+    lstMediaFormats.Append(pRedCodec.get());
 
     // The mock returns a const reference, so we need a const variable to hold it for the ReturnRef
     // call.
@@ -70,13 +71,13 @@ TEST_F(TextSdpParserTest, ParsePayloads_ValidT140AndRed)
     ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
             .WillByDefault(ReturnRef(constListMediaFormats));
 
-    parser.ParsePayloads(&m_objMockMediaDescriptor, &profile);
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
 
     // Expect 2 payloads to be added
-    EXPECT_EQ(profile.GetPayloadList().GetSize(), 2);
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 2);
 
     // Verify t140 payload
-    TextProfile::Payload* pT140Payload = profile.GetPayloadAt(0);
+    TextProfile::Payload* pT140Payload = objProfile.GetPayloadAt(0);
     ASSERT_NE(pT140Payload, nullptr);
     EXPECT_EQ(pT140Payload->GetRtpMap().GetPayloadNumber(), 100);
     EXPECT_TRUE(pT140Payload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"));
@@ -85,7 +86,7 @@ TEST_F(TextSdpParserTest, ParsePayloads_ValidT140AndRed)
     EXPECT_EQ(pT140Fmtp->GetCps(), 30);
 
     // Verify red payload
-    TextProfile::Payload* pRedPayload = profile.GetPayloadAt(1);
+    TextProfile::Payload* pRedPayload = objProfile.GetPayloadAt(1);
     ASSERT_NE(pRedPayload, nullptr);
     EXPECT_EQ(pRedPayload->GetRtpMap().GetPayloadNumber(), 101);
     EXPECT_TRUE(pRedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"));
@@ -97,63 +98,63 @@ TEST_F(TextSdpParserTest, ParsePayloads_ValidT140AndRed)
 
 TEST_F(TextSdpParserTest, ParsePayloads_InvalidPayloadType)
 {
-    TestableTextSdpParser parser;
-    TextProfile profile;
+    TestableTextSdpParser objParser;
+    TextProfile objProfile;
     ImsList<SdpMediaFormat*> lstMediaFormats;
 
     // Mock a codec with a static payload type, which should be rejected
-    SdpAvCodec* pStaticCodec = new SdpAvCodec();
+    auto pStaticCodec = std::make_unique<SdpAvCodec>();
     pStaticCodec->SetParameters("8 PCMA/8000", "");
-    lstMediaFormats.Append(pStaticCodec);
+    lstMediaFormats.Append(pStaticCodec.get());
 
     const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
     ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
             .WillByDefault(ReturnRef(constListMediaFormats));
 
-    parser.ParsePayloads(&m_objMockMediaDescriptor, &profile);
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
 
     // Expect no payloads to be added
-    EXPECT_EQ(profile.GetPayloadList().GetSize(), 0);
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 0);
 }
 
 TEST_F(TextSdpParserTest, ParsePayloads_InvalidCodecName)
 {
-    TestableTextSdpParser parser;
-    TextProfile profile;
+    TestableTextSdpParser objParser;
+    TextProfile objProfile;
     ImsList<SdpMediaFormat*> lstMediaFormats;
 
     // Mock a codec with an unsupported name
-    SdpAvCodec* pInvalidCodec = new SdpAvCodec();
+    auto pInvalidCodec = std::make_unique<SdpAvCodec>();
     pInvalidCodec->SetParameters("98 unsupported/1000", "");
-    lstMediaFormats.Append(pInvalidCodec);
+    lstMediaFormats.Append(pInvalidCodec.get());
 
     const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
     ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
             .WillByDefault(ReturnRef(constListMediaFormats));
 
-    parser.ParsePayloads(&m_objMockMediaDescriptor, &profile);
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
 
     // Expect no payloads to be added
-    EXPECT_EQ(profile.GetPayloadList().GetSize(), 0);
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 0);
 }
 
 TEST_F(TextSdpParserTest, ParsePayloads_RedFmtpWithoutMatchingSubtype)
 {
-    TestableTextSdpParser parser;
-    TextProfile profile;
+    TestableTextSdpParser objParser;
+    TextProfile objProfile;
     ImsList<SdpMediaFormat*> lstMediaFormats;
 
     // Mock a 'red' codec whose subtype (105) is not in the media format list
-    SdpAvCodec* pRedCodec = new SdpAvCodec();
+    auto pRedCodec = std::make_unique<SdpAvCodec>();
     pRedCodec->SetParameters("101 red/1000", "101 105/105");
-    lstMediaFormats.Append(pRedCodec);
+    lstMediaFormats.Append(pRedCodec.get());
 
     const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
     ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
             .WillByDefault(ReturnRef(constListMediaFormats));
 
-    parser.ParsePayloads(&m_objMockMediaDescriptor, &profile);
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
 
     // Expect no payloads to be added because the 'red' subtype is missing
-    EXPECT_EQ(profile.GetPayloadList().GetSize(), 0);
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 0);
 }

@@ -55,7 +55,7 @@ IMS_BOOL AudioSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParsePayloads(
         IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
@@ -76,7 +76,7 @@ void AudioSdpParser::ParsePayloads(
     }
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile)
 {
     if (pSdpCodec == IMS_NULL || pProfile == IMS_NULL)
@@ -124,7 +124,7 @@ void AudioSdpParser::ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfi
     }
 }
 
-PRIVATE void AudioSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec,
+PROTECTED void AudioSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec,
         OUT AudioProfile::Payload* pPayload, OUT IMS_SINT32& nPayloadTypeNumber,
         OUT AString& strCodecName)
 {
@@ -152,7 +152,7 @@ PRIVATE void AudioSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec,
     pPayload->SetRtpMap(nPayloadTypeNumber, strCodecName, nSamplingRate, nChannel);
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         OUT AudioProfile::Payload* pPayload, IN const AString& strCodecName)
 {
@@ -235,7 +235,7 @@ IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseAudioFmtp(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
@@ -268,7 +268,7 @@ IMS_BOOL AudioSdpParser::ParseAudioFmtp(IN const ImsList<AString>& objSplitEqual
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseAmrFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::AmrFmtp> pFmtp)
 {
@@ -280,7 +280,7 @@ void AudioSdpParser::ParseAmrFmtp(
     ParseOctetAlign(objSplitEqual, pFmtp);
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseEvsFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -335,7 +335,7 @@ void AudioSdpParser::ParseEvsFmtp(
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseModeSet(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
@@ -365,7 +365,7 @@ IMS_BOOL AudioSdpParser::ParseModeSet(IN const ImsList<AString>& objSplitEqual,
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseModeChangeCapability(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
@@ -389,7 +389,7 @@ IMS_BOOL AudioSdpParser::ParseModeChangeCapability(IN const ImsList<AString>& ob
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseModeChangePeriod(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
@@ -413,7 +413,7 @@ IMS_BOOL AudioSdpParser::ParseModeChangePeriod(IN const ImsList<AString>& objSpl
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseModeChangeNeighbor(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
@@ -437,7 +437,7 @@ IMS_BOOL AudioSdpParser::ParseModeChangeNeighbor(IN const ImsList<AString>& objS
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseMaxRed(IN const ImsList<AString>& objSplitEqual,
         OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp)
 {
@@ -461,7 +461,7 @@ IMS_BOOL AudioSdpParser::ParseMaxRed(IN const ImsList<AString>& objSplitEqual,
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseOctetAlign(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::AmrFmtp> pFmtp)
 {
@@ -481,7 +481,7 @@ void AudioSdpParser::ParseOctetAlign(
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseDtx(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -505,7 +505,7 @@ IMS_BOOL AudioSdpParser::ParseDtx(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseHfOnly(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -529,7 +529,7 @@ IMS_BOOL AudioSdpParser::ParseHfOnly(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseEvsSwitchMode(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -553,7 +553,7 @@ IMS_BOOL AudioSdpParser::ParseEvsSwitchMode(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseBr(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -615,7 +615,7 @@ IMS_BOOL AudioSdpParser::ParseBr(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseBw(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -679,7 +679,7 @@ IMS_BOOL AudioSdpParser::ParseBw(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseCmr(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -702,7 +702,7 @@ IMS_BOOL AudioSdpParser::ParseCmr(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseChAwMode(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -727,7 +727,7 @@ IMS_BOOL AudioSdpParser::ParseChAwMode(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseBrSend(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -789,7 +789,7 @@ IMS_BOOL AudioSdpParser::ParseBrSend(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseBrRecv(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -850,7 +850,7 @@ IMS_BOOL AudioSdpParser::ParseBrRecv(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseBwSend(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -913,7 +913,7 @@ IMS_BOOL AudioSdpParser::ParseBwSend(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseBwRecv(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
@@ -975,7 +975,7 @@ IMS_BOOL AudioSdpParser::ParseBwRecv(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::SetEvsBrVisible(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -993,7 +993,7 @@ void AudioSdpParser::SetEvsBrVisible(OUT std::shared_ptr<AudioProfile::EvsFmtp> 
             pFmtp->GetBrSend(), pFmtp->IsBrListVisible());
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::SetEvsBwVisible(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -1011,7 +1011,7 @@ void AudioSdpParser::SetEvsBwVisible(OUT std::shared_ptr<AudioProfile::EvsFmtp> 
             pFmtp->GetBwSend(), pFmtp->IsBwListVisible());
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AudioSdpParser::ParseTelephoneEventFmtp(
         IN const SdpAvCodec* pSdpCodec, OUT AudioProfile::Payload* pPayload)
 {
@@ -1040,7 +1040,7 @@ IMS_BOOL AudioSdpParser::ParseTelephoneEventFmtp(
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseEvents(
         IN const AString& strFmtp, OUT std::shared_ptr<AudioProfile::TelephoneEventFmtp> pFmtp)
 {
@@ -1057,7 +1057,7 @@ void AudioSdpParser::ParseEvents(
     IMS_TRACE_D("ParseEvents(): events[%s]", pFmtp->GetEvents().GetStr(), 0, 0);
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParsePtime(IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -1071,7 +1071,7 @@ void AudioSdpParser::ParsePtime(IN const IMediaDescriptor* pDescriptor, OUT Audi
     IMS_TRACE_D("ParsePtime(): ptime[%d]", pProfile->GetPtime(), 0, 0);
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseMaxPtime(
         IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
@@ -1086,7 +1086,7 @@ void AudioSdpParser::ParseMaxPtime(
     IMS_TRACE_D("ParseMaxPtime(): maxPtime[%d]", pProfile->GetMaxPtime(), 0, 0);
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseRtcpXr(IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -1135,7 +1135,7 @@ void AudioSdpParser::ParseRtcpXr(IN const IMediaDescriptor* pDescriptor, OUT Aud
             pProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported(), 0);
 }
 
-PRIVATE
+PROTECTED
 void AudioSdpParser::ParseAnbr(IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)

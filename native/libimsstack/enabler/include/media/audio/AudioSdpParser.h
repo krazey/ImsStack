@@ -43,7 +43,7 @@ public:
     virtual IMS_BOOL Parse(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
 
-private:
+protected:
     void ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
     void ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile);
     void ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile::Payload* pPayload,
