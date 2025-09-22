@@ -25,6 +25,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
+#include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceParticipantList.h"
@@ -65,7 +66,8 @@ void ConferenceEventNotifier::NotifyMerged(
         }
 
         piThread->OnMerged(piConferenceCallContext->CreateJniCallInfo(),
-                piConferenceCallContext->GetMediaManager().GetMediaInfo(),
+                piConferenceCallContext->GetMediaManager().GetMediaInfo(
+                        &piConferenceCallContext->GetSession()->GetISession()),
                 piConferenceCallContext->GetSupplementaryService().GetServices(),
                 bSubscribed ? objParticipantList.GetConfUsers() : ImsList<ConfUser*>());
     }

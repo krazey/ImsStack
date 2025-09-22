@@ -50,37 +50,63 @@ public:
     virtual void SetQosListener(IN IMediaQosEventListener* pListener) = 0;
 
     /**
-     * @brief Sets
+     * @brief Sets or updates the media information for a specific session.
      *
-     * @param objInfo
+     * If a MediaInfo for the ISession does not exist, it creates a new one.
+     * If it exists, this method backs up the current MediaInfo before setting the new
+     * information. This backup allows for restoration via RestoreMediaInfo() if a
+     * subsequent operation fails.
+     *
+     * @param piSession The ISession instance to associate the media information with.
+     * @param objInfo The new MediaInfo object containing the media attributes to set.
      */
-    virtual void SetMediaInfo(IN const MediaInfo& objInfo) = 0;
+    virtual void SetMediaInfo(IN const ISession* piSession, IN const MediaInfo& objInfo) = 0;
 
     /**
-     * @brief This method is to update a media information corresponging to the ISession.
-     * @param piSession ISession instance is used for managing the media profile.
+     * @brief Updates the media information for a specific session.
+     *
+     * This method queries the media enabler for the negotiated direction and quality for
+     * audio, video, and text streams. It then constructs a new MediaInfo object with these
+     * values.
+     *
+     * @param piSession The ISession instance whose media information needs to be synchronized
+     *                  with the negotiated SDP.
      */
     virtual void UpdateMediaInfo(IN const ISession* piSession) = 0;
 
     /**
-     * @brief Updates
+     * @brief Updates the media direction for a specific media type within a session.
      *
-     * @param eMediaType
-     * @param eDir
+     * This method is used to change the direction of a media stream (audio, video, or text)
+     * for a given session. It backs up the current direction before applying the new one,
+     * allowing for restoration if a subsequent operation (like SDP negotiation) fails.
+     *
+     * @param piSession ISession instance whose media direction is to be updated.
+     * @param eMediaType The media type to update (e.g., MEDIATYPE_AUDIO, MEDIATYPE_VIDEO).
+     * @param eDir The new media direction to set (e.g., DIRECTION_SEND, DIRECTION_INACTIVE).
      */
-    virtual void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) = 0;
+    virtual void UpdateMediaDirection(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the current media information for a specific session.
      *
+     * @param piSession ISession instance to query.
+     * @return A constant reference to the MediaInfo object containing the current media attributes
+     *         (direction, quality, etc.).
      */
-    virtual const MediaInfo& GetMediaInfo() const = 0;
+    virtual const MediaInfo& GetMediaInfo(IN const ISession* piSession) const = 0;
 
     /**
-     * @brief Restores
+     * @brief Restores the media information of a session to its previous state.
      *
+     * This is typically used to revert media attribute changes (e.g., direction) when a
+     * subsequent operation like SDP negotiation fails. It copies the backed-up 'old' media
+     * information back to the 'current' media information.
+     *
+     * @param piSession ISession instance whose media information is to be restored.
      */
-    virtual void RestoreMediaInfo() = 0;
+    virtual void RestoreMediaInfo(IN const ISession* piSession) = 0;
 
     /**
      * @brief This method is to create a media session for the operation related to Media. And set
@@ -250,21 +276,26 @@ public:
     /**
      * @brief Adjusts media direction to respond for an update that doesn't contain offer.
      *
+     * @param piSession ISession instance whose media direction is to be updated.
      * @param eCallType Call type to set the media directions in the auto offer.
      */
-    virtual void AdjustDirectionForAutoOffer(IN CallType eCallType);
+    virtual void AdjustDirectionForAutoOffer(IN const ISession* piSession, IN CallType eCallType);
 
     /**
      * @brief Adjusts media direction to respond for a hold or resume request.
+     *
+     * @param piSession ISession instance whose media direction is to be updated.
      */
-    virtual void AdjustDirectionForAutoAnswer();
+    virtual void AdjustDirectionForAutoAnswer(IN const ISession* piSession);
 
     /**
      * @brief Adjusts media direction for local resource confirmation.
      *
+     * @param piSession ISession instance to get media profile id.
      * @param eCallType Call type to set the media directions in the SDP offer.
      */
-    virtual void AdjustDirectionForLocalResourceConfirmation(IN CallType eCallType);
+    virtual void AdjustDirectionForLocalResourceConfirmation(
+            IN const ISession* piSession, IN CallType eCallType);
 
     /**
      * @brief Sets
@@ -278,7 +309,7 @@ public:
      *
      * @return
      */
-    virtual IMS_BOOL IsOnHold() = 0;
+    virtual IMS_BOOL IsOnHold(IN const ISession* piSession) = 0;
 
     /**
      * @brief Gets the supported Media Types from SDP Body

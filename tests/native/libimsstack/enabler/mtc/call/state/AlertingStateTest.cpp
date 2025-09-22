@@ -95,7 +95,6 @@ protected:
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
 
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
 
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
@@ -114,6 +113,7 @@ protected:
                 .WillByDefault(Return(pUdpKeepAliveSender));
 
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
 
         pUssiController = IMS_NULL;
         pAlertingState = new AlertingState(objCallContext);

@@ -101,7 +101,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
     IMS_BOOL bCallTypeChanged = pSession->GetCallType() != eCallType;
     pSession->SetCallType(eCallType);
 
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(&pSession->GetISession(), objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
     if (m_pUdpKeepAliveSender != IMS_NULL)
@@ -150,7 +150,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
     IMtcSession* pSession = m_objContext.GetSession();
 
     pSession->SetCallType(eCallType);
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(&pSession->GetISession(), objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
 

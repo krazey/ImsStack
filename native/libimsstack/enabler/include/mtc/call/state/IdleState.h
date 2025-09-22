@@ -68,17 +68,17 @@ protected:
             IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const override;
 
 private:
-    CallStateName ContinueStart();
-    CallStateName ContinueConference();
+    CallStateName ContinueStart(IN const MediaInfo& objMediaInfo);
+    CallStateName ContinueConference(IN const MediaInfo& objMediaInfo);
     CallStateName ContinueHandleIncoming();
-    CallStateName ContinueStartUssi();
+    CallStateName ContinueStartUssi(IN const MediaInfo& objMediaInfo);
 
     void SetResourceListForConference(IN_OUT IMessage& objMessage);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     ImsList<IMtcBlockRule*> GetBlockRulesAfterEpsFallback();
     IMS_BOOL IsCallPull() const;
-    IMS_RESULT HandleCallPull();
+    IMS_RESULT HandleCallPull(OUT MediaInfo& objMediaInfo);
     void CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers);
     AString RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget);
     const CallReasonInfo GetInternalErrorReason() const;

@@ -150,7 +150,8 @@ void SilentRedialHelper::ReStart()
     const AString strTarget = GetRemoteTarget();
 
     // MediaInfo
-    MediaInfo objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
+    MediaInfo objMediaInfo =
+            m_objContext.GetMediaManager().GetMediaInfo(&m_objContext.GetSession()->GetISession());
     MtcMediaUtil::RefineMediaInfoByCallType(eType, objMediaInfo);
 
     // SuppService list

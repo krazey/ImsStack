@@ -18,11 +18,13 @@
 #include "JniEnablerConnector.h"
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcCallThread.h"
+#include "MockISession.h"
 #include "MtcDef.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceEventNotifier.h"
@@ -58,8 +60,10 @@ public:
     MockIMtcCallManager objCallManager;
     MockIMtcCall objConferenceCall;
     MockIMtcCallContext objContext;
+    MockIMtcSession objMtcSession;
     MockIJniEnabler objMockJniEnabler;
     MockIJniMtcCallThread objMockCallThread;
+    MockISession objISession;
     MockCallConnectionIdManager* pIdManager;
     MockIMtcMediaManager objMediaManager;
     MockICallStateProxy objCallStateProxy;
@@ -92,7 +96,9 @@ protected:
         pIdManager = new MockCallConnectionIdManager(objContext);
         ON_CALL(*pIdManager, OnConferenceParticipantDisconnected(_)).WillByDefault(Return());
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMediaManager, GetMediaInfo()).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
 
         SetUpMockParticipantList();
 

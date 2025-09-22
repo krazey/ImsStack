@@ -22,9 +22,11 @@
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcCallThread.h"
 #include "MockIJniMtcServiceThread.h"
+#include "MockISession.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/UpdatingInfo.h"
@@ -51,7 +53,9 @@ public:
     MockIMtcCallContext objContext;
     JniCallInfo objJniCallInfo;
     MockIMtcMediaManager objMediaManager;
+    MockIMtcSession objMtcSession;
     MockIJniEnabler objMockJniEnabler;
+    MockISession objISession;
     MockIJniMtcCallThread objMockCallThread;
     MockMtcConfigurationProxy* pConfigurationProxy;
 
@@ -89,8 +93,10 @@ protected:
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
 
-        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
 
         ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockCallThread));
     }

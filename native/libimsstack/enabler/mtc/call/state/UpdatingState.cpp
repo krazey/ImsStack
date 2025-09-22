@@ -99,7 +99,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     IMtcSession* pSession = m_objContext.GetSession();
     const ISession& objSession = pSession->GetISession();
     pSession->SetCallType(eCallType);
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(&objSession, objMediaInfo);
 
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
     {
@@ -117,7 +117,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     }
 
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
-            m_objContext.GetMediaManager().GetMediaInfo();
+            m_objContext.GetMediaManager().GetMediaInfo(&objSession);
 
     // TODO: Internal error handling
     pSession->AcceptUpdate();
@@ -188,10 +188,10 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
     IMtcSession* pSession = m_objContext.GetSession();
     const ISession& objSession = pSession->GetISession();
 
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(&objSession, objMediaInfo);
     pSession->SetCallType(eCallType);
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
-            m_objContext.GetMediaManager().GetMediaInfo();
+            m_objContext.GetMediaManager().GetMediaInfo(&objSession);
 
     // TODO: Internal error handling
     pSession->AcceptUpdate();
@@ -669,7 +669,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
         if (m_objContext.GetUpdatingInfo().IsModifier())
         {
             m_objContext.GetUpdatingInfo().GetModifiedInfo() =
-                    m_objContext.GetMediaManager().GetMediaInfo();
+                    m_objContext.GetMediaManager().GetMediaInfo(piSession);
         }
 
         if (m_objContext.GetUpdatingInfo().GetTargetCallType() == CallType::UNKNOWN)
@@ -692,9 +692,9 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
-            m_objContext.GetMediaManager().GetMediaInfo();
+            m_objContext.GetMediaManager().GetMediaInfo(piSession);
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
-            m_objContext.GetMediaManager().GetMediaInfo();
+            m_objContext.GetMediaManager().GetMediaInfo(piSession);
     m_objContext.GetPreconditionManager().OnSdpReceived(piSession);
 
     return IMS_SUCCESS;
@@ -713,9 +713,9 @@ IMS_RESULT UpdatingState::SendRecoverUpdate()
     m_objContext.GetUpdatingInfo().GetModifiedInfo().eAudioDirection = DIRECTION_INVALID;
 
     m_objContext.GetUpdatingInfo().SetModifier();
-    m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
-
     IMtcSession* pSession = m_objContext.GetSession();
+    m_objContext.GetMediaManager().SetMediaInfo(
+            &pSession->GetISession(), m_objContext.GetUpdatingInfo().GetModifyingInfo());
     pSession->SetCallType(pSession->GetPreviousCallType());
 
     // TODO: Internal error handling

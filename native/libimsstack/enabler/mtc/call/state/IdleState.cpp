@@ -87,10 +87,10 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
 {
     IMS_TRACE_D("Start [%s]", strTarget.GetStr(), 0, 0);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
-
+    MediaInfo objMediaInfoToStart;
     if (IsCallPull())
     {
-        if (HandleCallPull() == IMS_FAILURE)
+        if (HandleCallPull(objMediaInfoToStart) == IMS_FAILURE)
         {
             return CallStateName::TERMINATING;
         }
@@ -98,7 +98,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     else
     {
         m_objContext.GetCallInfo().eInitialCallType = eCallType;
-        m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+        objMediaInfoToStart = objMediaInfo;
     }
 
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
@@ -106,18 +106,18 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     if (m_objContext.IsUssi())
     {
         m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
-        m_objOperationAfterBlockCheck = [&]()
+        m_objOperationAfterBlockCheck = [&, objMediaInfoToStart]()
         {
-            return ContinueStartUssi();
+            return ContinueStartUssi(objMediaInfoToStart);
         };
     }
     else
     {
         m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(
                 RemoveCallerIdServiceCodeAndUpdateSuppService(strTarget));
-        m_objOperationAfterBlockCheck = [&]()
+        m_objOperationAfterBlockCheck = [&, objMediaInfoToStart]()
         {
-            return ContinueStart();
+            return ContinueStart(objMediaInfoToStart);
         };
     }
 
@@ -135,13 +135,12 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     CopyConfUserListForAsynchronousHandling(lstUsers);
 
-    m_objOperationAfterBlockCheck = [&]()
+    m_objOperationAfterBlockCheck = [&, objMediaInfo]()
     {
-        return ContinueConference();
+        return ContinueConference(objMediaInfo);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -160,14 +159,14 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     {
         nVideoDirection = DIRECTION_SEND_RECEIVE;
     }
-    m_objContext.GetMediaManager().SetMediaInfo(MediaInfo(DIRECTION_SEND_RECEIVE, nVideoDirection,
-            DIRECTION_INVALID, AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, nVideoDirection, DIRECTION_INVALID,
+            AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID);
 
     CopyConfUserListForAsynchronousHandling(lstUsers);
 
-    m_objOperationAfterBlockCheck = [&]()
+    m_objOperationAfterBlockCheck = [&, objMediaInfo]()
     {
-        return ContinueConference();
+        return ContinueConference(objMediaInfo);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -284,7 +283,8 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     ISession* piSession = GetISession();
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
 
-    InitMediaSession();
+    InitMediaSession(MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
+            AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
     m_objContext.GetPreconditionManager().CreateQos(piSession);
 
     IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
@@ -296,7 +296,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
         m_objContext.GetMediaManager().AdjustDirectionForAutoOffer(
-                m_objContext.GetSession()->GetCallType());
+                piSession, m_objContext.GetSession()->GetCallType());
     }
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
@@ -412,7 +412,8 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     }
 
     m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
-    InitMediaSession();
+    InitMediaSession(MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
+            AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
 
     IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
     if (eCallReason != CODE_NONE)
@@ -424,7 +425,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueStart()
+CallStateName IdleState::ContinueStart(IN const MediaInfo& objMediaInfo)
 {
     if (m_objContext.CreateSession() == IMS_NULL)
     {
@@ -432,7 +433,7 @@ CallStateName IdleState::ContinueStart()
         return CallStateName::TERMINATING;
     }
 
-    InitMediaSession();
+    InitMediaSession(objMediaInfo);
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
@@ -456,7 +457,7 @@ CallStateName IdleState::ContinueStart()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueConference()
+CallStateName IdleState::ContinueConference(IN const MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("ContinueConference UserSize[%d]", m_pConfUsers.GetSize(), 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
@@ -464,10 +465,9 @@ CallStateName IdleState::ContinueConference()
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
-
     SetResourceListForConference(*GetISession()->GetNextRequest());
 
-    InitMediaSession();
+    InitMediaSession(objMediaInfo);
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
@@ -494,7 +494,7 @@ CallStateName IdleState::ContinueHandleIncoming()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueStartUssi()
+CallStateName IdleState::ContinueStartUssi(IN const MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("ContinueStartUssi", 0, 0, 0);
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
@@ -504,7 +504,7 @@ CallStateName IdleState::ContinueStartUssi()
         return CallStateName::TERMINATING;
     }
 
-    InitMediaSession();
+    InitMediaSession(objMediaInfo);
 
     if (m_objContext.GetUssiController()->FormStartUssiRequest(
                 m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)
@@ -602,7 +602,7 @@ IMS_BOOL IdleState::IsCallPull() const
 }
 
 PRIVATE
-IMS_RESULT IdleState::HandleCallPull()
+IMS_RESULT IdleState::HandleCallPull(OUT MediaInfo& objMediaInfo)
 {
     const IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
     if (!piMultiEndpointManager)
@@ -622,7 +622,7 @@ IMS_RESULT IdleState::HandleCallPull()
     }
 
     m_objContext.GetCallInfo().eInitialCallType = objDialogInfo.eCallType;
-    m_objContext.GetMediaManager().SetMediaInfo(*objDialogInfo.pMediaInfo);
+    objMediaInfo = *objDialogInfo.pMediaInfo;
 
     return IMS_SUCCESS;
 }

@@ -119,7 +119,7 @@ protected:
     {
         ON_CALL(objMockCallContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
-        ON_CALL(objMockMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMockMediaManager, GetMediaInfo(_)).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMockCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
         ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));

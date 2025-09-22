@@ -18,6 +18,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcCallController.h"
+#include "MockISession.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
@@ -53,6 +54,7 @@ public:
     MockIMtcMediaManager objMediaManager;
     // cppcheck-suppress unusedStructMember
     MockIMtcSession objMtcCallSession;
+    MockISession objISession;
     MockIPassiveTimerHolder objPassiveTimer;
     MockMtcConfigurationProxy objConfigurationProxy;
 
@@ -63,7 +65,6 @@ protected:
                 GetInt(ConfigEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT))
                 .WillByDefault(Return(180000));
 
-        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objMtcCall, GetCallContext).WillByDefault(ReturnRef(objCallContext));
         ON_CALL(objCallManager, GetCallByCallKey(CALL_KEY)).WillByDefault(Return(&objMtcCall));
@@ -73,6 +74,9 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objEventReceiver));
         ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
+        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcCallSession));
+        ON_CALL(objMtcCallSession, GetISession).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
 
         pRttAutoUpgrader = new RttAutoUpgrader(objContext);
     }

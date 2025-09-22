@@ -73,7 +73,7 @@ protected:
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
-        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
 
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));

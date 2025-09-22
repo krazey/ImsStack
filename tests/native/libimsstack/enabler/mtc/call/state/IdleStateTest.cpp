@@ -157,7 +157,8 @@ protected:
 
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
-        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objOutputMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(&objSession))
+                .WillByDefault(ReturnRef(objOutputMediaInfo));
 
         pIdleState = new IdleState(objCallContext);
     }
@@ -219,6 +220,22 @@ TEST_F(IdleStateTest, StartSetsUpParticipantInfo)
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 
     EXPECT_EQ(strTarget, pParticipantInfo->GetRemoteNumber());
+}
+
+TEST_F(IdleStateTest, StartSetsMediaInfo)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    ImsList<ConfUser*> lstUsers;
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objInputMediaInfo));
+    pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 }
 
 TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
@@ -409,8 +426,6 @@ TEST_F(IdleStateTest, StartSetsUpMediaManager)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
-
-    EXPECT_CALL(objMediaManager, SetMediaInfo(objInputMediaInfo)).Times(1);
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 }
@@ -740,14 +755,30 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
     objDialogInfo.strLocalTag = "anyLocalTag";
     objDialogInfo.strRemoteTag = "anyRemoteTag";
     objDialogInfo.eCallType = CallType::VT;
-    objDialogInfo.pMediaInfo = new MediaInfo();
+    objDialogInfo.pMediaInfo = new MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND,
+            DIRECTION_RECEIVE, AUDIO_QUALITY_AMR_NB, VIDEO_QUALITY_HD_PR, GTT_MODE_FULL);
     EXPECT_CALL(objMepManager, GetDialogInfo(pService->nValue)).WillOnce(Return(objDialogInfo));
-    EXPECT_CALL(objMediaManager, SetMediaInfo(*objDialogInfo.pMediaInfo)).Times(1);
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
     EXPECT_EQ(objDialogInfo.eCallType, objCallInfo.eInitialCallType);
 
     delete objDialogInfo.pMediaInfo;
+}
+
+TEST_F(IdleStateTest, StartUssiSetsMediaInfo)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    ImsList<ConfUser*> lstUsers;
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objInputMediaInfo));
+    pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 }
 
 TEST_F(IdleStateTest, StartUssiInvokesSendStartFailedIfCreateSessionFailed)
@@ -857,16 +888,18 @@ TEST_F(IdleStateTest, StartConferenceWithMediaSetsMediaInfo)
 
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
-                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
-    EXPECT_CALL(objMediaManager, SetMediaInfo(objInputMediaInfo)).Times(1);
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objInputMediaInfo));
 
-    EXPECT_EQ(CallStateName::IDLE,
-            pIdleState->StartConference(
-                    eCallType, strTarget, objInputMediaInfo, objInputSuppServices, lstUsers));
+    pIdleState->StartConference(
+            eCallType, strTarget, objInputMediaInfo, objInputSuppServices, lstUsers);
 }
 
-TEST_F(IdleStateTest, StartConferenceWithoutMediaSetsMediaInfoByCallTypeVoip)
+TEST_F(IdleStateTest, StartConferenceWithoutMediaSetsMediaInfo)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
@@ -874,17 +907,20 @@ TEST_F(IdleStateTest, StartConferenceWithoutMediaSetsMediaInfoByCallTypeVoip)
 
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
-                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
-    objInputMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
-    objInputMediaInfo.eVideoDirection = DIRECTION_INVALID;
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
 
-    EXPECT_CALL(objMediaManager, SetMediaInfo(objInputMediaInfo));
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
+            AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objMediaInfo));
 
-    EXPECT_EQ(CallStateName::IDLE, pIdleState->StartConference(eCallType, strTarget, lstUsers));
+    pIdleState->StartConference(eCallType, strTarget, lstUsers);
 }
 
-TEST_F(IdleStateTest, StartConferenceWithoutMediaSetsMediaInfoByCallTypeVt)
+TEST_F(IdleStateTest, StartConferenceForVtWithoutMediaSetsMediaInfo)
 {
     CallType eCallType = CallType::VT;
     AString strTarget("some_target");
@@ -892,14 +928,17 @@ TEST_F(IdleStateTest, StartConferenceWithoutMediaSetsMediaInfoByCallTypeVt)
 
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
-                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
-    objInputMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
-    objInputMediaInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
 
-    EXPECT_CALL(objMediaManager, SetMediaInfo(objInputMediaInfo));
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_INVALID,
+            AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objMediaInfo));
 
-    EXPECT_EQ(CallStateName::IDLE, pIdleState->StartConference(eCallType, strTarget, lstUsers));
+    pIdleState->StartConference(eCallType, strTarget, lstUsers);
 }
 
 TEST_F(IdleStateTest, StartConferenceInvokesSendStartFailedIfCreateSessionFailed)

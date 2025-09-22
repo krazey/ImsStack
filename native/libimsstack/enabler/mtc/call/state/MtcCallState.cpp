@@ -661,24 +661,24 @@ ISession* MtcCallState::GetISession()
 }
 
 PROTECTED
-void MtcCallState::InitMediaSession()
+void MtcCallState::InitMediaSession(IN const MediaInfo& objMediaInfo)
 {
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
     objMediaManager.CreateMediaSession();
-
-    objMediaManager.CreateMediaProfile(
-            &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE);
+    ISession* piSession = &m_objContext.GetSession()->GetISession();
+    objMediaManager.SetMediaInfo(piSession, objMediaInfo);
+    objMediaManager.CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
     if (m_objContext.GetCallInfo().bConference)
     {
         objMediaManager.SetConferenceCall();
     }
 
-    if (objMediaManager.GetMediaInfo().eVideoQuality == VIDEO_QUALITY_NOTUSED)
+    if (objMediaManager.GetMediaInfo(piSession).eVideoQuality == VIDEO_QUALITY_NOTUSED)
     {
         // TODO: This will be verified and can be changed when Media Interface is ready.
         // Assumes VIDEO_QUALITY_NOTUSED used only in case of Call Pull
-        objMediaManager.SetRtpPort(&m_objContext.GetSession()->GetISession(), MEDIATYPE_VIDEO, 0);
+        objMediaManager.SetRtpPort(piSession, MEDIATYPE_VIDEO, 0);
     }
 }
 

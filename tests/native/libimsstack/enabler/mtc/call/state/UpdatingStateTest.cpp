@@ -103,7 +103,7 @@ protected:
         ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
 
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMediaManager, GetMediaInfo()).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(&objSession)).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetSession(&objSession)).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetSupplementaryService())
@@ -241,7 +241,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstabli
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(CallType::VIDEO_RTT)).Times(1);
     EXPECT_CALL(objMediaManager, Run(&objSession, _, IMS_FALSE)).Times(1);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, _)).Times(1);
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession)).Times(1);
     EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
@@ -254,7 +254,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, _)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
@@ -331,7 +331,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, _)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
@@ -361,7 +361,7 @@ TEST_F(UpdatingStateTest, AcceptResumeReturnsEstablishedWhenPreviousRequestIsUpd
     pUpdatingInfo->GetAlertingInfo().eAudioDirection = DIRECTION_SEND;
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, _)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
@@ -387,7 +387,7 @@ TEST_F(UpdatingStateTest, AcceptResumeReturnsUpdatingWhenPreviousRequestIsNotUpd
     ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(objMediaInfo)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objMediaInfo)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(CallType::VOIP)).Times(1);
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
 

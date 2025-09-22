@@ -19,6 +19,7 @@
 
 #include "IMediaSession.h"
 #include "IMessage.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
@@ -31,6 +32,38 @@
 #include "media/MtcMediaProfileManager.h"
 
 class MediaManager;
+
+class SessionMedia
+{
+public:
+    inline SessionMedia() :
+            objMediaInfo(),
+            objOldMediaInfo()
+    {
+    }
+    inline explicit SessionMedia(IN const MediaInfo& objInfo) :
+            objMediaInfo(objInfo),
+            objOldMediaInfo()
+    {
+    }
+    inline virtual ~SessionMedia() {}
+    SessionMedia(IN const SessionMedia&) = delete;
+    SessionMedia& operator=(IN const SessionMedia&) = delete;
+
+public:
+    inline virtual const MediaInfo& GetMediaInfo() const { return objMediaInfo; }
+    inline virtual const MediaInfo& GetOldMediaInfo() const { return objOldMediaInfo; }
+    inline virtual void SetMediaInfo(IN const MediaInfo& objInfo)
+    {
+        objOldMediaInfo = objMediaInfo;
+        objMediaInfo = objInfo;
+    }
+    inline virtual void RestoreMediaInfo() { objMediaInfo = objOldMediaInfo; }
+
+private:
+    MediaInfo objMediaInfo;
+    MediaInfo objOldMediaInfo;
+};
 
 class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
@@ -56,12 +89,13 @@ public:
     void SetQosListener(IN IMediaQosEventListener* pListener) override;
 
     /* Media Info */
-    void SetMediaInfo(IN const MediaInfo& objInfo) override;
+    void SetMediaInfo(IN const ISession* piSession, IN const MediaInfo& objInfo) override;
     void UpdateMediaInfo(IN const ISession* piSession) override;
-    void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
+    void UpdateMediaDirection(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
     // using enum values defined in MtcDef.h
-    const MediaInfo& GetMediaInfo() const override;
-    void RestoreMediaInfo() override;
+    const MediaInfo& GetMediaInfo(IN const ISession* piSession) const override;
+    void RestoreMediaInfo(IN const ISession* piSession) override;
 
     /* MediaSession */
     void CreateMediaSession() override;
@@ -105,11 +139,12 @@ public:
     PemType GetPemType(IN ISession* piSession) override;  // remove..?
 
     IMS_BOOL IsAudioInactive() override;
-    void AdjustDirectionForAutoOffer(IN CallType eCallType) override;
-    void AdjustDirectionForAutoAnswer() override;
-    void AdjustDirectionForLocalResourceConfirmation(IN CallType eCallType) override;
+    void AdjustDirectionForAutoOffer(IN const ISession* piSession, IN CallType eCallType) override;
+    void AdjustDirectionForAutoAnswer(IN const ISession* piSession) override;
+    void AdjustDirectionForLocalResourceConfirmation(
+            IN const ISession* piSession, IN CallType eCallType) override;
     void SetSrvccState(IN SrvccState eState) override;
-    IMS_BOOL IsOnHold() override;
+    IMS_BOOL IsOnHold(IN const ISession* piSession) override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
     IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
 
@@ -126,7 +161,11 @@ private:
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
     IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
-    void SetDirectionToActiveFromInactive(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
+    void SetDirectionToActiveFromInactive(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
+
+    SessionMedia* GetSessionMedia(IN const ISession* piSession) const;
+    void DestroyAllSessionMedia();
 
 protected:
     MediaManager& m_objMediaManager;
@@ -134,8 +173,7 @@ protected:
     IMediaQosEventListener* m_pQosListener;
     MtcMediaProfileManager* m_pProfileManager;
     IMtcCallContext& m_objContext;
-    MediaInfo* m_pMediaInfo;
-    MediaInfo* m_pOldMediaInfo;
+    ImsMap<const ISession*, SessionMedia*> m_objSessionMedias;
     IMS_BOOL m_bLocalTone;
     IMS_BOOL m_bAudioInactive;
     IMediaSession* m_piMediaSession;
