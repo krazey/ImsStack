@@ -354,7 +354,7 @@ IMS_BOOL FeatureCaps::FormContactFeatures(
 }
 
 PUBLIC
-void FeatureCaps::UpdateRegCaps(IN CallerCapability* pRegCaps)
+void FeatureCaps::UpdateRegCaps(IN const CallerCapability* pRegCaps)
 {
     m_pRegCaps->Clear();
     m_pRegCaps->AddFeatures(pRegCaps);

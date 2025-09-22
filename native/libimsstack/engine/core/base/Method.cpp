@@ -276,7 +276,7 @@ IMS_RESULT Method::AdjustMessage(
 }
 
 PROTECTED
-void Method::CheckNCreateDialog(IN ISipConnection* piSc, IN IMS_BOOL bDestroy /*= IMS_FALSE*/,
+void Method::CheckNCreateDialog(IN const ISipConnection* piSc, IN IMS_BOOL bDestroy /*= IMS_FALSE*/,
         IN IMS_BOOL bTerminatedDialogRequired /*= IMS_FALSE*/)
 {
     if (bDestroy)
@@ -618,7 +618,7 @@ IMS_BOOL Method::SetChallengeNCredentials(IN ISipClientConnection* piScc)
 }
 
 PROTECTED
-void Method::UpdateRemoteUserIds(IN ISipConnection* piSc)
+void Method::UpdateRemoteUserIds(IN const ISipConnection* piSc)
 {
     ISipMessage* piSipMsg = (piSc != IMS_NULL) ? piSc->GetMessage() : IMS_NULL;
 

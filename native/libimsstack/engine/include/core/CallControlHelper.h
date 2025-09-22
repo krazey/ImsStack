@@ -43,7 +43,7 @@ public:
     const AString& GetSessionIdFromReplaces(IN const Replaces* pReplaces);
     const AString CreateSessionId();
 
-    static Replaces* CreateReplaces(IN ISipDialog* piDialog, IN IMS_BOOL bMo);
+    static Replaces* CreateReplaces(IN const ISipDialog* piDialog, IN IMS_BOOL bMo);
 
 private:
     IMS_UINT32 m_nGlobalSessionId;

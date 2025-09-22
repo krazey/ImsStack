@@ -83,8 +83,8 @@ protected:
     void UpdateConnection(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
     IMS_BOOL UpdateRequestOnReceived(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
     IMS_BOOL UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
-    IMS_BOOL UpdateResponseOnReceived(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
-    IMS_BOOL UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
+    IMS_BOOL UpdateResponseOnReceived(IN IMS_SINT32 nServiceMethod, IN const ISipConnection* piSc);
+    IMS_BOOL UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN const ISipConnection* piSc);
 
 private:
     IMS_BOOL AddPreviousResponse(IN IMS_SINT32 nServiceMethod, IN Message* pMessage);

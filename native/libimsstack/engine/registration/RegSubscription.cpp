@@ -1171,7 +1171,7 @@ void RegSubscription::SetOngoingConnection(IN ISipClientConnection* piScc)
 }
 
 PRIVATE
-void RegSubscription::SetPreviousRequest(IN ISipMessage* piSipMsg)
+void RegSubscription::SetPreviousRequest(IN const ISipMessage* piSipMsg)
 {
     if (m_piPreviousRequest != IMS_NULL)
     {
@@ -1186,7 +1186,7 @@ void RegSubscription::SetPreviousRequest(IN ISipMessage* piSipMsg)
 }
 
 PRIVATE
-void RegSubscription::SetPreviousResponse(IN ISipMessage* piSipMsg)
+void RegSubscription::SetPreviousResponse(IN const ISipMessage* piSipMsg)
 {
     if (m_piPreviousResponse != IMS_NULL)
     {
@@ -1584,7 +1584,7 @@ IMS_BOOL RegSubscription::SubscribeOnImplicitRefresh()
 // IMS_REQUEST_URI_VALIDATION_IN_MID_DIALOG
 PRIVATE
 IMS_BOOL RegSubscription::ValidateRequestUri(
-        IN const SipAddress& objRequestUri, IN ISipDialog* piDialog) const
+        IN const SipAddress& objRequestUri, IN const ISipDialog* piDialog) const
 {
     // Checks GRUU identities if it is supported
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
@@ -1883,7 +1883,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     return piScc;
 }
 
-PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonParameter(IN ISipMessage* piSipMsg)
+PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonParameter(IN const ISipMessage* piSipMsg)
 {
     AString strSubState = piSipMsg->GetHeader(ISipHeader::SUBSCRIPTION_STATE);
     ISipHeader* piHeader =

@@ -117,7 +117,7 @@ void RegInfo::RemoveListener(IN const IRegInfoListener* piListener)
 }
 
 PUBLIC
-IMS_BOOL RegInfo::Update(IN IDocument* piDocument)
+IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
 {
     if (piDocument == IMS_NULL)
     {

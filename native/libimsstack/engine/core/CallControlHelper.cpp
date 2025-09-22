@@ -150,7 +150,8 @@ const AString CallControlHelper::CreateSessionId()
     return strSessionId;
 }
 
-PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN ISipDialog* piDialog, IN IMS_BOOL bMo)
+PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(
+        IN const ISipDialog* piDialog, IN IMS_BOOL bMo)
 {
     (void)bMo;
 

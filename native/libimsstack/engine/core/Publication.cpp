@@ -818,7 +818,7 @@ ISipClientConnection* Publication::CreateConnectionWithDialog(
 }
 
 PRIVATE
-void Publication::ReceiveResponse(IN ISipClientConnection* piScc)
+void Publication::ReceiveResponse(IN const ISipClientConnection* piScc)
 {
     switch (m_pPubState->GetOperation())
     {

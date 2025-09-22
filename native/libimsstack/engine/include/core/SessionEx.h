@@ -73,7 +73,7 @@ protected:
 private:
     AString AdjustSessionExpiresHeader(
             IN const AString& strRequestSe, IN const AString& strResponseSe);
-    IMS_BOOL CheckNCreateRprHelper(IN ISipMessage* piSipMsg);
+    IMS_BOOL CheckNCreateRprHelper(IN const ISipMessage* piSipMsg);
     void DestroyRprHelper();
 
     void HandleRequestToPrack(IN ISipServerConnection* piSsc);

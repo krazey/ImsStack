@@ -1370,7 +1370,7 @@ void Service::RegisterMethod(IN Method* pMethod)
 }
 
 PUBLIC
-void Service::DeregisterMethod(IN Method* pMethod)
+void Service::DeregisterMethod(IN const Method* pMethod)
 {
     m_pMethodMngr->RemoveMethod(pMethod);
 }
@@ -1405,7 +1405,8 @@ IMS_BOOL Service::ValidateMethod(IN const SipMethod& objMethod) const
 
 PUBLIC
 IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
-        IN ISipDialog* piDialog /*= IMS_NULL*/, IN IMS_BOOL bIsMidDialogRequest /*= IMS_FALSE*/)
+        IN const ISipDialog* piDialog /*= IMS_NULL*/,
+        IN IMS_BOOL bIsMidDialogRequest /*= IMS_FALSE*/)
 {
     if (bIsMidDialogRequest)
     {
@@ -1604,7 +1605,8 @@ IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
 
 PUBLIC
 IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestUri,
-        IN ISipDialog* piDialog /*= IMS_NULL*/, IN IMS_BOOL bIsMidDialogRequest /*= IMS_FALSE*/)
+        IN const ISipDialog* piDialog /*= IMS_NULL*/,
+        IN IMS_BOOL bIsMidDialogRequest /*= IMS_FALSE*/)
 {
     IpAddress objIpForRUri(objRequestUri.GetHost());
 
@@ -2111,7 +2113,8 @@ void Service::FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPriv
 }
 
 PROTECTED
-void Service::SetGruuOptionTagInMidDialog(IN ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg)
+void Service::SetGruuOptionTagInMidDialog(
+        IN const ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg)
 {
     const ISipHeader* piContactHeader =
             (piDialog != IMS_NULL) ? piDialog->GetContactHeader() : IMS_NULL;

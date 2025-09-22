@@ -295,7 +295,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
 }
 
 PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterChange(
-        IN ISipConnection* piSc)
+        IN const ISipConnection* piSc)
 {
     ISipMessage* piSipMsg = piSc->GetMessage();
 

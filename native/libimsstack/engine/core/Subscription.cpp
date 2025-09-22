@@ -1257,7 +1257,7 @@ void Subscription::SetState(IN IMS_SINT32 nState)
 }
 
 PRIVATE
-void Subscription::UpdateResponse(IN ISipClientConnection* piScc)
+void Subscription::UpdateResponse(IN const ISipClientConnection* piScc)
 {
     switch (m_pSubState->GetOperation())
     {

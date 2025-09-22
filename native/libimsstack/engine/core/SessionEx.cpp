@@ -1644,7 +1644,7 @@ AString SessionEx::AdjustSessionExpiresHeader(
 }
 
 PRIVATE
-IMS_BOOL SessionEx::CheckNCreateRprHelper(IN ISipMessage* piSipMsg)
+IMS_BOOL SessionEx::CheckNCreateRprHelper(IN const ISipMessage* piSipMsg)
 {
     if (m_pRprHelper != IMS_NULL)
     {

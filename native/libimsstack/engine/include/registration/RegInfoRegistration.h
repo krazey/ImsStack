@@ -43,10 +43,10 @@ public:
 
 private:
     RegInfoContact* CheckNCreateContact(IN INode* piNode);
-    IMS_BOOL SetAor(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetAor(IN const INamedNodeMap* piNodeMap);
     IMS_BOOL SetContacts(IN INode* piNode);
-    IMS_BOOL SetId(IN INamedNodeMap* piNodeMap);
-    IMS_BOOL SetState(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetId(IN const INamedNodeMap* piNodeMap);
+    IMS_BOOL SetState(IN const INamedNodeMap* piNodeMap);
 
 private:
     AString m_strId;

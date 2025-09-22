@@ -204,12 +204,12 @@ protected:
     // Methods for handling SDP & Session Descriptor related operations
     IMS_BOOL CheckNCreateSessionDescriptor();
     IMS_BOOL CheckNSetSdpBodyPart(IN_OUT ISipMessage*& piSipMsg);
-    IMS_BOOL CheckNTerminateSession(IN ISipMessage* piSipMsg);
+    IMS_BOOL CheckNTerminateSession(IN const ISipMessage* piSipMsg);
     ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
     inline IMS_SINT32 GetCallState() const { return m_objCallState.GetState(); }
     IMS_SINT32 GetOfferAnswerState() const;
     inline SessionRefreshHelper* GetRefreshHelper() const { return m_pRefreshHelper; }
-    IMS_SINT32 HandleSdpOfferAnswer(IN ISipMessage* piSipMsg);
+    IMS_SINT32 HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg);
     IMS_BOOL IsInviteFinalResponseReceived(IN IMS_SINT32 nServiceMethod) const;
     IMS_BOOL IsMidDialogTransactionCreatable() const;
     inline IMS_BOOL IsTerminatePending() const { return m_bTerminatePending; }
@@ -270,7 +270,7 @@ private:
 
     // For UAC behavior
     IMS_RESULT HandleResponseToBye(IN ISipClientConnection* piScc);
-    IMS_RESULT HandleResponseToCancel(IN ISipClientConnection* piScc);
+    IMS_RESULT HandleResponseToCancel(IN const ISipClientConnection* piScc);
     IMS_RESULT HandleResponseToInvite(IN ISipClientConnection* piScc);
 
     // RACE_CONDITION : SESSION_UPDATE
@@ -322,7 +322,7 @@ private:
     IMS_BOOL UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger);
-    void CreateRemoteMediaCapabilities(IN ISipMessage* piSipMsg);
+    void CreateRemoteMediaCapabilities(IN const ISipMessage* piSipMsg);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

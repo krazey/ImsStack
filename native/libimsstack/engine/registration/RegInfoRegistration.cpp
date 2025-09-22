@@ -277,7 +277,7 @@ RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode* piNode)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetAor(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoRegistration::SetAor(IN const INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_AOR);
 
@@ -316,7 +316,7 @@ IMS_BOOL RegInfoRegistration::SetContacts(IN INode* piNode)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoRegistration::SetId(IN const INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
@@ -332,7 +332,7 @@ IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetState(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoRegistration::SetState(IN const INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
 

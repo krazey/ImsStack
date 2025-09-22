@@ -27,11 +27,11 @@ public:
 
 public:
     inline IMS_SINT32 GetState() const { return m_nState; }
-    void Initialize(IN ISipMessage* piSipMsg);
+    void Initialize(IN const ISipMessage* piSipMsg);
     IMS_BOOL SetRAckHeader(IN_OUT ISipMessage*& piSipMsg) const;
     IMS_BOOL SetRSeqHeader(IN_OUT ISipMessage*& piSipMsg) const;
-    IMS_BOOL UpdateOnMessageReceived(IN ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnMessageSent(IN ISipMessage* piSipMsg);
+    IMS_BOOL UpdateOnMessageReceived(IN const ISipMessage* piSipMsg);
+    IMS_BOOL UpdateOnMessageSent(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnOperationFailed();
 
 private:
