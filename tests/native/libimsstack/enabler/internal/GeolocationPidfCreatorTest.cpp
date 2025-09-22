@@ -1070,3 +1070,26 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithConfidence)
             "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
+
+TEST_F(GeolocationPidfCreatorTest, CreateFailsWhenLocationInfoIsNull)
+{
+    objPhoneInfoService.SetLocationInfo(IMS_NULL);
+    ByteArray objContent;
+
+    EXPECT_FALSE(pCreator->CreateWithoutPosition("entity_uri", IMS_TRUE, IMS_FALSE, objContent));
+    EXPECT_FALSE(pCreator->CreateWithPosition("entity_uri", objContent));
+    EXPECT_FALSE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
+    EXPECT_FALSE(pCreator->CreateWithoutCivic("entity_uri", objContent));
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateFailsWhenLocationPropertiesIsNull)
+{
+    ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLocationProperties(_))
+            .WillByDefault(Return(IMS_NULL));
+    ByteArray objContent;
+
+    EXPECT_FALSE(pCreator->CreateWithoutPosition("entity_uri", IMS_TRUE, IMS_FALSE, objContent));
+    EXPECT_FALSE(pCreator->CreateWithPosition("entity_uri", objContent));
+    EXPECT_FALSE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
+    EXPECT_FALSE(pCreator->CreateWithoutCivic("entity_uri", objContent));
+}
