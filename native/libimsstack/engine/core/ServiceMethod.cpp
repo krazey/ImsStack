@@ -743,7 +743,7 @@ IMS_BOOL ServiceMethod::UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod, IN ISi
 
 PROTECTED
 IMS_BOOL ServiceMethod::UpdateResponseOnReceived(
-        IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc)
+        IN IMS_SINT32 nServiceMethod, IN const ISipConnection* piSc)
 {
     Message* pMessage =
             Message::CreateReceivedMessage(m_pService->GetAppConfig(), piSc->GetMessage());
@@ -771,7 +771,8 @@ IMS_BOOL ServiceMethod::UpdateResponseOnReceived(
 }
 
 PROTECTED
-IMS_BOOL ServiceMethod::UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc)
+IMS_BOOL ServiceMethod::UpdateResponseOnSent(
+        IN IMS_SINT32 nServiceMethod, IN const ISipConnection* piSc)
 {
     // Make sure that Message MUST be created before SEND operation.
     if (GetNextResponse() == IMS_NULL)

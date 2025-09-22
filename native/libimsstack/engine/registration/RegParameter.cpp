@@ -861,7 +861,7 @@ IMS_BOOL RegParameter::UpdateSecurityHeaders(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
-void RegParameter::UpdateSipProfile(IN SipProfile* pProfile)
+void RegParameter::UpdateSipProfile(IN const SipProfile* pProfile)
 {
     if (pProfile == IMS_NULL)
     {

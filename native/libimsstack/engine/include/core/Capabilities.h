@@ -64,7 +64,7 @@ private:
             IN IMS_BOOL bIncludeAllFeatures = IMS_TRUE) const;
     IMS_BOOL CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckMediaCapability = IMS_TRUE,
             IN IMS_BOOL bRequest = IMS_FALSE) const;
-    void HandleCapabilities(IN ISipClientConnection* piScc);
+    void HandleCapabilities(IN const ISipClientConnection* piScc);
     inline IMS_BOOL HasFlag(IN IMS_SINT32 nFlags, IN IMS_SINT32 nFlag) const
     {
         return (nFlags & nFlag) == nFlag;

@@ -39,7 +39,7 @@ ReliableProvResponseHelper::~ReliableProvResponseHelper()
 }
 
 PUBLIC
-void ReliableProvResponseHelper::Initialize(IN ISipMessage* piSipMsg)
+void ReliableProvResponseHelper::Initialize(IN const ISipMessage* piSipMsg)
 {
     if (piSipMsg == IMS_NULL)
     {
@@ -126,7 +126,7 @@ IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage*& piSipMsg
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piSipMsg)
+IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN const ISipMessage* piSipMsg)
 {
     if (piSipMsg == IMS_NULL)
     {
@@ -169,7 +169,7 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piS
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage* piSipMsg)
+IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN const ISipMessage* piSipMsg)
 {
     if (piSipMsg == IMS_NULL)
     {

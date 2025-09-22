@@ -24,7 +24,7 @@ class Service;
 class RetransmissionHelper : public ITimerListener
 {
 public:
-    explicit RetransmissionHelper(IN Service* pService, IN IMS_BOOL bIntervalCap = IMS_TRUE);
+    explicit RetransmissionHelper(IN const Service* pService, IN IMS_BOOL bIntervalCap = IMS_TRUE);
     ~RetransmissionHelper() override;
 
     RetransmissionHelper(IN const RetransmissionHelper&) = delete;

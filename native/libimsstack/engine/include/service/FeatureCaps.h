@@ -49,7 +49,7 @@ public:
 
     IMS_BOOL FormContactFeatures(
             IN IMS_SINT32 nSipMethod, IN IMS_BOOL bRequest, OUT AString& strContactFeatures);
-    void UpdateRegCaps(IN CallerCapability* pRegCaps);
+    void UpdateRegCaps(IN const CallerCapability* pRegCaps);
 
 private:
     CallerCapability* GetExcludedFeaturesForRegCaps(IN IMS_BOOL bCreate = IMS_FALSE);

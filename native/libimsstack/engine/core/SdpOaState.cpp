@@ -703,7 +703,8 @@ PUBLIC VIRTUAL void SdpOaState::RemoveMediaParameter(IN IMS_SINT32 nMid)
  * @brief Creates a new session parameter for the local capabilities.
  */
 PUBLIC
-IMS_BOOL SdpOaState::CreateCapabilities(IN Service* pService, IN IMS_BOOL bMProf /*= IMS_FALSE*/)
+IMS_BOOL SdpOaState::CreateCapabilities(
+        IN const Service* pService, IN IMS_BOOL bMProf /*= IMS_FALSE*/)
 {
     if ((m_nState != STATE_IDLE) && (m_nState != STATE_OFFER_RECEIVED))
     {

@@ -165,13 +165,13 @@ public:
     }
     inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
     void RegisterMethod(IN Method* pMethod);
-    void DeregisterMethod(IN Method* pMethod);
+    void DeregisterMethod(IN const Method* pMethod);
 
     IMS_BOOL ValidateMethod(IN const SipMethod& objMethod) const;
     IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri,
-            IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
+            IN const ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
     IMS_BOOL ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestUri,
-            IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
+            IN const ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
 
     static IMS_BOOL ValidateFromAndTo(
             IN const AString& strFrom, IN const AString& strTo, IN IMS_BOOL bToLenient);
@@ -209,7 +209,7 @@ protected:
             IN IMS_BOOL bRequest, OUT AString& strContact, OUT IMS_BOOL& bIsContactGruu) const;
     inline IRegBinding* GetRegBinding() const { return m_piRegBinding; }
     inline IMS_BOOL IsUserIdProvisioned() const { return m_bProvisionedUserId; }
-    void SetGruuOptionTagInMidDialog(IN ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg);
+    void SetGruuOptionTagInMidDialog(IN const ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg);
 
 private:
     void CreateDefaultPublicUserId();

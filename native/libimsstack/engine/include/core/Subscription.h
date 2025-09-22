@@ -95,7 +95,7 @@ private:
     void CloseConnection();
     ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
     void SetState(IN IMS_SINT32 nState);
-    void UpdateResponse(IN ISipClientConnection* piScc);
+    void UpdateResponse(IN const ISipClientConnection* piScc);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

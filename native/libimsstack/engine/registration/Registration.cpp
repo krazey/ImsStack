@@ -1894,7 +1894,7 @@ void Registration::CallListener(
 }
 
 PRIVATE
-void Registration::CheckUaLocation(IN ISipMessage* piSipMsg)
+void Registration::CheckUaLocation(IN const ISipMessage* piSipMsg)
 {
     if (piSipMsg == IMS_NULL)
     {
@@ -2889,7 +2889,7 @@ void Registration::RestoreSecurityHeaders()
 
 // IMS_AUTH_NONCE_REUSE {
 PRIVATE
-void Registration::SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge)
+void Registration::SetAuthenticationChallenge(IN const ISipGenericChallenge* piChallenge)
 {
     if (piChallenge == IMS_NULL)
     {
@@ -3135,7 +3135,7 @@ void Registration::SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piScc
 
 // SIP_DIGEST_AUTH_NONCE_REUSE
 PRIVATE
-void Registration::SetNextNonce(IN ISipMessage* piSipMsg)
+void Registration::SetNextNonce(IN const ISipMessage* piSipMsg)
 {
     if (m_piGenericChallenge == IMS_NULL)
     {
@@ -3205,7 +3205,7 @@ void Registration::SetOngoingConnection(IN ISipClientConnection* piScc)
 }
 
 PRIVATE
-void Registration::SetPreviousRequest(IN ISipMessage* piSipMsg)
+void Registration::SetPreviousRequest(IN const ISipMessage* piSipMsg)
 {
     if (m_piPreviousRequest != IMS_NULL)
     {
@@ -3220,7 +3220,7 @@ void Registration::SetPreviousRequest(IN ISipMessage* piSipMsg)
 }
 
 PRIVATE
-void Registration::SetPreviousResponse(IN ISipMessage* piSipMsg)
+void Registration::SetPreviousResponse(IN const ISipMessage* piSipMsg)
 {
     if (m_piPreviousResponse != IMS_NULL)
     {

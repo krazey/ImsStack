@@ -1006,7 +1006,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
 }
 
 PRIVATE
-void Capabilities::HandleCapabilities(IN ISipClientConnection* piScc)
+void Capabilities::HandleCapabilities(IN const ISipClientConnection* piScc)
 {
     ISipMessage* piSipMsg = piScc->GetMessage();
 

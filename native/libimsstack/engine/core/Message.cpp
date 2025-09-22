@@ -90,7 +90,7 @@ ISipMessageBodyPart* Message::CreateBodyPartEx()
 }
 
 PUBLIC
-void Message::UpdateSentMessage(IN ISipMessage* piSipMsg)
+void Message::UpdateSentMessage(IN const ISipMessage* piSipMsg)
 {
     if (m_nState != STATE_UNSENT)
     {
@@ -205,7 +205,7 @@ PUBLIC GLOBAL Message* Message::CreateUnsentMessage(IN AppConfig* pAppConfig, IN
 }
 
 PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
-        IN AppConfig* pAppConfig, IN ISipMessage* piSipMsg)
+        IN AppConfig* pAppConfig, IN const ISipMessage* piSipMsg)
 {
     Message* pMessage = new Message(pAppConfig, STATE_RECEIVED);
 

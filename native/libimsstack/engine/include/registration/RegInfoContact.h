@@ -53,22 +53,22 @@ public:
 
 private:
     // Attributes
-    void SetCallId(IN INamedNodeMap* piNodeMap);
-    void SetCSeq(IN INamedNodeMap* piNodeMap);
-    void SetDurationRegistered(IN INamedNodeMap* piNodeMap);
-    IMS_BOOL SetEvent(IN INamedNodeMap* piNodeMap);
-    void SetExpiresValue(IN INamedNodeMap* piNodeMap);
-    IMS_BOOL SetId(IN INamedNodeMap* piNodeMap);
-    void SetQValue(IN INamedNodeMap* piNodeMap);
-    void SetRetryAfterValue(IN INamedNodeMap* piNodeMap);
-    IMS_BOOL SetState(IN INamedNodeMap* piNodeMap);
+    void SetCallId(IN const INamedNodeMap* piNodeMap);
+    void SetCSeq(IN const INamedNodeMap* piNodeMap);
+    void SetDurationRegistered(IN const INamedNodeMap* piNodeMap);
+    IMS_BOOL SetEvent(IN const INamedNodeMap* piNodeMap);
+    void SetExpiresValue(IN const INamedNodeMap* piNodeMap);
+    IMS_BOOL SetId(IN const INamedNodeMap* piNodeMap);
+    void SetQValue(IN const INamedNodeMap* piNodeMap);
+    void SetRetryAfterValue(IN const INamedNodeMap* piNodeMap);
+    IMS_BOOL SetState(IN const INamedNodeMap* piNodeMap);
 
     // Elements
-    void SetDisplayName(IN INode* piNode);
+    void SetDisplayName(IN const INode* piNode);
     void SetPublicGruu(IN INode* piNode);
     void SetTemporaryGruu(IN INode* piNode);
     void SetUnknownParameter(IN INode* piNode);
-    IMS_BOOL SetUri(IN INode* piNode);
+    IMS_BOOL SetUri(IN const INode* piNode);
 
 private:
     class TempGruu

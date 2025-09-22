@@ -157,9 +157,10 @@ private:
     SipServerConnectionListenerProxy* GetServerConnectionListener(IN IMS_SINT32 nSlotId);
     IMS_BOOL IsConnectionNotifierPresent(IN const ISipConnectionNotifier* piScn) const;
 
-    static IMS_BOOL CheckMessageValidity(IN ISipMessage* piSipMsg, OUT AString& strReason);
+    static IMS_BOOL CheckMessageValidity(IN const ISipMessage* piSipMsg, OUT AString& strReason);
     static AString CreateConnectionNotifierKey(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort);
-    static void CreateExtraFeatures(IN Service* pService, OUT ImsList<FeatureSet*>& objFeatures);
+    static void CreateExtraFeatures(
+            IN const Service* pService, OUT ImsList<FeatureSet*>& objFeatures);
     static void CreatePreferenceHeaders(
             IN const AStringArray& objAcceptContacts, OUT ImsList<PreferenceHeader*>& objHeaders);
     static void DestroyExtraFeatures(OUT ImsList<FeatureSet*>& objFeatures);
@@ -177,11 +178,12 @@ private:
     static Service* RouteSipRequest(
             IN ISipServerConnection* piSsc, OUT SipStatusCode& objStatusCode);
     static Service* RouteSipRequestByIfc(
-            IN const ImsList<Service*>& objServices, IN ISipServerConnection* piSsc);
+            IN const ImsList<Service*>& objServices, IN const ISipServerConnection* piSsc);
     static void SendResponse(IN ISipConnectionNotifier* piScn, IN ISipServerConnection* piSsc,
             IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase = AString::ConstNull(),
             IN IMS_BOOL bDebuggableToTag = IMS_FALSE);
-    static void SetServerHeader(IN ISipConnectionNotifier* piScn, IN ISipServerConnection* piSsc);
+    static void SetServerHeader(
+            IN ISipConnectionNotifier* piScn, IN const ISipServerConnection* piSsc);
 
 private:
     IMutex* m_piLock;
@@ -456,7 +458,7 @@ IMS_BOOL SipConnectionNotifierManagerPrivate::IsConnectionNotifierPresent(
 }
 
 PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::CheckMessageValidity(
-        IN ISipMessage* piSipMsg, OUT AString& strReason)
+        IN const ISipMessage* piSipMsg, OUT AString& strReason)
 {
     // According to the SIP method, check the mandatory header or parameters ...
     const SipMethod& objMethod = piSipMsg->GetMethod();
@@ -550,7 +552,7 @@ PRIVATE GLOBAL AString SipConnectionNotifierManagerPrivate::CreateConnectionNoti
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::CreateExtraFeatures(
-        IN Service* pService, OUT ImsList<FeatureSet*>& objFeatures)
+        IN const Service* pService, OUT ImsList<FeatureSet*>& objFeatures)
 {
     if (pService == IMS_NULL)
     {
@@ -1172,7 +1174,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
 }
 
 PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIfc(
-        IN const ImsList<Service*>& objServices, IN ISipServerConnection* piSsc)
+        IN const ImsList<Service*>& objServices, IN const ISipServerConnection* piSsc)
 {
     if (objServices.IsEmpty())
     {
@@ -1277,7 +1279,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::SendResponse(
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::SetServerHeader(
-        IN ISipConnectionNotifier* piScn, IN ISipServerConnection* piSsc)
+        IN ISipConnectionNotifier* piScn, IN const ISipServerConnection* piSsc)
 {
     if (piScn == IMS_NULL)
     {

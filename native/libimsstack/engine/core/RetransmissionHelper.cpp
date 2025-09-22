@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 RetransmissionHelper::RetransmissionHelper(
-        IN Service* pService, IN IMS_BOOL bIntervalCap /*= IMS_TRUE*/) :
+        IN const Service* pService, IN IMS_BOOL bIntervalCap /*= IMS_TRUE*/) :
         m_nDuration(TIMER_T1),
         m_nCumulativeDuration(TIMER_T1),
         m_nMaxDuration(TIMER_MAX),

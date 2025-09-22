@@ -4369,7 +4369,7 @@ IMS_BOOL Session::CheckNSetSdpBodyPart(IN_OUT ISipMessage*& piSipMsg)
 }
 
 PROTECTED
-IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSipMsg)
+IMS_BOOL Session::CheckNTerminateSession(IN const ISipMessage* piSipMsg)
 {
     if (!m_bTerminatePending)
     {
@@ -4521,7 +4521,7 @@ IMS_SINT32 Session::GetOfferAnswerState() const
 }
 
 PROTECTED
-IMS_SINT32 Session::HandleSdpOfferAnswer(IN ISipMessage* piSipMsg)
+IMS_SINT32 Session::HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg)
 {
     if (m_pOaState == IMS_NULL)
     {
@@ -5934,7 +5934,7 @@ IMS_RESULT Session::HandleResponseToBye(IN ISipClientConnection* piScc)
 }
 
 PRIVATE
-IMS_RESULT Session::HandleResponseToCancel(IN ISipClientConnection* piScc)
+IMS_RESULT Session::HandleResponseToCancel(IN const ISipClientConnection* piScc)
 {
     IMS_SINT32 nStatusCode = piScc->GetMessage()->GetStatusCode();
 
@@ -7690,7 +7690,7 @@ IMS_BOOL Session::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
 }
 
 PRIVATE
-void Session::CreateRemoteMediaCapabilities(IN ISipMessage* piSipMsg)
+void Session::CreateRemoteMediaCapabilities(IN const ISipMessage* piSipMsg)
 {
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 

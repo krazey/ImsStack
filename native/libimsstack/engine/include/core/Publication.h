@@ -76,7 +76,7 @@ private:
     void CloseConnection();
     ISipClientConnection* CreateConnectionWithDialog(
             IN ISipDialog* piDialog, IN const SipMethod& objMethod);
-    void ReceiveResponse(IN ISipClientConnection* piScc);
+    void ReceiveResponse(IN const ISipClientConnection* piScc);
     void SetState(IN IMS_SINT32 nState);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);

@@ -33,7 +33,7 @@ public:
 public:
     inline const ImsList<Method*>& GetMethods() const { return m_objMethods; }
     IMS_BOOL AddMethod(IN Method* pMethod);
-    void RemoveMethod(IN Method* pMethod);
+    void RemoveMethod(IN const Method* pMethod);
 
 private:
     ImsList<Method*> m_objMethods;

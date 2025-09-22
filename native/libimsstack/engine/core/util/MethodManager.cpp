@@ -54,7 +54,7 @@ IMS_BOOL MethodManager::AddMethod(IN Method* pMethod)
 }
 
 PUBLIC
-void MethodManager::RemoveMethod(IN Method* pMethod)
+void MethodManager::RemoveMethod(IN const Method* pMethod)
 {
     for (IMS_UINT32 i = 0; i < m_objMethods.GetSize(); ++i)
     {

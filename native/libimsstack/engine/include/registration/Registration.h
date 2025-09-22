@@ -214,7 +214,7 @@ private:
     IMS_RESULT AdjustMessage(IN_OUT ISipMessage* piSipMsg,
             IN IMS_SINT32 nMessage = IMessageMediator::MESSAGE_NORMAL);
     void CallListener(IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState, IN IMS_SINT32 nReason);
-    void CheckUaLocation(IN ISipMessage* piSipMsg);
+    void CheckUaLocation(IN const ISipMessage* piSipMsg);
     void ChoosePreferredContact();
     void ClearNextRequest();
     IDigestAka* CreateDigestAka(IN const SubscriberConfig* pSubsConfig);
@@ -232,7 +232,7 @@ private:
     IMS_BOOL RespondToPendingChallenge(IN const Credential& objCredential);
     void RestoreSecurityHeaders();
     // IMS_AUTH_NONCE_REUSE {
-    void SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge);
+    void SetAuthenticationChallenge(IN const ISipGenericChallenge* piChallenge);
     // }
     IMS_RESULT SetContactNExpiresHeader(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires = (-1));
@@ -241,11 +241,11 @@ private:
     // IMS_AUTH_NONCE_REUSE {
     void SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piScc);
     // SIP_DIGEST_AUTH_NONCE_REUSE
-    void SetNextNonce(IN ISipMessage* piSipMsg);
+    void SetNextNonce(IN const ISipMessage* piSipMsg);
     // }
     void SetOngoingConnection(IN ISipClientConnection* piScc);
-    void SetPreviousRequest(IN ISipMessage* piSipMsg);
-    void SetPreviousResponse(IN ISipMessage* piSipMsg);
+    void SetPreviousRequest(IN const ISipMessage* piSipMsg);
+    void SetPreviousResponse(IN const ISipMessage* piSipMsg);
     void SetState(IN IMS_SINT32 nState);
     void SetSubState(IN IMS_SINT32 nSubState);
     void StorePersistentHeaders(IN const ISipMessage* piSipMsg);

@@ -92,7 +92,7 @@ public:
     IMS_BOOL UpdateProfile(
             IN const SipAddress& objAor, IN const AString& strSubsId = AString::ConstNull());
     IMS_BOOL UpdateSecurityHeaders(IN const ISipMessage* piSipMsg);
-    void UpdateSipProfile(IN SipProfile* pProfile);
+    void UpdateSipProfile(IN const SipProfile* pProfile);
 
 private:
     // IRegParameter interface

@@ -35,7 +35,7 @@ public:
     IMS_RESULT UpdateOnMessageReceived(IN const ISipConnection* piSc) override;
     IMS_RESULT UpdateOnMessageSent(IN const ISipConnection* piSc) override;
 
-    IMS_BOOL AddSpecificHeaderWithoutParameterChange(IN ISipConnection* piSc);
+    IMS_BOOL AddSpecificHeaderWithoutParameterChange(IN const ISipConnection* piSc);
     IMS_BOOL AddSpecificHeaderOnEarlyUpdate(
             IN ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported);
     IMS_SINT32 GetRefreshMethod() const;
