@@ -42,6 +42,7 @@ PUBLIC IMS_BOOL TextSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
 
     MediaSdpParser::Parse(pSessionDescriptor, pDescriptor, pProfile);
     ParsePayloads(pDescriptor, pProfile);
+
     return IMS_TRUE;
 }
 
@@ -55,6 +56,8 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
     }
 
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
+
+    IMS_TRACE_I("ParsePayloads(): payload size[%d]", lstMediaFormat.GetSize(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {

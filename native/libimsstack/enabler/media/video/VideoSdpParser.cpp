@@ -60,6 +60,13 @@ IMS_BOOL VideoSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
 
     ParsePayloads(pDescriptor, pProfile);
 
+    // Fallback to parse only payload type number if no media formats found
+    // (e.g., dynamic payload type without rtpmap).
+    if (pProfile->GetPayloadList().GetSize() == 0)
+    {
+        ParsePayloadTypeNumber(pDescriptor, pProfile);
+    }
+
     // framerate
     pProfile->SetFrameRate(pDescriptor->GetAttributeInt(SdpAttribute::FRAMERATE));
 
@@ -126,6 +133,8 @@ void VideoSdpParser::ParsePayloads(
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
     ImsList<AString> objImageAttributes = pDescriptor->GetAttributes(SdpAttribute::IMAGEATTR);
     ImsList<AString> objFrameSizes = pDescriptor->GetAttributes(SdpAttribute::FRAMESIZE);
+
+    IMS_TRACE_I("ParsePayloads(): payload size[%d]", lstMediaFormat.GetSize(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {

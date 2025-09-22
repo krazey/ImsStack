@@ -52,6 +52,8 @@ protected:
             IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
     IMS_BOOL ParsePcfg(
             IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
+    void ParsePayloadTypeNumber(
+            IN const IMediaDescriptor* pDescriptor, OUT MediaBaseProfile* pProfile);
 
 private:
     MEDIA_CONTENT_TYPE m_eType;
