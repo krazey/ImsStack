@@ -907,9 +907,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosService::GetCapabilitiesForNetwork(AosNetworkType e
 PUBLIC VIRTUAL IMS_BOOL AosService::IsSupportCapabilitiesForNetwork(
         AosNetworkType eNetworkType, AosCapability eCapability)
 {
-    return (GetCapabilitiesForNetwork(eNetworkType) & static_cast<IMS_UINT32>(eCapability)) > 0
-            ? IMS_TRUE
-            : IMS_FALSE;
+    return (GetCapabilitiesForNetwork(eNetworkType) & eCapability) > 0;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::IsNasSecurityAlgorithmNull()
@@ -966,47 +964,47 @@ PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapa
 {
     AString strCapabilities = "[ ";
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::VOICE))
+    if (nCapabilities & AosCapability::VOICE)
     {
         strCapabilities.Append("VOICE ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::VIDEO))
+    if (nCapabilities & AosCapability::VIDEO)
     {
         strCapabilities.Append("VIDEO ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::UT))
+    if (nCapabilities & AosCapability::UT)
     {
         strCapabilities.Append("UT ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::SMS))
+    if (nCapabilities & AosCapability::SMS)
     {
         strCapabilities.Append("SMS ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER))
+    if (nCapabilities & AosCapability::CALL_COMPOSER)
     {
         strCapabilities.Append("CALL_COMPOSER ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY))
+    if (nCapabilities & AosCapability::CALL_COMPOSER_BUSINESS_ONLY)
     {
         strCapabilities.Append("CALL_COMPOSER_BUSINESS_ONLY ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE))
+    if (nCapabilities & AosCapability::OPTIONS_UCE)
     {
         strCapabilities.Append("OPTIONS_UCE ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE))
+    if (nCapabilities & AosCapability::PRESENCE_UCE)
     {
         strCapabilities.Append("PRESENCE_UCE ");
     }
 
-    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::TEXT))
+    if (nCapabilities & AosCapability::TEXT)
     {
         strCapabilities.Append("TEXT ");
     }
