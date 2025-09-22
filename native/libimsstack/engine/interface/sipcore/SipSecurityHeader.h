@@ -279,7 +279,7 @@ public:
      *
      * @return The newly created SipSecurityHeader.
      */
-    static SipSecurityHeader* FromSipHeader(IN ISipHeader* piHeader);
+    static SipSecurityHeader* FromSipHeader(IN const ISipHeader* piHeader);
 
 public:
     /// Pre-defined parameters\n

@@ -101,7 +101,8 @@ private:
     void ClearTransportResource();
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     void ControlUdpClientReference(IN IMS_SINT32 nControl);
-    IMS_BOOL CreateClientInitiatedConnection(IN IMS_SINT32 nPort, IN SipSocketAddress* pFarEnd);
+    IMS_BOOL CreateClientInitiatedConnection(
+            IN IMS_SINT32 nPort, const IN SipSocketAddress* pFarEnd);
     IMS_BOOL ConnectClientInitiatedConnection();
     void DestroyClientInitiatedConnection(IN IMS_SINT32 nPort);
     void ExtractProperties(IN const AString& strParams);

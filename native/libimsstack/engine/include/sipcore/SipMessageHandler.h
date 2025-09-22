@@ -47,8 +47,9 @@ private:
     IMS_SINT32 NotifyResponse(IN IMS_SINT32 nSlotId, IN ::SipMessage* pSipMsg,
             IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd);
 
-    IMS_BOOL CheckIpSecValidityForRequest(IN IMS_SINT32 nSlotId, IN SipTransactionState* pTState,
-            IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd);
+    IMS_BOOL CheckIpSecValidityForRequest(IN IMS_SINT32 nSlotId,
+            IN const SipTransactionState* pTState, IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd);
     IMS_BOOL CheckIpSecValidityForResponse(IN IMS_SINT32 nSlotId, IN ::SipMessage* pSipMsg,
             IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd);
     IMS_BOOL IsIpSecSaMatched(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,

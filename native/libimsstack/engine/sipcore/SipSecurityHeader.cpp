@@ -413,7 +413,7 @@ AString SipSecurityHeader::ToString() const
     return static_cast<const AStringBuffer&>(objBuffer).GetString();
 }
 
-PUBLIC GLOBAL SipSecurityHeader* SipSecurityHeader::FromSipHeader(IN ISipHeader* piHeader)
+PUBLIC GLOBAL SipSecurityHeader* SipSecurityHeader::FromSipHeader(IN const ISipHeader* piHeader)
 {
     if (piHeader == IMS_NULL)
     {

@@ -32,7 +32,7 @@ public:
 
 public:
     IMS_BOOL AttachDialogState(IN SipDialogState* pDState);
-    void DetachDialogState(IN SipDialogState* pDState);
+    void DetachDialogState(IN const SipDialogState* pDState);
     RcPtr<SipDialogState> LookupDialogState(IN SipDialogState* pDState, IN ::SipMessage* pSipMsg,
             IN IMS_BOOL bCheckForked = IMS_FALSE, OUT IMS_BOOL* pbIsForked = IMS_NULL);
 

@@ -66,7 +66,7 @@ IMS_BOOL SipManager::AttachDialogState(IN SipDialogState* pDState)
 }
 
 PUBLIC
-void SipManager::DetachDialogState(IN SipDialogState* pDState)
+void SipManager::DetachDialogState(IN const SipDialogState* pDState)
 {
     if (m_nState != STATE_ACTIVE)
     {

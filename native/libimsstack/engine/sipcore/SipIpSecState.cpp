@@ -284,7 +284,7 @@ void SipIpSecState::NotifyMessageSentFailed(IN ::SipMessage* pSipMsg)
 }
 
 PUBLIC
-void SipIpSecState::NotifyTransactionAborted(IN ::SipTxnKey* pSipTxnKey)
+void SipIpSecState::NotifyTransactionAborted(IN const ::SipTxnKey* pSipTxnKey)
 {
     sipcore::SipTxnKey* pTxnKey = SipStack::CreateTxnKeyFromKey(pSipTxnKey);
 
@@ -634,7 +634,7 @@ void SipIpSecState::NotifyMessageSentInternal(IN const SipTransportAddress& objN
 }
 
 PRIVATE
-void SipIpSecState::NotifyTransactionAbortedInternal(IN sipcore::SipTxnKey* pTxnKey)
+void SipIpSecState::NotifyTransactionAbortedInternal(IN const sipcore::SipTxnKey* pTxnKey)
 {
     if (m_pNewSa != IMS_NULL)
     {

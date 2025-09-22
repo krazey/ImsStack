@@ -729,7 +729,7 @@ public:
      * @param bForEmergency Flag specifying whether this profile is for emergency service or not
      * @return A new SipProfile instance.
      */
-    inline static SipProfile* Create(IN SipProfile* pProfile, IN IMS_BOOL bForEmergency)
+    inline static SipProfile* Create(IN const SipProfile* pProfile, IN IMS_BOOL bForEmergency)
     {
         SipProfile* pNewProfile =
                 (pProfile != IMS_NULL) ? new SipProfile(*pProfile) : new SipProfile();

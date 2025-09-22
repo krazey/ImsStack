@@ -52,7 +52,7 @@ public:
     SipSocket* Create(IN const SipSocketAddress& objSockAddr);
     SipSocket* CreateStreamSocket(
             IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
-    void Destroy(IN SipSocket*& pSocket, IN ISipSocketListener* piListener);
+    void Destroy(IN SipSocket*& pSocket, IN const ISipSocketListener* piListener);
     void DestroyStreamSocket(
             IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
     IMS_BOOL IsSocketPresent(IN SipSocket* pSocket) const;

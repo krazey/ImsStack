@@ -550,7 +550,7 @@ SipClientConnection* SipClientConnection::InitCancel()
 
 PUBLIC
 IMS_RESULT SipClientConnection::InitRequest(
-        IN const AString& strMethod, IN SipConnectionNotifier* pScn)
+        IN const AString& strMethod, IN const SipConnectionNotifier* pScn)
 {
     if (m_nState != STATE_CREATED)
     {

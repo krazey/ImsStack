@@ -49,7 +49,7 @@ PUBLIC VIRTUAL SipAck::~SipAck()
 }
 
 PUBLIC
-IMS_BOOL SipAck::IsSameTransaction(IN ::SipTxnKey* pTxnKey) const
+IMS_BOOL SipAck::IsSameTransaction(IN const ::SipTxnKey* pTxnKey) const
 {
     if (m_pCtState.IsNull())
     {
