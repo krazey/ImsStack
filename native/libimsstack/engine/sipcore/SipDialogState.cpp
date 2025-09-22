@@ -637,7 +637,7 @@ IMS_BOOL SipDialogState::InitDialogDetails(IN ::SipMessage* pSipMsg)
 }
 
 PUBLIC
-IMS_BOOL SipDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN SipDialogState* pDState)
+IMS_BOOL SipDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN const SipDialogState* pDState)
 {
     if (nTrigger == DIALOG_CANCELLED)
     {

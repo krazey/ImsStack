@@ -105,7 +105,7 @@ public:
     void NotifyMessageSent(IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd, IN ::SipMessage* pSipMsg);
     void NotifyMessageSentFailed(IN ::SipMessage* pSipMsg);
-    void NotifyTransactionAborted(IN ::SipTxnKey* pSipTxnKey);
+    void NotifyTransactionAborted(IN const ::SipTxnKey* pSipTxnKey);
 
 private:
     // EngineActivity class
@@ -127,7 +127,7 @@ private:
             IN const SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
     void NotifyMessageSentInternal(IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
-    void NotifyTransactionAbortedInternal(IN sipcore::SipTxnKey* pTxnKey);
+    void NotifyTransactionAbortedInternal(IN const sipcore::SipTxnKey* pTxnKey);
 
 private:
     // Event for message processing

@@ -360,7 +360,7 @@ PROTECTED VIRTUAL SipTransactionState* SipTransactionState::Clone()
 }
 
 PROTECTED
-IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* pTimerValues)
+IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN const SipTimerValues* pTimerValues)
 {
     IMS_TRACE_D("Send", 0, 0, 0);
 
@@ -568,7 +568,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
 
 PROTECTED
 void SipTransactionState::SetTimerValues(
-        IN SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext)
+        IN const SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext)
 {
     SipStack::SetTimerValues(pTimerValues, pTxnContext);
 }

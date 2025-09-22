@@ -77,7 +77,7 @@ public:
     inline IMS_BOOL IsCaller() const { return m_bIsCaller; }
 
     IMS_BOOL InitDialogDetails(IN ::SipMessage* pSipMsg);
-    IMS_BOOL InitDialogDetails(IN IMS_SINT32 nTrigger, IN SipDialogState* pDState);
+    IMS_BOOL InitDialogDetails(IN IMS_SINT32 nTrigger, IN const SipDialogState* pDState);
     IMS_BOOL InitRequest(IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg);
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
     IMS_RESULT SetContactParameter(

@@ -433,7 +433,7 @@ IMS_SINT32 SipMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN ::SipMess
 
 PRIVATE
 IMS_BOOL SipMessageHandler::CheckIpSecValidityForRequest(IN IMS_SINT32 nSlotId,
-        IN SipTransactionState* pTState, IN const SipTransportAddress& objNearEnd,
+        IN const SipTransactionState* pTState, IN const SipTransportAddress& objNearEnd,
         IN const SipTransportAddress& objFarEnd)
 {
     if (pTState->IsIpSecRequired() && SipRtConfigUtils::IsIpSecSaConfigured(nSlotId))

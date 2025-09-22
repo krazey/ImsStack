@@ -94,7 +94,7 @@ protected:
     void NotifyPongReceived();
     inline void SetForcinglyClosed(IN IMS_BOOL bClosed) { m_bForcinglyClosed = bClosed; }
     void SetSocketOptionForTcpMaxSeg(
-            IN INetworkConnection* piConnection, IN const IpAddress& objLocalIp);
+            IN const INetworkConnection* piConnection, IN const IpAddress& objLocalIp);
     void SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort);
     void SetState(IN IMS_SINT32 nState);
 

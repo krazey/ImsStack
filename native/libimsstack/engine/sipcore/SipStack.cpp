@@ -106,7 +106,7 @@ LOCAL IMS_BOOL FormAddrSpec(
 }
 
 LOCAL IMS_BOOL GetParameter(
-        IN SipHeaderBase* pHeader, IN const AString& strName, OUT SipNameValue*& pParam)
+        IN const SipHeaderBase* pHeader, IN const AString& strName, OUT SipNameValue*& pParam)
 {
     SIPStackError(EERR_NOERR);
 
@@ -285,7 +285,7 @@ GLOBAL SipHeaderBase* CloneHeader(IN SipHeaderBase* pHeader)
     return SipHeaders::CloneHdrObj(pHeader);
 }
 
-GLOBAL ::SipMessage* CloneMessage(IN ::SipMessage* pMessage)
+GLOBAL ::SipMessage* CloneMessage(IN const ::SipMessage* pMessage)
 {
     SIPStackError(EERR_NOERR);
 
@@ -298,7 +298,7 @@ GLOBAL ::SipMessage* CloneMessage(IN ::SipMessage* pMessage)
     return new ::SipMessage(*pMessage);
 }
 
-GLOBAL SipMsgBody* CloneMessageBody(IN SipMsgBody* pMsgBody)
+GLOBAL SipMsgBody* CloneMessageBody(IN const SipMsgBody* pMsgBody)
 {
     SIPStackError(EERR_NOERR);
 
@@ -2073,7 +2073,7 @@ GLOBAL AString GetChallengeScheme(IN SipHeaderBase* pHeader)
 }
 
 GLOBAL IMS_BOOL GetContent(
-        IN SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength)
+        IN const SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength)
 {
     SIPStackError(EERR_NOERR);
 
@@ -2303,7 +2303,7 @@ GLOBAL SipMethod GetMethod(IN ::SipMessage* pMessage)
     return objSipMethod;
 }
 
-GLOBAL IMS_SINT32 GetMessageBodyCount(IN ::SipMessage* pMessage)
+GLOBAL IMS_SINT32 GetMessageBodyCount(IN const ::SipMessage* pMessage)
 {
     return pMessage->GetMsgBodyCount();
 }
@@ -3166,7 +3166,7 @@ GLOBAL IMS_BOOL IsOptionSupported(IN ::SipMessage* pMessage, IN const AString& s
     return IMS_FALSE;
 }
 
-GLOBAL IMS_BOOL IsRequestMessage(IN ::SipMessage* pMessage)
+GLOBAL IMS_BOOL IsRequestMessage(IN const ::SipMessage* pMessage)
 {
     return (pMessage != IMS_NULL) ? (pMessage->GetMsgType() == ::SipMessage::REQ_TYPE) : IMS_FALSE;
 }
@@ -3826,7 +3826,7 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
 #endif
 }
 
-GLOBAL IMS_SINT32 GetBadHeaderCount(IN ::SipMessage* pMessage)
+GLOBAL IMS_SINT32 GetBadHeaderCount(IN const ::SipMessage* pMessage)
 {
 #ifdef SIP_BADMESSAGE_PARSING
     return pMessage->GetBadHeaderCount();
@@ -3953,7 +3953,7 @@ GLOBAL ::SipTxnKey* CreateTxnKey(IN ::SipMessage* pMessage, IN IMS_SINT32 /*nApi
     return new ::SipTxnKey(pMessage, &nError);
 }
 
-GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN ::SipTxnKey* pTxnKey)
+GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN const ::SipTxnKey* pTxnKey)
 {
     if (pTxnKey == IMS_NULL)
     {
@@ -3982,7 +3982,7 @@ GLOBAL IMS_BOOL CompareTxnKeys(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey
     return IMS_TRUE;
 }
 
-GLOBAL IMS_BOOL CompareTxnKeysForAck(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2)
+GLOBAL IMS_BOOL CompareTxnKeysForAck(IN const ::SipTxnKey* pTxnKey1, IN const ::SipTxnKey* pTxnKey2)
 {
     if ((pTxnKey1 == IMS_NULL) || (pTxnKey2 == IMS_NULL))
     {
@@ -4187,7 +4187,7 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType)
     return acTimerType[eTimerType];
 }
 
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimeoutData* pData)
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN const SipTimeoutData* pData)
 {
     if (pData == IMS_NULL)
     {
@@ -4208,7 +4208,7 @@ GLOBAL void InvokeTimerCallback(
     pfnCallback(pData, pvExtraParam);
 }
 
-GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext)
+GLOBAL void SetTimerValues(IN const SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext)
 {
     if ((pTv == IMS_NULL) || (pTxnContext->m_pSipTimerContext == IMS_NULL))
     {

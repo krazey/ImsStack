@@ -30,7 +30,7 @@ public:
     SipAck& operator=(IN const SipAck&) = delete;
 
 public:
-    IMS_BOOL IsSameTransaction(IN ::SipTxnKey* pTxnKey) const;
+    IMS_BOOL IsSameTransaction(IN const ::SipTxnKey* pTxnKey) const;
     inline IMS_BOOL IsStrayAck() const { return m_piTimer == IMS_NULL; }
     void RetransmitMessage();
 

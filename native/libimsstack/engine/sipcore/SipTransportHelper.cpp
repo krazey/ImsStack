@@ -232,7 +232,7 @@ SipSocket* SipTransportHelper::CreateStreamSocket(
 }
 
 PUBLIC
-void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN ISipSocketListener* piListener)
+void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketListener* piListener)
 {
     if (pSocket == IMS_NULL)
     {

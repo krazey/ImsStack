@@ -826,7 +826,7 @@ void SipConnectionNotifier::ControlUdpClientReference(IN IMS_SINT32 nControl)
 
 PRIVATE
 IMS_BOOL SipConnectionNotifier::CreateClientInitiatedConnection(
-        IN IMS_SINT32 nPort, IN SipSocketAddress* pFarEnd)
+        IN IMS_SINT32 nPort, IN const SipSocketAddress* pFarEnd)
 {
     SipTransportHelper* pTransportHelper = GetTransportHelper();
     SipSocketAddress objNearEnd;

@@ -111,7 +111,7 @@ void SipAckPackage::AddAck(IN SipClientTransactionState* pCtState, IN IMS_SINT32
 }
 
 PUBLIC
-IMS_BOOL SipAckPackage::NotifyStray2xx(IN ::SipTxnKey* pTxnKey)
+IMS_BOOL SipAckPackage::NotifyStray2xx(IN const ::SipTxnKey* pTxnKey)
 {
     for (IMS_UINT32 i = 0; i < m_objAcks.GetSize(); ++i)
     {

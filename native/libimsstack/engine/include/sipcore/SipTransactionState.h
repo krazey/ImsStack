@@ -80,8 +80,8 @@ public:
 protected:
     virtual SipTransactionState* Clone();
 
-    IMS_BOOL Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* pTimerValues);
-    void SetTimerValues(IN SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext);
+    IMS_BOOL Send(IN ::SipMessage* pSipMsg, IN const SipTimerValues* pTimerValues);
+    void SetTimerValues(IN const SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext);
     void SetFlowControlOption(IN const SipMethod& objMethod);
 
 public:

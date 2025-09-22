@@ -41,7 +41,7 @@ public:
     {
         return m_strCallId.Equals(strCallId);
     }
-    IMS_BOOL NotifyStray2xx(IN ::SipTxnKey* pTxnKey);
+    IMS_BOOL NotifyStray2xx(IN const ::SipTxnKey* pTxnKey);
 
 private:
     // ISipObject class

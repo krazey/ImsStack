@@ -71,7 +71,7 @@ public:
     // ISipClientConnection interface
     IMS_RESULT InitAck();
     SipClientConnection* InitCancel();
-    IMS_RESULT InitRequest(IN const AString& strMethod, IN SipConnectionNotifier* pScn);
+    IMS_RESULT InitRequest(IN const AString& strMethod, IN const SipConnectionNotifier* pScn);
     IMS_RESULT Receive(IN IMS_SLONG nTimeout = 0);
     IMS_RESULT SetCredentials(IN ImsList<Credential>& objCredentials);
     IMS_RESULT SetCredentials(IN const Credential& objCredential);

@@ -317,7 +317,7 @@ void SipSocket::NotifyPongReceived()
 
 PROTECTED
 void SipSocket::SetSocketOptionForTcpMaxSeg(
-        IN INetworkConnection* piConnection, IN const IpAddress& objLocalIp)
+        IN const INetworkConnection* piConnection, IN const IpAddress& objLocalIp)
 {
     // MSS(Max Segment Size) for TCP
     IMS_SINT32 nMss = piConnection->GetMtu();
