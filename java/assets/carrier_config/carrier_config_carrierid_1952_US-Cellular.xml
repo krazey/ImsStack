@@ -21,6 +21,11 @@
 
     <!-- Aos -->
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
+    <int-array name="ims.rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="3">
+        <item value="0"/>
+        <item value="2"/>
+        <item value="9"/>
+    </int-array>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
     <int name="imsemergency.ereg_retry_max_cnt_int" value="-1"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
