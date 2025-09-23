@@ -1302,7 +1302,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsReasonInfo reasonInfo =  ImsCallUtils.createReasonInfo(code, 0, "", 0);
             if (checkAndSetImmediateCallEndReason(reasonInfo)) {
-                setState(ImsCallSessionImplBase.State.TERMINATED);
                 return;
             }
 
