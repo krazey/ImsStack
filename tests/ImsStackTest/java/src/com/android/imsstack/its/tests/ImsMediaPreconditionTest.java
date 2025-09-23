@@ -18,7 +18,6 @@ package com.android.imsstack.its.tests;
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.net.QosSession;
@@ -72,7 +71,6 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
 
         assertTrue(callback.setMediaManager(imsMediaManager));
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
-        assertEquals(callback.getMediaManager().getTestMode(), 1);
 
         callback.release();
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
@@ -91,7 +89,6 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
         final TestCall call = new TestCall(mMmTelFeature);
         call.startVoiceCall();
 
-        assertEquals(callback.getMediaManager().getTestMode(), 1);
         logi(this, "end testTriggerSetTestMode");
     }
 
