@@ -183,7 +183,7 @@ Message* ServiceMethod::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
+    const PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
@@ -225,7 +225,7 @@ ImsList<Message*> ServiceMethod::GetPreviousResponses(IN IMS_SINT32 nServiceMeth
         return ImsList<Message*>();
     }
 
-    PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
+    const PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
@@ -492,7 +492,7 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /*= IMS_TRUE*/) 
 {
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pService->GetSipProfile()))
     {
-        ISipMessage* piSipMsg = IMS_NULL;
+        const ISipMessage* piSipMsg = IMS_NULL;
 
         // Outgoing request message
         if (bRequest)
@@ -856,7 +856,7 @@ ISipConnection* ServiceMethod::GetConnection(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
+    const PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->m_piSc == IMS_NULL)
     {

@@ -41,8 +41,7 @@ SessionParameter::SessionParameter(IN const SessionParameter& other) :
 {
     for (IMS_UINT32 i = 0; i < other.m_objMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
-
+        const SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
         m_objMediaParams.Append(new SdpMediaParameter(*pMediaParam));
     }
 }
@@ -68,8 +67,7 @@ SessionParameter& SessionParameter::operator=(IN const SessionParameter& other)
 
         for (IMS_UINT32 i = 0; i < other.m_objMediaParams.GetSize(); ++i)
         {
-            SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
-
+            const SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
             m_objMediaParams.Append(new SdpMediaParameter(*pMediaParam));
         }
     }
@@ -883,15 +881,15 @@ void SessionParameter::RemovePreconditionsIfNotSupport(
 
     for (IMS_UINT32 i = 0; i < objPeerMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter* pPeerMediaParam = objPeerMediaParams.GetAt(i);
+        const SdpMediaParameter* pPeerMediaParam = objPeerMediaParams.GetAt(i);
 
         if (pPeerMediaParam == IMS_NULL)
         {
             continue;
         }
 
-        SdpPrecondition* pCurrent = pPeerMediaParam->GetPrecondition(SdpAttribute::CURR);
-        SdpPrecondition* pDesired = pPeerMediaParam->GetPrecondition(SdpAttribute::DES);
+        const SdpPrecondition* pCurrent = pPeerMediaParam->GetPrecondition(SdpAttribute::CURR);
+        const SdpPrecondition* pDesired = pPeerMediaParam->GetPrecondition(SdpAttribute::DES);
 
         if ((pCurrent != IMS_NULL) || (pDesired != IMS_NULL))
         {

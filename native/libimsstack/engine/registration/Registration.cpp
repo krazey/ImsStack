@@ -203,7 +203,7 @@ IMS_BOOL Registration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor
     m_pStateTracker->SetSubscriberId(strSubsId);
     m_pStateTracker->SetEmergencyRegistration(bEmergency);
 
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
     if (piCc != IMS_NULL)
     {
         m_bLenientToCheckContactUriOfRegInfo = piCc->GetBoolean(
@@ -268,7 +268,7 @@ IMS_BOOL Registration::HasActiveBindings() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsActiveBinding())
         {
@@ -284,7 +284,7 @@ IMS_BOOL Registration::IsAllBindingsRemoved() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (!pContact->IsEmpty())
         {
@@ -437,7 +437,7 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
     piScc->Close();
     m_piOngoingScc = IMS_NULL;
 
-    ISipMessage* piSipMsg = GetPreviousResponse();
+    const ISipMessage* piSipMsg = GetPreviousResponse();
 
     // Handle the response except for 401/407
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
@@ -647,7 +647,7 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IpAddress& obj
     // Set user-info field
     pNewContact->SetAor(m_pStateTracker->GetAor());
 
-    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
+    const SipProfile* pProfile = m_pStateTracker->GetSipProfile();
     // Set "+sip.instance" parameter
     IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pProfile);
 
@@ -799,7 +799,7 @@ PRIVATE VIRTUAL IMS_BOOL Registration::IsBindingsUpdated() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsBindingsUpdated())
         {
@@ -1333,7 +1333,7 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
     if (m_bActiveBindingsRestorationEnabled)
     {
         NetworkService* pNetworkService = NetworkService::GetNetworkService();
-        INetworkConnection* piConnection =
+        const INetworkConnection* piConnection =
                 pNetworkService->FindConnection(m_pStateTracker->GetIpAddress());
 
         // Checks if the data connection is lost or not...
@@ -1362,7 +1362,7 @@ PRIVATE VIRTUAL void Registration::AddObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -1377,7 +1377,7 @@ PRIVATE VIRTUAL void Registration::RemoveObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -1477,7 +1477,7 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
         // Reset the flags after the transaction completed
         SetSubState(SUB_STATE_IDLE);
 
-        ISipMessage* piSipMsg = GetPreviousResponse();
+        const ISipMessage* piSipMsg = GetPreviousResponse();
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
@@ -1671,9 +1671,9 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
     }
 
     // Check the 'state' & 'event' reg info.
-    RegInfo* pRegInfo =
+    const RegInfo* pRegInfo =
             ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
-    IRegInfoRegistration* piRegInfoReg = IMS_NULL;
+    const IRegInfoRegistration* piRegInfoReg = IMS_NULL;
 
     if (pRegInfo == IMS_NULL)
     {
@@ -1715,7 +1715,7 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
         {
             for (IMS_UINT32 j = 0; j < m_objContacts.GetSize(); ++j)
             {
-                RegContact* pContact = m_objContacts.GetAt(j);
+                const RegContact* pContact = m_objContacts.GetAt(j);
 
                 if (pContact == IMS_NULL)
                 {
@@ -2213,7 +2213,7 @@ const SubscriberConfig* Registration::GetSubsConfig() const
 {
     const SubscriberConfig* pSubsConfig = IMS_NULL;
     const AString& strSubsId = m_pStateTracker->GetSubscriberId();
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     if (strSubsId.GetLength() > 0)
     {
@@ -2244,7 +2244,7 @@ IMS_BOOL Registration::IsAkaSupported(IN const SubscriberConfig* pSubsConfig) co
     }
     else
     {
-        IUsim* piUsim = PhoneInfoService::GetPhoneInfoService()->GetUsim(GetSlotId());
+        const IUsim* piUsim = PhoneInfoService::GetPhoneInfoService()->GetUsim(GetSlotId());
 
         if (piUsim != IMS_NULL)
         {
@@ -2275,8 +2275,8 @@ IMS_BOOL Registration::IsFlowControlRequired() const
     // - "outbound" option tag in Require header in 200 OK (to REGISTER)
     // If all the conditions are true, the provisioned flow control port is selected.
     // Otherwise, Sip::PORT_UNSPECIFIED is selected.
-    ISipMessage* piRequest = GetPreviousRequest();
-    ISipMessage* piResponse = GetPreviousResponse();
+    const ISipMessage* piRequest = GetPreviousRequest();
+    const ISipMessage* piResponse = GetPreviousResponse();
     const RegContact* pRegContact = m_pStateTracker->GetPreferredContact();
 
     if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()) && (piRequest != IMS_NULL) &&
@@ -2945,7 +2945,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
 
             for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
             {
-                RegContact* pContact = m_objContacts.GetAt(i);
+                const RegContact* pContact = m_objContacts.GetAt(i);
 
                 strContact = pContact->ToString();
 
@@ -2980,7 +2980,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
 
         for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
         {
-            RegContact* pContact = m_objContacts.GetAt(i);
+            const RegContact* pContact = m_objContacts.GetAt(i);
 
             if (bExpiresHeaderRequired)
             {
@@ -3028,7 +3028,8 @@ IMS_RESULT Registration::SetExpiresHeader(
     }
     else
     {
-        RegContact* pPreferredContact = m_objContacts.IsEmpty() ? IMS_NULL : m_objContacts.GetAt(0);
+        const RegContact* pPreferredContact =
+                m_objContacts.IsEmpty() ? IMS_NULL : m_objContacts.GetAt(0);
 
         if ((pPreferredContact != IMS_NULL) &&
                 (pPreferredContact->GetInitialExpires() !=
@@ -3533,7 +3534,7 @@ void Registration::UpdateCSeqNumber(IN const ISipMessage* piSipMsg)
 PRIVATE
 void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSipMsg)
 {
-    IRegContact* piRegContact = GetPreferredContact();
+    const IRegContact* piRegContact = GetPreferredContact();
 
     if (piRegContact == IMS_NULL)
     {

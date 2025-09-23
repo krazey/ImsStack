@@ -62,7 +62,7 @@ PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(
 PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::UpdateOnMessageReceived(
         IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {

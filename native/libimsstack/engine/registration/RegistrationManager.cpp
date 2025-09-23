@@ -120,7 +120,7 @@ PUBLIC VIRTUAL void RegistrationManager::DestroyRegistration(
 
     for (IMS_UINT32 i = 0; i < m_objRegistrations.GetSize(); ++i)
     {
-        IRegistration* piTmpReg = m_objRegistrations.GetValueAt(i);
+        const IRegistration* piTmpReg = m_objRegistrations.GetValueAt(i);
 
         if (piTmpReg->IsNetworkInterworkingRequired() != piReg->IsNetworkInterworkingRequired())
         {

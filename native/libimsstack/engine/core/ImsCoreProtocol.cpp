@@ -38,7 +38,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         IN const AString& strAppId, IN const AString& strServiceId, IN const AString& strUserId)
 {
-    IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+    const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
     IMS_SINT32 nSlotId = (piThread == IMS_NULL) ? IMS_SLOT_0 : piThread->GetSlotId();
 
     IMS_TRACE_D("CoreService - appId=%s, serviceId=%s, slotId=%d", strAppId.GetStr(),
@@ -49,7 +49,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         IMS_TRACE_D("CoreService - userId=%s", SipDebug::GetUri1(strUserId).GetStr(), 0, 0);
     }
 
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     if (!pConfigMngr->IsAppConfigured(strAppId, nSlotId))
     {
@@ -83,7 +83,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
 
     // Check if the service is already created
     IServiceManager* piServiceMngr = ImsCoreContext::GetInstance()->GetServiceManager();
-    Service* pService = piServiceMngr->GetService(nSlotId, strAppId, strServiceId);
+    const Service* pService = piServiceMngr->GetService(nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)
     {

@@ -26,7 +26,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PUBLIC GLOBAL IRegBinding* ServiceResolver::GetRegBinding(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId)
 {
-    Service* pService = ImsCoreContext::GetInstance()->GetServiceManager()->GetService(
+    const Service* pService = ImsCoreContext::GetInstance()->GetServiceManager()->GetService(
             nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)
@@ -48,7 +48,7 @@ PUBLIC GLOBAL ImsList<IRegBinding*> ServiceResolver::GetRegBindings(IN IMS_SINT3
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
     {
-        Service* pService = objServices.GetAt(i);
+        const Service* pService = objServices.GetAt(i);
 
         if (pService != IMS_NULL)
         {

@@ -83,7 +83,7 @@ PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::ConnectReferMethod(IN IServiceMethod* 
 
     if (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::BYE))
     {
-        SessionImpl* pSessionImpl = DYNAMIC_CAST(SessionImpl*, piServiceMethod);
+        const SessionImpl* pSessionImpl = DYNAMIC_CAST(SessionImpl*, piServiceMethod);
 
         pMethod = pSessionImpl->GetSession();
     }
@@ -178,7 +178,7 @@ PRIVATE VIRTUAL void ReferenceImpl::OnReference_Terminated(IN Reference* pRefere
 
 PRIVATE VIRTUAL void ReferenceImpl::OnNotification_Delivered(IN ServiceMethod* pMethod)
 {
-    Reference* pReference = DYNAMIC_CAST(Reference*, pMethod);
+    const Reference* pReference = DYNAMIC_CAST(Reference*, pMethod);
 
     if (m_pReference != pReference)
     {
@@ -198,7 +198,7 @@ PRIVATE VIRTUAL void ReferenceImpl::OnNotification_Delivered(IN ServiceMethod* p
 PRIVATE VIRTUAL void ReferenceImpl::OnNotification_DeliveryFailed(
         IN ServiceMethod* pMethod, IN IMS_SINT32 nStatusCode)
 {
-    Reference* pReference = DYNAMIC_CAST(Reference*, pMethod);
+    const Reference* pReference = DYNAMIC_CAST(Reference*, pMethod);
 
     if (m_pReference != pReference)
     {

@@ -427,7 +427,7 @@ IMS_RESULT RegParameter::FormHeaders(
     {
         for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
         {
-            ISipMessageBodyPart* piBodyPart = m_objBodyParts.GetAt(i);
+            const ISipMessageBodyPart* piBodyPart = m_objBodyParts.GetAt(i);
 
             if (piBodyPart != IMS_NULL)
             {
@@ -1208,7 +1208,7 @@ PRIVATE GLOBAL const ImsSubscriberInfo* RegParameter::GetImsSubscriberInfo(IN IM
         IN const SipAddress& objAor, IN const AString& strSubsId /*= AString::ConstNull()*/)
 {
     const SubscriberConfig* pSubscriberConfig = IMS_NULL;
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     if (strSubsId.GetLength() > 0)
     {

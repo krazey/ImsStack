@@ -325,7 +325,7 @@ IMS_BOOL FeatureCaps::FormContactFeatures(
         pCc->AddFeatures(m_pFeaturesForAllMessage);
     }
 
-    CallerCapability* pFeatures = IMS_NULL;
+    const CallerCapability* pFeatures = IMS_NULL;
 
     // REQUEST-CAPS
     if (bRequest)
@@ -479,7 +479,7 @@ IMS_BOOL FeatureCaps::HasAdditionalFeatures(IN IMS_SINT32 nSipMethod, IN IMS_BOO
         return IMS_TRUE;
     }
 
-    CallerCapability* pFeatures = IMS_NULL;
+    const CallerCapability* pFeatures = IMS_NULL;
 
     // REQUEST-CAPS
     if (bRequest)

@@ -628,7 +628,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::SendRequestToChallenge(IN ISipClientCo
 
 PRIVATE VIRTUAL void RegSubscription::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("___ Response (%s) received at the state, %d", objMethod.ToString().GetStr(),
@@ -887,7 +887,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMsgNotify = piSsc->GetMessage();
+    const ISipMessage* piSipMsgNotify = piSsc->GetMessage();
 
     if (piSipMsgNotify == IMS_NULL)
     {
@@ -917,7 +917,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
 
         for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
         {
-            ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+            const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
 
             if (piBodyPart == IMS_NULL)
             {
@@ -1104,7 +1104,7 @@ PRIVATE
 void RegSubscription::CheckDialogNCallListener()
 {
     // Check if the dialog is terminated or not
-    ISipDialog* piDialog = GetDialog();
+    const ISipDialog* piDialog = GetDialog();
 
     if (piDialog != IMS_NULL)
     {
@@ -1405,7 +1405,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
     if (piSipMsg->GetMethod().Equals(SipMethod::NOTIFY))
     {
-        ISipDialog* piDialog = GetDialog();
+        const ISipDialog* piDialog = GetDialog();
         const ISipHeader* piHeader =
                 (piDialog != IMS_NULL) ? piDialog->GetContactHeader() : IMS_NULL;
 
@@ -1491,7 +1491,7 @@ IMS_BOOL RegSubscription::SetHeaders(IN_OUT ISipMessage*& piSipMsg)
         }
         else
         {
-            ISipDialog* piDialog = GetDialog();
+            const ISipDialog* piDialog = GetDialog();
             const ISipHeader* piContactHeader =
                     (piDialog != IMS_NULL) ? piDialog->GetContactHeader() : IMS_NULL;
             const SipAddress* pContact =
@@ -1541,7 +1541,7 @@ IMS_BOOL RegSubscription::SubscribeOnImplicitRefresh()
     }
 
     ISipMessage* piSipMsg = piScc->GetMessage();
-    ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
+    const ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
 
     if (piInitialSipMsg != IMS_NULL)
     {
@@ -1688,7 +1688,7 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSubscription* pRegSub)
 {
     AString strAor = pRegSub->GetUserAor()->ToString();
-    RegStateTracker* pStateTracker = pRegSub->m_pRegStateTracker.Get();
+    const RegStateTracker* pStateTracker = pRegSub->m_pRegStateTracker.Get();
     ISipClientConnection* piScc = IMS_NULL;
     IMS_BOOL bOverwriteTarget = IMS_FALSE;
     IMS_SINT32 nTransportExt = pStateTracker->GetTransportExt();

@@ -42,7 +42,7 @@ IMS_BOOL sipUrnHelper_IsUuidFallbackRequiredWhenNoImei(IN IMS_SINT32 /*nSlotId*/
 PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType)
 {
     AStringBuffer objUrn(64);
-    IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
+    const IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
     AString strImei;
 
     if (piDeviceInfo != IMS_NULL)

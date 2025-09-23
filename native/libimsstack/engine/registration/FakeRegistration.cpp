@@ -135,7 +135,7 @@ IMS_BOOL FakeRegistration::HasActiveBindings() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsActiveBinding())
         {
@@ -151,7 +151,7 @@ IMS_BOOL FakeRegistration::IsAllBindingsRemoved() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (!pContact->IsEmpty())
         {
@@ -264,7 +264,7 @@ PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress&
     // Set user-info field
     pNewContact->SetAor(m_pStateTracker->GetAor());
 
-    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
+    const SipProfile* pProfile = m_pStateTracker->GetSipProfile();
     // Set "+sip.instance" parameter
     IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pProfile);
 
@@ -413,7 +413,7 @@ PRIVATE VIRTUAL IMS_BOOL FakeRegistration::IsBindingsUpdated() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsBindingsUpdated())
         {
@@ -656,7 +656,7 @@ PRIVATE VIRTUAL void FakeRegistration::AddObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -671,7 +671,7 @@ PRIVATE VIRTUAL void FakeRegistration::RemoveObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {

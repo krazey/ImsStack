@@ -327,7 +327,7 @@ IMS_BOOL CallerCapability::HasFeature(IN const Feature* pFeature) const
         return IMS_FALSE;
     }
 
-    FeatureSet* pFeatureSet = Lookup(pFeature->GetTag());
+    const FeatureSet* pFeatureSet = Lookup(pFeature->GetTag());
 
     if (pFeatureSet == IMS_NULL)
     {

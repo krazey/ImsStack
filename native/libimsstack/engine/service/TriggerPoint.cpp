@@ -576,7 +576,7 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSdpInfo(IN const ImsList<AString>
         return SPT_MATCH_OK;
     }
 
-    ISipMessageBodyPart* pBodyPart = piSipMsg->GetSdpBodyPart();
+    const ISipMessageBodyPart* pBodyPart = piSipMsg->GetSdpBodyPart();
 
     if (pBodyPart == IMS_NULL)
     {

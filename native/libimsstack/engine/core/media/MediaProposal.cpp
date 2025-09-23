@@ -89,14 +89,14 @@ IMS_SINT32 MediaProposal::GetDirection() const
         return Media::DIRECTION_NONE;
     }
 
-    MediaDescriptor* pDescriptor = GetMediaDescriptor();
+    const MediaDescriptor* pDescriptor = GetMediaDescriptor();
 
     if (pDescriptor == IMS_NULL)
     {
         return Media::DIRECTION_NONE;
     }
 
-    SdpMediaParameter* pMediaParam = GetPeerMediaParameter(pDescriptor->GetMid());
+    const SdpMediaParameter* pMediaParam = GetPeerMediaParameter(pDescriptor->GetMid());
 
     if (pMediaParam == IMS_NULL)
     {

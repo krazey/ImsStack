@@ -602,7 +602,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::InitInstance()
 
 PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);
@@ -690,11 +690,11 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
                 }
             }
 
-            IMessage* piMessage = GetPreviousRequest(IMessage::SUBSCRIPTION_SUBSCRIBE);
+            const IMessage* piMessage = GetPreviousRequest(IMessage::SUBSCRIPTION_SUBSCRIBE);
 
             if (piMessage != IMS_NULL)
             {
-                ISipMessage* piPreviousSIPMsg = piMessage->GetMessage();
+                const ISipMessage* piPreviousSIPMsg = piMessage->GetMessage();
 
                 if (piPreviousSIPMsg != IMS_NULL)
                 {
@@ -795,7 +795,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Dialog_Compare(IN ISipServerConnection*
         if (GetState() == STATE_PENDING)
         {
             IMS_SINT32 nOperation = m_pSubState->GetOperation();
-            ISipClientConnection* piScc = IMS_NULL;
+            const ISipClientConnection* piScc = IMS_NULL;
 
             IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
 
@@ -1101,7 +1101,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Refreshable_RefreshStarted()
         }
 
         ISipMessage* piSipMsg = piScc->GetMessage();
-        ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
+        const ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
 
         if (piInitialSipMsg != IMS_NULL)
         {
@@ -1170,7 +1170,7 @@ PRIVATE
 void Subscription::CheckDialogNCallListener()
 {
     // Check if the dialog is terminated or not
-    ISipDialog* piDialog = GetDialog();
+    const ISipDialog* piDialog = GetDialog();
 
     if (piDialog != IMS_NULL)
     {

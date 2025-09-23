@@ -74,7 +74,7 @@ void Reference::NotifierState::RemoveScc(IN const ISipClientConnection* piScc)
 {
     for (IMS_UINT32 i = 0; i < m_objSccs.GetSize(); ++i)
     {
-        ISipClientConnection* piTempScc = m_objSccs.GetAt(i);
+        const ISipClientConnection* piTempScc = m_objSccs.GetAt(i);
 
         if (piScc == piTempScc)
         {
@@ -386,7 +386,7 @@ IMS_RESULT Reference::SetReplaces(IN const AString& strSessionId)
         m_pReplaces = IMS_NULL;
     }
 
-    Replaces* pTmpReplaces =
+    const Replaces* pTmpReplaces =
             ImsCoreContext::GetInstance()->GetCallControlHelper()->GetReplacesFromSessionId(
                     strSessionId);
 
@@ -1054,7 +1054,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
         // In case of an early NOTIFY received ...
         if (GetState() == STATE_PROCEEDING)
         {
-            ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
+            const ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
 
             IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
 

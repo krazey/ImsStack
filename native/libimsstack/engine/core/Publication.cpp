@@ -492,7 +492,7 @@ PRIVATE VIRTUAL IMS_BOOL Publication::InitInstance()
 
 PRIVATE VIRTUAL void Publication::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);

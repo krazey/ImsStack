@@ -286,7 +286,7 @@ void Method::CheckNCreateDialog(IN const ISipConnection* piSc, IN IMS_BOOL bDest
 
     if (m_piDialog == IMS_NULL)
     {
-        ISipDialog* piTmpDlg = piSc->GetDialog();
+        const ISipDialog* piTmpDlg = piSc->GetDialog();
 
         if ((piTmpDlg->GetState() == ISipDialog::STATE_EARLY) ||
                 (piTmpDlg->GetState() == ISipDialog::STATE_CONFIRMED))
@@ -620,7 +620,7 @@ IMS_BOOL Method::SetChallengeNCredentials(IN ISipClientConnection* piScc)
 PROTECTED
 void Method::UpdateRemoteUserIds(IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = (piSc != IMS_NULL) ? piSc->GetMessage() : IMS_NULL;
+    const ISipMessage* piSipMsg = (piSc != IMS_NULL) ? piSc->GetMessage() : IMS_NULL;
 
     if (piSipMsg == IMS_NULL)
     {

@@ -115,7 +115,7 @@ IMS_UINT32 ServiceFilterCriteria::Evaluate(IN const ISipMessage* piSipMsg) const
 {
     for (IMS_UINT32 i = 0; i < m_objTriggerPoints.GetSize(); ++i)
     {
-        TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(i);
+        const TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(i);
 
         if (pTriggerPoint == IMS_NULL)
         {

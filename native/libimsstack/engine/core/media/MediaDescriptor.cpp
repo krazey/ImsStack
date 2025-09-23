@@ -155,7 +155,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN const AString& strAt
 
 PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -180,7 +180,7 @@ PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes() const
 
 PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetBandwidthInfo() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -205,7 +205,7 @@ PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetBandwidthInfo() const
 
 PRIVATE VIRTUAL AString MediaDescriptor::GetMediaDescription() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -227,7 +227,7 @@ PRIVATE VIRTUAL AString MediaDescriptor::GetMediaDescription() const
 
 PRIVATE VIRTUAL AString MediaDescriptor::GetMediaTitle() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -601,7 +601,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -652,7 +652,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
 PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -718,7 +718,7 @@ PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes(
 PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -813,7 +813,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
 PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetBandwidth(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -847,7 +847,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetBandwidth(
 
 PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetDirection() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -862,7 +862,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetDirection() const
 
 PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -879,7 +879,7 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
 
 PRIVATE VIRTUAL const ImsList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1246,7 +1246,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN const SdpMediaForm
     {
         case SdpMediaFormat::TYPE_RTP:
         {
-            SdpAvCodec* pAvCodec = DYNAMIC_CAST(SdpAvCodec*, pMediaFormat);
+            const SdpAvCodec* pAvCodec = DYNAMIC_CAST(SdpAvCodec*, pMediaFormat);
             SdpAvCodec* pTmpAvCodec = DYNAMIC_CAST(SdpAvCodec*, pTmpMediaFormat);
 
             if ((pAvCodec == IMS_NULL) || (pTmpAvCodec == IMS_NULL))
@@ -1401,7 +1401,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
 
 PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1418,7 +1418,7 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() 
 
 PRIVATE VIRTUAL IpAddress MediaDescriptor::GetLocalAddress() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1451,7 +1451,7 @@ PRIVATE VIRTUAL IpAddress MediaDescriptor::GetLocalAddress() const
 
 PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetLocalPort() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1477,7 +1477,7 @@ PRIVATE VIRTUAL IpAddress MediaDescriptor::GetRemoteAddress() const
 
 PRIVATE VIRTUAL const AString& MediaDescriptor::GetRemoteAddressAsString() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1496,7 +1496,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetRemoteAddressAsString() const
 
 PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetRemotePort() const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1511,7 +1511,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetRemotePort() const
 PRIVATE VIRTUAL const SdpPrecondition* MediaDescriptor::GetPrecondition(
         IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType /*= SdpPrecondition::TYPE_QOS*/) const
 {
-    SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
+    const SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {

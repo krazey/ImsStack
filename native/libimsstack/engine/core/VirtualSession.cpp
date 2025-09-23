@@ -689,7 +689,7 @@ IMS_SINT32 VirtualSession::HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg)
                 ((nOaState == SdpOaState::STATE_OFFER_RECEIVED) ||
                         (nOaState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
         {
-            SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+            const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
 
             if (pSessionParam != IMS_NULL)
             {
@@ -964,7 +964,7 @@ IMS_BOOL VirtualSession::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 {
-    SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+    const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
 
     if (nMediaCount != 0)

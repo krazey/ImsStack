@@ -257,7 +257,7 @@ IMS_BOOL RemoteCapabilities::IsAppSubTypeSupported(IN const AString& strAppSubTy
 
     for (IMS_UINT32 i = 0; i < m_objAppSubTypes.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = m_objAppSubTypes.GetAt(i);
+        const FeatureSet* pFeatureSet = m_objAppSubTypes.GetAt(i);
 
         if (pFeatureSet->Contains(strAppSubType))
         {
@@ -281,7 +281,7 @@ IMS_BOOL RemoteCapabilities::IsEventSupported(IN const AString& strEvent) const
 
     for (IMS_UINT32 i = 0; i < m_objEvents.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = m_objEvents.GetAt(i);
+        const FeatureSet* pFeatureSet = m_objEvents.GetAt(i);
 
         if (pFeatureSet->Contains(strEvent))
         {
@@ -305,7 +305,7 @@ IMS_BOOL RemoteCapabilities::IsIariSupported(IN const AString& strIari) const
 
     for (IMS_UINT32 i = 0; i < m_objIaris.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = m_objIaris.GetAt(i);
+        const FeatureSet* pFeatureSet = m_objIaris.GetAt(i);
 
         if (pFeatureSet->Contains(strIari))
         {
@@ -329,7 +329,7 @@ IMS_BOOL RemoteCapabilities::IsIcsiSupported(IN const AString& strIcsi) const
 
     for (IMS_UINT32 i = 0; i < m_objIcsis.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = m_objIcsis.GetAt(i);
+        const FeatureSet* pFeatureSet = m_objIcsis.GetAt(i);
 
         if (pFeatureSet->Contains(strIcsi))
         {
@@ -355,7 +355,7 @@ IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN const AString& strFeatureT
 
     for (IMS_UINT32 i = 0; i < m_objFeatureTags.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = m_objFeatureTags.GetAt(i);
+        const FeatureSet* pFeatureSet = m_objFeatureTags.GetAt(i);
 
         if (pFeatureSet->Contains(&objFeature))
         {

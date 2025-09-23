@@ -90,7 +90,7 @@ void RegInfo::AddListener(IN IRegInfoListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
+        const IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -106,7 +106,7 @@ void RegInfo::RemoveListener(IN const IRegInfoListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
+        const IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {

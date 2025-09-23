@@ -115,7 +115,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN const AString& strConne
         return IMS_FALSE;
     }
 
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     // Gets the configured application ids and checks if the app id exists or not
     AStringArray objAppIds = pConfigMngr->GetAppIds(GetSlotId());
@@ -744,7 +744,7 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     bIsContactGruu = IMS_FALSE;
 
     AString strContact(AString::ConstNull());
-    Service* pService = GetService();
+    const Service* pService = GetService();
     IMS_BOOL bGruuSupported =
             SipConfigProxy::IsGruuConfigured(GetSlotId(), pService->GetSipProfile());
 
@@ -837,7 +837,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
     {
         const Service* pService = objServices.GetAt(i);
-        AppConfig* pAppConfig = pService->GetAppConfig();
+        const AppConfig* pAppConfig = pService->GetAppConfig();
 
         // Collects SDP fields from IMS registry for session-level properties
         CollectSdpFieldsFromRegistry(
@@ -1008,7 +1008,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
 PRIVATE
 void Capabilities::HandleCapabilities(IN const ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Gets the Contact headers
     ImsList<AString> objContacts = piSipMsg->GetHeaders(ISipHeader::CONTACT_ANY);

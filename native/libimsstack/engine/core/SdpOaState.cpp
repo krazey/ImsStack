@@ -909,7 +909,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
 
     // In case of any pending SDP answer, the message may not include the SDP message body.
     // So, in here, checks the message if it includes the body or not
-    ISipMessageBodyPart* piBodyPart = piSipMsg->GetSdpBodyPart();
+    const ISipMessageBodyPart* piBodyPart = piSipMsg->GetSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {

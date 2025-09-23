@@ -486,7 +486,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
     AString strRemoteUserId;
 
     // Gets the remote user identity;

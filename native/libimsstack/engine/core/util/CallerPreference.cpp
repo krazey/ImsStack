@@ -552,7 +552,7 @@ PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN const AppConfig*
 
     for (IMS_SINT32 i = 0; i < nNumberOfHeaders; ++i)
     {
-        PreferenceHeader* pHeader = objHeaders.GetAt(i);
+        const PreferenceHeader* pHeader = objHeaders.GetAt(i);
 
         if (pHeader == IMS_NULL)
         {

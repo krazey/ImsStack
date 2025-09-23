@@ -63,7 +63,7 @@ PUBLIC VIRTUAL void ServiceManager::DetachService(IN Service* pService)
 
     for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); ++i)
     {
-        Service* pTmpService = m_objServices.GetAt(i);
+        const Service* pTmpService = m_objServices.GetAt(i);
 
         if (pTmpService->Equals(pService))
         {

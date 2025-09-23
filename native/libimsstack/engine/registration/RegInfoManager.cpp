@@ -242,7 +242,7 @@ void RegInfoManager::RemoveRegInfoParser(IN RegInfoParser*& pParser)
 
     for (IMS_UINT32 i = 0; i < m_objParsers.GetSize(); ++i)
     {
-        RegInfoParser* pTmpParser = m_objParsers.GetAt(i);
+        const RegInfoParser* pTmpParser = m_objParsers.GetAt(i);
 
         if (pParser == pTmpParser)
         {

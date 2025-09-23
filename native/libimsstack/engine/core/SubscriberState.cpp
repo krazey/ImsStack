@@ -588,7 +588,7 @@ IMS_BOOL SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipM
         {
             if (GetState() == STATE_SUBSCRIBING)
             {
-                EventPackage* pEventPackage = GetEventPackage();
+                const EventPackage* pEventPackage = GetEventPackage();
 
                 if (pEventPackage->GetDuration() <= 0)
                 {

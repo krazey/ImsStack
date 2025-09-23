@@ -307,7 +307,7 @@ IMS_RESULT Session::Accept()
             // Current view will be used when the following conditions match:
             // 1) re-INVITE w/o SDP received and no responses.
             // 2) re-INVITE w/o SDP received and any provisional response w/o SDP sent.
-            Message* pRequest = GetPreviousRequest(IMessage::SESSION_UPDATE);
+            const Message* pRequest = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
             if (pRequest != IMS_NULL && pRequest->GetMessage()->GetSdpBodyPart() == IMS_NULL)
             {
@@ -315,7 +315,7 @@ IMS_RESULT Session::Accept()
 
                 for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
                 {
-                    Message* pResponse = objResponses.GetAt(i);
+                    const Message* pResponse = objResponses.GetAt(i);
 
                     if (pResponse != IMS_NULL &&
                             pResponse->GetMessage()->GetSdpBodyPart() != IMS_NULL)
@@ -718,7 +718,7 @@ ISipClientConnection* Session::CreateTransaction(IN const SipMethod& objMethod)
 PUBLIC
 const ISipHeader* Session::GetContactHeader() const
 {
-    ISipDialog* piDialog = GetDialog();
+    const ISipDialog* piDialog = GetDialog();
 
     if (piDialog != IMS_NULL)
     {
@@ -863,14 +863,14 @@ IMS_BOOL Session::IsFinalResponseReceivedForInitialInviteRequest() const
 PUBLIC
 IMS_BOOL Session::IsReliableProvResponseSupported() const
 {
-    Message* pMessage = GetPreviousRequest(IMessage::SESSION_START);
+    const Message* pMessage = GetPreviousRequest(IMessage::SESSION_START);
 
     if (pMessage == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMsg = pMessage->GetMessage();
+    const ISipMessage* piSipMsg = pMessage->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
@@ -1524,7 +1524,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
         nServiceMethod = IMessage::SESSION_UPDATE;
     }
 
-    Message* pMessage = GetPreviousRequest(nServiceMethod);
+    const Message* pMessage = GetPreviousRequest(nServiceMethod);
 
     if (pMessage == IMS_NULL)
     {
@@ -1532,7 +1532,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSipMsg = pMessage->GetMessage();
+    const ISipMessage* piSipMsg = pMessage->GetMessage();
 
     // Do nothing if the handling method is not INVITE
     if (!piSipMsg->GetMethod().Equals(SipMethod::INVITE))
@@ -2236,7 +2236,8 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
             if (bTerminated)
             {
                 IMS_SINT32 nStatusCode = 0;
-                IMessage* piMessage = pForkedSession->GetPreviousResponse(IMessage::SESSION_START);
+                const IMessage* piMessage =
+                        pForkedSession->GetPreviousResponse(IMessage::SESSION_START);
 
                 if (piMessage != IMS_NULL)
                 {
@@ -2454,7 +2455,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
 
 PROTECTED VIRTUAL IMS_BOOL Session::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
 
     IMS_TRACE_D("___>>> INCOMING SESSION RECEIVED <<<___", 0, 0, 0);
 
@@ -2764,7 +2765,7 @@ PROTECTED VIRTUAL void Session::NotifySipError(
                 // CALLER_PREFERENCE_MANAGER
                 if (nOldState == STATE_RENEGOTIATING)
                 {
-                    IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+                    const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
                     if (piMessage != IMS_NULL)
                     {
@@ -2850,11 +2851,12 @@ PROTECTED VIRTUAL void Session::NotifySipError(
                     }
                     else
                     {
-                        IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_CANCEL);
+                        const IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_CANCEL);
 
                         if (piRequest != IMS_NULL)
                         {
-                            IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_CANCEL);
+                            const IMessage* piResponse =
+                                    GetPreviousResponse(IMessage::SESSION_CANCEL);
 
                             if ((piResponse == IMS_NULL) ||
                                     !SipStatusCode::IsFinal(piResponse->GetStatusCode()))
@@ -3155,7 +3157,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection*
     }
 #endif
 
-    ISipServerConnection* piSscInvite = IMS_NULL;
+    const ISipServerConnection* piSscInvite = IMS_NULL;
     IMS_SINT32 nState = GetState();
 
     if (nState == STATE_NEGOTIATING)
@@ -3207,7 +3209,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection*
 
 PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConnection* piSscCancel)
 {
-    ISipMessage* piSipMsg = piSscCancel->GetMessage();
+    const ISipMessage* piSipMsg = piSscCancel->GetMessage();
 
     if (!piSipMsg->GetMethod().Equals(SipMethod::CANCEL))
     {
@@ -3221,8 +3223,9 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
     if (!GetService()->ValidateRequestUri(objRequestUri))
     {
         IMS_BOOL bRUriMatched = IMS_FALSE;
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
-        ISipMessage* piOrigSipMsg = (piMessage != IMS_NULL) ? piMessage->GetMessage() : IMS_NULL;
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
+        const ISipMessage* piOrigSipMsg =
+                (piMessage != IMS_NULL) ? piMessage->GetMessage() : IMS_NULL;
 
         if (piOrigSipMsg != IMS_NULL)
         {
@@ -3348,7 +3351,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_Compare(IN ISipServerConnection* piSs
 
 PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection* piSsc)
 {
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("Dialog_NotifyRequest: %s request received", objMethod.ToString().GetStr(), 0, 0);
@@ -3991,13 +3994,13 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(
 PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUpdate(IN ISipServerConnection* piSsc)
 {
     // 4 Check if we have sent a session refresh request
-    IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+    const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
     if (piMessage != IMS_NULL)
     {
         if (piMessage->GetMethod().Equals(SipMethod::INVITE))
         {
-            IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_UPDATE);
+            const IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_UPDATE);
 
             // 140818, CONDITION_ACK_WAITING_STATE
             // It needs to properly handle UPDATE request(session refresh) before receiving ACK.
@@ -4128,7 +4131,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUpdate(IN ISipClientConnec
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
         // CALLER_PREFERENCE_MANAGER
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
         if (piMessage != IMS_NULL)
         {
@@ -4541,7 +4544,7 @@ IMS_SINT32 Session::HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg)
                 ((nOaState == SdpOaState::STATE_OFFER_RECEIVED) ||
                         (nOaState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
         {
-            SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+            const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
 
             if (pSessionParam != IMS_NULL)
             {
@@ -4572,8 +4575,8 @@ IMS_SINT32 Session::HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg)
 PROTECTED
 IMS_BOOL Session::IsInviteFinalResponseReceived(IN IMS_SINT32 nServiceMethod) const
 {
-    Message* pMessage = GetPreviousResponse(nServiceMethod);
-    ISipMessage* piSipMsg = (pMessage != IMS_NULL) ? pMessage->GetMessage() : IMS_NULL;
+    const Message* pMessage = GetPreviousResponse(nServiceMethod);
+    const ISipMessage* piSipMsg = (pMessage != IMS_NULL) ? pMessage->GetMessage() : IMS_NULL;
 
     return (piSipMsg != IMS_NULL) && piSipMsg->GetMethod().Equals(SipMethod::INVITE) &&
             (piSipMsg->GetStatusCode() >= SipStatusCode::SC_200);
@@ -4745,7 +4748,7 @@ IMS_BOOL Session::SetSdpBodyPartFromCurrentView(IN_OUT ISipMessage*& piSipMsg)
 PROTECTED
 IMS_BOOL Session::SetSdpBodyPartFromRefusedView(IN_OUT ISipMessage*& piSipMsg)
 {
-    SessionParameter* pRefusedView =
+    const SessionParameter* pRefusedView =
             (m_pOaState != IMS_NULL) ? m_pOaState->GetRefusedView() : IMS_NULL;
 
     if (pRefusedView == IMS_NULL)
@@ -5188,7 +5191,7 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
     // It's an optimization for the race condition handling between ACK and re-INVITE.
     if ((nState == STATE_RENEGOTIATING) || (nState == STATE_REESTABLISHING))
     {
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
         if ((piMessage != IMS_NULL) && piMessage->GetMethod().Equals(SipMethod::INVITE) &&
                 (piMessage->GetState() == IMessage::STATE_RECEIVED))
@@ -5206,7 +5209,7 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
         }
     }
 
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
     // INVITE_TXN_HANDLING_CORRECTION
@@ -5282,7 +5285,7 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
         Stop2xxRetransmission();
 
         IMS_BOOL bInitialSession = IMS_TRUE;
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
         if ((piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::INVITE) &&
                     piMessage->GetState() == IMessage::STATE_RECEIVED) ||
@@ -5619,7 +5622,7 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
     else if ((nState == STATE_REESTABLISHING) &&
             (GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_SENT))
     {
-        ISipMessage* piSipMsg = piSsc->GetMessage();
+        const ISipMessage* piSipMsg = piSsc->GetMessage();
 
         if ((piSipMsg != IMS_NULL) && (piSipMsg->GetSdpBodyPart() != IMS_NULL))
         {
@@ -5727,7 +5730,7 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
     // Even though ACK waiting timer is expired, it will be ignored in J180 layer.
     if (nState == STATE_ESTABLISHING)
     {
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
 
         if ((piMessage != IMS_NULL) && (piMessage->GetState() == IMessage::STATE_RECEIVED))
         {
@@ -5740,7 +5743,7 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
     }
     else if (nState == STATE_REESTABLISHING)
     {
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
         if ((piMessage != IMS_NULL) && piMessage->GetMethod().Equals(SipMethod::INVITE) &&
                 (piMessage->GetState() == IMessage::STATE_RECEIVED))
@@ -5807,7 +5810,7 @@ IMS_RESULT Session::HandleRequestToRefer(IN ISipServerConnection* piSsc)
         return IMS_SUCCESS;
     }
 
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
 
     if (piSipMsg->GetHeaderCount(ISipHeader::REFER_TO) != 1)
     {
@@ -5952,11 +5955,11 @@ IMS_RESULT Session::HandleResponseToCancel(IN const ISipClientConnection* piScc)
         }
         else
         {
-            IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_CANCEL);
+            const IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_CANCEL);
 
             if (piRequest != IMS_NULL)
             {
-                IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_CANCEL);
+                const IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_CANCEL);
 
                 if ((piResponse == IMS_NULL) ||
                         !SipStatusCode::IsFinal(piResponse->GetStatusCode()))
@@ -5996,7 +5999,7 @@ IMS_RESULT Session::HandleResponseToCancel(IN const ISipClientConnection* piScc)
 PRIVATE
 IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
     if (SipStatusCode::IsProvisional(nStatusCode) || SipStatusCode::IsFinalSuccess(nStatusCode))
@@ -6044,7 +6047,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
     }
 
     // CALLER_PREFERENCE_MANAGER
-    IMessage* piMessage = GetPreviousRequest(nServiceMethod);
+    const IMessage* piMessage = GetPreviousRequest(nServiceMethod);
 
     if (piMessage != IMS_NULL)
     {
@@ -6501,7 +6504,7 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
     }
 
     // Add a specific header for ACK request (Require, ...)
-    Message* pMessage = GetPreviousRequest(nServiceMethod);
+    const Message* pMessage = GetPreviousRequest(nServiceMethod);
 
     if (pMessage != IMS_NULL)
     {
@@ -6813,7 +6816,7 @@ IMS_RESULT Session::SendRequestToInviteOn422Received()
         return IMS_FAILURE;
     }
 
-    IMessage* piPreviousRequest = GetPreviousRequest(nServiceMethod);
+    const IMessage* piPreviousRequest = GetPreviousRequest(nServiceMethod);
 
     if (piPreviousRequest == IMS_NULL)
     {
@@ -7290,7 +7293,7 @@ void Session::TerminateOnReNegotiating()
     }
     else
     {
-        Message* pMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+        const Message* pMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
         if (pMessage != IMS_NULL)
         {
@@ -7444,7 +7447,7 @@ void Session::CleanupMedia()
 PRIVATE
 IMS_BOOL Session::CreateMediaFromSdp()
 {
-    SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+    const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
 
     if (nMediaCount != 0)
@@ -7580,7 +7583,7 @@ IMS_BOOL Session::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
 PRIVATE
 IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 {
-    SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+    const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
 
     if (nMediaCount != 0)
@@ -7696,7 +7699,7 @@ void Session::CreateRemoteMediaCapabilities(IN const ISipMessage* piSipMsg)
 
     if (nStatusCode == SipStatusCode::SC_488 || nStatusCode == SipStatusCode::SC_606)
     {
-        ISipMessageBodyPart* piBodyPart = piSipMsg->GetSdpBodyPart();
+        const ISipMessageBodyPart* piBodyPart = piSipMsg->GetSdpBodyPart();
         const ByteArray& objSdp =
                 (piBodyPart != IMS_NULL) ? piBodyPart->GetContent() : ByteArray::ConstNull();
 

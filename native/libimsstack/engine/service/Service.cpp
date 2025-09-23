@@ -763,7 +763,7 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piS
     if ((nStatusCode > SipStatusCode::SC_100) && (nStatusCode < SipStatusCode::SC_300))
     {
         IMS_SINT32 nDialogState = ISipDialog::STATE_INIT;
-        ISipDialog* piDialog = piSsc->GetDialog();
+        const ISipDialog* piDialog = piSsc->GetDialog();
 
         if (piDialog != IMS_NULL)
         {
@@ -955,7 +955,7 @@ const AString& Service::GetAssociatedUri(IN IMS_SINT32 nScheme) const
     {
         for (IMS_UINT32 i = 0; i < m_objAuthorizedUserIds.GetSize(); ++i)
         {
-            ISipHeader* piHeader = m_objAuthorizedUserIds.GetAt(i);
+            const ISipHeader* piHeader = m_objAuthorizedUserIds.GetAt(i);
 
             if (piHeader == IMS_NULL)
             {
@@ -982,7 +982,7 @@ const AString& Service::GetAssociatedUri(IN IMS_SINT32 nScheme) const
     {
         for (IMS_UINT32 i = 0; i < m_objAuthorizedUserIds.GetSize(); ++i)
         {
-            ISipHeader* piHeader = m_objAuthorizedUserIds.GetAt(i);
+            const ISipHeader* piHeader = m_objAuthorizedUserIds.GetAt(i);
 
             if (piHeader == IMS_NULL)
             {
@@ -1781,7 +1781,7 @@ PUBLIC GLOBAL IMS_BOOL Service::ValidateReferTo(
 PROTECTED VIRTUAL void Service::Close()
 {
     // Destroy a service-specific configurations .....
-    SipConfig* pSipConfig =
+    const SipConfig* pSipConfig =
             const_cast<SipConfig*>(ConfigurationManager::GetInstance()->GetSipConfig(GetSlotId()));
 
     if (pSipConfig != IMS_NULL)
@@ -2133,7 +2133,7 @@ void Service::SetGruuOptionTagInMidDialog(
 PRIVATE
 void Service::CreateDefaultPublicUserId()
 {
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     // Read a default public user identity
     if (!m_bProvisionedUserId)

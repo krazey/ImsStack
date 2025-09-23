@@ -441,7 +441,7 @@ IMS_BOOL SipConnectionNotifierManagerPrivate::IsConnectionNotifierPresent(
 
     for (IMS_UINT32 i = 0; i < m_objConnectionNotifiers.GetSize(); ++i)
     {
-        ISipConnectionNotifier* piTmpScn = m_objConnectionNotifiers.GetValueAt(i);
+        const ISipConnectionNotifier* piTmpScn = m_objConnectionNotifiers.GetValueAt(i);
 
         if (piTmpScn == IMS_NULL)
         {
@@ -671,7 +671,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::GetCalleePreferenceSupp
             continue;
         }
 
-        ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
+        const ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
 
         if (pSfc == IMS_NULL)
         {
@@ -922,7 +922,7 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::IsCalleePreferenceS
             continue;
         }
 
-        ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
+        const ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
 
         if (pSfc == IMS_NULL)
         {
@@ -1075,7 +1075,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
             continue;
         }
 
-        AppConfig* pAppConfig = pService->GetAppConfig();
+        const AppConfig* pAppConfig = pService->GetAppConfig();
         const CoreServiceConfig* pServiceConfig = pService->GetServiceConfig();
 
         CreateExtraFeatures(pService, objExtraFeatures);
@@ -1208,7 +1208,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIf
             continue;
         }
 
-        ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
+        const ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
 
         if (pSfc != IMS_NULL)
         {
@@ -1299,7 +1299,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::SetServerHeader(
     }
 
     IMS_SINT32 nSlotId = piSsc->GetSlotId();
-    SipProfile* pProfile = piScn->GetSipProfile();
+    const SipProfile* pProfile = piScn->GetSipProfile();
 
     if (!SipConfigProxy::IsUserAgentConfigured(nSlotId, pProfile))
     {

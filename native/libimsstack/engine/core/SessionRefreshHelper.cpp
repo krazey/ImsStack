@@ -77,7 +77,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
         return IMS_FALSE;
     }
 
-    ISipDialog* piDialog = piSc->GetDialog();
+    const ISipDialog* piDialog = piSc->GetDialog();
 
     if (piDialog == IMS_NULL)
     {
@@ -304,7 +304,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
         return IMS_FALSE;
     }
 
-    ISipDialog* piDialog = piSc->GetDialog();
+    const ISipDialog* piDialog = piSc->GetDialog();
 
     if (piDialog == IMS_NULL)
     {
@@ -594,7 +594,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::SendRefreshRequest(IN ISipClient
 PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
         IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
@@ -617,7 +617,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
         return RESULT_SUCCESS;
     }
 
-    ISipDialog* piDialog = piSc->GetDialog();
+    const ISipDialog* piDialog = piSc->GetDialog();
 
     // Any session refresh info. which comes in an early UPDATE SHOULD be ignored.
     if (piDialog != IMS_NULL)
@@ -822,14 +822,14 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
 
 PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageSent(IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
         return RESULT_ERROR;
     }
 
-    ISipDialog* piDialog = piSc->GetDialog();
+    const ISipDialog* piDialog = piSc->GetDialog();
 
     if (piDialog == IMS_NULL)
     {
@@ -965,7 +965,7 @@ PUBLIC
 IMS_BOOL SessionRefreshHelper::IsSessionTimerSupported(
         IN const ISipConnection* piSc, IN IMS_BOOL bSent)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
@@ -1029,14 +1029,14 @@ IMS_BOOL SessionRefreshHelper::IsSessionTimerSupported(
 PUBLIC
 void SessionRefreshHelper::StopSessionTimer(IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
         return;
     }
 
-    ISipDialog* piDialog = piSc->GetDialog();
+    const ISipDialog* piDialog = piSc->GetDialog();
 
     if (piDialog == IMS_NULL)
     {
@@ -1058,7 +1058,7 @@ void SessionRefreshHelper::StopSessionTimer(IN const ISipConnection* piSc)
 PUBLIC
 void SessionRefreshHelper::UpdateTimerOptionOnRequestReceived(IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
@@ -1070,7 +1070,7 @@ void SessionRefreshHelper::UpdateTimerOptionOnRequestReceived(IN const ISipConne
         return;
     }
 
-    ISipDialog* piDialog = piSc->GetDialog();
+    const ISipDialog* piDialog = piSc->GetDialog();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     // Checks if the initial INVITE/re-INVITE/UPDATE request supports
@@ -1237,7 +1237,7 @@ IMS_BOOL SessionRefreshHelper::IsSessionRefreshRequired(IN const ISipConnection*
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
@@ -1297,7 +1297,7 @@ PRIVATE
 void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
         IN IMS_BOOL bTimerOptionSupported, IN IMS_BOOL bSent /*= IMS_FALSE*/)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     // Gets the Session-Expires header field from SIP message
     // and sets the session interval and refresher.

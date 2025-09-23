@@ -681,7 +681,7 @@ void RegBinding::RestoreTransportResourceForClientInitiatedConnection()
         return;
     }
 
-    IRegParameter* piRegParam = m_piRegEx->GetParameter();
+    const IRegParameter* piRegParam = m_piRegEx->GetParameter();
 
     if (piRegParam == IMS_NULL)
     {

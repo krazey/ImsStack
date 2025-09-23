@@ -48,7 +48,7 @@ const ByteArray& PageMessage::GetContent() const
         return ByteArray::ConstNull();
     }
 
-    Message* pMessage = GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    const Message* pMessage = GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
     if (pMessage == IMS_NULL)
     {
@@ -58,7 +58,7 @@ const ByteArray& PageMessage::GetContent() const
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
-    ISipMessage* piSipMsg = pMessage->GetMessage();
+    const ISipMessage* piSipMsg = pMessage->GetMessage();
     ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
 
     if (objBodyParts.IsEmpty())
@@ -66,7 +66,7 @@ const ByteArray& PageMessage::GetContent() const
         return ByteArray::ConstNull();
     }
 
-    ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+    const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
 
     if (piBodyPart == IMS_NULL)
     {
@@ -85,7 +85,7 @@ AString PageMessage::GetContentType() const
         return AString::ConstNull();
     }
 
-    Message* pMessage = GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    const Message* pMessage = GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
     if (pMessage == IMS_NULL)
     {
@@ -95,7 +95,7 @@ AString PageMessage::GetContentType() const
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
-    ISipMessage* piSipMsg = pMessage->GetMessage();
+    const ISipMessage* piSipMsg = pMessage->GetMessage();
     ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
 
     if (objBodyParts.IsEmpty())
@@ -103,7 +103,7 @@ AString PageMessage::GetContentType() const
         return AString::ConstNull();
     }
 
-    ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+    const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
 
     if (piBodyPart == IMS_NULL)
     {
