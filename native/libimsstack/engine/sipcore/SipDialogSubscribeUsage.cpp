@@ -229,7 +229,7 @@ PUBLIC VIRTUAL AString SipDialogSubscribeUsage::ToString() const
 PUBLIC VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::UpdateUsageDetails(
         IN const SipMessageInfo& objMsgInfo)
 {
-    ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
+    const ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
     const SipMethod& objMethod = objMsgInfo.GetMethod();
 
     // Update Subscription-State header

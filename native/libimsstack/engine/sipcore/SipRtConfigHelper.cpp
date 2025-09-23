@@ -413,7 +413,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
     {
         case SipRtConfig::CONFIG_I_LOG_MASK:
         {
-            SipRtConfig::LogMask* pLogMask = DYNAMIC_CAST(SipRtConfig::LogMask*, pParam);
+            const SipRtConfig::LogMask* pLogMask = DYNAMIC_CAST(SipRtConfig::LogMask*, pParam);
 
             if (pLogMask == IMS_NULL)
             {
@@ -522,7 +522,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
         case SipRtConfig::CONFIG_I_IPSEC_SA:
         {
-            SipRtConfig::IpSecSa* pIpSecSa = DYNAMIC_CAST(SipRtConfig::IpSecSa*, pParam);
+            const SipRtConfig::IpSecSa* pIpSecSa = DYNAMIC_CAST(SipRtConfig::IpSecSa*, pParam);
 
             if (pIpSecSa == IMS_NULL)
             {

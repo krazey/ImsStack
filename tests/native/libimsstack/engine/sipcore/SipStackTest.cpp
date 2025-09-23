@@ -82,7 +82,7 @@ TEST_F(SipStackTest, SetTimerValues)
     objTv.SetValue(SipTimerValues::TIMER_K, nTK);
 
     SipTxnContext objTxnContext;
-    SipTxnTimerValues* pTxnTimerValues = objTxnContext.m_pSipTimerContext->m_pTxnSipTxnTimers;
+    const SipTxnTimerValues* pTxnTimerValues = objTxnContext.m_pSipTimerContext->m_pTxnSipTxnTimers;
     SipTxnContext* pTxnContext = &objTxnContext;
     SipStack::SetTimerValues(&objTv, pTxnContext);
 

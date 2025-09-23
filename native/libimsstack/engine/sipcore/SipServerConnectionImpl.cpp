@@ -31,7 +31,7 @@ SipServerConnectionImpl::SipServerConnectionImpl(IN SipServerConnection* pSsc) :
 {
     m_pSsc->SetErrorListener(this);
 
-    SipDialog* pDialog = m_pSsc->GetDialog();
+    const SipDialog* pDialog = m_pSsc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {

@@ -465,7 +465,7 @@ IMS_BOOL SipAuHelperPrivate::AddHeader(IN_OUT ::SipMessage*& pSipMsg)
 
     for (IMS_UINT32 i = 0; i < m_objResponses.GetSize(); ++i)
     {
-        SipGenericResponse* pResponse = m_objResponses.GetAt(i);
+        const SipGenericResponse* pResponse = m_objResponses.GetAt(i);
 
         if (pResponse == IMS_NULL)
         {

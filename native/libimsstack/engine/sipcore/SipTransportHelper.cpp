@@ -253,7 +253,7 @@ void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketList
 
         if ((nType == SipSocket::TYPE_TCP_CLIENT) || (nType == SipSocket::TYPE_TCP_CLIENT_OTHER))
         {
-            SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
+            const SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
 
             if ((pStreamSocket->IsKeepAliveTimerActive() ||
                         pStreamSocket->IsKeepAlivePermanent()) &&
@@ -828,7 +828,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_DataReceived(
         IpAddress objTmpIp;
         IMS_UINT32 nTmpPort;
         IMS_SINT32 nTransportProtocol = SipTransportAddress::PROTOCOL_TCP;
-        SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
+        const SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
 
         if ((pStreamSocket != IMS_NULL) && pStreamSocket->IsSecureSocket())
         {
@@ -897,7 +897,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_PassiveClosed(IN SipSocket
 
     for (IMS_UINT32 i = 0; i < m_objSockets.GetSize(); ++i)
     {
-        SipSocket* pTmpSocket = m_objSockets.GetAt(i);
+        const SipSocket* pTmpSocket = m_objSockets.GetAt(i);
 
         if (pSocket == pTmpSocket)
         {

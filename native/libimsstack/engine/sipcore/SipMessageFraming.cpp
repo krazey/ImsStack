@@ -211,7 +211,7 @@ void SipMessageFraming::ParseContentLength()
     const IMS_CHAR acCF_CLEN[2] = {SipHeaderName::CF_CONTENT_LENGTH, '\0'};
 
     IMS_CHAR* pStart = reinterpret_cast<IMS_CHAR*>(m_objMessageBuffer.GetData() + m_nOffset);
-    IMS_CHAR* pEnd = pStart + m_objMessageBuffer.GetLength() - m_nOffset;  // over 1 byte
+    const IMS_CHAR* pEnd = pStart + m_objMessageBuffer.GetLength() - m_nOffset;  // over 1 byte
     IMS_CHAR* pCurrentPos;
     IMS_CHAR* pTemp;
 

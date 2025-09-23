@@ -1700,7 +1700,7 @@ void SipDialogState::AddPendingRemoteTarget(IN const SipMessageInfo& objMsgInfo)
     // Checks if the pending remote target is already present or not
     for (IMS_UINT32 i = 0; i < m_objPendingRemoteTargets.GetSize(); ++i)
     {
-        PendingRemoteTarget* pRemoteTarget = m_objPendingRemoteTargets.GetAt(i);
+        const PendingRemoteTarget* pRemoteTarget = m_objPendingRemoteTargets.GetAt(i);
 
         if (pRemoteTarget == IMS_NULL)
         {

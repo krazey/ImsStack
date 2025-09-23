@@ -208,7 +208,7 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
 
 PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddLocalTimezone(IN_OUT AString& strHeader)
 {
-    ISystemTime* piSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
+    const ISystemTime* piSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
 
     if (piSysTime != IMS_NULL)
     {
@@ -232,7 +232,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddCountryParameter(
 
     ILocationInfo* piLocationInfo =
             PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);
-    ILocationProperties* piLocation = (piLocationInfo != IMS_NULL)
+    const ILocationProperties* piLocation = (piLocationInfo != IMS_NULL)
             ? piLocationInfo->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY)
             : IMS_NULL;
 
@@ -288,7 +288,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
     // P-Last-Access-Network-Info header -- starts
     ////////
     const AString strPlaniHeaderName("P-Last-Access-Network-Info");
-    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
+    const ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
     const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strPlaniHeaderName);
 
     do
@@ -369,7 +369,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPcni(
     }
 
     const AString strHeaderName("P-Cellular-Network-Info");
-    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
+    const ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
     const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strHeaderName);
 
     if (pHeader == IMS_NULL)
@@ -432,7 +432,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId
 
     if (!bCniHeaderRequired)
     {
-        ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
+        const ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
         const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strHeaderName);
 
         if (pHeader == IMS_NULL)
@@ -509,7 +509,7 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsMessageForN11OrEmergency(
 
     if (piHeader != IMS_NULL)
     {
-        SipAddress* pAddress = piHeader->GetSipAddress();
+        const SipAddress* pAddress = piHeader->GetSipAddress();
         const SipAddress::UserInfoPart* pUserInfoPart =
                 pAddress != IMS_NULL ? pAddress->GetUserInfoPart() : IMS_NULL;
         const AString& strUser =

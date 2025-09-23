@@ -698,7 +698,7 @@ GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen
         pMessage = new ::SipMessage();
     }
 
-    SIP_CHAR* pszSipBuffer = reinterpret_cast<SIP_CHAR*>(const_cast<IMS_BYTE*>(pBuffer));
+    const SIP_CHAR* pszSipBuffer = reinterpret_cast<SIP_CHAR*>(const_cast<IMS_BYTE*>(pBuffer));
 
     if (nOptions == SipPrivate::OPTIONS_D_PARTIAL)
     {
@@ -781,7 +781,7 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN ::SipMessage* pMessage)
         }
 
         IMS_CHAR* pszCompBodyStart = reinterpret_cast<IMS_CHAR*>(objBodyPart.GetData());
-        IMS_CHAR* pszCompBodyEnd = pszCompBodyStart + objBodyPart.GetLength() - 1;
+        const IMS_CHAR* pszCompBodyEnd = pszCompBodyStart + objBodyPart.GetLength() - 1;
         IMS_UINT32 nCompLength = objBodyPart.GetLength();
 
         if (pMessage->DecodeMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) ==
@@ -833,7 +833,7 @@ GLOBAL IMS_BOOL EncodeHeaderBody(
 
     if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
     {
-        SipUnknownHeader* pUnknownHeader = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
+        const SipUnknownHeader* pUnknownHeader = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
         strHeaderBody = pUnknownHeader->GetHeaderValue();
         return IMS_TRUE;
     }
@@ -2066,7 +2066,7 @@ GLOBAL AString GetChallengeScheme(IN SipHeaderBase* pHeader)
 
     SIPStackError(EERR_NOERR);
 
-    SipAuthBase* pAuthHeader = DYNAMIC_CAST(SipAuthBase*, pHeader);
+    const SipAuthBase* pAuthHeader = DYNAMIC_CAST(SipAuthBase*, pHeader);
     AString strScheme = pAuthHeader->GetValue();
 
     return strScheme;
@@ -2200,7 +2200,7 @@ GLOBAL IMS_SINT32 GetHeaderCount(IN ::SipMessage* pMessage, IN IMS_SINT32 nType)
         return SIP_ONE;
     }
 
-    SipHeaderList* pHeaderList = DYNAMIC_CAST(SipHeaderList*, pHeader);
+    const SipHeaderList* pHeaderList = DYNAMIC_CAST(SipHeaderList*, pHeader);
     IMS_SINT32 nHeaderCount = pHeaderList->GetSize();
 
     pHeader->SipDelete();
@@ -2603,7 +2603,7 @@ GLOBAL AString GetSentByFromVia(IN SipHeaderBase* pHeader)
         return AString::ConstNull();
     }
 
-    SipViaHeader* pViaHeader = DYNAMIC_CAST(SipViaHeader*, pHeader);
+    const SipViaHeader* pViaHeader = DYNAMIC_CAST(SipViaHeader*, pHeader);
 
     if (pViaHeader == IMS_NULL)
     {
@@ -2923,7 +2923,7 @@ GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strNam
 
         for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            SipNameValue* pNameVal = pSipUri->GetUriParam(i);
+            const SipNameValue* pNameVal = pSipUri->GetUriParam(i);
 
             if (pNameVal == SIP_NULL)
             {
@@ -2941,7 +2941,7 @@ GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strNam
 
         for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            SipNameValue* pNameVal = pSipUri->GetHdrParam(i);
+            const SipNameValue* pNameVal = pSipUri->GetHdrParam(i);
 
             if (pNameVal == SIP_NULL)
             {

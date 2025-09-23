@@ -245,7 +245,7 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::SetHeader(
 
 PUBLIC VIRTUAL const ByteArray& SipConnection::GetContent() const
 {
-    SipMessageBodyPart* pBodyPart = m_pMessage->GetBodyPart();
+    const SipMessageBodyPart* pBodyPart = m_pMessage->GetBodyPart();
 
     if (pBodyPart == IMS_NULL)
     {
@@ -328,7 +328,7 @@ PROTECTED VIRTUAL void SipConnection::TransactionState_TimerExpired()
         }
         else
         {
-            ISipMessage* piMessage = GetMessage();
+            const ISipMessage* piMessage = GetMessage();
 
             pMessageTracker->NotifyMessageSent(objMethod, GetStatusCode(),
                     (piMessage != IMS_NULL) ? piMessage->GetHeader(ISipHeader::CALL_ID)
@@ -377,7 +377,7 @@ PROTECTED VIRTUAL void SipConnection::Transport_NotifyError(
         }
         else
         {
-            ISipMessage* piMessage = GetMessage();
+            const ISipMessage* piMessage = GetMessage();
 
             pMessageTracker->NotifyMessageSent(SipConnection::GetMethod(), GetStatusCode(),
                     (piMessage != IMS_NULL) ? piMessage->GetHeader(ISipHeader::CALL_ID)

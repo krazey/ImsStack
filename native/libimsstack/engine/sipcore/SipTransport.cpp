@@ -135,7 +135,7 @@ SipSocket* SipTransport::CreateTcpClientSocket()
         {
             if (SipRtConfigUtils::IsTcpPortRangeConfigured(GetSlotId()))
             {
-                SipPortManager* pPortMngr = SipPortManager::GetInstance();
+                const SipPortManager* pPortMngr = SipPortManager::GetInstance();
 
                 if (pPortMngr->IsPortCProvisioned())
                 {

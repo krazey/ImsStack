@@ -623,7 +623,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
         }
         else
         {
-            SipDialogState* pDialogState = m_pDialogEx->GetDialogState();
+            const SipDialogState* pDialogState = m_pDialogEx->GetDialogState();
             AString strToTag =
                     (pDialogState != IMS_NULL) ? pDialogState->GetLocalTag() : AString::ConstNull();
 
@@ -1090,7 +1090,7 @@ IMS_BOOL SipServerTransactionState::InitResponse(
     // HEADER_REQ_SESSION-ID
     else if (SipFeatures::IsHeaderSessionIdRequired(GetSlotId()))
     {
-        SipDialogState* pDState = m_pDialogEx->GetDialogState();
+        const SipDialogState* pDState = m_pDialogEx->GetDialogState();
         AString strSessionId = pDState->GetSessionId();
 
         if (strSessionId.GetLength() == 0 && objMethod.Equals(SipMethod::INVITE))

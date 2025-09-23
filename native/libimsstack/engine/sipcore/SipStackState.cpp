@@ -129,7 +129,7 @@ IMS_BOOL SipStackState::FetchTransaction(
         IN ::SipTxnKey* pKey, IN IMS_SINT32 nOption, OUT ::SipTxnKey*& pOutKey, OUT SipTxn*& pTxn)
 {
     LockGuard objLock(m_piLock);
-    SipStackTransaction* pTransaction = FindTransaction(pKey);
+    const SipStackTransaction* pTransaction = FindTransaction(pKey);
 
     if (pTransaction == IMS_NULL)
     {
