@@ -19,6 +19,7 @@
 #include "AString.h"
 #include "ImsMap.h"
 #include "INativeEnabler.h"
+#include "AosEnumOperators.h"
 
 #define TO_UINT32(e) (static_cast<IMS_UINT32>(e))
 
@@ -29,7 +30,7 @@ class IAosEmergencyListener;
 
 enum class AosReasonCode;
 enum class AosNetworkType;
-enum class AosCapability;
+enum class AosCapability : IMS_UINT32;
 enum class AosIsimState;
 enum class AosPhoneNumberRetryCommand;
 enum class AosRegRequestType;
@@ -535,7 +536,7 @@ enum class AosNetworkType
 /**
  * Capability
  */
-enum class AosCapability
+enum class AosCapability : IMS_UINT32
 {
     NONE = 0,
     VOICE = 1 << 0,
@@ -550,6 +551,8 @@ enum class AosCapability
     // Internal capabilities
     TEXT = 1 << 11
 };
+
+DEFINE_ENUM_BITMASK_OPERATORS_EX(AosCapability)
 
 /**
  * ISIM State
