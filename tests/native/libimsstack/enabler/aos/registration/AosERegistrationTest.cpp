@@ -450,6 +450,18 @@ TEST_F(AosERegistrationTest, StartWaitEmergencyNetworkTimerWhenNetworkIsNotReady
     EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
 }
 
+TEST_F(AosERegistrationTest, DoNotStartWaitEmergencyNetworkTimerEvenWhenNetworkIsNotReadyIfWlan)
+{
+    ON_CALL(m_objMockIAosNetTracker, GetMobileServiceState())
+            .WillByDefault(Return(INetworkWatcher::STATE_OUT_OF_SERVICE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->Start();
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 0);
+}
+
 TEST_F(AosERegistrationTest, ReportFailureWhenStartWithFakeModeForEmergencySms)
 {
     ON_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
