@@ -47,6 +47,20 @@ public:
     void NetTracker_StatusChanged() override;
 
 protected:
+    enum class VolteHysTimerBlock
+    {
+        NONE = 0,
+        VOPS = 0x1,
+        SSAC = 0x2
+    };
+
+    enum class VolteHysTimerCheckReason
+    {
+        VOPS_CHANGED = 1,
+        SSAC_CHANGED
+    };
+
+protected:
     void InitializeHoldingBlocksPolicy() override;
     void InitializeServiceBlock() override;
     void InitializeServiceFeature() override;
@@ -79,6 +93,7 @@ protected:
     void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
 
     void UpdateGGsmaRcsTelephonyFeatureTag();
+    void UpdateSsacState();
     void UpdateVopsState();
     void SetVopsInfo(IN IMS_UINT32 nState, IN const AString& strPlmn);
 
@@ -89,8 +104,8 @@ protected:
     IMS_BOOL IsInvalidMobileNetwork() const;
     IMS_BOOL IsPlmnBlockCondition() const;
     IMS_BOOL IsVoiceCapableOnWiFiCalling() const;
-    IMS_BOOL IsVolteHysTimerStartingCondition() const;
-    IMS_BOOL IsVolteHysTimerBlocked() const;
+    IMS_BOOL IsVolteHysTimerBlocked(IN VolteHysTimerBlock eBlock) const;
+    IMS_BOOL IsVolteHysTimerStartingCondition(IN VolteHysTimerCheckReason eReason) const;
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
@@ -99,8 +114,9 @@ protected:
     void ProcessCallTerminated();
     void ProcessVolteHysTimerExpired();
     void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn);
-    void ClearVolteHysTimerBlocks();
-    void SetVolteHysTimerBlock(IN IMS_UINT32 nBlock);
+
+    void SetVolteHysTimerBlock(IN VolteHysTimerBlock eBlock);
+    void ResetVolteHysTimerBlock(IN VolteHysTimerBlock eBlock);
 
     // Timer
     IMS_BOOL StartVolteHysTimer(IN IMS_UINT32 nDuration);
@@ -120,14 +136,6 @@ protected:
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    enum
-    {
-        VOLTE_HYS_TIMER_BLOCK_NONE = 0,
-        VOLTE_HYS_TIMER_BLOCK_VOPS_PLMN_CHANGED = 0x1,
-        VOLTE_HYS_TIMER_BLOCK_DATA_DISCONNECTED = 0x2,
-        VOLTE_HYS_TIMER_BLOCK_VOPS_IGNORED = 0x4
-    };
-
 protected:
     IImsRadio* m_piImsRadio;
     ITimer* m_piVolteHysTimer;
@@ -137,7 +145,8 @@ protected:
     IMS_BOOL m_bVopsIgnoredForVolteEnabled;
     IMS_UINT32 m_nVopsState;
     IMS_UINT32 m_nHoldingVopsState;
-    AString m_strVopsPlmn;
     IMS_UINT32 m_nVolteHysTimerBlocks;
+    AString m_strVopsPlmn;
+    AString m_strSsacPlmn;
 };
 #endif  // AOS_HANDLE_MTC_H_
