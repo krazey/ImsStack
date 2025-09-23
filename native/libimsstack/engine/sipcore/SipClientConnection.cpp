@@ -837,7 +837,7 @@ ISipAckPackage* SipClientConnection::GrabAck()
     {
         IMS_BOOL bSipConfigRequired = IMS_TRUE;
         IMS_SINT32 nAliveInterval = 2000 * 64;
-        SipTimerValues* pTimerValues = GetTransactionTimerValues();
+        const SipTimerValues* pTimerValues = GetTransactionTimerValues();
 
         if (pTimerValues != IMS_NULL)
         {
@@ -1147,7 +1147,7 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ForkedResponseR
     }
 
     // Copy the transaction timer values
-    SipTimerValues* pTimerValues = GetTransactionTimerValues();
+    const SipTimerValues* pTimerValues = GetTransactionTimerValues();
 
     if (pTimerValues != IMS_NULL)
     {
@@ -1359,7 +1359,7 @@ void SipClientConnection::StartTcpConnectionMonitoringTimer()
         return;
     }
 
-    SipTransport* pTransport = m_pCtState->GetSipTransport();
+    const SipTransport* pTransport = m_pCtState->GetSipTransport();
 
     if (pTransport == IMS_NULL ||
             pTransport->GetProtocol(SipTransport::TA_FAR) != SipTransportAddress::PROTOCOL_TCP)
@@ -1368,7 +1368,7 @@ void SipClientConnection::StartTcpConnectionMonitoringTimer()
     }
 
     m_piTcpConnectionMonitoringTimer = TimerService::GetTimerService()->CreateTimer();
-    SipTimerValues* pTimerValues = GetTransactionTimerValues();
+    const SipTimerValues* pTimerValues = GetTransactionTimerValues();
     IMS_SINT32 nDuration =
             (pTimerValues != IMS_NULL) ? pTimerValues->GetValue(SipTimerValues::TIMER_T1) : 0;
 

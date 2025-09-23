@@ -63,7 +63,7 @@ IMS_RESULT SipClientConnectionImpl::InitDialogRequest()
 
     if (m_pDialogImpl == IMS_NULL)
     {
-        SipDialog* pDialog = m_pScc->GetDialog();
+        const SipDialog* pDialog = m_pScc->GetDialog();
 
         if (pDialog == IMS_NULL)
         {
@@ -154,7 +154,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::Send()
     if (nResult == IMS_SUCCESS)
     {
         SipDialog* pDialog = (m_pDialogImpl != IMS_NULL) ? m_pDialogImpl->GetDialog() : IMS_NULL;
-        SipDialog* pSccDialog = m_pScc->GetDialog();
+        const SipDialog* pSccDialog = m_pScc->GetDialog();
 
         if ((pSccDialog != IMS_NULL) && (pDialog != IMS_NULL) &&
                 (pDialog->GetState() == SipDialog::STATE_CONFIRMED))
@@ -250,7 +250,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitRequest(
         IN const AString& strMethod, IN ISipConnectionNotifier* piScn)
 {
     SipConnectionNotifierImpl* pScnImpl = DYNAMIC_CAST(SipConnectionNotifierImpl*, piScn);
-    SipConnectionNotifier* pScn = IMS_NULL;
+    const SipConnectionNotifier* pScn = IMS_NULL;
 
     if (pScnImpl != IMS_NULL)
     {
@@ -262,7 +262,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitRequest(
         return IMS_FAILURE;
     }
 
-    SipDialog* pDialog = m_pScc->GetDialog();
+    const SipDialog* pDialog = m_pScc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
@@ -412,7 +412,7 @@ PRIVATE VIRTUAL void SipClientConnectionImpl::OnClientConnection_NotifyForkedRes
         return;
     }
 
-    SipDialog* pDialog = pForkedScc->GetDialog();
+    const SipDialog* pDialog = pForkedScc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {

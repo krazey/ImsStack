@@ -214,7 +214,8 @@ PUBLIC GLOBAL void SipUtils::Init(IN IMS_SINT32 nSlotId)
         if ((nSlotId >= IMS_SLOT_0) && (nSlotId < SystemConfig::GetActiveSimCount()))
         {
             // Generates pseudo-random 128-bit system secret key
-            IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
+            const IDeviceInfo* piDeviceInfo =
+                    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
             AString strImei;
 
             piDeviceInfo->GetDeviceId(nSlotId, strImei);

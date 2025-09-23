@@ -424,7 +424,7 @@ IMS_BOOL SipClientTransactionState::InitCancel(IN const SipClientTransactionStat
 
         if (!pInviteTState->m_pDialogEx.IsNull())
         {
-            SipDialogState* pDState = pInviteTState->m_pDialogEx->GetDialogState();
+            const SipDialogState* pDState = pInviteTState->m_pDialogEx->GetDialogState();
 
             if (pDState != IMS_NULL)
             {

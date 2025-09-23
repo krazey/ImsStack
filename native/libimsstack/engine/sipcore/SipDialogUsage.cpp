@@ -109,7 +109,7 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
     if (!SipStack::IsRequestMessage(pSipMsg))
     {
         IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
-        SipDialogState* pDialogState = m_pDialogBase->GetDialogState();
+        const SipDialogState* pDialogState = m_pDialogBase->GetDialogState();
 
         switch (nStatusCode)
         {

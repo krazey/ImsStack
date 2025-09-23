@@ -149,7 +149,7 @@ IMS_SINT32 SipSocket::RemoveListener(IN const ISipSocketListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
+        const ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener != IMS_NULL)
         {
@@ -169,7 +169,7 @@ void SipSocket::SetListener(IN ISipSocketListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
+        const ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener != IMS_NULL)
         {
@@ -385,7 +385,7 @@ void SipSocket::SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 n
         }
     }
 
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(GetSlotId());
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(GetSlotId());
 
     // IP-level QoS option
     if (pConfigHelper->IsItemConfigured(SipRtConfig::CONFIG_I_IP_QOS))
@@ -423,7 +423,7 @@ PROTECTED GLOBAL void SipSocket::SetSocketOption(IN IMS_SINT32 nSlotId, IN ISock
         IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
         IN IMS_SINT32 nSocketOption, IN const IMS_CHAR* pszOptionName)
 {
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
 
     if (pConfigHelper->IsItemConfigured(nConfigItem))
     {

@@ -583,7 +583,7 @@ void SipServerConnection::StartClosePendingTimer()
     }
 
     IMS_UINT32 nTimerDuration = 2 * 64 * 1000;  // 128s
-    SipTimerValues* pTimerValues = GetTransactionTimerValues();
+    const SipTimerValues* pTimerValues = GetTransactionTimerValues();
 
     if (pTimerValues != IMS_NULL)
     {
@@ -624,7 +624,7 @@ IMS_BOOL SipServerConnection::WaitForMessageSent()
 {
     if (m_nState == STATE_COMPLETED)
     {
-        SipTransport* pTransport = m_pStState->GetSipTransport();
+        const SipTransport* pTransport = m_pStState->GetSipTransport();
 
         if ((pTransport != IMS_NULL) && pTransport->HasPendingMessage())
         {

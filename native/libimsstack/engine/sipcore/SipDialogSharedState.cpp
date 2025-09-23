@@ -84,7 +84,7 @@ void SipDialogSharedState::RemoveDialog(IN SipDialogEx* pDialogEx)
 
     for (IMS_UINT32 i = 0; i < m_objDialogExs.GetSize(); ++i)
     {
-        SipDialogEx* pTempDialogEx = m_objDialogExs.GetAt(i);
+        const SipDialogEx* pTempDialogEx = m_objDialogExs.GetAt(i);
 
         if (pTempDialogEx->Equals(pDialogEx))
         {
@@ -142,7 +142,7 @@ IMS_BOOL SipDialogSharedState::HasMultipleDialogUsages() const
 
     for (IMS_UINT32 i = 0; i < m_objDialogExs.GetSize(); ++i)
     {
-        SipDialogEx* pDialogEx = m_objDialogExs.GetAt(i);
+        const SipDialogEx* pDialogEx = m_objDialogExs.GetAt(i);
 
         if (pDialogEx == IMS_NULL)
         {

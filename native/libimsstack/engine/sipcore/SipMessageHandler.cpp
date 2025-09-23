@@ -469,7 +469,7 @@ PRIVATE
 IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
         IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd)
 {
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     IMS_BOOL bAtLeastOneSaMatched = IMS_FALSE;
     const ImsList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
 
@@ -527,7 +527,7 @@ PRIVATE
 IMS_BOOL SipMessageHandler::IsIpSecSaMatchedForUs(
         IN IMS_SINT32 nSlotId, IN const IpAddress& objIp, IN IMS_SINT32 nPort)
 {
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     const ImsList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
 
     for (IMS_UINT32 i = 0; i < objIpSecSas.GetSize(); ++i)
@@ -596,7 +596,7 @@ IMS_BOOL SipMessageHandler::CheckRegContactValidity(IN IMS_SINT32 nSlotId, IN ::
     }
 
     AString strCallId = SipStack::GetHeaderAsString(pSipMsg, ISipHeader::CALL_ID);
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     const SipAddress* pContact = pConfigHelper->GetRegContactUri(strCallId);
 
     if (pContact == IMS_NULL)

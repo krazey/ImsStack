@@ -55,7 +55,7 @@ PRIVATE VIRTUAL void SipRoutingRejectNotifier::AddListener(IN ISipRoutingRejectL
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipRoutingRejectListener* piTmpListener = m_objListeners.GetAt(i);
+        const ISipRoutingRejectListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -76,7 +76,7 @@ PRIVATE VIRTUAL void SipRoutingRejectNotifier::RemoveListener(
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipRoutingRejectListener* piTmpListener = m_objListeners.GetAt(i);
+        const ISipRoutingRejectListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {

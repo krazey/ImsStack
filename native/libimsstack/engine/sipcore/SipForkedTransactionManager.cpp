@@ -114,7 +114,7 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
         const RcPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(i);
-        SipDialogState* pDState = pCtState->GetDialog()->GetDialogState();
+        const SipDialogState* pDState = pCtState->GetDialog()->GetDialogState();
 
         AString strLocalTag = pDState->GetLocalTag();
         AString strRemoteTag = pDState->GetRemoteTag();

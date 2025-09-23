@@ -204,7 +204,7 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogImpl::IsSameDialog(IN const ISipConnection* piS
         return IMS_FALSE;
     }
 
-    SipDialogImpl* pDialogImpl = DYNAMIC_CAST(SipDialogImpl*, piSc->GetDialog());
+    const SipDialogImpl* pDialogImpl = DYNAMIC_CAST(SipDialogImpl*, piSc->GetDialog());
 
     if (pDialogImpl == IMS_NULL)
     {

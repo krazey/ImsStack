@@ -165,7 +165,7 @@ PRIVATE VIRTUAL void SipConnectionNotifierImpl::RemoveErrorListener(
 
     for (IMS_UINT32 i = 0; i < m_objErrorListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener* piErrorListener = m_objErrorListeners.GetAt(i);
+        const ISipConnectionNotifierErrorListener* piErrorListener = m_objErrorListeners.GetAt(i);
 
         if (piErrorListener == piListener)
         {

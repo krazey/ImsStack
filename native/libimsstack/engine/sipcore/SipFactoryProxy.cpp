@@ -318,28 +318,28 @@ void SipFactoryProxy::SetTokenGenerator(
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsIpSecStateEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    const SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsIpSecStateEnabled();
 }
 
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsMessageTrackerEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    const SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsMessageTrackerEnabled();
 }
 
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsPacketTrackerEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    const SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsPacketTrackerEnabled();
 }
 
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsRoutingRejectNotifierEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    const SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsRoutingRejectNotifierEnabled();
 }
 

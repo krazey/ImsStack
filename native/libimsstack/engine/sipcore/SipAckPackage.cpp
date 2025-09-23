@@ -78,7 +78,7 @@ void SipAckPackage::AddAck(IN SipClientTransactionState* pCtState, IN IMS_SINT32
         return;
     }
 
-    ::SipTxnKey* pTxnKey = pCtState->GetTxnKey();
+    const ::SipTxnKey* pTxnKey = pCtState->GetTxnKey();
 
     if (pTxnKey == IMS_NULL)
     {
@@ -88,7 +88,7 @@ void SipAckPackage::AddAck(IN SipClientTransactionState* pCtState, IN IMS_SINT32
 
     for (IMS_UINT32 i = 0; i < m_objAcks.GetSize(); ++i)
     {
-        SipAck* pAck = m_objAcks.GetAt(i);
+        const SipAck* pAck = m_objAcks.GetAt(i);
 
         if (pAck == IMS_NULL)
         {
@@ -149,7 +149,7 @@ PRIVATE VIRTUAL void SipAckPackage::Destroy()
 
     for (IMS_UINT32 i = 0; i < s_pAckPackagePrivate->objAckPackages.GetSize(); ++i)
     {
-        SipAckPackage* pPackage = s_pAckPackagePrivate->objAckPackages.GetAt(i);
+        const SipAckPackage* pPackage = s_pAckPackagePrivate->objAckPackages.GetAt(i);
 
         if (pPackage == IMS_NULL)
         {

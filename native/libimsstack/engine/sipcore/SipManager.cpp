@@ -76,7 +76,7 @@ void SipManager::DetachDialogState(IN const SipDialogState* pDState)
 
     for (IMS_UINT32 i = 0; i < m_objDialogStates.GetSize(); ++i)
     {
-        SipDialogState* pTempDState = m_objDialogStates.GetAt(i);
+        const SipDialogState* pTempDState = m_objDialogStates.GetAt(i);
 
         if (pTempDState != IMS_NULL)
         {
@@ -166,7 +166,7 @@ void SipManager::DetachConnectionNotifier(IN const SipConnectionNotifier* pScn)
 
     for (IMS_UINT32 i = 0; i < m_objScns.GetSize(); ++i)
     {
-        SipConnectionNotifier* pTempScn = m_objScns.GetAt(i);
+        const SipConnectionNotifier* pTempScn = m_objScns.GetAt(i);
 
         if (pTempScn != IMS_NULL)
         {
