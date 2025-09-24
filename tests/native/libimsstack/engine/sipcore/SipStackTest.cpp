@@ -62,7 +62,6 @@ TEST_F(SipStackTest, SetTimerValues)
     SipTimerValues objTv;
     IMS_UINT32 nT1 = 3000;
     IMS_UINT32 nT2 = 16000;
-    IMS_UINT32 nT4 = nT2 + 1000;
     IMS_UINT32 nTB = 32000;
     IMS_UINT32 nTD = 64000;
     IMS_UINT32 nTF = 8000;

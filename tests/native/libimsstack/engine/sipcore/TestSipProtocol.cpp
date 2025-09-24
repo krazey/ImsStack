@@ -48,7 +48,7 @@ IConnection* TestSipProtocol::OpenPrim(
     else
     {
         IMS_BOOL bOk = IMS_FALSE;
-        IMS_SINT32 nPort = strTarget.ToInt32(&bOk);
+        strTarget.ToInt32(&bOk);
 
         if (bOk == IMS_TRUE)
         {
