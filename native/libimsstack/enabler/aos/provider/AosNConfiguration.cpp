@@ -1065,7 +1065,7 @@ PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS
 
     InitConfig(piCc);
     InitAssetsConfig(piCc);
-    InitBundle(piCc);
+    InitBundles(piCc);
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
@@ -1099,11 +1099,11 @@ PRIVATE VIRTUAL void AosNConfiguration::Init(IN IN IMS_SINT32 nSlotId /* = IMS_S
 
     InitConfig(piCc);
     InitAssetsConfig(piCc);
-    InitBundle(piCc);
+    InitBundles(piCc);
 }
 
 PROTECTED
-void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
+void AosNConfiguration::InitBundleForExtraRegErr(IN const ICarrierConfig* piCc)
 {
     // AosExtraRegErrBundle
     ICarrierConfig* piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE);
@@ -1162,9 +1162,14 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForNotifyTerminatedForInitReg(IN const ICarrierConfig* piCc)
+{
     // AosNotifyTerminatedForInitRegBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState = piCcBundle->GetInt(
@@ -1210,9 +1215,14 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
             m_nEventToFollowWtForInitRegOnTerminatedState |= 0x1 << (objEventToFollow.GetAt(i) - 1);
         }
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForPcscfRecoveryConditions(IN const ICarrierConfig* piCc)
+{
     // AosPcscfRecoveryConditionsBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objPcscfRecoveryConditions.nMaxRetryCnt =
@@ -1232,9 +1242,14 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 m_objPcscfRecoveryConditions.nBaseTime, m_objPcscfRecoveryConditions.nMaxTime, 0);
 #endif
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForRegErrCodeWithRaTime(IN const ICarrierConfig* piCc)
+{
     // AosRegErrCodeWithRaTimeBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined = piCcBundle->GetBoolean(
@@ -1261,9 +1276,13 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForRegRetryInterval(IN const ICarrierConfig* piCc)
+{
     // AosRegRetryIntervalBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE);
+    ICarrierConfig* piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objRegRetryInterval.bUseRegRetryIntervalForSub = piCcBundle->GetBoolean(
@@ -1290,9 +1309,14 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForSubErrCodeForInitReg(IN const ICarrierConfig* piCc)
+{
     // AosSubErrCodeForInitRegBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt = piCcBundle->GetInt(
@@ -1313,9 +1337,14 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForSubErrCodeForTerminated(IN const ICarrierConfig* piCc)
+{
     // AosSubErrCodeForTerminatedBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt = piCcBundle->GetInt(
@@ -1334,9 +1363,13 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
+}
 
+PROTECTED
+void AosNConfiguration::InitBundleForWfcErrMessage(IN const ICarrierConfig* piCc)
+{
     // AosWfcErrMessageBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::ImsWfc::KEY_WFC_ERR_MESSAGE_BUNDLE);
+    ICarrierConfig* piCcBundle = piCc->GetBundle(CarrierConfig::ImsWfc::KEY_WFC_ERR_MESSAGE_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objWfcErrMessage.strWfcErrorReg403 =
@@ -1368,6 +1401,19 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 m_objWfcErrMessage.strWfcErrorOtherFailures.GetStr(), 0, 0);
 #endif
     }
+}
+
+PROTECTED
+void AosNConfiguration::InitBundles(IN const ICarrierConfig* piCc)
+{
+    InitBundleForExtraRegErr(piCc);
+    InitBundleForNotifyTerminatedForInitReg(piCc);
+    InitBundleForPcscfRecoveryConditions(piCc);
+    InitBundleForRegErrCodeWithRaTime(piCc);
+    InitBundleForRegRetryInterval(piCc);
+    InitBundleForSubErrCodeForInitReg(piCc);
+    InitBundleForSubErrCodeForTerminated(piCc);
+    InitBundleForWfcErrMessage(piCc);
 }
 
 PROTECTED
