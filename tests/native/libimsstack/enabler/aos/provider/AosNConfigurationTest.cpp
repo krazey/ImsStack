@@ -1362,15 +1362,16 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegErrCodeWithRaTime)
 
     ImsVector<IMS_SINT32> objRegErrCodeWithRaTime;
     objRegErrCodeWithRaTime.Add(486);
+    IMS_BOOL bKeyExistValue = IMS_TRUE;
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY, _))
-            .WillOnce(Return(objRegErrCodeWithRaTime));
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegErrCodeWithRaTime)));
 
     ImsVector<IMS_SINT32> objReregErrCodeWithRaTime;
     objReregErrCodeWithRaTime.Add(486);
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY, _))
-            .WillOnce(Return(objReregErrCodeWithRaTime));
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objReregErrCodeWithRaTime)));
 
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle, ReleaseBundle()).Times(1);
 
@@ -1387,6 +1388,43 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegErrCodeWithRaTime)
             m_pAosNConfiguration->GetReregErrCodeWithRetryAfterTime();
     EXPECT_EQ(1, objReregErrCode.GetSize());
     EXPECT_EQ(486, objReregErrCode.GetAt(0));
+}
+
+TEST_F(AosNConfigurationTest, InitBundleConfigForRegErrCodeWithRaTimeWithoutIntArrayKeys)
+{
+    // GIVEN
+    MockICarrierConfig objCarrierConfig;
+    MockICarrierConfig objRegErrCodeWithRaTimeBundle;
+
+    EXPECT_CALL(
+            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objRegErrCodeWithRaTimeBundle)));
+
+    ImsVector<IMS_SINT32> objRegErrCodeWithRaTime;
+    objRegErrCodeWithRaTime.Add(486);
+    IMS_BOOL bKeyExistValue = IMS_FALSE;
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+            GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegErrCodeWithRaTime)));
+
+    ImsVector<IMS_SINT32> objReregErrCodeWithRaTime;
+    objReregErrCodeWithRaTime.Add(486);
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+            GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objReregErrCodeWithRaTime)));
+
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle, ReleaseBundle()).Times(1);
+
+    // WHEN
+    m_pAosNConfiguration->InitBundleForRegErrCodeWithRaTime(
+            static_cast<ICarrierConfig*>(&objCarrierConfig));
+
+    // THEN
+    ImsVector<IMS_SINT32>& objErrCode = m_pAosNConfiguration->GetRegErrCodeWithRetryAfterTime();
+    EXPECT_EQ(0, objErrCode.GetSize());
+    ImsVector<IMS_SINT32>& objReregErrCode =
+            m_pAosNConfiguration->GetReregErrCodeWithRetryAfterTime();
+    EXPECT_EQ(0, objReregErrCode.GetSize());
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)

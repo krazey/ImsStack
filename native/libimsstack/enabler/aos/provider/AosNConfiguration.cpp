@@ -1254,14 +1254,27 @@ void AosNConfiguration::InitBundleForRegErrCodeWithRaTime(IN const ICarrierConfi
     {
         m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined = piCcBundle->GetBoolean(
                 CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL);
-        m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY);
-        m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY);
+        IMS_BOOL bKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objRegErrCodeWithRaTime = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY, bKeyExist);
+        if (bKeyExist)
+        {
+            m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime = objRegErrCodeWithRaTime;
+        }
+        IMS_BOOL bUpdateKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objReregErrCodeWithRaTime = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
+                bUpdateKeyExist);
+        if (bUpdateKeyExist)
+        {
+            m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime = objReregErrCodeWithRaTime;
+        }
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG, "KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE :: RECWRATOD(%d)",
-                m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined, 0, 0);
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE :: RECWRATOD(%d), KEY_ON(%d), UP_KEY_ON(%d)",
+                m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined, bKeyExist,
+                bUpdateKeyExist);
         IMS_UINT32 nSize = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime.GetSize();
         for (IMS_UINT32 i = 0; i < nSize; i++)
         {
