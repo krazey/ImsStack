@@ -1172,60 +1172,51 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErr)
 
     EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE))
             .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objExtraRegErr)));
-
     EXPECT_CALL(objExtraRegErr,
             GetBoolean(CarrierConfig::Ims::
                                KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
-
     EXPECT_CALL(objExtraRegErr,
             GetBoolean(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, -1))
+    EXPECT_CALL(objExtraRegErr,
+            GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
+                    CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED))
+            .WillOnce(Return(CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED));
+    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT, 0))
             .WillOnce(Return(0));
-
-    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT, -1))
-            .WillOnce(Return(0));
-
     EXPECT_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Ims::
                             KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
-                    -1))
+                    0))
             .WillOnce(Return(1));
-
     EXPECT_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Ims::
                             KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT,
-                    -1))
+                    0))
             .WillOnce(Return(2));
-
-    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_POLICY_INT, -1))
+    EXPECT_CALL(objExtraRegErr,
+            GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_POLICY_INT,
+                    CarrierConfig::Ims::ERROR_POLICY_NOT_SPECIFIED))
             .WillOnce(Return(CarrierConfig::Ims::ERROR_POLICY_PCSCF_FAILED));
-
     ImsVector<IMS_SINT32> objExtraRegErrCode;
-    objExtraRegErrCode.Clear();
     objExtraRegErrCode.Add(400);
+    IMS_BOOL bKeyExistValue = IMS_TRUE;
     EXPECT_CALL(
             objExtraRegErr, GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, _))
-            .WillOnce(Return(objExtraRegErrCode));
-
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrCode)));
     ImsVector<IMS_SINT32> objExtraReregErrCode;
-    objExtraReregErrCode.Clear();
     objExtraReregErrCode.Add(500);
     EXPECT_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY, _))
-            .WillOnce(Return(objExtraReregErrCode));
-
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraReregErrCode)));
     ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
-    objExtraRegErrWaitTimeSec.Clear();
     objExtraRegErrWaitTimeSec.Add(30);
     EXPECT_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY, _))
-            .WillOnce(Return(objExtraRegErrWaitTimeSec));
-
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrWaitTimeSec)));
     EXPECT_CALL(objExtraRegErr, ReleaseBundle()).Times(1);
 
     // WHEN
@@ -1234,7 +1225,8 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErr)
     // THEN
     EXPECT_FALSE(m_pAosNConfiguration->IsExtraReregErrInRoamingAsFailureHandled());
     EXPECT_TRUE(m_pAosNConfiguration->IsExtraRegErrRetryCntSharedForRegAndSubRequired());
-    EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrFinalType());
+    EXPECT_EQ(CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED,
+            m_pAosNConfiguration->GetExtraRegErrFinalType());
     EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrMaxCount());
     EXPECT_EQ(1, m_pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached());
     EXPECT_EQ(2, m_pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached());
@@ -1247,7 +1239,46 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErr)
     EXPECT_EQ(1, objReregErrCode.GetSize());
     EXPECT_EQ(500, objReregErrCode.GetAt(0));
     ImsVector<IMS_SINT32>& objWaitTime = m_pAosNConfiguration->GetExtraRegErrWaitTime();
+    EXPECT_EQ(1, objWaitTime.GetSize());
     EXPECT_EQ(30, objWaitTime.GetAt(0));
+}
+
+TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErrWithoutIntArrayKeys)
+{
+    // GIVEN
+    MockICarrierConfig objCarrierConfig;
+    MockICarrierConfig objExtraRegErr;
+
+    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objExtraRegErr)));
+    ImsVector<IMS_SINT32> objExtraRegErrCode;
+    objExtraRegErrCode.Add(400);
+    IMS_BOOL bKeyExistValue = IMS_FALSE;
+    EXPECT_CALL(
+            objExtraRegErr, GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrCode)));
+    ImsVector<IMS_SINT32> objExtraReregErrCode;
+    objExtraReregErrCode.Add(500);
+    EXPECT_CALL(objExtraRegErr,
+            GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraReregErrCode)));
+    ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
+    objExtraRegErrWaitTimeSec.Add(30);
+    EXPECT_CALL(objExtraRegErr,
+            GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrWaitTimeSec)));
+    EXPECT_CALL(objExtraRegErr, ReleaseBundle()).Times(1);
+
+    // WHEN
+    m_pAosNConfiguration->InitBundleForExtraRegErr(static_cast<ICarrierConfig*>(&objCarrierConfig));
+
+    // THEN
+    ImsVector<IMS_SINT32>& objErrCode = m_pAosNConfiguration->GetExtraRegErrCode();
+    EXPECT_EQ(0, objErrCode.GetSize());
+    ImsVector<IMS_SINT32>& objReregErrCode = m_pAosNConfiguration->GetExtraReregErrCode();
+    EXPECT_EQ(0, objReregErrCode.GetSize());
+    ImsVector<IMS_SINT32>& objWaitTime = m_pAosNConfiguration->GetExtraRegErrWaitTime();
+    EXPECT_EQ(0, objWaitTime.GetSize());
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForNotifyTerminatedForInitReg)

@@ -1114,23 +1114,42 @@ void AosNConfiguration::InitBundleForExtraRegErr(IN const ICarrierConfig* piCc)
         m_objExtraRegErr.bExtraRegErrRetryCntSharedForRegAndSub = piCcBundle->GetBoolean(
                 CarrierConfig::Ims::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL);
         m_objExtraRegErr.nExtraRegErrFinalType =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
+                        CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED);
         m_objExtraRegErr.nExtraRegErrMaxCnt =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT, 0);
         m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached = piCcBundle->GetInt(
                 CarrierConfig::Ims::
-                        KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT);
+                        KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
+                0);
         m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached = piCcBundle->GetInt(
                 CarrierConfig::Ims::
-                        KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT);
+                        KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT,
+                0);
         m_objExtraRegErr.nExtraRegErrPolicy =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_POLICY_INT);
-        m_objExtraRegErr.objExtraRegErrCode =
-                piCcBundle->GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY);
-        m_objExtraRegErr.objExtraReregErrCode = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY);
-        m_objExtraRegErr.objExtraRegErrWaitTimeSec = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_POLICY_INT,
+                        CarrierConfig::Ims::ERROR_POLICY_NOT_SPECIFIED);
+        IMS_BOOL bKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objExtraRegErrCode = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, bKeyExist);
+        if (bKeyExist)
+        {
+            m_objExtraRegErr.objExtraRegErrCode = objExtraRegErrCode;
+        }
+        IMS_BOOL bUpdateKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objExtraReregErrCode = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY, bUpdateKeyExist);
+        if (bUpdateKeyExist)
+        {
+            m_objExtraRegErr.objExtraReregErrCode = objExtraReregErrCode;
+        }
+        IMS_BOOL bWtKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY, bWtKeyExist);
+        if (bWtKeyExist)
+        {
+            m_objExtraRegErr.objExtraRegErrWaitTimeSec = objExtraRegErrWaitTimeSec;
+        }
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG, "KEY_EXTRA_REG_ERR_BUNDLE :: FinalType(%d), Policy(%d), MaxCnt(%d)",
@@ -1142,6 +1161,8 @@ void AosNConfiguration::InitBundleForExtraRegErr(IN const ICarrierConfig* piCc)
         A_IMS_TRACE_D(LOGTAG, "Pcscfs Repeated Cnt: EPS 5GS only(%d), LTE Combined(%d)",
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached,
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_ON(%d), UP_KEY_ON(%d), WT_KEY_ON(%d)", bKeyExist,
+                bUpdateKeyExist, bWtKeyExist);
         IMS_UINT32 nSize = m_objExtraRegErr.objExtraRegErrCode.GetSize();
         for (IMS_UINT32 i = 0; i < nSize; i++)
         {
