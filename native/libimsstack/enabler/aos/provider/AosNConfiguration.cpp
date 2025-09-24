@@ -1226,13 +1226,13 @@ void AosNConfiguration::InitBundleForPcscfRecoveryConditions(IN const ICarrierCo
     if (piCcBundle != IMS_NULL)
     {
         m_objPcscfRecoveryConditions.nMaxRetryCnt =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_CNT_INT);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_CNT_INT, 3);
         m_objPcscfRecoveryConditions.nWaitTime =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT, 20);
         m_objPcscfRecoveryConditions.nBaseTime =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT, 20);
         m_objPcscfRecoveryConditions.nMaxTime =
-                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT);
+                piCcBundle->GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT, 1800);
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG, "KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE :: MRC(%d), WT(%d)",

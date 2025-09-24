@@ -1320,16 +1320,16 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForPcscfRecoveryConditions)
             .WillRepeatedly(
                     Return(static_cast<ICarrierConfig*>(&objPcscfRecoveryConditionsBundle)));
     EXPECT_CALL(objPcscfRecoveryConditionsBundle,
-            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_CNT_INT, -1))
+            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_CNT_INT, 3))
             .WillOnce(Return(3));
     EXPECT_CALL(objPcscfRecoveryConditionsBundle,
-            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT, -1))
+            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT, 20))
             .WillOnce(Return(20));
     EXPECT_CALL(objPcscfRecoveryConditionsBundle,
-            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT, -1))
+            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT, 20))
             .WillOnce(Return(20));
     EXPECT_CALL(objPcscfRecoveryConditionsBundle,
-            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT, -1))
+            GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT, 1800))
             .WillOnce(Return(1800));
 
     EXPECT_CALL(objPcscfRecoveryConditionsBundle, ReleaseBundle()).Times(1);
