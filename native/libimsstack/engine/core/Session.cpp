@@ -6451,8 +6451,6 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /*= SipMethod::I
 PRIVATE
 IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod)
 {
-    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
-
     if (!GetService()->InitAck(piScc))
     {
         Ims::SetLastError(ImsError::GENERAL_ERROR);
