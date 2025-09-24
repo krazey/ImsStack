@@ -34,6 +34,8 @@
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
+    <boolean name="ims.support_verstat_based_on_network_for_reg_bool" value="true"/>
+    <boolean name="ims.support_verstat_for_reg_bool" value="true"/>
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="2"/>
     <int name="ims.ims_establishment_time_for_lte_sec_int" value="300"/>
@@ -75,6 +77,9 @@
             <item value="0"/>
         </int-array>
     </pbundle_as_map>
+    <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
+    <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="0"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Uce -->
@@ -91,6 +96,8 @@
     <boolean name="imsuce.add_video_tag_contact_header_in_publish_bool" value="true"/>
 
     <!-- Ut/Xcap -->
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
+    </int-array>
     <boolean name="imsss.ut_query_cf_all_and_cf_all_conditional_support_bool" value="false"/>
     <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 
