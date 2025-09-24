@@ -532,7 +532,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             for (IMS_UINT32 i = 0; i < m_objIpSecSas.GetSize(); ++i)
             {
-                SipRtConfig::IpSecSa& objIpSecSa = m_objIpSecSas.GetAt(i);
+                const SipRtConfig::IpSecSa& objIpSecSa = m_objIpSecSas.GetAt(i);
 
                 if (objIpSecSa.Equals(*pIpSecSa))
                 {

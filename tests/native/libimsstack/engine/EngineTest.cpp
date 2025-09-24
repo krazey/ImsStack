@@ -34,13 +34,14 @@ protected:
 
 TEST_F(EngineTest, GetConfiguration)
 {
-    MockIConfiguration& objConfiguration = m_objEngine.GetMockConfiguration();
+    const MockIConfiguration& objConfiguration = m_objEngine.GetMockConfiguration();
     EXPECT_EQ(Engine::GetConfiguration(), &objConfiguration);
 }
 
 TEST_F(EngineTest, GetRegistrationManager)
 {
-    MockIRegistrationManager& objRegistrationManager = m_objEngine.GetMockRegistrationManager();
+    const MockIRegistrationManager& objRegistrationManager =
+            m_objEngine.GetMockRegistrationManager();
     EXPECT_EQ(Engine::GetRegistrationManager(), &objRegistrationManager);
 }
 
