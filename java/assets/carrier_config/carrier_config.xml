@@ -584,9 +584,11 @@
     </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <pbundle_as_map name="ims.sub_err_code_for_terminated_bundle">
+        <!-- MUST not be defined for efficient overriding
         <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="0"/>
         <int-array name="ims.sub_err_code_for_terminated_int_array" num="0">
         </int-array>
+        -->
     </pbundle_as_map>
     <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
     <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="false"/>

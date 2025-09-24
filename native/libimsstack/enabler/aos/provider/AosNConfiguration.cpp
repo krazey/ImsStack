@@ -1348,13 +1348,18 @@ void AosNConfiguration::InitBundleForSubErrCodeForTerminated(IN const ICarrierCo
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt = piCcBundle->GetInt(
-                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT);
-        m_objSubErrCodeForTerminated.objSubErrCodeForTerminated = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY);
+                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT, 0);
+        IMS_BOOL bKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objSubErrCodeForTerminated = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY, bKeyExist);
+        if (bKeyExist)
+        {
+            m_objSubErrCodeForTerminated.objSubErrCodeForTerminated = objSubErrCodeForTerminated;
+        }
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG, "KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE :: STECRM(%d)",
-                m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt, 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE :: STECRM(%d), KEY_ON(%d)",
+                m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt, bKeyExist, 0);
         IMS_UINT32 nSize = m_objSubErrCodeForTerminated.objSubErrCodeForTerminated.GetSize();
         for (IMS_UINT32 i = 0; i < nSize; i++)
         {

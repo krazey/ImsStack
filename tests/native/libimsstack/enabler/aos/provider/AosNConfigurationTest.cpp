@@ -23,7 +23,9 @@
 #include "provider/AosNConfiguration.h"
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
+using ::testing::SetArgReferee;
 
 #define DECLARE_USING(Base)                              \
     using Base::InitConfig;                              \
@@ -1481,16 +1483,17 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForTerminated)
                     Return(static_cast<ICarrierConfig*>(&objSubErrCodeForTerminatedBundle)));
 
     EXPECT_CALL(objSubErrCodeForTerminatedBundle,
-            GetInt(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT, -1))
+            GetInt(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT, 0))
             .WillOnce(Return(0));
 
     ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
     objSubErrCodeForTerminated.Add(491);
     objSubErrCodeForTerminated.Add(500);
     objSubErrCodeForTerminated.Add(606);
+    IMS_BOOL bKeyExistValue = IMS_TRUE;
     EXPECT_CALL(objSubErrCodeForTerminatedBundle,
             GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY, _))
-            .WillOnce(Return(objSubErrCodeForTerminated));
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForTerminated)));
 
     EXPECT_CALL(objSubErrCodeForTerminatedBundle, ReleaseBundle()).Times(1);
 
@@ -1502,6 +1505,35 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForTerminated)
     EXPECT_EQ(0, m_pAosNConfiguration->GetRetryCountSubErrorSubTerminated());
     ImsVector<IMS_SINT32>& objErrCode = m_pAosNConfiguration->GetSubErrorSubTerminated();
     EXPECT_EQ(3, objErrCode.GetSize());
+}
+
+TEST_F(AosNConfigurationTest,
+        InitBundleConfigForSubErrCodeForTerminatedWithoutKeyForSubErrCodeForTerminated)
+{
+    // GIVEN
+    MockICarrierConfig objCarrierConfig;
+    MockICarrierConfig objSubErrCodeForTerminatedBundle;
+
+    EXPECT_CALL(
+            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE))
+            .WillOnce(Return(static_cast<ICarrierConfig*>(&objSubErrCodeForTerminatedBundle)));
+
+    ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
+    objSubErrCodeForTerminated.Add(491);
+    IMS_BOOL bKeyExistValue = IMS_FALSE;
+
+    EXPECT_CALL(objSubErrCodeForTerminatedBundle,
+            GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForTerminated)));
+    EXPECT_CALL(objSubErrCodeForTerminatedBundle, ReleaseBundle()).Times(1);
+
+    // WHEN
+    m_pAosNConfiguration->InitBundleForSubErrCodeForTerminated(
+            static_cast<ICarrierConfig*>(&objCarrierConfig));
+
+    // THEN
+    ImsVector<IMS_SINT32>& objErrCode = m_pAosNConfiguration->GetSubErrorSubTerminated();
+    EXPECT_EQ(0, objErrCode.GetSize());
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForBundleForWfcErrMessage)
