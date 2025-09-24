@@ -58,6 +58,7 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -157,7 +158,7 @@ protected:
 
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
-        ON_CALL(objMediaManager, GetMediaInfo(&objSession))
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objSession)))
                 .WillByDefault(ReturnRef(objOutputMediaInfo));
 
         pIdleState = new IdleState(objCallContext);
@@ -234,7 +235,7 @@ TEST_F(IdleStateTest, StartSetsMediaInfo)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
-    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objInputMediaInfo));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), objInputMediaInfo));
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 }
 
@@ -777,7 +778,7 @@ TEST_F(IdleStateTest, StartUssiSetsMediaInfo)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
-    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objInputMediaInfo));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), objInputMediaInfo));
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 }
 
@@ -893,7 +894,7 @@ TEST_F(IdleStateTest, StartConferenceWithMediaSetsMediaInfo)
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     MockIMessage objMessage;
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
-    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objInputMediaInfo));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), objInputMediaInfo));
 
     pIdleState->StartConference(
             eCallType, strTarget, objInputMediaInfo, objInputSuppServices, lstUsers);
@@ -915,7 +916,7 @@ TEST_F(IdleStateTest, StartConferenceWithoutMediaSetsMediaInfo)
 
     MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
             AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objMediaInfo));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), objMediaInfo));
 
     pIdleState->StartConference(eCallType, strTarget, lstUsers);
 }
@@ -936,7 +937,7 @@ TEST_F(IdleStateTest, StartConferenceForVtWithoutMediaSetsMediaInfo)
 
     MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_INVALID,
             AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID);
-    EXPECT_CALL(objMediaManager, SetMediaInfo(&objSession, objMediaInfo));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), objMediaInfo));
 
     pIdleState->StartConference(eCallType, strTarget, lstUsers);
 }

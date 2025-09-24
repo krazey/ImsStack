@@ -35,6 +35,7 @@
 LOCAL CallKey CALL_KEY = 1;
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -76,7 +77,8 @@ protected:
         ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcCallSession));
         ON_CALL(objMtcCallSession, GetISession).WillByDefault(ReturnRef(objISession));
-        ON_CALL(objMediaManager, GetMediaInfo(&objISession)).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
 
         pRttAutoUpgrader = new RttAutoUpgrader(objContext);
     }

@@ -585,7 +585,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
         if (bNeedToConfirm)
         {
             objMediaManager.AdjustDirectionForLocalResourceConfirmation(
-                    piSession, pSession->GetCallType());
+                    *piSession, pSession->GetCallType());
 
             if (pSession->SendPrack(IMS_TRUE) == IMS_FAILURE)
             {
@@ -851,7 +851,7 @@ CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSes
     }
 
     m_objContext.GetMediaManager().AdjustDirectionForLocalResourceConfirmation(
-            &objSession, m_objContext.GetSession(&objSession)->GetCallType());
+            objSession, m_objContext.GetSession(&objSession)->GetCallType());
 
     if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(&objSession)) == IMS_FAILURE)
     {

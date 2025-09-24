@@ -160,7 +160,7 @@ PRIVATE void RttAutoUpgrader::UpgradeToRttIfNeeded(IN CallKey nCallKey)
         IMtcCallContext& objCallContext =
                 m_objContext.GetCallManager().GetCallByCallKey(nCallKey)->GetCallContext();
         MediaInfo objNewMediaInfo = objCallContext.GetMediaManager().GetMediaInfo(
-                &objCallContext.GetSession()->GetISession());
+                objCallContext.GetSession()->GetISession());
 
         objNewMediaInfo.eTextDirection = DIRECTION_SEND_RECEIVE;
         objNewMediaInfo.eGttMode = GTT_MODE_FULL;

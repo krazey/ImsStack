@@ -100,7 +100,8 @@ protected:
                 .WillByDefault(ReturnRef(objPreconditionManager));
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
-        ON_CALL(objMediaManager, GetMediaInfo(&objSession)).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objSession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objContext, GetCallController).WillByDefault(ReturnRef(objController));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objMtcCallManager));

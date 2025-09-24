@@ -296,7 +296,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
         m_objContext.GetMediaManager().AdjustDirectionForAutoOffer(
-                piSession, m_objContext.GetSession()->GetCallType());
+                *piSession, m_objContext.GetSession()->GetCallType());
     }
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);

@@ -163,7 +163,8 @@ protected:
         ON_CALL(objCallContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
-        ON_CALL(objMediaManager, GetMediaInfo(&objSession)).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objSession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(12345));
 
         objCallInfo.ePeerType = PeerType::MO;
@@ -740,7 +741,7 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfNotRequiredToSendEarl
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
@@ -757,7 +758,7 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfNotAvailableToSendEar
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
@@ -776,7 +777,7 @@ TEST_F(OutgoingStateTest, QosReservedSendsEarlyUpdate)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(2);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL))
             .Times(2)
@@ -1392,7 +1393,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendEarlyUpdate)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(1);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_SUCCESS));
 
@@ -1664,7 +1665,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNoPreconditionSu
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, HandleResponse(_, _)).Times(1);
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
@@ -1681,7 +1682,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNotAvailableToSe
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
@@ -1701,7 +1702,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfCodeIs183ButNotN
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
@@ -1789,7 +1790,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredSendsEarlyUpdateIfAvailable)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(1);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_SUCCESS));
 
@@ -1811,7 +1812,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredTerminatesCallIfSendingUpdateFail
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(1);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_FAILURE));
 
@@ -1830,7 +1831,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyRe
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_200));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
 
@@ -2510,7 +2511,7 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
@@ -2536,7 +2537,7 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(0);
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
@@ -2565,7 +2566,7 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(&objSession, _))
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
             .Times(1);
     EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
