@@ -1320,15 +1320,20 @@ void AosNConfiguration::InitBundleForSubErrCodeForInitReg(IN const ICarrierConfi
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt = piCcBundle->GetInt(
-                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT);
-        m_objSubErrCodeForInitReg.objSubErrCodeForInitReg = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
+                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT, 0);
+        IMS_BOOL bKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objSubErrCodeForInitReg = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY, bKeyExist);
+        if (bKeyExist)
+        {
+            m_objSubErrCodeForInitReg.objSubErrCodeForInitReg = objSubErrCodeForInitReg;
+        }
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG,
                 "KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE :: "
-                "SERMCWIR(%d)",
-                m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt, 0, 0);
+                "SERMCWIR(%d), KEY_ON(%d)",
+                m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt, bKeyExist, 0);
         IMS_UINT32 nSize = m_objSubErrCodeForInitReg.objSubErrCodeForInitReg.GetSize();
         for (IMS_UINT32 i = 0; i < nSize; i++)
         {

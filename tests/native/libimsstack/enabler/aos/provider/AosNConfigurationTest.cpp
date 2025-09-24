@@ -1449,15 +1449,16 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForInitReg)
             .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objSubErrCodeForInitRegBundle)));
 
     EXPECT_CALL(objSubErrCodeForInitRegBundle,
-            GetInt(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT, -1))
+            GetInt(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT, 0))
             .WillOnce(Return(2));
 
     ImsVector<IMS_SINT32> objSubErrCodeForInitReg;
     objSubErrCodeForInitReg.Add(408);
     objSubErrCodeForInitReg.Add(504);
+    IMS_BOOL bKeyExistValue = IMS_TRUE;
     EXPECT_CALL(objSubErrCodeForInitRegBundle,
             GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY, _))
-            .WillOnce(Return(objSubErrCodeForInitReg));
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForInitReg)));
 
     EXPECT_CALL(objSubErrCodeForInitRegBundle, ReleaseBundle()).Times(1);
 
@@ -1469,6 +1470,35 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForInitReg)
     EXPECT_EQ(2, m_pAosNConfiguration->GetRetryCountSubErrorRegRequired());
     ImsVector<IMS_SINT32>& objErrCode = m_pAosNConfiguration->GetSubErrorRegRequired();
     EXPECT_EQ(2, objErrCode.GetSize());
+}
+
+TEST_F(AosNConfigurationTest,
+        InitBundleConfigForSubErrCodeForInitRegWithoutKeyForSubErrCodeForInitReg)
+{
+    // GIVEN
+    MockICarrierConfig objCarrierConfig;
+    MockICarrierConfig objSubErrCodeForInitRegBundle;
+
+    EXPECT_CALL(
+            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objSubErrCodeForInitRegBundle)));
+
+    ImsVector<IMS_SINT32> objSubErrCodeForInitReg;
+    objSubErrCodeForInitReg.Add(408);
+    IMS_BOOL bKeyExistValue = IMS_FALSE;
+    EXPECT_CALL(objSubErrCodeForInitRegBundle,
+            GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForInitReg)));
+
+    EXPECT_CALL(objSubErrCodeForInitRegBundle, ReleaseBundle()).Times(1);
+
+    // WHEN
+    m_pAosNConfiguration->InitBundleForSubErrCodeForInitReg(
+            static_cast<ICarrierConfig*>(&objCarrierConfig));
+
+    // THEN
+    ImsVector<IMS_SINT32>& objErrCode = m_pAosNConfiguration->GetSubErrorRegRequired();
+    EXPECT_EQ(0, objErrCode.GetSize());
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForTerminated)
