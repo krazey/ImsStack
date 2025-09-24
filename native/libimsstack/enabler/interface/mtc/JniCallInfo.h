@@ -34,7 +34,8 @@ public:
             bConferenceEnabled(IMS_FALSE),
             bConferenceSubscriptionRequired(IMS_FALSE),
             bRttCapable(IMS_FALSE),
-            bVideoCapable(IMS_FALSE)
+            bVideoCapable(IMS_FALSE),
+            bCrossSim(IMS_FALSE)
     {
     }
 
@@ -48,7 +49,8 @@ public:
             bConferenceEnabled(objRhs.bConferenceEnabled),
             bConferenceSubscriptionRequired(objRhs.bConferenceSubscriptionRequired),
             bRttCapable(objRhs.bRttCapable),
-            bVideoCapable(objRhs.bVideoCapable)
+            bVideoCapable(objRhs.bVideoCapable),
+            bCrossSim(objRhs.bCrossSim)
     {
     }
 
@@ -66,6 +68,7 @@ public:
             bConferenceSubscriptionRequired = objRhs.bConferenceSubscriptionRequired;
             bRttCapable = objRhs.bRttCapable;
             bVideoCapable = objRhs.bVideoCapable;
+            bCrossSim = objRhs.bCrossSim;
         }
 
         return *this;
@@ -83,7 +86,8 @@ public:
                 bUssi == objRhs.bUssi && bConference == objRhs.bConference &&
                 bConferenceEnabled == objRhs.bConferenceEnabled &&
                 bConferenceSubscriptionRequired == objRhs.bConferenceSubscriptionRequired &&
-                bRttCapable == objRhs.bRttCapable && bVideoCapable == objRhs.bVideoCapable;
+                bRttCapable == objRhs.bRttCapable && bVideoCapable == objRhs.bVideoCapable &&
+                bCrossSim == objRhs.bCrossSim;
     }
 
 public:
@@ -98,6 +102,7 @@ public:
     IMS_BOOL bConferenceSubscriptionRequired;
     IMS_BOOL bRttCapable;
     IMS_BOOL bVideoCapable;
+    IMS_BOOL bCrossSim;
 };
 
 #endif

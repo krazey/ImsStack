@@ -210,6 +210,8 @@ public class ImsCallUtils {
                 MtcCallInfo.isConference(ci));
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 MtcCallInfo.isVideoCapable(ci));
+        profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL,
+                MtcCallInfo.isCrossSim(ci));
 
         boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.AQuality);
         boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.AQuality);

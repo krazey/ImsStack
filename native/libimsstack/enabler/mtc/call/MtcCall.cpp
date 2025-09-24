@@ -545,6 +545,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
             ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT;
     objJniCallInfo.bRttCapable = GetSession() ? GetSession()->IsRttCapable() : IMS_FALSE;
     objJniCallInfo.bVideoCapable = GetSession() ? GetSession()->IsVideoCapable() : IMS_FALSE;
+    objJniCallInfo.bCrossSim = GetService().IsCrossSimConnected();
 
     return objJniCallInfo;
 }

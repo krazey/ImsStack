@@ -1089,6 +1089,21 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsCapabilityOfSession)
     EXPECT_EQ(pSession->IsVideoCapable(), objJniCallInfo.bVideoCapable);
 }
 
+TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCrossSim)
+{
+    ON_CALL(objService, IsCrossSimConnected).WillByDefault(Return(IMS_TRUE));
+
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(objService.IsCrossSimConnected(), objJniCallInfo.bCrossSim);
+
+    ON_CALL(objService, IsCrossSimConnected).WillByDefault(Return(IMS_FALSE));
+    objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(objService.IsCrossSimConnected(), objJniCallInfo.bCrossSim);
+}
+
 TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfNoSessionExists)
 {
     const SipMethod eAnyMethod = SipMethod::INVITE;

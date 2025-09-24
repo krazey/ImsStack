@@ -195,6 +195,19 @@ public final class MtcCallInfo {
         return ci.videoCapable;
     }
 
+    /**
+     * Checks if the call is a cross-SIM call.
+     *
+     * A cross-SIM call is one where the data connection of one SIM is used to facilitate
+     * a call (e.g., VoLTE or VoWiFi) on another SIM.
+     *
+     * @param ci The {@link CallInfo} object to check.
+     * @return {@code true} if the call is a cross-SIM call, {@code false} otherwise.
+     */
+    public static boolean isCrossSim(CallInfo ci) {
+        return ci.crossSim;
+    }
+
     public static void setServiceType(CallInfo ci, int serviceType) {
         ci.serviceType = serviceType;
     }
