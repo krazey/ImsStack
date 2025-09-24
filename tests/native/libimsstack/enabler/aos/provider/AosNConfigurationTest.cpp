@@ -1515,7 +1515,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForBundleForWfcErrMessage)
     AString strWfcErrorNotSupportedCountry("REG92 - Wi-Fi Calling isn't supported in this country");
     AString strWfcErrorSub403("REG09 - Missing 911 Address");
     AString strWfcErrorNotifyTerminated("REG09 - Missing 911 Address");
-    AString strWfcErrorOtherFailures("REG99 - Unable to Connect");
+    AString strWfcErrorOtherFailures = AString::ConstNull();
 
     EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::ImsWfc::KEY_WFC_ERR_MESSAGE_BUNDLE))
             .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objWfcErrMessageBundle)));
@@ -1562,7 +1562,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForBundleForWfcErrMessage)
             CarrierConfig::ImsWfc::WFC_ERROR_SUB_403));
     EXPECT_TRUE(m_pAosNConfiguration->IsWfcErrorMessageSupported(
             CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED));
-    EXPECT_TRUE(m_pAosNConfiguration->IsWfcErrorMessageSupported(
+    EXPECT_FALSE(m_pAosNConfiguration->IsWfcErrorMessageSupported(
             CarrierConfig::ImsWfc::WFC_ERROR_OTHER_FAILURES));
 }
 

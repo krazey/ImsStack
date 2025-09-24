@@ -628,12 +628,14 @@
     </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
     <pbundle_as_map name="imswfc.wfc_err_message_bundle">
+        <!-- MUST not be defined for efficient overriding
         <string name="imswfc.wfc_err_reg_403_string"></string>
         <string name="imswfc.wfc_err_reg_500_string"></string>
         <string name="imswfc.wfc_err_not_supported_country_string"></string>
         <string name="imswfc.wfc_err_sub_403_string"></string>
         <string name="imswfc.wfc_err_notify_terminated_string"></string>
         <string name="imswfc.wfc_err_other_failures_string"></string>
+        -->
     </pbundle_as_map>
 
     <!-- Mtc -->

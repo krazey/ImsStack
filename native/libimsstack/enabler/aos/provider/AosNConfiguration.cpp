@@ -524,17 +524,17 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsWfcErrorMessageSupported(IN IMS_SIN
     switch (nError)
     {
         case CarrierConfig::ImsWfc::WFC_ERROR_REG_403:
-            return !m_objWfcErrMessage.strWfcErrorReg403.IsEmpty();
+            return m_objWfcErrMessage.strWfcErrorReg403.GetLength() > 0;
         case CarrierConfig::ImsWfc::WFC_ERROR_REG_500:
-            return !m_objWfcErrMessage.strWfcErrorReg500.IsEmpty();
+            return m_objWfcErrMessage.strWfcErrorReg500.GetLength() > 0;
         case CarrierConfig::ImsWfc::WFC_ERROR_NOT_SUPPORTED_COUNTRY:
-            return !m_objWfcErrMessage.strWfcErrorNotSupportedCountry.IsEmpty();
+            return m_objWfcErrMessage.strWfcErrorNotSupportedCountry.GetLength() > 0;
         case CarrierConfig::ImsWfc::WFC_ERROR_SUB_403:
-            return !m_objWfcErrMessage.strWfcErrorSub403.IsEmpty();
+            return m_objWfcErrMessage.strWfcErrorSub403.GetLength() > 0;
         case CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED:
-            return !m_objWfcErrMessage.strWfcErrorNotifyTerminated.IsEmpty();
+            return m_objWfcErrMessage.strWfcErrorNotifyTerminated.GetLength() > 0;
         case CarrierConfig::ImsWfc::WFC_ERROR_OTHER_FAILURES:
-            return !m_objWfcErrMessage.strWfcErrorOtherFailures.IsEmpty();
+            return m_objWfcErrMessage.strWfcErrorOtherFailures.GetLength() > 0;
         default:
             return IMS_FALSE;
     }
@@ -1387,18 +1387,25 @@ void AosNConfiguration::InitBundleForWfcErrMessage(IN const ICarrierConfig* piCc
 
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_REG_403_STRING :: STECRM(%s)",
-                m_objWfcErrMessage.strWfcErrorReg403.GetStr(), 0, 0);
-        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_REG_500_STRING :: STECRM(%s)",
-                m_objWfcErrMessage.strWfcErrorReg500.GetStr(), 0, 0);
-        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING :: STECRM(%s)",
-                m_objWfcErrMessage.strWfcErrorNotSupportedCountry.GetStr(), 0, 0);
-        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_SUB_403_STRING :: STECRM(%s)",
-                m_objWfcErrMessage.strWfcErrorSub403.GetStr(), 0, 0);
-        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_NOTIFY_TERMINATED_STRING :: STECRM(%s)",
-                m_objWfcErrMessage.strWfcErrorNotifyTerminated.GetStr(), 0, 0);
-        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_OTHER_FAILURES_STRING :: STECRM(%s)",
-                m_objWfcErrMessage.strWfcErrorOtherFailures.GetStr(), 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_REG_403_STRING :: STECRM(%s), ON(%d)",
+                m_objWfcErrMessage.strWfcErrorReg403.GetStr(),
+                IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_REG_403), 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_REG_500_STRING :: STECRM(%s), ON(%d)",
+                m_objWfcErrMessage.strWfcErrorReg500.GetStr(),
+                IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_REG_500), 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING :: STECRM(%s), ON(%d)",
+                m_objWfcErrMessage.strWfcErrorNotSupportedCountry.GetStr(),
+                IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_NOT_SUPPORTED_COUNTRY),
+                0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_SUB_403_STRING :: STECRM(%s), ON(%d)",
+                m_objWfcErrMessage.strWfcErrorSub403.GetStr(),
+                IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403), 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_NOTIFY_TERMINATED_STRING :: STECRM(%s), ON(%d)",
+                m_objWfcErrMessage.strWfcErrorNotifyTerminated.GetStr(),
+                IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED), 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_OTHER_FAILURES_STRING :: STECRM(%s), ON(%d)",
+                m_objWfcErrMessage.strWfcErrorOtherFailures.GetStr(),
+                IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_OTHER_FAILURES), 0);
 #endif
     }
 }
