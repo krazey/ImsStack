@@ -1286,15 +1286,27 @@ void AosNConfiguration::InitBundleForRegRetryInterval(IN const ICarrierConfig* p
     if (piCcBundle != IMS_NULL)
     {
         m_objRegRetryInterval.bUseRegRetryIntervalForSub = piCcBundle->GetBoolean(
-                CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL);
-        m_objRegRetryInterval.objRegRetryRandomUpperValueSec = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY);
-        m_objRegRetryInterval.objRegRetryIntervalSec =
-                piCcBundle->GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY);
+                CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL, IMS_TRUE);
+        IMS_BOOL bRandomKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
+                bRandomKeyExist);
+        if (bRandomKeyExist)
+        {
+            m_objRegRetryInterval.objRegRetryRandomUpperValueSec = objRegRetryRandomUpperValueSec;
+        }
+        IMS_BOOL bKeyExist = IMS_FALSE;
+        ImsVector<IMS_SINT32> objRegRetryIntervalSec = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY, bKeyExist);
+        if (bKeyExist)
+        {
+            m_objRegRetryInterval.objRegRetryIntervalSec = objRegRetryIntervalSec;
+        }
         piCcBundle->ReleaseBundle();
 #ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG, "KEY_REG_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d)",
-                m_objRegRetryInterval.bUseRegRetryIntervalForSub, 0, 0);
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_REG_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d), RANDOM_KEY_ON(%d), KEY_ON(%d)",
+                m_objRegRetryInterval.bUseRegRetryIntervalForSub, bRandomKeyExist, bKeyExist);
         IMS_UINT32 nSize = m_objRegRetryInterval.objRegRetryRandomUpperValueSec.GetSize();
         for (IMS_UINT32 i = 0; i < nSize; i++)
         {

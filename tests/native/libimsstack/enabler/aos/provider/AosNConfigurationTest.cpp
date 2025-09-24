@@ -1399,7 +1399,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
             .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objRegRetryInterval)));
 
     EXPECT_CALL(objRegRetryInterval,
-            GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL, IMS_TRUE))
             .WillOnce(Return(IMS_TRUE));
 
     ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
@@ -1409,10 +1409,12 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
     objRegRetryRandomUpperValueSec.Add(0);
     objRegRetryRandomUpperValueSec.Add(0);
     objRegRetryRandomUpperValueSec.Add(0);
+    IMS_BOOL bKeyExistValue = IMS_TRUE;
     EXPECT_CALL(objRegRetryInterval,
             GetIntArray(
                     CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY, _))
-            .WillOnce(Return(objRegRetryRandomUpperValueSec));
+            .WillOnce(DoAll(
+                    SetArgReferee<1>(bKeyExistValue), Return(objRegRetryRandomUpperValueSec)));
 
     ImsVector<IMS_SINT32> objRegRetryIntervalSec;
     objRegRetryIntervalSec.Add(30);
@@ -1423,7 +1425,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
     objRegRetryIntervalSec.Add(900);
     EXPECT_CALL(objRegRetryInterval,
             GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY, _))
-            .WillOnce(Return(objRegRetryIntervalSec));
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegRetryIntervalSec)));
 
     EXPECT_CALL(objRegRetryInterval, ReleaseBundle()).Times(1);
 
@@ -1436,6 +1438,43 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
     ImsVector<IMS_SINT32>& objRandomInterval = m_pAosNConfiguration->GetRegRandomRetryIntervals();
     ImsVector<IMS_SINT32>& objInterval = m_pAosNConfiguration->GetRegRetryIntervals();
     EXPECT_EQ(objRandomInterval.GetSize(), objInterval.GetSize());
+}
+
+TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryIntervalWithoutIntArrayKeys)
+{
+    // GIVEN
+    MockICarrierConfig objCarrierConfig;
+    MockICarrierConfig objRegRetryInterval;
+
+    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objRegRetryInterval)));
+
+    ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
+    objRegRetryRandomUpperValueSec.Add(15);
+    IMS_BOOL bKeyExistValue = IMS_FALSE;
+    EXPECT_CALL(objRegRetryInterval,
+            GetIntArray(
+                    CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY, _))
+            .WillOnce(DoAll(
+                    SetArgReferee<1>(bKeyExistValue), Return(objRegRetryRandomUpperValueSec)));
+
+    ImsVector<IMS_SINT32> objRegRetryIntervalSec;
+    objRegRetryIntervalSec.Add(30);
+    EXPECT_CALL(objRegRetryInterval,
+            GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY, _))
+            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegRetryIntervalSec)));
+
+    EXPECT_CALL(objRegRetryInterval, ReleaseBundle()).Times(1);
+
+    // WHEN
+    m_pAosNConfiguration->InitBundleForRegRetryInterval(
+            static_cast<ICarrierConfig*>(&objCarrierConfig));
+
+    // THEN
+    ImsVector<IMS_SINT32>& objRandomInterval = m_pAosNConfiguration->GetRegRandomRetryIntervals();
+    ImsVector<IMS_SINT32>& objInterval = m_pAosNConfiguration->GetRegRetryIntervals();
+    EXPECT_EQ(0, objRandomInterval.GetSize());
+    EXPECT_EQ(0, objInterval.GetSize());
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForInitReg)
