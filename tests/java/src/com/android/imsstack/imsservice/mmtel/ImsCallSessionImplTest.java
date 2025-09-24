@@ -18,7 +18,9 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -863,22 +865,61 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testAlertUser() {
+    public void testAlertUserNormalCall() {
+        // For a normal call, it should just alert the user via MtcCall.
         mImsCallSession.alertUser();
         verify(mMockMtcCall, times(1)).alertUser();
+        verify(mMockImsCallSessionCallback, never()).invokeStartFailed(any(), any());
+    }
 
+    @Test
+    public void testAlertUserAutoRejectedCallNoListener() {
+        // For an auto-rejected call without a listener, it should cache the reason.
         when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
+        when(mMockImsCallSessionCallback.hasListener()).thenReturn(false);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
-        mImsCallSession.alertUser();
-        processAllFutureMessages();
 
+        mImsCallSession.alertUser();
+        assertNotEquals(ImsCallSessionImplBase.State.TERMINATING, mImsCallSession.getState());
+        assertNotEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
+        assertNotEquals(ImsCallSessionImplBase.State.INVALID, mImsCallSession.getState());
+
+        processAllMessages();
+
+        // Should set the immediate call end reason and not notify yet.
+        assertNotNull(mImsCallSession.mImmediateCallEndReason);
         verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
                 eq(mImsCallSession), any(ImsReasonInfo.class));
+    }
 
+    @Test
+    public void testAlertUserAutoRejectedCallSetListenerLater() {
+        // For an auto-rejected call, when the listener is set later, it should notify.
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
+        when(mMockImsCallSessionCallback.hasListener()).thenReturn(false);
+        mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
+        mImsCallSession.alertUser(); // Caches the reason
+
+        // Setting the listener should trigger the delayed notification.
         mImsCallSession.setListener(mMockImsCallSessionListener);
-        mImsCallSession.alertUser();
         processAllFutureMessages();
 
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
+    }
+
+    @Test
+    public void testAlertUserAutoRejectedCallWithListener() {
+        // For an auto-rejected call with a listener already set, it should notify immediately.
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
+        when(mMockImsCallSessionCallback.hasListener()).thenReturn(true);
+        mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
+
+        mImsCallSession.alertUser();
+        processAllMessages();
+
+        // Should not cache the reason, but notify directly.
+        assertNull(mImsCallSession.mImmediateCallEndReason);
         verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
                 eq(mImsCallSession), any(ImsReasonInfo.class));
     }
