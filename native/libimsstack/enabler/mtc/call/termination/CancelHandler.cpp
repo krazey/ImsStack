@@ -53,8 +53,8 @@ LOCAL IMS_SINT32 GetCodeFromReason(const ReasonHeaderValue& objReasonResult)
     return CODE_USER_TERMINATED_BY_REMOTE;
 }
 
-LOCAL void EnrichCallReasonInfo(IMtcCallContext& objContext, ReasonHeaderValue& objReasonResult,
-        CallReasonInfo& objReasonInfo)
+LOCAL void EnrichCallReasonInfo(IMtcCallContext& objContext,
+        const ReasonHeaderValue& objReasonResult, CallReasonInfo& objReasonInfo)
 {
     if (objContext.GetConfigurationProxy().GetBoolean(
                 ConfigVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL))
