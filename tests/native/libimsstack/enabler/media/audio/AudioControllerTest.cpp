@@ -22,6 +22,8 @@
 #include <MediaNetworkConnectionWatcher.h>
 #include <MockIMediaSessionListener.h>
 
+using namespace android::telephony::imsmedia;
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -439,4 +441,30 @@ TEST_F(AudioControllerTest, testConcurrentWifiAndLteSession)
 
     EXPECT_EQ(m_pController->UpdateSession(nNegoId1, nNetworkType1, m_pAudioNego), IMS_TRUE);
     m_pController->CloseSession();
+}
+
+TEST_F(AudioControllerTest, testUpdateAnbrEnabledConfig)
+{
+    const IMS_UINTP NEGO_ID = 1;
+    EXPECT_FALSE(m_pController->UpdateAnbrEnabledConfig(NEGO_ID, IMS_TRUE));
+
+    // Create a session
+    m_pController->CreateSession(&m_objListener, NEGO_ID, m_pConfig, MEDIA_SERVICE_DEFAULT);
+
+    // Update ANBR config
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pController->UpdateAnbrEnabledConfig(NEGO_ID, IMS_TRUE));
+
+    // Call again with same value, should not send message
+    EXPECT_TRUE(m_pController->UpdateAnbrEnabledConfig(NEGO_ID, IMS_TRUE));
+
+    // Update ANBR config to disabled
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pController->UpdateAnbrEnabledConfig(NEGO_ID, IMS_FALSE));
 }

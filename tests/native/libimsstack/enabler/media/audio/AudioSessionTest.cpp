@@ -210,6 +210,30 @@ TEST_F(AudioSessionTest, testUpdateAnbrEnabledConfig)
     EXPECT_TRUE(m_pSession->UpdateAnbrEnabledConfig(IMS_TRUE));
 }
 
+TEST_F(AudioSessionTest, testIsAnbrEnabled)
+{
+    // Initially, ANBR should be disabled.
+    EXPECT_FALSE(m_pSession->IsAnbrEnabled());
+
+    // Enable ANBR
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pSession->UpdateAnbrEnabledConfig(IMS_TRUE));
+
+    // Check if ANBR is enabled.
+    EXPECT_TRUE(m_pSession->IsAnbrEnabled());
+
+    // Disable ANBR
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pSession->UpdateAnbrEnabledConfig(IMS_FALSE));
+
+    // Check if ANBR is disabled.
+    EXPECT_FALSE(m_pSession->IsAnbrEnabled());
+}
+
 TEST_F(AudioSessionTest, testNotifyAnbrReceived)
 {
     EXPECT_FALSE(m_pSession->NotifyAnbrReceived(0, 0, 0));

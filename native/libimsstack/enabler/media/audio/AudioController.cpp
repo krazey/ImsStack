@@ -403,7 +403,14 @@ IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_B
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateAnbrEnabledConfig(bAnbrEnabled);
+        if (pAudioSession->IsAnbrEnabled() == bAnbrEnabled)
+        {
+            return IMS_TRUE;
+        }
+        else
+        {
+            return pAudioSession->UpdateAnbrEnabledConfig(bAnbrEnabled);
+        }
     }
 
     IMS_TRACE_E(0, "UpdateAnbrEnabledConfig(): session is not found", 0, 0, 0);

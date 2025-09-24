@@ -184,6 +184,14 @@ public:
     IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType);
 
     /**
+     * @brief Check Anbr Feature Negotiated
+     *
+     * @return IMS_BOOL Returns IMS_TRUE if the Anbr feature is successfully negotiated during SDP
+     * negotiation, or IMS_FALSE if it fails or is empty.
+     */
+    inline IMS_BOOL IsAnbrEnabled() { return m_bAnbrEnabled; }
+
+    /**
      * @brief Update the sdp negotiation result on whether to support the ANBR feature
      *
      * @param bAnbrEnabled The ANBR negotiation result, if it is true, the ANBR feature can be
