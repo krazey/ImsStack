@@ -390,6 +390,27 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfbWithoutReg)
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
 }
 
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutDoesNotInvokeEpsfbIfEpsFbIsNotAvailable)
+{
+    SetTransactionTimeout();
+    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcCall*> objOtherCalls;
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objCallContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+
+    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END);
+
+    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+}
+
 TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfiguration)
 {
     const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_408;
@@ -1210,6 +1231,23 @@ TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNr)
 
     EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::FAILURE_RESPONSE));
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbDoesNotInvokeEpsfbInNrIfEpsFbIsNotAvailable)
+{
+    SetMessageCode(SipStatusCode::SC_500);
+    SetActionConfig(SipStatusCode::SC_500, ConfigVoice::START_ERROR_ACTION_TRIGGER_EPSFB);
+
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    ImsList<IMtcCall*> objOtherCalls;
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objCallContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+
+    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::FAILURE_RESPONSE)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
 }
 
 TEST_F(StartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfRegistersNextPcscf)

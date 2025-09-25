@@ -68,7 +68,8 @@ PUBLIC VIRTUAL EpsFallbackTrigger::~EpsFallbackTrigger()
 PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByReasonInfo(
         IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason)
 {
-    if (objContext.GetCallInfo().ePeerType != PeerType::MO || !objContext.GetService().IsNr())
+    if (objContext.GetCallInfo().ePeerType != PeerType::MO || !objContext.GetService().IsNr() ||
+            !IsEpsFbAvailable(objContext))
     {
         return IMS_FALSE;
     }
@@ -98,7 +99,7 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(
         IN IMtcCallContext& objContext)
 {
     // Start only if Teps_fb_watchdog > 0 by Verizon's requirement
-    return objContext.GetService().IsNr() &&
+    return objContext.GetService().IsNr() && IsEpsFbAvailable(objContext) &&
             objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT) > 0;
 }
@@ -106,10 +107,26 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(
 PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByMoRequestTimeout(
         IN IMtcCallContext& objContext)
 {
-    return objContext.GetService().IsNr() &&
+    return objContext.GetService().IsNr() && IsEpsFbAvailable(objContext) &&
             objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT) >=
             0;
+}
+
+PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsEpsFbAvailable(IN IMtcCallContext& objContext)
+{
+    const ImsList<IMtcCall*>& lstCalls = objContext.GetOtherCalls();
+    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+    {
+        const IMtcCall* pCall = lstCalls.GetAt(nIndex);
+        if (pCall->GetState() == IMtcCall::State::ESTABLISHED ||
+                pCall->GetState() == IMtcCall::State::UPDATING)
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    return IMS_TRUE;
 }
 
 PUBLIC

@@ -543,7 +543,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleTriggerEpsfb(IN const IMessage& /*objMessage*/) const
 {
     IMS_TRACE_I("HandleTriggerEpsfb", 0, 0, 0);
-    if (m_objContext.GetService().IsNr())
+    if (m_objContext.GetService().IsNr() && EpsFallbackTrigger::IsEpsFbAvailable(m_objContext))
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
                 EpsFallbackReason::FAILURE_RESPONSE);

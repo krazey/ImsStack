@@ -43,6 +43,7 @@ class EpsFallbackTriggerTest : public ::testing::Test
 public:
     inline EpsFallbackTriggerTest() :
             pConfigurationProxy(IMS_NULL),
+            objOtherCalls(),
             objTimerService(),
             objTimer(objTimerService.GetMockTimer()),
             pEpsFbTrigger(IMS_NULL)
@@ -53,6 +54,7 @@ public:
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
     MockMtcConfigurationProxy* pConfigurationProxy;
+    ImsList<IMtcCall*> objOtherCalls;
     TestImsRadioService objImsRadioService;
     TestTimerService objTimerService;
     CallInfo objCallInfo;
@@ -74,6 +76,7 @@ protected:
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
 
         pEpsFbTrigger = new EpsFallbackTrigger(objContext);
     }
@@ -104,6 +107,22 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseIfNotInNr)
 {
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseIfEpsFbNotAvailable)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -211,6 +230,19 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfInNrAnd
     EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
 }
 
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfEpsFbNotAvailable)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
+
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
+
 TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsTrue)
 {
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
@@ -226,6 +258,20 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfNotI
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
             .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfEpsFbNotAvailable)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+
     EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
 }
 
@@ -247,6 +293,44 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsTrue)
             GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
             .WillByDefault(Return(1000));
     EXPECT_TRUE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, IsEpsFbAvailableReturnsFalseIfEstablishedCallExists)
+{
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+
+    EXPECT_FALSE(EpsFallbackTrigger::IsEpsFbAvailable(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, IsEpsFbAvailableReturnsFalseIfUpdatingCallExists)
+{
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState()).WillByDefault(Return(IMtcCall::State::UPDATING));
+    objOtherCalls.Append(&objOtherCall);
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+
+    EXPECT_FALSE(EpsFallbackTrigger::IsEpsFbAvailable(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, IsEpsFbAvailableReturnsTrueIfNoOtherCalls)
+{
+    // objOtherCalls is empty
+
+    EXPECT_TRUE(EpsFallbackTrigger::IsEpsFbAvailable(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, IsEpsFbAvailableReturnsTrueIfOtherCallsAreNotInBlockingStates)
+{
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(objOtherCalls));
+    MockIMtcCall objOtherCall1, objOtherCall2;
+    ON_CALL(objOtherCall2, GetState()).WillByDefault(Return(IMtcCall::State::TERMINATING));
+    objOtherCalls.Append(&objOtherCall1);
+    objOtherCalls.Append(&objOtherCall2);
+
+    EXPECT_TRUE(EpsFallbackTrigger::IsEpsFbAvailable(objContext));
 }
 
 TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)

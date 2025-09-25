@@ -75,6 +75,7 @@ public:
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason);
     static IMS_BOOL ShouldTriggerByWatchdogTimer(IN IMtcCallContext& objContext);
     static IMS_BOOL ShouldTriggerByMoRequestTimeout(IN IMtcCallContext& objContext);
+    static IMS_BOOL IsEpsFbAvailable(IN IMtcCallContext& objContext);
 
     virtual void StartWatchdog();
     virtual void OnEpsFallbackCompleted();
