@@ -195,6 +195,13 @@ public:
     virtual IMS_BOOL IsRttCapable() const = 0;
 
     /**
+     * @brief Checks if there's a pending PRACK transaction.
+     *
+     * @return True when it hasn't sent a PRACK for 183 or received a PRACK_RESPONSE for the PRACK.
+     */
+    virtual IMS_BOOL IsPrackPending() const = 0;
+
+    /**
      * @brief Gets the UpdateType of Early UPDATE previously sent and not succeeded yet.
      *
      * @return The UpdateType. If no previous Early UPDATE sent and not succeeded yet exists,

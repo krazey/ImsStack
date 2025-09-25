@@ -104,9 +104,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const CallReasonInfo& o
 PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
         IN ISession* piSession, IN [[maybe_unused]] IMS_UINT32 eMediaType)
 {
-    const IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
-    if (piMessage == IMS_NULL || piMessage->GetStatusCode() != SipStatusCode::SC_200)
+    const IMtcSession* pMtcSession = m_objContext.GetSession(piSession);
+    if (pMtcSession == IMS_NULL || pMtcSession->IsPrackPending())
     {
+        IMS_TRACE_D("Waiting for the PRACK transaction finishes", 0, 0, 0);
         return GetStateName();
     }
 

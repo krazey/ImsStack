@@ -19,6 +19,7 @@
 #include "IMessage.h"
 #include "ISession.h"
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ImsAosParameter.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
@@ -57,6 +58,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
         m_bSessionTerminatedOrStartFailed(IMS_FALSE),
+        m_bPrackPending(IMS_FALSE),
         m_eOngoingUpdateType(UpdateType::NONE),
         m_objCallTypeHistory({})
 {
@@ -344,6 +346,17 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
 
     UpdateCallTypeFromMessage(objResponse, IMS_TRUE);
     UpdateCapabilityFromMessage(objResponse);
+
+    if (objResponse.GetStatusCode() == SipStatusCode::SC_183 &&
+            objResponse.GetMessage()->IsMessageRpr())
+    {
+        m_bPrackPending = IMS_TRUE;
+    }
+
+    if (eType == ResponseType::PRACK_RESPONSE)
+    {
+        m_bPrackPending = IMS_FALSE;
+    }
 
     if (eType == ResponseType::EARLY_UPDATE_RESPONSE &&
             objResponse.GetStatusCode() == SipStatusCode::SC_200)
