@@ -132,10 +132,13 @@ public:
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
 
     /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
+     * @brief Cleans up media descriptors that are marked as deleted from the session.
      *
-     * @param nNegoId The negotiation id to clean the SDP set
-     * @param pSession ISession instance to get the SDP descriptor
+     * This is typically called after a session update is confirmed to remove media
+     * lines that are no longer part of the session (e.g., video removed from a call).
+     *
+     * @param nNegoId The ID of the negotiation context.
+     * @param pSession The ISession instance to clean up.
      */
     virtual void FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 

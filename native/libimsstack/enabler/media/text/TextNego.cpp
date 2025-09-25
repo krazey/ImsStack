@@ -324,7 +324,6 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     m_listOaModel.Append(pNewOaModel);
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
@@ -376,6 +375,5 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }

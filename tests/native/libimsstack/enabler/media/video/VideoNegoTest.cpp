@@ -467,7 +467,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferReceivedFail)
     EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
 }
 
-TEST_F(VideoNegoTest, testFinalizeSdp)
+TEST_F(VideoNegoTest, testConfirmSession)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
@@ -476,15 +476,8 @@ TEST_F(VideoNegoTest, testFinalizeSdp)
     m_pVideoNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(m_pVideoNego->GetOaModelList().GetSize(), 1);
-    m_pVideoNego->FinalizeSdp(&objSessionDescriptor, STATE_OFFER_RECEIVED);
-    EXPECT_EQ(m_pVideoNego->GetOaModelList().GetSize(), 1);
-    m_pVideoNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
-            MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
-    EXPECT_EQ(m_pVideoNego->GetOaModelList().GetSize(), 2);
-    m_pVideoNego->FinalizeSdp(&objSessionDescriptor, STATE_OFFER_SENT);
-    EXPECT_EQ(m_pVideoNego->GetOaModelList().GetSize(), 2);
-    m_pVideoNego->FinalizeSdp(&objSessionDescriptor, STATE_NEGOTIATED);
-    EXPECT_EQ(m_pVideoNego->GetOaModelList().GetSize(), 1);
+    m_pVideoNego->ConfirmSession();
+    EXPECT_EQ(m_pVideoNego->GetOaModelList().GetSize(), 0);
 }
 
 TEST_F(VideoNegoTest, testGetNegotiatedPayloadValid)

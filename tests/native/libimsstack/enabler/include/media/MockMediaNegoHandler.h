@@ -52,6 +52,7 @@ public:
                     OUT MediaNego::MediaNegoResult& errorReason),
             (override));
     MOCK_METHOD(void, FinalizeSdp, (IMS_UINTP nNegoId, IN ISession* pSession), (override));
+    MOCK_METHOD(void, ConfirmSession, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(NEGO_STATE, GetNegoState, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetNegotiatedMediaType, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedQuality, (IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType),

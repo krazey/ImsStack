@@ -119,7 +119,7 @@ protected:
         ON_CALL(objIMediaDescriptor, GetMediaDescriptionEx()).WillByDefault(Return(&objSdpMedia));
         objMediaList.Append(&objIMedia);
         ON_CALL(m_objIsession, GetMedia()).WillByDefault(Return(objMediaList));
-        ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(nullptr));
+        ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(IMS_NULL));
     }
 };
 
@@ -179,9 +179,9 @@ TEST_F(MediaNegoTest, testGetTextNego)
 
 TEST_F(MediaNegoTest, testCreateProfileNullNego)
 {
-    m_objMediaNego.SetAudioNego(nullptr);
-    m_objMediaNego.SetVideoNego(nullptr);
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetAudioNego(IMS_NULL);
+    m_objMediaNego.SetVideoNego(IMS_NULL);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     EXPECT_FALSE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
 }
 
@@ -242,11 +242,11 @@ TEST_F(MediaNegoTest, testGetSupportedMediaTypesFromSdp)
     EXPECT_EQ(m_objMediaNego.GetSupportedMediaTypesFromSdp(&m_objIsession), MEDIA_TYPE_INVALID);
 
     // test null sdp reader
-    ON_CALL(m_objIsession, GetRemoteMediaCapabilities()).WillByDefault(Return(nullptr));
+    ON_CALL(m_objIsession, GetRemoteMediaCapabilities()).WillByDefault(Return(IMS_NULL));
     EXPECT_EQ(m_objMediaNego.GetSupportedMediaTypesFromSdp(&m_objIsession), MEDIA_TYPE_INVALID);
 
     // test null session
-    EXPECT_EQ(m_objMediaNego.GetSupportedMediaTypesFromSdp(nullptr), MEDIA_TYPE_INVALID);
+    EXPECT_EQ(m_objMediaNego.GetSupportedMediaTypesFromSdp(IMS_NULL), MEDIA_TYPE_INVALID);
 }
 
 TEST_F(MediaNegoTest, testForking)
@@ -286,10 +286,10 @@ TEST_F(MediaNegoTest, testFormSdpNullAudioNego)
     MockISessionDescriptor objSessionDescriptor;
     ON_CALL(m_objIsession, GetSessionDescriptor()).WillByDefault(Return(&objSessionDescriptor));
     ON_CALL(m_objIsession, GetMedia()).WillByDefault(Return(ImsList<IMedia*>()));
-    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(nullptr));
+    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(IMS_NULL));
 
     // null audio nego
-    m_objMediaNego.SetAudioNego(nullptr);
+    m_objMediaNego.SetAudioNego(IMS_NULL);
     EXPECT_FALSE(m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND,
             MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND, IMS_FALSE));
     m_objMediaNego.SetAudioNego(m_pMockAudioNego);
@@ -303,10 +303,10 @@ TEST_F(MediaNegoTest, testFormSdpNullVideoNego)
     MockISessionDescriptor objSessionDescriptor;
     ON_CALL(m_objIsession, GetSessionDescriptor()).WillByDefault(Return(&objSessionDescriptor));
     ON_CALL(m_objIsession, GetMedia()).WillByDefault(Return(ImsList<IMedia*>()));
-    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(nullptr));
+    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(IMS_NULL));
 
     // null video nego
-    m_objMediaNego.SetVideoNego(nullptr);
+    m_objMediaNego.SetVideoNego(IMS_NULL);
     EXPECT_FALSE(m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_VIDEO, MEDIA_DIRECTION_SEND,
             MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND, IMS_FALSE));
     m_objMediaNego.SetVideoNego(m_pMockVideoNego);
@@ -320,10 +320,10 @@ TEST_F(MediaNegoTest, testFormSdpNullTextNego)
     MockISessionDescriptor objSessionDescriptor;
     ON_CALL(m_objIsession, GetSessionDescriptor()).WillByDefault(Return(&objSessionDescriptor));
     ON_CALL(m_objIsession, GetMedia()).WillByDefault(Return(ImsList<IMedia*>()));
-    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(nullptr));
+    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(IMS_NULL));
 
     // null text nego
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     EXPECT_FALSE(m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_TEXT, MEDIA_DIRECTION_SEND,
             MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND, IMS_FALSE));
     m_objMediaNego.SetTextNego(m_pMockTextNego);
@@ -337,7 +337,7 @@ TEST_F(MediaNegoTest, testFormSdpOfferSentState)
     MockISessionDescriptor objSessionDescriptor;
     ON_CALL(m_objIsession, GetSessionDescriptor()).WillByDefault(Return(&objSessionDescriptor));
     ON_CALL(m_objIsession, GetMedia()).WillByDefault(Return(ImsList<IMedia*>()));
-    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(nullptr));
+    ON_CALL(m_objIsession, CreateMedia(_, _, _)).WillByDefault(Return(IMS_NULL));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
     EXPECT_FALSE(m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND,
@@ -565,7 +565,7 @@ TEST_F(MediaNegoTest, testNegotiateSdpNullNegoAudio)
     ImsList<IMedia*> objMediaList;
     SetUpMedia(objIMedia, objIMediaDescriptor, objSdpMedia, objMediaList);
 
-    m_objMediaNego.SetAudioNego(nullptr);
+    m_objMediaNego.SetAudioNego(IMS_NULL);
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
     EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
             &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
@@ -598,7 +598,7 @@ TEST_F(MediaNegoTest, testNegotiateSdpNullNegoVideo)
     SetUpMedia(objIMediaAudio, objIMediaDescriptorAudio, objSdpMediaAudio, objMediaListAudioVideo);
     SetUpMedia(objIMediaVideo, objIMediaDescriptorVideo, objSdpMediaVideo, objMediaListAudioVideo);
 
-    m_objMediaNego.SetVideoNego(nullptr);
+    m_objMediaNego.SetVideoNego(IMS_NULL);
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
     EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
             &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
@@ -631,7 +631,7 @@ TEST_F(MediaNegoTest, testNegotiateSdpNullNegoText)
     SetUpMedia(objIMediaAudio, objIMediaDescriptorAudio, objSdpMediaAudio, objMediaListAudioText);
     SetUpMedia(objIMediaText, objIMediaDescriptorText, objSdpMediaText, objMediaListAudioText);
 
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
     EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
             &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
@@ -827,12 +827,92 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessText)
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
 }
 
-TEST_F(MediaNegoTest, testFinalizeSdp)
+TEST_F(MediaNegoTest, testFinalizeSdpWithNullSession)
 {
-    EXPECT_CALL(*m_pMockAudioNego, FinalizeSdp(_, _)).Times(1);
-    EXPECT_CALL(*m_pMockVideoNego, FinalizeSdp(_, _)).Times(1);
-    EXPECT_CALL(*m_pMockTextNego, FinalizeSdp(_, _)).Times(1);
+    // Act & Assert: Call with a null session, which should be handled gracefully without crashing.
+    // No mocks are needed as the function should return early.
+    m_objMediaNego.FinalizeSdp(IMS_NULL);
+}
+
+TEST_F(MediaNegoTest, testFinalizeSdpRemovesDeletedMedia)
+{
+    // Arrange: Create mock media objects, one to be deleted and one to be kept.
+    MockIMedia objMediaToDelete;
+    MockIMedia objMediaToKeep;
+    ImsList<IMedia*> mediaList;
+    mediaList.Append(&objMediaToDelete);
+    mediaList.Append(&objMediaToKeep);
+
+    // Setup the states for the media objects.
+    ON_CALL(objMediaToDelete, GetState()).WillByDefault(Return(IMedia::STATE_DELETED));
+    ON_CALL(objMediaToKeep, GetState()).WillByDefault(Return(IMedia::STATE_ACTIVE));
+
+    // Configure the mock session to return the prepared list of media.
+    ON_CALL(m_objIsession, GetMedia()).WillByDefault(Return(mediaList));
+
+    // Expect that RemoveMedia is called only for the media object marked as STATE_DELETED.
+    EXPECT_CALL(m_objIsession, RemoveMedia(&objMediaToDelete)).Times(1);
+    EXPECT_CALL(m_objIsession, RemoveMedia(&objMediaToKeep)).Times(0);
+
+    // Act: Call the method under test.
     m_objMediaNego.FinalizeSdp(&m_objIsession);
+}
+
+TEST_F(MediaNegoTest, testConfirmSessionAudioNegotiatedSetsStateNegotiated)
+{
+    // Arrange
+    m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
+    EXPECT_CALL(*m_pMockAudioNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, ConfirmSession()).Times(1);
+
+    ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_AMR));
+    ON_CALL(*m_pMockVideoNego, GetNegotiatedResolution())
+            .WillByDefault(Return(VIDEO_RESOLUTION_INVALID));
+    ON_CALL(*m_pMockTextNego, GetNegotiatedCodec()).WillByDefault(Return(TEXT_CODEC_NONE));
+
+    // Act
+    m_objMediaNego.ConfirmSession();
+
+    // Assert
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
+}
+
+TEST_F(MediaNegoTest, testConfirmSessionAudioVideoNegotiatedSetsStateIdle)
+{
+    // Arrange
+    m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
+    EXPECT_CALL(*m_pMockAudioNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, ConfirmSession()).Times(1);
+
+    ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_NONE));
+    ON_CALL(*m_pMockVideoNego, GetNegotiatedResolution())
+            .WillByDefault(Return(VIDEO_RESOLUTION_INVALID));
+    ON_CALL(*m_pMockTextNego, GetNegotiatedCodec()).WillByDefault(Return(TEXT_CODEC_NONE));
+
+    // Act
+    m_objMediaNego.ConfirmSession();
+
+    // Assert
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_IDLE);
+}
+
+TEST_F(MediaNegoTest, testConfirmSessionMediaNegotiatedButInitialStateIdleStaysIdle)
+{
+    // Arrange
+    m_objMediaNego.SetNegoState(STATE_IDLE);
+    EXPECT_CALL(*m_pMockAudioNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, ConfirmSession()).Times(1);
+
+    ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_AMR));
+
+    // Act
+    m_objMediaNego.ConfirmSession();
+
+    // Assert
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_IDLE);
 }
 
 TEST_F(MediaNegoTest, testGetNegotiatedAudioQualitySuccess)
@@ -851,7 +931,7 @@ TEST_F(MediaNegoTest, testGetNegotiatedAudioQualityRemotePortNegative)
 
 TEST_F(MediaNegoTest, testGetNegotiatedAudioQualityNullAudioNego)
 {
-    m_objMediaNego.SetAudioNego(nullptr);
+    m_objMediaNego.SetAudioNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedAudioQuality(), AUDIO_CODEC_NOT_USED);
 }
 
@@ -865,7 +945,7 @@ TEST_F(MediaNegoTest, testGetNegotiatedVideoQuality)
     EXPECT_CALL(*m_pMockVideoNego, GetNegotiatedRtpPort()).WillOnce(Return(0));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoQuality(), VIDEO_RESOLUTION_NOT_USED);
 
-    m_objMediaNego.SetVideoNego(nullptr);
+    m_objMediaNego.SetVideoNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoQuality(), VIDEO_RESOLUTION_NOT_USED);
 }
 
@@ -878,7 +958,7 @@ TEST_F(MediaNegoTest, testGetNegotiatedTextQuality)
     EXPECT_CALL(*m_pMockTextNego, GetNegotiatedRtpPort()).WillOnce(Return(0));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextQuality(), TEXT_CODEC_NOT_USED);
 
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextQuality(), TEXT_CODEC_NOT_USED);
 }
 
@@ -890,25 +970,25 @@ TEST_F(MediaNegoTest, testGetNegotiatedTextQualityRemotePortZero)
 
 TEST_F(MediaNegoTest, testGetNegotiatedTextQualityNullTextNego)
 {
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextQuality(), TEXT_CODEC_NOT_USED);
 }
 
 TEST_F(MediaNegoTest, testGetNegotiatedAudioDirectionNullAudioNego)
 {
-    m_objMediaNego.SetAudioNego(nullptr);
+    m_objMediaNego.SetAudioNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedAudioDirection(), MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoTest, testGetNegotiatedVideoDirectionNullVideoNego)
 {
-    m_objMediaNego.SetVideoNego(nullptr);
+    m_objMediaNego.SetVideoNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoDirection(), MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoTest, testGetNegotiatedTextDirectionNullTextNego)
 {
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextDirection(), MEDIA_DIRECTION_INVALID);
 }
 
@@ -917,7 +997,7 @@ TEST_F(MediaNegoTest, testGetNegotiatedAudioDirection)
     EXPECT_CALL(*m_pMockAudioNego, GetNegotiatedDirection()).WillOnce(Return(MEDIA_DIRECTION_SEND));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedAudioDirection(), MEDIA_DIRECTION_SEND);
 
-    m_objMediaNego.SetAudioNego(nullptr);
+    m_objMediaNego.SetAudioNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedAudioDirection(), MEDIA_DIRECTION_INVALID);
 }
 
@@ -926,7 +1006,7 @@ TEST_F(MediaNegoTest, testGetNegotiatedVideoDirection)
     EXPECT_CALL(*m_pMockVideoNego, GetNegotiatedDirection()).WillOnce(Return(MEDIA_DIRECTION_SEND));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoDirection(), MEDIA_DIRECTION_SEND);
 
-    m_objMediaNego.SetVideoNego(nullptr);
+    m_objMediaNego.SetVideoNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedVideoDirection(), MEDIA_DIRECTION_INVALID);
 }
 
@@ -935,7 +1015,7 @@ TEST_F(MediaNegoTest, testGetNegotiatedTextDirection)
     EXPECT_CALL(*m_pMockTextNego, GetNegotiatedDirection()).WillOnce(Return(MEDIA_DIRECTION_SEND));
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextDirection(), MEDIA_DIRECTION_SEND);
 
-    m_objMediaNego.SetTextNego(nullptr);
+    m_objMediaNego.SetTextNego(IMS_NULL);
     EXPECT_EQ(m_objMediaNego.GetNegotiatedTextDirection(), MEDIA_DIRECTION_INVALID);
 }
 
@@ -955,10 +1035,10 @@ TEST_F(MediaNegoTest, testGetMediaDescriptor)
             .WillByDefault(Return(&objIMediaDescriptorProposal));
     EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(&objIMedia), &objIMediaDescriptorProposal);
 
-    ON_CALL(objIMedia, GetProposal()).WillByDefault(Return(nullptr));
-    EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(&objIMedia), nullptr);
+    ON_CALL(objIMedia, GetProposal()).WillByDefault(Return(IMS_NULL));
+    EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(&objIMedia), IMS_NULL);
 
-    EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(nullptr), nullptr);
+    EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(IMS_NULL), IMS_NULL);
 }
 
 TEST_F(MediaNegoTest, testNegotiateSdpWhenPreviewModeAndNegotiated)

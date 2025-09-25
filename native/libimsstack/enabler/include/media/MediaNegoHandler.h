@@ -126,14 +126,21 @@ public:
     virtual IMS_BOOL NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason);
-
     /**
-     * @brief Delegates SDP finalization to the specified MediaNego instance.
+     * @brief Delegates the cleanup of deleted media descriptors to the specified MediaNego
+     * instance.
      * @see MediaNego::FinalizeSdp
      * @param nNegoId The ID of the MediaNego instance.
      * @param pSession ISession instance associated with the SDP.
      */
     virtual void FinalizeSdp(IMS_UINTP nNegoId, IN ISession* pSession);
+
+    /**
+     * @brief Confirms the session negotiation and cleans up any stale negotiation models.
+     * This should be called when a session is fully established (e.g., after 2xx/ACK).
+     * @param nNegoId The ID of the MediaNego instance.
+     */
+    virtual void ConfirmSession(IMS_UINTP nNegoId);
 
     // --- Getters for Negotiated Information (Delegated to MediaNego) ---
 

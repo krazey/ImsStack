@@ -251,37 +251,21 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
 
 PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
 {
-    if (m_listOaModel.GetSize() > 0)
+    std::shared_ptr<OaModel> pLatestOaModel = GetNegotiatedOaModel();
+    if (pLatestOaModel == IMS_NULL)
     {
-        std::shared_ptr<OaModel> pLatestOaModel = IMS_NULL;
-        pLatestOaModel = GetNegotiatedOaModel();
-        if (pLatestOaModel == IMS_NULL)
+        IMS_TRACE_E(0, "HasNegotiatedDtmf(): invalid OA model", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->GetPayloadList().GetSize(); i++)
+    {
+        AudioProfile::Payload* pPayload = GetNegotiatedProfile(*pLatestOaModel)->GetPayloadAt(i);
+
+        if (pPayload != IMS_NULL &&
+                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
         {
-            IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
-        if (!pLatestOaModel->IsAllProfileExist())
-        {
-            IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
-        for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->GetPayloadList().GetSize();
-                i++)
-        {
-            AudioProfile::Payload* pPayload =
-                    GetNegotiatedProfile(*pLatestOaModel)->GetPayloadAt(i);
-
-            if (pPayload == IMS_NULL)
-            {
-                continue;
-            }
-
-            if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
-            {
-                return IMS_TRUE;
-            }
+            return IMS_TRUE;
         }
     }
 
@@ -340,7 +324,7 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
     // Getting OaModel from list
     std::shared_ptr<OaModel> pNewOaModel = GetNegotiatedOaModel();
 
-    if (pNewOaModel == IMS_NULL || !pNewOaModel->IsAllProfileExist())
+    if (pNewOaModel == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormAnswer(): no valid negotiated model", 0, 0, 0);
         return IMS_FALSE;
@@ -601,7 +585,5 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // add session key
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }

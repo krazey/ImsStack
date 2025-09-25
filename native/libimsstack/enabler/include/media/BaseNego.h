@@ -45,31 +45,25 @@ public:
         std::shared_ptr<MediaBaseProfile> pPeerProfile;
         /** The SDP profile to store negotiated profiles */
         std::shared_ptr<MediaBaseProfile> pNegotiatedProfile;
-        /** The identification of SDP description object from the SDP engine */
-        IMS_SINTP nSessionDescriptorKey;
-        /** checking variable for confirmed session*/
-        IMS_BOOL bConfirmedSession;
 
-    public:
         OaModel() :
                 pLocalProfile(IMS_NULL),
                 pPeerProfile(IMS_NULL),
-                pNegotiatedProfile(IMS_NULL),
-                nSessionDescriptorKey(0),
-                bConfirmedSession(IMS_FALSE) {};
+                pNegotiatedProfile(IMS_NULL)
+        {
+        }
 
-    private:
-        OaModel(IN const OaModel& obj);
-        OaModel& operator=(IN const OaModel& obj);
-
-    public:
         IMS_BOOL IsAllProfileExist()
         {
             return (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
                            pNegotiatedProfile != IMS_NULL)
                     ? IMS_TRUE
                     : IMS_FALSE;
-        };
+        }
+
+    private:
+        OaModel(IN const OaModel& obj);
+        OaModel& operator=(IN const OaModel& obj);
     };
 
     explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0,
@@ -147,13 +141,9 @@ public:
             IN std::shared_ptr<MediaEnvironment> pEnvironment, IN MediaConfiguration* pConfig);
 
     /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
-     *
-     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
-     * @param eNegoState The current negotiation state to decide to remove the OA model item
+     * @brief Confirms the session negotiation and cleans up any stale negotiation models.
      */
-    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
-
+    virtual void ConfirmSession();
     /**
      * @brief Get the MediaBaseProfile object
      */
@@ -227,7 +217,7 @@ protected:
     virtual MediaBaseProfile* GetLocalProfile(IN const OaModel& objOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN const OaModel& objOaModel);
     virtual MediaBaseProfile* GetNegotiatedProfile(IN const OaModel& objOaModel);
-    std::shared_ptr<OaModel> GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
+    std::shared_ptr<OaModel> GetNegotiatedOaModel();
     void DestroyListOaModel();
     void Copy(IN const BaseNego* pNego);
     virtual std::shared_ptr<BaseNego::OaModel> CreateOaModel(

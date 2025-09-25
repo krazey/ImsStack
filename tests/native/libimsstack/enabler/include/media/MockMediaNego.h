@@ -42,6 +42,7 @@ public:
                     OUT MediaNegoResult& errorReason),
             (override));
     MOCK_METHOD(void, FinalizeSdp, (IN ISession * pSession), (override));
+    MOCK_METHOD(void, ConfirmSession, (), (override));
     MOCK_METHOD(void, SetNegoState, (NEGO_STATE eNegoState), (override));
     MOCK_METHOD(NEGO_STATE, GetNegoState, (), (override));
     MOCK_METHOD(std::shared_ptr<AudioNego>, GetAudioNego, (), (override));

@@ -555,6 +555,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 if (pMediaNego != IMS_NULL)
                 {
                     pMediaNego->SetPreviewMode(IMS_FALSE);
+                    m_pMediaNegoHandler->ConfirmSession(nNegoId);
                 }
             }
 

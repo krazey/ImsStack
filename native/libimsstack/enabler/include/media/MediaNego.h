@@ -117,11 +117,22 @@ public:
             OUT MediaNegoResult& errorReason);
 
     /**
-     * @brief Deletes invalid negotiation result and unnecessary Audio/Video/TextNego object
+     * @brief Finalizes the media session state by removing deleted media lines.
      *
-     * @param pSession ISession instance to get the SDP descriptor
+     * This method iterates through the media lines (m-lines) in the provided `ISession`
+     * and removes any that have been marked with `IMedia::STATE_DELETED`. This is a
+     * crucial cleanup step after a session modification (e.g., a re-INVITE) is
+     * confirmed, ensuring that the session object accurately reflects the active media.
+     *
+     * @param pSession The ISession instance whose media lines need to be finalized.
      */
     virtual void FinalizeSdp(IN ISession* pSession);
+
+    /**
+     * @brief Confirms the session negotiation, cleans up unconfirmed OA models,
+     * and sets the final negotiation state.
+     */
+    virtual void ConfirmSession();
 
     /**
      * @brief Set the negotiation state

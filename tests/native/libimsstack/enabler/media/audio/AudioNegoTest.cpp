@@ -489,24 +489,40 @@ TEST_F(AudioNegoTest, testNegotiateSdpOfferReceivedFail)
             STATE_OFFER_RECEIVED, &objSessionDescriptor, &objMediaDescriptor, nDirection);
     EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
 }
-
-TEST_F(AudioNegoTest, testFinalizeSdp)
+TEST_F(AudioNegoTest, testConfirmSession)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 0);
 
     m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
-    m_pAudioNego->FinalizeSdp(&objSessionDescriptor, STATE_OFFER_RECEIVED);
-    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
+
     m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 2);
-    m_pAudioNego->FinalizeSdp(&objSessionDescriptor, STATE_OFFER_SENT);
+
+    m_pAudioNego->ConfirmSession();
+    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
+}
+
+TEST_F(AudioNegoTest, testConfirmSessionRemovesIncomplete)
+{
+    MockISessionDescriptor objSessionDescriptorComplete;
+    MockIMediaDescriptor objMediaDescriptorComplete;
+
+    m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptorComplete, &objMediaDescriptorComplete,
+            MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
+    auto pCompleteOaModel = m_pAudioNego->GetOaModelList().GetAt(0);
+
+    MockISessionDescriptor objSessionDescriptorIncomplete;
+    MockIMediaDescriptor objMediaDescriptorIncomplete;
+    m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptorIncomplete,
+            &objMediaDescriptorIncomplete, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
+
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 2);
-    m_pAudioNego->FinalizeSdp(&objSessionDescriptor, STATE_NEGOTIATED);
+
+    m_pAudioNego->ConfirmSession();
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
 }
 

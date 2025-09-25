@@ -582,7 +582,7 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferReceivedFail)
     EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
 }
 
-TEST_F(TextNegoTest, testFinalizeSdp)
+TEST_F(TextNegoTest, testConfirmSession)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
@@ -591,15 +591,8 @@ TEST_F(TextNegoTest, testFinalizeSdp)
     m_pTextNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 1);
-    m_pTextNego->FinalizeSdp(&objSessionDescriptor, STATE_OFFER_RECEIVED);
-    EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 1);
-    m_pTextNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
-            MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
-    EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 2);
-    m_pTextNego->FinalizeSdp(&objSessionDescriptor, STATE_OFFER_SENT);
-    EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 2);
-    m_pTextNego->FinalizeSdp(&objSessionDescriptor, STATE_NEGOTIATED);
-    EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 1);
+    m_pTextNego->ConfirmSession();
+    EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 0);
 }
 
 TEST_F(TextNegoTest, testGetNegotiatedPayloadValid)

@@ -546,11 +546,32 @@ void MediaNego::FinalizeSdp(IN ISession* pSession)
     IMS_TRACE_D("FinalizeSdp - enter ISessionDescriptor[%" PFLS_x "]",
             reinterpret_cast<IMS_SINTP>(pSession->GetSessionDescriptor()), 0, 0);
 
+    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
+    ImsList<IMedia*> lstMediaToRemove;
+
+    for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
+    {
+        IMedia* pIMedia = lstIMedia.GetAt(i);
+        if (pIMedia != IMS_NULL && pIMedia->GetState() == IMedia::STATE_DELETED)
+        {
+            lstMediaToRemove.Append(pIMedia);
+        }
+    }
+
+    for (IMS_UINT32 i = 0; i < lstMediaToRemove.GetSize(); i++)
+    {
+        pSession->RemoveMedia(lstMediaToRemove.GetAt(i));
+    }
+}
+
+PUBLIC
+void MediaNego::ConfirmSession()
+{
     IMS_BOOL bNegotiated = IMS_FALSE;
 
     if (m_pAudioNego != IMS_NULL)
     {
-        m_pAudioNego->FinalizeSdp(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pAudioNego->ConfirmSession();
 
         if (m_pAudioNego->GetNegotiatedCodec() != AUDIO_CODEC_NONE)
         {
@@ -560,15 +581,17 @@ void MediaNego::FinalizeSdp(IN ISession* pSession)
 
     if (m_pVideoNego != IMS_NULL)
     {
-        m_pVideoNego->FinalizeSdp(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pVideoNego->ConfirmSession();
 
         if (m_pVideoNego->GetNegotiatedResolution() != VIDEO_RESOLUTION_INVALID)
+        {
             bNegotiated = IMS_TRUE;
+        }
     }
 
     if (m_pTextNego != IMS_NULL)
     {
-        m_pTextNego->FinalizeSdp(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pTextNego->ConfirmSession();
 
         if (m_pTextNego->GetNegotiatedCodec() != TEXT_CODEC_NONE)
         {
@@ -576,33 +599,13 @@ void MediaNego::FinalizeSdp(IN ISession* pSession)
         }
     }
 
-    if (bNegotiated)
+    if (bNegotiated && m_eNegoState != STATE_IDLE)
     {
         SetNegoState(STATE_NEGOTIATED);
     }
     else
     {
         SetNegoState(STATE_IDLE);
-    }
-
-    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
-
-    for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
-    {
-        IMedia* pIMedia = lstIMedia.GetAt(i);
-
-        if (pIMedia == IMS_NULL)
-        {
-            return;
-        }
-
-        if (pIMedia->GetState() == IMedia::STATE_DELETED)
-        {
-            if (pSession->RemoveMedia(pIMedia) == IMS_SUCCESS)
-            {
-                IMS_TRACE_D("FinalizeSdp() remove IMedia[%d / %" PFLS_x "] SUCCESS", i, pIMedia, 0);
-            }
-        }
     }
 }
 

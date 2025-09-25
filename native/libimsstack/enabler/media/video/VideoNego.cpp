@@ -179,7 +179,7 @@ PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescript
     // Getting OaModel from list
     std::shared_ptr<OaModel> pNewOaModel = GetNegotiatedOaModel();
 
-    if (pNewOaModel == IMS_NULL || !pNewOaModel->IsAllProfileExist())
+    if (pNewOaModel == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
         return IMS_FALSE;
@@ -361,7 +361,6 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     m_listOaModel.Append(pNewOaModel);
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
@@ -412,6 +411,5 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
