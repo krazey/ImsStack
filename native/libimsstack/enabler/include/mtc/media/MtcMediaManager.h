@@ -103,7 +103,7 @@ public:
     /* Media Profile */
     void CreateMediaProfile(
             IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOrigin) override;
-    void DestroyMediaProfile(IN ISession* piSession) override;
+    void DestroyMediaForSession(IN ISession* piSession) override;
     void DestroyAllMediaProfiles();  // called when terminate media
 
     /* Local Tone - public or private */
@@ -166,6 +166,7 @@ private:
 
     SessionMedia* GetSessionMedia(IN const ISession& objISession) const;
     void DestroyAllSessionMedia();
+    void DestroySessionMedia(IN const ISession& objISession);
 
 protected:
     MediaManager& m_objMediaManager;

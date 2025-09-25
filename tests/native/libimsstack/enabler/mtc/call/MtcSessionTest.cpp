@@ -163,7 +163,7 @@ TEST_F(MtcSessionTest, DestructorDestroysMediaProfileAndQosInfo)
 {
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 
-    EXPECT_CALL(objMediaManager, DestroyMediaProfile(_));
+    EXPECT_CALL(objMediaManager, DestroyMediaForSession(_));
     EXPECT_CALL(objPreconditionManager, DestroyQos(_));
 }
 

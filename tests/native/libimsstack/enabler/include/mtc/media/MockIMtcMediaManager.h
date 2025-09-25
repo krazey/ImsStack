@@ -50,7 +50,7 @@ public:
     MOCK_METHOD(void, CreateMediaProfile,
             (IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile),
             (override));
-    MOCK_METHOD(void, DestroyMediaProfile, (IN ISession* piSession), (override));
+    MOCK_METHOD(void, DestroyMediaForSession, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsLocalTone, (), (override));
     MOCK_METHOD(IMS_RESULT, FormSdp,
             (IN ISession* piSession, IN CallType eCallType,

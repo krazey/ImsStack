@@ -121,11 +121,11 @@ public:
             IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOrigin) = 0;
 
     /**
-     * @brief Destroys
+     * @brief Destroys the media profile and session media for a given session.
      *
-     * @param piSession
+     * @param piSession The ISession instance for which to destroy media resources.
      */
-    virtual void DestroyMediaProfile(IN ISession* piSession) = 0;
+    virtual void DestroyMediaForSession(IN ISession* piSession) = 0;
 
     /**
      * @brief To check if the ringback tone is played with a locally generated tone.

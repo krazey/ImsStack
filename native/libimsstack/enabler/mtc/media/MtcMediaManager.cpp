@@ -277,10 +277,11 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
             piSession, bForked, bOrigin, eMediaContents, m_piMediaSession);
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaProfile(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaForSession(IN ISession* piSession)
 {
-    IMS_TRACE_D("DestroyMediaProfile", 0, 0, 0);
+    IMS_TRACE_D("DestroyMediaForSession", 0, 0, 0);
     m_pProfileManager->DestroyMediaProfile(piSession, m_piMediaSession);
+    DestroySessionMedia(*piSession);
 }
 
 PUBLIC
@@ -696,6 +697,16 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsPreviewMode(IN ISession* piSession) c
     return m_piMediaSession->IsPreviewMode(GetMediaNegoId(piSession));
 }
 
+PRIVATE void MtcMediaManager::DestroySessionMedia(IN const ISession& objISession)
+{
+    IMS_SLONG nIndex = m_objSessionMedias.GetIndexOfKey(&objISession);
+    if (nIndex >= 0)
+    {
+        delete m_objSessionMedias.GetValueAt(nIndex);
+        m_objSessionMedias.RemoveAt(nIndex);
+    }
+}
+
 PRIVATE
 void MtcMediaManager::UpdateLocalTone(
         IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState)
@@ -948,11 +959,10 @@ SessionMedia* MtcMediaManager::GetSessionMedia(IN const ISession& objISession) c
 PRIVATE
 void MtcMediaManager::DestroyAllSessionMedia()
 {
-    IMS_TRACE_D("DestroyAllSessionMedia", 0, 0, 0);
-    for (IMS_UINT32 nIndex = m_objSessionMedias.GetSize(); nIndex > 0; nIndex--)
+    for (IMS_SINT32 nIndex = static_cast<IMS_SINT32>(m_objSessionMedias.GetSize()) - 1; nIndex >= 0;
+            nIndex--)
     {
-        SessionMedia* pSessionMedia = m_objSessionMedias.GetValueAt(nIndex - 1);
-        delete pSessionMedia;
-        m_objSessionMedias.RemoveAt(nIndex - 1);
+        delete m_objSessionMedias.GetValueAt(nIndex);
+        m_objSessionMedias.RemoveAt(nIndex);
     }
 }

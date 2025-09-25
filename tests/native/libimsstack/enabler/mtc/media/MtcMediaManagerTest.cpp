@@ -191,7 +191,19 @@ TEST_F(MtcMediaManagerTest, DestroyMediaProfileDestroysMediaProfile)
 {
     EXPECT_CALL(*pMediaProfileManager, DestroyMediaProfile(&objISession, &objMediaSession));
 
-    pMediaManager->DestroyMediaProfile(&objISession);
+    pMediaManager->DestroyMediaForSession(&objISession);
+}
+
+TEST_F(MtcMediaManagerTest, DestroyMediaProfileDestroysSessionMedia)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND, DIRECTION_SEND, DIRECTION_SEND, AUDIO_QUALITY_AMR_NB,
+            VIDEO_QUALITY_HD_PR, GTT_MODE_FULL);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession), objMediaInfo);
+
+    EXPECT_CALL(*pMediaProfileManager, DestroyMediaProfile(&objISession, &objMediaSession));
+    pMediaManager->DestroyMediaForSession(&objISession);
+    EXPECT_EQ(pMediaManager->GetMediaInfo(objISession), MediaInfo());
 }
 
 TEST_F(MtcMediaManagerTest, DestroyAllMediaProfileDestroysAllMediaProfile)
@@ -1396,7 +1408,7 @@ TEST_F(MtcMediaManagerTest, UpdatePemType_CallsSetMediaPemTypeOnSession_WithSend
 
     ON_CALL(objMediaSession, DestroyProfile(nNegoId)).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(*pMediaProfileManager, DestroyMediaProfile(&objISession, &objMediaSession));
-    pMediaManager->DestroyMediaProfile(&objISession);
+    pMediaManager->DestroyMediaForSession(&objISession);
 }
 
 TEST_F(MtcMediaManagerTest, UpdatePemType_NoHeader_AndConfigToInitialize)
@@ -1430,7 +1442,7 @@ TEST_F(MtcMediaManagerTest, UpdatePemType_NoHeader_AndConfigToInitialize)
 
     ON_CALL(objMediaSession, DestroyProfile(nNegoId)).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(*pMediaProfileManager, DestroyMediaProfile(&objISession, &objMediaSession));
-    pMediaManager->DestroyMediaProfile(&objISession);
+    pMediaManager->DestroyMediaForSession(&objISession);
 }
 
 TEST_F(MtcMediaManagerTest, SessionMediaDefaultConstructorInitializesMediaInfosToDefault)

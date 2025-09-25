@@ -84,7 +84,7 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
 {
     IMS_TRACE_I("~MtcSession", 0, 0, 0);
 
-    m_objContext.GetMediaManager().DestroyMediaProfile(&m_objSession);
+    m_objContext.GetMediaManager().DestroyMediaForSession(&m_objSession);
     m_objContext.GetPreconditionManager().DestroyQos(&m_objSession);
     m_objSession.SetMessageMediator(IMS_NULL);
     m_objSession.SetRefreshListener(IMS_NULL);
