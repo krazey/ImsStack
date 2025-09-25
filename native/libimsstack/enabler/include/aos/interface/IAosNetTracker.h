@@ -48,6 +48,7 @@ public:
     */
     virtual IMS_UINT32 GetNetworkType() = 0;
     virtual AString GetNetworkOperator() = 0;
+    virtual AString GetMobileNetworkPlmn() = 0;
 
     virtual void SetRatGuardTime(IN IMS_UINT32 nGuardTime) = 0;
     virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) = 0;

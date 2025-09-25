@@ -63,47 +63,48 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)                         \
-    using Base::CallTracker_ECallSessionReleased;   \
-    using Base::CallTracker_StateChanged;           \
-    using Base::ClearConnection;                    \
-    using Base::ClearTimers;                        \
-    using Base::Condition_RequestCommand;           \
-    using Base::GetAppState;                        \
-    using Base::GetState;                           \
-    using Base::IsRegWaitingRequired;               \
-    using Base::IsECallConnectedNetworkUnavailable; \
-    using Base::IsImsCall;                          \
-    using Base::IsKeepEPdnWhenNoPcscf;              \
-    using Base::IsRegBlockInCbm;                    \
-    using Base::IsTimerRunning;                     \
-    using Base::NetTracker_StatusChanged;           \
-    using Base::ProcessAppActivatedTimerExpired;    \
-    using Base::ProcessAppConnectedTimerExpired;    \
-    using Base::ProcessAppTerminatedTimerExpired;   \
-    using Base::ProcessConnectionUpdated;           \
-    using Base::ProcessECallStarted;                \
-    using Base::ProcessECallTerminated;             \
-    using Base::ProcessMessage;                     \
-    using Base::ProcessReconfigTimerExpired;        \
-    using Base::ProcessRegBlockedTimerExpired;      \
-    using Base::ProcessRegStart;                    \
-    using Base::SetAppState;                        \
-    using Base::SetAppType;                         \
-    using Base::SetImsCall;                         \
-    using Base::SetKeepEPdnWhenNoPcscf;             \
-    using Base::SetRegBlockInCbm;                   \
-    using Base::StateConnected_Connection;          \
-    using Base::StateConnected_Registration;        \
-    using Base::StateConnecting_Connection;         \
-    using Base::StateConnecting_Registration;       \
-    using Base::StateDisconnecting_Connection;      \
-    using Base::StateNotReady_Condition;            \
-    using Base::StateReady_Condition;               \
-    using Base::StateReady_Connection;              \
-    using Base::StateUpdating_Registration;         \
-    using Base::StartTimer;                         \
-    using Base::StopTimer;                          \
+#define DECLARE_USING(Base)                                \
+    using Base::CallTracker_ECallSessionReleased;          \
+    using Base::CallTracker_StateChanged;                  \
+    using Base::ClearConnection;                           \
+    using Base::ClearTimers;                               \
+    using Base::Condition_RequestCommand;                  \
+    using Base::GetAppState;                               \
+    using Base::GetState;                                  \
+    using Base::IsRegWaitingRequired;                      \
+    using Base::IsECallConnectedNetworkUnavailable;        \
+    using Base::IsImsCall;                                 \
+    using Base::IsKeepEPdnWhenNoPcscf;                     \
+    using Base::IsRegBlockInCbm;                           \
+    using Base::IsReleaseEmergencyPdnUponEmergencyCallEnd; \
+    using Base::IsTimerRunning;                            \
+    using Base::NetTracker_StatusChanged;                  \
+    using Base::ProcessAppActivatedTimerExpired;           \
+    using Base::ProcessAppConnectedTimerExpired;           \
+    using Base::ProcessAppTerminatedTimerExpired;          \
+    using Base::ProcessConnectionUpdated;                  \
+    using Base::ProcessECallStarted;                       \
+    using Base::ProcessECallTerminated;                    \
+    using Base::ProcessMessage;                            \
+    using Base::ProcessReconfigTimerExpired;               \
+    using Base::ProcessRegBlockedTimerExpired;             \
+    using Base::ProcessRegStart;                           \
+    using Base::SetAppState;                               \
+    using Base::SetAppType;                                \
+    using Base::SetImsCall;                                \
+    using Base::SetKeepEPdnWhenNoPcscf;                    \
+    using Base::SetRegBlockInCbm;                          \
+    using Base::StateConnected_Connection;                 \
+    using Base::StateConnected_Registration;               \
+    using Base::StateConnecting_Connection;                \
+    using Base::StateConnecting_Registration;              \
+    using Base::StateDisconnecting_Connection;             \
+    using Base::StateNotReady_Condition;                   \
+    using Base::StateReady_Condition;                      \
+    using Base::StateReady_Connection;                     \
+    using Base::StateUpdating_Registration;                \
+    using Base::StartTimer;                                \
+    using Base::StopTimer;                                 \
     using Base::UpdateConnectedServices;
 
 const IMS_SINT32 SLOT_ID = 0;
@@ -1156,6 +1157,60 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfSettingKeepPdnUntilEMod
 
     EXPECT_FALSE(m_pTestAosEApplication->IsKeepEPdnWhenNoPcscf());
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+}
+
+TEST_F(AosEApplicationTest,
+        ReleaseEPdnWhenECallTerminatedInFakeModeBySubscriberIncompletedAndAttachedToPlmnRequiresEPdnRelease)
+{
+    // GIVEN
+    ImsVector<AString> objPlmns;
+    objPlmns.Add("50501");
+    objPlmns.Add("50502");
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_FAKE));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPlmnsReleaseEPdnUponECallEndInFakeMode())
+            .WillByDefault(ReturnRef(objPlmns));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkPlmn())
+            .WillByDefault(Return(AString("50502")));
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillOnce(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL result = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    // THEN
+    EXPECT_TRUE(result);
+}
+
+TEST_F(AosEApplicationTest,
+        ReleaseEPdnWhenECallTerminatedInFakeModeBySubscriberIncompletedAndAttachedToPlmnNotRequiresEPdnRelease)
+{
+    // GIVEN
+    ImsVector<AString> objPlmns;
+    objPlmns.Add("50501");
+    objPlmns.Add("50502");
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_FAKE));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPlmnsReleaseEPdnUponECallEndInFakeMode())
+            .WillByDefault(ReturnRef(objPlmns));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkPlmn())
+            .WillByDefault(Return(AString("50503")));  // Different PLMN
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillOnce(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL result = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    // THEN
+    EXPECT_FALSE(result);
 }
 
 TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedInFakeModeIfConfigured)

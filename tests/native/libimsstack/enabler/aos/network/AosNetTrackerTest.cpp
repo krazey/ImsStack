@@ -374,6 +374,14 @@ TEST_F(AosNetTrackerTest, GetMobileNetworkRegistrationRejectCause)
     EXPECT_EQ(m_pAosNetTracker->GetMobileNetworkRegistrationRejectCause(), 3);
 }
 
+TEST_F(AosNetTrackerTest, GetMobileNetworkPlmn)
+{
+    AString strPlmn("00101");
+    EXPECT_CALL(m_objMockINetworkWatcher, GetAccessNetworkPlmn()).WillOnce(Return(strPlmn));
+    m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
+    EXPECT_EQ(m_pAosNetTracker->GetMobileNetworkPlmn(), strPlmn);
+}
+
 TEST_F(AosNetTrackerTest, GetMobileVoiceServiceState)
 {
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceServiceType())

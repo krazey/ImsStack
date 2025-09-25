@@ -159,10 +159,27 @@ PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
     }
 
     // FAKE MODE
-    if (m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE &&
-            GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndInFakeMode())
+    if (m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
     {
-        return IMS_TRUE;
+        if (GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndInFakeMode())
+        {
+            return IMS_TRUE;
+        }
+
+        // Checks if the fake mode was caused by BLOCK_SUBSCRIBER_INCOMPLETED. If the fake mode was
+        // caused by SIP error responses for EIMS registration, then it should follow the carrier's
+        // configuration instead of handling EPDN based on the PLMN the UE is currently attached to.
+        if (m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
+        {
+            const ImsVector<AString> plmns =
+                    GET_N_CONFIG(m_nSlotId)->GetPlmnsReleaseEPdnUponECallEndInFakeMode();
+            IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
+            if (piNetTracker != IMS_NULL && plmns.Contains(piNetTracker->GetMobileNetworkPlmn()))
+            {
+                A_IMS_TRACE_D(APPID, "Need to release emergency pdn.", 0, 0, 0);
+                return IMS_TRUE;
+            }
+        }
     }
 
     // IPCAN

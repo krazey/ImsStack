@@ -62,6 +62,7 @@ public:
     IMS_SINT32 GetMobileServiceState() override;
     IMS_UINT32 GetNetworkType() override;
     AString GetNetworkOperator() override;
+    AString GetMobileNetworkPlmn() override;
 
     void SetRatGuardTime(IN IMS_UINT32 nGuardTime) override;
     void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) override;
