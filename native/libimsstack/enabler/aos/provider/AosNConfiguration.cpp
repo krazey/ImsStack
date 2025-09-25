@@ -1046,6 +1046,11 @@ AosNConfiguration::GetNetworkAttachRejectCausesForCrossStackRedial()
     return m_objAsset.objNetworkAttachRejectCausesForCrossStackRedial;
 }
 
+PUBLIC VIRTUAL ImsVector<AString>& AosNConfiguration::GetPlmnsReleaseEPdnUponECallEndInFakeMode()
+{
+    return m_objAsset.objPlmnsReleaseEPdnUponECallEndInFakeMode;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -1851,6 +1856,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
                             KEY_NETWORK_ATTACH_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::ImsWfc::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
+    m_objAsset.objPlmnsReleaseEPdnUponECallEndInFakeMode = piCc->GetStringArray(CarrierConfig::
+                    ImsEmergency::KEY_PLMNS_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_STRING_ARRAY);
 }
 
 PROTECTED

@@ -2041,6 +2041,15 @@ public:
      */
     virtual ImsVector<IMS_SINT32>& GetNetworkAttachRejectCausesForCrossStackRedial() = 0;
 
+    /**
+     * @brief Indicate the PLMNs that require UE to release an emergency PDN/PDU after an emergency
+     *        call ends.
+     *
+     * @return vector PLMNs
+     * @see {@code imsemergency.plmns_release_epdn_upon_ecall_end_in_fake_mode_string_array}
+     */
+    virtual ImsVector<AString>& GetPlmnsReleaseEPdnUponECallEndInFakeMode() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,

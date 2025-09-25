@@ -990,6 +990,14 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             GetIntArray(CarrierConfig::ImsWfc::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY, _))
             .WillOnce(Return(objVowifiSubErrorCodeForInitReg));
 
+    ImsVector<AString> objPlmnsReleaseEPdnUponECallEndInFakeMode;
+    objPlmnsReleaseEPdnUponECallEndInFakeMode.Add("310410");
+    EXPECT_CALL(objCarrierConfig,
+            GetStringArray(CarrierConfig::ImsEmergency::
+                                   KEY_PLMNS_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_STRING_ARRAY,
+                    _))
+            .WillOnce(Return(objPlmnsReleaseEPdnUponECallEndInFakeMode));
+
     m_pAosNConfiguration->InitAssetsConfig(&objCarrierConfig);
 
     EXPECT_FALSE(m_pAosNConfiguration->IsCdmalessFeatureTagRequired());
@@ -1165,6 +1173,9 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     }
     EXPECT_EQ(2, cnt);
     objErrCode.Clear();
+    ImsVector<AString> objPlmns = m_pAosNConfiguration->GetPlmnsReleaseEPdnUponECallEndInFakeMode();
+    EXPECT_EQ(AString("310410"), objPlmns.GetAt(0));
+    objPlmns.Clear();
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErr)

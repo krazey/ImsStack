@@ -244,5 +244,6 @@ public:
     ImsVector<IMS_SINT32> objERegErrCodeNotSupportedCommonPolicy;
     ImsVector<IMS_SINT32> objNetworkAttachRejectCausesForCrossStackRedial;
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
+    ImsVector<AString> objPlmnsReleaseEPdnUponECallEndInFakeMode;
 };
 #endif  // AOS_ASSET_H_

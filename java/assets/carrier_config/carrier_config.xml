@@ -624,6 +624,51 @@
     <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="0"/>
     <int name="imsemergency.roaming_preferred_ereg_int" value="-1"/>
+    <string-array name="imsemergency.plmns_release_epdn_upon_ecall_end_in_fake_mode_string_array" num="43">
+        <item value="302610"/> <!-- Bell (Canada) -->
+        <item value="302630"/> <!-- Bell (Canada) -->
+        <item value="302640"/> <!-- Bell (Canada) -->
+        <item value="302490"/> <!-- Freedom (Canada) -->
+        <item value="310200"/> <!-- TMO (USA) -->
+        <item value="310210"/> <!-- TMO (USA) -->
+        <item value="310220"/> <!-- TMO (USA) -->
+        <item value="310230"/> <!-- TMO (USA) -->
+        <item value="310240"/> <!-- TMO (USA) -->
+        <item value="310250"/> <!-- TMO (USA) -->
+        <item value="310260"/> <!-- TMO (USA) -->
+        <item value="310270"/> <!-- TMO (USA) -->
+        <item value="310300"/> <!-- TMO (USA) -->
+        <item value="310490"/> <!-- TMO (USA) -->
+        <item value="310530"/> <!-- TMO (USA) -->
+        <item value="310640"/> <!-- TMO (USA) -->
+        <item value="310660"/> <!-- TMO (USA) -->
+        <item value="310800"/> <!-- TMO (USA) -->
+        <item value="313340"/> <!-- DISH (USA) -->
+        <item value="313350"/> <!-- DISH (USA) -->
+        <item value="313360"/> <!-- DISH (USA) -->
+        <item value="45002"/> <!-- KT (South Korea) -->
+        <item value="45004"/> <!-- KT (South Korea) -->
+        <item value="45008"/> <!-- KT (South Korea) -->
+        <item value="26003"/> <!-- Orange (Poland) -->
+        <item value="20610"/> <!-- Orange (Belgium) -->
+        <item value="20800"/> <!-- Orange (France) -->
+        <item value="20801"/> <!-- Orange (France) -->
+        <item value="20802"/> <!-- Orange (France) -->
+        <item value="21403"/> <!-- Orange (Spain) -->
+        <item value="22610"/> <!-- Orange (Romania) -->
+        <item value="23101"/> <!-- Orange (Slovakia) -->
+        <item value="26700"/> <!-- Orange (Reunion) -->
+        <item value="27099"/> <!-- Orange (Luxembourg) -->
+        <item value="34001"/> <!-- Orange (Guadeloupe) -->
+        <item value="21630"/> <!-- Telekom (Hungary) -->
+        <item value="46011"/> <!-- CTC (China) -->
+        <item value="46003"/> <!-- CTC (China) -->
+        <item value="46005"/> <!-- CTC (China) -->
+        <item value="50502"/> <!-- Optus (Australia) -->
+        <item value="50501"/> <!-- Telstra (Australia) -->
+        <item value="50571"/> <!-- Telstra (Australia) -->
+        <item value="50572"/> <!-- Telstra (Australia) -->
+    </string-array>
     <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
     <boolean name="imssms.support_sms_capability_in_wifi_roaming_bool" value="true"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="true"/>
