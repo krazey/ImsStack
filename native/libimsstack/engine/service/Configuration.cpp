@@ -149,8 +149,10 @@ PUBLIC VIRTUAL ISubscriberConfig* Configuration::GetSubscriberConfig(
         piSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(
                 SubscriberConfig::GetDefaultId(), nSlotId);
     }
-
-    piSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(strId, nSlotId);
+    else
+    {
+        piSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(strId, nSlotId);
+    }
 
     return const_cast<ISubscriberConfig*>(piSubsConfig);
 }
