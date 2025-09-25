@@ -72,7 +72,7 @@ void TestCoreBase::SetUpClientConnection(IN IMS_BOOL bMidDialog /*= IMS_FALSE*/)
     {
         m_pCoreService->SetScc(&m_objScc);
     }
-    m_pCoreService->SetImsConnected(IMS_TRUE);
+    m_pCoreService->MarkAsImsConnected(IMS_TRUE);
 
     ON_CALL(m_objScc, Close()).WillByDefault(Return());
     ON_CALL(m_objScc, SetErrorListener(_)).WillByDefault(Return());
@@ -92,7 +92,7 @@ void TestCoreBase::TearDownClientConnection()
 
 void TestCoreBase::SetUpServerConnection()
 {
-    m_pCoreService->SetImsConnected(IMS_TRUE);
+    m_pCoreService->MarkAsImsConnected(IMS_TRUE);
 
     ON_CALL(m_objSsc, Close()).WillByDefault(Return());
     ON_CALL(m_objSsc, SetErrorListener(_)).WillByDefault(Return());
@@ -145,7 +145,7 @@ void TestCoreBase::TearDown()
     TearDownClientConnection();
     TearDownServerConnection();
 
-    m_pCoreService->SetImsConnected(IMS_FALSE);
+    m_pCoreService->MarkAsImsConnected(IMS_FALSE);
 }
 
 }  // namespace android
