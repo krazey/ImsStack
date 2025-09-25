@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.telephony.DataFailCause;
@@ -1218,6 +1219,27 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidHandler() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setHandler(null);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(ReasonCode.REGISTRATION_ERROR.getValue());
+        parcel.writeInt(DataFailCause.NONE);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        verify(mMockAosRegistrationListener, never()).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.LTE, ReasonCode.REGISTRATION_ERROR, null,
+                DataFailCause.NONE);
+    }
+
+    @Test
     public void jniImsListenerProxy_notifyDeregistering() {
         mAosService.setRegisteredNetworkType(NetworkType.LTE);
         mAosService.addListener(mMockAosRegistrationListener);
@@ -1617,6 +1639,10 @@ public class AosServiceTest extends ImsStackTest {
 
         public void setConnectedOverCrossSim(boolean isConnected) {
             mIsConnectedOverCrossSim = isConnected;
+        }
+
+        public void setHandler(Handler handler) {
+            mHandler = handler;
         }
 
         public CapabilityPairs getCapabilityPairs() {
