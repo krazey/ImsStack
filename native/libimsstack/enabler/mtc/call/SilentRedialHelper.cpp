@@ -56,7 +56,9 @@ SilentRedialHelper::SilentRedialHelper(
         m_nCount(0),
         m_nTotalRetryDuration(0),
         m_strExtra(objReason.strExtraMessage),
-        m_piRetryTimer(IMS_NULL)
+        m_piRetryTimer(IMS_NULL),
+        m_objMediaInfo(
+                objContext.GetMediaManager().GetMediaInfo(objContext.GetSession()->GetISession()))
 {
     m_objContext.GetCallStateProxy().AddListener(this);
     SetRedialDetail();
@@ -150,8 +152,7 @@ void SilentRedialHelper::ReStart()
     const AString strTarget = GetRemoteTarget();
 
     // MediaInfo
-    MediaInfo objMediaInfo =
-            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession());
+    MediaInfo objMediaInfo = m_objMediaInfo;
     MtcMediaUtil::RefineMediaInfoByCallType(eType, objMediaInfo);
 
     // SuppService list

@@ -633,3 +633,31 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedialByRttEmergenc
 
     pRedialHelper->Timer_TimerExpired(&objTimer);
 }
+
+TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithMediaInfo)
+{
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
+    objMediaInfo.eTextDirection = DIRECTION_INACTIVE;
+    objMediaInfo.eAudioQuality = AUDIO_QUALITY_AMR_WB;
+    objMediaInfo.eVideoQuality = VIDEO_QUALITY_NONE;
+    objMediaInfo.eGttMode = GTT_MODE_INACTIVE;
+
+    const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+    pRedialHelper->Redial(ISilentRedialHelper::INTERVAL_BY_TYPE);
+
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    MediaInfo objRefinedMediaInfo = objMediaInfo;
+    objRefinedMediaInfo.eVideoDirection = DIRECTION_INVALID;
+    objRefinedMediaInfo.eVideoQuality = VIDEO_QUALITY_NONE;
+    objRefinedMediaInfo.eTextDirection = DIRECTION_INVALID;
+    objRefinedMediaInfo.eGttMode = GTT_MODE_INVALID;
+
+    AString strEmptyNumber;
+    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, objRefinedMediaInfo, _));
+
+    pRedialHelper->Timer_TimerExpired(&objTimer);
+}
