@@ -138,6 +138,8 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
     objParcel.writeInt32(bRttCapable);
     IMS_SINT32 bVideoCapable = (objCallInfo.bVideoCapable) ? 1 : 0;
     objParcel.writeInt32(bVideoCapable);
+    IMS_SINT32 bCrossSim = (objCallInfo.bCrossSim) ? 1 : 0;
+    objParcel.writeInt32(bCrossSim);
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(

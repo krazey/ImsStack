@@ -219,6 +219,7 @@ public class MtcCallTest extends ImsStackTest {
         parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
         parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
         parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
 
         parcel.writeInt(randomGenerator.ints(MediaInfo.AUDIO_QUALITY_AMR_NB,
                 MediaInfo.AUDIO_QUALITY_MAX).findFirst().getAsInt());

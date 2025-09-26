@@ -34,6 +34,7 @@ public class CallInfo implements Parcelable
     public boolean        confSub;
     public boolean        rttCapable;
     public boolean        videoCapable;
+    public boolean        crossSim;
 
     //------------------------------------------------------------------------------------------//
 
@@ -48,6 +49,7 @@ public class CallInfo implements Parcelable
         confSub = false;
         rttCapable = false;
         videoCapable = false;
+        crossSim = false;
 
         logLn("init");
     }
@@ -82,6 +84,7 @@ public class CallInfo implements Parcelable
         confSub = false;
         rttCapable = false;
         videoCapable = false;
+        crossSim = false;
 
         logLn("init");
     }
@@ -97,6 +100,7 @@ public class CallInfo implements Parcelable
         confSub = false;
         rttCapable = false;
         videoCapable = false;
+        crossSim = false;
 
         logLn("init");
     }
@@ -112,6 +116,7 @@ public class CallInfo implements Parcelable
         confSub = callInfo.confSub;
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
+        crossSim = callInfo.crossSim;
 
         logLn("update");
     }
@@ -126,21 +131,30 @@ public class CallInfo implements Parcelable
                 + " rttCapable : " + rttCapable
                 + " offline : " + offline
                 + " ussi : " + ussi
-                + " videoCapable : " + videoCapable);
+                + " videoCapable : " + videoCapable
+                + " crossSim : " + crossSim);
     }
 
+    /**
+     * Reads the state of this CallInfo instance from a Parcel.
+     * The values are read in the same order they were written in
+     * {@link #writeToParcel(Parcel, int)}.
+     *
+     * @param source The Parcel to read the object's data from.
+     */
     public void readFromParcel(Parcel source) {
         serviceType = source.readInt();
         callType = source.readInt();
         emergencyType = source.readInt();
 
-        offline = (source.readInt() == 1) ? true : false;
-        ussi = (source.readInt() == 1) ? true : false;
-        isConf = (source.readInt() == 1) ? true : false;
-        enabledConf = (source.readInt() == 1) ? true : false;
-        confSub = (source.readInt() == 1) ? true : false;
-        rttCapable = (source.readInt() == 1) ? true : false;
-        videoCapable = (source.readInt() == 1) ? true : false;
+        offline = source.readInt() == 1;
+        ussi = source.readInt() == 1;
+        isConf = source.readInt() == 1;
+        enabledConf = source.readInt() == 1;
+        confSub = source.readInt() == 1;
+        rttCapable = source.readInt() == 1;
+        videoCapable = source.readInt() == 1;
+        crossSim = source.readInt() == 1;
 
         logLn("read");
     }
@@ -159,6 +173,7 @@ public class CallInfo implements Parcelable
         dest.writeInt(confSub ? 1 : 0);
         dest.writeInt(rttCapable ? 1 : 0);
         dest.writeInt(videoCapable ? 1 : 0);
+        dest.writeInt(crossSim ? 1 : 0);
     }
 
     public int describeContents() {
