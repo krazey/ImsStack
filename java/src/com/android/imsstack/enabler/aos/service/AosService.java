@@ -86,12 +86,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     /** private members */
     private long mNativeObject = 0;
     private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
-    private Handler mHandler;
     private RegistrationState mRegState = RegistrationState.DEREGISTERED;
     private NativeStateListener mNativeStateListener;
     private IPhoneStateNotifier mNotifier;
 
     /** package-private members */
+    Handler mHandler;
     NetworkType mRegisteredNetworkType = NetworkType.NONE;
     int mFeatureTagBits = 0;
     int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -1137,6 +1137,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         public void onMessage(Parcel parcel) {
             int message = parcel.readInt();
             ImsLog.i("ListenerProxy.onMessage() :: message=" + message);
+
+            if (mHandler == null) {
+                ImsLog.w("ListenerProxy.onMessage() :: handler is null");
+                return;
+            }
 
             switch (message) {
                 case IIAosService.N2J_NOTIFY_REGISTERED -> {
