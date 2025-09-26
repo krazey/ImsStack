@@ -2084,9 +2084,12 @@ void Service::FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPriv
     // "+sip.instance" parameter can be inserted
     // if UE detects that the destination of requests & responses is a trusted intermediary, and
     // it's allowed by the configuration.
+    // NOTE: The emergency session may be allowed to set "+sip.instance" header parameter
+    // according to the 3GPP TS 24.237 (SC UE) and RFC 7255.
     if (IsWithinTrustDomain() &&
-            SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
-                    GetSlotId(), GetSipProfile()))
+            (IsForEmergency() ||
+                    SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
+                            GetSlotId(), GetSipProfile())))
     {
         bDeviceIdRequired = IMS_TRUE;
     }
