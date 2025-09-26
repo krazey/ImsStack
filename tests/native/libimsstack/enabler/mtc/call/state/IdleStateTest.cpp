@@ -1363,7 +1363,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfNoCodecMatched)
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
             .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
 
-    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+    const CallReasonInfo objReasonInfo(
+            CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
@@ -1386,7 +1387,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfInvalidDescriptor)
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
             .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
 
-    const CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
+    const CallReasonInfo objReasonInfo(
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, NegotiationResult::ERROR_INVALID_DESCRIPTOR);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
@@ -1669,7 +1671,8 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfNoCodecMatched)
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
             .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
 
-    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+    const CallReasonInfo objReasonInfo(
+            CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
@@ -1701,7 +1704,8 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfInvalidDescriptor)
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
             .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
 
-    const CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
+    const CallReasonInfo objReasonInfo(
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, NegotiationResult::ERROR_INVALID_DESCRIPTOR);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 

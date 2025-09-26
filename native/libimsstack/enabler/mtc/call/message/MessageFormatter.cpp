@@ -691,7 +691,9 @@ void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
         {
             IMS_TRACE_D("SetHeadersForReject : CODE_REJECT_UNSUPPORTED_SDP_HEADERS", 0, 0, 0);
             // RFC 3261 20.43
-            AString strWarning = "305 IMS-client \"Incompatible media format\"";
+            const AString strWarning = objReason.nExtraCode == MediaNego::ERROR_IP_MISMATCH
+                    ? "301 IMS-client \"Incompatible network address formats\""
+                    : "305 IMS-client \"Incompatible media format\"";
             m_objContext.GetMessageUtils().SetHeader(
                     m_piNextMessage, strWarning, ISipHeader::WARNING);
         }
@@ -700,18 +702,8 @@ void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
         {
             IMS_TRACE_D("SetHeadersForReject : CODE_MEDIA_NOT_ACCEPTABLE", 0, 0, 0);
             // RFC 3261 20.43
-            AString strWarning;
-            switch (objReason.nExtraCode)
-            {
-                case MediaNego::ERROR_IP_MISMATCH:
-                    strWarning = "301 IMS-client \"Incompatible network address formats\"";
-                    break;
-                default:
-                    strWarning = "304 IMS-client \"Media type not available\"";
-                    break;
-            }
-            m_objContext.GetMessageUtils().SetHeader(
-                    m_piNextMessage, strWarning, ISipHeader::WARNING);
+            m_objContext.GetMessageUtils().SetHeader(m_piNextMessage,
+                    "304 IMS-client \"Media type not available\"", ISipHeader::WARNING);
         }
         break;
         case CODE_SIP_NOT_ACCEPTABLE:
@@ -856,7 +848,6 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
             strPhrase = GetRejectPhrase(RejectType::ON_CONVERTING);
             break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
-        case CODE_REJECT_UNSUPPORTED_SDP_HEADERS:
             strPhrase = GetRejectPhrase(RejectType::NEGOTIATION_FAILURE);
             break;
         case CODE_ACCESS_CLASS_BLOCKED:

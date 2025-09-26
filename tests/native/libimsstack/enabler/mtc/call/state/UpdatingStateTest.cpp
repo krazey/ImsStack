@@ -1242,7 +1242,9 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNoCodecMatched)
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
-    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_CALL(objMtcSession,
+            Reject(CallReasonInfo(
+                    CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED)));
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
 }
@@ -1257,7 +1259,9 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfInvalidDescriptor)
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
-    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS)));
+    EXPECT_CALL(objMtcSession,
+            Reject(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS,
+                    NegotiationResult::ERROR_INVALID_DESCRIPTOR)));
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
 }

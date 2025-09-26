@@ -683,7 +683,8 @@ void MtcCallState::InitMediaSession(IN const MediaInfo& objMediaInfo)
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN const IMessage* piMessage)
+const CallReasonInfo MtcCallState::HandleReceivedSdp(
+        IN ISession* piSession, IN const IMessage* piMessage) const
 {
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
@@ -691,33 +692,32 @@ IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN const IMes
         if (IsAnswerMandatory(piSession, piMessage))
         {
             IMS_TRACE_E(0, "Answer must be included.", 0, 0, 0);
-            return CODE_MEDIA_NOT_ACCEPTABLE;
+            return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
         }
-        return CODE_NONE;
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (IsNeedToIgnore(piSession, piMessage) == IMS_TRUE)
     {
-        return CODE_NONE;
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (IsInvalidOfferAnswer(piSession, piMessage) == IMS_TRUE)
     {
-        return CODE_MEDIA_NOT_ACCEPTABLE;
+        return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
     }
 
     NegotiationResult negoResult = m_objContext.GetMediaManager().NegotiateSdp(piSession);
     if (negoResult != NegotiationResult::NO_ERROR)
     {
         IMS_TRACE_D("HandleReceivedSdp - Nego SDP Failed", 0, 0, 0);
-        // TODO: return fail reason? IMS_RESULT? it's always NEGOFAIL?
-        return GetCallReasonByNegotiationResult(negoResult);
+        return GetReasonByNegotiationResult(negoResult);
     }
 
     m_objContext.GetPreconditionManager().OnSdpReceived(piSession);
 
     IMS_TRACE_D("HandleReceivedSdp - Nego Done", 0, 0, 0);
-    return CODE_NONE;
+    return CallReasonInfo(CODE_NONE);
 }
 
 PROTECTED
@@ -1072,16 +1072,20 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessag
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult)
+const CallReasonInfo MtcCallState::GetReasonByNegotiationResult(IN NegotiationResult eNegoResult)
 {
     switch (eNegoResult)
     {
         case NegotiationResult::NO_ERROR:
-            return CODE_NONE;
+            return CallReasonInfo(CODE_NONE);
         case NegotiationResult::ERROR_INVALID_DESCRIPTOR:
-            return CODE_REJECT_UNSUPPORTED_SDP_HEADERS;
+        case NegotiationResult::ERROR_IP_MISMATCH:
+        case NegotiationResult::ERROR_NO_AUDIO:
+        case NegotiationResult::ERROR_NO_VIDEO:
+        case NegotiationResult::ERROR_NO_TEXT:
+            return CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult);
         default:
-            return CODE_MEDIA_NOT_ACCEPTABLE;
+            return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult);
     }
 }
 
