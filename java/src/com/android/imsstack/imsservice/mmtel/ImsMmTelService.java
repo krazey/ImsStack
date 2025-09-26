@@ -47,6 +47,7 @@ import com.android.imsstack.util.LocalLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -55,6 +56,10 @@ import java.util.function.Consumer;
 public class ImsMmTelService extends MmTelFeature
         implements ImsServiceRecord.Listener, ImsRegistrationTracker.CapabilityUpdateListener {
     private static final int LOG_SIZE = 50;
+    private static final Map<Integer, String> STATE_TO_STRING = Map.of(
+            ImsFeature.STATE_UNAVAILABLE, "UNAVAILABLE",
+            ImsFeature.STATE_INITIALIZING, "INITIALIZING",
+            ImsFeature.STATE_READY, "READY");
 
     private final ImsContext mImsContext;
     private final MmTelFeatureCapabilityListener mFeatureCapabilityListener
@@ -203,7 +208,7 @@ public class ImsMmTelService extends MmTelFeature
         if (callApp != null) {
             callApp.getUtInterface().changeCapabilities(enabledCaps, disabledCaps);
         }
-        mLocalLog.log("changeEnabledCapabilities " + enabledCaps + ", " + disabledCaps);
+        mLocalLog.log("changeEnabledCapabilities: " + enabledCaps + ", " + disabledCaps);
     }
 
     @Override
@@ -311,6 +316,7 @@ public class ImsMmTelService extends MmTelFeature
         }
 
         logi("onFeatureRemoved");
+        mLocalLog.log("onFeatureRemoved");
 
         int phoneId = mImsContext.getPhoneId();
         ImsServiceManager sm = ImsServiceManager.getDefault();
@@ -326,6 +332,7 @@ public class ImsMmTelService extends MmTelFeature
     @Override
     public void onFeatureReady() {
         logi("onFeatureReady");
+        mLocalLog.log("onFeatureReady");
 
         ImsServiceManager sm = ImsServiceManager.getDefault();
         ImsCallApp callApp = sm.getCallApp(mImsContext.getPhoneId());
@@ -334,8 +341,7 @@ public class ImsMmTelService extends MmTelFeature
             createCallApp();
         }
 
-        // FIXME: P-GII
-        // Update feature capabilities and IMS registration state
+        mServiceRegistry.setMmTelFeature(this);
     }
 
     @Override
@@ -388,7 +394,7 @@ public class ImsMmTelService extends MmTelFeature
         pw.println("MmTelFeature:");
         pw.increaseIndent();
 
-        pw.println("featureState=" + getFeatureState());
+        pw.println("featureState=" + STATE_TO_STRING.get(getFeatureState()));
 
         // Local logs
         pw.println("Most recent logs:");
