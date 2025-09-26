@@ -17,10 +17,12 @@
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcSession.h"
 #include "call/MtcCallController.h"
 #include "conferencecall/MockIConferenceController.h"
 #include "conferencecall/MockIConferenceManager.h"
@@ -29,6 +31,7 @@
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/OperationAsyncRunner.h"
+#include "media/MockIMtcMediaManager.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <initializer_list>
@@ -37,6 +40,7 @@ using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Eq;
 using ::testing::Invoke;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -50,17 +54,26 @@ public:
     MockIEctManager objEctManager;
     MockICallStateProxy objCallStateProxy;
     MockMtcConfigurationProxy objConfigurationProxy;
+    MockIMtcMediaManager objMediaManager;
     MockIPassiveTimerHolder objPassiveTimer;
+    MockIMtcSession objMtcSession;
+    MockISession objISession;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
         ON_CALL(objContext, GetEctManager).WillByDefault(ReturnRef(objEctManager));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
 
         pCallController = new MtcCallController(objContext);
     }

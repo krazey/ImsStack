@@ -79,6 +79,7 @@ private:
     IMS_SINT32 m_nTotalRetryDuration;
     const AString m_strExtra;
     ITimer* m_piRetryTimer;
+    MediaInfo m_objMediaInfo;
 
     LOCAL const IMS_UINT32 NO_LIMIT = 999;
 };
