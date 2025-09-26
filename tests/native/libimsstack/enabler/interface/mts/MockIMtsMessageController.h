@@ -35,6 +35,8 @@ public:
     MOCK_METHOD(void, ProcessMtSms, (IN IPageMessage * piMessage, IN MtsServiceType eServiceType),
             (override));
     MOCK_METHOD(void, ClearAllMessages, (), (override));
+    MOCK_METHOD(void, TriggerEmergencySmsStateNotification,
+            (IN IMS_BOOL bInitialized, IN IMS_SINT32 nMessageReference), (override));
 };
 
 #endif

@@ -41,7 +41,8 @@ public:
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber, IN IMS_UINT32 nRetryCount),
             (override));
-    MOCK_METHOD(IMS_BOOL, IsWlan, (), (const override));
+    MOCK_METHOD(IMS_BOOL, IsWlan, (), (const, override));
+    MOCK_METHOD(void, NotifyEmergencySmsStateToAos, (IN IMS_BOOL bInitialized), (const, override));
 };
 
 #endif

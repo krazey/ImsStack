@@ -689,4 +689,53 @@ TEST_F(MtsServiceTest, TrafficGuardTimerExpiredAndStopImsTraffic)
     pNormalService->Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
 
+TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWhenAosIsDetached)
+{
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    pNormalService->ReplaceIImsAos(IMS_NULL);
+
+    EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencySmsState(_, _)).Times(0);
+
+    pNormalService->NotifyEmergencySmsStateToAos(IMS_TRUE);
+}
+
+TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWhenAosInfoIsNull)
+{
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockIImsAos, GetAosInfo()).WillByDefault(Return(IMS_NULL));
+
+    EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencySmsState(_, _)).Times(0);
+
+    pNormalService->NotifyEmergencySmsStateToAos(IMS_TRUE);
+}
+
+TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWithImsPdn)
+{
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::IMS))
+            .Times(1);
+
+    pNormalService->NotifyEmergencySmsStateToAos(IMS_TRUE);
+}
+
+TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWithEmergencyPdn)
+{
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(
+            objMockIImsAosInfo, NotifyEmergencySmsState(IMS_FALSE, EmergencyServicePdn::EMERGENCY))
+            .Times(1);
+
+    pEmergencyService->NotifyEmergencySmsStateToAos(IMS_FALSE);
+}
+
 }  // namespace android
