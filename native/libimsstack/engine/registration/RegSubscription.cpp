@@ -1890,41 +1890,35 @@ PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonParameter(IN const ISipMessa
             SipParsingHelper::CreateHeader(ISipHeader::SUBSCRIPTION_STATE, strSubState);
     IMS_UINT16 nReason = IRegSubscription::PARAM_REASON_NONE;
 
-    if (piHeader == IMS_NULL)
+    if (piHeader != IMS_NULL)
     {
-        return nReason;
+        nReason = SubState::ExtractReasonParameter(piHeader);
+        nReason = GetReasonFromSubStateReason(nReason);
+        piHeader->Destroy();
     }
-
-    nReason = SubState::ExtractReasonParameter(piHeader);
-
-    if (nReason == SubState::REASON_NORESOURCE)
-    {
-        nReason = IRegSubscription::PARAM_REASON_NORESOURCE;
-    }
-    else if (nReason == SubState::REASON_DEACTIVATED)
-    {
-        nReason = IRegSubscription::PARAM_REASON_DEACTIVATED;
-    }
-    else if (nReason == SubState::REASON_PROBATION)
-    {
-        nReason = IRegSubscription::PARAM_REASON_PROBATION;
-    }
-    else if (nReason == SubState::REASON_REJECTED)
-    {
-        nReason = IRegSubscription::PARAM_REASON_REJECTED;
-    }
-    else if (nReason == SubState::REASON_TIMEOUT)
-    {
-        nReason = IRegSubscription::PARAM_REASON_TIMEOUT;
-    }
-    else if (nReason == SubState::REASON_GIVEUP)
-    {
-        nReason = IRegSubscription::PARAM_REASON_GIVEUP;
-    }
-
-    piHeader->Destroy();
 
     return nReason;
+}
+
+PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonFromSubStateReason(IN IMS_UINT16 nReason)
+{
+    switch (nReason)
+    {
+        case SubState::REASON_NORESOURCE:
+            return IRegSubscription::PARAM_REASON_NORESOURCE;
+        case SubState::REASON_DEACTIVATED:
+            return IRegSubscription::PARAM_REASON_DEACTIVATED;
+        case SubState::REASON_PROBATION:
+            return IRegSubscription::PARAM_REASON_PROBATION;
+        case SubState::REASON_REJECTED:
+            return IRegSubscription::PARAM_REASON_REJECTED;
+        case SubState::REASON_TIMEOUT:
+            return IRegSubscription::PARAM_REASON_TIMEOUT;
+        case SubState::REASON_GIVEUP:
+            return IRegSubscription::PARAM_REASON_GIVEUP;
+        default:
+            return nReason;
+    }
 }
 
 PRIVATE GLOBAL const IMS_CHAR* RegSubscription::StateToString(IN IMS_SINT32 nState)

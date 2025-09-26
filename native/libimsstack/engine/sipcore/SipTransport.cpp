@@ -393,10 +393,7 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
         goto EXIT_SendToNetwork;
     }
 
-    if (!m_bIsRetransmission)
-    {
-        m_bIsRetransmission = IMS_TRUE;
-    }
+    m_bIsRetransmission = IMS_TRUE;
 
     return IMS_TRUE;
 
@@ -717,10 +714,7 @@ PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
         {
             // If this message(first message) is successfully sent,
             // then the retransmission flag will be set in here.
-            if (!m_bIsRetransmission)
-            {
-                m_bIsRetransmission = IMS_TRUE;
-            }
+            m_bIsRetransmission = IMS_TRUE;
 
             // The pending message is completely sent.
             if (m_pSendBuffer == IMS_NULL)

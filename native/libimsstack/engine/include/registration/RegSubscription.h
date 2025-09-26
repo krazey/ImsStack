@@ -119,6 +119,7 @@ private:
 
     static ISipClientConnection* CreateConnection(IN RegSubscription* pRegSub);
     static IMS_UINT16 GetReasonParameter(IN const ISipMessage* piSipMsg);
+    static IMS_UINT16 GetReasonFromSubStateReason(IN IMS_UINT16 nReason);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:

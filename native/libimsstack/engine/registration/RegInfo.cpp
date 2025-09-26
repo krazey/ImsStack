@@ -192,11 +192,7 @@ IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
                 nNewVersion, m_nVersion, 0);
     }
 
-    if (!m_bIsCreated)
-    {
-        m_bIsCreated = IMS_TRUE;
-    }
-
+    m_bIsCreated = IMS_TRUE;
     m_nVersion = nNewVersion;
 
     if (strState.EqualsIgnoreCase(RegInfoConst::ATTR_STATE_FULL))
