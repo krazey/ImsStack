@@ -36,8 +36,8 @@ class CancelHandlerTest : public ::testing::Test
 {
 public:
     inline CancelHandlerTest() :
-            objHandler(objContext),
-            pConfigurationProxy(IMS_NULL)
+            pConfigurationProxy(IMS_NULL),
+            objHandler(objContext)
     {
     }
 
