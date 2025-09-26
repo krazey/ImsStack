@@ -92,6 +92,14 @@ public:
      *                   {@code IMS_FALSE} otherwise.
      */
     virtual IMS_BOOL IsWlan() const = 0;
+
+    /**
+     * @brief Notifies the emergency SMS state to the AOS.
+     *
+     * @param bInitialized {@code IMS_TRUE} if the emergency SMS is initialized,
+     *                     {@code IMS_FALSE} otherwise.
+     */
+    virtual void NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const = 0;
 };
 
 #endif

@@ -55,6 +55,7 @@ __IMS_TRACE_TAG_COM_MTS__;
 
 LOCAL const IMS_CHAR CONTENT_TYPE_PIDF_XML[] = "application/pidf+xml";
 LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
+LOCAL const IMS_SINT32 INVALID_MESSAGE_REFERENCE = -1;
 
 PUBLIC
 MtsMessageController::MtsMessageController(IN IMtsContext& objContext) :
@@ -69,7 +70,8 @@ MtsMessageController::MtsMessageController(IN IMtsContext& objContext) :
         m_pRetryContent(IMS_NULL),
         m_objTimerUpdateHelper(
                 ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId()),
-                Engine::GetConfiguration()->GetSipConfig(m_objContext.GetSlotId()))
+                Engine::GetConfiguration()->GetSipConfig(m_objContext.GetSlotId())),
+        m_nLastEmergencyMessageReference(INVALID_MESSAGE_REFERENCE)
 {
     IMS_TRACE_I("+MtsMessageController [slot_%d]", m_objContext.GetSlotId(), 0, 0);
 
@@ -141,6 +143,8 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
         CleanRetryContent();
         return;
     }
+
+    TriggerEmergencySmsStateNotification(IMS_FALSE, piMtsMessage->GetMessageReference());
 
     // Should it control the emergency registration when it needs to?
     IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(
@@ -617,6 +621,11 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
             MtsTransactionType::MESSAGE_TYPE_SEND, piMtsMessage);
     piMtsMessage->PrintInfo();
 
+    if (bEmergencyNumber)
+    {
+        TriggerEmergencySmsStateNotification(IMS_TRUE, piMtsMessage->GetMessageReference());
+    }
+
     // TODO: Remove In-Reply-To validation for SMMA case.
     if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_MS ||
             piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_SMMA)
@@ -909,7 +918,35 @@ const ByteArray& MtsMessageController::ProcessReceivedMessage(
             MtsTransactionType::MESSAGE_TYPE_RECEIVE, piMtsMessage);
     piMtsMessage->PrintInfo();
 
+    if (piMtsMessage->GetSmsFormat() == SmsFormatType::SMSFORMAT_3GPP &&
+            (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_ACK_FROM_N ||
+                    piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_ERROR_FROM_N))
+    {
+        TriggerEmergencySmsStateNotification(IMS_FALSE, piMtsMessage->GetMessageReference());
+    }
+
     return objContent;
+}
+
+PUBLIC
+void MtsMessageController::TriggerEmergencySmsStateNotification(
+        IN IMS_BOOL bInitialized, IN IMS_SINT32 nMessageReference)
+{
+    IMS_TRACE_I("TriggerEmergencySmsStateNotification : bInitialized[%s], nMessageReference[%d]",
+            _TRACE_B_(bInitialized), nMessageReference, 0);
+
+    if (nMessageReference == INVALID_MESSAGE_REFERENCE)
+    {
+        return;
+    }
+
+    if (bInitialized || nMessageReference == m_nLastEmergencyMessageReference)
+    {
+        m_objContext.GetService(MtsServiceType::EMERGENCY)
+                .NotifyEmergencySmsStateToAos(bInitialized);
+        m_nLastEmergencyMessageReference =
+                bInitialized ? nMessageReference : INVALID_MESSAGE_REFERENCE;
+    }
 }
 
 PRIVATE void MtsMessageController::ReportTransmissionResult(

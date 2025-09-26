@@ -424,6 +424,38 @@ void MtsService::Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nD
 }
 
 PUBLIC
+void MtsService::NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const
+{
+    IMS_TRACE_I("NotifyEmergencySmsStateToAos", 0, 0, 0);
+
+    IMS_BOOL bSupportSmsOverEmergencyPdn =
+            ConfigService::GetConfigService()
+                    ->GetCarrierConfig(m_objContext.GetSlotId())
+                    ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL);
+
+    if (m_piImsAos == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
+        return;
+    }
+
+    IImsAosInfo* pIImsAosInfo = m_piImsAos->GetAosInfo();
+    if (pIImsAosInfo == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "pIImsAosInfo is null", 0, 0, 0);
+        return;
+    }
+
+    EmergencyServicePdn eEmergencyServicePdn = EmergencyServicePdn::IMS;
+    if (bSupportSmsOverEmergencyPdn)
+    {
+        eEmergencyServicePdn = EmergencyServicePdn::EMERGENCY;
+    }
+
+    pIImsAosInfo->NotifyEmergencySmsState(bInitialized, eEmergencyServicePdn);
+}
+
+PUBLIC
 IMS_BOOL MtsService::IsWlan() const
 {
     IMS_UINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;

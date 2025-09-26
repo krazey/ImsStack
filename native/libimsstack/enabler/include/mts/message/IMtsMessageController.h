@@ -62,6 +62,16 @@ public:
      * @brief Clears all SMS messages managed by the controller.
      */
     virtual void ClearAllMessages() = 0;
+
+    /**
+     * @brief Notifies the emergency SMS state to the AOS.
+     *
+     * @param bInitialized {@code IMS_TRUE} if the emergency SMS is initialized,
+     *                     {@code IMS_FALSE} otherwise.
+     * @param nMessageReference The message reference of the SMS.
+     */
+    virtual void TriggerEmergencySmsStateNotification(IN IMS_BOOL bInitialized,
+             IN IMS_SINT32 nMessageReference) = 0;
 };
 
 #endif

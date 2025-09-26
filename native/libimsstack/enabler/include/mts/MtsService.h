@@ -78,6 +78,7 @@ public:
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN IMS_UINT32 nRetryCount) override;
     IMS_BOOL IsWlan() const override;
+    void NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const override;
 
     // IMtsTrafficListener
     void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,

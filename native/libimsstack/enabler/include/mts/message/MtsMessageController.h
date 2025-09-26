@@ -56,6 +56,8 @@ public:
             IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount) override;
     void ProcessMtSms(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType) override;
     void ClearAllMessages() override;
+    void TriggerEmergencySmsStateNotification(
+            IN IMS_BOOL bInitialized, IN IMS_SINT32 nMessageReference) override;
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
@@ -136,6 +138,7 @@ private:
     std::function<void()> m_objRetryFunction;
     ByteArray* m_pRetryContent;
     MtsTransactionTimerUpdateHelper m_objTimerUpdateHelper;
+    IMS_SINT32 m_nLastEmergencyMessageReference;
 };
 
 #endif
