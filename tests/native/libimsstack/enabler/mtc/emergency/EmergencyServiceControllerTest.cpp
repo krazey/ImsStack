@@ -106,10 +106,31 @@ protected:
         EXPECT_CALL(objEmergencyService, RemoveAosStateListener(pController)).Times(1);
         EXPECT_CALL(objPassiveTimer,
                 RemoveListener(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, pController));
+        EXPECT_CALL(objPassiveTimer,
+                RemoveListener(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN,
+                        pController));
+        EXPECT_CALL(objPassiveTimer,
+                RemoveTimer(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+                .Times(1);
+        ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(&objNormalService));
+        EXPECT_CALL(objNormalService, RemoveNetworkWatcherListener(pController)).Times(1);
 
         delete pController;
         delete pConfigurationProxy;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
+    }
+
+    void StartAndAosDisconnectedOnWlan()
+    {
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objNormalService, IsActive()).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_TRUE));
+        pController->Start();
+        pController->OnAosStateChanged(
+                objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED, 0);
     }
 };
 
@@ -133,6 +154,7 @@ TEST_F(EmergencyServiceControllerTest, StartAddsListeners)
     EXPECT_CALL(objEmergencyService, AddAosStateListener(pController)).Times(1);
     EXPECT_CALL(objPassiveTimer,
             AddListener(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, pController));
+    EXPECT_CALL(objNormalService, AddNetworkWatcherListener(pController)).Times(1);
 
     pController->Start();
 }
@@ -284,25 +306,106 @@ TEST_F(EmergencyServiceControllerTest,
     EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
 }
 
-TEST_F(EmergencyServiceControllerTest,
-        StartAndAosDisconnectedNotifiesUnavailableIfNormalServiceRegisteredOnWlan)
+TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedOnWlanStartsTimer)
 {
-    pController->Start();
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetIntFromArray(ConfigVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY, 0))
+            .WillByDefault(Return(nTimer));
 
-    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objNormalService, IsActive()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE, IMS_FALSE))
+            .Times(1);
+    EXPECT_CALL(objPassiveTimer,
+            AddListener(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, pController))
+            .Times(1);
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN, nTimer,
+                    IMS_FALSE, IMS_TRUE))
+            .Times(1);
+    EXPECT_CALL(objPassiveTimer,
+            AddListener(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN,
+                    pController))
+            .Times(1);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
+
+    StartAndAosDisconnectedOnWlan();
+}
+
+TEST_F(EmergencyServiceControllerTest, HandoverTimerExpiresNotifiesUnavailable)
+{
+    StartAndAosDisconnectedOnWlan();
 
     EXPECT_CALL(objJniMtcServiceThread,
             OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::UNAVAILABLE,
                     EmergencyServiceUnavailableReason::NONE, ServiceType::EMERGENCY))
             .Times(1);
+    // EXPECT_CALL(objEsm, StopOpen(IMS_FALSE)).Times(1); - By AsyncRunner
+
+    pController->OnPassiveTimerExpired(
+            IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN);
+}
+
+TEST_F(EmergencyServiceControllerTest, RatChangedToWwanRetriesOnImsPdn)
+{
+    StartAndAosDisconnectedOnWlan();
+
+    ON_CALL(objPassiveTimer,
+            IsActive(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
+            .WillByDefault(Return(0));
+
+    EXPECT_CALL(objPassiveTimer,
+            RemoveTimer(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+            .Times(1);
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                    EmergencyServiceUnavailableReason::NONE, ServiceType::EMERGENCY))
+            .Times(0);
+    // EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(1); - By AsyncRunner
+
+    pController->OnRatChanged(ServiceType::NORMAL, INetworkWatcher::RADIOTECH_TYPE_IWLAN,
+            INetworkWatcher::RADIOTECH_TYPE_LTE);
+}
+
+TEST_F(EmergencyServiceControllerTest, RatChangedToWwanInRoamingNotifiesUnavailable)
+{
+    StartAndAosDisconnectedOnWlan();
+
+    ON_CALL(objPassiveTimer,
+            IsActive(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(objPassiveTimer,
+            RemoveTimer(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+            .Times(1);
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                    EmergencyServiceUnavailableReason::NONE, ServiceType::EMERGENCY))
+            .Times(1);
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X))
+            .Times(1);
+
+    pController->OnRatChanged(ServiceType::NORMAL, INetworkWatcher::RADIOTECH_TYPE_IWLAN,
+            INetworkWatcher::RADIOTECH_TYPE_LTE);
+}
+
+TEST_F(EmergencyServiceControllerTest, RatChangedToWlanDoesNothing)
+{
+    StartAndAosDisconnectedOnWlan();
+
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
-    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+    pController->OnRatChanged(ServiceType::NORMAL, INetworkWatcher::RADIOTECH_TYPE_IWLAN,
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesUnavailable)
@@ -582,6 +685,8 @@ TEST_F(EmergencyServiceControllerTest, CloseStopsRegTo18xTimer)
     pController->Start();
 
     EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+    EXPECT_CALL(objPassiveTimer,
+            RemoveTimer(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN));
 
     pController->Close();
 }

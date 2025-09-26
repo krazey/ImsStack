@@ -23,6 +23,7 @@
 #include "call/IMtcCall.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/IPassiveTimerListener.h"
 
@@ -34,6 +35,7 @@ class EmergencyServiceController final :
         public IEmergencyServiceController,
         public IMtcAosStateListener,
         public IMtcCallStateListener,
+        public IMtcNetworkWatcherListener,
         public IPassiveTimerListener
 {
 public:
@@ -57,9 +59,18 @@ public:
     void OnCallSessionReleased(
             IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
     void OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType) override;
+    void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
+            IN IMS_SINT32 eRatType) override;
 
 private:
     LOCAL const IMS_SINT32 REASON_UNSPECIFIED = -1;
+
+    enum class RetryOverImsPdnAction
+    {
+        NO_RETRY,
+        RETRY_IMMEDIATELY,
+        RETRY_AFTER_HANDOVER
+    };
 
     IMtcEmergencyServiceManager& m_objServiceManager;
     IMtcContext& m_objContext;
@@ -67,6 +78,7 @@ private:
 
     IMtcCall::State m_eEmergencyCallState;
     CallKey m_nEmergencyCallKey;
+    IMS_UINT32 m_ePendingUnavailableAosReasonForHandover;
 
     void HandleServiceOpened();
     void HandleServiceUnavailable(IN IMS_UINT32 eAosReason);
@@ -83,9 +95,12 @@ private:
     void SetState(IN IEmergencyServiceController::State eState);
     void Start18xWaitingTimer();
     void Stop18xWaitingTimer();
+    void StartWaitForHandoverToRetryOverImsPdnTimer();
+    void StopWaitForHandoverToRetryOverImsPdnTimer();
 
     IMS_BOOL IsCurrentEmergencyCall(IN CallKey nCallKey) const;
-    IMS_BOOL IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const;
+    RetryOverImsPdnAction GetRetryOverImsPdnAction(IN IMS_SINT32 eAosReason) const;
+    IMS_BOOL IsNetworkRoaming() const;
 
     EmergencyServiceUnavailableReason ConvertToUnavailableReason(IN IMS_UINT32 eAosReason);
 };

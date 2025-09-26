@@ -37,6 +37,7 @@ public:
         PRE_ALERTING_GUARD,
         REGISTRATION_TO_18X,
         RTT_AUTO_UPGRADE_GUARD,
+        WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN,
     };
 
     virtual ~IPassiveTimerHolder() = default;
