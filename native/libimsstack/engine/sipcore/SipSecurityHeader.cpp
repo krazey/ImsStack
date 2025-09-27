@@ -134,6 +134,55 @@ const AString& SipSecurityHeader::GetUnknownParameterValue(IN IMS_SINT32 nName) 
 }
 
 PUBLIC
+IMS_BOOL SipSecurityHeader::IsSecurityMechanismMatched(IN const SipSecurityHeader& other) const
+{
+    if (m_nMechanism != other.m_nMechanism)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_nMechanism == MECHANISM_UNKNOWN && !m_strMechanism.EqualsIgnoreCase(other.m_strMechanism))
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_nAlgorithm != other.m_nAlgorithm)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nEncryptionAlgorithm =
+            (m_nEncryptionAlgorithm == EALG_UNSPECIFIED) ? EALG_NULL : m_nEncryptionAlgorithm;
+    IMS_SINT32 nOtherEncryptionAlgorithm = (other.m_nEncryptionAlgorithm == EALG_UNSPECIFIED)
+            ? EALG_NULL
+            : other.m_nEncryptionAlgorithm;
+
+    if (nEncryptionAlgorithm != nOtherEncryptionAlgorithm)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nProtocol = (m_nProtocol == PROTOCOL_UNSPECIFIED) ? PROTOCOL_ESP : m_nProtocol;
+    IMS_SINT32 nOtherProtocol =
+            (other.m_nProtocol == PROTOCOL_UNSPECIFIED) ? PROTOCOL_ESP : other.m_nProtocol;
+
+    if (nProtocol != nOtherProtocol)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nMode = (m_nMode == MODE_UNSPECIFIED) ? MODE_TRANSPORT : m_nMode;
+    IMS_SINT32 nOtherMode = (other.m_nMode == MODE_UNSPECIFIED) ? MODE_TRANSPORT : other.m_nMode;
+
+    if (nMode != nOtherMode)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
+PUBLIC
 void SipSecurityHeader::SetPort(IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortS)
 {
     m_nPortC = nPortC;
@@ -164,7 +213,7 @@ void SipSecurityHeader::SetSpi(
 {
     m_nSpiC = nSpiC;
     m_nSpiS = nSpiS;
-    m_bSpi3gppCompliant = b3gppCompliant;
+    SetSpiOption(b3gppCompliant);
 
     m_nMechParams |= SPI_C;
     m_nMechParams |= SPI_S;

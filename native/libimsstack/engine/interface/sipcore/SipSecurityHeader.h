@@ -175,6 +175,14 @@ public:
     }
 
     /**
+     * @brief Checks if the security mechanisms are matched.
+     *
+     * @return If the security mechanisms are matched, returns IMS_TRUE.
+     *         Otherwise, returns IMS_FALSE.
+     */
+    IMS_BOOL IsSecurityMechanismMatched(IN const SipSecurityHeader& other) const;
+
+    /**
      * @brief Sets "q" parameter value.
      *
      * @param strPreference "q" parameter value to be set
