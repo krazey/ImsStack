@@ -846,6 +846,59 @@ public class SscXmlCreatorTest {
     }
 
     @Test
+    public void createXml_updateCfRegistrationWhenXmlHasRuleDeactivatedWithInconsistentNamespace() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-busy\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-not-reachable\">"
+                + "<cp:conditions> "
+                + "<rule-deactivated/> "
+                + "<ss:not-reachable/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFB, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals("", targetElement.getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFB));
+        assertEquals(0, ruleCondition.getLength());
+    }
+
+    @Test
     public void createXml_updateCfErasure() {
         SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ERASURE,
                 SscConstant.CONDITION_CFB, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);

@@ -614,6 +614,59 @@ public class SscXmlParserTest {
     }
 
     @Test
+    public void getSscServiceFromDoc_cfWhenXmlHasBothAudioAndVideoWithInconsistentNamespace() {
+        String xml = "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-unconditional\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>audio</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target></ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-unconditional-video\">"
+                + "<cp:conditions>"
+                + "<media>video</media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>";
+
+        processEntireDocumentQuery();
+
+        SscServiceQueryData queryData = getQueryData(ESsType.CF, SscConstant.CONDITION_CFU,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
+        queryData.setResponseCode(SscConstant.HTTP_OK);
+        CfServiceData data = (CfServiceData) mSscXmlParser.getSscServiceFromDoc(queryData,
+                getDocumentFromString(xml), null);
+
+        assertNotNull(data);
+        assertNotNull(data.getRuleSet());
+        assertEquals(2, data.getRuleSet().size());
+
+        for (int i = 0; i < data.getRuleSet().size(); i++) {
+            SscRuleData ruleData = data.getRuleSet().get(i);
+            assertEquals(SscConstant.CONDITION_CFU, ruleData.getSsCondition());
+            if (ruleData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO) {
+                assertEquals(SscConstant.STATUS_ENABLE, ruleData.getState());
+                assertEquals("+1234567890", ruleData.getForwardToNumber());
+            } else if (ruleData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
+                assertEquals(SscConstant.STATUS_DISABLE, ruleData.getState());
+                assertNull(ruleData.getForwardToNumber());
+            }
+        }
+    }
+
+    @Test
     public void getSscServiceFromDoc_cfAudioWhenNoMediaInXml() {
         String xml = "<ss:communication-diversion active=\"true\">"
                 + "<cp:ruleset>"
