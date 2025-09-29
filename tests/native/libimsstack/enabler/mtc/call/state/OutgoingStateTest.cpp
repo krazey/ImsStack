@@ -722,8 +722,7 @@ TEST_F(OutgoingStateTest, OnReceivingNetworkToneFailedInvokesSendProgressingWith
 
 TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfPrackTransactionIsNotCompleted)
 {
-    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objMtcSession, IsPrackPending).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))

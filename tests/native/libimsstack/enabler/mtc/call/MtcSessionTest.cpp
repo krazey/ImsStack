@@ -21,6 +21,7 @@
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
+#include "MockISipMessage.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
@@ -59,6 +60,7 @@ public:
     MockIMtcMediaManager objMediaManager;
     MockISession objSession;
     MockIMessage objMessage;
+    MockISipMessage objSipMessage;
     MockIMessageSender* pMessageSender;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
@@ -113,6 +115,8 @@ protected:
 
         ON_CALL(objThisCall, GetState).WillByDefault(Return(IMtcCall::State::IDLE));
         ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objThisCall));
+
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
         pMessageSender = new MockIMessageSender();
         pMtcSession = IMS_NULL;
@@ -1181,6 +1185,29 @@ TEST_F(MtcSessionTest, HandleResponseDoesNotInvokeSetCallTypeIfSameCallType)
     // previous call type is not changed.
     EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
     EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleResponseDoesNotSetsPrackPendingIfUnreliable183)
+{
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_183));
+    ON_CALL(objSipMessage, IsMessageRpr).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+    EXPECT_FALSE(pMtcSession->IsPrackPending());
+}
+
+TEST_F(MtcSessionTest, HandleResponseSetsPrackPendingIfReliable183AndPrackResponse)
+{
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_183));
+    ON_CALL(objSipMessage, IsMessageRpr).WillByDefault(Return(IMS_TRUE));
+
+    pMtcSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+    EXPECT_TRUE(pMtcSession->IsPrackPending());
+
+    pMtcSession->HandleResponse(ResponseType::PRACK_RESPONSE, objMessage);
+    EXPECT_FALSE(pMtcSession->IsPrackPending());
 }
 
 TEST_F(MtcSessionTest, HandleResponseSetsInConferenceIfIsFocus)

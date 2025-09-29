@@ -61,6 +61,7 @@ public:
     MOCK_METHOD(MtcExtensionSet&, GetExtensionSet, (), (override));
     MOCK_METHOD(IMS_BOOL, IsVideoCapable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRttCapable, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsPrackPending, (), (const, override));
     MOCK_METHOD(UpdateType, GetOngoingUpdateType, (), (const, override));
 };
 

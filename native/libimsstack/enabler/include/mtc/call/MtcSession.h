@@ -79,6 +79,7 @@ public:
     inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; }
     inline IMS_BOOL IsVideoCapable() const override { return m_bVideoCapable; }
     inline IMS_BOOL IsRttCapable() const override { return m_bRttCapable; }
+    inline IMS_BOOL IsPrackPending() const { return m_bPrackPending; }
     inline UpdateType GetOngoingUpdateType() const override { return m_eOngoingUpdateType; }
 
 private:
@@ -122,6 +123,7 @@ private:
     IMS_BOOL m_bRttCapable;
     IMS_BOOL m_bTerminated;
     IMS_BOOL m_bSessionTerminatedOrStartFailed;
+    IMS_BOOL m_bPrackPending;
     UpdateType m_eOngoingUpdateType;
 
     std::vector<CallType> m_objCallTypeHistory;
