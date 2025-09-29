@@ -382,6 +382,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
             mMockImsCallApp = null;
             mMmTelFeature.onFeatureReady();
             assertNotNull(mMockImsCallApp);
+            verify(mMockServiceRegistry).setMmTelFeature(eq(mMmTelFeature));
         } finally {
             serviceManager.dispose();
             ImsServiceManager.setDefault(null);
