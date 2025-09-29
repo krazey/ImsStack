@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <map>
+
 #include "ISessionDescriptor.h"
 #include "ImsTypeDef.h"
 #include "MediaEnvironment.h"
@@ -192,6 +194,190 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
     }
 
     return AUDIO_CODEC_BITRATE_INVALID;
+}
+
+PUBLIC VIRTUAL IMS_FLOAT AudioNego::GetNegotiatedCodecBitrateKbps(void)
+{
+    static const std::map<AUDIO_CODEC_BITRATE, IMS_FLOAT> bitrateMap = {
+            {AUDIO_CODEC_BITRATE_AMR_475,        4.75f  },
+            {AUDIO_CODEC_BITRATE_AMR_515,        5.15f  },
+            {AUDIO_CODEC_BITRATE_AMR_590,        5.90f  },
+            {AUDIO_CODEC_BITRATE_AMR_670,        6.70f  },
+            {AUDIO_CODEC_BITRATE_AMR_740,        7.40f  },
+            {AUDIO_CODEC_BITRATE_AMR_795,        7.95f  },
+            {AUDIO_CODEC_BITRATE_AMR_1020,       10.20f },
+            {AUDIO_CODEC_BITRATE_AMR_1220,       12.20f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_660,     6.60f  },
+            {AUDIO_CODEC_BITRATE_AMR_WB_885,     8.85f  },
+            {AUDIO_CODEC_BITRATE_AMR_WB_1265,    12.65f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_1425,    14.25f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_1585,    15.85f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_1825,    18.25f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_1985,    19.85f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_2305,    23.05f },
+            {AUDIO_CODEC_BITRATE_AMR_WB_2385,    23.85f },
+            {AUDIO_CODEC_BITRATE_EVS_590,        5.90f  },
+            {AUDIO_CODEC_BITRATE_EVS_720,        7.20f  },
+            {AUDIO_CODEC_BITRATE_EVS_800,        8.00f  },
+            {AUDIO_CODEC_BITRATE_EVS_960,        9.60f  },
+            {AUDIO_CODEC_BITRATE_EVS_1320,       13.20f },
+            {AUDIO_CODEC_BITRATE_EVS_1320_CHA_2, 13.20f },
+            {AUDIO_CODEC_BITRATE_EVS_1320_CHA_3, 13.20f },
+            {AUDIO_CODEC_BITRATE_EVS_1320_CHA_5, 13.20f },
+            {AUDIO_CODEC_BITRATE_EVS_1320_CHA_7, 13.20f },
+            {AUDIO_CODEC_BITRATE_EVS_1640,       16.40f },
+            {AUDIO_CODEC_BITRATE_EVS_2440,       24.40f },
+            {AUDIO_CODEC_BITRATE_EVS_3200,       32.00f },
+            {AUDIO_CODEC_BITRATE_EVS_4800,       48.00f },
+            {AUDIO_CODEC_BITRATE_EVS_6400,       64.00f },
+            {AUDIO_CODEC_BITRATE_EVS_9600,       96.00f },
+            {AUDIO_CODEC_BITRATE_EVS_12800,      128.00f},
+            {AUDIO_CODEC_BITRATE_EVS_IO_660,     6.60f  },
+            {AUDIO_CODEC_BITRATE_EVS_IO_885,     8.85f  },
+            {AUDIO_CODEC_BITRATE_EVS_IO_1265,    12.65f },
+            {AUDIO_CODEC_BITRATE_EVS_IO_1425,    14.25f },
+            {AUDIO_CODEC_BITRATE_EVS_IO_1585,    15.85f },
+            {AUDIO_CODEC_BITRATE_EVS_IO_1825,    18.25f },
+            {AUDIO_CODEC_BITRATE_EVS_IO_1985,    19.85f },
+            {AUDIO_CODEC_BITRATE_EVS_IO_2305,    23.05f },
+            {AUDIO_CODEC_BITRATE_EVS_IO_2385,    23.85f },
+    };
+
+    AUDIO_CODEC_BITRATE nBitrate = GetNegotiatedAudioCodecRate();
+    auto it = bitrateMap.find(nBitrate);
+    return (it != bitrateMap.end()) ? it->second : 0.0f;
+}
+
+PUBLIC VIRTUAL IMS_FLOAT AudioNego::GetNegotiatedCodecBandwidthKhz(void)
+{
+    auto pPayload = static_cast<AudioProfile::Payload*>(GetNegotiatedPayload());
+    IMS_FLOAT nBandWidth = 0.0f;
+
+    if (pPayload == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthKhz(): invalid Payload", 0, 0, 0);
+        return 0.0f;
+    }
+
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+    {
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
+        if (pEvsFmtp != IMS_NULL)
+        {
+            IMS_UINT32 bwList = pEvsFmtp->GetBwList();
+
+            nBandWidth = AudioProfileUtil::GetEvsBandwidthKhz(bwList);
+        }
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+    {
+        nBandWidth = 8.0f;
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
+    {
+        nBandWidth = 4.0f;
+    }
+
+    IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthKhz(): BandWidth[%f]", nBandWidth, 0, 0);
+    return nBandWidth;
+}
+
+PUBLIC VIRTUAL void AudioNego::GetNegotiatedCodecBitrateRange(
+        OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd)
+{
+    nBitrateStart = 0.0f;
+    nBitrateEnd = 0.0f;
+    auto pPayload = static_cast<AudioProfile::Payload*>(GetNegotiatedPayload());
+
+    if (pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+            pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+    {
+        IMS_SINT32 nSmallestMode = AudioProfileUtil::GetSmallestModesetInFmtp(
+                pPayload->GetRtpMap().GetPayloadType(), pPayload);
+        IMS_SINT32 nLargestMode = AudioProfileUtil::GetLargestModesetInFmtp(
+                pPayload->GetRtpMap().GetPayloadType(), pPayload);
+
+        nBitrateStart = AudioProfileUtil::GetBitrateFromAmrMode(
+                pPayload->GetRtpMap().GetPayloadType(), nSmallestMode);
+        nBitrateEnd = AudioProfileUtil::GetBitrateFromAmrMode(
+                pPayload->GetRtpMap().GetPayloadType(), nLargestMode);
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+    {
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
+        if (pEvsFmtp != IMS_NULL)
+        {
+            IMS_SINT32 nSmallestMode = AudioProfileUtil::GetSmallestModesetInFmtp("EVS", pPayload);
+            IMS_SINT32 nLargestMode = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pPayload);
+
+            nBitrateStart = AudioProfileUtil::GetBitrateFromEvsMode(
+                    pEvsFmtp->GetEvsModeSwitch(), nSmallestMode);
+            nBitrateEnd = AudioProfileUtil::GetBitrateFromEvsMode(
+                    pEvsFmtp->GetEvsModeSwitch(), nLargestMode);
+        }
+    }
+}
+
+PUBLIC VIRTUAL void AudioNego::GetNegotiatedCodecBandwidthRange(
+        OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd)
+{
+    nBandwidthStart = 0.0f;
+    nBandwidthEnd = 0.0f;
+    auto pPayload = static_cast<AudioProfile::Payload*>(GetNegotiatedPayload());
+
+    if (pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+    {
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
+        if (pEvsFmtp != IMS_NULL)
+        {
+            IMS_UINT32 bwList = pEvsFmtp->GetBwList();
+            if (bwList & EVS_BW_NB)
+            {
+                nBandwidthStart = 4.0f;
+            }
+            else if (bwList & EVS_BW_WB)
+            {
+                nBandwidthStart = 8.0f;
+            }
+            else if (bwList & EVS_BW_SWB)
+            {
+                nBandwidthStart = 16.0f;
+            }
+            else if (bwList & EVS_BW_FB)
+            {
+                nBandwidthStart = 20.0f;
+            }
+            else
+            {
+                IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthRange(): invalid Bandwidth", 0, 0, 0);
+                return;
+            }
+
+            nBandwidthEnd = AudioProfileUtil::GetEvsBandwidthKhz(bwList);
+        }
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+    {
+        nBandwidthStart = 8.0f;
+        nBandwidthEnd = 8.0f;
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
+    {
+        nBandwidthStart = 4.0f;
+        nBandwidthEnd = 4.0f;
+    }
+    IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthRange(): start[%f] end[%f]", nBandwidthStart,
+            nBandwidthEnd, 0);
 }
 
 PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)

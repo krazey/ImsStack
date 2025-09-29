@@ -102,6 +102,42 @@ public:
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
 
     /**
+     * @brief Gets the smallest mode-set or bitrate index from the FMTP attributes of a payload.
+     *
+     * @param strCodec The codec name (e.g., "AMR", "AMR-WB", "EVS").
+     * @param pPayload The audio payload to inspect.
+     * @return The smallest mode-set/bitrate index, or -1 if not found or on error.
+     */
+    static IMS_SINT32 GetSmallestModesetInFmtp(
+            IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
+
+    /**
+     * @brief Gets the bitrate in kbps for a given AMR/AMR-WB mode.
+     *
+     * @param strCodec The codec name ("AMR" or "AMR-WB").
+     * @param nMode The codec mode index.
+     * @return The bitrate in kbps.
+     */
+    static IMS_FLOAT GetBitrateFromAmrMode(IN const AString& strCodec, IN IMS_SINT32 nMode);
+
+    /**
+     * @brief Gets the bitrate in kbps for a given EVS mode.
+     *
+     * @param nEvsModeSwitch The EVS mode switch value (0 for Primary, 1 for AMR-WB IO).
+     * @param nMode The codec mode index.
+     * @return The bitrate in kbps.
+     */
+    static IMS_FLOAT GetBitrateFromEvsMode(IN IMS_SINT32 nEvsModeSwitch, IN IMS_SINT32 nMode);
+
+    /**
+     * @brief Gets the highest EVS bandwidth in kHz from a bandwidth list bitmask.
+     *
+     * @param bwList The bitmask representing the EVS bandwidth list.
+     * @return The highest bandwidth in kHz.
+     */
+    static IMS_FLOAT GetEvsBandwidthKhz(IN IMS_UINT32 bwList);
+
+    /**
      * @brief Sets the ANBR (Adaptive Narrow-Band Rate) support status in the audio profile.
      *
      * This function checks the media session configuration for the given slot and service type

@@ -111,6 +111,12 @@ public:
     MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId) override;
     IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
     IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
+    IMS_FLOAT GetNegotiatedCodecBitrateKbps(IN IMS_UINTP nNegoId) override;
+    IMS_FLOAT GetNegotiatedCodecBandwidthKhz(IN IMS_UINTP nNegoId) override;
+    void GetNegotiatedCodecBitrateRange(IN IMS_UINTP nNegoId, OUT IMS_FLOAT& nBitrateStart,
+            OUT IMS_FLOAT& nBitrateEnd) override;
+    void GetNegotiatedCodecBandwidthRange(IN IMS_UINTP nNegoId, OUT IMS_FLOAT& nBandwidthStart,
+            OUT IMS_FLOAT& nBandwidthEnd) override;
     IMS_SINT32 GetRemotePort(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
     MEDIA_DIRECTION GetNegotiatedDirection(
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType) override;

@@ -510,6 +510,52 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetNegotiatedCodecBitrate(
     return m_pMediaNegoHandler->GetNegotiatedCodecBitrate(nNegoId, eType);
 }
 
+PUBLIC VIRTUAL IMS_FLOAT MediaSession::GetNegotiatedCodecBitrateKbps(IN IMS_UINTP nNegoId)
+{
+    if (m_pMediaNegoHandler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBitrateKbps() - invalid MediaNegoHandler", 0, 0, 0);
+        return 0;
+    }
+
+    return m_pMediaNegoHandler->GetNegotiatedCodecBitrateKbps(nNegoId, MEDIA_TYPE_AUDIO);
+}
+
+PUBLIC VIRTUAL IMS_FLOAT MediaSession::GetNegotiatedCodecBandwidthKhz(IN IMS_UINTP nNegoId)
+{
+    if (m_pMediaNegoHandler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthKhz() - invalid MediaNegoHandler", 0, 0, 0);
+        return 0;
+    }
+
+    return m_pMediaNegoHandler->GetNegotiatedCodecBandwidthKhz(nNegoId, MEDIA_TYPE_AUDIO);
+}
+
+PUBLIC VIRTUAL void MediaSession::GetNegotiatedCodecBitrateRange(
+        IN IMS_UINTP nNegoId, OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd)
+{
+    if (m_pMediaNegoHandler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBitrateRange() - invalid MediaNegoHandler", 0, 0, 0);
+        return;
+    }
+    m_pMediaNegoHandler->GetNegotiatedCodecBitrateRange(
+            nNegoId, MEDIA_TYPE_AUDIO, nBitrateStart, nBitrateEnd);
+}
+
+PUBLIC VIRTUAL void MediaSession::GetNegotiatedCodecBandwidthRange(
+        IN IMS_UINTP nNegoId, OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd)
+{
+    if (m_pMediaNegoHandler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthRange() - invalid MediaNegoHandler", 0, 0, 0);
+        return;
+    }
+    m_pMediaNegoHandler->GetNegotiatedCodecBandwidthRange(
+            nNegoId, MEDIA_TYPE_AUDIO, nBandwidthStart, nBandwidthEnd);
+}
+
 PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetRemotePort(
         IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType)
 {

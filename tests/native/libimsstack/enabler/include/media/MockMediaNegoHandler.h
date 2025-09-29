@@ -59,6 +59,16 @@ public:
             (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedCodecBitrate,
             (IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType), (override));
+    MOCK_METHOD(IMS_FLOAT, GetNegotiatedCodecBitrateKbps,
+            (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType), (override));
+    MOCK_METHOD(IMS_FLOAT, GetNegotiatedCodecBandwidthKhz,
+            (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType), (override));
+    MOCK_METHOD(void, GetNegotiatedCodecBitrateRange,
+            (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE, OUT IMS_FLOAT&, OUT IMS_FLOAT&),
+            (override));
+    MOCK_METHOD(void, GetNegotiatedCodecBandwidthRange,
+            (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE, OUT IMS_FLOAT&, OUT IMS_FLOAT&),
+            (override));
     MOCK_METHOD(
             IMS_SINT32, GetRemotePort, (IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType), (override));
     MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedDirection,
@@ -68,5 +78,4 @@ public:
     MOCK_METHOD(IMS_BOOL, SetRtpPort,
             (IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType, IMS_UINT32 nPort), (override));
 };
-
 #endif  // MOCK_MEDIA_NEGO_HANDLER_H_

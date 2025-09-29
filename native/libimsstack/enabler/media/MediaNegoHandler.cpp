@@ -349,6 +349,69 @@ IMS_SINT32 MediaNegoHandler::GetNegotiatedCodecBitrate(IMS_UINTP nNegoId, MEDIA_
 }
 
 PUBLIC
+IMS_FLOAT MediaNegoHandler::GetNegotiatedCodecBitrateKbps(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(
+                0, "GetNegotiatedCodecBitrateKbps(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
+        return 0.0f;
+    }
+
+    return pMediaNego->GetNegotiatedCodecBitrateKbps(eMediaType);
+}
+
+PUBLIC
+IMS_FLOAT MediaNegoHandler::GetNegotiatedCodecBandwidthKhz(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthKhz(): NegoId[%" PFLS_x "] not found", nNegoId,
+                0, 0);
+        return 0.0f;
+    }
+
+    return pMediaNego->GetNegotiatedCodecBandwidthKhz(eMediaType);
+}
+
+PUBLIC
+void MediaNegoHandler::GetNegotiatedCodecBitrateRange(IN IMS_UINTP nNegoId,
+        IN MEDIA_CONTENT_TYPE eMediaType, OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd)
+{
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBitrateRange(): NegoId[%" PFLS_x "] not found", nNegoId,
+                0, 0);
+        nBitrateStart = 0.0f;
+        nBitrateEnd = 0.0f;
+        return;
+    }
+    pMediaNego->GetNegotiatedCodecBitrateRange(eMediaType, nBitrateStart, nBitrateEnd);
+}
+
+PUBLIC
+void MediaNegoHandler::GetNegotiatedCodecBandwidthRange(IN IMS_UINTP nNegoId,
+        IN MEDIA_CONTENT_TYPE eMediaType, OUT IMS_FLOAT& nBandwidthStart,
+        OUT IMS_FLOAT& nBandwidthEnd)
+{
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthRange(): NegoId[%" PFLS_x "] not found", nNegoId,
+                0, 0);
+        nBandwidthStart = 0.0f;
+        nBandwidthEnd = 0.0f;
+        return;
+    }
+    pMediaNego->GetNegotiatedCodecBandwidthRange(eMediaType, nBandwidthStart, nBandwidthEnd);
+}
+
+PUBLIC
 IMS_SINT32 MediaNegoHandler::GetRemotePort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType)
 {
     std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
