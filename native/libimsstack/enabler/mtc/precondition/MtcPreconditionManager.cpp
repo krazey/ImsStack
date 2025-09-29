@@ -51,7 +51,7 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
         m_pListener(IMS_NULL),
         m_objContext(objContext),
         m_pSdpPreconditionHelper(new SdpPreconditionHelper()),
-        m_bOnWlan(objContext.GetService().IsWlanIpCanType()),
+        m_bOnWlan(objContext.GetService().GetRatType() == INetworkWatcher::RADIOTECH_TYPE_IWLAN),
         m_ePreviousRatType(m_objContext.GetService().GetMobileRatType()),
         m_eCurrentRatType(m_ePreviousRatType)
 {
@@ -685,7 +685,7 @@ void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession) const
 PRIVATE
 void MtcPreconditionManager::OnWaitAudioDedicatedBearerTimerExpired(IN QosTimer* pTimer)
 {
-    if (m_objContext.GetService().IsWlanIpCanType())
+    if (m_bOnWlan)
     {
         return;
     }
@@ -1052,7 +1052,7 @@ IMS_BOOL MtcPreconditionManager::IsLocalResourceReserved(
         return IMS_FALSE;
     }
 
-    if (m_objContext.GetService().IsWlanIpCanType())
+    if (m_bOnWlan)
     {
         IMS_TRACE_D("IsLocalResourceReserved : it is on Wi-Fi", 0, 0, 0);
         return IMS_TRUE;
@@ -1076,7 +1076,7 @@ PRIVATE
 IMS_BOOL MtcPreconditionManager::IsLocalResourceReservedByMediaType(
         IN ISession* piSession, IN IMS_UINT32 eMediaType) const
 {
-    if (m_objContext.GetService().IsWlanIpCanType())
+    if (m_bOnWlan)
     {
         IMS_TRACE_D("IsLocalResourceReservedByMediaType : it is on Wi-Fi", 0, 0, 0);
         return IMS_TRUE;
