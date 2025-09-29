@@ -424,19 +424,33 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
 
             if (!m_bOnWlan)  // W2L
             {
-                if (GetQosInfo(piSession)->IsWaitAudioDedicatedBearerTimerStarted() &&
-                        !IsLocalResourceReserved(piSession, IMS_FALSE))
+                if (!IsLocalResourceReserved(piSession, IMS_FALSE))
                 {
-                    StartQosTimer(piSession, QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER);
+                    if (GetQosInfo(piSession)->IsWaitAudioDedicatedBearerTimerStarted())
+                    {
+                        StartQosTimer(piSession, QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER);
+                    }
+                    else if (!IsConfirmedDialog(piSession))
+                    {
+                        IMS_TRACE_I("Start QoS wait timer - W2L in Early state", 0, 0, 0);
+                        StartQosTimer(piSession, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
+                    }
                 }
             }
             else  // L2W
             {
                 StopQosTimer(piSession, QosTimerType::GUARD_AFTER_LOST);
                 StopQosTimer(piSession, QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE);
+                StopQosTimer(piSession, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
 
-                NotifyQosStatusToListener(
-                        piSession, IMS_TRUE, SetLocalResourceAvailable(piSession));
+                IMS_UINT32 eMediaType = MtcMediaUtil::GetMediaTypesFromCallType(
+                        m_objContext.GetSession()->GetCallType());
+                QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
+                if (pStatusTable)
+                {
+                    pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(eMediaType), IMS_TRUE);
+                }
+                NotifyQosStatusToListener(piSession, IMS_TRUE, eMediaType);
             }
         }
     }
@@ -1218,6 +1232,7 @@ IMS_BOOL MtcPreconditionManager::IsNeedToStartWaitAudioDedicatedBearerTimer(
 
     if (IsNotUsingDedicatedWaitTimerByRatCondition())
     {
+        IMS_TRACE_D("No need to start audio dedicated bearer wait timer.", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1419,16 +1434,8 @@ IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objIS
     if (IsConfirmedDialog(&objISession))
     {
         // Check if it's sending a first response for re-INVITE.
-        if (!m_objContext.GetUpdatingInfo().IsModifier() &&
-                objISession.GetPreviousResponse(IMessage::SESSION_UPDATE) == IMS_NULL)
-        {
-            // TODO: check after sending 100 Tyring.
-            return IMS_TRUE;
-        }
-        else
-        {
-            return IMS_FALSE;
-        }
+        return !m_objContext.GetUpdatingInfo().IsModifier() &&
+                objISession.GetPreviousResponse(IMessage::SESSION_UPDATE) == IMS_NULL;
     }
 
     return (m_objContext.GetCallInfo().ePeerType == PeerType::MT);
@@ -1440,6 +1447,12 @@ IMS_BOOL MtcPreconditionManager::IsNotUsingDedicatedWaitTimerByRatCondition() co
     IMS_TRACE_D("IsNotUsingDedicatedWaitTimerByRatCondition pre[%s] curr[%s]",
             MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
             MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
+
+    if (m_bOnWlan)
+    {
+        return IMS_TRUE;
+    }
+
     if (m_objContext.GetConfigurationProxy().Contains(
                 ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_NR) &&
