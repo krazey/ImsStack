@@ -1069,6 +1069,11 @@ PROTECTED IMS_BOOL AosERegistration::IsAnonymousECallActionPresent(IN IMS_SINT32
 
 PROTECTED IMS_BOOL AosERegistration::IsNetworkReady() const
 {
+    if (m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        return IMS_TRUE;
+    }
+
     return (m_piContext->GetNetTracker()->GetMobileServiceState() !=
                     INetworkWatcher::STATE_OUT_OF_SERVICE ||
             m_piContext->GetNetTracker()->IsEmergencyAttach());
