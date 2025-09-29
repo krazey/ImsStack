@@ -51,6 +51,7 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
         m_pListener(IMS_NULL),
         m_objContext(objContext),
         m_pSdpPreconditionHelper(new SdpPreconditionHelper()),
+        bLocalResourceConfirmedInitially(IMS_FALSE),
         m_bOnWlan(objContext.GetService().GetRatType() == INetworkWatcher::RADIOTECH_TYPE_IWLAN),
         m_ePreviousRatType(m_objContext.GetService().GetMobileRatType()),
         m_eCurrentRatType(m_ePreviousRatType)
@@ -204,6 +205,14 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
 {
     if (!IsPreconditionSupported(piSession))
     {
+        return IMS_FALSE;
+    }
+
+    if (bLocalResourceConfirmedInitially && !IsConfirmedDialog(piSession))
+    {
+        // In forked session, SetLocalResourceConfirmed() cannot be invoked before sending the
+        // first SDP, this information should be obtained from the original session.
+        IMS_TRACE_D("IsLocalResourceConfirmationRequired already sendrecv in INVITE", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -813,6 +822,7 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     IMS_SINT32 eSdpMediaType = GetSdpMediaType(eMediaType);
     if (!pStatusTable->GetRecords(eSdpMediaType).IsEmpty())
     {
+        IMS_TRACE_D("CreateStatusRecords : already created", 0, 0, 0);
         return;
     }
 
@@ -838,6 +848,10 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
         {
             bLocalReserved = IMS_TRUE;
         }
+    }
+    else
+    {
+        bLocalResourceConfirmedInitially = bLocalReserved;
     }
 
     pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType, bLocalReserved);
