@@ -1173,54 +1173,53 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErr)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objExtraRegErr;
 
-    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE))
-            .WillRepeatedly(Return(&objExtraRegErr));
-    EXPECT_CALL(objExtraRegErr,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE))
+            .WillByDefault(Return(&objExtraRegErr));
+    ON_CALL(objExtraRegErr,
             GetBoolean(CarrierConfig::Ims::
                                KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
                     IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objExtraRegErr,
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objExtraRegErr,
             GetBoolean(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
                     IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objExtraRegErr,
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
                     CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED))
-            .WillOnce(Return(CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED));
-    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT, 0))
-            .WillOnce(Return(0));
-    EXPECT_CALL(objExtraRegErr,
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED));
+    ON_CALL(objExtraRegErr, GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT, 0))
+            .WillByDefault(Return(0));
+    ON_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Ims::
                             KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
                     0))
-            .WillOnce(Return(1));
-    EXPECT_CALL(objExtraRegErr,
+            .WillByDefault(Return(1));
+    ON_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Ims::
                             KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT,
                     0))
-            .WillOnce(Return(2));
-    EXPECT_CALL(objExtraRegErr,
+            .WillByDefault(Return(2));
+    ON_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_POLICY_INT,
                     CarrierConfig::Ims::ERROR_POLICY_NOT_SPECIFIED))
-            .WillOnce(Return(CarrierConfig::Ims::ERROR_POLICY_PCSCF_FAILED));
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PCSCF_FAILED));
     ImsVector<IMS_SINT32> objExtraRegErrCode;
     objExtraRegErrCode.Add(400);
     IMS_BOOL bKeyExistValue = IMS_TRUE;
-    EXPECT_CALL(
-            objExtraRegErr, GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrCode)));
+    ON_CALL(objExtraRegErr, GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrCode)));
     ImsVector<IMS_SINT32> objExtraReregErrCode;
     objExtraReregErrCode.Add(500);
-    EXPECT_CALL(objExtraRegErr,
+    ON_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraReregErrCode)));
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraReregErrCode)));
     ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
     objExtraRegErrWaitTimeSec.Add(30);
-    EXPECT_CALL(objExtraRegErr,
+    ON_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrWaitTimeSec)));
-    EXPECT_CALL(objExtraRegErr, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrWaitTimeSec)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForExtraRegErr(&objCarrierConfig);
@@ -1252,25 +1251,24 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErrWithoutIntArrayKeys)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objExtraRegErr;
 
-    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE))
-            .WillRepeatedly(Return(&objExtraRegErr));
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_BUNDLE))
+            .WillByDefault(Return(&objExtraRegErr));
     ImsVector<IMS_SINT32> objExtraRegErrCode;
     objExtraRegErrCode.Add(400);
     IMS_BOOL bKeyExistValue = IMS_FALSE;
-    EXPECT_CALL(
-            objExtraRegErr, GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrCode)));
+    ON_CALL(objExtraRegErr, GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrCode)));
     ImsVector<IMS_SINT32> objExtraReregErrCode;
     objExtraReregErrCode.Add(500);
-    EXPECT_CALL(objExtraRegErr,
+    ON_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraReregErrCode)));
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraReregErrCode)));
     ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
     objExtraRegErrWaitTimeSec.Add(30);
-    EXPECT_CALL(objExtraRegErr,
+    ON_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Ims::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrWaitTimeSec)));
-    EXPECT_CALL(objExtraRegErr, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objExtraRegErrWaitTimeSec)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForExtraRegErr(&objCarrierConfig);
@@ -1290,37 +1288,33 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForNotifyTerminatedForInitReg)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objNotifyTerminated;
 
-    EXPECT_CALL(objCarrierConfig,
+    ON_CALL(objCarrierConfig,
             GetBundle(CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE))
-            .WillRepeatedly(Return(&objNotifyTerminated));
-
-    EXPECT_CALL(objNotifyTerminated,
+            .WillByDefault(Return(&objNotifyTerminated));
+    ON_CALL(objNotifyTerminated,
             GetInt(CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT, 0))
-            .WillOnce(Return(40));
-
+            .WillByDefault(Return(40));
     ImsVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
     objEventForInitRegOnTerminatedState.Add(1);
     objEventForInitRegOnTerminatedState.Add(2);
     objEventForInitRegOnTerminatedState.Add(3);
     IMS_BOOL bKeyExistValue = IMS_TRUE;
-    EXPECT_CALL(objNotifyTerminated,
+    ON_CALL(objNotifyTerminated,
             GetIntArray(
                     CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY, _))
-            .WillOnce(DoAll(
+            .WillByDefault(DoAll(
                     SetArgReferee<1>(bKeyExistValue), Return(objEventForInitRegOnTerminatedState)));
 
     ImsVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
     objEventWithWtForInitRegOnTerminatedState.Add(2);
     objEventWithWtForInitRegOnTerminatedState.Add(5);
-    EXPECT_CALL(objNotifyTerminated,
+    ON_CALL(objNotifyTerminated,
             GetIntArray(
                     CarrierConfig::Ims ::
                             KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
                     _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue),
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue),
                     Return(objEventWithWtForInitRegOnTerminatedState)));
-
-    EXPECT_CALL(objNotifyTerminated, ReleaseBundle()).Times(1);
 
     // WHEN
     m_pAosNConfiguration->InitBundleForNotifyTerminatedForInitReg(&objCarrierConfig);
@@ -1351,28 +1345,24 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForNotifyTerminatedForInitRegWitho
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objNotifyTerminated;
 
-    EXPECT_CALL(objCarrierConfig,
+    ON_CALL(objCarrierConfig,
             GetBundle(CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE))
-            .WillRepeatedly(Return(&objNotifyTerminated));
-
+            .WillByDefault(Return(&objNotifyTerminated));
     ImsVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
     IMS_BOOL bKeyExistValue = IMS_FALSE;
-    EXPECT_CALL(objNotifyTerminated,
+    ON_CALL(objNotifyTerminated,
             GetIntArray(
                     CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY, _))
-            .WillOnce(DoAll(
+            .WillByDefault(DoAll(
                     SetArgReferee<1>(bKeyExistValue), Return(objEventForInitRegOnTerminatedState)));
-
     ImsVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
-    EXPECT_CALL(objNotifyTerminated,
+    ON_CALL(objNotifyTerminated,
             GetIntArray(
                     CarrierConfig::Ims ::
                             KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
                     _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue),
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue),
                     Return(objEventWithWtForInitRegOnTerminatedState)));
-
-    EXPECT_CALL(objNotifyTerminated, ReleaseBundle()).Times(1);
 
     // WHEN
     m_pAosNConfiguration->InitBundleForNotifyTerminatedForInitReg(&objCarrierConfig);
@@ -1396,23 +1386,20 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForPcscfRecoveryConditions)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objPcscfRecoveryConditionsBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE))
-            .WillRepeatedly(Return(&objPcscfRecoveryConditionsBundle));
-    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE))
+            .WillByDefault(Return(&objPcscfRecoveryConditionsBundle));
+    ON_CALL(objPcscfRecoveryConditionsBundle,
             GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_CNT_INT, 3))
-            .WillOnce(Return(3));
-    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            .WillByDefault(Return(3));
+    ON_CALL(objPcscfRecoveryConditionsBundle,
             GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT, 20))
-            .WillOnce(Return(20));
-    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            .WillByDefault(Return(20));
+    ON_CALL(objPcscfRecoveryConditionsBundle,
             GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT, 20))
-            .WillOnce(Return(20));
-    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            .WillByDefault(Return(20));
+    ON_CALL(objPcscfRecoveryConditionsBundle,
             GetInt(CarrierConfig::Ims::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT, 1800))
-            .WillOnce(Return(1800));
-
-    EXPECT_CALL(objPcscfRecoveryConditionsBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(Return(1800));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForPcscfRecoveryConditions(&objCarrierConfig);
@@ -1430,29 +1417,25 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegErrCodeWithRaTime)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objRegErrCodeWithRaTimeBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE))
-            .WillRepeatedly(Return(&objRegErrCodeWithRaTimeBundle));
-
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE))
+            .WillByDefault(Return(&objRegErrCodeWithRaTimeBundle));
+    ON_CALL(objRegErrCodeWithRaTimeBundle,
             GetBoolean(
                     CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-
+            .WillByDefault(Return(IMS_FALSE));
     ImsVector<IMS_SINT32> objRegErrCodeWithRaTime;
     objRegErrCodeWithRaTime.Add(486);
     IMS_BOOL bKeyExistValue = IMS_TRUE;
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+    ON_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegErrCodeWithRaTime)));
-
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegErrCodeWithRaTime)));
     ImsVector<IMS_SINT32> objReregErrCodeWithRaTime;
     objReregErrCodeWithRaTime.Add(486);
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+    ON_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objReregErrCodeWithRaTime)));
-
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objReregErrCodeWithRaTime)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForRegErrCodeWithRaTime(&objCarrierConfig);
@@ -1474,24 +1457,21 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegErrCodeWithRaTimeWithoutIntA
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objRegErrCodeWithRaTimeBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE))
-            .WillRepeatedly(Return(&objRegErrCodeWithRaTimeBundle));
-
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE))
+            .WillByDefault(Return(&objRegErrCodeWithRaTimeBundle));
     ImsVector<IMS_SINT32> objRegErrCodeWithRaTime;
     objRegErrCodeWithRaTime.Add(486);
     IMS_BOOL bKeyExistValue = IMS_FALSE;
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+    ON_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegErrCodeWithRaTime)));
-
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegErrCodeWithRaTime)));
     ImsVector<IMS_SINT32> objReregErrCodeWithRaTime;
     objReregErrCodeWithRaTime.Add(486);
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+    ON_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objReregErrCodeWithRaTime)));
-
-    EXPECT_CALL(objRegErrCodeWithRaTimeBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objReregErrCodeWithRaTime)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForRegErrCodeWithRaTime(&objCarrierConfig);
@@ -1510,13 +1490,11 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objRegRetryInterval;
 
-    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE))
-            .WillRepeatedly(Return(&objRegRetryInterval));
-
-    EXPECT_CALL(objRegRetryInterval,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE))
+            .WillByDefault(Return(&objRegRetryInterval));
+    ON_CALL(objRegRetryInterval,
             GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL, IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE));
-
+            .WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
     objRegRetryRandomUpperValueSec.Add(0);
     objRegRetryRandomUpperValueSec.Add(0);
@@ -1525,12 +1503,11 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
     objRegRetryRandomUpperValueSec.Add(0);
     objRegRetryRandomUpperValueSec.Add(0);
     IMS_BOOL bKeyExistValue = IMS_TRUE;
-    EXPECT_CALL(objRegRetryInterval,
+    ON_CALL(objRegRetryInterval,
             GetIntArray(
                     CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY, _))
-            .WillOnce(DoAll(
+            .WillByDefault(DoAll(
                     SetArgReferee<1>(bKeyExistValue), Return(objRegRetryRandomUpperValueSec)));
-
     ImsVector<IMS_SINT32> objRegRetryIntervalSec;
     objRegRetryIntervalSec.Add(30);
     objRegRetryIntervalSec.Add(30);
@@ -1538,11 +1515,9 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryInterval)
     objRegRetryIntervalSec.Add(120);
     objRegRetryIntervalSec.Add(480);
     objRegRetryIntervalSec.Add(900);
-    EXPECT_CALL(objRegRetryInterval,
+    ON_CALL(objRegRetryInterval,
             GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegRetryIntervalSec)));
-
-    EXPECT_CALL(objRegRetryInterval, ReleaseBundle()).Times(1);
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegRetryIntervalSec)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForRegRetryInterval(&objCarrierConfig);
@@ -1560,25 +1535,21 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForRegRetryIntervalWithoutIntArray
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objRegRetryInterval;
 
-    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE))
-            .WillRepeatedly(Return(&objRegRetryInterval));
-
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_BUNDLE))
+            .WillByDefault(Return(&objRegRetryInterval));
     ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
     objRegRetryRandomUpperValueSec.Add(15);
     IMS_BOOL bKeyExistValue = IMS_FALSE;
-    EXPECT_CALL(objRegRetryInterval,
+    ON_CALL(objRegRetryInterval,
             GetIntArray(
                     CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY, _))
-            .WillOnce(DoAll(
+            .WillByDefault(DoAll(
                     SetArgReferee<1>(bKeyExistValue), Return(objRegRetryRandomUpperValueSec)));
-
     ImsVector<IMS_SINT32> objRegRetryIntervalSec;
     objRegRetryIntervalSec.Add(30);
-    EXPECT_CALL(objRegRetryInterval,
+    ON_CALL(objRegRetryInterval,
             GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegRetryIntervalSec)));
-
-    EXPECT_CALL(objRegRetryInterval, ReleaseBundle()).Times(1);
+            .WillByDefault(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objRegRetryIntervalSec)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForRegRetryInterval(&objCarrierConfig);
@@ -1596,23 +1567,20 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForInitReg)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objSubErrCodeForInitRegBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE))
-            .WillRepeatedly(Return(&objSubErrCodeForInitRegBundle));
-
-    EXPECT_CALL(objSubErrCodeForInitRegBundle,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE))
+            .WillByDefault(Return(&objSubErrCodeForInitRegBundle));
+    ON_CALL(objSubErrCodeForInitRegBundle,
             GetInt(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT, 0))
-            .WillOnce(Return(2));
+            .WillByDefault(Return(2));
 
     ImsVector<IMS_SINT32> objSubErrCodeForInitReg;
     objSubErrCodeForInitReg.Add(408);
     objSubErrCodeForInitReg.Add(504);
     IMS_BOOL bKeyExistValue = IMS_TRUE;
-    EXPECT_CALL(objSubErrCodeForInitRegBundle,
+    ON_CALL(objSubErrCodeForInitRegBundle,
             GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForInitReg)));
-
-    EXPECT_CALL(objSubErrCodeForInitRegBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForInitReg)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForSubErrCodeForInitReg(&objCarrierConfig);
@@ -1630,18 +1598,15 @@ TEST_F(AosNConfigurationTest,
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objSubErrCodeForInitRegBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE))
-            .WillRepeatedly(Return(&objSubErrCodeForInitRegBundle));
-
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE))
+            .WillByDefault(Return(&objSubErrCodeForInitRegBundle));
     ImsVector<IMS_SINT32> objSubErrCodeForInitReg;
     objSubErrCodeForInitReg.Add(408);
     IMS_BOOL bKeyExistValue = IMS_FALSE;
-    EXPECT_CALL(objSubErrCodeForInitRegBundle,
+    ON_CALL(objSubErrCodeForInitRegBundle,
             GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForInitReg)));
-
-    EXPECT_CALL(objSubErrCodeForInitRegBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForInitReg)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForSubErrCodeForInitReg(&objCarrierConfig);
@@ -1657,24 +1622,20 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForSubErrCodeForTerminated)
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objSubErrCodeForTerminatedBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE))
-            .WillRepeatedly(Return(&objSubErrCodeForTerminatedBundle));
-
-    EXPECT_CALL(objSubErrCodeForTerminatedBundle,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE))
+            .WillByDefault(Return(&objSubErrCodeForTerminatedBundle));
+    ON_CALL(objSubErrCodeForTerminatedBundle,
             GetInt(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT, 0))
-            .WillOnce(Return(0));
-
+            .WillByDefault(Return(0));
     ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
     objSubErrCodeForTerminated.Add(491);
     objSubErrCodeForTerminated.Add(500);
     objSubErrCodeForTerminated.Add(606);
     IMS_BOOL bKeyExistValue = IMS_TRUE;
-    EXPECT_CALL(objSubErrCodeForTerminatedBundle,
+    ON_CALL(objSubErrCodeForTerminatedBundle,
             GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForTerminated)));
-
-    EXPECT_CALL(objSubErrCodeForTerminatedBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForTerminated)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForSubErrCodeForTerminated(&objCarrierConfig);
@@ -1692,18 +1653,15 @@ TEST_F(AosNConfigurationTest,
     MockICarrierConfig objCarrierConfig;
     MockICarrierConfig objSubErrCodeForTerminatedBundle;
 
-    EXPECT_CALL(
-            objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE))
-            .WillOnce(Return(&objSubErrCodeForTerminatedBundle));
-
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE))
+            .WillByDefault(Return(&objSubErrCodeForTerminatedBundle));
     ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
     objSubErrCodeForTerminated.Add(491);
     IMS_BOOL bKeyExistValue = IMS_FALSE;
-
-    EXPECT_CALL(objSubErrCodeForTerminatedBundle,
+    ON_CALL(objSubErrCodeForTerminatedBundle,
             GetIntArray(CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY, _))
-            .WillOnce(DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForTerminated)));
-    EXPECT_CALL(objSubErrCodeForTerminatedBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(
+                    DoAll(SetArgReferee<1>(bKeyExistValue), Return(objSubErrCodeForTerminated)));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForSubErrCodeForTerminated(&objCarrierConfig);
@@ -1725,35 +1683,23 @@ TEST_F(AosNConfigurationTest, InitBundleConfigForBundleForWfcErrMessage)
     AString strWfcErrorSub403("REG09 - Missing 911 Address");
     AString strWfcErrorNotifyTerminated("REG09 - Missing 911 Address");
     AString strWfcErrorOtherFailures = AString::ConstNull();
-
-    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::ImsWfc::KEY_WFC_ERR_MESSAGE_BUNDLE))
-            .WillRepeatedly(Return(&objWfcErrMessageBundle));
-    EXPECT_CALL(
-            objWfcErrMessageBundle, GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_REG_403_STRING, _))
-            .Times(1)
-            .WillOnce(Return(strWfcErrorReg403));
-    EXPECT_CALL(
-            objWfcErrMessageBundle, GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_REG_500_STRING, _))
-            .Times(1)
-            .WillOnce(Return(strWfcErrorReg500));
-    EXPECT_CALL(objWfcErrMessageBundle,
+    ON_CALL(objCarrierConfig, GetBundle(CarrierConfig::ImsWfc::KEY_WFC_ERR_MESSAGE_BUNDLE))
+            .WillByDefault(Return(&objWfcErrMessageBundle));
+    ON_CALL(objWfcErrMessageBundle, GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_REG_403_STRING, _))
+            .WillByDefault(Return(strWfcErrorReg403));
+    ON_CALL(objWfcErrMessageBundle, GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_REG_500_STRING, _))
+            .WillByDefault(Return(strWfcErrorReg500));
+    ON_CALL(objWfcErrMessageBundle,
             GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING, _))
-            .Times(1)
-            .WillOnce(Return(strWfcErrorNotSupportedCountry));
-    EXPECT_CALL(
-            objWfcErrMessageBundle, GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_SUB_403_STRING, _))
-            .Times(1)
-            .WillOnce(Return(strWfcErrorSub403));
-    EXPECT_CALL(objWfcErrMessageBundle,
+            .WillByDefault(Return(strWfcErrorNotSupportedCountry));
+    ON_CALL(objWfcErrMessageBundle, GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_SUB_403_STRING, _))
+            .WillByDefault(Return(strWfcErrorSub403));
+    ON_CALL(objWfcErrMessageBundle,
             GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_NOTIFY_TERMINATED_STRING, _))
-            .Times(1)
-            .WillOnce(Return(strWfcErrorNotifyTerminated));
-    EXPECT_CALL(objWfcErrMessageBundle,
+            .WillByDefault(Return(strWfcErrorNotifyTerminated));
+    ON_CALL(objWfcErrMessageBundle,
             GetString(CarrierConfig::ImsWfc::KEY_WFC_ERR_OTHER_FAILURES_STRING, _))
-            .Times(1)
-            .WillOnce(Return(strWfcErrorOtherFailures));
-
-    EXPECT_CALL(objWfcErrMessageBundle, ReleaseBundle()).Times(1);
+            .WillByDefault(Return(strWfcErrorOtherFailures));
 
     // WHEN
     m_pAosNConfiguration->InitBundleForWfcErrMessage(&objCarrierConfig);
