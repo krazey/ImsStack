@@ -32,13 +32,6 @@ __IMS_TRACE_TAG_REG__;
 // in the instance-id.
 // e.g. IMEI: "urn:gsma:imei:00000000-000000-0", IMEISV: urn:gsma:imei:00000000-000000-0;svn=00"
 
-LOCAL
-IMS_BOOL sipUrnHelper_IsUuidFallbackRequiredWhenNoImei(IN IMS_SINT32 /*nSlotId*/)
-{
-    // NOTE: will be integrated in the future.
-    return IMS_FALSE;
-}
-
 PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType)
 {
     AStringBuffer objUrn(64);
@@ -54,15 +47,9 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 
     {
         strImei = "00000000000000";
 
-        // 3GPP - If no IMEI is available, so take the form of a string representation
+        // NOTE: 3GPP - If no IMEI is available, so take the form of a string representation
         // of a UUID as a URN in RFC 4122.
-        // (Name selection should be changed later)
-        if (sipUrnHelper_IsUuidFallbackRequiredWhenNoImei(nSlotId) &&
-                ((nType == GSMA_IMEI) || (nType == GSMA_IMEISV) || (nType == UUID_IMEI_MD5) ||
-                        (nType == UUID_IMEI_SHA1)))
-        {
-            nType = UUID_IMEI_NAMED_V3;
-        }
+        // (Name selection should be changed later - UUID_IMEI_NAMED_V3)
     }
 
     switch (nType)

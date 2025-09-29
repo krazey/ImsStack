@@ -41,9 +41,9 @@ protected:
 private:
     IMS_SINT32 TranslateMessage(IN const ISipMessage* piSipMsg) const;
     IMS_BOOL UpdateOnNotifyRequest(IN const ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg);
+    void UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnSubscribeRequest(IN const ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnSubscribeResponse(IN const ISipMessage* piSipMsg);
+    void UpdateOnSubscribeResponse(IN const ISipMessage* piSipMsg);
 
     static void InitializeStateTable();
 

@@ -2558,14 +2558,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySipForkedResponse(
         (*pProposalView) = (*pCapabilities);
 
         // Create all the medias from the proposal view
-        if (!pSession->CreateMediaFromSdp())
-        {
-            pSession->Destroy();
-            piForkedScc->Close();
-
-            IMS_TRACE_E(0, "Creating the media from SDP failed", 0, 0, 0);
-            return IMS_FALSE;
-        }
+        pSession->CreateMediaFromSdp();
     }
 
     if (!pSession->UpdateRequestOnSent(IMessage::SESSION_START, piForkedScc))
@@ -7443,7 +7436,7 @@ void Session::CleanupMedia()
 }
 
 PRIVATE
-IMS_BOOL Session::CreateMediaFromSdp()
+void Session::CreateMediaFromSdp()
 {
     const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
@@ -7519,8 +7512,6 @@ IMS_BOOL Session::CreateMediaFromSdp()
             }
         }
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE

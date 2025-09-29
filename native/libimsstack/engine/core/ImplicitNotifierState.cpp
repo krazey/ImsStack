@@ -69,23 +69,14 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN const ISipMessage*
         // On REFER request received ...
         if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
         {
-            if (!UpdateOnReferRequest(piSipMsg))
-            {
-                IMS_TRACE_E(0, "Updating the notifier state on REFER request failed", 0, 0, 0);
-                return IMS_FALSE;
-            }
+            UpdateOnReferRequest(piSipMsg);
         }
         // On REFER response sent ...
         else
         {
             // Reset the flag for subscription duration changed
             SetDurationUpdated(IMS_FALSE);
-
-            if (!UpdateOnReferResponse(piSipMsg))
-            {
-                IMS_TRACE_E(0, "Updating the notifier state on REFER response failed", 0, 0, 0);
-                return IMS_FALSE;
-            }
+            UpdateOnReferResponse(piSipMsg);
         }
     }
     else if (objMethod.Equals(SipMethod::NOTIFY))
@@ -105,11 +96,7 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN const ISipMessage*
         // On NOTIFY response received ...
         else
         {
-            if (!UpdateOnNotifyResponse(piSipMsg))
-            {
-                IMS_TRACE_E(0, "Updating the notifier state on NOTIFY response failed", 0, 0, 0);
-                return IMS_FALSE;
-            }
+            UpdateOnNotifyResponse(piSipMsg);
         }
     }
 
@@ -330,7 +317,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNotifyRequest(IN const ISipMessage* piSi
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg)
+void ImplicitNotifierState::UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg)
 {
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
@@ -373,12 +360,10 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNotifyResponse(IN const ISipMessage* piS
             }
         }
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnReferRequest(IN const ISipMessage* piSipMsg)
+void ImplicitNotifierState::UpdateOnReferRequest(IN const ISipMessage* piSipMsg)
 {
     // Extracts an Event header
     if (GetState() == STATE_INIT)
@@ -399,17 +384,15 @@ IMS_BOOL ImplicitNotifierState::UpdateOnReferRequest(IN const ISipMessage* piSip
 
         GetEventPackage()->SetEventHeader(piHeader);
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnReferResponse(IN const ISipMessage* piSipMsg)
+void ImplicitNotifierState::UpdateOnReferResponse(IN const ISipMessage* piSipMsg)
 {
     if (GetState() == STATE_TERMINATED)
     {
         IMS_TRACE_D("Subscription is already in TERMINATED state...", 0, 0, 0);
-        return IMS_TRUE;
+        return;
     }
 
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
@@ -417,7 +400,6 @@ IMS_BOOL ImplicitNotifierState::UpdateOnReferResponse(IN const ISipMessage* piSi
     if (SipStatusCode::Is1XX(nStatusCode))
     {
         // Do nothing ...
-        return IMS_TRUE;
     }
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
@@ -437,8 +419,6 @@ IMS_BOOL ImplicitNotifierState::UpdateOnReferResponse(IN const ISipMessage* piSi
                 SetState(piSipMsg, STATE_INIT);
             }
         }
-
-        return IMS_TRUE;
     }
     else
     {
@@ -448,8 +428,6 @@ IMS_BOOL ImplicitNotifierState::UpdateOnReferResponse(IN const ISipMessage* piSi
             SetState(piSipMsg, STATE_TERMINATED);
         }
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE GLOBAL void ImplicitNotifierState::InitializeStateTable()

@@ -237,11 +237,7 @@ IMS_BOOL RegInfoRegistration::Update(IN INode* piNode)
 
     // "contact" elements
     INode* piNode_Contact = piNode->GetFirstChild();
-
-    if (!SetContacts(piNode_Contact))
-    {
-        return IMS_FALSE;
-    }
+    SetContacts(piNode_Contact);
 
     return IMS_TRUE;
 }
@@ -298,7 +294,7 @@ IMS_BOOL RegInfoRegistration::SetAor(IN const INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetContacts(IN INode* piNode)
+void RegInfoRegistration::SetContacts(IN INode* piNode)
 {
     while (piNode != IMS_NULL)
     {
@@ -311,8 +307,6 @@ IMS_BOOL RegInfoRegistration::SetContacts(IN INode* piNode)
 
         piNode = piNode->GetNextSibling();
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE

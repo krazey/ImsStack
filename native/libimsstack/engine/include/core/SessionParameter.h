@@ -84,7 +84,7 @@ public:
 
 private:
     void Clear();
-    IMS_BOOL Create();
+    void Create();
     IMS_SINT32 CreateMid();
     IMS_SINT32 CompareMediaGroups(IN const SessionParameter* pPeerParam,
             OUT SessionParameter*& pProposalView, IN IMS_SINT32 nOptions);

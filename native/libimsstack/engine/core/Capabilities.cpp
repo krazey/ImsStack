@@ -221,20 +221,19 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_SINT32 nFlags /*= FLAG_REQUEST
         AString strContactHeader;
         IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-        if (CreateContactHeader(strContactHeader, bIsContactGruu))
+        CreateContactHeader(strContactHeader, bIsContactGruu);
+
+        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
         {
-            if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
-            {
-                IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-                goto EXIT_QueryCapabilities;
-            }
+            IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
+            goto EXIT_QueryCapabilities;
+        }
 
-            const AString strGruu(Sip::STR_GRUU);
+        const AString strGruu(Sip::STR_GRUU);
 
-            if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
-            {
-                piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
-            }
+        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
+        {
+            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
         }
     }
 
@@ -326,21 +325,20 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(IN IMS_SINT32 nFlags /*= FLAG_RES
         AString strContactHeader;
         IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-        if (CreateContactHeader(strContactHeader, bIsContactGruu,
-                    HasFlag(nFlags, FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER)))
+        CreateContactHeader(strContactHeader, bIsContactGruu,
+                HasFlag(nFlags, FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER));
+
+        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
         {
-            if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
-            {
-                IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-                return IMS_FAILURE;
-            }
+            IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
+            return IMS_FAILURE;
+        }
 
-            const AString strGruu(Sip::STR_GRUU);
+        const AString strGruu(Sip::STR_GRUU);
 
-            if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
-            {
-                piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
-            }
+        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
+        {
+            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
         }
     }
 
@@ -429,20 +427,19 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
     AString strContactHeader;
     IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-    if (CreateContactHeader(strContactHeader, bIsContactGruu, IMS_FALSE))
+    CreateContactHeader(strContactHeader, bIsContactGruu, IMS_FALSE);
+
+    if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
     {
-        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
-        {
-            IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-            return IMS_FAILURE;
-        }
+        IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
+        return IMS_FAILURE;
+    }
 
-        const AString strGruu(Sip::STR_GRUU);
+    const AString strGruu(Sip::STR_GRUU);
 
-        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
-        {
-            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
-        }
+    if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
+    {
+        piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
     }
 
     if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
@@ -600,20 +597,17 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySipRequest(IN ISipServerConnection*
 
     // Sets Contact header with all the service's capability in this device.
 
-    if (CreateContactHeader(strContactHeader, bIsContactGruu))
+    CreateContactHeader(strContactHeader, bIsContactGruu);
+
+    if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
     {
-        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
-        {
-            IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-            goto EXIT_NotifySipRequest;
-        }
+        IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
+        goto EXIT_NotifySipRequest;
+    }
 
-        const AString strGruu(Sip::STR_GRUU);
-
-        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
-        {
-            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
-        }
+    if (bIsContactGruu && !piSipMsg->IsOptionSupported(Sip::STR_GRUU))
+    {
+        piSipMsg->AddHeader(ISipHeader::SUPPORTED, Sip::STR_GRUU);
     }
 
     // Create SDP for the response to OPTIONS request
@@ -718,8 +712,8 @@ PRIVATE VIRTUAL void Capabilities::NotifySipError(
 }
 
 PRIVATE
-IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
-        OUT IMS_BOOL& bIsContactGruu, IN IMS_BOOL bIncludeAllFeatures /*= IMS_TRUE*/) const
+void Capabilities::CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
+        IN IMS_BOOL bIncludeAllFeatures /*= IMS_TRUE*/) const
 {
     CallerCapability objCc(0);
 
@@ -796,8 +790,6 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
         strContactHeader.Append(TextParser::CHAR_SEMICOLON);
         strContactHeader.Append(objCc.ToString());
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE

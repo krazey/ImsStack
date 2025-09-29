@@ -99,8 +99,8 @@ public:
 private:
     void ClearRouteSet();
     IMS_BOOL CreateRouteSet(IN const SipMessageInfo& objMsgInfo);
-    IMS_BOOL UpdateComponents(IN const SipMessageInfo& objMsgInfo);
-    IMS_BOOL UpdateContact(IN const SipMessageInfo& objMsgInfo);
+    void UpdateComponents(IN const SipMessageInfo& objMsgInfo);
+    void UpdateContact(IN const SipMessageInfo& objMsgInfo);
     IMS_BOOL UpdateRemoteUri(IN const SipMessageInfo& objMsgInfo);
     IMS_BOOL UpdateRouteSet(IN const SipMessageInfo& objMsgInfo);
     // HEADER_REQ_SESSION-ID

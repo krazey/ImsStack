@@ -316,7 +316,7 @@ private:
     // Methods for handling SDP & Media related operations
     IMS_BOOL AddMedia(IN Media* pMedia);
     void CleanupMedia();
-    IMS_BOOL CreateMediaFromSdp();
+    void CreateMediaFromSdp();
     IMS_BOOL IsMediaInitializationDone() const;
     IMS_BOOL UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger);

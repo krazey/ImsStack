@@ -57,7 +57,7 @@ protected:
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
 private:
-    IMS_BOOL CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
+    void CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
             IN IMS_BOOL bIncludeAllFeatures = IMS_TRUE) const;
     IMS_BOOL CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckMediaCapability = IMS_TRUE,
             IN IMS_BOOL bRequest = IMS_FALSE) const;

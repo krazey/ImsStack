@@ -350,10 +350,8 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN const SessionParameter* pOffer,
         IN IMS_SINT32 nOptions, IN IMS_BOOL bInitialOffer /*= IMS_FALSE*/)
 {
     // Initialize the local & remote SDP views
-    if (!pProposalView->Create() || !pPeerView->Create())
-    {
-        return SdpOfferAnswer::RESULT_FAILURE;
-    }
+    pProposalView->Create();
+    pPeerView->Create();
 
     // Compare & generate the session level parameters
     IMS_SINT32 nOaResult = CompareSessionParameters(IMS_TRUE, pOffer, pProposalView, pPeerView);
@@ -399,10 +397,8 @@ IMS_SINT32 SessionParameter::ProcessAnswer(IN const SessionParameter* pAnswer,
         IN IMS_SINT32 nOptions)
 {
     // Initialize the local & remote SDP views
-    if (!pProposalView->Create() || !pPeerView->Create())
-    {
-        return SdpOfferAnswer::RESULT_FAILURE;
-    }
+    pProposalView->Create();
+    pPeerView->Create();
 
     // Compare & generate the session level parameters
     IMS_SINT32 nOaResult = CompareSessionParameters(IMS_FALSE, pAnswer, pProposalView, pPeerView);
@@ -519,15 +515,13 @@ void SessionParameter::Clear()
 }
 
 PRIVATE
-IMS_BOOL SessionParameter::Create()
+void SessionParameter::Create()
 {
     SdpSessionParameter objNewSessionParam;
 
     Clear();
 
     m_objSessionParam = objNewSessionParam;
-
-    return IMS_TRUE;
 }
 
 PRIVATE
