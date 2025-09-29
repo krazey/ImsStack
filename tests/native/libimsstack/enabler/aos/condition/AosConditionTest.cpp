@@ -62,6 +62,7 @@ const AString PROFILE_ID = AString("test");
     using Base::RemoveAosServiceListener;                \
     using Base::Event_NotifyEvent;                       \
     using Base::CallTracker_StateChanged;                \
+    using Base::CallTracker_ECallSessionReleased;        \
     using Base::NetTracker_StatusChanged;                \
     using Base::Subscriber_StateChanged;                 \
     using Base::Block_Changed;                           \
@@ -165,6 +166,13 @@ public:
 class AosConditionTest : public ::testing::Test
 {
 public:
+    AosConditionTest() :
+            m_pAosCondition(IMS_NULL),
+            m_piAosNConfiguration(IMS_NULL),
+            m_piAosService(IMS_NULL)
+    {
+    }
+
     TestAosCondition* m_pAosCondition;
 
     IAosNConfiguration* m_piAosNConfiguration;
@@ -209,10 +217,7 @@ protected:
     {
         RestoreOriginInstance();
 
-        if (m_pAosCondition)
-        {
-            delete m_pAosCondition;
-        }
+        delete m_pAosCondition;
     }
 
     void ReplaceOriginWithMock()
@@ -224,7 +229,7 @@ protected:
         AosProvider::GetInstance()->SetService(&m_objMockIAosService);
     }
 
-    void RestoreOriginInstance()
+    void RestoreOriginInstance() const
     {
         AosProvider::GetInstance()->SetService(m_piAosService);
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
@@ -802,6 +807,20 @@ TEST_F(AosConditionTest, ShouldNotDoAnythingWhenStateChangedInCaseOfNotCs)
 
     // WHEN
     m_pAosCondition->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosConditionTest, ShouldNotDoAnythingWhenECallSessionIsReleased)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+
+    // WHEN
+    m_pAosCondition->CallTracker_ECallSessionReleased(IMS_TRUE);
 
     // THEN : GIVEN conditions should be met.
 }
