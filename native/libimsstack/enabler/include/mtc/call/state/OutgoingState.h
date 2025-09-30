@@ -93,6 +93,7 @@ private:
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
     CallReasonInfo ConvertConnectionFailureToCallReasonInfo(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
+    CallStateName HandleAudioPortZero(IN ISession* piSession);
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
     ISilentRedialHelper* m_pSilentRedialHelper;

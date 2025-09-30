@@ -2710,3 +2710,106 @@ TEST_F(OutgoingStateTest, UssiStartedInvokesSendStartedToUi)
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->UssiStarted(&objSession));
 }
+
+TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroNormalCall)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+    ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(0));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcSession,
+            Terminate(IMS_FALSE,
+                    CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                            EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)))
+            .Times(1);
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)))
+            .Times(1);
+
+    CallStateName nextState = pOutgoingState->SessionRprReceived(&objSession, 0);
+    EXPECT_EQ(nextState, CallStateName::TERMINATING);
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroEmergencyCallNonRtt)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+    ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(0));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(objMtcSession,
+            Terminate(IMS_FALSE,
+                    CallReasonInfo(
+                            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY)))
+            .Times(1);
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY)))
+            .Times(1);
+
+    CallStateName nextState = pOutgoingState->SessionRprReceived(&objSession, 0);
+    EXPECT_EQ(nextState, CallStateName::TERMINATING);
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroEmergencyCallRtt)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+    ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(0));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::RTT));
+
+    EXPECT_CALL(objController, GetRedialHelper(_, _)).WillOnce(ReturnRef(objRedialHelper));
+    EXPECT_CALL(objRedialHelper, Redial(_)).WillOnce(Return(CallReasonInfo(CODE_NONE)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+
+    CallStateName nextState = pOutgoingState->SessionRprReceived(&objSession, 0);
+    EXPECT_EQ(nextState, CallStateName::IDLE);
+}
+
+TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroEmergencyCallRtt)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+    ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(0));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::RTT));
+
+    EXPECT_CALL(objController, GetRedialHelper(_, _)).WillOnce(ReturnRef(objRedialHelper));
+    EXPECT_CALL(objRedialHelper, Redial(_)).WillOnce(Return(CallReasonInfo(CODE_NONE)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+
+    CallStateName nextState = pOutgoingState->SessionStarted(&objSession);
+    EXPECT_EQ(nextState, CallStateName::IDLE);
+}

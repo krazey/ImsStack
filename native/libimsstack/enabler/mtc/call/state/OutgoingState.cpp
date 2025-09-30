@@ -172,6 +172,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
             return CallStateName::TERMINATING;
         }
+
+        if (m_objContext.GetMediaManager().GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
+        {
+            return HandleAudioPortZero(piSession);
+        }
     }
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
@@ -562,12 +567,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (objMediaManager.GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
     {
-        CallReasonInfo objReason(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
-        HandleCancel(piSession, objReason);
-        OnStartFailed(objReason);
-
-        return CallStateName::TERMINATING;
+        return HandleAudioPortZero(piSession);
     }
 
     if (piSession->IsFinalResponseReceivedForInitialInviteRequest())
@@ -1019,4 +1019,34 @@ CallReasonInfo OutgoingState::ConvertConnectionFailureToCallReasonInfo(
         default:
             return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
     }
+}
+
+PRIVATE
+CallStateName OutgoingState::HandleAudioPortZero(IN ISession* piSession)
+{
+    IMS_TRACE_I("HandleAudioPortZero", 0, 0, 0);
+
+    IMS_SINT32 nExtraCode;
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        IMtcSession* piMtcSession = m_objContext.GetSession(piSession);
+        if (piMtcSession != IMS_NULL && piMtcSession->GetCallType() == CallType::RTT)
+        {
+            const CallReasonInfo objReason(
+                    CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
+            HandleCancel(piSession, objReason);
+            return HandleSilentRedialReason(objReason);
+        }
+        nExtraCode = EXTRA_CODE_CALL_RETRY_EMERGENCY;
+    }
+    else
+    {
+        nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+    }
+
+    const CallReasonInfo objReason(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, nExtraCode);
+    HandleCancel(piSession, objReason);
+    OnStartFailed(objReason);
+
+    return CallStateName::TERMINATING;
 }
