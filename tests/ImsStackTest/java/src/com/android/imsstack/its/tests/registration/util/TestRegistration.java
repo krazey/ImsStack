@@ -451,7 +451,7 @@ public class TestRegistration extends ServerFailureHandler {
             logd(this, "onSubscriberAssociatedUriChanged::uris:" + Arrays.toString(uris));
 
             mEventRecords.put(RegEvent.Type.SUBSCRIBER_ASSOCIATED_URI_CHANGED,
-                    new RegEvent.EventRecord(uris));
+                    new RegEvent.EventRecord((Object) uris));
 
             if (mExpectedEvent.is(RegEvent.Type.SUBSCRIBER_ASSOCIATED_URI_CHANGED)
                     && ((RegEvent.SubscriberAssociatedUriChangedEvent) mExpectedEvent)
