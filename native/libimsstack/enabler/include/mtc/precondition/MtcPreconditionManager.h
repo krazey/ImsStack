@@ -100,7 +100,7 @@ public:
     virtual IMS_BOOL IsPreconditionSupportedInLocal() const override;
     virtual IMS_BOOL IsDedicatedBearerAllocated(
             IN ISession* piSession, IN IMS_UINT32 eMediaType) const override;
-    virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser() const override;
+    virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser(IN ISession* piSession) const override;
     virtual IMS_BOOL IsAvailableToAlertUser(IN ISession* piSession) const override;
     virtual IMS_BOOL IsLocalResourceConfirmationRequired(IN ISession* piSession) const override;
     virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(

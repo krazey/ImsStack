@@ -916,6 +916,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_U
         KEY_IMS_VOICE_PREFIX "policy_for_checking_qos_while_call_upgrading_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL[] =
         KEY_IMS_VOICE_PREFIX "wait_qos_when_local_precondition_not_supported_bool";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL[] =
+                KEY_IMS_VOICE_PREFIX "wait_qos_for_incoming_invite_without_precondition_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "reject_offerless_invite_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_MAX_COUNT_INT[] =

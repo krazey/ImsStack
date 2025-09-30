@@ -271,13 +271,13 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
 
     const SipMethod objMethod(SipMethod::INVITE);
 
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_EQ(CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
 
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
@@ -322,7 +322,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_FALSE));
@@ -340,7 +340,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedSendsIncomingCallReceiv
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
@@ -424,7 +424,7 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
     ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
@@ -464,7 +464,8 @@ TEST_F(IncomingStateTest, SessionPrackReceivedSendsIncomingCallReceivedIf180Exis
 
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived());
 
-    EXPECT_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser()).Times(0);
+    EXPECT_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .Times(0);
     EXPECT_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession)).Times(0);
     SetParamsForIncomingCallReceived();
 
@@ -585,7 +586,7 @@ TEST_F(IncomingStateTest, QosReservedDoesNothingIfIsCheckingResourcesRequiredToA
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived()).Times(0);
 
@@ -596,7 +597,7 @@ TEST_F(IncomingStateTest, QosReservedDoesNothingIfIsAvailableToAlertUserIsFalse)
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_FALSE));
@@ -609,7 +610,7 @@ TEST_F(IncomingStateTest, QosReservedInvokesSendIncomingCallReceived)
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
@@ -627,7 +628,7 @@ TEST_F(IncomingStateTest, QosReservedInvokesRejectsIfSendProvisionalResponseFail
 
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));

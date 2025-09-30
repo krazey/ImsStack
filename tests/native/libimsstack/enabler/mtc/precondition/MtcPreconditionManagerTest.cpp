@@ -390,16 +390,19 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -409,16 +412,19 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -431,7 +437,22 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsCheckingResourcesRequiredToAlertUserReturnsFalseIfRemotePreconditionIsNotSupported)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_FALSE));
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -444,8 +465,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsRoaming()).WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -456,9 +480,12 @@ TEST_F(MtcPreconditionManagerTest,
             GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsFalseIfSessionIsNull)

@@ -35,7 +35,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsPreconditionSupportedInLocal, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDedicatedBearerAllocated,
             (IN ISession* piSession, IN IMS_UINT32 eMediaType), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsCheckingResourcesRequiredToAlertUser, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCheckingResourcesRequiredToAlertUser, (IN ISession * piSession),
+            (const, override));
     MOCK_METHOD(IMS_BOOL, IsAvailableToAlertUser, (IN ISession* piSession), (const, override));
     MOCK_METHOD(IMS_BOOL, IsLocalResourceConfirmationRequired, (IN ISession * piSession),
             (const, override));
