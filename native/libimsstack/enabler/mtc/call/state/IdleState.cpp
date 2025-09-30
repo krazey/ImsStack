@@ -287,10 +287,10 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
             AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
     m_objContext.GetPreconditionManager().CreateQos(piSession);
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(eCallReason));
+        return RejectIncomingAndToTerminating(objReason);
     }
 
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
@@ -415,10 +415,10 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     InitMediaSession(MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
             AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(eCallReason));
+        return RejectIncomingAndToTerminating(objReason);
     }
 
     return OnReadyToAlert();

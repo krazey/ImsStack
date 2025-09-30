@@ -418,7 +418,19 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupported)
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 }
 
-TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithInvalidDescriptor)
+TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupportedSdpHeadersWithIpMismatch)
+{
+    const AString strWarning("301 IMS-client \"Incompatible network address formats\"");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MediaNego::ERROR_IP_MISMATCH);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupportedSdpHeadersWithInvalidDescriptor)
 {
     const AString strWarning("305 IMS-client \"Incompatible media format\"");
     IMS_SINT32 eStatusCode;
@@ -431,19 +443,7 @@ TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithInvalidDe
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 }
 
-TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithIpMismatch)
-{
-    const AString strWarning("301 IMS-client \"Incompatible network address formats\"");
-    IMS_SINT32 eStatusCode;
-    AString strPhrase;
-
-    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_IP_MISMATCH);
-    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
-
-    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
-}
-
-TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithNoCodecMatched)
+TEST_F(MessageFormatterTest, FormRejectMessageWithMediaNotAcceptableWithNoCodecMatched)
 {
     const AString strWarning("304 IMS-client \"Media type not available\"");
     IMS_SINT32 eStatusCode;
@@ -881,7 +881,6 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
     EXPECT_STREQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
-    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_UNSUPPORTED_SDP_HEADERS).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_ACCESS_CLASS_BLOCKED).GetStr(), pszTestPhrase);
 }
 

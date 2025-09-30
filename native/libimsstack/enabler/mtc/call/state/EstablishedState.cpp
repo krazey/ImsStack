@@ -568,7 +568,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
     NegotiationResult eNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
     if (eNegoResult != NegotiationResult::NO_ERROR)
     {
-        return CallReasonInfo(GetCallReasonByNegotiationResult(eNegoResult), eNegoResult);
+        return GetReasonByNegotiationResult(eNegoResult);
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =

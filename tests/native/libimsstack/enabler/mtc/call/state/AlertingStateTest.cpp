@@ -490,7 +490,9 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfNoCodecMatched)
     SipMethod objMethod = SipMethod::ACK;
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(
+                    CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED)));
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
 }
 
@@ -508,8 +510,9 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfInvalidSdpDescriptor)
     SipMethod objMethod = SipMethod::ACK;
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
-    EXPECT_CALL(
-            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS,
+                    NegotiationResult::ERROR_INVALID_DESCRIPTOR)));
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
 }
 

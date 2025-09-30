@@ -194,11 +194,10 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     pSession->HandleRequest(RequestType::ACK, *piMessage);
 
     // TODO: need to check NegotiationState::STATE_OFFER_SENT?
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
         // TODO TerminateAndToTerminating() ?
-        CallReasonInfo objReason(eCallReason);
         pSession->Terminate(IMS_TRUE, objReason);
 
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
@@ -250,10 +249,10 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     UpdateType eUpdateType = pSession->GetOngoingUpdateType();
     pSession->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(eCallReason));
+        return RejectIncomingAndToTerminating(objReason);
     }
 
     if (eUpdateType == UpdateType::NORMAL)
@@ -291,7 +290,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -316,7 +315,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPrackReceived(IN ISession* pi
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
         // According to RFC 6337, UE must send re-offer.

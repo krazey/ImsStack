@@ -230,7 +230,8 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedWithNoCodecMatched)
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
             .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
-    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+    const CallReasonInfo objReasonInfo(
+            CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED);
 
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
@@ -252,7 +253,8 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedWithInvalidDescriptor)
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
             .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
-    const CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
+    const CallReasonInfo objReasonInfo(
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, NegotiationResult::ERROR_INVALID_DESCRIPTOR);
 
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));

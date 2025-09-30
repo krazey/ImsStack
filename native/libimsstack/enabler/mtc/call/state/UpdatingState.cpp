@@ -342,7 +342,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();
@@ -366,7 +366,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pMtcSession = m_objContext.GetSession();
     pMtcSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         if (pMtcSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -435,11 +435,10 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* pi
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
-        const CallReasonInfo objReason(eCallReason);
         RejectUpdate(objReason);
         RecoverModificationFailure();
         return CallStateName::ESTABLISHED;
@@ -447,8 +446,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* pi
 
     if (pSession->RespondToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {
-        const CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
-        RejectUpdate(objReason);
+        RejectUpdate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
         RecoverModificationFailure();
         return CallStateName::ESTABLISHED;
     }
@@ -475,7 +473,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
 
     pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();

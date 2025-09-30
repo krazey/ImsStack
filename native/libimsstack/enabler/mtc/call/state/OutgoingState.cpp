@@ -163,11 +163,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     }
     else
     {
-        IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-        if (eCallReason != CODE_NONE)
+        CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+        if (objReason.nCode != CODE_NONE)
         {
             pSession->SendAck();
-            CallReasonInfo objReason(eCallReason);
             HandleCancel(piSession, objReason);
             OnStartFailed(objReason);
 
@@ -235,10 +234,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        CallReasonInfo objReason(eCallReason);
         HandleCancel(piSession, objReason);
         OnStartFailed(objReason);
 
@@ -289,7 +287,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -345,10 +343,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        CallReasonInfo objReason(eCallReason);
         HandleCancel(piSession, objReason);
         OnStartFailed(objReason);
 
@@ -455,10 +452,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
     // TODO: not to update precondition attributes?
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        CallReasonInfo objReason(eCallReason);
         HandleCancel(piSession, objReason);
         OnStartFailed(objReason);
 
@@ -550,17 +546,16 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
 
-    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
-    if (eCallReason != CODE_NONE)
+    const CallReasonInfo objSdpReason = HandleReceivedSdp(piSession, piMessage);
+    if (objSdpReason.nCode != CODE_NONE)
     {
         if (MultipleDialogHandler().OnUnavailableDialogCreated(m_objContext,
                     *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
         {
             return GetStateName();
         }
-        CallReasonInfo objReason(eCallReason);
-        HandleCancel(piSession, objReason);
-        OnStartFailed(objReason);
+        HandleCancel(piSession, objSdpReason);
+        OnStartFailed(objSdpReason);
 
         return CallStateName::TERMINATING;
     }
