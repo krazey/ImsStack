@@ -499,6 +499,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
         StartTimer(TIMER_MO_NOANSWER);
     }
 
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
     const IMS_BOOL bNeedToConfirm = m_objContext.GetConfigurationProxy().GetBoolean(
                                       ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL) &&
             IsNeedToSendLocalResourceConfirmation(piSession);
@@ -573,8 +574,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
         return CallStateName::TERMINATING;
     }
-
-    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (piSession->IsFinalResponseReceivedForInitialInviteRequest())
     {
