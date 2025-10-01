@@ -148,23 +148,6 @@ AppConfig TestAppConfig::Create(IN const IMS_CHAR* pszAppId, IN const IMS_CHAR* 
     return objAppConfig;
 }
 
-AppConfig* TestAppConfig::CreateP(IN const IMS_CHAR* pszAppId, IN const IMS_CHAR* pszConfig,
-        IN IMS_SINT32 nFlags /*= FLAG_STREAM_ALL*/)
-{
-    const AString strAppId(pszAppId);
-    AString strConfig(pszConfig);
-
-    SetConfig(strConfig, nFlags);
-
-    ImsRegistry objRegistry;
-    ImsRegistryLoader::GetRegistryFromContent(strAppId, strConfig, objRegistry);
-
-    AppConfig* pAppConfig = new AppConfig(strAppId);
-    pAppConfig->Create(objRegistry, IMS_SLOT_0);
-
-    return pAppConfig;
-}
-
 void TestAppConfig::SetConfig(IN_OUT AString& strConfig, IN IMS_SINT32 nFlags)
 {
     if ((nFlags & FLAG_STREAM_AUDIO_VIDEO) != 0)
