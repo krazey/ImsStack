@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<carrier_config>
-    <!-- Please always keep this config on the first line. -->
-    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
-    <int-array name="ims.parent_carrier_ids_int_array" num="1">
-        <item value="1911"/>
-    </int-array>
-    <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
-
-    <!-- Ssc -->
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
-</carrier_config>
+<carrier_config_list>
+    <carrier_config gid1="ABCD2025">
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="1"/>
+        </int-array>
+        <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
+            <item value="-1"/>
+            <item value="-1"/>
+        </int-array>
+    </carrier_config>
+</carrier_config_list>

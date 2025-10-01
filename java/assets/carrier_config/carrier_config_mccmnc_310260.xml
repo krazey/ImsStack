@@ -57,6 +57,13 @@
             <item value="1"/>
         </int-array>
     </carrier_config>
+    <carrier_config gid1="6913">
+        <!-- Please always keep this config on the first line. -->
+        <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="1"/>
+        </int-array>
+    </carrier_config>
     <carrier_config gid1="6914">
         <!-- Please always keep this config on the first line. -->
         <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
@@ -107,6 +114,13 @@
         </int-array>
     </carrier_config>
     <carrier_config gid1="8525">
+        <!-- Please always keep this config on the first line. -->
+        <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="1"/>
+        </int-array>
+    </carrier_config>
+    <carrier_config gid1="8550">
         <!-- Please always keep this config on the first line. -->
         <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
         <int-array name="ims.parent_carrier_ids_int_array" num="1">
