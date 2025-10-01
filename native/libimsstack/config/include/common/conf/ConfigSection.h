@@ -31,7 +31,6 @@ public:
 public:
     inline void AddComment(IN const AString& strComment) { m_objComment.Add(strComment); }
     inline const AString& GetName() const { return m_strSectionName; }
-    void GetKeys(OUT AStringArray& objKeys) const;
     const AString& GetValue(IN const IMS_CHAR* pszKey) const;
     IMS_BOOL SetValue(IN const IMS_CHAR* pszKey, IN const AString& strValue);
     AString ToString() const;

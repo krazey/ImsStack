@@ -24,8 +24,6 @@ class TestAppConfig
 public:
     static AppConfig Create(IN const IMS_CHAR* pszAppId, IN const IMS_CHAR* pszConfig,
             IN IMS_SINT32 nFlags = FLAG_STREAM_ALL);
-    static AppConfig* CreateP(IN const IMS_CHAR* pszAppId, IN const IMS_CHAR* pszConfig,
-            IN IMS_SINT32 nFlags = FLAG_STREAM_ALL);
 
 private:
     static void SetConfig(IN_OUT AString& strConfig, IN IMS_SINT32 nFlags);
