@@ -512,11 +512,17 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
         nTextDirection = GetNegotiatedTextDirection();
     }
 
-    if (nAudioDirection == MEDIA_DIRECTION_INVALID && nVideoDirection == MEDIA_DIRECTION_INVALID &&
+    if (GetNegotiatedAudioQuality() == AUDIO_CODEC_NOT_USED &&
+            GetNegotiatedVideoQuality() == VIDEO_RESOLUTION_NOT_USED &&
             GetNegotiatedTextQuality() == TEXT_CODEC_NOT_USED)
     {
         IMS_TRACE_E(0, "NegotiateSdp(): no negotiated media", 0, 0, 0);
-        errorReason = ERROR_NO_CODEC_MATCHED;
+
+        if (errorReason == NO_ERROR)
+        {
+            errorReason = ERROR_NO_CODEC_MATCHED;
+        }
+
         return IMS_FALSE;
     }
 

@@ -1041,6 +1041,46 @@ TEST_F(MediaNegoTest, testGetMediaDescriptor)
     EXPECT_EQ(m_objMediaNego.GetMediaDescriptor(IMS_NULL), IMS_NULL);
 }
 
+TEST_F(MediaNegoTest, testNegotiateSdpIpMismatch)
+{
+    // Arrange
+    SetupProfileExpectation();
+    EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
+
+    MediaNego::MediaNegoResult errorReason = MediaNego::NO_ERROR;
+    IMS_SINT32 nAudioDirection, nVideoDirection, nTextDirection;
+
+    // Set up a media line with an IPv6 remote address
+    MockIMedia objIMedia;
+    MockIMediaDescriptor objIMediaDescriptor;
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    ImsList<IMedia*> objMediaList;
+    SetUpMedia(objIMedia, objIMediaDescriptor, objSdpMedia, objMediaList);
+
+    // Local IP is IPv4 (from SetUp), set remote to IPv6
+    IpAddress objRemoteIpV6("::1");
+    ON_CALL(objIMediaDescriptor, GetRemoteAddress()).WillByDefault(Return(objRemoteIpV6));
+    ON_CALL(objIMediaDescriptor, GetRemotePort()).WillByDefault(Return(REMOTE_PORT));
+
+    // Set state to offer sent to simulate MT call flow where we negotiate an answer
+    m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
+
+    // Act
+    IMS_BOOL bResult = m_objMediaNego.NegotiateSdp(
+            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason);
+
+    // Assert
+    // Negotiation should fail because no media lines can be successfully negotiated.
+    EXPECT_FALSE(bResult);
+    // The specific error reason should be IP_MISMATCH.
+    EXPECT_EQ(errorReason, MediaNego::ERROR_IP_MISMATCH);
+    // The state should not change from OFFER_SENT.
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
+    // No direction should be negotiated.
+    EXPECT_EQ(nAudioDirection, MEDIA_DIRECTION_INVALID);
+}
+
 TEST_F(MediaNegoTest, testNegotiateSdpWhenPreviewModeAndNegotiated)
 {
     SetupProfileExpectation();

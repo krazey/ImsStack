@@ -222,7 +222,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
     if (!m_pMediaNegoHandler->NegotiateSdp(
                 nNegoId, pSession, nAudioDirection, nVideoDirection, nTextDirection, errorReason))
     {
-        IMS_TRACE_E(0, "NegotiateSdp() - fail to negotiate sdp", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateSdp() - fail to negotiate sdp, reason[%d]", errorReason, 0, 0);
         return IMS_FALSE;
     }
 
