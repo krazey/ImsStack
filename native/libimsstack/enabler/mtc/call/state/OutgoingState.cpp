@@ -832,10 +832,12 @@ PRIVATE
 CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSession)
 {
     IMS_TRACE_D("MaySendPreconditionConfirmation", 0, 0, 0);
-    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) !=
-            NegotiationState::STATE_NEGOTIATED)
+
+    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    if (objMediaManager.GetNegotiationState(&objSession) != NegotiationState::STATE_NEGOTIATED ||
+            objMediaManager.IsPreviewMode(&objSession))
     {
-        IMS_TRACE_I("NegotiationState is not STATE_NEGOTIATED.", 0, 0, 0);
+        IMS_TRACE_I("NegotiationState is not STATE_NEGOTIATED or in the Preview Mode.", 0, 0, 0);
         return GetStateName();
     }
 
@@ -844,7 +846,7 @@ CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSes
         return GetStateName();
     }
 
-    m_objContext.GetMediaManager().AdjustDirectionForLocalResourceConfirmation(
+    objMediaManager.AdjustDirectionForLocalResourceConfirmation(
             objSession, m_objContext.GetSession(&objSession)->GetCallType());
 
     if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(&objSession)) == IMS_FAILURE)

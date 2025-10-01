@@ -788,6 +788,28 @@ TEST_F(OutgoingStateTest, QosReservedSendsEarlyUpdate)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
 
+TEST_F(OutgoingStateTest, QosReservedNotSendUpdateInPreviewMode)
+{
+    MockIMessage objPrackResponseMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objPrackResponseMessage));
+    ON_CALL(objPrackResponseMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ON_CALL(objMediaManager, IsPreviewMode(_)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
+            .Times(0);
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
+}
+
 TEST_F(OutgoingStateTest, QosReserveFailedTerminatesCallIfNextActionIsReleaseWhenCsfbIsAvailable)
 {
     EXPECT_CALL(objMtcSession,
