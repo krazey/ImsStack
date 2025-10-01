@@ -79,7 +79,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
         {
@@ -127,7 +127,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
         {
@@ -167,7 +167,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
         {
@@ -227,7 +227,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (!objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         return GetStateName();
     }

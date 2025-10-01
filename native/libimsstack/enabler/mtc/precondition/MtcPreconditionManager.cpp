@@ -167,7 +167,8 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
     return eStatus == QosStatus::AVAILABLE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAlertUser() const
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAlertUser(
+        IN ISession* piSession) const
 {
     IMS_TRACE_D("IsCheckingResourcesRequiredToAlertUser", 0, 0, 0);
 
@@ -176,7 +177,15 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAle
         return IMS_FALSE;
     }
 
-    return IsPreconditionSupportedInLocal()
+    const IMS_BOOL bPreconditionSupportedInLocal = IsPreconditionSupportedInLocal();
+    if ((bPreconditionSupportedInLocal && !IsPreconditionSupported(piSession)) &&
+            !m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL))
+    {
+        return IMS_FALSE;
+    }
+
+    return bPreconditionSupportedInLocal
             ? IMS_TRUE
             : m_objContext.GetConfigurationProxy().GetBoolean(
                       ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL);
