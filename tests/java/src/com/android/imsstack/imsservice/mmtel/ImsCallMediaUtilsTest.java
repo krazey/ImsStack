@@ -18,6 +18,8 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -26,10 +28,12 @@ import android.telecom.VideoProfile;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.util.Range;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.mtc.AudioCodecAttributes;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 
@@ -45,6 +49,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class ImsCallMediaUtilsTest {
     private static final int SLOT_ID = 0;
+    private static final float DELTA = 0.001f;
 
     //Mocked classes
     @Mock CarrierConfig mMockCarrierConfig;
@@ -698,5 +703,59 @@ public class ImsCallMediaUtilsTest {
         assertEquals(profile.getMediaProfile().mVideoQuality,
                 ImsStreamMediaProfile.VIDEO_QUALITY_QCIF);
         assertEquals(profile.getMediaProfile().mRttMode, ImsStreamMediaProfile.RTT_MODE_DISABLED);
+    }
+
+    @Test
+    public void testUpdateCallProfileFromMediaInfoForAudioCodecAttributes() {
+        ImsCallProfile profile = new ImsCallProfile();
+        MediaInfo mediaInfo = new MediaInfo();
+
+        // Test with null AudioCodecAttributes
+        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mediaInfo);
+        assertNull(profile.getMediaProfile().getAudioCodecAttributes());
+
+        // Test with non-null AudioCodecAttributes
+        AudioCodecAttributes fromAttributes =
+                new AudioCodecAttributes(64f, 32f, 128f, 16f, 8f, 24f);
+        mediaInfo.setAudioCodecAttributes(fromAttributes);
+
+        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mediaInfo);
+
+        android.telephony.ims.AudioCodecAttributes toAttributes =
+                profile.getMediaProfile().getAudioCodecAttributes();
+        assertNotNull(toAttributes);
+        assertEquals(64, toAttributes.getBitrateKbps(), DELTA);
+        assertEquals(new Range<>(32f, 128f), toAttributes.getBitrateRangeKbps());
+        assertEquals(16, toAttributes.getBandwidthKhz(), DELTA);
+        assertEquals(new Range<>(8f, 24f), toAttributes.getBandwidthRangeKhz());
+    }
+
+    @Test
+    public void testUpdateCallProfileForAudioCodecAttributes() {
+        ImsCallProfile toProfile = new ImsCallProfile();
+        ImsCallProfile fromProfile = new ImsCallProfile();
+
+        // Test with null AudioCodecAttributes in fromProfile
+        fromProfile.getMediaProfile().setAudioCodecAttributes(null);
+        ImsCallMediaUtils.updateCallProfileForAudioCodecAttributes(toProfile, fromProfile);
+        assertNull(toProfile.getMediaProfile().getAudioCodecAttributes());
+
+        // Test with non-null AudioCodecAttributes in fromProfile
+        Range<Float> bitrateRange = new Range<>(32f, 128f);
+        Range<Float> bandwidthRange = new Range<>(8f, 24f);
+        android.telephony.ims.AudioCodecAttributes fromAttributes =
+                new android.telephony.ims.AudioCodecAttributes(64, bitrateRange, 16,
+                        bandwidthRange);
+        fromProfile.getMediaProfile().setAudioCodecAttributes(fromAttributes);
+
+        ImsCallMediaUtils.updateCallProfileForAudioCodecAttributes(toProfile, fromProfile);
+
+        android.telephony.ims.AudioCodecAttributes toAttributes =
+                toProfile.getMediaProfile().getAudioCodecAttributes();
+        assertNotNull(toAttributes);
+        assertEquals(64, toAttributes.getBitrateKbps(), DELTA);
+        assertEquals(bitrateRange, toAttributes.getBitrateRangeKbps());
+        assertEquals(16, toAttributes.getBandwidthKhz(), DELTA);
+        assertEquals(bandwidthRange, toAttributes.getBandwidthRangeKhz());
     }
 }

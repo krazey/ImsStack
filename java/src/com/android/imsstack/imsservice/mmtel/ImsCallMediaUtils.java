@@ -20,7 +20,9 @@ import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.util.Range;
 
+import com.android.imsstack.enabler.mtc.AudioCodecAttributes;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -480,13 +482,76 @@ public class ImsCallMediaUtils {
 
         profile.getMediaProfile().copyFrom(new ImsStreamMediaProfile(audioQuality, audioDirection,
                 videoQuality, videoDirection, rttMode));
+
+        updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mi);
         updateCallProfileFromMediaInfoForRtt(profile, mi);
+    }
+
+    /**
+     * Updates the {@link ImsCallProfile} with the audio codec attributes from a
+     * {@link MediaInfo} object.
+     *
+     * @param profile The ImsCallProfile to update.
+     * @param mi The MediaInfo object containing the new audio codec attributes.
+     */
+    public static void updateCallProfileFromMediaInfoForAudioCodecAttributes(ImsCallProfile profile,
+            final MediaInfo mi) {
+        AudioCodecAttributes fromAttributes = mi.getAudioCodecAttributes();
+
+        if (fromAttributes == null) {
+            return;
+        }
+
+        Range<Float> bitrateRange = new Range<>(fromAttributes.mBitrateStartKbps,
+                fromAttributes.mBitrateEndKbps);
+        Range<Float> bandwidthRange = new Range<>(fromAttributes.mBandwidthStartKhz,
+                fromAttributes.mBandwidthEndKhz);
+
+        android.telephony.ims.AudioCodecAttributes toAttributes =
+                new android.telephony.ims.AudioCodecAttributes(fromAttributes.mBitrateKbps,
+                bitrateRange, fromAttributes.mBandwidthKhz, bandwidthRange);
+        profile.getMediaProfile().setAudioCodecAttributes(toAttributes);
     }
 
     public static void updateCallProfileFromMediaInfoForRtt(ImsCallProfile profile,
             final MediaInfo mi) {
         profile.getMediaProfile().setRttMode(getRttModeFromGTTMode(mi.gttMode));
         profile.setCallExtraInt(MEDIA_TEXT_DIRECTION, mi.textDir);
+    }
+
+    /**
+     * Updates the audio codec attributes of an {@link ImsCallProfile} from another
+     * {@link ImsCallProfile}.
+     *
+     * This method copies the {@link android.telephony.ims.AudioCodecAttributes} from the
+     * {@code fromProfile} to the {@code toProfile}. A new attributes object is created for the
+     * {@code toProfile} to avoid sharing instances.
+     *
+     * If the attributes in {@code fromProfile} are null, this method does nothing.
+     *
+     * @param toProfile The destination {@link ImsCallProfile} to update.
+     * @param fromProfile The source {@link ImsCallProfile} containing the attributes to copy.
+     */
+    public static void updateCallProfileForAudioCodecAttributes(
+            ImsCallProfile toProfile, ImsCallProfile fromProfile) {
+        android.telephony.ims.AudioCodecAttributes fromAttributes =
+                fromProfile.getMediaProfile().getAudioCodecAttributes();
+
+        if (fromAttributes ==  null) {
+            return;
+        }
+
+        Range<Float> bitrateRange = fromAttributes.getBitrateRangeKbps();
+        Range<Float> bandwidthRange = fromAttributes.getBandwidthRangeKhz();
+
+        android.telephony.ims.AudioCodecAttributes toAttributes =
+                new android.telephony.ims.AudioCodecAttributes(
+                fromAttributes.getBitrateKbps(),
+                        new Range<>(bitrateRange.getLower(), bitrateRange.getUpper()),
+                fromAttributes.getBandwidthKhz(),
+                        new Range<>(bandwidthRange.getLower(), bandwidthRange.getUpper()));
+
+        toProfile.getMediaProfile().setAudioCodecAttributes(toAttributes);
     }
 
     private static MediaInfo createMediaInfoForVideoCallOnCallAccept(

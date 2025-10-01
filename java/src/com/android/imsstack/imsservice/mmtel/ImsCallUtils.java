@@ -205,6 +205,7 @@ public class ImsCallUtils {
 
         ImsCallProfile profile = new ImsCallProfile(serviceType, callType, new Bundle(),
                 mediaProfile);
+        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mi);
 
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE,
                 MtcCallInfo.isConference(ci));

@@ -2510,6 +2510,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 fromProfile.getMediaProfile().getVideoQuality(),
                 toProfile.getMediaProfile().getVideoDirection(),
                 fromProfile.getMediaProfile().getRttMode()));
+        ImsCallMediaUtils.updateCallProfileForAudioCodecAttributes(toProfile, fromProfile);
     }
 
     private static boolean shouldUpdateVideoCapabilityBeforeModifyRequest(
