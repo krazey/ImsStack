@@ -271,16 +271,6 @@ PROTECTED AString AudioSdpGenerator::GenerateAmrFmtp(
     AddModeSetListToFmtp(pAmrFmtp, strFmtp);
     AddOctetAlignToFmtp(pAmrFmtp, strFmtp);
 
-    if (strFmtp.IsNull())
-    {
-        ForceToAddModeSetList(pAmrFmtp, strFmtp);
-
-        if (strFmtp.IsNull())
-        {
-            ForceToAddOctetAlign(pAmrFmtp, strFmtp);
-        }
-    }
-
     AddModeChangeCapabilityToFmtp(pAmrFmtp, strFmtp);
     AddModeChangePeriodToFmtp(pAmrFmtp, strFmtp);
     AddModeChangeNeighborToFmtp(pAmrFmtp, strFmtp);
@@ -887,39 +877,4 @@ PROTECTED void AudioSdpGenerator::AddBrRecvToFmtp(
         strFmtp.Append("br-recv=");
         strFmtp.Append(strTemp);
     }
-}
-
-PROTECTED void AudioSdpGenerator::ForceToAddModeSetList(
-        IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp)
-{
-    if (pFmtp == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ForceToAddModeSetList(): invalid fmtp", 0, 0, 0);
-        return;
-    }
-
-    IMS_TRACE_I("ForceToAddModeSetList()", 0, 0, 0);
-
-    IMS_BOOL bVisibleModeSet = pFmtp->IsModeSetVisible();
-    pFmtp->SetVisibleModeSet(IMS_TRUE);
-    AddModeSetListToFmtp(pFmtp, strFmtp);
-    pFmtp->SetVisibleModeSet(bVisibleModeSet);
-    IMS_TRACE_I("ForceToAddModeSetList(): mode-set visible[%d]", bVisibleModeSet, 0, 0);
-}
-
-PROTECTED void AudioSdpGenerator::ForceToAddOctetAlign(
-        IN std::shared_ptr<AudioProfile::AmrFmtp> pFmtp, OUT AString& strFmtp)
-{
-    if (pFmtp == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ForceToAddOctetAlign(): invalid fmtp", 0, 0, 0);
-        return;
-    }
-
-    IMS_BOOL bVisibleOctetAlign = pFmtp->IsOctetAlignVisible();
-    pFmtp->SetVisibleOctetAlign(IMS_TRUE);
-    AddOctetAlignToFmtp(pFmtp, strFmtp);
-    pFmtp->SetVisibleOctetAlign(bVisibleOctetAlign);
-
-    IMS_TRACE_I("ForceToAddOctetAlign(): octet-aligned visible[%d]", bVisibleOctetAlign, 0, 0);
 }

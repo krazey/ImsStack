@@ -98,7 +98,7 @@ TEST_F(AudioSdpGeneratorAmrTest, TestGenerateAmrFmtp)
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
     strFmtp = GenerateAmrFmtp(m_pAmrFmtpEmpty);
-    EXPECT_EQ(strFmtp, STR_OCTETALIGN0);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     strFmtp = GenerateAmrFmtp(m_pAmrFmtpFull);
 
@@ -122,32 +122,6 @@ TEST_F(AudioSdpGeneratorAmrTest, TestGenerateAmrFmtp)
     strResult.Append(STR_MAXRED);
 
     EXPECT_EQ(strFmtp, strResult);
-}
-
-TEST_F(AudioSdpGeneratorAmrTest, TestForceToAddModeSetList)
-{
-    AString strFmtp = AString::ConstNull();
-    auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>();
-    pAmrFmtp->SetModeSetList(MODESET_LIST);
-    pAmrFmtp->SetVisibleModeSet(IMS_FALSE);
-
-    ForceToAddModeSetList(pAmrFmtp, strFmtp);
-    EXPECT_EQ(strFmtp, STR_MODESET_LIST);
-    // Check that visibility is restored
-    EXPECT_FALSE(pAmrFmtp->IsModeSetVisible());
-}
-
-TEST_F(AudioSdpGeneratorAmrTest, TestForceToAddOctetAlign)
-{
-    AString strFmtp = AString::ConstNull();
-    auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>();
-    pAmrFmtp->SetOctetAlign(OCTET_ALIGN);
-    pAmrFmtp->SetVisibleOctetAlign(IMS_FALSE);
-
-    ForceToAddOctetAlign(pAmrFmtp, strFmtp);
-    EXPECT_EQ(strFmtp, STR_OCTETALIGN1);
-    // Check that visibility is restored
-    EXPECT_FALSE(pAmrFmtp->IsOctetAlignVisible());
 }
 
 TEST_F(AudioSdpGeneratorAmrTest, TestAppendSeparatorIfNotEmpty)
@@ -681,7 +655,7 @@ protected:
 TEST_F(AudioSdpGeneratorTest, TestGenerateFmtpNullPayload)
 {
     AString strFmtp = "some_initial_value";
-    AudioProfile::Payload* pPayload = nullptr;
+    AudioProfile::Payload* pPayload = IMS_NULL;
 
     IMS_BOOL result = GenerateFmtp(strFmtp, pPayload);
 
@@ -708,7 +682,7 @@ TEST_F(AudioSdpGeneratorTest, TestGenerateFmtp)
 
     strFmtp = "initial";
     payload.GetRtpMap().SetPayloadType("AMR");
-    payload.SetFmtp(nullptr);
+    payload.SetFmtp(IMS_NULL);
     result = GenerateFmtp(strFmtp, &payload);
     EXPECT_FALSE(result);
     EXPECT_EQ(strFmtp, "initial");
@@ -724,7 +698,7 @@ TEST_F(AudioSdpGeneratorTest, TestGenerateFmtp)
 
     strFmtp = "initial";
     payload.GetRtpMap().SetPayloadType("telephone-event");
-    payload.SetFmtp(nullptr);
+    payload.SetFmtp(IMS_NULL);
     result = GenerateFmtp(strFmtp, &payload);
     EXPECT_FALSE(result);
     EXPECT_EQ(strFmtp, "initial");
@@ -741,7 +715,7 @@ TEST_F(AudioSdpGeneratorTest, TestGenerateFmtp)
 
     strFmtp = "initial";
     payload.GetRtpMap().SetPayloadType("EVS");
-    payload.SetFmtp(nullptr);
+    payload.SetFmtp(IMS_NULL);
     result = GenerateFmtp(strFmtp, &payload);
     EXPECT_FALSE(result);
     EXPECT_EQ(strFmtp, "initial");
@@ -749,7 +723,7 @@ TEST_F(AudioSdpGeneratorTest, TestGenerateFmtp)
     // --- PCMU/PCMA ---
     strFmtp = "initial";
     payload.GetRtpMap().SetPayloadType("pcmu");
-    payload.SetFmtp(nullptr);
+    payload.SetFmtp(IMS_NULL);
     result = GenerateFmtp(strFmtp, &payload);
     EXPECT_TRUE(result);
     EXPECT_EQ(strFmtp, "initial");
@@ -757,7 +731,7 @@ TEST_F(AudioSdpGeneratorTest, TestGenerateFmtp)
     // --- Unsupported ---
     strFmtp = "initial";
     payload.GetRtpMap().SetPayloadType("unsupported-codec");
-    payload.SetFmtp(nullptr);
+    payload.SetFmtp(IMS_NULL);
     result = GenerateFmtp(strFmtp, &payload);
     EXPECT_FALSE(result);
     EXPECT_EQ(strFmtp, "initial");
