@@ -1038,7 +1038,15 @@ public class ConfigAgent implements ConfigInterface {
                 } else if (value instanceof long[]) {
                     mTestConfig.putLongArray(key, (long[]) value);
                 } else if (value instanceof String[]) {
-                    mTestConfig.putStringArray(key, (String[]) value);
+                    String[] stringArray = (String[]) value;
+                    for (int i = 0; i < stringArray.length; ++i) {
+                        String s = stringArray[i];
+                        if (s.contains("\\")) {
+                            ImsLog.d(this, mSlotId, "Escaping character detected: " + s);
+                            stringArray[i] = s.replace("\\", "");
+                        }
+                    }
+                    mTestConfig.putStringArray(key, stringArray);
                 } else if (value instanceof Double) {
                     mTestConfig.putDouble(key, (Double) value);
                 } else if (value instanceof double[]) {

@@ -559,6 +559,30 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
+    public void testConfigCommandSetConfigForStringArrayWithComma() {
+        final String[] actualValues = new String[] { "380:5,0", "380:6,1" };
+        final String[] valuesWithComma = new String[] { "380:5\\,0", "380:6\\,1" };
+        BroadcastReceiver receiver = setUpConfigCommand();
+        Bundle extras = new Bundle();
+        extras.putStringArray(KEY_TEST_STRING_ARRAY, valuesWithComma);
+
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_SET_CONFIG);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getBooleanExtra(eq(ConfigAgent.KEY_COMMITTABLE), anyBoolean()))
+                .thenReturn(true);
+        when(intent.getExtras()).thenReturn(extras);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_COMMITTABLE_OK, receiver.getResultCode());
+
+        PersistableBundle config = mConfigAgent.getCarrierConfig().getConfig();
+        assertTrue(Arrays.equals(actualValues, config.getStringArray(KEY_TEST_STRING_ARRAY)));
+    }
+
+    @Test
+    @SmallTest
     public void testConfigCommandGetConfig() {
         BroadcastReceiver receiver = setUpConfigCommand();
 
