@@ -1090,7 +1090,7 @@ void RegParameter::ChoosePreferredSecurityClient()
     {
         const SipSecurityHeader& objClientHeader = m_objSecurityClients.GetAt(i);
 
-        if (objClientHeader.GetMechanism() != m_pPreferredSecurityServer->GetMechanism())
+        if (!objClientHeader.IsSecurityMechanismMatched(*m_pPreferredSecurityServer))
         {
             continue;
         }
@@ -1160,7 +1160,7 @@ void RegParameter::ChoosePreferredSecurityServer()
         {
             const SipSecurityHeader& objClientHeader = m_objSecurityClients.GetAt(j);
 
-            if (objClientHeader.GetMechanism() == objServerHeader.GetMechanism())
+            if (objClientHeader.IsSecurityMechanismMatched(objServerHeader))
             {
                 bSupportedHeaderFound = IMS_TRUE;
                 break;
