@@ -33,9 +33,9 @@ protected:
     void SetUp() override
     {
         m_pNegotiator = std::make_unique<AudioProfileNegotiator>();
-        m_pLocalProfile = new AudioProfile();
-        m_pPeerProfile = new AudioProfile();
-        m_pNegotiatedProfile = new AudioProfile();
+        m_pLocalProfile = std::make_unique<AudioProfile>();
+        m_pPeerProfile = std::make_unique<AudioProfile>();
+        m_pNegotiatedProfile = std::make_unique<AudioProfile>();
 
         // Default mock config values
         ON_CALL(m_objMockConfig, GetBandwidthNegoOption())
@@ -50,12 +50,7 @@ protected:
         m_pLocalProfile->SetBandwidthAs(32);  // Example AS
     }
 
-    void TearDown() override
-    {
-        delete m_pLocalProfile;
-        delete m_pPeerProfile;
-        delete m_pNegotiatedProfile;
-    }
+    void TearDown() override {}
 
     // Helper to create a basic AMR-WB payload
     AudioProfile::Payload* CreateAmrWbPayload(IMS_UINT32 nPayloadNum, IMS_UINT32 nModeSet)
@@ -67,6 +62,16 @@ protected:
         auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
         pFmtp->SetModeSetList(nModeSet);
         pPayload->SetFmtp(pFmtp);
+        return pPayload;
+    }
+
+    // Helper to create a basic AMR-WB payload with octet-align
+    AudioProfile::Payload* CreateAmrWbPayload(
+            IMS_UINT32 nPayloadNum, IMS_UINT32 nModeSet, IMS_SINT32 octetAlign)
+    {
+        AudioProfile::Payload* pPayload = CreateAmrWbPayload(nPayloadNum, nModeSet);
+        std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp())
+                ->SetOctetAlign(octetAlign);
         return pPayload;
     }
 
@@ -113,22 +118,22 @@ protected:
     }
 
     std::unique_ptr<AudioProfileNegotiator> m_pNegotiator;
-    AudioProfile* m_pLocalProfile;
-    AudioProfile* m_pPeerProfile;
-    AudioProfile* m_pNegotiatedProfile;
+    std::unique_ptr<AudioProfile> m_pLocalProfile;
+    std::unique_ptr<AudioProfile> m_pPeerProfile;
+    std::unique_ptr<AudioProfile> m_pNegotiatedProfile;
     MockAudioConfiguration m_objMockConfig;
 };
 
 TEST_F(AudioProfileNegotiatorTest, NegotiateNullInputsReturnsFalse)
 {
+    EXPECT_FALSE(m_pNegotiator->Negotiate(IMS_NULL, m_pPeerProfile.get(), IMS_FALSE,
+            m_pNegotiatedProfile.get(), &m_objMockConfig));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(m_pLocalProfile.get(), IMS_NULL, IMS_FALSE,
+            m_pNegotiatedProfile.get(), &m_objMockConfig));
     EXPECT_FALSE(m_pNegotiator->Negotiate(
-            nullptr, m_pPeerProfile, IMS_FALSE, m_pNegotiatedProfile, &m_objMockConfig));
-    EXPECT_FALSE(m_pNegotiator->Negotiate(
-            m_pLocalProfile, nullptr, IMS_FALSE, m_pNegotiatedProfile, &m_objMockConfig));
-    EXPECT_FALSE(m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_FALSE, nullptr, &m_objMockConfig));
-    EXPECT_FALSE(m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_FALSE, m_pNegotiatedProfile, nullptr));
+            m_pLocalProfile.get(), m_pPeerProfile.get(), IMS_FALSE, IMS_NULL, &m_objMockConfig));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(), IMS_FALSE,
+            m_pNegotiatedProfile.get(), IMS_NULL));
 }
 
 TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferReceivedReturnsTrue)
@@ -140,8 +145,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferReceivedReturnsTrue)
     m_pPeerProfile->SetDataPort(6004);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -167,8 +172,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
     m_pPeerProfile->SetDataPort(6004);
 
     // Act: Call Negotiate with bIsOfferReceived = IMS_FALSE (MO scenario)
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_FALSE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_FALSE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -184,6 +189,82 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
     EXPECT_EQ(m_pLocalProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kLocalPayload);
 }
 
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrFmtpVisibility)
+{
+    // Arrange
+    // Local profile supports octet-align=1 and has a specific mode-set
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0x0F, 1));  // octet-align=1
+    auto localFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+    localFmtp->SetVisibleOctetAlign(IMS_TRUE);
+    localFmtp->SetVisibleModeSet(IMS_TRUE);
+
+    // Peer profile supports octet-align=1 and has an overlapping mode-set
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0x3F, 1));  // octet-align=1
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Check negotiated mode-set (intersection of 0x0F and 0x3F is 0x3F)
+    EXPECT_EQ(pNegoFmtp->GetModeSetList(), 0x3F);
+    // Since negotiated mode-set is not 0, visibility should be true.
+    EXPECT_TRUE(pNegoFmtp->IsModeSetVisible());
+
+    // Check negotiated octet-align (should take local's value)
+    EXPECT_EQ(pNegoFmtp->GetOctetAlign(), 1);
+    // Since local octet-align is 1, visibility should be true.
+    EXPECT_TRUE(pNegoFmtp->IsOctetAlignVisible());
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrFmtpPeerModeSetNotVisible)
+{
+    // Arrange
+    // Local profile has a specific mode-set and octet-align=0 (not visible)
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0x0F, 0));
+    auto localFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+    localFmtp->SetVisibleModeSet(IMS_TRUE);
+    localFmtp->SetVisibleOctetAlign(IMS_FALSE);
+
+    // Peer profile has no mode-set (mode-set=0) and it's not visible.
+    // octet-align is also 0.
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0, 0));
+    auto peerFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pPeerProfile->GetPayloadAt(0)->GetFmtp());
+    peerFmtp->SetVisibleModeSet(IMS_FALSE);
+    peerFmtp->SetVisibleOctetAlign(IMS_FALSE);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Check negotiated mode-set 0x0F
+    EXPECT_EQ(pNegoFmtp->GetModeSetList(), 0x0F);
+    // Since negotiated mode-set is 0, visibility should be inherited from the peer (false).
+    EXPECT_TRUE(pNegoFmtp->IsModeSetVisible());
+}
+
 TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
 {
     // Arrange
@@ -194,8 +275,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
     m_pPeerProfile->SetDataPort(6006);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -205,7 +286,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 101);  // Should take peer's PT
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
     EXPECT_GT(m_pNegotiatedProfile->GetDataPort(), 0);
-    ASSERT_NE(pNegoPayload->GetFmtp(), nullptr);
+    ASSERT_NE(pNegoPayload->GetFmtp(), IMS_NULL);
     auto pNegoFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
     // Check negotiated BW/BR (intersection)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x07);   // NB & WB & SWB
@@ -225,8 +306,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiatePcmOfferReceivedReturnsTrue)
     m_pPeerProfile->SetDataPort(6008);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -251,8 +332,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEventMatchingRateAppended)
     m_pPeerProfile->SetDataPort(6010);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -279,8 +360,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEvent8kAcceptedAppended)
     m_pPeerProfile->SetDataPort(6012);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -305,8 +386,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingAudioPayloadReturnsFalse)
     m_pPeerProfile->SetDataPort(6014);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_FALSE(bResult);  // Should fail as no common audio codec found
@@ -326,8 +407,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEmptyPeerPayloadListCopiesLocal)
     m_pPeerProfile->SetDataPort(6016);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);  // Negotiation succeeds by copying local
@@ -352,8 +433,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeRe
     m_pPeerProfile->SetDataPort(6020);
 
     // Act: Negotiate with offer received (triggers IR.92 rel15 logic path first)
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);  // Expect success
@@ -361,7 +442,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeRe
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 101);
-    ASSERT_NE(pNegoPayload->GetFmtp(), nullptr);
+    ASSERT_NE(pNegoPayload->GetFmtp(), IMS_NULL);
     auto pNegoFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
     // Check negotiated BW/BR (intersection from CompareEvsBwBrMode)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x07);   // NB & WB & SWB (0x0F & 0x07)
@@ -383,8 +464,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeLe
     // Act: Negotiate with offer received.
     // Expect CompareEvsBwBrMode to fail (nNegoEntry=0), then CompareEvsBwBrModeLegacy to succeed
     // (nNegoEntry=1).
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);  // Expect success via legacy path
@@ -392,7 +473,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeLe
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 102);
-    ASSERT_NE(pNegoPayload->GetFmtp(), nullptr);
+    ASSERT_NE(pNegoPayload->GetFmtp(), IMS_NULL);
     auto pNegoFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
     // Check negotiated BW/BR (intersection from CompareEvsBwBrModeLegacy)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x04);   // SWB only (0x04 & 0x0F)
@@ -408,8 +489,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive
     m_pPeerProfile->SetDataPort(6030);
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -429,8 +510,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend
     m_pPeerProfile->SetDataPort(6032);
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -450,8 +531,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionInactiveReturnsTrue)
     m_pPeerProfile->SetDataPort(0);  // Inactive often has port 0
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -482,8 +563,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthRemoteOption)
             .WillRepeatedly(Return(MediaConfiguration::BW_OPTION_REMOTE_VALUE));
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -513,8 +594,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthLocalOption)
             .WillRepeatedly(Return(MediaConfiguration::BW_OPTION_LOCAL_VALUE));
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -535,8 +616,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalActive)
     m_pPeerProfile->SetDataPort(6044);
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -555,8 +636,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalHold)
     m_pPeerProfile->SetDataPort(6046);
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -583,8 +664,8 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateRtcpIntervalDisabledWhenRsRrZero)
             .WillRepeatedly(Return(MediaConfiguration::BW_OPTION_REMOTE_VALUE));
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);

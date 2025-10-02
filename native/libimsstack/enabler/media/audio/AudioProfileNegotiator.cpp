@@ -289,8 +289,6 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
     nLocalPayloadIndex = FindPayloadIndexFromProfile(
             pPeerPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pPeerPayload);
 
-    IMS_TRACE_D("NegotiateAmrFmtp(): payload index[%d]", nLocalPayloadIndex, 0, 0);
-
     auto pLocalFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
             pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp());
     auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>(
@@ -298,6 +296,8 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
 
     pAmrFmtp->SetModeSetList(nNegoModeSetList);
     pAmrFmtp->SetDefaultRtpModeSet(nNegoDefaultRtpModeSet);
+    pAmrFmtp->SetVisibleModeSet(
+            pAmrFmtp->GetModeSetList() != 0 ? IMS_TRUE : pAmrFmtp->IsModeSetVisible());
     pAmrFmtp->SetDtx(pLocalFmtp->IsDtxEnabled());
     pAmrFmtp->SetVisibleModeChangeCapability(pLocalFmtp->IsModeChangeCapabilityVisible());
     pAmrFmtp->SetModeChangeCapability(pLocalFmtp->GetModeChangeCapability());
@@ -305,8 +305,9 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
     pAmrFmtp->SetModeChangeNeighbor(pLocalFmtp->GetModeChangeNeighbor());
     pAmrFmtp->SetVisibleModeChangePeriod(pLocalFmtp->IsModeChangePeriodVisible());
     pAmrFmtp->SetModeChangePeriod(pLocalFmtp->GetModeChangePeriod());
-    pAmrFmtp->SetVisibleOctetAlign(pLocalFmtp->IsOctetAlignVisible());
     pAmrFmtp->SetOctetAlign(pLocalFmtp->GetOctetAlign());
+    pAmrFmtp->SetVisibleOctetAlign(
+            pLocalFmtp->GetOctetAlign() == 1 ? IMS_TRUE : pLocalFmtp->IsOctetAlignVisible());
 
     return pAmrFmtp;
 }

@@ -72,11 +72,6 @@ protected:
     void AddBwRecvToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
     void AddBrSendToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
     void AddBrRecvToFmtp(IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp, OUT AString& strFmtp);
-
-    void ForceToAddModeSetList(
-            IN std::shared_ptr<AudioProfile::AudioFmtp> pFmtp, OUT AString& strFmtp);
-    void ForceToAddOctetAlign(
-            IN std::shared_ptr<AudioProfile::AmrFmtp> pFmtp, OUT AString& strFmtp);
 };
 
 #endif
