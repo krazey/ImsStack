@@ -257,6 +257,7 @@
     </string-array>
     <boolean name="imsvoice.restart_ringing_timer_by_sending_180_bool" value="false"/>
     <boolean name="imsvoice.eps_fallback_trigger_by_ac_barring_bool" value="false"/>
+    <boolean name="imsemergency.emergency_call_current_location_discovery_supported_bool" value="false"/>
 
     <!-- Mts -->
     <int-array name="imssms.sms_generic_error_codes_int_array" num="6">
