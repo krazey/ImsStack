@@ -150,15 +150,15 @@ public final class ApnIms extends Apn {
      */
     @Override
     protected void updateCrossSimStatus(@NetworkType int networkType) {
-        boolean isCrossSimUsed = (mIsCellularDefaultNetwork
-                && (networkType == TelephonyManager.NETWORK_TYPE_IWLAN));
+        boolean isNetworkTypeIwlan = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN);
+        boolean isCrossSimUsed = (mIsCellularDefaultNetwork && isNetworkTypeIwlan);
 
         ImsLog.i(mSlotId, "Update CrossSim status from " + mIsConnectedOverCrossSim
                 + " to " + isCrossSimUsed);
         if (mIsConnectedOverCrossSim != isCrossSimUsed) {
             mIsConnectedOverCrossSim = isCrossSimUsed;
             for (Listener l : mListeners) {
-                l.onCrossSimStatusChanged(mIsConnectedOverCrossSim);
+                l.onCrossSimStatusChanged(mIsConnectedOverCrossSim, isNetworkTypeIwlan);
             }
         }
     }

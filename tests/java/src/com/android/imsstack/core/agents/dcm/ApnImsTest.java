@@ -200,7 +200,7 @@ public class ApnImsTest {
 
         mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_IWLAN);
 
-        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean());
+        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean(), anyBoolean());
         mApnIms.removeListener(mMockApnListener);
     }
 
@@ -212,7 +212,7 @@ public class ApnImsTest {
 
         mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_LTE);
 
-        verify(mMockApnListener).onCrossSimStatusChanged(false);
+        verify(mMockApnListener).onCrossSimStatusChanged(false, false);
         mApnIms.removeListener(mMockApnListener);
     }
 
@@ -452,7 +452,7 @@ public class ApnImsTest {
         mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean());
+        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean(), anyBoolean());
         mApnIms.removeListener(mMockApnListener);
     }
 
@@ -467,7 +467,7 @@ public class ApnImsTest {
         mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockApnListener).onCrossSimStatusChanged(true);
+        verify(mMockApnListener).onCrossSimStatusChanged(true, true);
         mApnIms.removeListener(mMockApnListener);
     }
 

@@ -62,10 +62,10 @@ public interface IApn {
         /**
          * Invoked when the connection status through Cross SIM is changed.
          *
-         * @param connectedOverCrossSim {@code true} if connected over CrossSim,
-         *                              {@code false} otherwise.
+         * @param isCrossSimUsed {@code true} if CrossSim is used, {@code false} otherwise.
+         * @param isNetworkTypeIwlan {@code true} if connected over IWLAN, {@code false} otherwise.
          */
-        default void onCrossSimStatusChanged(boolean connectedOverCrossSim) {
+        default void onCrossSimStatusChanged(boolean isCrossSimUsed, boolean isNetworkTypeIwlan) {
         }
 
         /**
