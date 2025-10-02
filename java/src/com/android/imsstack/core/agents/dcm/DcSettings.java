@@ -75,7 +75,7 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
-    public int[] getImsSupportedRats() {
+    public int[] getImsSupportedAccessNetworks() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         if (config != null) {

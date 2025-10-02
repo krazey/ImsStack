@@ -97,10 +97,7 @@ public class TelephonyAgent implements TelephonyInterface {
         int networkType = tmp.getDataNetworkType(mSlotId);
         IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {
-            if (is5G(networkType) && !dnw.is5GRequired()) {
-                networkType = TelephonyManager.NETWORK_TYPE_LTE;
-            }
-            dnw.setRatFromTelephonyManager(networkType);
+            dnw.updateTelephonyNetworkType(networkType);
         }
         return networkType;
     }
@@ -112,12 +109,8 @@ public class TelephonyAgent implements TelephonyInterface {
 
         IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {
-            if (is5G(voiceNetworkType) && !dnw.is5GRequired()) {
-                voiceNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
-            }
-            dnw.setVoiceRatFromTelephonyManager(voiceNetworkType);
+            dnw.updateTelephonyVoiceNetworkType(voiceNetworkType);
         }
-
         return voiceNetworkType;
     }
 

@@ -100,7 +100,7 @@ public class DcSettingsTest {
     }
 
     @Test
-    public void testGetImsSupportedRats() throws Exception {
+    public void testGetImsSupportedAccessNetworks() throws Exception {
         int[] emptyList = {};
         int[] availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};
 
@@ -109,10 +109,10 @@ public class DcSettingsTest {
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
-        int[] unAvailableRats = mDcSettingsUT.getImsSupportedRats();
+        int[] unAvailableRats = mDcSettingsUT.getImsSupportedAccessNetworks();
         assertEquals(unAvailableRats.length, emptyList.length);
 
-        int[] availableRats = mDcSettingsUT.getImsSupportedRats();
+        int[] availableRats = mDcSettingsUT.getImsSupportedAccessNetworks();
         assertEquals(availableRats.length, availableList.length);
     }
 
@@ -197,7 +197,7 @@ public class DcSettingsTest {
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
         assertTrue(mDcSettingsUT.isVopsIgnored());
-        int[] availableRats = mDcSettingsUT.getImsSupportedRats();
+        int[] availableRats = mDcSettingsUT.getImsSupportedAccessNetworks();
         assertEquals(availableRats.length, 0);
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
         assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);

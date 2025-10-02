@@ -22,7 +22,6 @@ import static com.android.imsstack.base.TestAppContext.SLOT1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -128,22 +127,16 @@ public class TelephonyAgentTest {
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
+        verify(mDcNetWatcher).updateTelephonyNetworkType(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // NR
         when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(true);
+        when(mDcNetWatcher.isImsSupportedNetworkType(TelephonyManager.NETWORK_TYPE_NR))
+                .thenReturn(true);
 
         assertEquals(TelephonyManager.NETWORK_TYPE_NR, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_NR));
-
-        // NR & 5G not support
-        when(mDcNetWatcher.is5GRequired()).thenReturn(false);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher, times(2))
-                .setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
+        verify(mDcNetWatcher).updateTelephonyNetworkType(eq(TelephonyManager.NETWORK_TYPE_NR));
     }
 
     @Test
@@ -155,25 +148,17 @@ public class TelephonyAgentTest {
 
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getVoiceNetworkType());
         verify(mDcNetWatcher)
-                .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
+                .updateTelephonyVoiceNetworkType(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // NR
         when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(true);
+        when(mDcNetWatcher.isImsSupportedNetworkType(TelephonyManager.NETWORK_TYPE_NR))
+                .thenReturn(true);
 
         assertEquals(TelephonyManager.NETWORK_TYPE_NR, mTelephonyAgent.getVoiceNetworkType());
         verify(mDcNetWatcher)
-                .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_NR));
-
-        // NR & 5G not support
-        when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
-                .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(false);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getVoiceNetworkType());
-        verify(mDcNetWatcher, times(2))
-                .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
+                .updateTelephonyVoiceNetworkType(eq(TelephonyManager.NETWORK_TYPE_NR));
     }
 
     @Test

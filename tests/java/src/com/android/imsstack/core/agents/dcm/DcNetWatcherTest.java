@@ -81,6 +81,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -127,7 +128,7 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
                 .thenReturn(mMockPhoneStateNotifier);
-        when(mMockDcSetting.getImsSupportedRats())
+        when(mMockDcSetting.getImsSupportedAccessNetworks())
                 .thenReturn(new int[] {AccessNetworkConstants.AccessNetworkType.EUTRAN,
                         AccessNetworkConstants.AccessNetworkType.IWLAN,
                         AccessNetworkConstants.AccessNetworkType.UTRAN,
@@ -159,7 +160,7 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testInit() {
-        verify(mMockDcSetting).getImsSupportedRats();
+        verify(mMockDcSetting).getImsSupportedAccessNetworks();
         verify(mMockSystemInterface).getSystem(SLOT0);
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
         verify(mTestAppContext.getBroadcastReceiverProxy()).registerReceiver(any(), any());
@@ -183,143 +184,17 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testIsRatPolicyAvailable_5G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_NR);
-        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
+    public void testUpdateTelephonyNetworkType() {
+        mDcNetWatcher.updateTelephonyNetworkType(TelephonyManager.NETWORK_TYPE_LTE);
 
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_NR);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mTelephonyNetworkType);
     }
 
     @Test
-    public void testIsRatPolicyAvailable_4G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
+    public void testUpdateTelephonyVoiceNetworkType() {
+        mDcNetWatcher.updateTelephonyVoiceNetworkType(TelephonyManager.NETWORK_TYPE_LTE);
 
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_NR);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_3G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UMTS);
-        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UMTS);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_ehrpd() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EHRPD);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EHRPD);
-        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EHRPD);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EHRPD);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_2G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_GSM);
-        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UMTS);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_GSM);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_evdo() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EVDO);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EVDO_B);
-        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EVDO);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EVDO_A);
-        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testSetRatFromTelephonyManager() {
-        mDcNetWatcher.setRatFromTelephonyManager(TelephonyManager.NETWORK_TYPE_LTE);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mRatFromTm);
-    }
-
-    @Test
-    public void testSetVoiceRatFromTelephonyManager() {
-        mDcNetWatcher.setVoiceRatFromTelephonyManager(TelephonyManager.NETWORK_TYPE_LTE);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mVoiceRatFromTm);
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mTelephonyVoiceNetworkType);
     }
 
     @Test
@@ -343,181 +218,159 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testCheckAndConvertNrRat_5GWhen5GRequired() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
+    public void testGetAvailableInternalAccessNetworkType_ngran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.NGRAN);
 
-        Integer rat = (Integer) invokeMethod(mDcNetWatcher, "checkAndConvertNrRat",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_NR});
 
-        assertEquals(Integer.valueOf(TelephonyManager.NETWORK_TYPE_NR), rat);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_NGRAN), accessNetworkType);
     }
 
     @Test
-    public void testCheckAndConvertNrRat_5GWhen5GNotRequired() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
+    public void testGetAvailableInternalAccessNetworkType_eutran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.EUTRAN);
 
-        Integer rat = (Integer) invokeMethod(mDcNetWatcher, "checkAndConvertNrRat",
-                new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_NR});
-
-        assertEquals(Integer.valueOf(TelephonyManager.NETWORK_TYPE_LTE), rat);
-    }
-
-    @Test
-    public void testCheckAndConvertNrRat_3G() {
-        Integer rat = (Integer) invokeMethod(mDcNetWatcher, "checkAndConvertNrRat",
-                new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_UMTS});
-
-        assertEquals(Integer.valueOf(TelephonyManager.NETWORK_TYPE_UMTS), rat);
-    }
-
-    @Test
-    public void testGetPreferredRadioTechCategory_5G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
-                new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_NR});
-
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_5G), radioTech);
-    }
-
-    @Test
-    public void testGetPreferredRadioTechCategory_4G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_LTE});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_4G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EUTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_ehrpd() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EHRPD);
+    public void testGetAvailableInternalAccessNetworkType_ehrpd() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.CDMA2000);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_EHRPD});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EHRPD), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EHRPD), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_3G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
+    public void testGetAvailableInternalAccessNetworkType_utran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.UTRAN);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_HSPA});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_3G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_UTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_2G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
+    public void testGetAvailableInternalAccessNetworkType_geran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.GERAN);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_EDGE});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_2G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_GEREAN), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_evdo() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EVDO);
+    public void testGetAvailableInternalAccessNetworkType_evdo() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.CDMA2000);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_EVDO_A});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EVDO), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EVDO), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_1xrtt() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_1XRTT);
+    public void testGetAvailableInternalAccessNetworkType_1xrtt() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.CDMA2000);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_1xRTT});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_1XRTT), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_1XRTT), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_none() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+    public void testGetAvailableInternalAccessNetworkType_unknown() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {0});
 
-        assertEquals(Integer.valueOf(0), radioTech);
+        assertEquals(Integer.valueOf(0), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_5G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_ngran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_NR});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_5G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_NGRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_4G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_eutran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_LTE});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_4G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EUTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_ehrpd() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_ehrpd() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_EHRPD});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EHRPD), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EHRPD), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_3G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
-                new Object[] {TelephonyManager.NETWORK_TYPE_HSPAP});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_3G), radioTech);
+    public void testGetInternalAccessNetworkType_utran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
+                new Object[] {TelephonyManager.NETWORK_TYPE_UMTS});
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_UTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_2G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_geran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_GPRS});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_2G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_GEREAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_evdo() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
-                new Object[] {TelephonyManager.NETWORK_TYPE_EVDO_B});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EVDO), radioTech);
+    public void testGetInternalAccessNetworkType_evdo() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
+                new Object[] {TelephonyManager.NETWORK_TYPE_EVDO_0});
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EVDO), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_1xrtt() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_1xrtt() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_CDMA});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_1XRTT), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_1XRTT), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_none() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class}, new Object[] {0});
-        assertEquals(Integer.valueOf(0), radioTech);
+    public void testGetInternalAccessNetworkType_unknown() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class}, new Object[] {0});
+        assertEquals(Integer.valueOf(0), accessNetworkType);
     }
 
     @Test
@@ -549,7 +402,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
         verify(mNetWatherListener).onNetworkOperatorChanged("45000");
-        assertEquals("45000", mDcNetWatcher.getOperatorNumeric());
+        assertEquals("45000", mDcNetWatcher.getNetworkOperator());
     }
 
     @Test
@@ -650,7 +503,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testOnServiceStateChanged_handleRadioTechChangedWithLte() throws Exception {
+    public void testOnServiceStateChanged_handleNetworkTypeChangeWithLte() throws Exception {
         when(mMockTelephonyInterface.getNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
@@ -658,12 +511,14 @@ public class DcNetWatcherTest extends ImsStackTest {
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
         verify(mNetWatherListener).onDataNetworkTypeChanged();
-        verify(mMockSystem).notifyNetworkTypeChanged(DcNetWatcher.RAT_4G);
+        verify(mMockSystem).notifyNetworkTypeChanged(IDcNetWatcher.AN_EUTRAN);
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getNetworkType());
+        assertEquals(AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                mDcNetWatcher.getAccessNetworkType());
     }
 
     @Test
-    public void testOnServiceStateChanged_handleVoiceRadioTechChangedWithLte() throws Exception {
+    public void testOnServiceStateChanged_handleVoiceNetworkTypeChangeWithLte() throws Exception {
         NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
@@ -675,7 +530,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
         verify(mNetWatherListener).onVoiceNetworkTypeChanged();
-        verify(mMockSystem).notifyVoiceNetworkTypeChanged(DcNetWatcher.RAT_4G);
+        verify(mMockSystem).notifyVoiceNetworkTypeChanged(IDcNetWatcher.AN_EUTRAN);
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getVoiceNetworkType());
     }
 
@@ -717,7 +572,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
-        when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
@@ -725,7 +579,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO,
                 ImsEventDef.IMS_LTE_INFO_EPS_ONLY_ATTACHED,
                 ImsEventDef.IMS_LTE_INFO_EXTRA_NONE);
-        assertEquals(ServiceState.DUPLEX_MODE_FDD, mDcNetWatcher.getLteDuplexMode());
     }
 
     @Test
@@ -1000,7 +853,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
 
         // Called once in init() and again in onCarrierConfigChanged().
-        verify(mMockDcSetting, times(2)).getImsSupportedRats();
+        verify(mMockDcSetting, times(2)).getImsSupportedAccessNetworks();
     }
 
     @Test
@@ -1064,33 +917,27 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testIs1xRtt() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_CDMA);
+    public void testIs3G() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkType", mDcNetWatcher,
+                TelephonyManager.NETWORK_TYPE_UMTS);
 
-        assertTrue(mDcNetWatcher.is1xRtt());
+        assertTrue(mDcNetWatcher.is3G());
     }
 
     @Test
-    public void testIsVoiceRat4G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        assertFalse(mDcNetWatcher.isVoiceRat4G());
-
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
+    public void testIs4G() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkType", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertTrue(mDcNetWatcher.isVoiceRat4G());
+
+        assertTrue(mDcNetWatcher.is4G());
     }
 
     @Test
-    public void testIsVoiceRat5G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        assertFalse(mDcNetWatcher.isVoiceRat5G());
-
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
+    public void testIs5G() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkType", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
-        assertTrue(mDcNetWatcher.isVoiceRat5G());
+
+        assertTrue(mDcNetWatcher.is5G());
     }
 
     @Test

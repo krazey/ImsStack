@@ -38,9 +38,9 @@ public interface IDcSettings extends IDc {
     boolean isImsPdnRequestWithoutMmtelRequired();
 
     /**
-     * Returns list of RAT technologies on which IMS is supported.
+     * Returns list of access network on which IMS is supported.
      */
-    int[] getImsSupportedRats();
+    int[] getImsSupportedAccessNetworks();
 
     /**
      * Returns a platform configuration for Cross SIM.

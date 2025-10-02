@@ -16,16 +16,23 @@
 
 package com.android.imsstack.core.agents.dcmif;
 
+import android.telephony.AccessNetworkConstants;
+import android.telephony.Annotation.NetworkType;
+
 /**
  * this class is the interface about data connection watcher
  */
 public interface IDcNetWatcher extends IDc {
+    // Access network types for IMS adaptation layer
+    int AN_UNKNOWN = 0;
+    int AN_EHRPD = 1;
+    int AN_GEREAN = 2;
+    int AN_UTRAN = 3;
+    int AN_EUTRAN = 4;
+    int AN_NGRAN = 5;
+    int AN_1XRTT = 6; // will be removed
+    int AN_EVDO = 7; // will be removed
     int REGISTRATION_REJECT_CAUSE_NONE = 0;
-
-    /**
-     * Returns whether one of the {@link IDcSettings#getImsSupportedRats} is available.
-     */
-    boolean isRatPolicyAvailable();
 
     /**
      * Returns the service state of the PS domain (cellular only).
@@ -44,12 +51,12 @@ public interface IDcNetWatcher extends IDc {
     /**
      * Returns data network type.
      */
-    int getNetworkType();
+    @NetworkType int getNetworkType();
 
     /**
      * Returns voice network type.
      */
-    int getVoiceNetworkType();
+    @NetworkType int getVoiceNetworkType();
 
     /**
      * Returns voice service state.
@@ -72,9 +79,9 @@ public interface IDcNetWatcher extends IDc {
     void clearNetworkRegistrationRejectCause();
 
     /**
-     * Returns current registered operator numeric id.
+     * Returns the numeric name (MCC+MNC) of current registered operator.
      */
-    String getOperatorNumeric();
+    String getNetworkOperator();
 
     /**
      * Returns whether airplane mode is enabled.
@@ -128,31 +135,16 @@ public interface IDcNetWatcher extends IDc {
     boolean isVopsSupported();
 
     /**
-     * Returns duplex mode for the phone.
-     */
-    int getLteDuplexMode();
-
-    /**
      * Stores the network type obtained from the TelephonyManager.
      * It is used for checking network type mismatch between ServiceState and TelephonyManager.
      */
-    void setRatFromTelephonyManager(int nRat);
+    void updateTelephonyNetworkType(@NetworkType int networkType);
 
     /**
      * Stores the voice network type obtained from the TelephonyManager.
      * It is used for checking network type mismatch between ServiceState and TelephonyManager.
      */
-    void setVoiceRatFromTelephonyManager(int nVoiceRat);
-
-    /**
-     * Returns whether the current network type belongs to the 1xRTT category.
-     */
-    boolean is1xRtt();
-
-    /**
-     * Returns whether the current network type belongs to the 2G category.
-     */
-    boolean is2G();
+    void updateTelephonyVoiceNetworkType(@NetworkType int networkType);
 
     /**
      * Returns whether the current network type belongs to the 3G category.
@@ -170,29 +162,17 @@ public interface IDcNetWatcher extends IDc {
     boolean is5G();
 
     /**
-     * Returns whether IMS service is supported in the 5G network.
+     * Returns the access network type of the current network.
      */
-    boolean is5GRequired();
+    @AccessNetworkConstants.RadioAccessNetworkType int getAccessNetworkType();
 
     /**
-     * Returns whether the current network type belongs to the HRPD category.
+     * Returns whether IMS service is supported in the specified network type.
+     *
+     * @param networkType The network type to check whether IMS service is supported.
+     * @return true if the IMS service is supported in specified network type, false otherwise.
      */
-    boolean isEhrpd();
-
-    /**
-     * Returns whether the current network type belongs to the EVDO category.
-     */
-    boolean isEvdo();
-
-     /**
-      * Returns whether the current voice network type belongs to the 4G category.
-      */
-    boolean isVoiceRat4G();
-
-     /**
-      * Returns whether the current voice network type belongs to 5G category.
-      */
-    boolean isVoiceRat5G();
+    boolean isImsSupportedNetworkType(@NetworkType int networkType);
 
     /**
      * Listener interface to receive the change notification of network status.
