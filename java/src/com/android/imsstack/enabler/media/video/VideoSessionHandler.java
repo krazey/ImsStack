@@ -155,7 +155,22 @@ public class VideoSessionHandler extends MediaState {
         public void handleMessage(Message msg) {
             ImsLog.d("messageType = " + msg.what);
 
-            if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
+            if (isClosed() && (msg.what == MediaConstants.REQUEST_OPEN_SESSION)) {
+                ImsLog.w("Session=" + getVideoSessionId() + " is closing, run the 2nd openSession: "
+                        + msg.what);
+                // OpenSession is called while the previous closeSession is in progress
+                try {
+                    synchronized (mLock) {
+                        mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+                    }
+                } catch (InterruptedException e) {
+                    ImsLog.e("interrupted while waiting for previous session to close: "
+                            + e.getMessage());
+                }
+                if (isClosed()) {
+                    handleVideoSessionClosed();
+                }
+            } else if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
                 ImsLog.w("Session=" + getVideoSessionId() + " is closing, discard request: "
                         + msg.what);
                 return;
@@ -272,6 +287,11 @@ public class VideoSessionHandler extends MediaState {
         public void onSessionClosed() {
             ImsLog.d("onSessionClosed for SessionId[" + getVideoSessionId() + "]");
 
+            // Release the wait as Sessionclosed Response is received
+            synchronized (mLock) {
+                mLock.notifyAll();
+            }
+
             Message.obtain(mVideoMessageHandler, MediaConstants.RESPONSE_SESSION_CLOSED)
                     .sendToTarget();
         }
@@ -380,7 +400,6 @@ public class VideoSessionHandler extends MediaState {
             /** Requests (ImsStack -> ImsMedia) */
             case MediaConstants.REQUEST_OPEN_SESSION:
             {
-                setMediaState(MEDIA_STATE_OPENING);
                 mLocalIpAddress = parcel.readString();
                 mLocalPortNumber = parcel.readInt();
                 ImsLog.d("localIpAddress= " + mLocalIpAddress
@@ -450,7 +469,8 @@ public class VideoSessionHandler extends MediaState {
     public boolean isValidRequest(final int requestType) {
         return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
                 || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
-                && !isClosed()));
+                && !isClosed())
+                || (isClosed() && (requestType == MediaConstants.REQUEST_OPEN_SESSION)));
     }
 
     private void createQosAgent(int slotId) {
