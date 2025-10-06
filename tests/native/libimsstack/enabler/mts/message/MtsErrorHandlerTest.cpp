@@ -42,8 +42,6 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-const LOCAL IMS_SINT32 MESSAGE_RESPONSE_WAIT_TIMER = 8000;
-
 namespace android
 {
 
