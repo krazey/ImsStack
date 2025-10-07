@@ -160,7 +160,8 @@ public final class SmsRPdu {
             mTpdu = new SmsTPdu(this, direction);
             mTpdu.parse();
             if (DBG) {
-                log("DecodedSmsPdu: " + this);
+                log("DecodedSmsPdu:");
+                dumpToLog();
             }
         } catch (RuntimeException e) {
             loge("Error parsing pdu: " + e.getMessage());
@@ -458,34 +459,28 @@ public final class SmsRPdu {
         return String.format("%3s", Integer.toBinaryString(mMessageTypeInd)).replace(' ', '0');
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\n  RP Message Type: ").append(getRpMessageTypeString());
-        builder.append("\n  RP-MTI (Message Type Indicator): ").append(getMessageTypeIndicator());
-        builder.append("\n  RP-MR (Message Reference): ").append(mMessageRef);
+    // For logging purpose
+    private void dumpToLog() {
+        log("  RP Message Type: " + getRpMessageTypeString());
+        log("  RP-MTI (Message Type Indicator): " + getMessageTypeIndicator());
+        log("  RP-MR (Message Reference): " + mMessageRef);
 
         if (mOrigAddr != null) {
-            builder.append("\n  RP-OA (Origination Address): ")
-                    .append(ImsLog.hiddenString(mOrigAddr));
+            log("  RP-OA (Origination Address): " + ImsLog.hiddenString(mOrigAddr));
         }
         if (mDestAddr != null) {
-            builder.append("\n  RP-DA (Destination Address): ")
-                    .append(ImsLog.hiddenString(mDestAddr));
+            log("  RP-DA (Destination Address): " + ImsLog.hiddenString(mDestAddr));
         }
         if (mRpMessageType == SmsUtils.RP_ERROR) {
-            builder.append("\n  RP-Cause: ").append(String.format("0x%02X", getRPCause()));
+            log("  RP-Cause: " + String.format("0x%02X", getRPCause()));
         }
 
-        builder.append("\n  R-PDU Header: ").append(byteArrayToString(getRpduHeader()));
+        log("  R-PDU Header: " + byteArrayToString(getRpduHeader()));
 
         if (mTpdu != null) {
-            builder.append("\n").append(mTpdu.toString());
+            mTpdu.dumpToLog();
         } else {
-            builder.append("\n  T-PDU: Not Present");
+            log("  T-PDU: Not Present");
         }
-        builder.append("\n");
-
-        return builder.toString();
     }
 }

@@ -477,99 +477,79 @@ public class SmsTPdu {
         ImsLog.d(TAG + s);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\n  Direction: ").append(mDirection);
-        builder.append("\n  TP-MTI: ").append(getMessageTypeIndicator());
-        builder.append(" (").append(getMtiString()).append(")");
-        builder.append("\n  TP-RP (Reply Path): ").append(mReplyPath);
-        builder.append("\n  TP-UDHI (UDH Indicator): ").append(mUserDataHeaderIndicator);
+    public void dumpToLog() {
+        logd("  Direction: " + mDirection);
+        logd("  TP-MTI: " + getMessageTypeIndicator() + " (" + getMtiString() + ")");
+        logd("  TP-RP (Reply Path): " + mReplyPath);
+        logd("  TP-UDHI (UDH Indicator): " + mUserDataHeaderIndicator);
 
         if (mDirection == Direction.MS_TO_SC) {
             if (mMessageTypeIndicator == MTI_SUBMIT) {
-                builder.append("\n  TP-SRR (Status Report Request): ").append(mStatusReportRequest);
-                builder.append("\n  TP-VPF (Validity Period Format): ")
-                        .append(mValidityPeriodFormat);
-                builder.append("\n  TP-RD (Reject Duplicate): ").append(mRejectDuplicate);
-                builder.append("\n  TP-MR (Message Reference): ").append(mMessageRef);
-                builder.append("\n  TP-DA (Destination Address): ")
-                        .append(byteArrayToString(mDestinationAddress));
-                builder.append("\n  TP-PID (Protocol ID): ")
-                        .append(String.format("0x%02X", mProtocolIdentifier));
-                builder.append("\n  TP-DCS (Data Coding Scheme): ")
-                        .append(getDataCodingSchemeHex());
-                builder.append("\n  TP-UDL (User Data Length): ").append(mUserDataLength);
+                logd("  TP-SRR (Status Report Request): " + mStatusReportRequest);
+                logd("  TP-VPF (Validity Period Format): " + mValidityPeriodFormat);
+                logd("  TP-RD (Reject Duplicate): " + mRejectDuplicate);
+                logd("  TP-MR (Message Reference): " + mMessageRef);
+                logd("  TP-DA (Destination Address): " + byteArrayToString(mDestinationAddress));
+                logd("  TP-PID (Protocol ID): " + String.format("0x%02X", mProtocolIdentifier));
+                logd("  TP-DCS (Data Coding Scheme): " + getDataCodingSchemeHex());
+                logd("  TP-UDL (User Data Length): " + mUserDataLength);
             } else if (mMessageTypeIndicator == MTI_DELIVER_REPORT) {
-                builder.append("\n  TP-FCS (Failure Cause): ")
-                        .append(String.format("0x%02X", mFailureCause));
-                appendOptionalParams(builder);
+                logd("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
+                appendOptionalParamsToLog();
             }
         } else { // SC_TO_MS
             if (mMessageTypeIndicator == MTI_DELIVER || mMessageTypeIndicator == MTI_RESERVED) {
-                builder.append("\n  TP-SRI (Status Report Indication): ")
-                        .append(mStatusReportIndication);
-                builder.append("\n  TP-MMS (More Messages to Send): ").append(mMoreMessageToSend);
-                builder.append("\n  TP-OA (Originating Address): ")
-                        .append(byteArrayToString(mOriginatingAddress));
-                builder.append("\n  TP-PID (Protocol ID): ")
-                        .append(String.format("0x%02X", mProtocolIdentifier));
-                builder.append("\n  TP-DCS (Data Coding Scheme): ")
-                        .append(getDataCodingSchemeHex());
-                builder.append("\n  TP-UDL (User Data Length): ")
-                        .append(mUserDataLength); // Note: Value context depends on DCS/UDHI
+                logd("  TP-SRI (Status Report Indication): " + mStatusReportIndication);
+                logd("  TP-MMS (More Messages to Send): " + mMoreMessageToSend);
+                logd("  TP-OA (Originating Address): " + byteArrayToString(mOriginatingAddress));
+                logd("  TP-PID (Protocol ID): " + String.format("0x%02X", mProtocolIdentifier));
+                logd("  TP-DCS (Data Coding Scheme): " + getDataCodingSchemeHex());
+                logd("  TP-UDL (User Data Length): " + mUserDataLength);
             } else if (mMessageTypeIndicator == MTI_STATUS_REPORT) {
-                builder.append("\n  TP-SRQ (Status Report Qualifier): ")
-                        .append(mStatusReportQualifier);
-                builder.append("\n  TP-LP (Loop Prevention): ").append(mLoopPrevention);
-                builder.append("\n  TP-MMS (More Messages to Send): ").append(mMoreMessageToSend);
-                builder.append("\n  TP-MR (Message Reference): ").append(mMessageRef);
-                builder.append("\n  TP-RA (Recipient Address): ")
-                        .append(byteArrayToString(mDestinationAddress));
-                builder.append("\n  TP-ST (Status): ").append(String.format("0x%02X", mStatus));
-                appendOptionalParams(builder);
+                logd("  TP-SRQ (Status Report Qualifier): " + mStatusReportQualifier);
+                logd("  TP-LP (Loop Prevention): " + mLoopPrevention);
+                logd("  TP-MMS (More Messages to Send): " + mMoreMessageToSend);
+                logd("  TP-MR (Message Reference): " + mMessageRef);
+                logd("  TP-RA (Recipient Address): " + byteArrayToString(mDestinationAddress));
+                logd("  TP-ST (Status): " + String.format("0x%02X", mStatus));
+                appendOptionalParamsToLog();
             } else if (mMessageTypeIndicator == MTI_SUBMIT_REPORT) {
-                builder.append("\n  TP-FCS (Failure Cause): ")
-                        .append(String.format("0x%02X", mFailureCause));
-                appendOptionalParams(builder);
+                logd("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
+                appendOptionalParamsToLog();
             }
         }
 
         if (mUserDataHeaderIndicator == USER_DATA_HEADER_PRESENT && mUserDataHeader != null) {
-            builder.append("\n  TP-UDH (User Data Header): ")
-                    .append(byteArrayToString(mUserDataHeader));
+            logd("  TP-UDH (User Data Header): " + byteArrayToString(mUserDataHeader));
             if (mUdhIei != -1
                     && (mUdhIei == IEI_CONCATENATED_SMS_8BIT
                             || mUdhIei == IEI_CONCATENATED_SMS_16BIT)) {
-                builder.append("\n    Concat IEI: ").append(String.format("0x%02X", mUdhIei));
-                builder.append("\n    Concat Ref: ").append(mUdhReference);
-                builder.append("\n    Concat Max: ").append(mUdhMaxNum);
-                builder.append("\n    Concat Seq: ").append(mUdhSeqNum);
+                logd("    Concat IEI: " + String.format("0x%02X", mUdhIei));
+                logd("    Concat Ref: " + mUdhReference);
+                logd("    Concat Max: " + mUdhMaxNum);
+                logd("    Concat Seq: " + mUdhSeqNum);
             }
         } else {
-            builder.append("\n  TP-UDH (User Data Header): Not Present");
+            logd("  TP-UDH (User Data Header): Not Present");
         }
 
-        builder.append("\n  T-PDU Header: ").append(byteArrayToString(getTpduHeader()));
-        return builder.toString();
+        logd("  T-PDU Header: " + byteArrayToString(getTpduHeader()));
     }
 
-    private void appendOptionalParams(StringBuilder builder) {
+    private void appendOptionalParamsToLog() {
         if (mParameterIndicator != -1) {
-            builder.append("\n  TP-PI (Parameter Indicator): ")
-                    .append(String.format("0x%02X", mParameterIndicator));
+            logd("  TP-PI (Parameter Indicator): " + String.format("0x%02X", mParameterIndicator));
             if ((mParameterIndicator & 0x01) != 0) {
-                builder.append("\n    TP-PID: ")
-                        .append(String.format("0x%02X", mProtocolIdentifier));
+                logd("    TP-PID: " + String.format("0x%02X", mProtocolIdentifier));
             }
             if ((mParameterIndicator & 0x02) != 0) {
-                builder.append("\n    TP-DCS: ").append(getDataCodingSchemeHex());
+                logd("    TP-DCS: " + getDataCodingSchemeHex());
             }
             if ((mParameterIndicator & 0x04) != 0) {
-                builder.append("\n    TP-UDL: ").append(mUserDataLength);
+                logd("    TP-UDL: " + mUserDataLength);
             }
         } else {
-            builder.append("\n  TP-PI (Parameter Indicator): Not Present");
+            logd("  TP-PI (Parameter Indicator): Not Present");
         }
     }
 
