@@ -66,8 +66,6 @@ public:
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
 
 private:
-    void ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred, IN VideoProfile* pLocalProfile,
-            IN const VideoProfile* pPeerProfile, OUT VideoProfile** pNegotiatedProfile);
     void NegotiateAvpf(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             OUT VideoProfile* pNegotiatedProfile);
     void NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile);

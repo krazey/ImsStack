@@ -206,10 +206,10 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateNoCommonCodec)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Peer payload
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Peer payload is copied
     EXPECT_EQ(m_pNegotiatedProfile->GetIpAddress(), m_pLocalProfile->GetIpAddress());
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
-    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), m_pPeerProfile->GetDirection());
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
     EXPECT_NE(m_pNegotiatedProfile->GetRtcpInterval(), 0);
 }
 
@@ -224,10 +224,11 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateNoPeerPayloads)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);  // No payloads
+    // When no peer payloads, ResetNegotiatedProfile copies the local profile.
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetIpAddress(), m_pLocalProfile->GetIpAddress());
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
-    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), m_pPeerProfile->GetDirection());
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
     EXPECT_NE(m_pNegotiatedProfile->GetRtcpInterval(), 0);
 }
 
@@ -244,11 +245,10 @@ TEST_F(VideoProfileNegotiatorTest, NegotiatePeerPortZero)
 
     // Assert
     EXPECT_TRUE(bResult);  // Negotiation should still "succeed" but bResult in port 0
-    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+    // When IP/Port negotiation fails, ResetNegotiatedProfile is called.
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Local payload is copied
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);               // Port is reset
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
-    // Check if pPayload list is copied but ports/direction are invalidated
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(),
-            1);  // Payload might still be selected initially
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvpf)
@@ -304,10 +304,10 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateLocalPortZero)
 
     // Assert
     EXPECT_TRUE(bResult);  // Negotiation "succeeds" but bResults in port 0
-    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+    // When IP/Port negotiation fails, ResetNegotiatedProfile is called.
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Local payload is copied
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);               // Port is reset
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
-    // Payload list might be copied from local but ports/direction invalidated
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)

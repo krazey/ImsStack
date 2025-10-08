@@ -47,8 +47,6 @@ public:
             IN MediaConfiguration* pConfig);
 
 private:
-    IMS_BOOL ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred, IN TextProfile* pLocalProfile,
-            IN TextProfile* pPeerProfile, OUT TextProfile** pNegotiatedProfile);
     IMS_BOOL NegotiatePayload(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
     TextProfile::Payload* CreatePayload(IN const MediaBaseProfile::RtpMap& objRtpMap,

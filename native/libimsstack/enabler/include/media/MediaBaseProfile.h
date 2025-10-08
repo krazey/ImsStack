@@ -313,11 +313,11 @@ public:
     void DeletePayloads() { m_lstPayload.Clear(); }
 
     inline void SetIpAddress(IN const IpAddress objIpAddress) { m_objIpAddress = objIpAddress; }
-    inline IpAddress& GetIpAddress() { return m_objIpAddress; }
+    inline const IpAddress& GetIpAddress() const { return m_objIpAddress; }
     inline void SetDataPort(IN const IMS_UINT32 nDataPort) { m_nDataPort = nDataPort; }
-    inline IMS_UINT32 GetDataPort() { return m_nDataPort; }
+    inline IMS_UINT32 GetDataPort() const { return m_nDataPort; }
     inline void SetControlPort(IN const IMS_UINT32 nControlPort) { m_nControlPort = nControlPort; }
-    inline IMS_UINT32 GetControlPort() { return m_nControlPort; }
+    inline IMS_UINT32 GetControlPort() const { return m_nControlPort; }
     inline void SetTransportType(IN const AString strTransportType)
     {
         m_strTransportType = strTransportType;
@@ -342,6 +342,7 @@ public:
         m_nNegotiatedPayloadIndex = nNegotiatedPayloadIndex;
     }
     inline IMS_SINT32 GetNegotiatedPayloadIndex() { return m_nNegotiatedPayloadIndex; }
+    inline IMS_SINT32 GetPayloadListSize() const { return m_lstPayload.GetSize(); }
     inline ImsList<std::shared_ptr<BasePayload>>& GetPayloadList() { return m_lstPayload; }
     inline void AddPayload(std::shared_ptr<BasePayload> pPayload) { m_lstPayload.Append(pPayload); }
 

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
-#include "MediaProfileUtil.h"
 #include "video/VideoProfileNegotiator.h"
+
+#include "MediaDef.h"
+#include "MediaProfileUtil.h"
+#include "ServiceTrace.h"
 #include "video/VideoProfile.h"
 #include "video/VideoProfileUtil.h"
 
@@ -47,20 +48,11 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
 
     m_bIsOfferReceived = bIsOfferReceived;
 
-    IMS_TRACE_I("Negotiate(): IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
-
-    if (!NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile))
-    {
-        // reset using the local profile
-        ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
-        return IMS_TRUE;
-    }
-
+    NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile);
     NegotiateAvpf(pLocalProfile, pPeerProfile, pNegotiatedProfile);
     NegotiateTransportType(pNegotiatedProfile);
 
     IMS_SINT32 nNegotiatedMaxFrameRate = 0;
-
     IMS_BOOL bNegotiatedPayload = NegotiatePayload(
             pLocalProfile, pPeerProfile, pNegotiatedProfile, &nNegotiatedMaxFrameRate);
 
@@ -92,7 +84,8 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
     else
     {
         // reset using the peer profile
-        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
+        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile,
+                reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
     }
 
     // RTCP interval
@@ -111,32 +104,11 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
         }
     }
 
+    IMS_TRACE_D("Negotiate(): negotiated payload size[%d], port[%d], direction[%d], ",
+            pNegotiatedProfile->GetPayloadListSize(), pNegotiatedProfile->GetDataPort(),
+            pNegotiatedProfile->GetDirection());
+
     return IMS_TRUE;
-}
-
-PRIVATE
-void VideoProfileNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
-        IN VideoProfile* pLocalProfile, IN const VideoProfile* pPeerProfile,
-        OUT VideoProfile** pNegotiatedProfile)
-{
-    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ResetNegotiatedProfile(): invalid argument", 0, 0, 0);
-        return;
-    }
-
-    if (bPeerPreferred)
-    {
-        **pNegotiatedProfile = *pPeerProfile;
-        (*pNegotiatedProfile)->SetIpAddress(pLocalProfile->GetIpAddress());
-    }
-    else
-    {
-        **pNegotiatedProfile = *pLocalProfile;
-    }
-
-    (*pNegotiatedProfile)->SetDataPort(0);
-    (*pNegotiatedProfile)->SetNegotiatedPayloadIndex(-1);
 }
 
 PRIVATE

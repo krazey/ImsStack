@@ -17,11 +17,11 @@
 #include <algorithm>
 #include <array>
 
-#include "ServiceTrace.h"
+#include "audio/AudioProfileNegotiator.h"
 
 #include "MediaProfileUtil.h"
+#include "ServiceTrace.h"
 #include "audio/AudioDef.h"
-#include "audio/AudioProfileNegotiator.h"
 #include "audio/AudioProfileUtil.h"
 
 #define EVS_NEGO_RETRY_COUNT 2
@@ -59,10 +59,11 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
     NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile);
 
-    if (pPeerProfile->GetPayloadList().GetSize() == 0)
+    if (pPeerProfile->GetPayloadListSize() == 0)
     {
-        IMS_TRACE_I("Negotiate(): empty payload list", 0, 0, 0);
-        ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
+        IMS_TRACE_I("Negotiate(): empty peer payload list", 0, 0, 0);
+        ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile,
+                reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
     }
     else
     {
@@ -72,16 +73,16 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
         if (pNegotiatedPayload == IMS_NULL)
         {
             IMS_TRACE_D("Negotiate(): null negotiated payload", 0, 0, 0);
-            ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
-            pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
+            ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile,
+                    reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
             return IMS_FALSE;
         }
 
         if (!NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile))
         {
             IMS_TRACE_D("Negotiate(): fail to negotiate the direction", 0, 0, 0);
-            ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
-            pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
+            ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile,
+                    reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
             return IMS_FALSE;
         }
 
@@ -102,20 +103,11 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
         pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
     }
 
+    IMS_TRACE_D("Negotiate(): negotiated payload size[%d], port[%d], direction[%d], ",
+            pNegotiatedProfile->GetPayloadListSize(), pNegotiatedProfile->GetDataPort(),
+            pNegotiatedProfile->GetDirection());
+
     return IMS_TRUE;
-}
-
-PRIVATE
-void AudioProfileNegotiator::ResetNegotiatedProfile(
-        IN const AudioProfile* pLocalProfile, OUT AudioProfile** pNegotiatedProfile)
-{
-    if (pLocalProfile == IMS_NULL)
-    {
-        return;
-    }
-
-    **pNegotiatedProfile = *pLocalProfile;
-    (*pNegotiatedProfile)->SetDataPort(0);
 }
 
 PRIVATE

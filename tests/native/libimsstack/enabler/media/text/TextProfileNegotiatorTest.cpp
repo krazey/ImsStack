@@ -289,7 +289,7 @@ TEST_F(TextProfileNegotiatorTest, NegotiateNoMatchingPayloadReturnsFalse)
     EXPECT_TRUE(bResult);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
-    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive)

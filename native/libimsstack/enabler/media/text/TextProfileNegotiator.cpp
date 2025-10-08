@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
 #include "text/TextProfileNegotiator.h"
+
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -46,11 +46,7 @@ PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 
     IMS_TRACE_I("Negotiate(): IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
 
-    if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
-    {
-        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
-        return IMS_TRUE;
-    }
+    NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile);
 
     IMS_BOOL bPayloadNegotiated = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
     IMS_BOOL bRet = IMS_TRUE;
@@ -64,49 +60,16 @@ PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
     {
         IMS_TRACE_D("Negotiate(): no negotiated payload. use the peer profile and make port 0", 0,
                 0, 0);
-        bRet = ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
+        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile,
+                reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
     }
 
     NegotiateRtcpInterval(pNegotiatedProfile, pConfig);
 
     IMS_TRACE_D("Negotiate(): negotiated payload size[%d], port[%d], direction[%d], ",
-            pNegotiatedProfile->GetPayloadList().GetSize(), pNegotiatedProfile->GetDataPort(),
+            pNegotiatedProfile->GetPayloadListSize(), pNegotiatedProfile->GetDataPort(),
             pNegotiatedProfile->GetDirection());
 
-    return bRet;
-}
-
-PRIVATE
-IMS_BOOL TextProfileNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
-        IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
-        OUT TextProfile** pNegotiatedProfile)
-{
-    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ResetNegotiatedProfile(): invalid argument", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (bPeerPreferred)
-    {
-        IMS_TRACE_D("ResetNegotiatedProfile(): by Peer Profile payload size[%d]",
-                pPeerProfile->GetPayloadList().GetSize(), 0, 0);
-        **pNegotiatedProfile = *pPeerProfile;
-        (*pNegotiatedProfile)->SetIpAddress(pLocalProfile->GetIpAddress());
-    }
-    else
-    {
-        IMS_TRACE_D("ResetNegotiatedProfile(): by Local Profile payload size[%d]",
-                pLocalProfile->GetPayloadList().GetSize(), 0, 0);
-
-        if (pLocalProfile->GetPayloadList().GetSize() > 0)
-        {
-            **pNegotiatedProfile = *pLocalProfile;
-        }
-    }
-
-    (*pNegotiatedProfile)->SetDataPort(0);
-    (*pNegotiatedProfile)->SetDirection(MEDIA_DIRECTION_INVALID);
     return IMS_TRUE;
 }
 
