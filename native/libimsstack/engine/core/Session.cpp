@@ -712,7 +712,15 @@ ISipClientConnection* Session::CreateTransaction(IN const SipMethod& objMethod)
         return IMS_NULL;
     }
 
-    return GetService()->CreateConnection(piDialog, objMethod);
+    ISipClientConnection* piScc = GetService()->CreateConnection(piDialog, objMethod);
+
+    if (piScc != IMS_NULL)
+    {
+        // IMPLICIT_ROUTING_FOR_MID_DIALOG
+        SetImplicitRouteHeader(piScc);
+    }
+
+    return piScc;
 }
 
 PUBLIC
@@ -4491,15 +4499,10 @@ ISipClientConnection* Session::CreateConnectionL(
 {
     ISipClientConnection* piScc = CreateConnection(piDialog, objMethod);
 
-    // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    if (m_bImplicitRoutingRequired && (piScc != IMS_NULL))
+    if (piScc != IMS_NULL)
     {
-        const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
-
-        if (!objServiceRoutes.IsEmpty())
-        {
-            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
-        }
+        // IMPLICIT_ROUTING_FOR_MID_DIALOG
+        SetImplicitRouteHeader(piScc);
     }
 
     return piScc;
@@ -6451,15 +6454,7 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
     }
 
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    if (m_bImplicitRoutingRequired)
-    {
-        const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
-
-        if (!objServiceRoutes.IsEmpty())
-        {
-            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
-        }
-    }
+    SetImplicitRouteHeader(piScc);
 
     // Set SDP message if any offer
     ISipMessage* piSipMsg = piScc->GetMessage();
@@ -7043,6 +7038,20 @@ IMS_RESULT Session::SendResponseEx(
     UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
     return IMS_SUCCESS;
+}
+
+PRIVATE
+void Session::SetImplicitRouteHeader(IN ISipClientConnection* piScc)
+{
+    if (m_bImplicitRoutingRequired)
+    {
+        const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
+
+        if (!objServiceRoutes.IsEmpty())
+        {
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+        }
+    }
 }
 
 PRIVATE

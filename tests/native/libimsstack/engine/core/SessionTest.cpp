@@ -24,7 +24,9 @@
 #include "TestCoreService.h"
 
 using ::testing::_;
+using ::testing::Eq;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
@@ -80,6 +82,7 @@ public:
     }
     inline void SetStateForTest(IN IMS_SINT32 nState) { SetState(nState); }
     inline void SendRequestToByeInternalForTest() { SendRequestToByeInternal(); }
+    inline void CreateDialog(IN const ISipConnection* piSc) { CheckNCreateDialog(piSc); }
 
 public:
     TestSessionRefreshHelper* m_pTestRefreshHelper;
@@ -188,6 +191,29 @@ TEST_F(SessionTest, SendRequestToByeInternal)
             .WillOnce(Return());
 
     m_pSession->SendRequestToByeInternalForTest();
+}
+
+TEST_F(SessionTest, CreateTransaction)
+{
+    SetUpClientConnection(IMS_TRUE);
+
+    // Create a SIP dialog
+    SetUpDialog(ISipDialog::STATE_CONFIRMED);
+    m_pSession->CreateDialog(&GetScc());
+
+    AString strServiceRoute("sip:192.168.0.1");
+    AStringArray objServiceRoutes;
+    objServiceRoutes.AddElement(strServiceRoute);
+    ON_CALL(GetCoreService()->GetMockRegBinding(), GetServiceRoutes())
+            .WillByDefault(ReturnRef(objServiceRoutes));
+    ON_CALL(GetSipMsg(), GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+
+    EXPECT_CALL(GetScc(), SetImplicitRouteHeader(Eq(strServiceRoute))).WillOnce(Return());
+
+    SipMethod objMethod(SipMethod::INFO);
+    ISipClientConnection* piScc = m_pSession->CreateTransaction(objMethod);
+
+    ASSERT_TRUE(piScc != nullptr);
 }
 
 }  // namespace android

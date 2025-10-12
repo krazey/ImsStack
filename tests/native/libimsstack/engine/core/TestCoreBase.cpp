@@ -114,6 +114,13 @@ void TestCoreBase::VerifyAndClear()
     Mock::VerifyAndClear(&m_objSipMsgBodyPart);
 }
 
+void TestCoreBase::SetUpDialog(IN IMS_SINT32 nState)
+{
+    ON_CALL(m_objDialog, Clone()).WillByDefault(Return(&m_objDialog));
+    ON_CALL(m_objDialog, GetState()).WillByDefault(Return(nState));
+    ON_CALL(m_objDialog, Destroy()).WillByDefault(Return());
+}
+
 void TestCoreBase::InitMethod(IN_OUT ServiceMethod* pMethod, IN IMS_BOOL bOriginated /*= IMS_TRUE*/)
 {
     pMethod->InitMethod(m_strLocalUserId, m_strRemoteUserId, m_objDefaultUserId, bOriginated);

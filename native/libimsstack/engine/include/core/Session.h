@@ -298,6 +298,7 @@ private:
     IMS_RESULT SendResponseEx(IN ISipServerConnection* piSsc, IN IMS_SINT32 nServiceMethod,
             IN IMS_SINT32 nStatusCode);
 
+    void SetImplicitRouteHeader(IN ISipClientConnection* piScc);
     void SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest);
     void Start2xxRetransmission();
     void Stop2xxRetransmission();
