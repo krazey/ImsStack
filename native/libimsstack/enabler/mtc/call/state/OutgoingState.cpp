@@ -1031,7 +1031,7 @@ CallStateName OutgoingState::HandleAudioPortZero(IN ISession* piSession)
     IMS_SINT32 nExtraCode;
     if (m_objContext.GetCallInfo().IsEmergency())
     {
-        IMtcSession* piMtcSession = m_objContext.GetSession(piSession);
+        const IMtcSession* piMtcSession = m_objContext.GetSession(piSession);
         if (piMtcSession != IMS_NULL && piMtcSession->GetCallType() == CallType::RTT)
         {
             const CallReasonInfo objReason(
