@@ -133,7 +133,7 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
                     (int8_t)(pPayload->GetRtpMap().GetSamplingRate() / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140_RED);
             pTextConfig->setRedundantPayload(pFmtp->GetRedPayload());
-            pTextConfig->setRedundantLevel(pFmtp->GetRedLevel());
+            pTextConfig->setRedundantLevel(pFmtp->GetRedLevel() > 0 ? pFmtp->GetRedLevel() - 1 : 0);
             break;
         }
         else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
