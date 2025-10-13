@@ -236,7 +236,7 @@ void MtsMessageController::Timer_TimerExpired(IN ITimer* piTimer)
     }
     else if (piTimer == m_piRetryAfterTimer)
     {
-        if (m_objRetryFunction != nullptr)
+        if (m_objRetryFunction != IMS_NULL && m_pRetryContent != IMS_NULL)
         {
             m_objRetryFunction();
         }
