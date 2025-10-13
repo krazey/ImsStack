@@ -91,6 +91,7 @@ public:
     void SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY);
+    void RetransmitAck();
 
     IMS_RESULT InitDialogRequest(IN const SipMethod& objMethod, IN SipDialogEx* pDialogEx);
     IMS_RESULT SendWithCredentials();

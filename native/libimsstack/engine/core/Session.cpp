@@ -2616,6 +2616,17 @@ PROTECTED VIRTUAL void Session::NotifySipResponse(IN ISipClientConnection* piScc
         return;
     }
 
+    // UAC: 2XX-INVITE retransmission received.
+    if ((GetCallState() == CallState::STATE_INVITE_2XX_RECEIVED ||
+                GetCallState() == CallState::STATE_REINVITE_2XX_RECEIVED) &&
+            piScc->GetMethod().Equals(SipMethod::INVITE) &&
+            SipStatusCode::IsFinalSuccess(piScc->GetStatusCode()))
+    {
+        IMS_TRACE_I("UAC: 2XX-INVITE RETRANSMISSION", 0, 0, 0);
+        piScc->RetransmitAck();
+        return;
+    }
+
     ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Update the call state

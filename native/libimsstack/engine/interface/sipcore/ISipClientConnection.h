@@ -268,6 +268,11 @@ public:
     virtual void SetTransportTuple(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY) = 0;
+
+    /**
+     * @brief Retransmits the ACK request if it's already sent.
+     */
+    virtual void RetransmitAck() = 0;
 };
 
 #endif

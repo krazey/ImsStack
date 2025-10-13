@@ -984,6 +984,15 @@ void SipClientConnection::SetTransportTuple(IN const IpAddress& objIp, IN IMS_SI
 }
 
 PUBLIC
+void SipClientConnection::RetransmitAck()
+{
+    if (m_pCtState->IsAckSent())
+    {
+        m_pCtState->RetransmitMessage();
+    }
+}
+
+PUBLIC
 IMS_RESULT SipClientConnection::InitDialogRequest(
         IN const SipMethod& objMethod, IN SipDialogEx* pDialogEx)
 {
