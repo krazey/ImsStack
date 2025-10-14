@@ -155,19 +155,7 @@ static SIP_BOOL ProceedingState_SendNon100ProvisionalResponse(
         {
             SIP_UINT32 nRseqNum = SipMessage::GetRSeqNum(pMsgIn, SipHeaderBase::RSEQ);
             pTxnKey->SetRSeq(nRseqNum);
-            if (SipTxnUtil::AddTxnKey(pTxnKey) == SIP_FALSE)
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                        "ProceedingState_SendNon100ProvisionalResponse: Adding txn key to DB "
-                        "failed",
-                        SIP_ZERO, SIP_ZERO);
-            }
-            else
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                        "ProceedingState_SendNon100ProvisionalResponse: Txnkey added.", SIP_ZERO,
-                        SIP_ZERO);
-            }
+            SipTxnUtil::AddTxnKey(pTxnKey);
         }
 
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();

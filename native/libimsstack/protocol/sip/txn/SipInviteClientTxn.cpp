@@ -278,20 +278,9 @@ static SIP_BOOL CallingState_Receive1xxResponse(SipTxn* pTxn, SIP_VOID* pvData, 
 
     if (nStatusCode != 100)
     {
-        SIP_BOOL bRSeqExist = pMsgIn->HasHeader(SipHeaderBase::RSEQ);
-
-        if (bRSeqExist == SIP_TRUE)
+        if (pMsgIn->HasHeader(SipHeaderBase::RSEQ) == SIP_TRUE)
         {
-            SipTxnKey* pRprTxnKey = new SipTxnKey(pMsgIn, pnError);
-
-            if (SipTxnUtil::AddTxnKey(pRprTxnKey) == SIP_FALSE)
-            {
-                pRprTxnKey->SipDelete();
-
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                        "CallingState_Receive1xxResponse: Adding RprTxnKey failed.", SIP_ZERO,
-                        SIP_ZERO);
-            }
+            SipTxnUtil::AddTxnKey(new SipTxnKey(pMsgIn, pnError));
         }
     }
 
@@ -429,13 +418,7 @@ static SIP_BOOL ProceedingState_Receive1xxResponse(
                 }
                 else
                 {
-                    if (SipTxnUtil::AddTxnKey(pTempTxnKey) == SIP_FALSE)
-                    {
-                        pTempTxnKey->SipDelete();
-                        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                                "ProceedingState_Receive1xxResponse: Adding txn key failed.",
-                                SIP_ZERO, SIP_ZERO);
-                    }
+                    SipTxnUtil::AddTxnKey(pTempTxnKey);
                     pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
                 }
             }
