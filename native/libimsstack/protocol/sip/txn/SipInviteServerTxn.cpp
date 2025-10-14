@@ -192,7 +192,6 @@ static SIP_BOOL ProceedingState_SendFailureResponse(
     pTxn->InitRetransmissionInfo();
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
     SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
@@ -202,7 +201,8 @@ static SIP_BOOL ProceedingState_SendFailureResponse(
     /* For Unreliable Transport : Start Timer G*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pTxn->StartTxnTimer(SipTxn::TIMER_G, nDurationT1, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_G, objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1),
+                    pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "ProceedingState_SendFailureResponse: Starting Timer_G failed.", SIP_ZERO,
@@ -285,14 +285,13 @@ static SIP_BOOL ProceedingState_Timer_G_H_Timeout(
     }
 
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
-    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
 
     if (nDurationExpired == 0)
     {
+        const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+        nDurationExpired = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
         // Timer T1 already fired.
-        pTxn->IncreaseDurationExpired(nT1Val);
-        nDurationExpired = nT1Val;
+        pTxn->IncreaseDurationExpired(nDurationExpired);
     }
 
     SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
@@ -465,14 +464,13 @@ static SIP_BOOL CompletedState_Timer_G_H_Timeout(
     (void)pvData;
 
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
-    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
 
     if (nDurationExpired == 0)
     {
+        const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+        nDurationExpired = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
         // Timer T1 already fired.
-        pTxn->IncreaseDurationExpired(nT1Val);
-        nDurationExpired = nT1Val;
+        pTxn->IncreaseDurationExpired(nDurationExpired);
     }
 
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
@@ -494,6 +492,7 @@ static SIP_BOOL CompletedState_Timer_G_H_Timeout(
         {
             SIP_UINT32 nCurrentDuration = pTxn->GetCurrentDuration();
             SIP_UINT32 nNextDuration = nCurrentDuration << 1;
+            const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
             SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T2);
 
             /* MIN(2*T1, T2) seconds*/

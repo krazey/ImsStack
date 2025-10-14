@@ -57,8 +57,8 @@ static SIP_BOOL HandleFailureResponse(IN SipTxn* pTxn, IN_OUT SipTxnFsmData* pFs
         return SIP_FALSE;
     }
 
-    const SipTxnTimerValues& pSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationTD = pSipTxnTimers.GetTimerValue(SipTxn::TIMER_D);
+    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+    SIP_UINT32 nDurationTD = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_D);
 
     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "HandleFailureResponse: TimerD: %d", nDurationTD, 0);
 
@@ -124,9 +124,8 @@ static SIP_BOOL IdleState_SendInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, SIP_
        1. Retx Timer : Retransmission Timer for UDP only
        2. Txn Timer  : Req Timeout Timer for any Transport
      */
-    const SipTxnTimerValues& pSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationT1 = pSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
-    SIP_UINT32 nDurationTB = pSipTxnTimers.GetTimerValue(SipTxn::TIMER_B);
+    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+    SIP_UINT32 nDurationTB = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_B);
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     const SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
@@ -134,7 +133,8 @@ static SIP_BOOL IdleState_SendInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, SIP_
     /* For Unreliable Transport : Start Timer A*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pTxn->StartTxnTimer(SipTxn::TIMER_A, nDurationT1, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_A, objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1),
+                    pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "IdleState_SendInviteRequest: Starting Timer_A failed", SIP_ZERO, SIP_ZERO);

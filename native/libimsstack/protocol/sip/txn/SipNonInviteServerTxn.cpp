@@ -36,15 +36,13 @@ static SIP_BOOL SendFinalResponse(
 {
     const SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     const SipTransportParameter* pTransparam = pFsmData->m_pTranspParam;
-
-    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_J);
-
     SIP_INT32 eTranspMsgSentProtocol = pTransparam->GetTranspProtocol();
 
-    /* For Unreliable Transport : Start Timer J*/
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
+        const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+        SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_J);
+
         if (pTxn->StartTxnTimer(SipTxn::TIMER_J, nDurationTJ, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendFinalResponse: Starting Timer_J failed.",
@@ -54,11 +52,9 @@ static SIP_BOOL SendFinalResponse(
         pTxn->SetCurrentDuration(nDurationTJ);
         *pnNewTxnState = SipTxn::NON_INV_SER_COMPLETED_ST;
     }
-    /* For Reliable Transport : Terminate Txn */
     else
     {
         *pnNewTxnState = SipTxn::NON_INV_SER_TERMINATED_ST;
-        return SIP_TRUE;
     }
     return SIP_TRUE;
 }
@@ -66,6 +62,15 @@ static SIP_BOOL SendFinalResponse(
 static SIP_BOOL IdleState_ReceiveNonInviteRequest(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+    if (pCallback == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "IdleState_ReceiveNonInviteRequest: Callback is null",
+                SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     SipTxnKey* pNewTxnKey = new SipTxnKey(pTxn->GetTxnKey(), pnError);
 
     if ((pNewTxnKey == SIP_NULL) || (*pnError == E_ERR_PF_MALLOCFAILED))
@@ -81,15 +86,7 @@ static SIP_BOOL IdleState_ReceiveNonInviteRequest(
         return SIP_FALSE;
     }
 
-    SIP_BOOL bStatus = SIP_FALSE;
-    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
-
-    if (pCallback != SIP_NULL)
-    {
-        bStatus = pCallback->FetchTransaction(pNewTxnKey, SipTxn::OPT_CREATE, pTxn);
-    }
-
-    if (bStatus == SIP_FALSE)
+    if (pCallback->FetchTransaction(pNewTxnKey, SipTxn::OPT_CREATE, pTxn) == SIP_FALSE)
     {
         pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
@@ -135,15 +132,7 @@ static SIP_BOOL IdleState_ReceiveNonInviteRequest(
 
         if (pINVTxnKey != SIP_NULL)
         {
-            SIP_BOOL bStatus = SIP_FALSE;
-            ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
-
-            if (pCallback != SIP_NULL)
-            {
-                bStatus = pCallback->FetchTransaction(pINVTxnKey, SipTxn::OPT_FETCH, pInvSerTxn);
-            }
-
-            if (bStatus == SIP_TRUE)
+            if (pCallback->FetchTransaction(pINVTxnKey, SipTxn::OPT_FETCH, pInvSerTxn) == SIP_TRUE)
             {
                 if (pInvSerTxn != SIP_NULL)
                 {

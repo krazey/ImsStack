@@ -37,15 +37,13 @@ static SIP_BOOL HandleTimeout(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnErro
 {
     (void)pvData;
 
-    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
-
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
     if (nDurationExpired == 0)
     {
+        const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+        nDurationExpired = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
         // Timer T1 already fired.
-        pTxn->IncreaseDurationExpired(nT1Val);
-        nDurationExpired = nT1Val;
+        pTxn->IncreaseDurationExpired(nDurationExpired);
     }
 
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
@@ -72,6 +70,7 @@ static SIP_BOOL HandleTimeout(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnErro
                seconds.
             */
             SIP_UINT16 nCurTxnState = pTxn->GetTxnState();
+            const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
             SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T2);
             if (nCurTxnState == SipTxn::NON_INV_CLI_TRYING_ST)
             {
@@ -189,7 +188,6 @@ static SIP_BOOL IdleState_SendNonInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, S
        2. Transaction Timer : for TCP
      */
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
     SIP_UINT32 nDurationTF = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_F);
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     const SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
@@ -198,7 +196,8 @@ static SIP_BOOL IdleState_SendNonInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, S
     /* For Unreliable Transport : Start Timer E*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pTxn->StartTxnTimer(SipTxn::TIMER_E, nDurationT1, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_E, objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1),
+                    pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "IdleState_SendNonInviteRequest:  Starting Timer_E failed.", SIP_ZERO,
