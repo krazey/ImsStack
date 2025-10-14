@@ -28,6 +28,7 @@
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
+#include "interface/MockIAosCallTracker.h"
 #include "interface/MockIAosConnection.h"
 #include "interface/MockIAosConnectorListener.h"
 #include "interface/MockIAosNConfiguration.h"
@@ -160,9 +161,11 @@ public:
     AStringArray m_objPcscfs;
     IAosNConfiguration* m_piAosNConfiguration;
     IAosService* m_piAosService;
+    IAosCallTracker* m_piAosCallTracker;
 
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
+    MockIAosCallTracker m_objMockIAosCallTracker;
     MockIAosConnection m_objMockIAosConnection;
     MockIAosConnectorListener m_objMockIAosConnectorListener;
     MockIAosNConfiguration m_objMockIAosNConfiguration;
@@ -192,6 +195,9 @@ protected:
         ASSERT_TRUE(m_pAosConnector != nullptr);
 
         m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
+
+        m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
+        AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, 0);
     }
 
     void TearDown() override
@@ -203,6 +209,8 @@ protected:
             delete m_pAosConnector;
             m_pAosConnector = IMS_NULL;
         }
+
+        AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, 0);
     }
 };
 
@@ -611,15 +619,17 @@ TEST_F(AosConnectorTest, DoNothingIfInvalidAppStateWhenPcscfChanged)
 
     m_pAosConnector->AosConnection_PcscfChanged();
 }
-TEST_F(AosConnectorTest, HoldProcessingIfConfiguredToIgnoreDuringRegisteredStateWhenPcscfChanged)
+
+TEST_F(AosConnectorTest, DoNothingIfKeepExistingPcscfOnPcscfChangeDuringTheCallIsTrueWhenPcscfChangeDuringTheCall)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
     ON_CALL(m_objMockIAosApplication, IsOn()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, IsNoInitRegOnPcscfChange())
+    ON_CALL(m_objMockIAosNConfiguration, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall())
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
 
-    // not handle PCSCF change because configured to not initialize registration
+    // not handle PCSCF change because KeepExistingPcscfOnPcscfChangeDuringTheCall is True
     EXPECT_CALL(
             m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_PCSCF_CHANGED))
             .Times(0);
@@ -629,12 +639,52 @@ TEST_F(AosConnectorTest, HoldProcessingIfConfiguredToIgnoreDuringRegisteredState
     EXPECT_TRUE(m_pAosConnector->GetPcscfChangeIgnored());
 }
 
+TEST_F(AosConnectorTest, NotifyChangeWhenPcscfChangedInIdleIfKeepExistingPcscfOnPcscfChangeDuringTheCallIsTrue)
+{
+    ON_CALL(m_objMockIAosApplication, GetAppState())
+            .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
+    ON_CALL(m_objMockIAosApplication, IsOn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).WillOnce(Return(IMS_TRUE));
+
+    // handle PCSCF change
+    EXPECT_CALL(
+            m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_PCSCF_CHANGED));
+
+    m_pAosConnector->AosConnection_PcscfChanged();
+
+    EXPECT_FALSE(m_pAosConnector->GetPcscfChangeIgnored());
+}
+
+TEST_F(AosConnectorTest, NotifyChangeWhenPcscfChangedIfKeepExistingPcscfOnPcscfChangeDuringTheCallIsFalse)
+{
+    ON_CALL(m_objMockIAosApplication, GetAppState())
+            .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
+    ON_CALL(m_objMockIAosApplication, IsOn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).WillOnce(Return(IMS_TRUE));
+
+    // handle PCSCF change
+    EXPECT_CALL(
+            m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_PCSCF_CHANGED));
+
+    m_pAosConnector->AosConnection_PcscfChanged();
+
+    EXPECT_FALSE(m_pAosConnector->GetPcscfChangeIgnored());
+}
+
 TEST_F(AosConnectorTest, DoNothingIfNoAvailablePcscfExistWhenPcscfChanged)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
-    ON_CALL(m_objMockIAosNConfiguration, IsNoInitRegOnPcscfChange())
+    ON_CALL(m_objMockIAosApplication, IsOn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall())
             .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).WillByDefault(Return(IMS_FALSE));
 
     // not handle PCSCF change because the PCSCF address is not available
@@ -643,13 +693,15 @@ TEST_F(AosConnectorTest, DoNothingIfNoAvailablePcscfExistWhenPcscfChanged)
             .Times(0);
 
     m_pAosConnector->AosConnection_PcscfChanged();
+
+    EXPECT_FALSE(m_pAosConnector->GetPcscfChangeIgnored());
 }
 
 TEST_F(AosConnectorTest, NotifyChangeWhenPcscfChanged)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
-    ON_CALL(m_objMockIAosNConfiguration, IsNoInitRegOnPcscfChange())
+    ON_CALL(m_objMockIAosNConfiguration, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall())
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).WillOnce(Return(IMS_TRUE));
 
@@ -1104,4 +1156,30 @@ TEST_F(AosConnectorTest, NotHandleInvalidTimer)
     m_pAosConnector->NotifyTimerExpired(nInvalidTimer);
 
     m_pAosConnector->StopTimer(nInvalidTimer);
+}
+
+TEST_F(AosConnectorTest, NotifyChangeWhenPcscfChangedIfProcessPendingPcscfChangeIsTrue)
+{
+    m_pAosConnector->SetPcscfChangeIgnored(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).WillOnce(Return(IMS_TRUE));
+    // handle PCSCF change
+    EXPECT_CALL(
+            m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_PCSCF_CHANGED));
+
+    m_pAosConnector->ProcessPendingPcscfChange();
+    EXPECT_FALSE(m_pAosConnector->GetPcscfChangeIgnored());
+}
+
+TEST_F(AosConnectorTest, DoNothingIfNoAvailablePcscfExistWhenProcessPendingPcscfChange)
+{
+    m_pAosConnector->SetPcscfChangeIgnored(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).WillOnce(Return(IMS_FALSE));
+
+    // not handle PCSCF change because the PCSCF address is not available
+    EXPECT_CALL(
+            m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_PCSCF_CHANGED))
+            .Times(0);
+
+    m_pAosConnector->ProcessPendingPcscfChange();
+    EXPECT_FALSE(m_pAosConnector->GetPcscfChangeIgnored());
 }

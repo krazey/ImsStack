@@ -23,6 +23,7 @@
 #include "IAosService.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosApplication.h"
+#include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
 #include "interface/IAosConnectorListener.h"
 #include "interface/IAosNConfiguration.h"
@@ -172,6 +173,21 @@ PUBLIC VIRTUAL void AosConnector::ResetReadyRecovery()
 PUBLIC VIRTUAL IMS_BOOL AosConnector::IsCrossSimConnected() const
 {
     return m_bCrossSimConnected;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosConnector::ProcessPendingPcscfChange()
+{
+    if (m_bIsPcscfChangeIgnored)
+    {
+        m_bIsPcscfChangeIgnored = IMS_FALSE;
+        if (m_piPcscf->CheckAndProcessChangeFromPco())
+        {
+            Notify(LISTENER_TYPE_UPDATED, REASON_PCSCF_CHANGED);
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED
@@ -551,6 +567,7 @@ PROTECTED VIRTUAL void AosConnector::CleanAll()
     ClearPending();
     SetPcscfConfigured(IMS_FALSE);
     SetDataConnected(IMS_FALSE);
+    m_bIsPcscfChangeIgnored = IMS_FALSE;
 
     SetState(STATE_IDLE);
 }
@@ -862,16 +879,18 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_PcscfChanged()
         return;
     }
 
-    if (!IsEmergencyType() && GET_N_CONFIG(m_piAppContext->GetSlotId())->IsNoInitRegOnPcscfChange())
+    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
+    const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(nSlotId);
+    if (!IsEmergencyType() &&
+        GET_N_CONFIG(nSlotId)->ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() &&
+        m_piAppContext->GetApp()->IsOn() &&
+        (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive()))
     {
-        if (m_piAppContext->GetApp()->IsOn())
-        {
-            A_IMS_TRACE_D(APPPROFILE, "AosConnection_PcscfChanged :: ignore in registered state", 0,
-                    0, 0);
+        A_IMS_TRACE_D(APPPROFILE, "AosConnection_PcscfChanged :: ignore in incall mode", 0, 0,
+                0);
 
-            m_bIsPcscfChangeIgnored = IMS_TRUE;
-            return;
-        }
+        m_bIsPcscfChangeIgnored = IMS_TRUE;
+        return;
     }
 
     if (!m_piPcscf->CheckAndProcessChangeFromPco())

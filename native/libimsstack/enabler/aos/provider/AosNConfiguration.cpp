@@ -401,11 +401,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsStopERegTimerOnEpdnConnected() cons
     return m_objAsset.bStopERegTimerOnEpdnConnected;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsNoInitRegOnPcscfChange() const
-{
-    return m_objAsset.bNoInitRegOnPcscfChange;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPdnReconnectOnAllPcscfsUnavailable() const
 {
     return m_objAsset.bPdnReconnectOnAllPcscfsUnavailable;
@@ -553,6 +548,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUseRegInfoContactWithoutUriCheck() 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType) const
 {
     return m_objAsset.objTestMode.Contains(nType);
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const
+{
+    return m_objAsset.bKeepExistingPcscfOnPcscfChangeDuringTheCall;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipTimerT1()
@@ -1680,6 +1680,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL);
     m_objAsset.bKeepERegRetryOnWlan =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
+    m_objAsset.bKeepExistingPcscfOnPcscfChangeDuringTheCall = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_KEEP_EXISTING_PCSCF_ON_PCSCF_CHANGE_DURING_THE_CALL_BOOL);
     m_objAsset.bKeepRegRetryCntUponPdnReconnect =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL);
     m_objAsset.bKeepRegRetryTimerOnAllEnablersDetached = piCc->GetBoolean(
@@ -1690,8 +1692,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_WITH_RAT_CHECK_ENABLED_BOOL);
     m_objAsset.bStopERegTimerOnEpdnConnected = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL);
-    m_objAsset.bNoInitRegOnPcscfChange =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
     m_objAsset.bPdnReconnectOnAllPcscfsUnavailable =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_PDN_RECONNECT_ON_ALL_PCSCFS_UNAVAILABLE_BOOL);
     m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(

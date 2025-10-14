@@ -42,12 +42,12 @@ public:
             bInitSubUponSubTerminated(IMS_FALSE),
             bKeepEPdnUponPcscfUnavailable(IMS_FALSE),
             bKeepERegRetryOnWlan(IMS_FALSE),
+            bKeepExistingPcscfOnPcscfChangeDuringTheCall(IMS_FALSE),
             bKeepRegRetryCntUponPdnReconnect(IMS_FALSE),
             bKeepRegRetryTimerOnAllEnablersDetached(IMS_FALSE),
             bRegTimerForECallTimeoutAsFailure(IMS_TRUE),
             bRegTimerForECallWithRatCheckEnabled(IMS_FALSE),
             bStopERegTimerOnEpdnConnected(IMS_FALSE),
-            bNoInitRegOnPcscfChange(IMS_FALSE),
             bPdnReconnectOnAllPcscfsUnavailable(IMS_FALSE),
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
@@ -156,12 +156,12 @@ public:
     IMS_BOOL bInitSubUponSubTerminated;
     IMS_BOOL bKeepEPdnUponPcscfUnavailable;
     IMS_BOOL bKeepERegRetryOnWlan;
+    IMS_BOOL bKeepExistingPcscfOnPcscfChangeDuringTheCall;
     IMS_BOOL bKeepRegRetryCntUponPdnReconnect;
     IMS_BOOL bKeepRegRetryTimerOnAllEnablersDetached;
     IMS_BOOL bRegTimerForECallTimeoutAsFailure;
     IMS_BOOL bRegTimerForECallWithRatCheckEnabled;
     IMS_BOOL bStopERegTimerOnEpdnConnected;
-    IMS_BOOL bNoInitRegOnPcscfChange;
     IMS_BOOL bPdnReconnectOnAllPcscfsUnavailable;
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;

@@ -4246,3 +4246,50 @@ TEST_F(AosApplicationTest, ReturnFalseIfRegisteredNetworkIsNone)
     // WHEN & THEN
     EXPECT_FALSE(m_pAosApplication->IsRegisteredNetwork(NW_REPORT_RADIO_INVALID));
 }
+
+TEST_F(AosApplicationTest, RemovePendingRegFeatureIfProcessPendingPcscfChangeIsTrueWhenCallStateChangeToIdle)
+{
+    // GIVEN
+    m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
+    m_pAosApplication->AddFeature(PENDING_REG_STOP_HELD);
+    ON_CALL(m_objMockAosConnector, ProcessPendingPcscfChange()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosApplication->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+    EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_STOP_HELD));
+    EXPECT_FALSE(m_pAosApplication->IsImsCall());
+    EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
+}
+
+TEST_F(AosApplicationTest, KeepPendingRegFeatureIfProcessPendingPcscfChangeIsFalseWhenCallStateChangeToIdle)
+{
+    // GIVEN
+    m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
+    m_pAosApplication->AddFeature(PENDING_REG_STOP_HELD);
+    ON_CALL(m_objMockAosConnector, ProcessPendingPcscfChange()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosApplication->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+    EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_STOP_HELD));
+}
+
+TEST_F(AosApplicationTest, KeepPendingRegFeatureIfProcessPendingPcscfChangeIsTrueWhenCallStateChangeToOffhook)
+{
+    // GIVEN
+    m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
+    m_pAosApplication->AddFeature(PENDING_REG_STOP_HELD);
+    ON_CALL(m_objMockAosConnector, ProcessPendingPcscfChange()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosApplication->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+    EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_STOP_HELD));
+}

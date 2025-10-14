@@ -3360,6 +3360,16 @@ PROTECTED VIRTUAL void AosApplication::CallTracker_StateChanged(
     }
 
     IMS_BOOL bCurrState = (eState > CallState::IDLE) ? IMS_TRUE : IMS_FALSE;
+
+    if (!bCurrState && m_pConnector->ProcessPendingPcscfChange())
+    {
+        m_pUtil->RemoveFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
+        m_pUtil->RemoveFeature(PENDING_REG_STOP_HELD, m_nRegPending);
+        SetImsCall(IMS_FALSE);
+        SetRegRecoveryHeld(IMS_FALSE);
+        return;
+    }
+
     if (IsImsCall() != bCurrState)
     {
         SetImsCall(bCurrState);

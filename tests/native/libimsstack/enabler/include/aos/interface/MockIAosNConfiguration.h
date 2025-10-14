@@ -86,7 +86,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRegTimerForECallTimeoutAsFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegTimerForECallWithRatCheckEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsStopERegTimerOnEpdnConnected, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsNoInitRegOnPcscfChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsPdnReconnectOnAllPcscfsUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfSupported, (IN IMS_SINT32 nGeolocationPidfType),
@@ -113,6 +112,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVideoSupportedForEmergencyReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUseRegInfoContactWithoutUriCheck, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTestModeEnabled, (IN IMS_SINT32 nType), (const, override));
+    MOCK_METHOD(IMS_BOOL, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall, (), (const, override));
 
     MOCK_METHOD(IMS_SINT32, GetSipTimerT1, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));

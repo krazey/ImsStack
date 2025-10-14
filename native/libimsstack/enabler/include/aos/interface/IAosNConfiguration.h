@@ -557,16 +557,6 @@ public:
     virtual IMS_BOOL IsStopERegTimerOnEpdnConnected() const = 0;
 
     /**
-     * @brief Returns whether UE doesn't send initial registration due to pcscf change
-     *
-     *        If this is set as TRUE, UE doesn't send initial registration due to pcscf change.
-     *
-     * @return IMS_BOOL Return whether the logic is applied or not.
-     * @see {@code ims.no_init_reg_on_pcscf_change_bool}
-     */
-    virtual IMS_BOOL IsNoInitRegOnPcscfChange() const = 0;
-
-    /**
      * @brief Returns whether UE will reconnect PDN when all pcscfs are unavailable.
      *
      * @return IMS_BOOL Return whether to reconnect PDN or not.
@@ -795,6 +785,18 @@ public:
      * @see {@code ims.test_mode_int_array}
      */
     virtual IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const = 0;
+
+    /**
+     * @brief Indicates whether to keep using the existing pcscf to perform re-reg when handover
+     *        between cellular and wifi during the call.
+     *
+     *        If the value is true, the UE uses the existing pcscf.
+     *        If the value is false, the UE uses the new pcscf.
+     *
+     * @return IMS_BOOL Return whether to keep using the existing pcscf or not
+     * @see {@code ims.keep_existing_pcscf_on_pcscf_change_during_the_call_bool}
+     */
+    virtual IMS_BOOL ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const = 0;
 
     /**
      * @brief Get the SIP timer T1

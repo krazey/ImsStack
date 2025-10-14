@@ -446,12 +446,12 @@ public class CarrierConfig {
                 KEY_PREFIX + "init_ipsec_setting_with_new_pcscf_bool";
         public static final String KEY_INIT_SUB_UPON_SUB_TERMINATED_BOOL =
                 KEY_PREFIX + "init_sub_upon_sub_terminated_bool";
+        public static final String KEY_KEEP_EXISTING_PCSCF_ON_PCSCF_CHANGE_DURING_THE_CALL_BOOL =
+                KEY_PREFIX + "keep_existing_pcscf_on_pcscf_change_during_the_call_bool";
         public static final String KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL =
                 KEY_PREFIX + "keep_reg_retry_cnt_upon_pdn_reconnect_bool";
         public static final String KEY_KEEP_REG_RETRY_TIMER_ON_ALL_ENABLERS_DETACHED_BOOL =
                 KEY_PREFIX + "keep_reg_retry_timer_on_all_enablers_detached_bool";
-        public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
-                KEY_PREFIX + "no_init_reg_on_pcscf_change_bool";
         public static final String KEY_PDN_RECONNECT_ON_ALL_PCSCFS_UNAVAILABLE_BOOL =
                 KEY_PREFIX + "pdn_reconnect_on_all_pcscfs_unavailable_bool";
         public static final String KEY_REG_CONTACT_VALIDATION_BOOL =

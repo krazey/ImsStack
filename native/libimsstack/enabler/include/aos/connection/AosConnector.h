@@ -48,6 +48,7 @@ public:
     virtual IMS_BOOL IsReady() const;
     virtual void ResetReadyRecovery();
     virtual IMS_BOOL IsCrossSimConnected() const;
+    virtual IMS_BOOL ProcessPendingPcscfChange();
 
     // GetState
     enum

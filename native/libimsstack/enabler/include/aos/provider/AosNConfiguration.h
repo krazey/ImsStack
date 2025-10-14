@@ -100,7 +100,6 @@ public:
     IMS_BOOL IsRegTimerForECallTimeoutAsFailure() const override;
     IMS_BOOL IsRegTimerForECallWithRatCheckEnabled() const override;
     IMS_BOOL IsStopERegTimerOnEpdnConnected() const override;
-    IMS_BOOL IsNoInitRegOnPcscfChange() const override;
     IMS_BOOL IsPdnReconnectOnAllPcscfsUnavailable() const override;
     IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const override;
     IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const override;
@@ -125,6 +124,7 @@ public:
     IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const override;
     IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const override;
     IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const override;
+    IMS_BOOL ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const override;
 
     IMS_SINT32 GetSipTimerT1() override;
     IMS_UINT32 GetRegistrationRetryBaseTime() override;

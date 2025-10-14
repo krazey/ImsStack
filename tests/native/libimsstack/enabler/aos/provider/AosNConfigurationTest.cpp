@@ -619,6 +619,11 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::
+                               KEY_KEEP_EXISTING_PCSCF_ON_PCSCF_CHANGE_DURING_THE_CALL_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
@@ -638,9 +643,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL,
                     IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_PDN_RECONNECT_ON_ALL_PCSCFS_UNAVAILABLE_BOOL,
@@ -1016,7 +1018,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsRegTimerForECallTimeoutAsFailure());
     EXPECT_TRUE(m_pAosNConfiguration->IsRegTimerForECallWithRatCheckEnabled());
     EXPECT_FALSE(m_pAosNConfiguration->IsStopERegTimerOnEpdnConnected());
-    EXPECT_FALSE(m_pAosNConfiguration->IsNoInitRegOnPcscfChange());
     EXPECT_FALSE(m_pAosNConfiguration->IsPdnReconnectOnAllPcscfsUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsContactUriValidationChecked());
@@ -1045,6 +1046,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsUseRegInfoContactWithoutUriCheck());
     EXPECT_FALSE(m_pAosNConfiguration->IsTestModeEnabled(
             CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION));
+    EXPECT_FALSE(m_pAosNConfiguration->ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall());
 
     EXPECT_EQ(0, m_pAosNConfiguration->GetAuthFailureRetryMaxCnt());
     EXPECT_EQ(1, m_pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
