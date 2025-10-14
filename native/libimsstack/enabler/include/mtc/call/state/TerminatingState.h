@@ -34,6 +34,7 @@ public:
     CallStateName SessionStartFailed(IN ISession* piSession) override;
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+    CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) override;
 
 private:
     void HandleCallSessionReleased();

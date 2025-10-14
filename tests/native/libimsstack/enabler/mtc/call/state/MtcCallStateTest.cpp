@@ -26,11 +26,14 @@
 #include "MockISipClientConnection.h"
 #include "MockISipServerConnection.h"
 #include "MtcDef.h"
+#include "PlatformContext.h"
+#include "TestPhoneInfoService.h"
 #include "aos/ImsAosReason.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
@@ -62,6 +65,8 @@ public:
     MockIMtcMediaManager objMediaManager;
     MockEpsFallbackTrigger* pEpsFbTrigger;
     MockMtcConfigurationProxy* pConfigurationProxy;
+    MockIMtcUiNotifier objUiNotifier;
+    TestPhoneInfoService objPhoneInfoService;
     MediaInfo objMediaInfo;
     CallReasonInfo* pReason;
 
@@ -73,11 +78,15 @@ protected:
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
+        ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
         ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
                 .WillByDefault(ReturnRef(objMediaInfo));
 
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
         pReason = new CallReasonInfo(CODE_UNSPECIFIED);
         pState = new MtcCallState(INITIAL_CALL_STATE, objContext);
@@ -89,6 +98,8 @@ protected:
         delete pConfigurationProxy;
         delete pReason;
         delete pState;
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 };
 
@@ -610,6 +621,28 @@ TEST_F(MtcCallStateTest, OnIpcanChangedDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnIpcanChanged(IIpcan::CATEGORY_MOBILE));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnIpcanChanged(IIpcan::CATEGORY_WLAN));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnIpcanChanged(IIpcan::CATEGORY_ANY));
+}
+
+TEST_F(MtcCallStateTest, OnRatChangedDoesNothingIfTransitionIsSupported)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsImsServiceContinuitySupported(_, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const IMS_SINT32 eAnyRat = INetworkWatcher::RADIOTECH_TYPE_UNKNOWN;
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnRatChanged(eAnyRat, eAnyRat));
+}
+
+TEST_F(MtcCallStateTest, OnRatChangedTerminatesCallIfTransitionIsNotSupported)
+{
+    MockIMtcSession objSession;
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objSession));
+    EXPECT_CALL(objSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
+    EXPECT_CALL(objUiNotifier, SendTerminated(CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsImsServiceContinuitySupported(_, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    const IMS_SINT32 eAnyRat = INetworkWatcher::RADIOTECH_TYPE_UNKNOWN;
+    EXPECT_EQ(CallStateName::TERMINATING, pState->OnRatChanged(eAnyRat, eAnyRat));
 }
 
 TEST_F(MtcCallStateTest, OnConnectionFailedDoesNothing)

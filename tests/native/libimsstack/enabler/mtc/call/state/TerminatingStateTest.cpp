@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "INetworkWatcher.h"
 #include "ISession.h"
 #include "MockISession.h"
 #include "call/IMtcCall.h"
@@ -171,6 +172,12 @@ TEST_F(TerminatingStateTest, OnTimerExpiredInvokesNotifyCallSessionReleased)
 
     objTerminatingState.OnTimerExpired(MtcCallState::TimerType::TIMER_E911_WAIT_SESSION_RELEASED);
     Mock::VerifyAndClearExpectations(&objStateProxy);
+}
+
+TEST_F(TerminatingStateTest, OnRatChangedDoesNothing)
+{
+    const IMS_SINT32 eAnyRat = INetworkWatcher::RADIOTECH_TYPE_UNKNOWN;
+    EXPECT_EQ(CallStateName::TERMINATING, objTerminatingState.OnRatChanged(eAnyRat, eAnyRat));
 }
 
 TEST_F(TerminatingStateTest, OnEnterInvokesOnTerminatedBeforeCreatingSession)

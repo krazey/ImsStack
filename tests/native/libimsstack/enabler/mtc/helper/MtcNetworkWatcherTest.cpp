@@ -59,23 +59,33 @@ protected:
                 PlatformContext::SERVICE_PHONE_INFO, pOldPhoneInfoService);
         delete pNetworkWatcher;
     }
+
+    void NotifyRatType(IN NETRADIO_ENTYPE eRatType)
+    {
+        ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+                .WillByDefault(Return(eRatType));
+        pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
+    }
 };
 
 TEST_F(MtcNetworkWatcherTest, GetMobileRatTypeReturnsConvertedType)
 {
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_NR));
-    pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
-    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetMobileRatType());
-
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
+    NotifyRatType(NW_REPORT_RADIO_EHRPD);
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_EHRPD, pNetworkWatcher->GetMobileRatType());
+    NotifyRatType(NW_REPORT_RADIO_LTE);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    NotifyRatType(NW_REPORT_RADIO_NR);
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetMobileRatType());
+    NotifyRatType(NW_REPORT_RADIO_WCDMA);
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_UMTS, pNetworkWatcher->GetMobileRatType());
+    NotifyRatType(NW_REPORT_RADIO_HSPA);
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_HSPA, pNetworkWatcher->GetMobileRatType());
+    NotifyRatType(NW_REPORT_RADIO_GSM);
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_GSM, pNetworkWatcher->GetMobileRatType());
+    NotifyRatType(NW_REPORT_RADIO_EDGE);
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_EDGE, pNetworkWatcher->GetMobileRatType());
 
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
-    pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
+    NotifyRatType(NW_REPORT_RADIO_EVDODO);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN, pNetworkWatcher->GetMobileRatType());
 }
 

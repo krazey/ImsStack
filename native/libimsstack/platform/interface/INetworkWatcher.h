@@ -160,6 +160,22 @@ public:
 
     virtual IMS_BOOL IsImsVoiceCallSupported() = 0;
 
+    /**
+     * @brief Checks if IMS service continuity is supported during a network change.
+     *
+     * This function is used to determine if an IMS service can be maintained when the device moves
+     * from one network type to another.
+     *
+     * It returns IMS_TRUE for RADIOTECH_TYPE_INVALID or RADIOTECH_TYPE_UNKNOWN, as it's expected
+     * that those cases can be handled without this continuity check.
+     *
+     * @param ePreviousNetwork The previous network type the device was connected to.
+     * @param eCurrentNetwork The current network type the device has handed over to.
+     * @return IMS_TRUE if the handover is supported for the IMS services. Otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL IsImsServiceContinuitySupported(
+            IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork) const = 0;
+
     virtual IMS_BOOL IsEmergencyOnly() = 0;
 
     virtual IMS_BOOL IsEmergencyAttachSupported() = 0;
