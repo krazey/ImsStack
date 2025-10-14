@@ -40,7 +40,8 @@ import java.util.Objects;
 
 public class RegistrationHelper {
 
-    private final SingleLatch mEventLatch = new SingleLatch("RegistrationHelper");
+    private final SingleLatch mEventLatch = new SingleLatch(
+            RegistrationHelper.class.getSimpleName());
 
     /**
      * Performs IMS registration based on the provided {@link ImsStackTestBase} instance.

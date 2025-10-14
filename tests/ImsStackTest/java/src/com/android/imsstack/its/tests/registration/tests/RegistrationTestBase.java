@@ -21,12 +21,16 @@ import android.telephony.Annotation;
 import android.telephony.CarrierConfigManager;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyManager.SimState;
 import android.telephony.data.ApnSetting;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
+import com.android.imsstack.its.base.TestConstants;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.ControlConnection;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
@@ -35,6 +39,9 @@ import com.android.imsstack.its.tests.ImsStackTestBase;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
 import com.android.imsstack.its.tests.registration.util.TestRegistration;
+import com.android.imsstack.its.util.SingleLatch;
+
+import java.util.Objects;
 
 /**
  * Base class for Registration ImsStack tests.
@@ -42,6 +49,16 @@ import com.android.imsstack.its.tests.registration.util.TestRegistration;
  * and utility methods required by most registration test scenarios.
  */
 public class RegistrationTestBase extends ImsStackTestBase {
+    protected final SingleLatch mEventLatch = new SingleLatch(
+            RegistrationTestBase.class.getSimpleName());
+    protected static final int REG_ERROR_CODE_403 = 403;
+    protected static final int REG_ERROR_CODE_404 = 404;
+    protected static final int REG_ERROR_CODE_5XX = 5;
+    protected static final int REG_ERROR_CODE_503 = 503;
+    protected static final int REG_ERROR_CODE_504 = 504;
+
+    protected static final int ERROR_TYPE_REPEATED = 1;
+    protected static final int ERROR_TYPE_CRITICAL = 2;
 
     protected ControlConnection mServerControlConnection;
     protected TestRegistration mRegistration;
@@ -92,15 +109,21 @@ public class RegistrationTestBase extends ImsStackTestBase {
     }
 
     /**
-     * Notifies the {@link TelephonyManagerProxy} of a precise data connection state change
-     * for the specific slot associated with the provided {@link RegistrationInfo}.
+     * Notifies the {@link TelephonyManagerProxy} of a precise data connection state change.
+     * If the {@link RegistrationInfo} is provided, the notification will be associated with
+     * that specific slot. If it is {@code null}, it will default to using
+     * {@link TestConstants#SLOT0}.
      *
      * @param pdcs The precise data connection state to notify.
-     * @param info The registration info containing the slot ID to use for the proxy.
+     * @param info The registration info containing the slot ID, or {@code null} to use the default
+     * slot.
      */
     protected void notifyPreciseDataConnectionState(
-            @NonNull PreciseDataConnectionState pdcs, @NonNull RegistrationInfo info) {
-        TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(getSubId(info.getSlotId()));
+            @NonNull PreciseDataConnectionState pdcs, @Nullable RegistrationInfo info) {
+        Objects.requireNonNull(pdcs, "pdcs must not be null.");
+
+        int slotId = (info != null) ? info.getSlotId() : TestConstants.SLOT0;
+        TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(getSubId(slotId));
         telephony.notifyPreciseDataConnectionStateChanged(pdcs);
     }
 
@@ -120,5 +143,31 @@ public class RegistrationTestBase extends ImsStackTestBase {
                 .setApnSetting(mTestImsApn)
                 .setState(state)
                 .build();
+    }
+
+    /**
+     * Simulates a SIM state change and broadcasts it to the system.
+     * This method provides a comprehensive way to test SIM state changes. It mimics a real
+     * event by first internally setting the application state for the target subscription and then
+     * dispatching a system-wide broadcast to notify all listeners.
+     * After triggering the state change, the method pauses for a predefined duration
+     * ({@code SingleLatch.LONG_SLEEP_MS}). This delay is crucial for allowing asynchronous
+     * teardown and cleanup procedures within the ImsStack to complete, ensuring the system reaches
+     * a stable state before the test proceeds to its next steps or concludes.
+     *
+     * @param info The registration information containing the target slot ID. If {@code null},
+     * it defaults to {@link TestConstants#SLOT0}.
+     * @param simState The SIM state to be broadcast (e.g.,
+     * {@link TelephonyManager#SIM_STATE_ABSENT}).
+     */
+    protected void simulateSimStateChange(@Nullable RegistrationInfo info,
+            @SimState int simState) {
+        int subId = getSubId((info != null) ? info.getSlotId() : TestConstants.SLOT0);
+        TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
+        telephony.setSimApplicationState(simState);
+        broadcastSimApplicationStateChanged(
+                TestConstants.SLOT0, MSimUtils.INVALID_SUB_ID, simState);
+
+        mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
     }
 }

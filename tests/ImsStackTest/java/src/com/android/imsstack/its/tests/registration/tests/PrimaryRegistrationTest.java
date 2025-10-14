@@ -30,16 +30,21 @@ import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.RegistrationManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.its.base.ServiceStateBuilder;
+import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
 import com.android.imsstack.its.tests.registration.util.MessageBuildUtils;
 import com.android.imsstack.its.tests.registration.util.TestRegistration;
+import com.android.imsstack.its.util.SingleLatch;
 
 import org.junit.After;
 import org.junit.Before;
@@ -67,6 +72,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     public void tearDown() throws Exception {
         mServerControlConnection.disconnect();
         tearDownBase(SLOT0);
+
+        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
     }
 
     @Test
@@ -107,18 +114,19 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -140,18 +148,19 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VIDEO,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -173,17 +182,16 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -203,23 +211,141 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith403() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_ResponseWith403_TriggerPlmnBlock()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<403-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY - REG_ERROR_CODE_403
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_403});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_CRITICAL
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_CRITICAL);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith404() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_ResponseWith404_TriggerPlmnBlock()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<404-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY - REG_ERROR_CODE_404
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_404});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_CRITICAL
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_CRITICAL);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith500() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_ResponseWith500_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<500-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_5XX
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_5XX});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith503() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_ResponseWith503_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<503-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_503
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_503});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -228,8 +354,38 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith504() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_ResponseWith504_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<504-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_504
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_504});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -269,8 +425,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
         mRegistration.expect().registered();
-
-        mRegistration.expect(1000).nothing();
     }
 
     @Test
@@ -291,12 +445,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
              "unregistered"
          */
 
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
         boolean isRegistered = mRegistrationHelper.performRegistration(this, mInfoBuilder.build());
 
         assertTrue(isRegistered);
 
         logi(this, "RegistrationTest: Receives NOTIFY(Unregistered)");
-        mRegistration.expect(1000).nothing();
 
         /*
           TODO : Set a suitable ImsReasonInfo
@@ -328,13 +485,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
           c. the state attribute set to "terminated" and the event attribute set either to
              "rejected"
          */
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
         boolean isRegistered = mRegistrationHelper.performRegistration(this, mInfoBuilder.build());
 
         assertTrue(isRegistered);
 
         logi(this, "RegistrationTest: Receives NOTIFY(Rejected)");
-        mRegistration.expect(1000).nothing();
 
         /*
           TODO : Set a suitable ImsReasonInfo
@@ -367,12 +526,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
              "deactivated"
          */
 
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
         boolean isRegistered = mRegistrationHelper.performRegistration(this, mInfoBuilder.build());
 
         assertTrue(isRegistered);
 
         logi(this, "RegistrationTest: Receives NOTIFY(Deactivated)");
-        mRegistration.expect(1000).nothing();
 
         /*
           TODO : Set a suitable ImsReasonInfo
@@ -404,12 +566,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+        RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
                         .build())
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -431,11 +595,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
@@ -446,7 +609,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -468,11 +633,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
@@ -483,7 +647,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -505,10 +671,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
@@ -519,7 +682,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
     }
@@ -532,35 +697,174 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+        RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForNrCs()
                         .addNetworkRegistrationInfoForNr()
                         .build())
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().registered();
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith403() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_ResponseWith403_TriggerPlmnBlock() throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<403-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_403
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_403});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_CRITICAL
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_CRITICAL);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith404() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_ResponseWith404_TriggerPlmnBlock() throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<404-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_404
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_404});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_CRITICAL
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_CRITICAL);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith500() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_ResponseWith500_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<500-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_5XX
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_5XX});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith503() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_ResponseWith503_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<503-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_503
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_503});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -569,8 +873,43 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith504() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_ResponseWith504_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<504-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_504
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_504});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -613,13 +952,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .addNetworkRegistrationInfoForNr()
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder
+        RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(ss)
-                .build());
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered();
-
-        mRegistration.expect(1000).nothing();
     }
 
     @Test
@@ -654,20 +993,20 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
-        RegistrationInfo info = mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForUmts()
                         .addNetworkRegistrationInfoForIwlan()
                         .build())
                 .build();
-        mRegistrationHelper.triggerRegistration(this, info);
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), info);
+                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
     }
@@ -689,12 +1028,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
-        RegistrationInfo info = mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForUmts()
                         .addNetworkRegistrationInfoForIwlan()
@@ -707,10 +1045,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, info);
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), info);
+                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
     }
@@ -732,12 +1070,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
-        RegistrationInfo info = mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForUmts()
                         .addNetworkRegistrationInfoForIwlan()
@@ -749,10 +1086,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .setDisableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
-        mRegistrationHelper.triggerRegistration(this, info);
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), info);
+                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
     }
@@ -774,11 +1112,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
-        RegistrationInfo info = mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForUmts()
                         .addNetworkRegistrationInfoForIwlan()
@@ -790,10 +1127,11 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .setEnableCapability(CAPABILITY_TYPE_SMS,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
-        mRegistrationHelper.triggerRegistration(this, info);
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), info);
+                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
     }
@@ -806,20 +1144,20 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
-        RegistrationInfo info = mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                                 .addNetworkRegistrationInfoForUmts()
                                 .addNetworkRegistrationInfoForIwlan()
                                 .build())
                 .build();
-        mRegistrationHelper.triggerRegistration(this, info);
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), info);
+                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -827,23 +1165,181 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith403() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_ResponseWith403_TriggerPlmnBlock()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<403-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY - REG_ERROR_CODE_403
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_403});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_CRITICAL
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_CRITICAL);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith404() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_ResponseWith404_TriggerPlmnBlock()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<404-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY - REG_ERROR_CODE_404
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_404});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_CRITICAL
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_CRITICAL);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith500() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_ResponseWith500_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<500-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_5XX
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_5XX});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith503() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_ResponseWith503_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<503-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_503
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_503});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -852,8 +1348,48 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith504() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_ResponseWith504_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<504-REGISTER");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_504
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_504});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -883,25 +1419,22 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | >SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
-        RegistrationInfo info = mInfoBuilder
-                .addConfig(config)
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
                         .addNetworkRegistrationInfoForUmts()
                         .addNetworkRegistrationInfoForIwlan()
                         .build())
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, info);
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), info);
+                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
-
-        mRegistration.expect(1000).nothing();
     }
 
     @Test
@@ -918,5 +1451,4 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     public void testCarrierDefaultWlan_Deregister_ByNotifyDeactivated() throws Exception {
         // TODO
     }
-
 }
