@@ -18,9 +18,6 @@
 
 #include "ImsVector.h"
 
-// The duplInheritedMember warning is suppressed because the identical member function name
-// is an intentional design, which uses private inheritance and method wrapping.
-// cppcheck-suppress-begin duplInheritedMember
 template <class T>
 class ImsStack : private ImsVector<T>
 {
@@ -69,7 +66,6 @@ public:
     inline T& Top() { return ImsVector<T>::Top(); }
     inline const T& Top() const { return ImsVector<T>::Top(); }
 };
-// cppcheck-suppress-end duplInheritedMember
 
 // Overrides operators
 PUBLIC
