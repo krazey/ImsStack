@@ -364,14 +364,53 @@ TEST_F(AosConnectorTest, DoNothingIfAlreadyInReadyStateWhenStateChangedToActive)
 
 TEST_F(AosConnectorTest, WaitForIpv6IfRequiredWhenStateChangedToActive)
 {
+    m_objPcscfs.AddElement(AString("2001::1"));
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(_)).WillByDefault(ReturnRef(m_objPcscfs));
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
+    ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_TRUE));
 
     m_pAosConnector->AosConnection_StateChanged(IAosConnection::STATE_ACTIVE);
 
     // run TIMER_IPV6 and wait for IPv6 address
     EXPECT_EQ(m_pAosConnector->GetPendingFeature(), AosConnector::PENDING_IPV6_DELAY);
+    EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
+}
+
+TEST_F(AosConnectorTest, DoNotWaitForIpv6IfCanNotOptainIpv6PcscfWhenStateChangedToActive)
+{
+    m_objPcscfs.AddElement(AString("::"));
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(_)).WillByDefault(ReturnRef(m_objPcscfs));
+    ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
+            .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
+    ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+            GetPersistentInt(
+                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue())
+            .WillByDefault(Return(AosConnector::PCO_INVALID_VALUE));
+
+    m_pAosConnector->AosConnection_StateChanged(IAosConnection::STATE_ACTIVE);
+
+    EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
+}
+
+TEST_F(AosConnectorTest, WaitForIpv6IfPcscfDiscoveryOtherThanPcoIsPossibleWhenStateChangedToActive)
+{
+    m_objPcscfs.AddElement(AString("::"));
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(_)).WillByDefault(ReturnRef(m_objPcscfs));
+    ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
+            .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
+    ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosConnector->AosConnection_StateChanged(IAosConnection::STATE_ACTIVE);
+
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
 }
 

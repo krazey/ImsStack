@@ -356,6 +356,27 @@ IMS_BOOL AosConnector::IsDataConnectedWithoutPending() const
 }
 
 PROTECTED
+IMS_BOOL AosConnector::IsIpv6PcscfUnavailable() const
+{
+    if (!m_piPcscf->IsSinglePcoScheme())
+    {
+        return IMS_FALSE;
+    }
+
+    const AStringArray& objPcscfs = m_piConnection->GetPcscfAddress(IpAddress::IPV6);
+    for (IMS_SINT32 nAt = 0; nAt < objPcscfs.GetCount(); nAt++)
+    {
+        const AString& strPcscf = objPcscfs.GetElementAt(nAt);
+        IpAddress objIpa;
+        if (objIpa.Parse(strPcscf) && !objIpa.IsAnyAddress())
+        {
+            return IMS_FALSE;
+        }
+    }
+    return IMS_TRUE;
+}
+
+PROTECTED
 void AosConnector::CheckReadyRecoveryAndSetTimer()
 {
     if (m_piConnection->GetConnectionType() == NetworkPolicy::APN_IMS)
@@ -760,7 +781,7 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nD
             IpAddress objIpAddress = m_piConnection->GetLocalAddress();
             IMS_BOOL bLocalIpv4 = objIpAddress.IsIPv4Address();
 
-            if (!IsDataConnected() && bLocalIpv4)
+            if (!IsDataConnected() && !IsIpv6PcscfUnavailable() && bLocalIpv4)
             {
                 A_IMS_TRACE_I(APPPROFILE, "wait for obtaining IPv6 address", 0, 0, 0);
 

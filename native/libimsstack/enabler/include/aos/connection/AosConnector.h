@@ -121,6 +121,7 @@ protected:
     IMS_BOOL IsTerminating() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsDataConnectedWithoutPending() const;
+    IMS_BOOL IsIpv6PcscfUnavailable() const;
 
     void CheckReadyRecoveryAndSetTimer();
     IMS_BOOL CheckIpChangedForEmergency();

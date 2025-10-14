@@ -615,6 +615,9 @@ public class DcApn implements IDcApn {
             }
 
             if (inetAddress instanceof Inet6Address) {
+                if (((Inet6Address) inetAddress).isIPv4CompatibleAddress()) {
+                    continue;
+                }
                 if ((ipVersion == EIpVersion.IPV4.getInt())
                         || (ipVersion == EIpVersion.IPV4V6.getInt())) {
                     continue;

@@ -554,6 +554,22 @@ public class DcApnTest {
     }
 
     @Test
+    public void testGetPcscfAddress_IgnoreIpv4CompatibleAddress() throws Exception {
+        String[] ipv4CompatibleAddrs = {"::10.183.25.6", "::10.183.35.6"};
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(ipv4CompatibleAddrs[0]));
+        linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(ipv4CompatibleAddrs[1]));
+        linkProperties.addLinkAddress(new LinkAddress("2001::2/63"));
+
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManagerProxy.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        String[] result = mDcApn.getPcscfAddress(EApnType.IMS.getType(), EIpVersion.IPV6.getInt());
+        assertEquals(0, result.length);
+    }
+
+    @Test
     public void testGetMtu_NullLinkProperties() throws Exception {
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
