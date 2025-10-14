@@ -799,8 +799,9 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
         SIP_CHAR* pszHdrName = SIP_NULL;
         SIP_CHAR* pszHdrBody = SIP_NULL;
 
-        if (m_objHdrs->Decode(pStartPt, nDecLen, (SIP_CHAR**)&pszHdrName,
-                    (SIP_CHAR**)&pszHdrBody) == SIP_FALSE)
+        if (m_objHdrs->Decode(pStartPt, nDecLen, static_cast<SIP_CHAR**>(&pszHdrName),
+                    static_cast<SIP_CHAR**>(&pszHdrBody)) == SIP_FALSE)
+
         {
             if (pszHdrName != SIP_NULL)
             {
@@ -1106,8 +1107,8 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         SIP_CHAR* pszHdrName = SIP_NULL;
         SIP_CHAR* pszHdrBody = SIP_NULL;
 
-        if (m_objHdrs->Decode(pStartPt, nDecLen, (SIP_CHAR**)&pszHdrName,
-                    (SIP_CHAR**)&pszHdrBody) == SIP_FALSE)
+        if (m_objHdrs->Decode(pStartPt, nDecLen, static_cast<SIP_CHAR**>(&pszHdrName),
+                    static_cast<SIP_CHAR**>(&pszHdrBody)) == SIP_FALSE)
         {
 #ifdef SIP_BADMESSAGE_PARSING
             SipBadHeader* pBadHdr = new SipBadHeader();
