@@ -16,6 +16,10 @@
 
 package com.android.imsstack.core.agents.dcmif;
 
+import androidx.annotation.NonNull;
+
+import java.util.List;
+
 /**
  * This provides interface to check carrier configurations.
  */
@@ -40,7 +44,8 @@ public interface IDcSettings extends IDc {
     /**
      * Returns list of access network on which IMS is supported.
      */
-    int[] getImsSupportedAccessNetworks();
+    @NonNull
+    List<Integer> getImsSupportedAccessNetworks();
 
     /**
      * Returns a platform configuration for Cross SIM.

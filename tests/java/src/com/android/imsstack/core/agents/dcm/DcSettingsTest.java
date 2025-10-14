@@ -39,6 +39,8 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @RunWith(JUnit4.class)
 public class DcSettingsTest {
     private static final int SLOT_0 = 0;
@@ -103,17 +105,16 @@ public class DcSettingsTest {
     public void testGetImsSupportedAccessNetworks() throws Exception {
         int[] emptyList = {};
         int[] availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};
-
         when(mMockCarrierConfig.getIntArray(
                 eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
-        int[] unAvailableRats = mDcSettingsUT.getImsSupportedAccessNetworks();
-        assertEquals(unAvailableRats.length, emptyList.length);
+        List<Integer> imsSupportedAccessNetworks = mDcSettingsUT.getImsSupportedAccessNetworks();
+        assertTrue(imsSupportedAccessNetworks.isEmpty());
 
-        int[] availableRats = mDcSettingsUT.getImsSupportedAccessNetworks();
-        assertEquals(availableRats.length, availableList.length);
+        imsSupportedAccessNetworks = mDcSettingsUT.getImsSupportedAccessNetworks();
+        assertEquals(imsSupportedAccessNetworks.size(), availableList.length);
     }
 
     @Test
@@ -197,8 +198,7 @@ public class DcSettingsTest {
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
         assertTrue(mDcSettingsUT.isVopsIgnored());
-        int[] availableRats = mDcSettingsUT.getImsSupportedAccessNetworks();
-        assertEquals(availableRats.length, 0);
+        assertTrue(mDcSettingsUT.getImsSupportedAccessNetworks().isEmpty());
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
         assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),

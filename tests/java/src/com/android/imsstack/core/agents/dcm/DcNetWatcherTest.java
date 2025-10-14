@@ -125,15 +125,11 @@ public class DcNetWatcherTest extends ImsStackTest {
                 TelephonyInterface.class, mMockTelephonyInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
                 ConfigInterface.class, mMockConfigInterface, SLOT0);
+        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT0);
 
         when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
                 .thenReturn(mMockPhoneStateNotifier);
-        when(mMockDcSetting.getImsSupportedAccessNetworks())
-                .thenReturn(new int[] {AccessNetworkConstants.AccessNetworkType.EUTRAN,
-                        AccessNetworkConstants.AccessNetworkType.IWLAN,
-                        AccessNetworkConstants.AccessNetworkType.UTRAN,
-                        AccessNetworkConstants.AccessNetworkType.GERAN});
-        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT0);
+        when(mMockDcSetting.getImsSupportedAccessNetworks()).thenReturn(Collections.emptyList());
 
         mDcNetWatcher = new DcNetWatcher(SLOT0);
         mDcNetWatcher.init(mContext);
