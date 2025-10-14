@@ -32,8 +32,11 @@ public:
     virtual ~MediaProfileNegotiator();
 
 protected:
-    IMS_BOOL NegotiateIpPort(IN MediaBaseProfile* pLocalProfile, IN MediaBaseProfile* pPeerProfile,
-            OUT MediaBaseProfile* pNegotiatedProfile);
+    IMS_BOOL NegotiateIpPort(IN const MediaBaseProfile* pLocalProfile,
+            IN const MediaBaseProfile* pPeerProfile, OUT MediaBaseProfile* pNegotiatedProfile);
+    IMS_BOOL ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
+            IN const MediaBaseProfile* pLocalProfile, IN const MediaBaseProfile* pPeerProfile,
+            OUT MediaBaseProfile** pNegotiatedProfile);
 
     MEDIA_CONTENT_TYPE m_eType;
     IMS_BOOL m_bIsOfferReceived;
