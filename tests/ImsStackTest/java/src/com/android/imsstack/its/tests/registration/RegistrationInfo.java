@@ -17,6 +17,7 @@ package com.android.imsstack.its.tests.registration;
 
 import android.net.NetworkCapabilities;
 import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
@@ -239,7 +240,10 @@ public final class RegistrationInfo {
         /**
          * Constructs a new {@code RegistrationInfo.Builder} with default values.
          */
-        public Builder() {}
+        public Builder() {
+            mConfig = new PersistableBundle();
+            mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
+        }
 
         /**
          * Sets the slot ID for the registration information.

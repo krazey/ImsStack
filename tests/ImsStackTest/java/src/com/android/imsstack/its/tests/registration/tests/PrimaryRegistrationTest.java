@@ -57,15 +57,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Before
     public void setUp() throws Exception {
-        setRegistrationBaseConfig();
-
         setUpBase(SLOT0);
 
         mRegistration = new TestRegistration(mImsServiceConnector.getRegistration());
         createControlConnection(mRegistration);
 
         mRegistrationHelper = new RegistrationHelper();
-        mInfoBuilder = new RegistrationInfo.Builder().setConfig(mConfig);
+        mConfig = new PersistableBundle();
+        mInfoBuilder = new RegistrationInfo.Builder();
     }
 
     @After

@@ -18,6 +18,7 @@ package com.android.imsstack.its.tests.registration.tests;
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 import static com.android.imsstack.its.tests.registration.RegistrationInfo.SimSupportMode;
 
+import android.os.PersistableBundle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -44,16 +45,14 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Before
     public void setUp() throws Exception {
-
-        setRegistrationBaseConfig();
-
         setUpBase(SLOT0);
 
         mRegistration = new TestRegistration(mImsServiceConnector.getRegistration());
         createControlConnection(mRegistration);
 
         mRegistrationHelper = new RegistrationHelper();
-        mInfoBuilder = new RegistrationInfo.Builder().setConfig(mConfig);
+        mConfig = new PersistableBundle();
+        mInfoBuilder = new RegistrationInfo.Builder();
 
         setDefaultRegistrationScenario();
     }
