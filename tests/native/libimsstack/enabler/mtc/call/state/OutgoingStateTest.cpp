@@ -2358,6 +2358,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedTerminatesCallIfRemoteAudioPortIsZer
             .WillByDefault(Return(&objMessage));
 
     ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(0));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE));
     EXPECT_CALL(objMtcSession,
@@ -2745,6 +2746,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroNormalCall)
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     objCallInfo.eEmergencyType = EmergencyType::NONE;
 
     EXPECT_CALL(objMtcSession,
@@ -2773,6 +2775,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroEmergencyCallNonR
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::VOIP));
 
@@ -2802,6 +2805,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroEmergencyCallRtt)
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::RTT));
 
@@ -2818,13 +2822,14 @@ TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroEmergencyCallRtt)
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
     MockIMessage objMessage;
-    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::RTT));
 
@@ -2834,4 +2839,26 @@ TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroEmergencyCallRtt)
 
     CallStateName nextState = pOutgoingState->SessionStarted(&objSession);
     EXPECT_EQ(nextState, CallStateName::IDLE);
+}
+
+TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroUssiCall)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+    ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(0));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcSession, SendAck).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
+
+    EXPECT_CALL(objUiNotifier, SendStarted);
+
+    CallStateName nextState = pOutgoingState->SessionStarted(&objSession);
+    EXPECT_EQ(nextState, CallStateName::ESTABLISHED);
 }

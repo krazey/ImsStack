@@ -175,7 +175,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
         if (m_objContext.GetMediaManager().GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
         {
-            return HandleAudioPortZero(piSession);
+            CallStateName eStateName = HandleAudioPortZero(piSession);
+            if (eStateName != GetStateName())
+            {
+                return eStateName;
+            }
         }
     }
 
@@ -567,7 +571,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (objMediaManager.GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
     {
-        return HandleAudioPortZero(piSession);
+        CallStateName eStateName = HandleAudioPortZero(piSession);
+        if (eStateName != GetStateName())
+        {
+            return eStateName;
+        }
     }
 
     if (piSession->IsFinalResponseReceivedForInitialInviteRequest())
@@ -1032,6 +1040,12 @@ PRIVATE
 CallStateName OutgoingState::HandleAudioPortZero(IN ISession* piSession)
 {
     IMS_TRACE_I("HandleAudioPortZero", 0, 0, 0);
+
+    if (m_objContext.IsUssi())
+    {
+        IMS_TRACE_I("HandleAudioPortZero : Ignore for USSI", 0, 0, 0);
+        return GetStateName();
+    }
 
     IMS_SINT32 nExtraCode;
     if (m_objContext.GetCallInfo().IsEmergency())
