@@ -1296,6 +1296,22 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallResumeFailedWithEct() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+        mImsCallSession.getCallDetails().set(mCallDetails.ON_ECT);
+        mImsCallSession.getCallDetails().set(mCallDetails.IMPLICIT_ON_HOLD);
+        when(mMockMtcCall.getCallInfo()).thenReturn(mMockCallInfo);
+        when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
+
+        mImsCallSession.getCallListenerProxy().onCallResumeFailed(mMockMtcCall, mockCallReasonInfo);
+        processAllFutureMessages();
+
+        verify(mMockMtcCall, times(1)).resume(any(MediaInfo.class));
+        assertTrue(mImsCallSession.getCallDetails().is(mCallDetails.ON_ECT));
+        assertTrue(mImsCallSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
+    }
+
+    @Test
     public void testOnCallResumeFailedWithUserTerminated() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
 
@@ -1552,7 +1568,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.getCallListenerProxy().onCallTransferFailed(mMockMtcCall,
                 mockCallReasonInfo);
         verify(mMockMtcCall, never()).resume(any(MediaInfo.class));
-        assertFalse(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
+        assertTrue(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
         assertFalse(targetSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
         assertFalse(mImsCallSession.mIsEctConfirmationRequired);
         verify(mMockImsCallSessionCallback, never()).invokeCallSessionTransferFailed(
@@ -1572,8 +1588,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 mockCallReasonInfo);
         processAllMessages();
         verify(mMockMtcCall).resume(any(MediaInfo.class));
-        assertFalse(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
-        assertFalse(targetSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
+        assertTrue(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
+        assertTrue(targetSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
         processAllMessages();
         verify(mMockImsCallSessionCallback).invokeCallSessionTransferFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
