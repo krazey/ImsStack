@@ -98,9 +98,11 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
 {
     IMtcSession* pSession = m_objContext.GetSession();
 
-    IMS_BOOL bCallTypeChanged = pSession->GetCallType() != eCallType;
-    pSession->SetCallType(eCallType);
+    IMS_BOOL bIsAcceptedWithVideoModification = pSession->GetCallType() == CallType::VT &&
+            m_objContext.GetMediaManager().GetMediaInfo(pSession->GetISession()).eVideoDirection !=
+                    objMediaInfo.eVideoDirection;
 
+    pSession->SetCallType(eCallType);
     m_objContext.GetMediaManager().SetMediaInfo(pSession->GetISession(), objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
@@ -109,7 +111,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
         m_pUdpKeepAliveSender->Stop();
     }
 
-    if (bCallTypeChanged &&
+    if (bIsAcceptedWithVideoModification &&
             m_objContext.GetMediaManager().GetNegotiationState(&pSession->GetISession()) ==
                     NegotiationState::STATE_NEGOTIATED)
     {

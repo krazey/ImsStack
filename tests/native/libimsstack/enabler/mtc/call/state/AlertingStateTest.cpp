@@ -332,11 +332,12 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
 }
 
-TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
+TEST_F(AlertingStateTest, AcceptWithVideoModificationInvokesSendEarlyUpdate)
 {
-    CallType eAcceptCallType = CallType::VOIP;
-    CallType eCurrentCallType = CallType::VT;
-    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eCurrentCallType));
+    CallType eAcceptCallType = CallType::VT;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
+    MediaInfo objDiffMediaInfo;
+    objDiffMediaInfo.eVideoDirection = DIRECTION_RECEIVE;
 
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
@@ -348,7 +349,45 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
     EXPECT_CALL(objMtcSession, Accept).Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL));
 
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objDiffMediaInfo));
+}
+
+TEST_F(AlertingStateTest, AcceptAudioDoesNotInvokesSendEarlyUpdate)
+{
+    CallType eAcceptCallType = CallType::VOIP;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    EXPECT_CALL(objMtcSession, Accept);
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
+
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
+}
+
+TEST_F(AlertingStateTest, AcceptDoesNotInvokesSendEarlyUpdateIfNegoStateIsNotNegotiated)
+{
+    CallType eAcceptCallType = CallType::VT;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
+    MediaInfo objDiffMediaInfo;
+    objDiffMediaInfo.eVideoDirection = DIRECTION_RECEIVE;
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+
+    EXPECT_CALL(objMtcSession, Accept);
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objDiffMediaInfo));
 }
 
 TEST_F(AlertingStateTest, AcceptStopsKeepAlive)
