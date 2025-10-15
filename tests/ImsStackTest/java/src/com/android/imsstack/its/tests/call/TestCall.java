@@ -181,6 +181,12 @@ public class TestCall extends ServerFailureHandler {
         }
 
         @Override
+        public void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            mExpectedEvent = new CallEvent.SessionInitiatingFailedEvent(reasonMatcher);
+            mWait.run();
+        }
+
+        @Override
         public void initiated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
             mExpectedEvent = new CallEvent.SessionInitiatedEvent(profileMatcher);
             mWait.run();
@@ -212,6 +218,19 @@ public class TestCall extends ServerFailureHandler {
                     mEventRecords.get(CallEvent.Type.MMTEL_INCOMING_CALL);
 
             assertTriggered(record);
+        }
+
+        @Override
+        public void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            final @Nullable CallEvent.EventRecord record =
+                    mEventRecords.get(CallEvent.Type.SESSION_INITIATING_FAILED);
+
+            if (!assertTriggered(record)) {
+                return;
+            }
+            if (!reasonMatcher.test((ImsReasonInfo) record.param1)) {
+                failByUnexpectedParameters();
+            }
         }
 
         @Override
@@ -309,6 +328,20 @@ public class TestCall extends ServerFailureHandler {
             if (mExpectedEvent.is(CallEvent.Type.SESSION_INITIATED)
                     && ((CallEvent.SessionInitiatedEvent) mExpectedEvent)
                         .matchParameter(profile)) {
+                mLatch.countDownAndInit();
+            }
+        }
+
+        @Override
+        public void callSessionInitiatingFailed(ImsReasonInfo reason) {
+            Log.d(this, "callSessionInitiatingFailed - reason: " + reason);
+
+            mEventRecords.put(CallEvent.Type.SESSION_INITIATING_FAILED,
+                    new CallEvent.EventRecord(reason));
+
+            if (mExpectedEvent.is(CallEvent.Type.SESSION_INITIATING_FAILED)
+                    && ((CallEvent.SessionInitiatingFailedEvent) mExpectedEvent)
+                        .matchParameter(reason)) {
                 mLatch.countDownAndInit();
             }
         }
