@@ -136,11 +136,11 @@ public:
     virtual void FinalizeSdp(IMS_UINTP nNegoId, IN ISession* pSession);
 
     /**
-     * @brief Confirms the session negotiation and cleans up any stale negotiation models.
+     * @brief Finalizes the session negotiation and cleans up any stale negotiation models.
      * This should be called when a session is fully established (e.g., after 2xx/ACK).
      * @param nNegoId The ID of the MediaNego instance.
      */
-    virtual void ConfirmSession(IMS_UINTP nNegoId);
+    virtual void FinalizeNegotiation(IMS_UINTP nNegoId);
 
     // --- Getters for Negotiated Information (Delegated to MediaNego) ---
 

@@ -129,10 +129,10 @@ public:
     virtual void FinalizeSdp(IN ISession* pSession);
 
     /**
-     * @brief Confirms the session negotiation, cleans up unconfirmed OA models,
-     * and sets the final negotiation state.
+     * @brief Finalizes the session negotiation by cleaning up any stale negotiation models and
+     * setting the final negotiation state based on the outcome.
      */
-    virtual void ConfirmSession();
+    virtual void FinalizeNegotiation();
 
     /**
      * @brief Set the negotiation state

@@ -489,7 +489,7 @@ TEST_F(AudioNegoTest, testNegotiateSdpOfferReceivedFail)
             STATE_OFFER_RECEIVED, &objSessionDescriptor, &objMediaDescriptor, nDirection);
     EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
 }
-TEST_F(AudioNegoTest, testConfirmSession)
+TEST_F(AudioNegoTest, testCleanupIncompleteOaModels)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
@@ -498,15 +498,11 @@ TEST_F(AudioNegoTest, testConfirmSession)
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
 
-    m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
-            MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
-    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 2);
-
-    m_pAudioNego->ConfirmSession();
-    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
+    m_pAudioNego->CleanupIncompleteOaModels();
+    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 0);
 }
 
-TEST_F(AudioNegoTest, testConfirmSessionRemovesIncomplete)
+TEST_F(AudioNegoTest, testCleanupIncompleteOaModelsRemovesIncomplete)
 {
     MockISessionDescriptor objSessionDescriptorComplete;
     MockIMediaDescriptor objMediaDescriptorComplete;
@@ -522,7 +518,7 @@ TEST_F(AudioNegoTest, testConfirmSessionRemovesIncomplete)
 
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 2);
 
-    m_pAudioNego->ConfirmSession();
+    m_pAudioNego->CleanupIncompleteOaModels();
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
 }
 

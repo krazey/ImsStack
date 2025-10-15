@@ -582,7 +582,7 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferReceivedFail)
     EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
 }
 
-TEST_F(TextNegoTest, testConfirmSession)
+TEST_F(TextNegoTest, testCleanupIncompleteOaModels)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
@@ -591,7 +591,7 @@ TEST_F(TextNegoTest, testConfirmSession)
     m_pTextNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 1);
-    m_pTextNego->ConfirmSession();
+    m_pTextNego->CleanupIncompleteOaModels();
     EXPECT_EQ(m_pTextNego->GetOaModelList().GetSize(), 0);
 }
 

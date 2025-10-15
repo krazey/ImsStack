@@ -226,17 +226,17 @@ void MediaNegoHandler::FinalizeSdp(IMS_UINTP nNegoId, IN ISession* pSession)
 }
 
 PUBLIC
-void MediaNegoHandler::ConfirmSession(IMS_UINTP nNegoId)
+void MediaNegoHandler::FinalizeNegotiation(IMS_UINTP nNegoId)
 {
     std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "ConfirmSession(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FinalizeNegotiation(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
         return;
     }
 
-    pMediaNego->ConfirmSession();
+    pMediaNego->FinalizeNegotiation();
 }
 
 PUBLIC

@@ -368,6 +368,7 @@ PUBLIC VIRTUAL void MediaSession::FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession*
     }
 
     m_pMediaNegoHandler->FinalizeSdp(nNegoId, pSession);
+    m_pMediaNegoHandler->FinalizeNegotiation(nNegoId);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
@@ -555,7 +556,6 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 if (pMediaNego != IMS_NULL)
                 {
                     pMediaNego->SetPreviewMode(IMS_FALSE);
-                    m_pMediaNegoHandler->ConfirmSession(nNegoId);
                 }
             }
 

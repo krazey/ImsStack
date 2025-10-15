@@ -141,9 +141,10 @@ public:
             IN std::shared_ptr<MediaEnvironment> pEnvironment, IN MediaConfiguration* pConfig);
 
     /**
-     * @brief Confirms the session negotiation and cleans up any stale negotiation models.
+     * @brief Cleans up any stale or incomplete negotiation models (OaModel).
      */
-    virtual void ConfirmSession();
+    virtual void CleanupIncompleteOaModels();
+
     /**
      * @brief Get the MediaBaseProfile object
      */
