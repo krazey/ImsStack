@@ -44,7 +44,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipIdentityHeader();
+    ~SipIdentityHeader() override;
 
 private:
     SIP_CHAR* m_pSignedIdentityDigest;

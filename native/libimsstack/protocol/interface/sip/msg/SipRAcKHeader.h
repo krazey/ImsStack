@@ -56,7 +56,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipRAcKHeader();
+    ~SipRAcKHeader() override;
 };
 
 #endif  //__SIP_RACK_HEADER_H__

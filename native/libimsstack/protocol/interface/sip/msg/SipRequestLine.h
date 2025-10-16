@@ -47,7 +47,7 @@ public:
     SipAddrSpec* GetReqUri();
 
 private:
-    ~SipRequestLine();
+    ~SipRequestLine() override;
 };
 
 #endif  //__SIP_REQUEST_LINE_H__

@@ -23,7 +23,7 @@ class SipDefLoggerUtil : public ISipLoggerUtil
 {
 public:
     SipDefLoggerUtil();
-    ~SipDefLoggerUtil();
+    ~SipDefLoggerUtil() override;
 
 public:
     SIP_VOID DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,

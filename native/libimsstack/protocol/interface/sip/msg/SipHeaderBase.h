@@ -215,7 +215,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 protected:
-    virtual ~SipHeaderBase();
+    ~SipHeaderBase() override;
     SIP_BOOL IsEmptyHeaderBodyAllowed() const;
     static SIP_BOOL FindComment(const SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
             const SIP_CHAR*& pszCommentStart, const SIP_CHAR*& pszCommentEnd);
@@ -248,6 +248,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    virtual ~SipNameAddrHeader();
+    ~SipNameAddrHeader() override;
 };
 #endif  //__SIP_HEADER_BASE_H__

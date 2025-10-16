@@ -122,7 +122,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipDateHeader();
+    ~SipDateHeader() override;
     static SIP_INT32 GetWeekDayType(SIP_CHAR* pszWeekDay);
     static SIP_INT32 GetMonthType(SIP_CHAR* pszMonth);
 };

@@ -36,7 +36,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    virtual ~SipIntegerHeader();
+    ~SipIntegerHeader() override;
 
     static constexpr SIP_INT32 MAX_GEOLOCATION_ERROR = 999;
     static constexpr SIP_UINT32 MAX_EXPIRES = 4294967295;

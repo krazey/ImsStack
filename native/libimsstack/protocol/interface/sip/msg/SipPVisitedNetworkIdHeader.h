@@ -29,6 +29,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipPVisitedNetworkIdHeader();
+    ~SipPVisitedNetworkIdHeader() override;
 };
 #endif  //__SIP_P_VISITED_NETWORK_ID_HEADER_H__

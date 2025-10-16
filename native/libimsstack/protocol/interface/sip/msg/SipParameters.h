@@ -44,7 +44,7 @@ public:
             IParameterComponent* pParameterComponent = SIP_NULL);
 
 private:
-    virtual ~SipNameValue();
+    ~SipNameValue() override;
 };
 
 class SipParameters

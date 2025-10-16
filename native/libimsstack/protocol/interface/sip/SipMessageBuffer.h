@@ -23,7 +23,7 @@ class SipMessageBuffer : public RcObject
 public:
     SipMessageBuffer();
     SipMessageBuffer(const SipMessageBuffer& other);
-    virtual ~SipMessageBuffer();
+    ~SipMessageBuffer() override;
 
 private:
     SipMessageBuffer& operator=(IN const SipMessageBuffer&) = delete;

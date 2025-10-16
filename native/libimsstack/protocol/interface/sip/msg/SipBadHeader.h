@@ -44,6 +44,6 @@ public:
     inline SIP_BOOL IsValidHeader() const override { return SIP_TRUE; }
 
 private:
-    ~SipBadHeader();
+    ~SipBadHeader() override;
 };
 #endif  //__SIP_BAD_HEADER_H__

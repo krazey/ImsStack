@@ -56,6 +56,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipWarningHeader();
+    ~SipWarningHeader() override;
 };
 #endif  //__SIP_WARNING_HEADER_H__

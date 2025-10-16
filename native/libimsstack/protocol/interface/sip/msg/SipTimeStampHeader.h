@@ -49,6 +49,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipTimeStampHeader();
+    ~SipTimeStampHeader() override;
 };
 #endif  //__SIP_TIME_STAMP_HEADER_H__

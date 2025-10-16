@@ -203,7 +203,7 @@ public:
     static SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
 
 private:
-    ~SipMessage();
+    ~SipMessage() override;
 
     static constexpr SIP_UINT32 MAX_METHOD_LEN = 32;
 };

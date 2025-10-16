@@ -47,6 +47,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipCSeqHeader();
+    ~SipCSeqHeader() override;
 };
 #endif  //__SIP_CSEQ_HEADER_H__

@@ -45,6 +45,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipResourcePriorityHeader();
+    ~SipResourcePriorityHeader() override;
 };
 #endif  //__SIP_RESOURCE_PRIORITY_HEADER_H__

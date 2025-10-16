@@ -47,6 +47,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipRetryAfterHeader();
+    ~SipRetryAfterHeader() override;
 };
 #endif  //__SIP_RETRY_AFTER_HEADER_H__

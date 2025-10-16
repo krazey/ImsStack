@@ -32,6 +32,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipInfoBase();
+    ~SipInfoBase() override;
 };
 #endif  //__SIP_INFO_BASE_H__

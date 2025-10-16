@@ -50,6 +50,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipContentTypeHeader();
+    ~SipContentTypeHeader() override;
 };
 #endif  //__SIP_CONTENT_TYPE_HEADER_H__

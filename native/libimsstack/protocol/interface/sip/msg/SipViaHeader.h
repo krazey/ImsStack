@@ -73,7 +73,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipViaHeader();
+    ~SipViaHeader() override;
 };
 
 #endif  //__SIP_VIA_HEADER_H__

@@ -23,7 +23,7 @@ class SipDefNetworkUtil : public ISipNetworkUtil
 {
 public:
     SipDefNetworkUtil();
-    ~SipDefNetworkUtil();
+    ~SipDefNetworkUtil() override;
 
 public:
     SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,

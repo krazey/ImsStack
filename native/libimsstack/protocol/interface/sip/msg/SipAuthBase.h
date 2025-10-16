@@ -44,6 +44,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipAuthBase();
+    ~SipAuthBase() override;
 };
 #endif  //__SIP_AUTH_BASE_H__

@@ -56,6 +56,6 @@ public:
     inline const SIP_CHAR* GetReasonPhrase() const { return m_pszReasonPhrase; }
 
 private:
-    ~SipStatusLine();
+    ~SipStatusLine() override;
 };
 #endif  //__SIP_STATUS_LINE_H__

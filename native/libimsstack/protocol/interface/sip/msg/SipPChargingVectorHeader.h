@@ -41,6 +41,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipPChargingVectorHeader();
+    ~SipPChargingVectorHeader() override;
 };
 #endif  //__SIP_P_CHARGING_VECTOR_HEADER_H__

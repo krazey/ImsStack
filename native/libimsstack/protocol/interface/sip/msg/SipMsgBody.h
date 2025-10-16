@@ -63,7 +63,7 @@ public:
     SipHeaderBase* GetMimeHdrObj(SIP_INT32 eIndex);
 
 private:
-    virtual ~SipMIMEHdrs();
+    ~SipMIMEHdrs() override;
 };
 
 /*Class for message body list*/
@@ -92,7 +92,7 @@ public:
     SIP_BOOL DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 private:
-    ~SipMsgBodyList();
+    ~SipMsgBodyList() override;
 };
 
 class SipMsgBody : public SipRefBase
@@ -173,7 +173,7 @@ public:
     inline SIP_UINT32 GetBufferLength() const { return m_nBufLen; }
 
 private:
-    ~SipMsgBody();
+    ~SipMsgBody() override;
 };
 
 #endif  //__SIP_MSG_BODY_H__

@@ -31,7 +31,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipRequestDispositionHeader();
+    ~SipRequestDispositionHeader() override;
 
     static constexpr SIP_UINT16 MAX_DIRECTIVE_SIZE = 12;
     static const SIP_CHAR* DIRECTIVE_STRING[MAX_DIRECTIVE_SIZE];

@@ -29,7 +29,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipPPreferredServiceHeader();
+    ~SipPPreferredServiceHeader() override;
 
     static constexpr SIP_UINT32 MAX_LET_DIG = 27;
 };

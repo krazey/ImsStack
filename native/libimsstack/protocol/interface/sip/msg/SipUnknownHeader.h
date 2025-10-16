@@ -48,6 +48,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipUnknownHeader();
+    ~SipUnknownHeader() override;
 };
 #endif  //__SIP_UNKNOWN_HEADER_H__

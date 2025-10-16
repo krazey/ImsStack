@@ -45,6 +45,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipEventHeader();
+    ~SipEventHeader() override;
 };
 #endif  //__SIP_EVENT_HEADER_H__

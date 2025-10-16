@@ -40,6 +40,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    virtual ~SipUserAgentHeader();
+    ~SipUserAgentHeader() override;
 };
 #endif  //__SIP_USER_AGENT_HEADER_H__

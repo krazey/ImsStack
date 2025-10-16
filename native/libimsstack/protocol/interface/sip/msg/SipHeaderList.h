@@ -48,7 +48,7 @@ public:
     static SipHeaderBase* GetNewListObj(SIP_INT32 eHdr, SipHeaderBase* pHeader);
 
 private:
-    ~SipHeaderList();
+    ~SipHeaderList() override;
 };
 
 #endif  //__SIP_HEADER_LIST_H__

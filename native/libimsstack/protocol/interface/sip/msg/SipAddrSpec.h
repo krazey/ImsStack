@@ -52,7 +52,7 @@ private:
 
     SIP_BOOL DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-    ~SipUri();
+    ~SipUri() override;
 
 public:
     SipUri();
@@ -155,7 +155,7 @@ public:
     inline const SipUri* GetSipUriAsRef() const { return m_pSipUri; }
 
 private:
-    ~SipAddrSpec();
+    ~SipAddrSpec() override;
 };
 
 class SipNameAddr : public SipRefBase
@@ -182,7 +182,7 @@ public:
     inline const SIP_CHAR* GetDisplayName() const { return m_pszDispName; }
 
 private:
-    virtual ~SipNameAddr();
+    ~SipNameAddr() override;
 };
 
 #endif  //__SIP_ADDR_SPEC_H__

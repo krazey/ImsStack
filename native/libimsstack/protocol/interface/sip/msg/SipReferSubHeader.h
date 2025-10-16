@@ -29,6 +29,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipReferSubHeader();
+    ~SipReferSubHeader() override;
 };
 #endif  //__SIP_REFER_SUB_HEADER_H__

@@ -97,7 +97,7 @@ public:
     SIP_INT32 CompareKeysForRPR(SipTxnKey* pGeneratedKey);
 
 private:
-    virtual ~SipTxnKey();
+    ~SipTxnKey() override;
     SIP_VOID Clear();
 };
 

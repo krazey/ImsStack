@@ -44,6 +44,6 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
-    ~SipTriggerConsentHeader();
+    ~SipTriggerConsentHeader() override;
 };
 #endif  //__SIP_TRIGGER_CONSENT_HEADER_H__
