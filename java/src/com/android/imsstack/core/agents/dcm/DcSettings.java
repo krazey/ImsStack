@@ -19,6 +19,8 @@ package com.android.imsstack.core.agents.dcm;
 import android.content.Context;
 import android.telephony.CarrierConfigManager;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -27,6 +29,10 @@ import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * This class provide interface to get carrier configurations
@@ -75,21 +81,22 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
-    public int[] getImsSupportedAccessNetworks() {
+    public @NonNull List<Integer> getImsSupportedAccessNetworks() {
         CarrierConfig config = getCarrierConfig(mSlotId);
-
-        if (config != null) {
-            int[] supportedRats = config.getIntArray(
-                    CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
-            if (supportedRats != null) {
-                return supportedRats;
-            } else {
-                ImsLog.w(mSlotId, "supportedRats is null");
-            }
-        } else {
+        if (config == null) {
             ImsLog.w(mSlotId, "config is null");
+            return Collections.emptyList();
         }
-        return new int[]{};
+
+        int[] supportedRats = config.getIntArray(
+                CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
+
+        if (supportedRats == null) {
+            ImsLog.w(mSlotId, "supportedRats is null");
+            return Collections.emptyList();
+        }
+
+        return IntStream.of(supportedRats).boxed().toList();
     }
 
     @Override

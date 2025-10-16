@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.IntStream;
 
 /** This class is for providing the network information */
 public class DcNetWatcher implements IDcNetWatcher {
@@ -67,11 +66,10 @@ public class DcNetWatcher implements IDcNetWatcher {
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
 
     // Default IMS supported network types
-    private static final int[] DEFAULT_IMS_SUPPORTED_NETWORKS = new int[]{
+    private static final List<Integer> DEFAULT_IMS_SUPPORTED_NETWORKS = List.of(
             AccessNetworkConstants.AccessNetworkType.EUTRAN,
             AccessNetworkConstants.AccessNetworkType.NGRAN,
-            AccessNetworkConstants.AccessNetworkType.IWLAN
-    };
+            AccessNetworkConstants.AccessNetworkType.IWLAN);
 
     private Context mContext;
 
@@ -456,14 +454,13 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private void loadImsSupportedAccessNetworks() {
-        int[] supportedNetworks = (mDcSettings != null)
+        mImsSupportedAccessNetworks = (mDcSettings != null)
                 ? mDcSettings.getImsSupportedAccessNetworks()
                 : DEFAULT_IMS_SUPPORTED_NETWORKS;
 
-        if (supportedNetworks.length == 0) {
-            supportedNetworks = DEFAULT_IMS_SUPPORTED_NETWORKS;
+        if (mImsSupportedAccessNetworks.isEmpty()) {
+            mImsSupportedAccessNetworks = DEFAULT_IMS_SUPPORTED_NETWORKS;
         }
-        mImsSupportedAccessNetworks = IntStream.of(supportedNetworks).boxed().toList();
     }
 
     private static boolean getDataRoaming(ServiceState ss) {
