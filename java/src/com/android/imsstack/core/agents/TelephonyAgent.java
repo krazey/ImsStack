@@ -32,8 +32,6 @@ import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
-import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Collections;
@@ -94,24 +92,13 @@ public class TelephonyAgent implements TelephonyInterface {
     @Override
     public @NetworkType int getNetworkType() {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy();
-        int networkType = tmp.getDataNetworkType(mSlotId);
-        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-        if (dnw != null) {
-            dnw.updateTelephonyNetworkType(networkType);
-        }
-        return networkType;
+        return tmp.getDataNetworkType(mSlotId);
     }
 
     @Override
     public @NetworkType int getVoiceNetworkType() {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy();
-        int voiceNetworkType = tmp.getVoiceNetworkType(mSlotId);
-
-        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-        if (dnw != null) {
-            dnw.updateTelephonyVoiceNetworkType(voiceNetworkType);
-        }
-        return voiceNetworkType;
+        return tmp.getVoiceNetworkType(mSlotId);
     }
 
     @Override

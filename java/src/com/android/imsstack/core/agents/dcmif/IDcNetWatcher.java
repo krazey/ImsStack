@@ -135,18 +135,6 @@ public interface IDcNetWatcher extends IDc {
     boolean isVopsSupported();
 
     /**
-     * Stores the network type obtained from the TelephonyManager.
-     * It is used for checking network type mismatch between ServiceState and TelephonyManager.
-     */
-    void updateTelephonyNetworkType(@NetworkType int networkType);
-
-    /**
-     * Stores the voice network type obtained from the TelephonyManager.
-     * It is used for checking network type mismatch between ServiceState and TelephonyManager.
-     */
-    void updateTelephonyVoiceNetworkType(@NetworkType int networkType);
-
-    /**
      * Returns whether the current network type belongs to the 3G category.
      */
     boolean is3G();

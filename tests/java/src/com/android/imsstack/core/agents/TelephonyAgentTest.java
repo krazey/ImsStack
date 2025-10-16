@@ -48,7 +48,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class TelephonyAgentTest {
     @Mock private PhoneStateInterface mPhoneStateInterface;
-    @Mock private IDcNetWatcher mDcNetWatcher;
 
     private TestAppContext mTestAppContext;
     private TelephonyManagerProxy mTelephonyManagerProxy;
@@ -63,7 +62,6 @@ public class TelephonyAgentTest {
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT0);
-        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
 
         mTelephonyAgent = new TelephonyAgent(SLOT0);
         mTelephonyAgent.init(mTestAppContext.getContext());
@@ -125,18 +123,12 @@ public class TelephonyAgentTest {
         // LTE
         when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).updateTelephonyNetworkType(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // NR
         when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.isImsSupportedNetworkType(TelephonyManager.NETWORK_TYPE_NR))
-                .thenReturn(true);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_NR, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).updateTelephonyNetworkType(eq(TelephonyManager.NETWORK_TYPE_NR));
     }
 
     @Test
@@ -145,20 +137,12 @@ public class TelephonyAgentTest {
         // LTE
         when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getVoiceNetworkType());
-        verify(mDcNetWatcher)
-                .updateTelephonyVoiceNetworkType(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // NR
         when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.isImsSupportedNetworkType(TelephonyManager.NETWORK_TYPE_NR))
-                .thenReturn(true);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_NR, mTelephonyAgent.getVoiceNetworkType());
-        verify(mDcNetWatcher)
-                .updateTelephonyVoiceNetworkType(eq(TelephonyManager.NETWORK_TYPE_NR));
     }
 
     @Test
