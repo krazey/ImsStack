@@ -40,6 +40,7 @@ import com.android.imsstack.its.base.ServiceStateBuilder;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
+import com.android.imsstack.its.servercontrol.ServerMessage;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
 import com.android.imsstack.its.tests.registration.util.MessageBuildUtils;
@@ -57,15 +58,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     @Before
     public void setUp() throws Exception {
-        setRegistrationBaseConfig();
-
         setUpBase(SLOT0);
 
         mRegistration = new TestRegistration(mImsServiceConnector.getRegistration());
         createControlConnection(mRegistration);
 
         mRegistrationHelper = new RegistrationHelper();
-        mInfoBuilder = new RegistrationInfo.Builder().setConfig(mConfig);
+        mConfig = new PersistableBundle();
+        mInfoBuilder = new RegistrationInfo.Builder();
     }
 
     @After
@@ -197,7 +197,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith423() throws Exception {
+    public void testCarrierDefaultLte_Register_Response423() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -211,7 +211,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith403_TriggerPlmnBlock()
+    public void testCarrierDefaultLte_Register_Response403_TriggerPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -245,7 +245,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith404_TriggerPlmnBlock()
+    public void testCarrierDefaultLte_Register_Response404_TriggerPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -279,7 +279,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith500_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultLte_Register_Response500_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -314,7 +314,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith503_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultLte_Register_Response503_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -349,12 +349,45 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith503WithRetryAfter() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_Response503RetryAfter_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("503-REGISTER")
+                .setHeader("Retry-After", "100")
+                .build());
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_503
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_503});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith504_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultLte_Register_Response504_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -389,8 +422,41 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultLte_Register_ResponseWith504WithRetryAfter() throws Exception {
-        // TODO
+    public void testCarrierDefaultLte_Register_Response504RetryAfter_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("504-REGISTER")
+                .setHeader("Retry-After", "100")
+                .build());
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_504
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_504});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -690,7 +756,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith423() throws Exception {
+    public void testCarrierDefaultNr_Register_Response423() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -712,7 +778,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith403_TriggerPlmnBlock() throws Exception {
+    public void testCarrierDefaultNr_Register_Response403_TriggerPlmnBlock() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<403-REGISTER");
@@ -750,7 +816,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith404_TriggerPlmnBlock() throws Exception {
+    public void testCarrierDefaultNr_Register_Response404_TriggerPlmnBlock() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<404-REGISTER");
@@ -788,7 +854,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith500_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultNr_Register_Response500_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -828,7 +894,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith503_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultNr_Register_Response503_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -868,12 +934,50 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith503WithRetryAfter() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_Response503RetryAfter_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("503-REGISTER")
+                .setHeader("Retry-After", "100")
+                .build());
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_503
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_503});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith504_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultNr_Register_Response504_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -913,8 +1017,44 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultNr_Register_ResponseWith504WithRetryAfter() throws Exception {
-        // TODO
+    public void testCarrierDefaultNr_Register_Response504RetryAfter_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("504-REGISTER")
+                .setHeader("Retry-After", "100")
+                .build());
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_504
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_504});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForNrCs()
+                        .addNetworkRegistrationInfoForNr()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -1009,6 +1149,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1051,6 +1193,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1093,6 +1237,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1134,10 +1280,12 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith423() throws Exception {
+    public void testCarrierDefaultWlan_Register_Response423() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -1162,10 +1310,12 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistration.expect().registering();
 
         mRegistration.expect().registered();
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith403_TriggerPlmnBlock()
+    public void testCarrierDefaultWlan_Register_Response403_TriggerPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1209,7 +1359,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith404_TriggerPlmnBlock()
+    public void testCarrierDefaultWlan_Register_Response404_TriggerPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1253,7 +1403,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith500_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultWlan_Register_Response500_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1298,7 +1448,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith503_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultWlan_Register_Response503_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1343,12 +1493,55 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith503WithRetryAfter() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_Response503RetryAfter_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("503-REGISTER")
+                .setHeader("Retry-After", "100")
+                .build());
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_503
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_503});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith504_TriggerPlmnBlockWithTimeOut()
+    public void testCarrierDefaultWlan_Register_Response504_TriggerPlmnBlockWithTimeOut()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1393,8 +1586,51 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void testCarrierDefaultWlan_Register_ResponseWith504WithRetryAfter() throws Exception {
-        // TODO
+    public void testCarrierDefaultWlan_Register_Response504RetryAfter_TriggerPlmnBlockWithTimeOut()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("504-REGISTER")
+                .setHeader("Retry-After", "100")
+                .build());
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY - REG_ERROR_CODE_504
+        mConfig.putIntArray(CarrierConfig.Ims.KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY,
+                new int[] {REG_ERROR_CODE_504});
+
+        // KEY_EXTRA_REG_ERR_FINAL_TYPE_INT - ERROR_TYPE_REPEATED
+        PersistableBundle objExtraRegErrBundle = new PersistableBundle();
+        objExtraRegErrBundle.putInt(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, ERROR_TYPE_REPEATED);
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(new ServiceStateBuilder()
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                        .build())
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect().registering();
+
+        mRegistration.expect().deregistered(
+                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                action -> action
+                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1435,6 +1671,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered();
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test

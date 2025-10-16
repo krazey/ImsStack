@@ -18,7 +18,6 @@ package com.android.imsstack.its.tests.registration.tests;
 import android.os.PersistableBundle;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation;
-import android.telephony.CarrierConfigManager;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.SimState;
@@ -86,16 +85,6 @@ public class RegistrationTestBase extends ImsStackTestBase {
     protected void createControlConnection(ServerFailureHandler serverFailureHandler) {
         mServerControlConnection =
                 new ControlConnection(serverFailureHandler, getPcscfAddresses().get(0));
-    }
-
-    /**
-     * Initializes {@link #mConfig} with base carrier configurations common to most tests,
-     * such as disabling SIP over IPSec. Tests should call this and then add or override
-     * specific configurations as needed.
-     */
-    protected void setRegistrationBaseConfig() {
-        mConfig = new PersistableBundle();
-        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
     }
 
     /**
