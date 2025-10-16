@@ -142,7 +142,6 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
             SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "OnSendTxn: INVALID Txn Type", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        break;
     }
 
     pTxnInfo->m_bTxnTerminated = objTxnFsmData.m_bTxnTerminated;
@@ -235,7 +234,6 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
             SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "OnRecvTxn: INVALID Txn Type", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        break;
     }
 
     if ((eTxnType == SipTxn::INVITE_CLIENT) || (eTxnType == SipTxn::INVITE_SERVER))
