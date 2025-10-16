@@ -68,7 +68,7 @@ SIP_BOOL SipAuthBase::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) con
 
     while (nIndex < nSize)
     {
-        SipNameValue* pNameValue = m_objAuthList.GetAt(nIndex);
+        const SipNameValue* pNameValue = m_objAuthList.GetAt(nIndex);
 
         if (nIndex > 0)
         {
@@ -104,7 +104,7 @@ SIP_BOOL SipAuthBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE
 
     while (nIndex < nCount)
     {
-        SipNameValue* pParamNamValue = m_objAuthList.GetAt(nIndex);
+        const SipNameValue* pNameValue = m_objAuthList.GetAt(nIndex);
 
         if (nIndex > 0)
         {
@@ -112,7 +112,7 @@ SIP_BOOL SipAuthBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE
             (*ppCurrPos)++;
         }
 
-        if (pParamNamValue->Encode(ppCurrPos) == SIP_FALSE)
+        if (pNameValue->Encode(ppCurrPos) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
@@ -201,7 +201,7 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
     }
 
     SIP_CHAR* pszVal = SIP_NULL;
-    SIP_CHAR* pszElement = valueList.GetAt(SIP_ZERO);
+    const SIP_CHAR* pszElement = valueList.GetAt(SIP_ZERO);
     if (pTempNameValue->m_eParamType == SipParameters::FEATURE)
     {
         int nLen = SIP_ZERO;

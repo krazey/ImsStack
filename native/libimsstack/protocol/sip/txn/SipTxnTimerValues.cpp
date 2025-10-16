@@ -36,7 +36,7 @@ SipTxnTimerValues::SipTxnTimerValues() :
         m_nTimerL_Value(SIP_ZERO),
         m_nTimerM_Value(SIP_ZERO)
 {
-    SipConfiguration* pConfig = SipConfiguration::GetInstance();
+    const SipConfiguration* pConfig = SipConfiguration::GetInstance();
 
     m_nT1Value = pConfig->GetT1();
     m_nT2Value = pConfig->GetT2();

@@ -192,7 +192,7 @@ static SIP_BOOL IdleState_SendNonInviteRequest(SipTxn* pTxn, SIP_VOID* pvData, S
     SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
     SIP_UINT32 nDurationTF = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_F);
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
+    const SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
     /* For Unreliable Transport : Start Timer E*/

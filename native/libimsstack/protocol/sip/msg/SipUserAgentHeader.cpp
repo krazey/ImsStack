@@ -31,7 +31,7 @@ SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader) :
     SIP_UINT32 nSize = objHeader.m_objProductList.GetSize();
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
-        SIP_CHAR* pszTempszVal = objHeader.m_objProductList.GetAt(nCount);
+        const SIP_CHAR* pszTempszVal = objHeader.m_objProductList.GetAt(nCount);
         if (pszTempszVal != SIP_NULL)
         {
             SIP_CHAR* pszVal = SipPf_Strdup(pszTempszVal);

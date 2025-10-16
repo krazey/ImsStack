@@ -829,7 +829,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
         {
             nEvent = SipTxn::INV_SER_RECV_ACK_REQ_EVT;
 
-            SipTxnKey* pInviteTxnKey = (pTxn != SIP_NULL) ? pTxn->GetTxnKey() : SIP_NULL;
+            const SipTxnKey* pInviteTxnKey = (pTxn != SIP_NULL) ? pTxn->GetTxnKey() : SIP_NULL;
 
             if (pInviteTxnKey != SIP_NULL)
             {

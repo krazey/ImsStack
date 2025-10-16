@@ -31,7 +31,7 @@ SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader) :
     SIP_UINT32 nSize = objHeader.m_objPrivacyList.GetSize();
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
-        SIP_CHAR* pszTempVal = objHeader.m_objPrivacyList.GetAt(nCount);
+        const SIP_CHAR* pszTempVal = objHeader.m_objPrivacyList.GetAt(nCount);
         if (pszTempVal != SIP_NULL)
         {
             SIP_CHAR* pszVal = SipPf_Strdup(pszTempVal);
@@ -86,7 +86,7 @@ SIP_BOOL SipPrivacyHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
 
     for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nCount; nIndex++)
     {
-        SIP_CHAR* pszPrivacy = m_objPrivacyList.GetAt(nIndex);
+        const SIP_CHAR* pszPrivacy = m_objPrivacyList.GetAt(nIndex);
         if (nIndex != SIP_ZERO)
         {
             SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);

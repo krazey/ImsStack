@@ -208,7 +208,7 @@ static SIP_BOOL ProceedingState_SendFailureResponse(
     SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
+    const SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
     /* For Unreliable Transport : Start Timer G*/
@@ -287,7 +287,7 @@ static SIP_BOOL ProceedingState_TransportError(
 static SIP_BOOL ProceedingState_Timer_G_H_Timeout(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
+    const SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
 
     if (pTimeoutData == SIP_NULL)
     {

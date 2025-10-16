@@ -262,7 +262,7 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
 {
     const SIP_CHAR STR_VIA_ENC_FORMAT[] = "\r\nVia:";
     const SIP_CHAR STR_VIA_COMPACT_ENC_FORMAT[] = "\r\nv:";
-    SIP_CHAR* pSipBuffer = pSentBuffer->GetSipBuffer();
+    const SIP_CHAR* pSipBuffer = pSentBuffer->GetSipBuffer();
     SIP_CHAR* pszTemp = SipPf_Strstr(pSipBuffer, STR_VIA_ENC_FORMAT);
 
     if (pszTemp == SIP_NULL)

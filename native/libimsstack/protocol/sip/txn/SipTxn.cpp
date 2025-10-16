@@ -514,7 +514,7 @@ SIP_INT32 SipTxn::GetMsgSentProto()
         return SipTransportInfo::PROTOCOL_INVALID;
     }
 
-    SipTransportParameter* pMsgSentTransParam = m_pTranspInfo->GetMsgSentTranspParam();
+    const SipTransportParameter* pMsgSentTransParam = m_pTranspInfo->GetMsgSentTranspParam();
     if (pMsgSentTransParam == SIP_NULL)
     {
         /*  stack error */

@@ -35,7 +35,7 @@ TEST_F(SipMessageBufferTest, SetGetAndUpdate)
     RcPtr<SipMessageBuffer> pMsgBuffer = SipMessageBuffer::GetInstance();
     EXPECT_EQ(SipMessageBuffer::MAX_MSG_SIZE, pMsgBuffer->GetLength());
 
-    SIP_UCHAR* pBuffer = pMsgBuffer->GetBuffer();
+    const SIP_UCHAR* pBuffer = pMsgBuffer->GetBuffer();
     EXPECT_TRUE(pBuffer != nullptr);
 
     pBuffer = pMsgBuffer->GetBuffer(0);

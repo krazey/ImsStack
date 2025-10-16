@@ -72,7 +72,7 @@ SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
             objBuffer += COMMA;
         }
 
-        SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
+        const SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
 
         if (pNameValue == SIP_NULL)
         {
@@ -109,7 +109,7 @@ SIP_BOOL SipAuthInfoHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SI
             SipMsgUtil::Encode(*ppCurrPos, COMMA);
         }
 
-        SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
+        const SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
 
         if (pNameValue == SIP_NULL)
         {

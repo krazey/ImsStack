@@ -32,7 +32,7 @@ SipEventHeader::SipEventHeader(const SipEventHeader& objHeader) :
 
     for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
     {
-        SIP_CHAR* pTemplate = objHeader.m_objEventTemplates.GetAt(nIndex);
+        const SIP_CHAR* pTemplate = objHeader.m_objEventTemplates.GetAt(nIndex);
 
         if (pTemplate != SIP_NULL)
         {

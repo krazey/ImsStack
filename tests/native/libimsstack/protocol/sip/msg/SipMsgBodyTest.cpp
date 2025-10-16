@@ -395,7 +395,7 @@ level1 - message body 2\r\n\
     SipMsgBody* pBody2 = pMsgBobyList->GetBodyByIndex(1);
     ASSERT_TRUE(pBody2 != nullptr);
 
-    SipMsgBodyList* pBobyList2 = pBody2->GetMessageBodyList();
+    const SipMsgBodyList* pBobyList2 = pBody2->GetMessageBodyList();
     ASSERT_TRUE(pBobyList2 == nullptr);
 
     SipHeaderBase* pContentEncodingHeader = pBody2->GetContentEncoding();
@@ -414,7 +414,7 @@ level1 - message body 2\r\n\
     SipMsgBody* pBody3 = pMsgBobyList->GetBodyByIndex(2);
     ASSERT_TRUE(pBody3 != nullptr);
 
-    SipMsgBodyList* pBobyList3 = pBody3->GetMessageBodyList();
+    const SipMsgBodyList* pBobyList3 = pBody3->GetMessageBodyList();
     ASSERT_TRUE(pBobyList3 == nullptr);
 
     EXPECT_STREQ("level1 - message body 2", pBody3->GetBuffer());

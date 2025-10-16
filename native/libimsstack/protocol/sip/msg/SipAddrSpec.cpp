@@ -182,7 +182,7 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 
         for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue* pNameValue = m_pUriHdrParams->GetParam(nIndex);
+            const SipNameValue* pNameValue = m_pUriHdrParams->GetParam(nIndex);
 
             if (pNameValue != SIP_NULL)
             {
@@ -285,15 +285,15 @@ SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
 
         for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue* pParamNamValue = m_pUriHdrParams->GetParam(nIndex);
+            const SipNameValue* pNameValue = m_pUriHdrParams->GetParam(nIndex);
 
-            if (pParamNamValue != SIP_NULL)
+            if (pNameValue != SIP_NULL)
             {
                 if (nIndex != SIP_ZERO)
                 {
                     SipMsgUtil::Encode(*ppCurrPos, AMPERSAND);
                 }
-                pParamNamValue->Encode(ppCurrPos,
+                pNameValue->Encode(ppCurrPos,
                         const_cast<IParameterComponent*>(
                                 static_cast<const IParameterComponent*>(this)));
             }

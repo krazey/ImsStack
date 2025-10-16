@@ -34,8 +34,8 @@ static SIP_BOOL HandleInvalidStateEvent(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT
 static SIP_BOOL SendFinalResponse(
         SipTxn* pTxn, void* pvData, SIP_UINT16* pnNewTxnState, SIP_UINT16* pnError)
 {
-    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    SipTransportParameter* pTransparam = pFsmData->m_pTranspParam;
+    const SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+    const SipTransportParameter* pTransparam = pFsmData->m_pTranspParam;
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_J);

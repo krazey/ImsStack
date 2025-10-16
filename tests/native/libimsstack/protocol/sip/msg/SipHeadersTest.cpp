@@ -36,7 +36,7 @@ TEST_F(SipHeadersTest, createCoreHdrObject)
     SipHeaderBase* pAllowHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::ALLOW);
     ASSERT_TRUE(pAllowHdr != nullptr);
 
-    SipHeaderBase* pInvalid = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TYPE_END);
+    const SipHeaderBase* pInvalid = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TYPE_END);
     EXPECT_TRUE(pInvalid == nullptr);
 
     SipHeaderBase* pExpiresHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::EXPIRES_ANY);
@@ -118,7 +118,7 @@ TEST_F(SipHeadersTest, CloneHdrObject)
 
     SipHeaderBase* pMaxFwdCloneHdr = SipHeaders::CloneHdrObj(pMaxForwardsHdr);
     SipHeaderBase* pViaCloneHdr = SipHeaders::CloneHdrObj(pViaHdr);
-    SipHeaderBase* pInvalidHdr = SipHeaders::CloneHdrObj(nullptr);
+    const SipHeaderBase* pInvalidHdr = SipHeaders::CloneHdrObj(nullptr);
 
     ASSERT_TRUE(pMaxFwdCloneHdr != nullptr);
     ASSERT_TRUE(pViaCloneHdr != nullptr);
@@ -161,7 +161,7 @@ TEST_F(SipHeadersTest, GetHdrObj)
     EXPECT_TRUE(pMaxForwardsHdr != nullptr);
     pMaxForwardsHdr->SipDelete();
 
-    SipHeaderBase* pUserAgentHdr = pHdrs->GetHdrObj(SipHeaderBase::USER_AGENT, 0);
+    const SipHeaderBase* pUserAgentHdr = pHdrs->GetHdrObj(SipHeaderBase::USER_AGENT, 0);
     EXPECT_TRUE(pUserAgentHdr == nullptr);
 
     pViaHdr = pHdrs->GetHdrObj(SipHeaderBase::VIA, 0);
@@ -171,7 +171,7 @@ TEST_F(SipHeadersTest, GetHdrObj)
     pViaHdr = pHdrs->GetHdrObj(SipHeaderBase::VIA, 5);
     EXPECT_TRUE(pViaHdr == nullptr);
 
-    SipHeaderBase* pSecurityClientHdr = pHdrs->GetHdrObj(SipHeaderBase::SECURITY_CLIENT, 0);
+    const SipHeaderBase* pSecurityClientHdr = pHdrs->GetHdrObj(SipHeaderBase::SECURITY_CLIENT, 0);
     EXPECT_TRUE(pSecurityClientHdr == nullptr);
 
     EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_END));
@@ -317,7 +317,7 @@ TEST_F(SipHeadersTest, GetHdrObj_Index)
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
     pMaxForwardsHdr->SipDelete();
 
-    SipHeaderBase* pUserAgentHdr = pHdrs->GetHdrObj(SipHeaderBase::USER_AGENT);
+    const SipHeaderBase* pUserAgentHdr = pHdrs->GetHdrObj(SipHeaderBase::USER_AGENT);
     EXPECT_TRUE(pUserAgentHdr == nullptr);
 
     pViaHdr = pHdrs->GetHdrObj(SipHeaderBase::VIA);

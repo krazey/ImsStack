@@ -439,7 +439,7 @@ Content-Length: 0\r\n\
 
     EXPECT_EQ(SipTxn::STATUS_RETRANSMISSION, nTxnStatus);
 
-    SipTransportParameter* pMsgSentTransParam = pNewTranspInfo->GetMsgSentTranspParam();
+    const SipTransportParameter* pMsgSentTransParam = pNewTranspInfo->GetMsgSentTranspParam();
     ASSERT_TRUE(pMsgSentTransParam != nullptr);
 
     EXPECT_EQ(SipTransportInfo::PROTOCOL_UDP, pMsgSentTransParam->GetTranspProtocol());

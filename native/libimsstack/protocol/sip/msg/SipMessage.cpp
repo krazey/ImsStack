@@ -1685,12 +1685,12 @@ SIP_UINT32 SipMessage::GetRSeqNum(SipMessage* pMessage, SIP_INT32 eHdrType)
         {
             if (eHdrType == SipHeaderBase::RSEQ)
             {
-                SipIntegerHeader* pRSeq = static_cast<SipIntegerHeader*>(pHeader);
+                const SipIntegerHeader* pRSeq = static_cast<SipIntegerHeader*>(pHeader);
                 nRSeqNum = pRSeq->GetValueInt();
             }
             else
             {
-                SipRAcKHeader* pRAck = static_cast<SipRAcKHeader*>(pHeader);
+                const SipRAcKHeader* pRAck = static_cast<SipRAcKHeader*>(pHeader);
                 nRSeqNum = pRAck->GetResponseNum();
             }
 

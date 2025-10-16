@@ -82,7 +82,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_UserAndHeader(
      */
     SIP_CHAR* pCurrPt = pszString;
     SIP_INT32 nLength = SipPf_Strlen(pszString);
-    SIP_CHAR* pEndPt = pCurrPt + nLength;
+    const SIP_CHAR* pEndPt = pCurrPt + nLength;
 
     SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
     SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
@@ -129,7 +129,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Password(SIP_CHAR* pszString)
      */
     SIP_CHAR* pCurrPt = pszString;
     SIP_INT32 nLength = SipPf_Strlen(pszString);
-    SIP_CHAR* pEndPt = pCurrPt + nLength;
+    const SIP_CHAR* pEndPt = pCurrPt + nLength;
 
     SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
     SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
