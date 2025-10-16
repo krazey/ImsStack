@@ -123,7 +123,7 @@ private:
     void SetSessionRefreshParameters(IN IMS_SINT32 nRefresher, IN IMS_SINT32 nRefreshRequest,
             IN IMS_SINT32 nMinSe, IN IMS_SINT32 nSessionTimerDuration,
             IN IMS_SINT32 nLocalSessionTimerDuration);
-    static IMS_BOOL IsUpdateMethodSupported(IN const ISipMessage* piSipMsg);
+    IMS_BOOL IsUpdateMethodSupported(IN const ISipMessage* piSipMsg);
 
 public:
     enum

@@ -1571,8 +1571,8 @@ void SessionRefreshHelper::SetSessionRefreshParameters(IN IMS_SINT32 nRefresher,
     m_nLocalSessionTimerDuration = nLocalSessionTimerDuration;
 }
 
-PRIVATE GLOBAL IMS_BOOL SessionRefreshHelper::IsUpdateMethodSupported(
-        IN const ISipMessage* piSipMsg)
+PRIVATE
+IMS_BOOL SessionRefreshHelper::IsUpdateMethodSupported(IN const ISipMessage* piSipMsg)
 {
     ImsList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::ALLOW);
 
@@ -1586,5 +1586,8 @@ PRIVATE GLOBAL IMS_BOOL SessionRefreshHelper::IsUpdateMethodSupported(
         }
     }
 
-    return IMS_FALSE;
+    // If the flag is set once when creating a SIP dialog and
+    // there is no Allow header in the mid-dialog transaction,
+    // the existing value is referenced as is.
+    return m_bUpdateMethodAllowed;
 }
