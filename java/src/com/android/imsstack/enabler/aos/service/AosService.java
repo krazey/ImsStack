@@ -588,17 +588,23 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void onCrossSimStatusChanged(boolean connectedOverCrossSim) {
+    public void onCrossSimStatusChanged(boolean isCrossSimUsed, boolean isNetworkTypeIwlan) {
         ImsLog.d(mSlotId, "AosService: onCrossSimStatusChanged");
-        if (mIsConnectedOverCrossSim == connectedOverCrossSim) {
+        if (mIsConnectedOverCrossSim == isCrossSimUsed) {
             return;
         }
 
-        mIsConnectedOverCrossSim = connectedOverCrossSim;
-        if ((mRegisteredNetworkType == NetworkType.CROSS_SIM) && !mIsConnectedOverCrossSim) {
-            updateRegisteredNetworkType(NetworkType.IWLAN);
-        } else if ((mRegisteredNetworkType == NetworkType.IWLAN) && mIsConnectedOverCrossSim) {
-            updateRegisteredNetworkType(NetworkType.CROSS_SIM);
+        mIsConnectedOverCrossSim = isCrossSimUsed;
+        notifyCrossSimStatus();
+
+        // update registered network type only when network is changed between IWLAN and CrossSim.
+        // Changing between Cellular and IWLAN(and CrossSim) is updated after registration.
+        if (isNetworkTypeIwlan) {
+            if ((mRegisteredNetworkType == NetworkType.CROSS_SIM) && !mIsConnectedOverCrossSim) {
+                updateRegisteredNetworkType(NetworkType.IWLAN);
+            } else if ((mRegisteredNetworkType == NetworkType.IWLAN) && mIsConnectedOverCrossSim) {
+                updateRegisteredNetworkType(NetworkType.CROSS_SIM);
+            }
         }
     }
 
@@ -748,9 +754,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 IAosRegistration.Cause.IMS_SERVICE);
     }
 
-    private void notifyCrossSimStatus(NetworkType networkType) {
+    private void notifyCrossSimStatus() {
         sendRequest(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
-                (networkType == NetworkType.CROSS_SIM
+                (mIsConnectedOverCrossSim
                 ? CrossSimStatus.DATA_CONNECTED : CrossSimStatus.DATA_DISCONNECTED).getValue());
     }
 
@@ -782,8 +788,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             l.notifyRegistered(RegistrationType.NORMAL, mRegisteredNetworkType, mFeatureTagBits,
                     mFeatureTags);
         }
-
-        notifyCrossSimStatus(networkType);
     }
 
     private NetworkType adjustedNetworkType(

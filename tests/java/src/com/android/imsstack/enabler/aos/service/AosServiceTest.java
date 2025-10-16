@@ -873,27 +873,44 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeForCellular() {
+    public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeFromCellular() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_CONNECTED.getValue());
         mAosService.addListener(mMockAosRegistrationListener);
         mAosService.setConnectedOverCrossSim(false);
         mAosService.setRegisteredNetworkType(NetworkType.LTE);
 
-        mAosService.onCrossSimStatusChanged(true);
+        mAosService.onCrossSimStatusChanged(true, true);
 
         assertEquals(NetworkType.LTE, mAosService.getRegisteredNetworkType());
         verifyNoMoreInteractions(mMockAosRegistrationListener);
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeToCellular() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_DISCONNECTED.getValue());
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setConnectedOverCrossSim(true);
+        mAosService.setRegisteredNetworkType(NetworkType.CROSS_SIM);
+
+        mAosService.onCrossSimStatusChanged(false, false);
+
+        assertEquals(NetworkType.CROSS_SIM, mAosService.getRegisteredNetworkType());
+        verifyNoMoreInteractions(mMockAosRegistrationListener);
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
     }
 
     @Test
     public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToIwlan() {
         byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
                 CrossSimStatus.DATA_DISCONNECTED.getValue());
-
         mAosService.addListener(mMockAosRegistrationListener);
         mAosService.setConnectedOverCrossSim(true);
         mAosService.setRegisteredNetworkType(NetworkType.CROSS_SIM);
 
-        mAosService.onCrossSimStatusChanged(false);
+        mAosService.onCrossSimStatusChanged(false, true);
 
         assertEquals(NetworkType.IWLAN, mAosService.getRegisteredNetworkType());
         verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
@@ -905,12 +922,11 @@ public class AosServiceTest extends ImsStackTest {
     public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToCrossSim() {
         byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
                 CrossSimStatus.DATA_CONNECTED.getValue());
-
         mAosService.addListener(mMockAosRegistrationListener);
         mAosService.setConnectedOverCrossSim(false);
         mAosService.setRegisteredNetworkType(NetworkType.IWLAN);
 
-        mAosService.onCrossSimStatusChanged(true);
+        mAosService.onCrossSimStatusChanged(true, true);
 
         assertEquals(NetworkType.CROSS_SIM, mAosService.getRegisteredNetworkType());
         verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
