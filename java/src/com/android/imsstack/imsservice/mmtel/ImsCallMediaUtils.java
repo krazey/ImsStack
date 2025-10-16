@@ -472,24 +472,11 @@ public class ImsCallMediaUtils {
 
     public static void updateCallProfileFromMediaInfo(ICallContext context,
             ImsCallProfile profile, final MediaInfo mi) {
-        updateCallProfileFromMediaInfo(context, profile, mi, false);
-    }
-
-    public static void updateCallProfileFromMediaInfo(ICallContext context,
-            ImsCallProfile profile, final MediaInfo mi, boolean directionNegoRequired) {
         int audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.AQuality);
         int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.VQuality);
         int rttMode = getRttModeFromGTTMode(mi.GTTMode);
-        int audioDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
-        int videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
-
-        if (directionNegoRequired) {
-            audioDirection = getNegotiatedDirection(mi, true);
-            videoDirection = getNegotiatedDirection(mi, false);
-        } else {
-            audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.ADir);
-            videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.VDir);
-        }
+        int audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.ADir);
+        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.VDir);
 
         profile.getMediaProfile().copyFrom(new ImsStreamMediaProfile(audioQuality, audioDirection,
                 videoQuality, videoDirection, rttMode));
@@ -506,8 +493,8 @@ public class ImsCallMediaUtils {
             ImsCallProfile profile, int callType, int audioCapabilities, int videoCapabilities) {
         int audioQuality = getNegotiatedAudioQuality(profile, audioCapabilities);
         int videoQuality = VideoCallUtils.getNegotiatedVideoQuality(profile, videoCapabilities);
-        int audioDirection = getNegotiatedDirection(profile, true);
-        int videoDirection = getNegotiatedDirection(profile, false);
+        int audioDirection = getMediaDirectionFromProfile(profile, true);
+        int videoDirection = getMediaDirectionFromProfile(profile, false);
 
         if (FEATURE_OVERRIDE_VIDEO_DIRECTION_FROM_CALL_TYPE) {
             int videoDir = getVideoDirectionFromCallType(callType);
@@ -526,7 +513,7 @@ public class ImsCallMediaUtils {
     private static MediaInfo createMediaInfoForVoiceCallOnCallAccept(ImsCallProfile profile,
             int audioCapabilities) {
         int audioQuality = getNegotiatedAudioQuality(profile, audioCapabilities);
-        int audioDirection = getNegotiatedDirection(profile, true);
+        int audioDirection = getMediaDirectionFromProfile(profile, true);
 
         return new MediaInfo(audioQuality, MediaInfo.VIDEO_QUALITY_NONE,
                 audioDirection, MediaInfo.DIRECTION_INVALID,
@@ -535,64 +522,16 @@ public class ImsCallMediaUtils {
                 getGttModeFromRttMode(profile.getMediaProfile().getRttMode()));
     }
 
-    private static int getNegotiatedDirection(ImsCallProfile profile, boolean isAudio) {
-        if (isAudio) {
-            switch (profile.getMediaProfile().getAudioDirection()) {
-            case ImsStreamMediaProfile.DIRECTION_RECEIVE:
-                return MediaInfo.DIRECTION_SEND;
-            case ImsStreamMediaProfile.DIRECTION_SEND:
-                return MediaInfo.DIRECTION_RECEIVE;
-            case ImsStreamMediaProfile.DIRECTION_INACTIVE:
-                return MediaInfo.DIRECTION_INACTIVE;
-            case ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE:
-                return MediaInfo.DIRECTION_SEND_RECEIVE;
-            default:
-                return MediaInfo.DIRECTION_INVALID;
-            }
-        } else {
-            switch (profile.getMediaProfile().getVideoDirection()) {
-            case ImsStreamMediaProfile.DIRECTION_RECEIVE:
-                return MediaInfo.DIRECTION_SEND;
-            case ImsStreamMediaProfile.DIRECTION_SEND:
-                return MediaInfo.DIRECTION_RECEIVE;
-            case ImsStreamMediaProfile.DIRECTION_INACTIVE:
-                return MediaInfo.DIRECTION_INACTIVE;
-            case ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE:
-                return MediaInfo.DIRECTION_SEND_RECEIVE;
-            default:
-                return MediaInfo.DIRECTION_INVALID;
-            }
-        }
-    }
-
-    private static int getNegotiatedDirection(MediaInfo mi, boolean isAudio) {
-        if (isAudio) {
-            switch (mi.ADir) {
-            case MediaInfo.DIRECTION_SEND:
-                return ImsStreamMediaProfile.DIRECTION_RECEIVE;
-            case MediaInfo.DIRECTION_RECEIVE:
-                return ImsStreamMediaProfile.DIRECTION_SEND;
-            case MediaInfo.DIRECTION_INACTIVE:
-                return ImsStreamMediaProfile.DIRECTION_INACTIVE;
-            case MediaInfo.DIRECTION_SEND_RECEIVE:
-                return ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
-            default:
-                return ImsStreamMediaProfile.DIRECTION_INVALID;
-            }
-        } else {
-            switch (mi.VDir) {
-            case MediaInfo.DIRECTION_SEND:
-                return ImsStreamMediaProfile.DIRECTION_RECEIVE;
-            case MediaInfo.DIRECTION_RECEIVE:
-                return ImsStreamMediaProfile.DIRECTION_SEND;
-            case MediaInfo.DIRECTION_INACTIVE:
-                return ImsStreamMediaProfile.DIRECTION_INACTIVE;
-            case MediaInfo.DIRECTION_SEND_RECEIVE:
-                return ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
-            default:
-                return ImsStreamMediaProfile.DIRECTION_INVALID;
-            }
-        }
+    private static int getMediaDirectionFromProfile(ImsCallProfile profile, boolean isAudio) {
+        return switch (isAudio
+                ? profile.getMediaProfile().getAudioDirection()
+                : profile.getMediaProfile().getVideoDirection()) {
+            case ImsStreamMediaProfile.DIRECTION_RECEIVE -> MediaInfo.DIRECTION_RECEIVE;
+            case ImsStreamMediaProfile.DIRECTION_SEND -> MediaInfo.DIRECTION_SEND;
+            case ImsStreamMediaProfile.DIRECTION_INACTIVE -> MediaInfo.DIRECTION_INACTIVE;
+            case ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE -> MediaInfo.DIRECTION_SEND_RECEIVE;
+            default -> MediaInfo.DIRECTION_INVALID;
+        };
     }
 
     private static int getNegotiatedAudioQuality(ImsCallProfile profile,

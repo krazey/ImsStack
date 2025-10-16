@@ -81,8 +81,77 @@ public class ImsCallMediaUtilsTest {
     }
 
     @Test
-    public void testCreateMediaInfoFromMediaProfile() {
+    public void testCreateMediaInfoForCallAcceptSetsDirectionForVoiceCall() {
+        ImsCallProfile profile = new ImsCallProfile();
 
+        profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                MediaInfo.DIRECTION_INVALID);
+
+        profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                MediaInfo.DIRECTION_INACTIVE);
+
+        profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                MediaInfo.DIRECTION_RECEIVE);
+
+        profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_SEND;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                MediaInfo.DIRECTION_SEND);
+
+        profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                MediaInfo.DIRECTION_SEND_RECEIVE);
+    }
+
+    @Test
+    public void testCreateMediaInfoForCallAcceptSetsDirectionForVideoCall() {
+        ImsCallProfile profile = new ImsCallProfile();
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                MediaInfo.DIRECTION_INVALID);
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                MediaInfo.DIRECTION_INACTIVE);
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                MediaInfo.DIRECTION_RECEIVE);
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_SEND;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                MediaInfo.DIRECTION_SEND);
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                MediaInfo.DIRECTION_SEND_RECEIVE);
+    }
+
+    @Test
+    public void testCreateMediaInfoFromMediaProfile() {
         ImsStreamMediaProfile imsStreamMediaProfile = new ImsStreamMediaProfile(
                 ImsStreamMediaProfile.AUDIO_QUALITY_AMR, ImsStreamMediaProfile.DIRECTION_SEND,
                 ImsStreamMediaProfile.VIDEO_QUALITY_QCIF,
@@ -629,21 +698,5 @@ public class ImsCallMediaUtilsTest {
         assertEquals(profile.getMediaProfile().mVideoQuality,
                 ImsStreamMediaProfile.VIDEO_QUALITY_QCIF);
         assertEquals(profile.getMediaProfile().mRttMode, ImsStreamMediaProfile.RTT_MODE_DISABLED);
-
-        mediaInfo.ADir = ImsStreamMediaProfile.DIRECTION_SEND;
-        mediaInfo.VDir = ImsStreamMediaProfile.DIRECTION_SEND;
-        ImsCallMediaUtils.updateCallProfileFromMediaInfo(context, profile, mediaInfo, true);
-        assertEquals(profile.getMediaProfile().mAudioDirection,
-                ImsStreamMediaProfile.DIRECTION_RECEIVE);
-        assertEquals(profile.getMediaProfile().mVideoDirection,
-                ImsStreamMediaProfile.DIRECTION_RECEIVE);
-
-        mediaInfo.ADir = ImsStreamMediaProfile.DIRECTION_RECEIVE;
-        mediaInfo.VDir = ImsStreamMediaProfile.DIRECTION_RECEIVE;
-        ImsCallMediaUtils.updateCallProfileFromMediaInfo(context, profile, mediaInfo, true);
-        assertEquals(profile.getMediaProfile().mAudioDirection,
-                ImsStreamMediaProfile.DIRECTION_SEND);
-        assertEquals(profile.getMediaProfile().mVideoDirection,
-                ImsStreamMediaProfile.DIRECTION_SEND);
     }
 }
