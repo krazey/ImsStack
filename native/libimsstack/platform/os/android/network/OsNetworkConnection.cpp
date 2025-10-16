@@ -994,8 +994,6 @@ void OsNetworkConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 PRIVATE
 void OsNetworkConnection::NotifyDataDisconnected(IN IMS_SINT32 nErrorCode)
 {
-    IMS_UINT32 nOldState = m_nState;
-
     if (m_nState == STATE_TERMINATING)
     {
         SetState(STATE_TERMINATED);
@@ -1013,19 +1011,11 @@ void OsNetworkConnection::NotifyDataDisconnected(IN IMS_SINT32 nErrorCode)
     }
 
     CallReferenceListeners(NET_DISCONNECTED, nErrorCode);
-
-    if ((nOldState == STATE_ACTIVATING) || (nOldState == STATE_ACTIVE))
-    {
-        // 4 FIXME : is it required in here?
-        Release();
-    }
 }
 
 PRIVATE
 void OsNetworkConnection::NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode)
 {
-    IMS_UINT32 nOldState = m_nState;
-
     if (m_nState == STATE_TERMINATING)
     {
         SetState(STATE_TERMINATED);
@@ -1043,12 +1033,6 @@ void OsNetworkConnection::NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode)
     }
 
     CallReferenceListeners(NET_CONNECT_FAILED, nErrorCode);
-
-    if ((nOldState == STATE_ACTIVATING) || (nOldState == STATE_ACTIVE))
-    {
-        // 4 FIXME : is it required in here?
-        Release();
-    }
 }
 
 PRIVATE
@@ -1206,32 +1190,15 @@ void OsNetworkConnection::PostEvent(IN IMS_UINT32 nEvent)
 PRIVATE
 IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
-    if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
+    if (bDisableApn)
     {
+        IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
+                GetProfileName().GetStr(), 0, 0);
+
         if (PlatformContext::GetInstance()->GetSystem()->ReleaseNetwork(
                     GetApnType(), GetSlotId()) == 0)
         {
             IMS_TRACE_E(0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
-            return IMS_FALSE;
-        }
-    }
-    else
-    {
-        if (bDisableApn)
-        {
-            IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
-                    GetProfileName().GetStr(), 0, 0);
-
-            if (PlatformContext::GetInstance()->GetSystem()->ReleaseNetwork(
-                        GetApnType(), GetSlotId()) == 0)
-            {
-                IMS_TRACE_E(
-                        0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
-                return IMS_FALSE;
-            }
-        }
-        else
-        {
             return IMS_FALSE;
         }
     }
