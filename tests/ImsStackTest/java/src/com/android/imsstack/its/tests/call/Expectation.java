@@ -43,6 +43,14 @@ public abstract class Expectation {
     /** Expects there's an incoming call. */
     public abstract void incomingCall();
 
+    /** Expects the call initiation is failed with the specific reason. */
+    public abstract void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher);
+
+    /** Expects the call initiation is failed with any reason. */
+    public final void initiatingFailed() {
+        initiatingFailed(reason -> true);
+    }
+
     /** Expects the call is initiated with the specific call profile. */
     public abstract void initiated(@NonNull Predicate<ImsCallProfile> profileMatcher);
 

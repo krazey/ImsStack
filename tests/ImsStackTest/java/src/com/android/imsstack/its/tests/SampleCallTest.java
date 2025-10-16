@@ -155,7 +155,7 @@ public class SampleCallTest extends CallTestBase {
         performRegistration();
 
         mCall.startVoiceCall();
-        mCall.expect().terminated(
+        mCall.expect().initiatingFailed(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_SIP_USER_REJECTED);
     }
 

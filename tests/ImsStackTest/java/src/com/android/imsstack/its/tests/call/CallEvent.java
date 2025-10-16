@@ -49,6 +49,7 @@ public class CallEvent {
     public enum Type {
         NONE,
         MMTEL_INCOMING_CALL,
+        SESSION_INITIATING_FAILED,
         SESSION_INITIATED,
         SESSION_TERMINATED,
         SESSION_USSD_MESSAGE_RECEIVED,
@@ -83,6 +84,21 @@ public class CallEvent {
     public static class MmTelIncomingCallEvent extends CallEvent {
         public MmTelIncomingCallEvent() {
             super(Type.MMTEL_INCOMING_CALL);
+        }
+    }
+
+    /** Event from {@link IImsCallSessionListener.Stub#callSessionInitiatingFailed}. */
+    public static class SessionInitiatingFailedEvent extends CallEvent {
+        private @NonNull Predicate<ImsReasonInfo> mReasonMatcher;
+
+        public SessionInitiatingFailedEvent(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            super(Type.SESSION_INITIATING_FAILED);
+            mReasonMatcher = reasonMatcher;
+        }
+
+        /** Checks if the parameters match with the expectation. */
+        public boolean matchParameter(@Nullable ImsReasonInfo reason) {
+            return mReasonMatcher.test(reason);
         }
     }
 
