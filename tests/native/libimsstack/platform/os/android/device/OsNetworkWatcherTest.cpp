@@ -367,6 +367,15 @@ TEST_F(OsNetworkWatcherTest, GetNetworkRegistrationRejectCause)
     EXPECT_EQ(m_pOsNetworkWatcher->GetNetworkRegistrationRejectCause(), 0);
 }
 
+TEST_F(OsNetworkWatcherTest, GetAccessNetworkPlmn)
+{
+    AString strPlmn("00101");
+
+    EXPECT_CALL(m_objMockSystem, GetAccessNetworkPlmn(_)).Times(1).WillOnce(Return(strPlmn));
+
+    EXPECT_EQ(m_pOsNetworkWatcher->GetAccessNetworkPlmn(), strPlmn);
+}
+
 TEST_F(OsNetworkWatcherTest, NotifyEvent)
 {
     m_objPhoneInfoService.SetNetworkWatcher(m_pOsNetworkWatcher);

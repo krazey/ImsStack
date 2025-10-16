@@ -573,4 +573,10 @@ public interface SystemCallInterface {
      * @return A reject cause.
      */
     int getNetworkRegistrationRejectCause();
+
+    /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current attached
+     * operator. 5 or 6 decimal digits.
+     */
+    @NonNull String getAccessNetworkPlmn();
 }

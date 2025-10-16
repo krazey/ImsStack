@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
@@ -140,6 +141,28 @@ public class DcUtils implements IDcUtils {
                 + ", defaultNetworkType=" + defaultNetworkType);
 
         return new IDcUtils.AccessNetworkInfo(networkType, ani);
+    }
+
+    @Override
+    @NonNull
+    public String getAccessNetworkPlmn() {
+        NetworkRegistrationInfo nri = getNetworkRegistrationInfo(getServiceState());
+        CellIdentity ci = (nri != null) ? nri.getCellIdentity() : null;
+
+        final String plmn = switch (ci) {
+            case CellIdentityGsm gsm -> gsm.getMobileNetworkOperator();
+            case CellIdentityWcdma wcdma -> wcdma.getMobileNetworkOperator();
+            case CellIdentityLte lte -> lte.getMobileNetworkOperator();
+            case CellIdentityNr nr -> {
+                if (TextUtils.isEmpty(nr.getMccString()) || TextUtils.isEmpty(nr.getMncString())) {
+                    yield "";
+                }
+                yield nr.getMccString() + nr.getMncString();
+            }
+            case null, default -> "";
+        };
+
+        return plmn != null ? plmn : "";
     }
 
     /**

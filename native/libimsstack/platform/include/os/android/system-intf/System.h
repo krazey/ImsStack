@@ -127,6 +127,7 @@ public:
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsIpv6Preferred(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetNetworkRegistrationRejectCause(IN IMS_SINT32 nSlotId) override;
+    AString GetAccessNetworkPlmn(IN IMS_SINT32 nSlotId) override;
 
     ////
     // WiFi-related information

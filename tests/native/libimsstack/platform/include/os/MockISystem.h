@@ -106,6 +106,7 @@ public:
             (override));
     MOCK_METHOD(AStringArray, GetLastAccessNetworkInfo,
             (IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(AString, GetAccessNetworkPlmn, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, RequestNetwork, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId),
             (override));
     MOCK_METHOD(IMS_SINT32, ReleaseNetwork, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId),

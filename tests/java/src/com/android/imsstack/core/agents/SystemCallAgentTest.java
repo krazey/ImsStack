@@ -684,6 +684,21 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetAccessNetworkPlmn() {
+        mSystemCallAgent.getAccessNetworkPlmn();
+
+        verify(mDcUtils).getAccessNetworkPlmn();
+
+        replaceDcUtils(null);
+        String result = mSystemCallAgent.getAccessNetworkPlmn();
+
+        assertNotNull(result);
+        assertEquals("", result);
+        verifyNoMoreInteractions(mDcUtils);
+    }
+
+    @Test
+    @SmallTest
     public void testGetHostByName() {
         String host = "test.ims.com";
         mSystemCallAgent.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt(), host);

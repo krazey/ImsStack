@@ -1116,6 +1116,24 @@ TEST_F(SystemTest, GetNetworkRegistrationRejectCause)
     EXPECT_EQ(m_pSystem->GetNetworkRegistrationRejectCause(0), 0);
 }
 
+TEST_F(SystemTest, GetAccessNetworkPlmn)
+{
+    AString strPlmn("00101");
+    String16 str16(strPlmn.GetStr(), strPlmn.GetLength());
+
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(1)
+            .WillOnce(Invoke(
+                    [str16](Unused, android::Parcel& out, Unused)
+                    {
+                        out.writeString16(str16);
+                        out.setDataPosition(0);
+                        return 1;
+                    }));
+
+    EXPECT_EQ(m_pSystem->GetAccessNetworkPlmn(0), strPlmn);
+}
+
 TEST_F(SystemTest, IsImsEmergencyCallSupported)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))

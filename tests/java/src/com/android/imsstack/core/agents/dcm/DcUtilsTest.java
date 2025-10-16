@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -229,6 +230,127 @@ public class DcUtilsTest {
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_CELL_ID], Long.toHexString(ci.getCid()));
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_TAC_OR_LAC], Integer.toHexString(ci.getLac()));
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_MODE], "");
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_serviceStateNull() {
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(null);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_networkRegistrationInfoNull() {
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_cellIdentityNull() {
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_LTE)
+                .setCellIdentity(null).build();
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_gsm() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_GPRS);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00101", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_wcdma() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_UMTS);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00102", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_lte() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00103", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_nr() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_NR);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00104", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_nrMccNull() {
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_NR)
+                .setCellIdentity(
+                        new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
+                                null, "04", 0x555555555L, "Test-SIM", "Test",
+                                Collections.emptyList()))
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_nrMncNull() {
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_NR)
+                .setCellIdentity(
+                        new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
+                                "001", null, 0x555555555L, "Test-SIM", "Test",
+                                Collections.emptyList()))
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
     }
 
     @Test
@@ -518,17 +640,17 @@ public class DcUtilsTest {
         switch (networkType) {
             case TelephonyManager.NETWORK_TYPE_LTE:
                 return new CellIdentityLte(0x1111111, 13, 0x2222, 0, new int[] {}, 0,
-                        "001", "01", "Test-SIM", "Test", Collections.emptyList(), null);
+                        "001", "03", "Test-SIM", "Test", Collections.emptyList(), null);
             case TelephonyManager.NETWORK_TYPE_NR:
                 return new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
-                        "001", "01", 0x555555555L, "Test-SIM", "Test", Collections.emptyList());
+                        "001", "04", 0x555555555L, "Test-SIM", "Test", Collections.emptyList());
             case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSPAP:
                 return new CellIdentityWcdma(0x6666, 0x7777777, 3, 0,
-                        "001", "01", "Test-SIM", "Test", Collections.emptyList(), null);
+                        "001", "02", "Test-SIM", "Test", Collections.emptyList(), null);
             case TelephonyManager.NETWORK_TYPE_GPRS: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_EDGE:
                 return new CellIdentityGsm(0x8888, 0x9999, 0, 1,

@@ -956,6 +956,17 @@ public final class SystemCallAgent implements SystemCallInterface {
                 : IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE;
     }
 
+    /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current attached
+     * operator. 5 or 6 decimal digits.
+     */
+    @Override
+    @NonNull
+    public String getAccessNetworkPlmn() {
+        IDcUtils utils = DcFactory.getDcAgent(IDcUtils.class, mSlotId);
+        return (utils != null) ? utils.getAccessNetworkPlmn() : "";
+    }
+
     private IDcApn getDcApn() {
         return DcFactory.getDcAgent(IDcApn.class, mSlotId);
     }

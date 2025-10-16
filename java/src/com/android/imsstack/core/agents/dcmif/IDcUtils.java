@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.core.agents.dcmif;
 
+import androidx.annotation.NonNull;
+
 /**
  * This provides the utility interfaces that are related to the data network.
  */
@@ -40,6 +42,15 @@ public interface IDcUtils extends IDc {
      * @return The access network information.
      */
     AccessNetworkInfo getAccessNetworkInfo(int defaultNetworkType);
+
+    /**
+     * Returns PLMN consists of MCC and MNC from network UE attaches to. The PLMN is getting from
+     * the {@code CellIdentity} of the {@code NetworkRegistrationInfo} of the {@code ServiceState}.
+     *
+     * @return The PLMN consists of MCC and MNC from network UE camps in.
+     */
+    @NonNull
+    String getAccessNetworkPlmn();
 
     /**
      * Return mobile data is enabled or not in setting menu.

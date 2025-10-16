@@ -553,6 +553,11 @@ PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkRegistrationRejectCause()
             GetSlotId());
 }
 
+PUBLIC VIRTUAL AString OsNetworkWatcher::GetAccessNetworkPlmn() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->GetAccessNetworkPlmn(GetSlotId());
+}
+
 PRIVATE GLOBAL const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)
 {
     switch (nType)

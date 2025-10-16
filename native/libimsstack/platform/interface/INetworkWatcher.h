@@ -166,6 +166,7 @@ public:
 
     virtual IMS_SINT32 GetMocnPlmnInfo() = 0;
     virtual IMS_SINT32 GetNetworkRegistrationRejectCause() = 0;
+    virtual AString GetAccessNetworkPlmn() const = 0;
 
 public:
     inline void RegisterObserver(IN INetworkWatcherListener* piListener)

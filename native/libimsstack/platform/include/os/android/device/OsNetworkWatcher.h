@@ -61,6 +61,7 @@ public:
     // 2nd PLMN info for MOCN
     IMS_SINT32 GetMocnPlmnInfo() override;
     IMS_SINT32 GetNetworkRegistrationRejectCause() override;
+    AString GetAccessNetworkPlmn() const override;
 
     // ISystemListener
     void System_NotifyEvent(

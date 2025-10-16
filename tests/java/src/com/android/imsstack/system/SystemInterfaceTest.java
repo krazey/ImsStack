@@ -2117,6 +2117,24 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallGetAccessNetworkPlmn() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.GET_ACCESS_NETWORK_PLMN);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).getAccessNetworkPlmn();
+    }
+
+    @Test
+    @SmallTest
     public void testSystemCallGetIsimState() {
         setUpSystemInterface();
         setUpSystem();

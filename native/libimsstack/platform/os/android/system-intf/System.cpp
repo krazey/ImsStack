@@ -826,6 +826,16 @@ IMS_SINT32 System::GetNetworkRegistrationRejectCause(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
+AString System::GetAccessNetworkPlmn(IN IMS_SINT32 nSlotId)
+{
+    AString strPlmn(AString::ConstNull());
+
+    GetString(SystemConstants::GET_ACCESS_NETWORK_PLMN, strPlmn, nSlotId);
+
+    return strPlmn;
+}
+
+PUBLIC
 IMS_BOOL System::IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId)
 {
     return (GetInt(SystemConstants::IS_IMS_EMERGENCY_CALL_SUPPORTED, 0, nSlotId) == 1);
