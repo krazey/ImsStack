@@ -25,6 +25,7 @@
 #include "SipStatusCode.h"
 #include "media/IMedia.h"
 #include "media/IMediaDescriptor.h"
+#include "media/MtcMediaUtil.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStringUtils.h"
@@ -56,6 +57,13 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormPreconditionSdp(
         IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
         if (piMediaDescriptor == IMS_NULL)
         {
+            continue;
+        }
+
+        if (piMediaDescriptor->GetMediaDescriptionEx() != IMS_NULL &&
+                !IsPreconditionIncludedInSdp(piMediaDescriptor))
+        {
+            IMS_TRACE_D("FormPreconditionSdp : no remote precondition attribute, skipped", 0, 0, 0);
             continue;
         }
 
@@ -154,7 +162,7 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormFailurePreconditionSdp(IN ISessio
 }
 
 PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
-        IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState)
+        IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState) const
 {
     IMS_UINT32 eMediaType = MEDIATYPE_NONE;
 
@@ -183,42 +191,43 @@ PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
 }
 
 PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(
-        IN ISession* piSession) const
+        IN ISession* piSession, IN IMS_UINT32 eMediaType) const
 {
-    IMS_BOOL bResult = IMS_FALSE;
-
     if (piSession == IMS_NULL)
     {
-        return bResult;
+        return IMS_FALSE;
     }
 
     ImsList<IMedia*> lstMedias = piSession->GetMedia();
-
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
         const IMedia* piMedia = lstMedias.GetAt(index);
-        if (!piMedia)
+        if (piMedia == IMS_NULL || piMedia->GetState() == IMedia::STATE_DELETED)
         {
             continue;
         }
 
         const IMediaDescriptor* piMediaDescriptor = GetMediaDescriptor(piMedia);
-        if (!piMediaDescriptor)
+        if (piMediaDescriptor == IMS_NULL)
         {
             continue;
         }
 
-        const SdpSegmentedPrecondition* pCurr = DYNAMIC_CAST(
-                SdpSegmentedPrecondition*, piMediaDescriptor->GetPrecondition(SdpAttribute::CURR));
-        if (pCurr)
+        if (eMediaType != MEDIATYPE_NONE &&
+                !HasMatchingRemoteMediaType(piMediaDescriptor, eMediaType))
         {
-            bResult = IMS_TRUE;
-            break;
+            continue;
+        }
+
+        if (IsPreconditionIncludedInSdp(piMediaDescriptor))
+        {
+            IMS_TRACE_D("IsPreconditionIncludedInSdp : true", 0, 0, 0);
+            return IMS_TRUE;
         }
     }
 
-    IMS_TRACE_D("IsPreconditionIncludedInSdp : %s", _TRACE_B_(bResult), 0, 0);
-    return bResult;
+    IMS_TRACE_D("IsPreconditionIncludedInSdp : false", 0, 0, 0);
+    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
@@ -522,4 +531,30 @@ IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
     IMS_TRACE_D("HasReservedResourceInSdp : There's no %s.",
             QosStringUtils::ConvertSdpMediaType(eSdpMediaType), 0, 0);
     return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(
+        IN const IMediaDescriptor* piMediaDescriptor)
+{
+    return (piMediaDescriptor != IMS_NULL &&
+            piMediaDescriptor->GetPrecondition(SdpAttribute::CURR) != IMS_NULL);
+}
+
+PRIVATE
+IMS_BOOL SdpPreconditionHelper::HasMatchingRemoteMediaType(
+        IN const IMediaDescriptor* piMediaDescriptor, IN IMS_UINT32 eMediaType)
+{
+    if (piMediaDescriptor == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    const SdpMedia* pRemoteSdp = piMediaDescriptor->GetMediaDescriptionEx();
+    if (pRemoteSdp == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return MtcMediaUtil::GetSdpMediaType(eMediaType) == pRemoteSdp->GetType();
 }

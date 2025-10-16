@@ -234,7 +234,8 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
     IMS_BOOL bResult = std::any_of(objMediaTypeList.begin(), objMediaTypeList.end(),
             [this, piSession, pStatusTable](IMS_UINT32 eMediaType)
             {
-                return !pStatusTable->IsLocalResourceConfirmed(GetSdpMediaType(eMediaType)) &&
+                return !pStatusTable->IsLocalResourceConfirmed(
+                               MtcMediaUtil::GetSdpMediaType(eMediaType)) &&
                         IsLocalResourceReservedByMediaType(piSession, eMediaType);
             });
 
@@ -457,7 +458,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
                 QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
                 if (pStatusTable)
                 {
-                    pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(eMediaType), IMS_TRUE);
+                    pStatusTable->UpdateLocalCurrentStatus(
+                            MtcMediaUtil::GetSdpMediaType(eMediaType), IMS_TRUE);
                 }
                 NotifyQosStatusToListener(piSession, IMS_TRUE, eMediaType);
             }
@@ -512,8 +514,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
     {
         return;
     }
-    pStatusTable->UpdateLocalCurrentStatus(
-            GetSdpMediaType(eMediaType), IsLocalResourceReservedByMediaType(piSession, eMediaType));
+    pStatusTable->UpdateLocalCurrentStatus(MtcMediaUtil::GetSdpMediaType(eMediaType),
+            IsLocalResourceReservedByMediaType(piSession, eMediaType));
 
     if ((eCurrStatus == QosStatus::IDLE && eStatus == QosStatus::AVAILABLE) &&
             (!GetQosTimer(piSession)->IsQosTimerActivated(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE)))
@@ -842,7 +844,7 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     }
 
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-    IMS_SINT32 eSdpMediaType = GetSdpMediaType(eMediaType);
+    IMS_SINT32 eSdpMediaType = MtcMediaUtil::GetSdpMediaType(eMediaType);
     if (!pStatusTable->GetRecords(eSdpMediaType).IsEmpty())
     {
         IMS_TRACE_D("CreateStatusRecords : already created", 0, 0, 0);
@@ -1066,10 +1068,17 @@ IMS_BOOL MtcPreconditionManager::IsRemoteResourceReserved(IN ISession* piSession
 
     for (IMS_UINT32 eMediaType : objMediaTypeList)
     {
+        if (!m_pSdpPreconditionHelper->IsPreconditionIncludedInSdp(piSession, eMediaType))
+        {
+            IMS_TRACE_D("IsRemoteResourceReserved : MediaType[%s] - no remote attributes",
+                    MtcMediaStringUtils::ConvertContentType(eMediaType), 0, 0);
+            continue;
+        }
+
         QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
         if (!pStatusTable ||
                 !pStatusTable->IsCurrentStatusEnabled(
-                        GetSdpMediaType(eMediaType), SdpPrecondition::STATUS_REMOTE))
+                        MtcMediaUtil::GetSdpMediaType(eMediaType), SdpPrecondition::STATUS_REMOTE))
         {
             return IMS_FALSE;
         }
@@ -1259,7 +1268,7 @@ IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSess
         {
             SetQosStatus(piSession, QosStatus::AVAILABLE, eMediaType);
             GetQosStatusTable(piSession)->UpdateLocalCurrentStatus(
-                    GetSdpMediaType(eMediaType), IMS_TRUE);
+                    MtcMediaUtil::GetSdpMediaType(eMediaType), IMS_TRUE);
             eEnabledMediaTypes |= eMediaType;
         }
     }
@@ -1290,29 +1299,6 @@ IMS_SINT32 MtcPreconditionManager::GetQosTime(IN QosTimerType eType) const
             return m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT);
     }
-}
-
-PRIVATE
-IMS_SINT32 MtcPreconditionManager::GetSdpMediaType(IN IMS_UINT32 eMediaType)
-{
-    IMS_SINT32 eSdpMediaType = SdpMedia::TYPE_INVALID;
-
-    switch (eMediaType)
-    {
-        case MEDIATYPE_AUDIO:
-            eSdpMediaType = SdpMedia::TYPE_AUDIO;
-            break;
-        case MEDIATYPE_VIDEO:
-            eSdpMediaType = SdpMedia::TYPE_VIDEO;
-            break;
-        case MEDIATYPE_TEXT:
-            eSdpMediaType = SdpMedia::TYPE_TEXT;
-            break;
-        default:
-            break;
-    }
-
-    return eSdpMediaType;
 }
 
 PRIVATE
