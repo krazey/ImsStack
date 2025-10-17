@@ -74,16 +74,18 @@ public class MediaManagerHelper {
 
     private void createImsMediaManagerInstance() {
 
+        if (sMediaHandlerThread == null || !sMediaHandlerThread.isAlive()) {
+            ImsLog.d("New media handler thread created");
+            sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
+            sMediaHandlerThread.start();
+        }
+
         if (sImsMediaManager == null) {
             ImsLog.d("ImsMediaManager instance created");
-            sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             sExecutor = Executors.newSingleThreadExecutor();
             setImsMediaConnected(false);
             sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
                     new ImsMediaManagerCallback());
-            if (sMediaHandlerThread.getState() == Thread.State.NEW) {
-                sMediaHandlerThread.start();
-            }
         }
     }
 
@@ -133,6 +135,7 @@ public class MediaManagerHelper {
         }
 
         if (sMediaHandlerThread != null) {
+            ImsLog.i("ImsMediaManager - Quit media handler thread safely");
             sMediaHandlerThread.quitSafely();
             sMediaHandlerThread = null;
         }
