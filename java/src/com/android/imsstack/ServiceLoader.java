@@ -28,6 +28,7 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.media.VideoConfigSpropGenerator;
+import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsProxy;
@@ -111,6 +112,10 @@ public class ServiceLoader {
         DcFactory.createDcAgents(slotId);
         DcFactory.initDcAgents(context, slotId);
 
+        if (UtFactory.getInstance().getUtInterface(slotId) != null) {
+            UtFactory.getInstance().getUtInterface(slotId).start(context);
+        }
+
         ImsStackRegistry.setImsServiceState(slotId, true);
 
         AosFactory.getInstance().start(slotId);
@@ -126,6 +131,10 @@ public class ServiceLoader {
         Log.i(this, "Stopped on slot" + slotId);
 
         ImsStackRegistry.setImsServiceState(slotId, false);
+
+        if (UtFactory.getInstance().getUtInterface(slotId) != null) {
+            UtFactory.getInstance().getUtInterface(slotId).close();
+        }
 
         AosFactory.getInstance().stop(slotId);
         DcFactory.cleanUpDcAgents(slotId);
