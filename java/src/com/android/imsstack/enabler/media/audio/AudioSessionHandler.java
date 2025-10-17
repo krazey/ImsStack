@@ -1044,8 +1044,12 @@ public class AudioSessionHandler extends MediaState {
 
     private void handleMediaQualityStatusNotification(final MediaQualityStatus qualityStatus) {
         if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(
-                    mMediaConfig.getRtpConfig().getAccessNetwork(), qualityStatus);
+            if (mMediaConfig.getRtpConfig() != null) {
+                mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(
+                        mMediaConfig.getRtpConfig().getAccessNetwork(), qualityStatus);
+            } else {
+                ImsLog.e("RtpConfig is null, cannot notify media quality status");
+            }
         }
     }
 
