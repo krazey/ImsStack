@@ -819,10 +819,12 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAsModifierWithSdp)
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VOIP));
 
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT_UPDATE, _)).Times(1);
     EXPECT_CALL(objMtcSession, SendAck()).Times(1);
     EXPECT_CALL(objMediaManager, NegotiateSdp(_)).Times(1);
+    EXPECT_CALL(objMtcSession, SetCallType(CallType::VOIP));
     EXPECT_CALL(objMtcPreconditionManager, OnSdpReceived(_)).Times(1);
     EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
     EXPECT_CALL(objUiNotifier, SendUpdated()).Times(1);
