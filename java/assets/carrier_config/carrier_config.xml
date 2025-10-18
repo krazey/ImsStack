@@ -702,6 +702,7 @@
     <boolean name="imsvoice.use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_when_call_rejected_by_server_error_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_when_call_retry_unavailable_bool" value="false"/>
+    <boolean name="imsvoice.enable_registration_recovery_when_bye_transaction_timeout_bool" value="false"/>
     <boolean name="imswfc.reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="false"/>
     <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="false"/>
     <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="false"/>

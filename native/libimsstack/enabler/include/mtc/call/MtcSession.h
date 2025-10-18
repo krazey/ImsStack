@@ -111,6 +111,8 @@ private:
     IMS_BOOL IsInHistory(IN CallType eCallType) const;
     void SaveCallTypeHistory(IN CallType eCallType);
 
+    void HandleByeTransactionIfNeeded();
+
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
 

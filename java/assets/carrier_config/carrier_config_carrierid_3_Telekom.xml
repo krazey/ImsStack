@@ -75,6 +75,7 @@
         <item value="4"/> <!-- CSFB_BLOCK_CONDITION_IN_HOME -->
     </int-array>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
+    <boolean name="imsvoice.enable_registration_recovery_when_bye_transaction_timeout_bool" value="false"/>
     <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
         <item value="10000"/>
         <item value="10000"/>
