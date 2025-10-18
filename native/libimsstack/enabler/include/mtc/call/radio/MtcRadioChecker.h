@@ -28,6 +28,8 @@
 using TrafficType = IMS_UINT32;
 using CallDirection = IMS_UINT32;
 
+class ISession;
+
 class IMtcRadioConnectionListener
 {
 public:
@@ -101,7 +103,7 @@ public:
     }
 
     // IInterfaceHolderListener
-    void OnSessionInterfaceReleased(IN CallKey nKey) override;
+    void OnSessionInterfaceReleased(IN CallKey nKey, IN ISession& objSession) override;
 
     // IMtcRadioConnectionListener
     void OnConnectionFailed(IN TrafficType eTrafficType, IN CallDirection eCallDirection,

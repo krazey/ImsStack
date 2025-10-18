@@ -15,7 +15,7 @@
  */
 
 #include "ICoreService.h"
-#include "ISession.h"
+#include "IMessage.h"
 #include "ITimer.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
@@ -165,17 +165,17 @@ void SessionInterfaceHolder::ReleaseISession(IN ISession* piSession, IN IMS_BOOL
 
             ITimer* piTempTimer = pRecord->second->piTimer;
             StopTimer(piTempTimer);
-
-            piSession->Destroy();
             delete pRecord->second;
             m_objSessionRecords.erase(pRecord);
+
             if (m_objSessionRecords.count(nKey) == 0)
             {
                 for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
                 {
-                    m_objListeners.GetAt(i)->OnSessionInterfaceReleased(nKey);
+                    m_objListeners.GetAt(i)->OnSessionInterfaceReleased(nKey, *piSession);
                 }
             }
+            piSession->Destroy();
         }
         else
         {

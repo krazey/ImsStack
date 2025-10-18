@@ -22,25 +22,31 @@
 class IInterfaceHolderListener
 {
 public:
-    virtual ~IInterfaceHolderListener(){};
+    inline virtual ~IInterfaceHolderListener() {};
 
     /**
-     * @brief Notifies
+     * @brief Notifies that all ISession interfaces associated with the given call key have been
+     * released.
      *
+     * @param nKey The call key for which the sessions were released.
+     * @param objSession The session interface that was released for this call key.
      */
-    virtual void OnSessionInterfaceReleased(IN CallKey nKey) { (void)nKey; };
+    inline virtual void OnSessionInterfaceReleased(
+            IN [[maybe_unused]] CallKey nKey, IN [[maybe_unused]] ISession& objSession) {};
 
     /**
-     * @brief Notifies
+     * @brief Notifies that all IReference interfaces have been cleared from the
+     * ReferenceInterfaceHolder.
      *
      */
-    virtual void OnReferenceInterfaceCleared() {};
+    inline virtual void OnReferenceInterfaceCleared() {};
 
     /**
-     * @brief Notifies
+     * @brief Notifies that all ISubscription interfaces have been cleared from the
+     * SubscriptionInterfaceHolder.
      *
      */
-    virtual void OnSubscriptionInterfaceCleared() {};
+    inline virtual void OnSubscriptionInterfaceCleared() {};
 };
 
 #endif

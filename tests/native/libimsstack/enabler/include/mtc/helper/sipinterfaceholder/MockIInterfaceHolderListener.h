@@ -21,10 +21,12 @@
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include <gmock/gmock.h>
 
+class ISession;
+
 class MockIInterfaceHolderListener : public IInterfaceHolderListener
 {
 public:
-    MOCK_METHOD(void, OnSessionInterfaceReleased, (IN CallKey), (override));
+    MOCK_METHOD(void, OnSessionInterfaceReleased, (IN CallKey, IN ISession&), (override));
     MOCK_METHOD(void, OnReferenceInterfaceCleared, (), (override));
     MOCK_METHOD(void, OnSubscriptionInterfaceCleared, (), (override));
 };

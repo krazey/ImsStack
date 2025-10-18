@@ -23,6 +23,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockINetworkWatcher.h"
+#include "MockISession.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
 #include "call/IMtcCall.h"
@@ -387,11 +388,12 @@ TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTrafficForMo
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+    MockISession objISession;
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1, objISession);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY2);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY2, objISession);
 }
 
 TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTrafficForMt)
@@ -405,11 +407,12 @@ TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTrafficForMt
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+    MockISession objISession;
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1, objISession);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY2);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY2, objISession);
 }
 
 TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedDoesNotInvokeStopImsTrafficDuringSilentRedial)
@@ -426,7 +429,8 @@ TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedDoesNotInvokeStopImsTraffi
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
-    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+    MockISession objISession;
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1, objISession);
 
     // Destructor triggers it
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_));
