@@ -24,11 +24,14 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/termination/IByeTransactionHandlerListener.h"
+#include <functional>
 
 class IMtcCallManager;
 class IMtcContext;
 class ISession;
 class ISilentRedialHelper;
+class ByeTransactionHandler;
 class SilentRedialHelper;
 enum class KeyType;
 struct ConfUser;
@@ -38,7 +41,7 @@ union Key;
  * Provides operations to manipulate calls. Each operation could be failed or not handled if the
  * current status is not applicable or some other reasons.
  */
-class MtcCallController final : public IMtcCallController
+class MtcCallController final : public IMtcCallController, public IByeTransactionHandlerListener
 {
 public:
     explicit MtcCallController(IN IMtcContext& objContext);
@@ -83,14 +86,23 @@ public:
     // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget) override;
 
+    void HandleByeTransaction(
+            IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation) override;
+
+    // IByeTransactionHandlerListener
+    void OnByeTransactionCompleted(IN ByeTransactionHandler* pHandler) override;
+
     ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) override;
     void ReleaseRedialHelper() override;
 
 private:
+    void ClearByeTransactionHandlers(IN IMS_BOOL bRemoveListener);
+
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
     SilentRedialHelper* m_pRedialHelper;
+    ImsList<ByeTransactionHandler*> m_lstByeHandlers;
 };
 
 #endif

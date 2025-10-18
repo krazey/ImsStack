@@ -20,6 +20,7 @@
 #include "INativeEnabler.h"
 #include "ImsList.h"
 #include "call/IMtcCall.h"
+#include <functional>
 
 class AString;
 class IMtcCallContext;
@@ -280,6 +281,15 @@ public:
      * @param strTarget
      */
     virtual void Transfer(IN CallKey nCallKey, IN const AString& strTarget) = 0;
+
+    /**
+     * @brief Handles a BYE transaction for a call.
+     *
+     * @param nCallKey Key of the call to be manipulated.
+     * @param objOperation The operation to be executed when the BYE transaction is completed.
+     */
+    virtual void HandleByeTransaction(
+            IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation) = 0;
 
     /**
      * @brief Gets
