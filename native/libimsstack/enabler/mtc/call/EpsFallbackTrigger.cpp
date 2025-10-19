@@ -24,6 +24,7 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/EpsFallbackTrigger.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"

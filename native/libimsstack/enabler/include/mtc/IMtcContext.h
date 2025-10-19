@@ -17,7 +17,6 @@
 #ifndef INTERFACE_MTC_CONTEXT_H_
 #define INTERFACE_MTC_CONTEXT_H_
 
-#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "helper/MtcTimerWrapper.h"
 #include <functional>
@@ -36,6 +35,7 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
+class IMtcService;
 class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
@@ -44,6 +44,7 @@ class MtcConfigurationProxy;
 class MtcLocationRefresher;
 class RttAutoUpgrader;
 class OperationAsyncRunner;
+enum class ServiceType;
 
 class IMtcContext
 {

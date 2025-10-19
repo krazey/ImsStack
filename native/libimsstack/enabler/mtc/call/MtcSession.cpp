@@ -30,6 +30,7 @@
 #include "call/MtcSession.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/PreconditionExtension.h"
+#include "call/message/IMessageSender.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"

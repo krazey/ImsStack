@@ -17,10 +17,8 @@
 #ifndef MTC_CALL_MANAGER_H_
 #define MTC_CALL_MANAGER_H_
 
-#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallManager.h"
 
@@ -28,6 +26,7 @@ class ICoreService;
 class IMtcContext;
 class MtcCall;
 class NullCall;
+enum class ServiceType;
 
 class MtcCallManager final : public IMtcCallManager
 {

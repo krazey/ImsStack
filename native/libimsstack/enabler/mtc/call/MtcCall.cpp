@@ -36,6 +36,7 @@
 #include "call/MtcCall.h"
 #include "call/MtcCallStringUtils.h"
 #include "call/MtcSession.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/MtcBlockChecker.h"
 #include "call/message/MessageSender.h"
 #include "call/radio/IMtcRadioChecker.h"

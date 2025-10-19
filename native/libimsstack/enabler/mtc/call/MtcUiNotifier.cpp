@@ -27,6 +27,7 @@
 #include "JniEnablerConnector.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"

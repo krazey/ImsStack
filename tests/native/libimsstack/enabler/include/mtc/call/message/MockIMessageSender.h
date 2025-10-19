@@ -20,6 +20,7 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
+#include "call/message/IMessageSender.h"
 #include <gmock/gmock.h>
 
 struct CallReasonInfo;

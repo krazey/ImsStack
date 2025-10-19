@@ -19,9 +19,9 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
 
+class IMtcCall;
 class IMtcCallContext;
 
 class ProcessingCallBlockRule final : public IMtcBlockRule

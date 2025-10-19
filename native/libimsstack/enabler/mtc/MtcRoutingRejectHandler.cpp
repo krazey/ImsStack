@@ -23,6 +23,7 @@
 #include "MtcRoutingRejectHandler.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

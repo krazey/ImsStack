@@ -18,18 +18,17 @@
 #define MTC_CALL_CONTROLLER_H_
 
 #include "IMtcCallController.h"
-#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "IuMtcCall.h"
-#include "IuMtcService.h"
 #include "call/IMtcCall.h"
 
 class IMtcCallManager;
 class IMtcContext;
+class IMtcService;
 class ISession;
 class ISilentRedialHelper;
 class SilentRedialHelper;
+enum class ServiceType;
 enum class KeyType;
 struct ConfUser;
 union Key;

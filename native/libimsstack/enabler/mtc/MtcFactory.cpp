@@ -17,6 +17,7 @@
 #include "IMtcApp.h"
 #include "MtcApp.h"
 #include "MtcFactory.h"
+#include "IMutex.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
 

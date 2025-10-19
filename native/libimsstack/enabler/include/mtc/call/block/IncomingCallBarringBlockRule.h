@@ -17,7 +17,6 @@
 #ifndef INCOMING_CALL_BARRING_BLOCK_RULE_H_
 #define INCOMING_CALL_BARRING_BLOCK_RULE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"

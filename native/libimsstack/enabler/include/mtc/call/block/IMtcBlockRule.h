@@ -19,7 +19,6 @@
 
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
 class IMtcBlockRuleCheckListener;
 

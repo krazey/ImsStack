@@ -42,6 +42,7 @@
 #include "call/MtcCallStringUtils.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
+#include "call/UpdatingInfo.h"
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "call/state/MockIMtcCallState.h"
 #include "call/state/MockMtcCallStateMachine.h"

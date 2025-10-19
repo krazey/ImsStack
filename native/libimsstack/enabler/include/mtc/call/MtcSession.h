@@ -22,12 +22,12 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "call/message/IMessageSender.h"
 #include <vector>
 
 class IMessage;
 class IConferenceManager;
 class IEctManager;
+class IMessageSender;
 class IMtcAosConnector;
 class IMtcCallContext;
 class IMtcCallController;

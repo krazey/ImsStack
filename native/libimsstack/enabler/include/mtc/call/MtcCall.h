@@ -17,7 +17,6 @@
 #ifndef MTC_CALL_H_
 #define MTC_CALL_H_
 
-#include "IMtcContext.h"
 #include "ISessionListener.h"
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
@@ -31,11 +30,9 @@
 #include "call/MtcPendingOperationHolder.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
-#include "call/UpdatingInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/message/MtcMessageMediator.h"
 #include "call/radio/IMtcRadioChecker.h"
-#include "call/state/CallStateFactory.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "helper/IMtcAosStateListener.h"
@@ -63,7 +60,6 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
-class IMtcRadioChecker;
 class IMtcService;
 class IMtcSession;
 class IMtcSipInterfaceFactory;
@@ -78,6 +74,7 @@ class MtcConfigurationProxy;
 class MtcLocationRefresher;
 class OperationAsyncRunner;
 class UdpKeepAliveSender;
+class UpdatingInfo;
 class UssiController;
 struct CallReasonInfo;
 struct ConfUser;

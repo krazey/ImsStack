@@ -21,7 +21,6 @@
 #include "IConfiguration.h"
 #include "IMtcApp.h"
 #include "IMtcContext.h"
-#include "IMtcService.h"
 #include "ImsApp.h"
 #include "ImsList.h"
 #include "MtcImsEventReceiver.h"
@@ -55,6 +54,7 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
+class IMtcService;
 class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
@@ -62,6 +62,7 @@ class LastComeFirstServedHelper;
 class MtcTimerWrapper;
 class OperationAsyncRunner;
 class RttAutoUpgrader;
+enum class ServiceType;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {

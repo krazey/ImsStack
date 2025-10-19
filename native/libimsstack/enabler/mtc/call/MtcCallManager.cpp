@@ -15,11 +15,13 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IMtcService.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
 #include "call/NullCall.h"
+#include "call/state/CallStateFactory.h"
 #include <functional>
 #include <memory>
 

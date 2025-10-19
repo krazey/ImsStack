@@ -17,11 +17,10 @@
 #ifndef INTERFACE_MTC_UI_NOTIFIER_H_
 #define INTERFACE_MTC_UI_NOTIFIER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 
 class AString;
+enum class CallType;
 struct CallReasonInfo;
 
 /**

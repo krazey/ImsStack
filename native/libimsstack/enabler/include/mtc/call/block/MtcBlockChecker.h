@@ -19,7 +19,6 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/IMtcBlockRule.h"
 

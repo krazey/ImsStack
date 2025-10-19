@@ -19,7 +19,8 @@
 
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
+
+class IMtcCallContext;
 
 class UpdatingInfo final
 {

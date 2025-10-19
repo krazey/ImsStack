@@ -16,6 +16,7 @@
 
 #include "MtcDef.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCallStringUtils.h"
 #include "call/UpdatingInfo.h"

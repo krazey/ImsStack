@@ -19,7 +19,6 @@
 
 #include "ITimer.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 
 class IMtcCallContext;
 class MtcConfigurationProxy;
