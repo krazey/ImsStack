@@ -167,6 +167,40 @@ TEST_F(TextSessionTest, testUpdateRtpConfig)
     EXPECT_TRUE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
 }
 
+// Test case for redundant level equal to 0.
+// Verifies that the redundant level is floored at 0.
+TEST_F(TextSessionTest, UpdateRtpConfig_RedundantLevelIsZero)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+
+    // Setup: Local and peer profiles need a payload to pass initial checks.
+    TextProfile::Payload* pLocalPayload = new TextProfile::Payload();
+    pLocalPayload->SetRtpMap(100, "RED", 1000, 1);
+    objLocalProfile.AddPayload(pLocalPayload);
+
+    TextProfile::Payload* pPeerPayload = new TextProfile::Payload();
+    pPeerPayload->SetRtpMap(100, "RED", 1000, 1);
+    objPeerProfile.AddPayload(pPeerPayload);
+
+    // Setup: Negotiated profile with redundancy level of 0 (invalid, but should be handled).
+    TextProfile::Payload* pNegoPayload = new TextProfile::Payload();
+    auto pFmtp = std::make_shared<TextProfile::RedFmtp>(0, 101);
+    pNegoPayload->SetRtpMap(100, "RED", 1000, 1);
+    pNegoPayload->SetFmtp(pFmtp);
+    objNegoProfile.AddPayload(pNegoPayload);
+
+    // Action: Update the RTP configuration.
+    EXPECT_TRUE(
+            m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+
+    // Verification: The internal redundant level should be floored at 0.
+    TextConfig* pTextConfig = reinterpret_cast<TextConfig*>(m_pSession->GetRtpConfig());
+    ASSERT_NE(pTextConfig, nullptr);
+    EXPECT_EQ(pTextConfig->getRedundantLevel(), 0);
+}
+
 TEST_F(TextSessionTest, testOpen)
 {
     EXPECT_CALL(m_objMockListener,
