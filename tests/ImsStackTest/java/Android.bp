@@ -42,6 +42,7 @@ android_test {
         "platform-test-annotations",
         "testables",
         "truth",
+        "scm_proto",
     ],
     libs: [
         "android.test.base.stubs.system",
@@ -53,4 +54,15 @@ android_test {
     ],
     test_suites: ["general-tests"],
     //test_config: "AndroidTest.xml",
+}
+
+java_library {
+    name: "scm_proto",
+    proto: {
+        type: "lite",
+        canonical_path_from_root: false,
+    },
+    srcs: [
+        "proto/scm.proto",
+    ],
 }
