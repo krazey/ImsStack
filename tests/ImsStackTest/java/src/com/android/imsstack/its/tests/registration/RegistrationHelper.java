@@ -159,6 +159,8 @@ public class RegistrationHelper {
         }
         testBase.startEnabler(slotId);
 
+        mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
+
         getCarrierConfigManagerProxy().notifyCarrierConfigChanged(
                 slotId, subId, telephony.getSimCarrierId(), telephony.getSimSpecificCarrierId());
     }
