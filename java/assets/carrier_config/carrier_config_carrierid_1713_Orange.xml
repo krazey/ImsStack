@@ -16,7 +16,7 @@
 -->
 <!-- carrier_name: Orange (Slovakia) -->
 <carrier_config>
-    <!-- Carrier configurations -->
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
     <!-- Aos -->
     <boolean name="ims.pdn_reconnect_on_all_pcscfs_unavailable_bool" value="true"/>
     <int name="ims.pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int" value="120"/>

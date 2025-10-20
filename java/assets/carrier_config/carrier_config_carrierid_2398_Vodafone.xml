@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
+<!-- Vodafone Czech (vodafone_cz) -->
 <carrier_config>
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>

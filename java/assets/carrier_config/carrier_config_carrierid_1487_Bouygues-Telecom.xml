@@ -15,6 +15,7 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
     <!-- MTC -->
     <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
