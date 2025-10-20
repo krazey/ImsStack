@@ -25,7 +25,7 @@ function coveragegen() {
 
     adb root
     adb shell rm "$COVERAGE_OUTPUT_DEVICE_PATH/*"
-    atest $(get_test_name "$@")
+    atest $(get_test_name "$@") -- --log-level-display ERROR
     atest --latest-result
 
     rm -rf $COVERAGE_OUTPUT_PATH
@@ -40,7 +40,7 @@ function imstest() {
 
     clear
     echo "> atest $command"
-    atest $command
+    atest $command -- --log-level-display ERROR
 }
 
 function imstestf() {
@@ -92,7 +92,7 @@ function its() {
 
     clear
     echo "> atest -c ImsStackTest:$command"
-    atest -c ImsStackTest:$command
+    atest -c ImsStackTest:$command -- --log-level-display ERROR
 }
 
 function get_its_test_name() {
