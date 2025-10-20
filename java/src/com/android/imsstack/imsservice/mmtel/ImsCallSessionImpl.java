@@ -87,6 +87,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private static final boolean FEATURE_CHANGE_CONFERENCE_PARTICIPANT_STATE_ON_DROP = false;
     private static final String MEDIA_GTT_MODE = "media_gtt_mode";
     private static final String PREFIX_MMI_PARTICIPANT_DROP = "callId:";
+    private static final int TRANSFER_RESUME_RECOVERY_DELAY_TIME = 2000;
+
     /**
      * Extra key to identify that the session modification is handled by ImsCallSessionImpl.
      * Value: boolean type
@@ -3939,21 +3941,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (mCallDetails.is(CallDetails.ON_ECT)
                     && mCallDetails.is(CallDetails.IMPLICIT_ON_HOLD)) {
-                mCallDetails.clear(CallDetails.ON_ECT);
-                mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
-
-                if (mOperationFailReason != null) {
-                    if (!mTransferRequestedSession.mIsEctConfirmationRequired) {
-                        log("CallTransfer: Confirmation not required");
-                    } else {
-                        mTransferRequestedSession.mCallback.invokeCallSessionTransferFailed(
-                                mTransferRequestedSession, mOperationFailReason);
-                    }
-
-                    mOperationFailReason = null;
-                }
-
-                clearTransferRequestedSessionEctDetails();
+                // TODO(b/451717299): mTransferRequestedSession.mCallback.
+                // invokeCallSessionTransferFailed is required here?
+                mCallContext.getCallHandler().postDelayed(
+                        () -> mCall.resume(MtcCallUtils.createUnholdMedia(
+                            mCall.getCallInfo(), mCall.getMediaInfo(),
+                            isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE))),
+                            TRANSFER_RESUME_RECOVERY_DELAY_TIME);
                 return;
             }
 
@@ -4410,9 +4404,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                             isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)));
                 }
             }
-
-            mTransferTargetSession.mCallDetails.clear(CallDetails.ON_ECT);
-            mTransferTargetSession.mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
 
             if (!mIsEctConfirmationRequired) {
                 log("CallTransfer: Confirmation not required");
