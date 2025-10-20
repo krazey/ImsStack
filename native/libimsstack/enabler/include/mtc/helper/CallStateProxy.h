@@ -25,7 +25,6 @@
 #include "helper/ICallStateProxy.h"
 
 class IMtcCallManager;
-struct CallInfo;
 
 struct CallStateDetails
 {

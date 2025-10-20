@@ -63,7 +63,6 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
-class IMtcRadioChecker;
 class IMtcService;
 class IMtcSession;
 class IMtcSipInterfaceFactory;

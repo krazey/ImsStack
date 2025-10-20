@@ -34,7 +34,6 @@ class Ims3gpp;
 class ISession;
 class ISipHeader;
 class ISipMessage;
-class IMtcCall;
 class SipAddress;
 class SipParameter;
 struct ConfUser;
