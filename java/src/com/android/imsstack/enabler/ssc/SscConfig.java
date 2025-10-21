@@ -379,6 +379,10 @@ public final class SscConfig {
                 CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL);
     }
 
+    static boolean useRootElementWhenDocQuery(int slotId) {
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_USE_ROOT_ELEMENT_WHEN_DOC_QUERY_BOOL);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);

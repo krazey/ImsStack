@@ -995,6 +995,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_update_cb_without_password_bool";
         public static final String KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL =
                 KEY_PREFIX + "ut_update_cb_with_conditions_element_bool";
+        public static final String KEY_UT_USE_ROOT_ELEMENT_WHEN_DOC_QUERY_BOOL =
+                KEY_PREFIX + "ut_use_root_element_when_doc_query_bool";
 
         private ImsSs() {}
     }
