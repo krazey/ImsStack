@@ -846,6 +846,38 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateCvoDisabledPeer)
     EXPECT_EQ(m_pNegotiatedProfile->GetCvoId(), 0);
 }
 
+TEST_F(VideoProfileNegotiatorTest, NegotiatePacketizationMode)
+{
+    // Arrange
+    // Local payload with packetization-mode = 1
+    VideoProfile::Payload* pLocalPayload = AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    auto pLocalFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pLocalPayload->GetFmtp());
+    pLocalFmtp->SetPacketizationMode(1);
+
+    // Peer payload with packetization-mode = 0
+    VideoProfile::Payload* pPeerPayload = AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    auto pPeerFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pPeerPayload->GetFmtp());
+    pPeerFmtp->SetPacketizationMode(0);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE /* bIsOfferReceived */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+
+    auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // The negotiated packetization-mode should be the peer's mode.
+    EXPECT_EQ(pNegoFmtp->GetPacketizationMode(), pPeerFmtp->GetPacketizationMode());
+    EXPECT_EQ(pNegoFmtp->GetPacketizationMode(), 0);
+}
+
 TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionOfferPeerSend)
 {
     // Arrange
