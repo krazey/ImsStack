@@ -104,7 +104,7 @@ IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 {
     IMS_TRACE_I("FormSdp(): type[%d], state[%x], mode[%d]", eMediaType, m_eNegoState,
             bEnforceReofferMode);
-    IMS_TRACE_I("FormSdp(): direction audio[%d],  video[%d], text[%d]", nAudioDirection,
+    IMS_TRACE_I("FormSdp(): direction audio[%d], video[%d], text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
 
     if (m_pMediaEnvironment == IMS_NULL || m_eNegoState == STATE_OFFER_SENT || m_bPreviewMode)
@@ -571,13 +571,13 @@ void MediaNego::FinalizeSdp(IN ISession* pSession)
 }
 
 PUBLIC
-void MediaNego::ConfirmSession()
+void MediaNego::FinalizeNegotiation()
 {
     IMS_BOOL bNegotiated = IMS_FALSE;
 
     if (m_pAudioNego != IMS_NULL)
     {
-        m_pAudioNego->ConfirmSession();
+        m_pAudioNego->CleanupIncompleteOaModels();
 
         if (m_pAudioNego->GetNegotiatedCodec() != AUDIO_CODEC_NONE)
         {
@@ -587,7 +587,7 @@ void MediaNego::ConfirmSession()
 
     if (m_pVideoNego != IMS_NULL)
     {
-        m_pVideoNego->ConfirmSession();
+        m_pVideoNego->CleanupIncompleteOaModels();
 
         if (m_pVideoNego->GetNegotiatedResolution() != VIDEO_RESOLUTION_INVALID)
         {
@@ -597,7 +597,7 @@ void MediaNego::ConfirmSession()
 
     if (m_pTextNego != IMS_NULL)
     {
-        m_pTextNego->ConfirmSession();
+        m_pTextNego->CleanupIncompleteOaModels();
 
         if (m_pTextNego->GetNegotiatedCodec() != TEXT_CODEC_NONE)
         {

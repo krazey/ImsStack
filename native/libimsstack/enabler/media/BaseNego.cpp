@@ -163,7 +163,7 @@ PUBLIC VIRTUAL void BaseNego::NegotiateSdp(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL void BaseNego::ConfirmSession()
+PUBLIC VIRTUAL void BaseNego::CleanupIncompleteOaModels()
 {
     // Clean up incomplete OA model from the end of the list.
     // This can happen if an offer was created but never answered.
@@ -172,7 +172,8 @@ PUBLIC VIRTUAL void BaseNego::ConfirmSession()
         std::shared_ptr<OaModel> pLastOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
         if (pLastOaModel != IMS_NULL && !pLastOaModel->IsAllProfileExist())
         {
-            IMS_TRACE_I("ConfirmSession(): type[%d], removing incomplete OA model index[%d]",
+            IMS_TRACE_I(
+                    "CleanupIncompleteOaModels(): type[%d], removing incomplete OA model index[%d]",
                     m_eType, m_listOaModel.GetSize() - 1, 0);
             m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         }

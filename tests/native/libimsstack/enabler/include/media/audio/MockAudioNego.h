@@ -41,7 +41,7 @@ public:
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
             (override));
-    MOCK_METHOD(void, ConfirmSession, (), (override));
+    MOCK_METHOD(void, CleanupIncompleteOaModels, (), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));
     MOCK_METHOD(IMS_BOOL, SetLocalPort, (IMS_UINT32 nPort), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));

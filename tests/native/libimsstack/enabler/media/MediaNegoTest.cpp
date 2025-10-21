@@ -858,13 +858,13 @@ TEST_F(MediaNegoTest, testFinalizeSdpRemovesDeletedMedia)
     m_objMediaNego.FinalizeSdp(&m_objIsession);
 }
 
-TEST_F(MediaNegoTest, testConfirmSessionAudioNegotiatedSetsStateNegotiated)
+TEST_F(MediaNegoTest, testFinalizeNegotiationAudioNegotiatedSetsStateNegotiated)
 {
     // Arrange
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_CALL(*m_pMockAudioNego, ConfirmSession()).Times(1);
-    EXPECT_CALL(*m_pMockVideoNego, ConfirmSession()).Times(1);
-    EXPECT_CALL(*m_pMockTextNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockAudioNego, CleanupIncompleteOaModels()).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, CleanupIncompleteOaModels()).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, CleanupIncompleteOaModels()).Times(1);
 
     ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_AMR));
     ON_CALL(*m_pMockVideoNego, GetNegotiatedResolution())
@@ -872,19 +872,19 @@ TEST_F(MediaNegoTest, testConfirmSessionAudioNegotiatedSetsStateNegotiated)
     ON_CALL(*m_pMockTextNego, GetNegotiatedCodec()).WillByDefault(Return(TEXT_CODEC_NONE));
 
     // Act
-    m_objMediaNego.ConfirmSession();
+    m_objMediaNego.FinalizeNegotiation();
 
     // Assert
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
 }
 
-TEST_F(MediaNegoTest, testConfirmSessionAudioVideoNegotiatedSetsStateIdle)
+TEST_F(MediaNegoTest, testFinalizeNegotiationNoMediaNegotiatedSetsStateIdle)
 {
     // Arrange
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_CALL(*m_pMockAudioNego, ConfirmSession()).Times(1);
-    EXPECT_CALL(*m_pMockVideoNego, ConfirmSession()).Times(1);
-    EXPECT_CALL(*m_pMockTextNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockAudioNego, CleanupIncompleteOaModels()).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, CleanupIncompleteOaModels()).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, CleanupIncompleteOaModels()).Times(1);
 
     ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_NONE));
     ON_CALL(*m_pMockVideoNego, GetNegotiatedResolution())
@@ -892,24 +892,54 @@ TEST_F(MediaNegoTest, testConfirmSessionAudioVideoNegotiatedSetsStateIdle)
     ON_CALL(*m_pMockTextNego, GetNegotiatedCodec()).WillByDefault(Return(TEXT_CODEC_NONE));
 
     // Act
-    m_objMediaNego.ConfirmSession();
+    m_objMediaNego.FinalizeNegotiation();
 
     // Assert
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_IDLE);
 }
 
-TEST_F(MediaNegoTest, testConfirmSessionMediaNegotiatedButInitialStateIdleStaysIdle)
+TEST_F(MediaNegoTest, testFinalizeNegotiationAfterSingleFormSdp)
+{
+    // Arrange: Initial state is IDLE. Set up mocks for FormSdp.
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_IDLE);
+    SetupProfileExpectation();
+    EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
+    MockISessionDescriptor objSessionDescriptor;
+    ON_CALL(m_objIsession, GetSessionDescriptor()).WillByDefault(Return(&objSessionDescriptor));
+    ON_CALL(*m_pMockAudioNego, FormSdp(_, _, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
+    MockIMedia objIMediaAudio;
+    MockIMediaDescriptor objIMediaDescriptorAudio;
+    SdpMedia objSdpMediaAudio;
+    objSdpMediaAudio.SetType(SdpMedia::TYPE_AUDIO);
+    ImsList<IMedia*> objMediaListAudio;
+    SetUpMedia(objIMediaAudio, objIMediaDescriptorAudio, objSdpMediaAudio, objMediaListAudio);
+
+    // Act: Form an initial SDP offer.
+    m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND,
+            MEDIA_DIRECTION_INVALID, MEDIA_DIRECTION_INVALID, IMS_FALSE);
+
+    // Assert: State should now be OFFER_SENT.
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
+
+    // Act: Finalize the negotiation without a peer answer.
+    m_objMediaNego.FinalizeNegotiation();
+
+    // Assert: State should reset to IDLE as no media was actually negotiated.
+    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_IDLE);
+}
+
+TEST_F(MediaNegoTest, testFinalizeNegotiationMediaNegotiatedButInitialStateIdleStaysIdle)
 {
     // Arrange
     m_objMediaNego.SetNegoState(STATE_IDLE);
-    EXPECT_CALL(*m_pMockAudioNego, ConfirmSession()).Times(1);
-    EXPECT_CALL(*m_pMockVideoNego, ConfirmSession()).Times(1);
-    EXPECT_CALL(*m_pMockTextNego, ConfirmSession()).Times(1);
+    EXPECT_CALL(*m_pMockAudioNego, CleanupIncompleteOaModels()).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, CleanupIncompleteOaModels()).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, CleanupIncompleteOaModels()).Times(1);
 
     ON_CALL(*m_pMockAudioNego, GetNegotiatedCodec()).WillByDefault(Return(AUDIO_CODEC_AMR));
 
     // Act
-    m_objMediaNego.ConfirmSession();
+    m_objMediaNego.FinalizeNegotiation();
 
     // Assert
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_IDLE);

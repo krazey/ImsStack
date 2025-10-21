@@ -1234,3 +1234,18 @@ TEST_F(MediaSessionTest, testSetMediaPemTypeNegoNotFound)
 
     m_pSession->SetMediaPemType(NEGO_ID, MEDIA_PEM_TYPE::SENDONLY);
 }
+
+TEST_F(MediaSessionTest, testFinalizeSdpDelegatesToHandler)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    MockISession mockSession;
+
+    // Expect FinalizeSdp to be called on the handler
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FinalizeSdp(nNegoId, &mockSession)).Times(1);
+
+    // Expect FinalizeNegotiation to be called on the handler as well
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FinalizeNegotiation(nNegoId)).Times(1);
+
+    // Call the method under test
+    m_pSession->FinalizeSdp(nNegoId, &mockSession);
+}
