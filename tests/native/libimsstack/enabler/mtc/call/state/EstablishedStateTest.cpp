@@ -774,6 +774,7 @@ TEST_F(EstablishedStateTest,
     ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
 
     EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1);
+    EXPECT_CALL(objMockMediaManager, Run(_, _, _)).Times(1);
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }

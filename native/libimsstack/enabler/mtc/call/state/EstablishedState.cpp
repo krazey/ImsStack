@@ -619,12 +619,6 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
         return CallReasonInfo(CODE_NONE);
     }
 
-    const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
-    if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
-    {
-        eStateName = CallStateName::ESTABLISHED;
-    }
-
     m_objContext.GetMediaManager().AdjustDirectionForAutoAnswer(objSession);
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo(objSession);
@@ -632,6 +626,13 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
     if (pMtcSession->AcceptUpdate() == IMS_FAILURE)
     {
         // TODO
+    }
+
+    const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
+    {
+        eStateName = CallStateName::ESTABLISHED;
+        m_objContext.GetMediaManager().Run(&objSession, IMS_NULL, IMS_FALSE);
     }
 
     return CallReasonInfo(CODE_NONE);
