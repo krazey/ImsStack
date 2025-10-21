@@ -42,7 +42,6 @@ import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PhoneStateInterface;
-import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -108,12 +107,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     // data network roaming state that was not overridden by any carrier config
     private boolean mDataNetworkRoaming = false;
     private boolean mAirplaneMode = false;
-
-    // Network types in TelephonyManager for sync with ServiceState
-    @VisibleForTesting
-    protected int mTelephonyNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    @VisibleForTesting
-    protected int mTelephonyVoiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
     // IMS voice over PS Session Supported
     private int mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
@@ -228,8 +221,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         mVoiceRoaming = false;
         mDataNetworkRoaming = false;
         mAirplaneMode = false;
-        mTelephonyNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-        mTelephonyVoiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
         mEmcbs = false;
         mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
@@ -357,16 +348,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         } else {
             return mImsVopsState != ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
         }
-    }
-
-    @Override
-    public void updateTelephonyNetworkType(@NetworkType int networkType) {
-        mTelephonyNetworkType = networkType;
-    }
-
-    @Override
-    public void updateTelephonyVoiceNetworkType(@NetworkType int networkType) {
-        mTelephonyVoiceNetworkType = networkType;
     }
 
     @Override
@@ -515,11 +496,10 @@ public class DcNetWatcher implements IDcNetWatcher {
         return false;
     }
 
-    private static int getAccessNetworkTechnology(ServiceState ss) {
+    private static int getAccessNetworkTechnology(
+            ServiceState ss, @NetworkRegistrationInfo.Domain int domain) {
         NetworkRegistrationInfo nri =
-                ss.getNetworkRegistrationInfo(
-                        NetworkRegistrationInfo.DOMAIN_CS,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+                ss.getNetworkRegistrationInfo(domain, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
         if (nri != null) {
             return nri.getAccessNetworkTechnology();
         }
@@ -624,15 +604,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                 ? wwanRegInfo.getRejectCause() : REGISTRATION_REJECT_CAUSE_NONE;
     }
 
-    private int getCurrentTelephonyNetworkType() {
-        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
-                TelephonyInterface.class, mSlotId);
-
-        return (telephony != null)
-                ? telephony.getNetworkType()
-                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    }
-
     private boolean updateVoiceServiceState(ServiceState serviceState) {
         int voiceServiceState = serviceState.getState();
 
@@ -671,10 +642,11 @@ public class DcNetWatcher implements IDcNetWatcher {
         return false;
     }
 
-    private boolean updateNetworkType() {
-        int networkType = getCurrentTelephonyNetworkType();
+    private boolean updateNetworkType(ServiceState serviceState) {
+        int networkType = getAccessNetworkTechnology(
+                serviceState, NetworkRegistrationInfo.DOMAIN_PS);
 
-        if (mNetworkType != networkType || getNetworkType() != mTelephonyNetworkType) {
+        if (mNetworkType != networkType) {
             mNetworkType = networkType;
             return true;
         }
@@ -683,10 +655,10 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private boolean updateVoiceNetworkType(ServiceState serviceState) {
-        int networkType = getAccessNetworkTechnology(serviceState);
+        int networkType = getAccessNetworkTechnology(
+                serviceState, NetworkRegistrationInfo.DOMAIN_CS);
 
-        if (mVoiceNetworkType != networkType
-                || getVoiceNetworkType() != mTelephonyVoiceNetworkType) {
+        if (mVoiceNetworkType != networkType) {
             mVoiceNetworkType = networkType;
             return true;
         }
@@ -1047,7 +1019,7 @@ public class DcNetWatcher implements IDcNetWatcher {
                 changedStates.add(NetworkServiceState.DATA_SERVICE_STATE);
             }
 
-            if (updateNetworkType()) {
+            if (updateNetworkType(serviceState)) {
                 changedStates.add(NetworkServiceState.DATA_NETWORK_TYPE);
             }
 

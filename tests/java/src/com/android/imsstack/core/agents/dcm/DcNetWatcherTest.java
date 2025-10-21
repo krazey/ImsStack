@@ -94,7 +94,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock ISystem mMockSystem;
     @Mock PhoneStateInterface mMockPhoneStateInterface;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
-    @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock ConfigInterface mMockConfigInterface;
     @Mock SystemInterface mMockSystemInterface;
     @Mock NativeStateInterface mMockNativeStateInterface;
@@ -121,8 +120,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 PhoneStateInterface.class, mMockPhoneStateInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT0);
-        AgentFactory.getInstance().setAgent(
-                TelephonyInterface.class, mMockTelephonyInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
                 ConfigInterface.class, mMockConfigInterface, SLOT0);
         DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT0);
@@ -177,20 +174,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockPhoneStateNotifier).setListener(null);
         verify(mTestAppContext.getBroadcastReceiverProxy()).unregisterReceiver(any());
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
-    }
-
-    @Test
-    public void testUpdateTelephonyNetworkType() {
-        mDcNetWatcher.updateTelephonyNetworkType(TelephonyManager.NETWORK_TYPE_LTE);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mTelephonyNetworkType);
-    }
-
-    @Test
-    public void testUpdateTelephonyVoiceNetworkType() {
-        mDcNetWatcher.updateTelephonyVoiceNetworkType(TelephonyManager.NETWORK_TYPE_LTE);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mTelephonyVoiceNetworkType);
     }
 
     @Test
@@ -500,8 +483,12 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testOnServiceStateChanged_handleNetworkTypeChangeWithLte() throws Exception {
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
@@ -509,8 +496,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mNetWatherListener).onDataNetworkTypeChanged();
         verify(mMockSystem).notifyNetworkTypeChanged(IDcNetWatcher.AN_EUTRAN);
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getNetworkType());
-        assertEquals(AccessNetworkConstants.AccessNetworkType.EUTRAN,
-                mDcNetWatcher.getAccessNetworkType());
     }
 
     @Test
@@ -564,8 +549,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(DataSpecificRegistrationInfo.class, "mLteAttachResultType", dsrInfo,
                 DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_EPS_ONLY);
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
@@ -590,8 +573,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
         replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
                 ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
@@ -623,8 +604,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
         replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
                 ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
@@ -652,8 +631,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
         replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
                 ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
@@ -680,8 +657,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
                 ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
         replaceInstance(DcNetWatcher.class, "mImsVopsPlmn", mDcNetWatcher, "111111");
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
