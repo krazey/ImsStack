@@ -108,5 +108,17 @@
         {
             "name": "ImsStackNativeEnablerMtsTests"
         }
+    ],
+
+    // For tiss-presubmit test group
+    "tiss-presubmit": [
+        {
+            "name": "ImsStackTest",
+            "options": [
+                {
+                    "include-filter": "com.android.imsstack.its.tests.ImsTissTest"
+                }
+            ]
+        }
     ]
 }
