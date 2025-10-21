@@ -786,11 +786,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -817,12 +819,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -855,12 +859,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VIDEO,
@@ -891,11 +897,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -917,11 +925,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -949,12 +959,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -987,12 +999,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1026,12 +1040,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1066,12 +1082,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1109,12 +1127,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1149,12 +1169,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1192,12 +1214,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForNrCs()
-                        .addNetworkRegistrationInfoForNr()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1589,12 +1613,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1627,12 +1653,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -1671,12 +1699,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VIDEO,
@@ -1714,12 +1744,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -1748,12 +1780,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                    .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1789,12 +1823,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1833,12 +1869,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1877,12 +1915,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1922,12 +1962,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1970,12 +2012,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -2015,12 +2059,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -2063,12 +2109,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -2111,12 +2159,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
-                .setServiceState(new ServiceStateBuilder()
-                        .addNetworkRegistrationInfoForUmts()
-                        .addNetworkRegistrationInfoForIwlan()
-                        .build())
+                .setServiceState(ss)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -2159,7 +2209,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
         ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForLtePs()
                 .addNetworkRegistrationInfoForIwlan()
                 .build();
 
@@ -2279,7 +2329,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
         ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForLtePs()
                 .addNetworkRegistrationInfoForIwlan()
                 .build();
 
@@ -2343,7 +2393,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 objNotifyTerminatedForInitRegUsedEvenBundle);
 
         ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForLtePs()
                 .addNetworkRegistrationInfoForIwlan()
                 .build();
 
@@ -2399,7 +2449,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
         ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForLtePs()
                 .addNetworkRegistrationInfoForIwlan()
                 .build();
 
@@ -2463,7 +2513,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
 
         ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForLtePs()
                 .addNetworkRegistrationInfoForIwlan()
                 .build();
 
