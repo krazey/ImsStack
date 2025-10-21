@@ -170,10 +170,12 @@ void SessionInterfaceHolder::ReleaseISession(IN ISession* piSession, IN IMS_BOOL
 
             if (m_objSessionRecords.count(nKey) == 0)
             {
-                for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
+                auto objListenersForNotify = m_objListeners;
+                for (IMS_UINT32 i = 0; i < objListenersForNotify.GetSize(); ++i)
                 {
-                    m_objListeners.GetAt(i)->OnSessionInterfaceReleased(nKey, *piSession);
+                    objListenersForNotify.GetAt(i)->OnSessionInterfaceReleased(nKey, *piSession);
                 }
+                objListenersForNotify.Clear();
             }
             piSession->Destroy();
         }

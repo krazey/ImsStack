@@ -28,6 +28,7 @@
 
 using ::testing::_;
 using ::testing::InSequence;
+using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Ref;
 using ::testing::Return;
@@ -328,6 +329,30 @@ TEST_F(SessionInterfaceHolderTest, ListenerIsNotifiedOnlyIfAllInterfacesInSameCa
 
         pHolder->ReleaseISession(&objISession2OfCall2, IMS_TRUE, IMS_FALSE);
     }
+}
+
+TEST_F(SessionInterfaceHolderTest, AllListenerIsNotifedIfOneListenerRemovesItself)
+{
+    MockIInterfaceHolderListener objListener2;
+    pHolder->AddListener(&objListener);
+    pHolder->AddListener(&objListener2);
+
+    EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1, _))
+            .WillOnce(Invoke(
+                    [this](CallKey, ISession&)
+                    {
+                        pHolder->RemoveListener(&objListener);
+                    }));
+
+    EXPECT_CALL(objListener2, OnSessionInterfaceReleased(CALL_KEY_1, _)).Times(1);
+
+    EXPECT_CALL(objMockISession, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockISession, GetState())
+            .WillRepeatedly(testing::Return(ISession::STATE_TERMINATED));
+    EXPECT_CALL(objMockISession, Destroy()).Times(1);
+
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+    pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_TRUE);
 }
 
 }  // namespace android
