@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MockISession.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
@@ -64,7 +65,8 @@ TEST_F(MtcSipInterfaceFactoryTest,
         SameSessionInterfaceHolderIsReturnedForTheSecondInvokingAfterReleased)
 {
     const SessionInterfaceHolder* pHolder1 = &pFactory->GetISessionHolder();
-    pFactory->OnSessionInterfaceReleased(0);
+    MockISession objMockISession;
+    pFactory->OnSessionInterfaceReleased(0, objMockISession);
     const SessionInterfaceHolder* pHolder2 = &pFactory->GetISessionHolder();
     EXPECT_EQ(pHolder1, pHolder2);
 }

@@ -19,6 +19,7 @@
 #include "ImsAosParameter.h"
 #include "MediaDef.h"
 #include "MockIMessage.h"
+#include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
 #include "MockISipMessage.h"
@@ -45,6 +46,7 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -55,6 +57,7 @@ class MtcSessionTest : public ::testing::Test
 public:
     MockIMtcCallContext objContext;
     MockIMtcCallManager objCallManager;
+    MockIMtcCallController objCallController;
     MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcPreconditionManager objPreconditionManager;
     MockIMtcMediaManager objMediaManager;
@@ -76,6 +79,7 @@ protected:
     {
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objContext, GetCallController).WillByDefault(ReturnRef(objCallController));
         ON_CALL(objContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
         ON_CALL(objContext, GetCallKey).WillByDefault(Return(CALL_KEY));
@@ -157,7 +161,7 @@ protected:
     }
 };
 
-TEST_F(MtcSessionTest, CreateMtSessionaInvokesAddISessionInSessionHolder)
+TEST_F(MtcSessionTest, CreateMtSessionInvokesAddISessionInSessionHolder)
 {
     EXPECT_CALL(*pSessionInterfaceHolder, AddISession(CALL_KEY, &objSession));
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -169,6 +173,10 @@ TEST_F(MtcSessionTest, DestructorDestroysMediaProfileAndQosInfo)
 
     EXPECT_CALL(objMediaManager, DestroyMediaForSession(_));
     EXPECT_CALL(objPreconditionManager, DestroyQos(_));
+
+    // Trigger the destructor
+    delete pMtcSession;
+    pMtcSession = IMS_NULL;
 }
 
 TEST_F(MtcSessionTest, StartInvokesStartInMessageSender)
@@ -648,6 +656,236 @@ TEST_F(MtcSessionTest, TerminateWithReasonUserTerminatedInvokesTerminate)
     EXPECT_CALL(*pMessageSender, Terminate(IMS_TRUE, objReason)).Times(1);
 
     pMtcSession->Terminate(IMS_TRUE, objReason);
+}
+
+TEST_F(MtcSessionTest, TerminateDoesNotInvokeHandleByTransactionIfNotUsingBye)
+{
+    CreateMtcSession();
+
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .Times(0);
+
+    EXPECT_CALL(objContext, GetSessions()).Times(0);
+    EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _)).Times(0);
+
+    pMtcSession->Terminate(IMS_FALSE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateDoesNotInvokeHandleByTransactionIfNotConfigured)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objContext, GetSessions()).Times(0);
+    EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateDoesNotInvokeHandleByTransactionIfNotLastSession)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateDoesNotInvokeHandleByTransactionIfEmergencyCall)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateDoesNotInvokeHandleByTransactionIfNoAosConnector)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).WillOnce(Return(nullptr));
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateInvokesHandleByeTransaction)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).WillOnce(Return(&objAosConnector));
+
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _))
+            .WillOnce(Invoke(
+                    [this]([[maybe_unused]] CallKey key,
+                            std::function<void(ISession&)> objOperation)
+                    {
+                        objOperation(objSession);
+                    }));
+
+    MockIMessage objByeRequest;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
+            .WillByDefault(Return(&objByeRequest));
+    ON_CALL(objByeRequest, GetState()).WillByDefault(Return(IMessage::STATE_SENT));
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_TERMINATE))
+            .WillByDefault(Return(IMS_NULL));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY));
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateInvokesHandleByeTransactionButNoAosControlIfNotTimeout)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).WillOnce(Return(&objAosConnector));
+
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _))
+            .WillOnce(Invoke(
+                    [this]([[maybe_unused]] CallKey key,
+                            std::function<void(ISession&)> objOperation)
+                    {
+                        objOperation(objSession);
+                    }));
+
+    MockIMessage objByeRequest;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
+            .WillByDefault(Return(&objByeRequest));
+    ON_CALL(objByeRequest, GetState()).WillByDefault(Return(IMessage::STATE_SENT));
+    MockIMessage objByeResponse;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_TERMINATE))
+            .WillByDefault(Return(&objByeResponse));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateInvokesHandleByeTransactionButNoAosControlIfByeIsNull)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).WillOnce(Return(&objAosConnector));
+
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _))
+            .WillOnce(Invoke(
+                    [this]([[maybe_unused]] CallKey key,
+                            std::function<void(ISession&)> objOperation)
+                    {
+                        objOperation(objSession);
+                    }));
+
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
+            .WillByDefault(Return(IMS_NULL));
+    EXPECT_CALL(objSession, GetPreviousResponse(IMessage::SESSION_TERMINATE)).Times(0);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
+}
+
+TEST_F(MtcSessionTest, TerminateInvokesHandleByeTransactionButNoAosControlIfByeIsReceived)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(pMtcSession);
+    EXPECT_CALL(objContext, GetSessions()).WillOnce(ReturnRef(objSessions));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objMtcService, GetAosConnector).WillOnce(Return(&objAosConnector));
+
+    EXPECT_CALL(objCallController, HandleByeTransaction(_, _))
+            .WillOnce(Invoke(
+                    [this]([[maybe_unused]] CallKey key,
+                            std::function<void(ISession&)> objOperation)
+                    {
+                        objOperation(objSession);
+                    }));
+
+    MockIMessage objByeRequest;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
+            .WillByDefault(Return(&objByeRequest));
+    ON_CALL(objByeRequest, GetState()).WillByDefault(Return(IMessage::STATE_RECEIVED));
+    EXPECT_CALL(objSession, GetPreviousResponse(IMessage::SESSION_TERMINATE)).Times(0);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(0);
+
+    pMtcSession->Terminate(IMS_TRUE, CallReasonInfo(CODE_USER_TERMINATED));
 }
 
 TEST_F(MtcSessionTest, SecondTerminateReturnsFailure)

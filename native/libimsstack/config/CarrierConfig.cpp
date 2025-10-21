@@ -1230,6 +1230,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::
 const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[] = KEY_IMS_VOICE_PREFIX
         "enable_registration_recovery_when_call_retry_unavailable_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL[] = KEY_IMS_VOICE_PREFIX
+        "enable_registration_recovery_when_bye_transaction_timeout_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[] =
         KEY_IMS_WFC_PREFIX "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[] =

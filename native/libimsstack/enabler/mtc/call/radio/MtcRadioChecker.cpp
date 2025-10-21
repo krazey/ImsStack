@@ -19,6 +19,7 @@
 #include "IMtcContext.h"
 #include "IMtcService.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
@@ -136,7 +137,8 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
     return CheckResult::UNBLOCKED;
 }
 
-PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(IN CallKey nKey)
+PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(
+        IN CallKey nKey, IN [[maybe_unused]] ISession& objSession)
 {
     RemoveCallKeyAndStopTrafficCheckingIfNeeded(nKey);
 }

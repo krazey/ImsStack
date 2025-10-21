@@ -1248,6 +1248,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "enable_registration_recovery_when_call_rejected_by_server_error_bool";
         public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL =
                 KEY_PREFIX + "enable_registration_recovery_when_call_retry_unavailable_bool";
+        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL =
+                KEY_PREFIX + "enable_registration_recovery_when_bye_transaction_timeout_bool";
         public static final String KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL =
                 KEY_PREFIX + "check_server_outage_reason_for_vxlte_call_bool";
         public static final String KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL =

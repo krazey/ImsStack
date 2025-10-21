@@ -27,7 +27,9 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::InSequence;
 using ::testing::Mock;
+using ::testing::Ref;
 using ::testing::Return;
 
 LOCAL const CallKey CALL_KEY_1 = 1;
@@ -264,11 +266,11 @@ TEST_F(SessionInterfaceHolderTest,
 
 TEST_F(SessionInterfaceHolderTest, AddAndReleaseWithTerminatedNotifiesListener)
 {
-    ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
-
     pHolder->AddListener(&objListener);
 
-    EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1));
+    InSequence seq;
+    EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1, Ref(objMockISession)));
+    EXPECT_CALL(objMockISession, Destroy());
 
     pHolder->AddISession(CALL_KEY_1, &objMockISession);
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_FALSE);
@@ -283,14 +285,14 @@ TEST_F(SessionInterfaceHolderTest, AddAndRemoveListenerRemovesGivenListener)
     pHolder->AddListener(&objListener);
     pHolder->RemoveListener(&objListener);
 
-    EXPECT_CALL(objListener, OnSessionInterfaceReleased(_)).Times(0);
-    EXPECT_CALL(objAnotherListener, OnSessionInterfaceReleased(_));
+    EXPECT_CALL(objListener, OnSessionInterfaceReleased(_, _)).Times(0);
+    EXPECT_CALL(objAnotherListener, OnSessionInterfaceReleased(_, Ref(objMockISession)));
 
     pHolder->AddISession(CALL_KEY_1, &objMockISession);
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_FALSE);
 }
 
-TEST_F(SessionInterfaceHolderTest, ListnerIsNotifiedOnlyIfAllInterfacesInSameCallKeyAreReleased)
+TEST_F(SessionInterfaceHolderTest, ListenerIsNotifiedOnlyIfAllInterfacesInSameCallKeyAreReleased)
 {
     ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
 
@@ -307,22 +309,22 @@ TEST_F(SessionInterfaceHolderTest, ListnerIsNotifiedOnlyIfAllInterfacesInSameCal
     pHolder->AddISession(CALL_KEY_2, &objISession2OfCall2);
 
     {
-        EXPECT_CALL(objListener, OnSessionInterfaceReleased(_)).Times(0);
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(_, _)).Times(0);
 
         pHolder->ReleaseISession(&objISession1OfCall1, IMS_TRUE, IMS_FALSE);
         pHolder->ReleaseISession(&objISession1OfCall2, IMS_TRUE, IMS_FALSE);
     }
 
     {
-        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1));
-        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_2)).Times(0);
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1, Ref(objISession2OfCall1)));
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_2, _)).Times(0);
 
         pHolder->ReleaseISession(&objISession2OfCall1, IMS_TRUE, IMS_FALSE);
     }
 
     {
-        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1)).Times(0);
-        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_2));
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1, _)).Times(0);
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_2, Ref(objISession2OfCall2)));
 
         pHolder->ReleaseISession(&objISession2OfCall2, IMS_TRUE, IMS_FALSE);
     }

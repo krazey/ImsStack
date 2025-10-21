@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "IMessage.h"
+#include "IMtcCallController.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -284,6 +285,10 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Terminate(
 
     if (CallReasonInfo::IsTerminateRequired(objReason.nCode))
     {
+        if (bUseBye)
+        {
+            HandleByeTransactionIfNeeded();
+        }
         m_objExtensionSet.FormatRequest(RequestType::TERMINATE, *m_objSession.GetNextRequest());
         return m_pMessageSender->Terminate(bUseBye, objReason);
     }
@@ -696,4 +701,42 @@ void MtcSession::SaveCallTypeHistory(IN CallType eCallType)
         IMS_TRACE_D("SaveCallTypeHistory [%d]", eCallType, 0, 0);
         m_objCallTypeHistory.push_back(eCallType);
     }
+}
+
+PRIVATE
+void MtcSession::HandleByeTransactionIfNeeded()
+{
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+    {
+        return;
+    }
+
+    if (m_objContext.GetSessions().GetSize() > 1 || m_objContext.GetCallInfo().IsEmergency())
+    {
+        return;
+    }
+
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (!pAosConnector)
+    {
+        return;
+    }
+
+    m_objContext.GetCallController().HandleByeTransaction(m_objContext.GetCallKey(),
+            [pAosConnector](ISession& objSession)
+            {
+                const IMessage* piByeMessage =
+                        objSession.GetPreviousRequest(IMessage::SESSION_TERMINATE);
+                if (piByeMessage == IMS_NULL || piByeMessage->GetState() != IMessage::STATE_SENT)
+                {
+                    return;
+                }
+
+                if (objSession.GetPreviousResponse(IMessage::SESSION_TERMINATE) == IMS_NULL)
+                {
+                    IMS_TRACE_E(0, "BYE transaction timed out", 0, 0, 0);
+                    pAosConnector->Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+                }
+            });
 }

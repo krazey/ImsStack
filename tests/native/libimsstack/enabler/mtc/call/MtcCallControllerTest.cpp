@@ -24,15 +24,19 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/MtcCallController.h"
+#include "call/termination/ByeTransactionHandler.h"
 #include "conferencecall/MockIConferenceController.h"
 #include "conferencecall/MockIConferenceManager.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIPassiveTimerHolder.h"
+#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "helper/OperationAsyncRunner.h"
 #include "media/MockIMtcMediaManager.h"
 #include <functional>
+#include <memory>
 #include <gtest/gtest.h>
 #include <initializer_list>
 
@@ -58,6 +62,8 @@ public:
     MockIPassiveTimerHolder objPassiveTimer;
     MockIMtcSession objMtcSession;
     MockISession objISession;
+    MockIMtcSipInterfaceFactory objSipInterfaceFactory;
+    MockSessionInterfaceHolder objSessionInterfaceHolder;
     MediaInfo objMediaInfo;
 
 protected:
@@ -72,6 +78,10 @@ protected:
         ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objContext, GetSipInterfaceFactory)
+                .WillByDefault(ReturnRef(objSipInterfaceFactory));
+        ON_CALL(objSipInterfaceFactory, GetISessionHolder)
+                .WillByDefault(ReturnRef(objSessionInterfaceHolder));
         ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
                 .WillByDefault(ReturnRef(objMediaInfo));
 
@@ -465,6 +475,63 @@ TEST_F(MtcCallControllerTest, TransferCallsEctManager)
     EXPECT_CALL(objEctManager, Transfer(nCallKey, strTarget));
 
     pCallController->Transfer(nCallKey, strTarget);
+}
+
+TEST_F(MtcCallControllerTest, HandleByeTransactionAddsListenerToSessionHolder)
+{
+    CallKey nCallKey = 1;
+    std::function<void(ISession&)> objOperation = [](ISession&)
+    {
+    };
+
+    EXPECT_CALL(objSessionInterfaceHolder, AddListener(_)).Times(1);
+
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+
+    EXPECT_CALL(objSessionInterfaceHolder, RemoveListener(_)).Times(0);
+}
+
+TEST_F(MtcCallControllerTest, OnByeTransactionCompletedRemovesListenerAndDeletesHandler)
+{
+    CallKey nCallKey = 1;
+    EXPECT_CALL(objSessionInterfaceHolder, RemoveListener(_));
+
+    std::function<void(ISession&)> objOperation = [](ISession&)
+    {
+    };
+
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+
+    // Pass a dummy handler to trigger ClearByeTransactionHandlers.
+    // The handler itself is not managed by the controller, so it must be deleted manually.
+    std::unique_ptr<ByeTransactionHandler> pHandler =
+            std::make_unique<ByeTransactionHandler>(nCallKey, *pCallController,
+                    [](ISession&)
+                    {
+                    });
+    pCallController->OnByeTransactionCompleted(pHandler.get());
+}
+
+TEST_F(MtcCallControllerTest, OnByeTransactionCompletedRemovesListenerAndDeletesAllHandlers)
+{
+    CallKey nCallKey = 1;
+    std::function<void(ISession&)> objOperation = [](ISession&)
+    {
+    };
+
+    EXPECT_CALL(objSessionInterfaceHolder, AddListener(_)).Times(2);
+
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+
+    EXPECT_CALL(objSessionInterfaceHolder, RemoveListener(_)).Times(2);
+
+    std::unique_ptr<ByeTransactionHandler> pHandler =
+            std::make_unique<ByeTransactionHandler>(nCallKey, *pCallController,
+                    [](ISession&)
+                    {
+                    });
+    pCallController->OnByeTransactionCompleted(pHandler.get());
 }
 
 TEST_F(MtcCallControllerTest, GetRedialHelperCreatesSilentRedialHelper)

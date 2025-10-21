@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_I_INTERFACE_HOLDER_LISTENER_H_
-#define MOCK_I_INTERFACE_HOLDER_LISTENER_H_
+#ifndef INTERFACE_BYE_TRANSACTION_HANDLER_LISTENER_H_
+#define INTERFACE_BYE_TRANSACTION_HANDLER_LISTENER_H_
 
-#include "call/IMtcCall.h"
-#include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
-#include <gmock/gmock.h>
+class ByeTransactionHandler;
 
-class ISession;
-
-class MockIInterfaceHolderListener : public IInterfaceHolderListener
+class IByeTransactionHandlerListener
 {
 public:
-    MOCK_METHOD(void, OnSessionInterfaceReleased, (IN CallKey, IN ISession&), (override));
-    MOCK_METHOD(void, OnReferenceInterfaceCleared, (), (override));
-    MOCK_METHOD(void, OnSubscriptionInterfaceCleared, (), (override));
+    virtual ~IByeTransactionHandlerListener() = default;
+    virtual void OnByeTransactionCompleted(IN ByeTransactionHandler* pHandler) = 0;
 };
 
 #endif
