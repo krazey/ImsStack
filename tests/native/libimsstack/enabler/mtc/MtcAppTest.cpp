@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IMtcCallController.h"
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
@@ -72,6 +74,7 @@ protected:
         m_pConfigService->SetCarrierConfig(&m_objMockICarrierConfig);
         m_pOldConfigService = PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, m_pConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
         pMtcApp = new MtcApp(SLOT_ID);
     }
 
@@ -99,7 +102,7 @@ TEST_F(MtcAppTest, GetSlotId)
 
 TEST_F(MtcAppTest, GetSubscriberConfig)
 {
-    EXPECT_EQ(pMtcApp->GetSubscriberConfig(), nullptr);
+    EXPECT_NE(pMtcApp->GetSubscriberConfig(), nullptr);
     pMtcApp->Stop();
 }
 
