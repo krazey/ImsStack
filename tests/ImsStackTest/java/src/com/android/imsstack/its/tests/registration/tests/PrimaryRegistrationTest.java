@@ -91,7 +91,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
-        mRegistration.expect().registered();
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -125,7 +127,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -159,7 +162,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -190,7 +194,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -204,7 +209,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
         mRegistration.expect().registering();
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -499,7 +505,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
-        mRegistration.expect().registered();
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Ignore("TISS support is required.")
@@ -802,7 +810,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -837,7 +846,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -872,7 +882,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -904,7 +915,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -923,7 +935,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistration.expect().registering();
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -1238,7 +1251,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Ignore("TISS support is required.")
@@ -1555,7 +1569,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
 
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
@@ -1596,7 +1611,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
 
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
@@ -1637,7 +1653,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
 
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
@@ -1677,7 +1694,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
 
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
@@ -1704,7 +1722,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistration.expect().registering();
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
 
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
@@ -2094,7 +2113,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
                 TelephonyManager.DATA_CONNECTED), regInfo);
 
-        mRegistration.expect().registered();
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
 
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
