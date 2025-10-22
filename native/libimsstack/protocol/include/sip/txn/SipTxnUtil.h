@@ -26,7 +26,7 @@ private:
 
 public:
     static SipTxnKey* SearchTxnKey(SipTxnKey* pTxn, SIP_BOOL bCheckRSeq = SIP_TRUE);
-    static SIP_BOOL AddTxnKey(SipTxnKey* pTxnKey);
+    static SIP_VOID AddTxnKey(SipTxnKey* pTxnKey);
     static SIP_BOOL DeleteTxnKey(SipTxnKey* pTxnKey, SIP_BOOL bCheckToTag = SIP_FALSE);
 };
 #endif  //__SIP_TXN_UTIL_H__

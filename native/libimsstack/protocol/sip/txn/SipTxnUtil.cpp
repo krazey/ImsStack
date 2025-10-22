@@ -99,19 +99,10 @@ SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey* pUserTxnkey, SipTxnKey* pStoredT
 
     return SIP_TRUE;
 }
-/*
- * Description        : This function Adds Tnx Key to the list
- */
-SIP_BOOL SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
-{
-    if (s_txnKeyList.Add(pTxnKey) < 0)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipTxnUtil::AddTxnKey:Adding in list failed",
-                SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
 
-    return SIP_TRUE;
+SIP_VOID SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
+{
+    s_txnKeyList.Add(pTxnKey);
 }
 
 SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
