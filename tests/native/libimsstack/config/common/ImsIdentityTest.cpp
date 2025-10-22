@@ -192,6 +192,11 @@ TEST_F(ImsIdentityTest, GetAnonymousUserId)
     EXPECT_EQ(ImsIdentity::GetAnonymousUserId(), AString("sip:anonymous@anonymous.invalid"));
 }
 
+TEST_F(ImsIdentityTest, GetUnavailableUserId)
+{
+    EXPECT_EQ(ImsIdentity::GetUnavailableUserId(), AString("sip:unavailable@unknown.invalid"));
+}
+
 TEST_F(ImsIdentityTest, GetPhoneContext)
 {
     ConfigurationManager* pConfigurationManager = ConfigurationManager::GetInstance();
