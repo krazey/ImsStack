@@ -754,7 +754,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
+        public void notifyRegistered(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
             if (regType != RegistrationType.NORMAL) {
                 return;
@@ -769,7 +770,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
+        public void notifyRegistering(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
             if (regType != RegistrationType.NORMAL) {
                 return;
@@ -780,8 +782,8 @@ public class SscServiceState {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, ReasonCode reason, String message,
-                int dataFailCause) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message, int dataFailCause) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }
@@ -795,13 +797,14 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyDeregistering(int regType) {
+        public void notifyDeregistering(@RegistrationType.RegistrationTypeDef int regType) {
             // Do nothing.
         }
 
         @Override
         public void notifyTechnologyChangeFailed(
-                int regType, NetworkType networkType, ReasonCode reason, String message) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }
@@ -815,8 +818,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(
-                int capabilities, NetworkType networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(@Capability.CapabilityMask int capabilities,
+                NetworkType networkType, @CapabilityReason.CapabilityReasonDef int reason) {
             // do nothing
         }
 
@@ -831,8 +834,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyImsFeatureChanged(
-                int regType, NetworkType networkType, int featureTagBits) {
+        public void notifyImsFeatureChanged(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits) {
             // do nothing.
         }
 

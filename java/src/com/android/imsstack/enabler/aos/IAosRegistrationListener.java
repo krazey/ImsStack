@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.net.Uri;
 import android.telephony.ims.ImsReasonInfo;
@@ -22,6 +23,8 @@ import android.util.Pair;
 
 import com.android.internal.annotations.Keep;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
@@ -37,7 +40,8 @@ public interface IAosRegistrationListener {
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      * @param featureTags Type of {@code Set<String>}.
      */
-    void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
+    void notifyRegistered(@RegistrationType.RegistrationTypeDef int regType,
+            NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
             Set<String> featureTags);
 
     /**
@@ -48,7 +52,8 @@ public interface IAosRegistrationListener {
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      * @param featureTags Type of {@code Set<String>}.
      */
-    void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
+    void notifyRegistering(@RegistrationType.RegistrationTypeDef int regType,
+            NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
             Set<String> featureTags);
 
     /**
@@ -62,15 +67,15 @@ public interface IAosRegistrationListener {
      *           {@link android.telephony.DataFailCause}.
      */
     void notifyDeregistered(
-            int regType, NetworkType networkType, ReasonCode reason, String message,
-            int dataFailCause);
+            @RegistrationType.RegistrationTypeDef int regType,
+            NetworkType networkType, ReasonCode reason, String message, int dataFailCause);
 
     /**
      * Notify the application that the device is disconnecting from the IMS network.
      *
      * @param regType Type of the registration. See {@link RegistrationType}.
      */
-    void notifyDeregistering(int regType);
+    void notifyDeregistering(@RegistrationType.RegistrationTypeDef int regType);
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
@@ -81,8 +86,8 @@ public interface IAosRegistrationListener {
      * @param reason The handover failure reason. See {@link ReasonCode}.
      * @param message The handover failure message.
      */
-    void notifyTechnologyChangeFailed(
-            int regType, NetworkType networkType, ReasonCode reason, String message);
+    void notifyTechnologyChangeFailed(@RegistrationType.RegistrationTypeDef int regType,
+            NetworkType networkType, ReasonCode reason, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -100,7 +105,8 @@ public interface IAosRegistrationListener {
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param reason Reason for update failure. See {@link CapabilityReason}.
      */
-    void notifyCapabilitiesUpdateFailed(int capabilities, NetworkType networkType, int reason);
+    void notifyCapabilitiesUpdateFailed(@Capability.CapabilityMask int capabilities,
+            NetworkType networkType, @CapabilityReason.CapabilityReasonDef int reason);
 
     /**
      * This method is called when capabilities are changed from
@@ -131,7 +137,8 @@ public interface IAosRegistrationListener {
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      */
-    void notifyImsFeatureChanged(int regType, NetworkType networkType, int featureTagBits);
+    void notifyImsFeatureChanged(@RegistrationType.RegistrationTypeDef int regType,
+            NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits);
 
     /**
      * Represents the registration state. This enum defines the possible states of registration,
@@ -187,13 +194,22 @@ public interface IAosRegistrationListener {
         public static final int EMERGENCY = 1;
         public static final int FAKE = 2;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                RegistrationType.NORMAL,
+                RegistrationType.EMERGENCY,
+                RegistrationType.FAKE
+        })
+        public @interface RegistrationTypeDef {}
+
         /**
          * This method returns a String for the given registration type.
          *
          * @param regType The registration Type.
          * @return A String for the given registration type.
          */
-        public static String toString(int regType) {
+        public static String toString(@RegistrationTypeDef int regType) {
             return switch (regType) {
                 case NORMAL -> "NORMAL";
                 case EMERGENCY -> "EMERGENCY";
@@ -271,7 +287,33 @@ public interface IAosRegistrationListener {
         // Internal capability
         public static final int TEXT = 1 << 11;
 
-        public static String toString(int capabilities) {
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, value = {
+                Capability.NONE,
+                Capability.VOICE,
+                Capability.VIDEO,
+                Capability.UT,
+                Capability.SMS,
+                Capability.CALL_COMPOSER,
+                Capability.CALL_COMPOSER_BUSINESS_ONLY,
+                Capability.OPTIONS_UCE,
+                Capability.PRESENCE_UCE,
+                Capability.TEXT
+        })
+        public @interface CapabilityMask {}
+
+        /**
+         * Returns a string representation of the given capability bitmask.
+         * The output string lists the names of the enabled capabilities within brackets,
+         * separated by spaces (e.g., "[voice video sms]").
+         *
+         * @param capabilities A bitmask of capability flags, typically validated by
+         * {@link CapabilityMask}. For example, {@code Capability.VOICE | Capability.SMS}.
+         * @return A string listing the names of the enabled capabilities based on the provided
+         *         bitmask.
+         */
+        public static String toString(@CapabilityMask int capabilities) {
             StringBuilder sb = new StringBuilder("[");
 
             appendToken(sb, capabilities, VOICE, "voice");
@@ -327,7 +369,50 @@ public interface IAosRegistrationListener {
         /// ALL
         public static final int ALL = 0xFFFFFFFF;
 
-        public static String toString(int feature) {
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, value = {
+                FeatureTagMask.NONE,
+                FeatureTagMask.MMTEL,
+                FeatureTagMask.VIDEO,
+                FeatureTagMask.TEXT,
+                FeatureTagMask.USSI,
+                FeatureTagMask.VERSTAT,
+                FeatureTagMask.SMSIP,
+                FeatureTagMask.STANDALONE_MSG,
+                FeatureTagMask.CHAT_IM,
+                FeatureTagMask.CHAT_SESSION,
+                FeatureTagMask.FILE_TRANSFER,
+                FeatureTagMask.FILE_TRANSFER_VIA_SMS,
+                FeatureTagMask.CALL_COMPOSER_ENRICHED_CALLING,
+                FeatureTagMask.CALL_COMPOSER_VIA_TELEPHONY,
+                FeatureTagMask.POST_CALL,
+                FeatureTagMask.SHARED_MAP,
+                FeatureTagMask.SHARED_SKETCH,
+                FeatureTagMask.GEO_PUSH,
+                FeatureTagMask.GEO_PUSH_VIA_SMS,
+                FeatureTagMask.CHATBOT_COMMUNICATION_USING_SESSION,
+                FeatureTagMask.CHATBOT_COMMUNICATION_USING_STANDALONE_MSG,
+                FeatureTagMask.CHATBOT_VERSION_SUPPORTED,
+                FeatureTagMask.CHATBOT_VERSION_V2_SUPPORTED,
+                FeatureTagMask.CHATBOT_ROLE,
+                FeatureTagMask.PRESENCE
+        })
+        public @interface FeatureTagMaskDef {}
+
+        /**
+         * Returns a string representation of the given feature tag bitmask.
+         * The output string lists the lowercase names of the enabled feature tags
+         * within brackets, separated by spaces (e.g., "[mmtel video smsip]").
+         * If no flags are set (value is {@link #NONE}), it returns "[]".
+         *
+         * @param feature A bitmask of feature tag flags, typically validated by
+         * {@link FeatureTagMaskDef}. For example,
+         * {@code FeatureTagMask.MMTEL | FeatureTagMask.SMSIP}.
+         * @return A string listing the names of the enabled feature tags based on the
+         * provided bitmask.
+         */
+        public static String toString(@FeatureTagMaskDef int feature) {
             StringBuilder sb = new StringBuilder("[");
 
             appendToken(sb, feature, MMTEL, "mmtel");
@@ -660,6 +745,14 @@ public interface IAosRegistrationListener {
          * The capability was able to be changed.
          */
         public static final int SUCCESS = 0;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                CapabilityReason.ERROR_GENERIC,
+                CapabilityReason.SUCCESS
+        })
+        public @interface CapabilityReasonDef {}
     }
 
     /**
@@ -686,5 +779,15 @@ public interface IAosRegistrationListener {
          * Used as extra code when IMS termination due to WFC missing 911 address
          */
         public static final int WFC_MISSING_911_ADDRESS = 1626;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                ExtraReason.CODE_NORMAL_DEREGISTRATION,
+                ExtraReason.CODE_RADIO_VOPS_NOT_SUPPORTED,
+                ExtraReason.CODE_SSAC_BARRED,
+                ExtraReason.WFC_MISSING_911_ADDRESS
+        })
+        public @interface ExtraReasonDef {}
     }
 }

@@ -743,7 +743,8 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
+        public void notifyRegistered(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 Set<String> featureTags) {
             logi("ImsRegistrationTracker notifyRegistered");
 
@@ -766,7 +767,8 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
+        public void notifyRegistering(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 Set<String> featureTags) {
             logi("ImsRegistrationTracker notifyRegistering");
 
@@ -781,8 +783,8 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, ReasonCode reason, String message,
-                int dataFailCause) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message, int dataFailCause) {
             logi("ImsRegistrationTracker notifyDeregistered - type=" + regType + ", network="
                     + networkType.toString() + ", reason =" + reason.toString()
                     + ", message =" + message + ", dataFailCause =" + dataFailCause);
@@ -800,7 +802,7 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyDeregistering(int regType) {
+        public void notifyDeregistering(@RegistrationType.RegistrationTypeDef int regType) {
             if (regType != RegistrationType.NORMAL) {
                 logi("notifyDeregistering is ignored");
                 return;
@@ -813,7 +815,8 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyTechnologyChangeFailed(
-                int regType, NetworkType networkType, ReasonCode reason, String message) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message) {
             int radioTech = convertToTelephonyNetworkType(networkType);
 
             mRegImpl.notifyTechnologyChangeFailed(regType, radioTech, reason, message);
@@ -825,8 +828,8 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(
-                int capabilities, NetworkType networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(@Capability.CapabilityMask int capabilities,
+                NetworkType networkType, @CapabilityReason.CapabilityReasonDef int reason) {
             if (mListener != null) {
                 int radioTech = convertToTelephonyNetworkType(networkType);
                 int capability = convertToTelephonyCapability(capabilities);
@@ -838,7 +841,8 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyImsFeatureChanged(
-                int regType, NetworkType networkType, int featureTagBits) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                @FeatureTagMask.FeatureTagMaskDef int featureTagBits) {
             logi("notifyImsFeatureChanged: type=" + regType
                     + ", network=" + networkType.toString() + ", features=" + featureTagBits);
 
