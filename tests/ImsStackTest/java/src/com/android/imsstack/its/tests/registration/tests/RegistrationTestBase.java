@@ -59,6 +59,12 @@ public class RegistrationTestBase extends ImsStackTestBase {
     protected static final int ERROR_TYPE_REPEATED = 1;
     protected static final int ERROR_TYPE_CRITICAL = 2;
 
+    protected static final int NOTIFY_TERMINATED_EXPIRED = 1;
+    protected static final int NOTIFY_TERMINATED_DEACTIVATED = 2;
+    protected static final int NOTIFY_TERMINATED_PROBATION = 3;
+    protected static final int NOTIFY_TERMINATED_UNREGISTERED = 4;
+    protected static final int NOTIFY_TERMINATED_REJECTED = 5;
+
     protected ControlConnection mServerControlConnection;
     protected TestRegistration mRegistration;
     protected RegistrationHelper mRegistrationHelper;

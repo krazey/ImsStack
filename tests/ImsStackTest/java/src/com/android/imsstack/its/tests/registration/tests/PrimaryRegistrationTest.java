@@ -24,8 +24,6 @@ import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TE
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
-import static org.junit.Assert.assertTrue;
-
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
@@ -49,6 +47,7 @@ import com.android.imsstack.its.util.SingleLatch;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -73,7 +72,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mServerControlConnection.disconnect();
         tearDownBase(SLOT0);
 
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
     }
 
     @Test
@@ -493,126 +492,281 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistration.expect().registered();
     }
 
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultLte_Deregister_ByNotifyUnregistered() throws Exception {
-        logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
-                + "NOTIFY(Unregistered)");
-
+        // TODO: The following XML files must be included in TISS:
         /*
-          TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Unregistered)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If it does not receive a SUBSCRIBE message within 10 second after REGISTER.
-
-          The server must send a NOTIFY message contain the following attribute:
-          a. The state attribute within the <registration> element set to "terminated"
-          b. within each <contact> element belonging to this UE
-          c. the state attribute set to "terminated" and the event attribute set either to
-             "unregistered"
-         */
+        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="unregistered">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_unregistered")
+                .build());
+        generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        boolean isRegistered = mRegistrationHelper.performRegistration(this, mInfoBuilder.build());
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
 
-        assertTrue(isRegistered);
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
 
-        logi(this, "RegistrationTest: Receives NOTIFY(Unregistered)");
-
-        /*
-          TODO : Set a suitable ImsReasonInfo
-          Sample :
-          mRegistration.expect(3000).deregistered(
-              reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR, null, null);
-         */
-
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
+        mRegistration.expect().deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultLte_Deregister_ByNotifyUnregistered_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="unregistered">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_unregistered")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_UNREGISTERED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_UNREGISTERED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+    }
+
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultLte_Deregister_ByNotifyRejected() throws Exception {
-        logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
-                + "NOTIFY(Rejected)");
-
+        // TODO: The following XML files must be included in TISS:
         /*
-          TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Rejected)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If it does not receive a SUBSCRIBE message within 10 second after REGISTER.
+        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="rejected">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
 
-          The server must send a NOTIFY message contain the following attribute:
-          a. The state attribute within the <registration> element set to "terminated"
-          b. within each <contact> element belonging to this UE
-          c. the state attribute set to "terminated" and the event attribute set either to
-             "rejected"
-         */
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_rejected")
+                .build());
+        generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        boolean isRegistered = mRegistrationHelper.performRegistration(this, mInfoBuilder.build());
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
 
-        assertTrue(isRegistered);
-
-        logi(this, "RegistrationTest: Receives NOTIFY(Rejected)");
-
-        /*
-          TODO : Set a suitable ImsReasonInfo
-          Sample :
-          mRegistration.expect(3000).deregistered(
-              reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR, null, null);
-         */
-
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyDeactivated() throws Exception {
-        logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
-                + "NOTIFY(Deactivated)");
-
+    public void testCarrierDefaultLte_Deregister_ByNotifyRejected_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
         /*
-          TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Deactivated)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If it does not receive a SUBSCRIBE message within 10 second after REGISTER.
-
-          The server must send a NOTIFY message contain the following attribute:
-          a. The state attribute within the <registration> element set to "terminated"
-          b. within each <contact> element belonging to this UE
-          c. the state attribute set to "terminated" and the event attribute set either to
-             "deactivated"
-         */
+        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="rejected">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_rejected")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        boolean isRegistered = mRegistrationHelper.performRegistration(this, mInfoBuilder.build());
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_REJECTED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_REJECTED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
 
-        assertTrue(isRegistered);
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
 
-        logi(this, "RegistrationTest: Receives NOTIFY(Deactivated)");
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+    }
+
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultLte_Deregister_ByNotifyDeactivated() throws Exception {
+        // TODO: The following XML files must be included in TISS:
         /*
-          TODO : Set a suitable ImsReasonInfo
-          Sample :
-          mRegistration.expect(3000).deregistered(
-              reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR, null, null);
-         */
+        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="deactivated">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
 
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_deactivated")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+    }
+
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultLte_Deregister_ByNotifyDeactivated_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
         /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
+        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="deactivated">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_deactivated")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_DEACTIVATED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_DEACTIVATED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_LTE);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1101,19 +1255,319 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistration.expect().registered();
     }
 
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultNr_Deregister_ByNotifyUnregistered() throws Exception {
-        // TODO
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="unregistered">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_unregistered")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultNr_Deregister_ByNotifyUnregistered_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="unregistered">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_unregistered")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_UNREGISTERED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_UNREGISTERED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
+    }
+
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultNr_Deregister_ByNotifyRejected() throws Exception {
-        // TODO
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="rejected">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_rejected")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultNr_Deregister_ByNotifyRejected_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="rejected">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_rejected")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_REJECTED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_REJECTED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
+    }
+
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultNr_Deregister_ByNotifyDeactivated() throws Exception {
-        // TODO
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="deactivated">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_deactivated")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+    }
+
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultNr_Deregister_ByNotifyDeactivated_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="deactivated">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_deactivated")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_DEACTIVATED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_DEACTIVATED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_NR);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
     @Test
@@ -1297,9 +1751,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(new ServiceStateBuilder()
-                                .addNetworkRegistrationInfoForUmts()
-                                .addNetworkRegistrationInfoForIwlan()
-                                .build())
+                        .addNetworkRegistrationInfoForUmts()
+                        .addNetworkRegistrationInfoForIwlan()
+                    .build())
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1675,18 +2129,363 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultWlan_Deregister_ByNotifyUnregistered() throws Exception {
-        // TODO
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="unregistered">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_unregistered")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultWlan_Deregister_ByNotifyUnregistered_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="unregistered">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_unregistered")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_UNREGISTERED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_UNREGISTERED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
+    }
+
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultWlan_Deregister_ByNotifyRejected() throws Exception {
-        // TODO
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="rejected">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_rejected")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultWlan_Deregister_ByNotifyRejected_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="rejected">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_rejected")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_REJECTED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_REJECTED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
+    }
+
+    @Ignore("TISS support is required.")
     @Test
     public void testCarrierDefaultWlan_Deregister_ByNotifyDeactivated() throws Exception {
-        // TODO
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="deactivated">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_deactivated")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
+    }
+
+    @Ignore("TISS support is required.")
+    @Test
+    public void testCarrierDefaultWlan_Deregister_ByNotifyDeactivated_TriggerRegister()
+            throws Exception {
+        // TODO: The following XML files must be included in TISS:
+        /*
+        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
+        <?xml version="1.0" encoding="UTF-8"?>
+        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
+          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
+              state="terminated">
+            <contact id="1" state="terminated" event="deactivated">
+              <uri>sip:ue_instance@192.168.200.44:5060</uri>
+              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
+            </contact>
+          </registration>
+        </reginfo>
+        */
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("NOTIFY-SUBSCRIBE")
+                .setXml("reg_notify_deactivated")
+                .build());
+        generator.addMessages(">200-NOTIFY");
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY - NOTIFY_TERMINATED_DEACTIVATED
+        PersistableBundle objNotifyTerminatedForInitRegUsedEvenBundle = new PersistableBundle();
+        objNotifyTerminatedForInitRegUsedEvenBundle.putIntArray(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                new int[] {NOTIFY_TERMINATED_DEACTIVATED});
+        mConfig.putPersistableBundle(
+                CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                objNotifyTerminatedForInitRegUsedEvenBundle);
+
+        mConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForUmts()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(mConfig)
+                .setServiceState(ss)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo);
+
+        mRegistration.expect(20000).deregistered(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
+                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
+                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
+                networkType -> networkType == REGISTRATION_TECH_IWLAN);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
+
+        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 }
