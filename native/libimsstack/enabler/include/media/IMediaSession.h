@@ -256,8 +256,10 @@ public:
      * @brief Set p-early media header
      *
      * @param nNegoId The target Audio/Video/TextSession identification
-     * @param ePemType The p-early media header value
-     * @return
+     * @param ePemType The p-early media header value. SetMediaPemType(), which transmits the PEM
+     * direction to the media, is called when MTC's SetPemType() is called. Only valid values
+     * ​​transmitted via SIP should be transmitted to the media. If "none" is set, it should be
+     * discarded.
      */
     virtual void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType) = 0;
 
