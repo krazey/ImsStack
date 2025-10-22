@@ -705,6 +705,17 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
+    public void testMediaQualityStatusNotificationRtpConfigNull() {
+        // Receive Media Quality Status Notification when RtpConfig is null
+        MediaQualityStatus qualityStatus = MediaTestUtils.createMediaQualityStatus();
+        when(mMockMediaConfig.getRtpConfig()).thenReturn(null);
+        mAudioSessionCallback.notifyMediaQualityStatus(qualityStatus);
+        processAllMessages();
+        verify(mMockAudioSessionCallbackHandler, never()).onNotifyMediaQualityStatus(
+                anyInt(), any(MediaQualityStatus.class));
+    }
+
+    @Test
     public void testCallQualityChanged() {
         // Receive Call Quality Changed Notification
         CallQuality callQuality = MediaTestUtils.createCallQuality();
