@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
@@ -329,7 +330,11 @@ public class ImsCallContextTest extends ImsStackTest {
                     ICallContext.MEDIA_AUDIO));
 
         int[] intArray = {0, 1};
-        when(mMockCarrierConfig.getIntArray(
+        PersistableBundle audioCodecCapaPayloadBundle = Mockito.mock(PersistableBundle.class);
+        when(mMockCarrierConfig.getBundle(
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .thenReturn(audioCodecCapaPayloadBundle);
+        when(audioCodecCapaPayloadBundle.getIntArray(
                 CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY))
                 .thenReturn(intArray);
         when(mMockDcNetWatcher.is4G()).thenReturn(true);

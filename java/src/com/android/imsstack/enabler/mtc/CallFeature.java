@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -31,11 +32,15 @@ public final class CallFeature {
     }
 
     public static boolean isAudioEvsSupported(int slotId) {
-        int[] evsCodecs = getConfigInterface(slotId).getCarrierConfig()
-                .getIntArray(CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+        PersistableBundle audioCodecCapaPayloadTypes = getConfigInterface(slotId).getCarrierConfig()
+               .getBundle(CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
-        if (evsCodecs != null) {
-            return (evsCodecs.length > 0) ? true : false;
+        if (audioCodecCapaPayloadTypes != null){
+            int[] evsCodecs = audioCodecCapaPayloadTypes
+                    .getIntArray(CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+            if (evsCodecs != null) {
+                return (evsCodecs.length > 0) ? true : false;
+            }
         }
 
         return false;
