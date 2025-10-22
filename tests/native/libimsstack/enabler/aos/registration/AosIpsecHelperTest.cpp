@@ -60,7 +60,6 @@ enum
     TYPE_CLIENT
 };
 
-// FIXME : It will be fixed when it is confirmed that it is possible to change MockAosIpsec.
 class TestAosIpsecEx : public AosIpsec
 {
 public:
