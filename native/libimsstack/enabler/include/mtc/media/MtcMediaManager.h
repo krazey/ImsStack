@@ -168,6 +168,8 @@ private:
     void DestroyAllSessionMedia();
     void DestroySessionMedia(IN const ISession& objISession);
 
+    void SetMediaPemType(IN IMS_UINTP nNegoId, IN PemType ePemType);
+
 protected:
     MediaManager& m_objMediaManager;
     IMediaReportEventListener* m_pMediaReportListener;

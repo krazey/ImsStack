@@ -386,48 +386,28 @@ void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IMessage* piMessage)
 {
-    PemType ePemType = PemType::NONE;
-
     AString strPemHeader =
             m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::P_EARLY_MEDIA);
+    PemType ePemType = MtcMediaUtil::GetPemType(strPemHeader);
 
-    if (strPemHeader.Contains("sendrecv"))
+    // When UE receives P-Early-Media header with "gated", PemType will keep the value.
+    if (ePemType == PemType::NONE)
     {
-        ePemType = PemType::SENDRECV;
-    }
-    else if (strPemHeader.Contains("sendonly"))
-    {
-        ePemType = PemType::SENDONLY;
-    }
-    else if (strPemHeader.Contains("recvonly"))
-    {
-        ePemType = PemType::RECVONLY;
-    }
-    else if (strPemHeader.Contains("inactive"))
-    {
-        ePemType = PemType::INACTIVE;
-    }
-    // When UE receives P-Early-Media header with "gated", PemType will be keep the value.
-
-    if (ePemType != PemType::NONE ||
-            m_objContext.GetConfigurationProxy().GetBoolean(
+        if (!m_objContext.GetConfigurationProxy().GetBoolean(
                     ConfigVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL))
-    {
-        m_pProfileManager->SetPemType(piSession, ePemType);
+        {
+            IMS_TRACE_D("UpdatePemType : no update for P-Early-Media value.", 0, 0, 0);
+            return;
+        }
     }
     else
     {
-        IMS_TRACE_D("UpdatePemType : no update for P-Early-Media value.", 0, 0, 0);
+        SetMediaPemType(GetMediaNegoId(piSession), ePemType);
     }
 
+    m_pProfileManager->SetPemType(piSession, ePemType);
     IMS_TRACE_D("UpdatePemType : [%s]", MtcMediaStringUtils::ConvertPemType(GetPemType(piSession)),
             0, 0);
-
-    if (m_piMediaSession != IMS_NULL)
-    {
-        IMS_UINTP nNegoId = GetMediaNegoId(piSession);
-        m_piMediaSession->SetMediaPemType(nNegoId, (MEDIA_PEM_TYPE)ePemType);
-    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::Run(
@@ -965,4 +945,36 @@ void MtcMediaManager::DestroyAllSessionMedia()
         delete m_objSessionMedias.GetValueAt(nIndex);
         m_objSessionMedias.RemoveAt(nIndex);
     }
+}
+
+PRIVATE
+void MtcMediaManager::SetMediaPemType(IN IMS_UINTP nNegoId, IN PemType ePemType)
+{
+    if (!m_piMediaSession)
+    {
+        IMS_TRACE_E(0, "SetMediaPemType : No IMediaSession", 0, 0, 0);
+        return;
+    }
+
+    MEDIA_PEM_TYPE eMediaPemType;
+    switch (ePemType)
+    {
+        case PemType::SENDRECV:
+            eMediaPemType = MEDIA_PEM_TYPE::SENDRECV;
+            break;
+        case PemType::SENDONLY:
+            eMediaPemType = MEDIA_PEM_TYPE::SENDONLY;
+            break;
+        case PemType::RECVONLY:
+            eMediaPemType = MEDIA_PEM_TYPE::RECVONLY;
+            break;
+        case PemType::INACTIVE:
+            eMediaPemType = MEDIA_PEM_TYPE::INACTIVE;
+            break;
+        case PemType::NONE:
+        default:
+            eMediaPemType = MEDIA_PEM_TYPE::NONE;
+            break;
+    }
+    m_piMediaSession->SetMediaPemType(nNegoId, eMediaPemType);
 }

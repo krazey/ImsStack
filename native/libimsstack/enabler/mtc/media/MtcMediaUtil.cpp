@@ -357,3 +357,24 @@ PUBLIC GLOBAL void MtcMediaUtil::RefineMediaInfoByCallType(
         }
     }
 }
+
+PUBLIC GLOBAL PemType MtcMediaUtil::GetPemType(IN const AString& strPemHeader)
+{
+    if (strPemHeader.Contains("sendrecv"))
+    {
+        return PemType::SENDRECV;
+    }
+    else if (strPemHeader.Contains("sendonly"))
+    {
+        return PemType::SENDONLY;
+    }
+    else if (strPemHeader.Contains("recvonly"))
+    {
+        return PemType::RECVONLY;
+    }
+    else if (strPemHeader.Contains("inactive"))
+    {
+        return PemType::INACTIVE;
+    }
+    return PemType::NONE;
+}

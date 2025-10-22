@@ -1379,7 +1379,7 @@ TEST_F(MtcMediaManagerTest, RestoreSdpDoesNotInvokeISessionRestoreIfNotEstablish
     pMediaManager->RestoreSdp(&objISession);
 }
 
-TEST_F(MtcMediaManagerTest, UpdatePemType_CallsSetMediaPemTypeOnSession_WithSendRecvHeader)
+TEST_F(MtcMediaManagerTest, UpdatePemTypeInvokesSetMediaPemTypeWithSendRecvHeader)
 {
     const IMS_UINTP nNegoId = 123;
     AString strPemHeader = "sendrecv";
@@ -1411,7 +1411,7 @@ TEST_F(MtcMediaManagerTest, UpdatePemType_CallsSetMediaPemTypeOnSession_WithSend
     pMediaManager->DestroyMediaForSession(&objISession);
 }
 
-TEST_F(MtcMediaManagerTest, UpdatePemType_NoHeader_AndConfigToInitialize)
+TEST_F(MtcMediaManagerTest, UpdatePemTypeDoesNotInvokeSetMediaPemTypeWhenNoHeader)
 {
     const IMS_UINTP nNegoId = 123;
     AString strPemHeader = "";  // No P-Early-Media header
@@ -1436,7 +1436,7 @@ TEST_F(MtcMediaManagerTest, UpdatePemType_NoHeader_AndConfigToInitialize)
             .WillOnce(Return(IMS_TRUE));
     // Expect calls made by MtcMediaManager::UpdatePemType
     EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, eExpectedProfileManagerPemType));
-    EXPECT_CALL(objMediaSession, SetMediaPemType(nNegoId, eExpectedMediaSessionPemType));
+    EXPECT_CALL(objMediaSession, SetMediaPemType(nNegoId, eExpectedMediaSessionPemType)).Times(0);
 
     pMediaManager->UpdatePemType(&objISession, &objIMessage);
 

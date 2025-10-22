@@ -442,4 +442,17 @@ TEST_F(MtcMediaUtilTest,
     EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
 }
 
+TEST_F(MtcMediaUtilTest, GetPemTypeReturnsCorrectPemType)
+{
+    EXPECT_EQ(MtcMediaUtil::GetPemType("sendrecv"), PemType::SENDRECV);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("sendonly"), PemType::SENDONLY);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("recvonly"), PemType::RECVONLY);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("inactive"), PemType::INACTIVE);
+
+    EXPECT_EQ(MtcMediaUtil::GetPemType("sendrecv;param=1"), PemType::SENDRECV);
+    EXPECT_EQ(MtcMediaUtil::GetPemType(""), PemType::NONE);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("some_other_value"), PemType::NONE);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("SendRecv"), PemType::NONE);
+}
+
 }  // namespace android
