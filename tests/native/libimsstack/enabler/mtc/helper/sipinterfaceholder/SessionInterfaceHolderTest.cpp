@@ -348,6 +348,42 @@ TEST_F(SessionInterfaceHolderTest, AllListenerIsNotifiedIfOneListenerRemovesItse
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_TRUE);
 }
 
+TEST_F(SessionInterfaceHolderTest, AllListenersNotifiedWhenListenerAddsAnother)
+{
+    // This test verifies that if a listener adds another listener during the notification
+    // callback, the original set of listeners are all still notified, and the newly added
+    // listener is not notified in the current cycle. This ensures the notification loop
+    // operates on a stable snapshot of the listeners present when the notification began.
+
+    MockIInterfaceHolderListener objListener2;
+    MockIInterfaceHolderListener objListener3;
+    pHolder->AddListener(&objListener);
+    pHolder->AddListener(&objListener2);
+
+    // When the first listener is called, it adds a third listener.
+    EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1, _))
+            .WillOnce(Invoke(
+                    [this, &objListener3](CallKey, ISession&)
+                    {
+                        pHolder->AddListener(&objListener3);
+                    }));
+
+    // The second listener, which was in the original list, should still be notified.
+    EXPECT_CALL(objListener2, OnSessionInterfaceReleased(CALL_KEY_1, _)).Times(1);
+
+    // The third listener, added during the notification, should not be called in this cycle.
+    EXPECT_CALL(objListener3, OnSessionInterfaceReleased(CALL_KEY_1, _)).Times(0);
+
+    // Setup for the session release logic
+    EXPECT_CALL(objMockISession, SetListener(_)).Times(1);
+    ON_CALL(objMockISession, GetState()).WillByDefault(Return(ISession::STATE_TERMINATED));
+    EXPECT_CALL(objMockISession, Destroy()).Times(1);
+
+    // Trigger the notification
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+    pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_TRUE);
+}
+
 TEST_F(SessionInterfaceHolderTest, ReleaseISessionDoesNotStartTimerIfSessionIsNull)
 {
     pHolder->AddISession(CALL_KEY_1, &objMockISession);
