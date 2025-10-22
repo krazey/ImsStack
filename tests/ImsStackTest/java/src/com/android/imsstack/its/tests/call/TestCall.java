@@ -50,7 +50,7 @@ public class TestCall extends ServerFailureHandler {
 
     private @Nullable ImsCallSessionWrapper mCallSession = null;
 
-    private @NonNull CallEvent mExpectedEvent = new CallEvent(CallEvent.Type.NONE);
+    private @NonNull CallEvent<?, ?, ?> mExpectedEvent = new CallEvent<>(CallEvent.Type.NONE);
     private final @NonNull EnumMap<CallEvent.Type, CallEvent.EventRecord> mEventRecords =
             new EnumMap<>(CallEvent.Type.class);
     private @NonNull SingleLatch mLatch = new SingleLatch(TestCall.class.getSimpleName());
@@ -132,8 +132,32 @@ public class TestCall extends ServerFailureHandler {
         mLatch.countDownAndInit();
     }
 
+    /**
+     * Stores the call event and stop waiting for the expected event if the given event and
+     * parameters match with the expected.
+     */
+    @SuppressWarnings("unchecked") // It verifies that the event type matches.
+    private <T1, T2, T3> void onCallEventReceived(
+            @NonNull CallEvent.Type eventType, @NonNull CallEvent.EventRecord record) {
+        if (eventType == CallEvent.Type.NONE) {
+            Log.e(this, "Invalid event type NONE");
+            return;
+        }
+
+        mEventRecords.put(eventType, record);
+
+        if (!mExpectedEvent.is(eventType)) {
+            return;
+        }
+
+        if (((CallEvent<T1, T2, T3>) mExpectedEvent).matchParameters(
+                (T1) record.param1, (T2) record.param2, (T3) record.param3)) {
+            mLatch.countDownAndInit();
+        }
+    }
+
     private void resetExpectation() {
-        this.mExpectedEvent = new CallEvent(CallEvent.Type.NONE);
+        this.mExpectedEvent = new CallEvent<>(CallEvent.Type.NONE);
         this.mEventRecords.clear();
     }
 
@@ -174,7 +198,7 @@ public class TestCall extends ServerFailureHandler {
         public void incomingCall() {
             mMmTelFeature.setIncomingCallListener(mIncomingCallListener);
 
-            mExpectedEvent = new CallEvent.MmTelIncomingCallEvent();
+            mExpectedEvent = new CallEvent<>(CallEvent.Type.MMTEL_INCOMING_CALL);
             mWait.run();
 
             mMmTelFeature.setIncomingCallListener(null);
@@ -182,27 +206,31 @@ public class TestCall extends ServerFailureHandler {
 
         @Override
         public void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            mExpectedEvent = new CallEvent.SessionInitiatingFailedEvent(reasonMatcher);
+            mExpectedEvent = new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_INITIATING_FAILED, reasonMatcher);
             mWait.run();
         }
 
         @Override
         public void initiated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
-            mExpectedEvent = new CallEvent.SessionInitiatedEvent(profileMatcher);
+            mExpectedEvent = new CallEvent<ImsCallProfile, Void, Void>(
+                    CallEvent.Type.SESSION_INITIATED, profileMatcher);
             mWait.run();
         }
 
         @Override
         public void terminated(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            mExpectedEvent = new CallEvent.SessionTerminatedEvent(reasonMatcher);
+            mExpectedEvent = new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_TERMINATED, reasonMatcher);
             mWait.run();
         }
 
         @Override
         public void ussdMessageReceived(
                 @NonNull IntPredicate modeMatcher, @NonNull Predicate<String> ussdMessageMatcher) {
-            mExpectedEvent = new CallEvent.SessionUssdMessageReceivedEvent(
-                    modeMatcher, ussdMessageMatcher);
+            mExpectedEvent = new CallEvent<Integer, String, Void>(
+                    CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
+                    (obj) -> modeMatcher.test(obj), ussdMessageMatcher);
             mWait.run();
         }
     }
@@ -214,164 +242,107 @@ public class TestCall extends ServerFailureHandler {
 
         @Override
         public void incomingCall() {
-            final @Nullable CallEvent.EventRecord record =
-                    mEventRecords.get(CallEvent.Type.MMTEL_INCOMING_CALL);
-
-            assertTriggered(record);
+            assertTriggered(CallEvent.Type.MMTEL_INCOMING_CALL, (record) -> true);
         }
 
         @Override
         public void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            final @Nullable CallEvent.EventRecord record =
-                    mEventRecords.get(CallEvent.Type.SESSION_INITIATING_FAILED);
-
-            if (!assertTriggered(record)) {
-                return;
-            }
-            if (!reasonMatcher.test((ImsReasonInfo) record.param1)) {
-                failByUnexpectedParameters();
-            }
+            assertTriggered(CallEvent.Type.SESSION_INITIATING_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
         }
 
         @Override
         public void initiated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
-            final @Nullable CallEvent.EventRecord record =
-                    mEventRecords.get(CallEvent.Type.SESSION_INITIATED);
-
-            if (!assertTriggered(record)) {
-                return;
-            }
-            if (!profileMatcher.test((ImsCallProfile) record.param1)) {
-                failByUnexpectedParameters();
-            }
+            assertTriggered(CallEvent.Type.SESSION_INITIATED,
+                    (record) -> profileMatcher.test((ImsCallProfile) record.param1));
         }
 
         @Override
         public void terminated(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            final @Nullable CallEvent.EventRecord record =
-                    mEventRecords.get(CallEvent.Type.SESSION_TERMINATED);
-
-            if (!assertTriggered(record)) {
-                return;
-            }
-            if (!reasonMatcher.test((ImsReasonInfo) record.param1)) {
-                failByUnexpectedParameters();
-            }
+            assertTriggered(CallEvent.Type.SESSION_TERMINATED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
         }
 
         @Override
         public void ussdMessageReceived(
                     @NonNull IntPredicate modeMatcher,
                     @NonNull Predicate<String> ussdMessageMatcher) {
-            final @Nullable CallEvent.EventRecord record =
-                    mEventRecords.get(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED);
-
-            if (!assertTriggered(record)) {
-                return;
-            }
-            if (!modeMatcher.test((int) record.param1)
-                    || !ussdMessageMatcher.test((String) record.param2)) {
-                failByUnexpectedParameters();
-            }
+            assertTriggered(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
+                    (record) -> modeMatcher.test((int) record.param1)
+                            && ussdMessageMatcher.test((String) record.param2));
         }
 
         /**
-         * @return True if the record exists and continue to check parameters.
-         *         False if the record doesn't exist so no need to check parameters.
-         *         The test fails and returns nothing if the assertion fails.
+         * Asserts if an event was triggered or not, based on {@link #isExpectToBeTriggered()}.
+         *
+         * If expected, fails if the event is missing or its parameters fail the predicate.
+         * If not expected, fails if the event was triggered.
+         *
+         * @param eventType The event to check.
+         * @param parameterPredicate Validates event parameters; only used if the event is expected.
          */
-        private boolean assertTriggered(@Nullable CallEvent.EventRecord record) {
+        private void assertTriggered(
+                @NonNull CallEvent.Type eventType,
+                @NonNull Predicate<CallEvent.EventRecord> parameterPredicate) {
+            final @Nullable CallEvent.EventRecord record = mEventRecords.get(eventType);
+
             if (isExpectToBeTriggered()) {
                 if (record == null) {
-                    fail("The event is expected but it hasn't been triggered.");
+                    fail("The event " + eventType + " is expected but it hasn't been triggered.");
+                } else if (!parameterPredicate.test(record)) {
+                    fail("The event has been triggered with unexpected parameters");
                 }
-                return true;    // Pass, continue to check parameters.
             } else {
                 if (record != null) {
-                    fail("The event with the given parameters is not expected"
-                            + " but has been triggered.");
+                    fail("The event " + eventType + " is not expected but has been triggered.");
                 }
-                return false;   // Pass, no need to check parameters.
             }
-        }
-
-        private void failByUnexpectedParameters() {
-            fail("The event has been triggered with unexpected parameters");
         }
     }
 
+    /** Receives events from {@link ImsMmTelFeatureWrapper.IncomingCallListener}. */
     private class IncomingCallListener implements ImsMmTelFeatureWrapper.IncomingCallListener {
         @Override
         public @Nullable IImsCallSessionListener onIncomingCall(
                 @NonNull IImsCallSession c, @Nullable String callId, @Nullable Bundle extras) {
-            Log.d(this, "onIncomingCall");
-
-            mEventRecords.put(CallEvent.Type.MMTEL_INCOMING_CALL, new CallEvent.EventRecord());
-
             mCallSession = new ImsCallSessionWrapper(c, mCallSessionListener);
 
-            if (mExpectedEvent.is(CallEvent.Type.MMTEL_INCOMING_CALL)) {
-                mLatch.countDownAndInit();
-            }
+            Log.d(this, "onIncomingCall");
+            onCallEventReceived(CallEvent.Type.MMTEL_INCOMING_CALL, new CallEvent.EventRecord());
 
             return mCallSessionListener;
         }
     }
 
+    /** Receives events from {@link IImsCallSessionListener}. */
     private class CallSessionListener extends ImsCallSessionWrapper.ImsCallSessionListener {
-        @Override
-        public void callSessionInitiated(ImsCallProfile profile) {
-            Log.d(this, "callSessionInitiated - profile: " + profile);
-
-            mEventRecords.put(CallEvent.Type.SESSION_INITIATED, new CallEvent.EventRecord(profile));
-
-            if (mExpectedEvent.is(CallEvent.Type.SESSION_INITIATED)
-                    && ((CallEvent.SessionInitiatedEvent) mExpectedEvent)
-                        .matchParameter(profile)) {
-                mLatch.countDownAndInit();
-            }
-        }
-
         @Override
         public void callSessionInitiatingFailed(ImsReasonInfo reason) {
             Log.d(this, "callSessionInitiatingFailed - reason: " + reason);
-
-            mEventRecords.put(CallEvent.Type.SESSION_INITIATING_FAILED,
+            onCallEventReceived(CallEvent.Type.SESSION_INITIATING_FAILED,
                     new CallEvent.EventRecord(reason));
+        }
 
-            if (mExpectedEvent.is(CallEvent.Type.SESSION_INITIATING_FAILED)
-                    && ((CallEvent.SessionInitiatingFailedEvent) mExpectedEvent)
-                        .matchParameter(reason)) {
-                mLatch.countDownAndInit();
-            }
+        @Override
+        public void callSessionInitiated(ImsCallProfile profile) {
+            Log.d(this, "callSessionInitiated - profile: " + profile);
+            onCallEventReceived(CallEvent.Type.SESSION_INITIATED,
+                    new CallEvent.EventRecord(profile));
         }
 
         @Override
         public void callSessionTerminated(ImsReasonInfo reason) {
             Log.d(this, "callSessionTerminated - reason: " + reason);
-
-            mEventRecords.put(CallEvent.Type.SESSION_TERMINATED, new CallEvent.EventRecord(reason));
-
-            if (mExpectedEvent.is(CallEvent.Type.SESSION_TERMINATED)
-                    && ((CallEvent.SessionTerminatedEvent) mExpectedEvent)
-                        .matchParameter(reason)) {
-                mLatch.countDownAndInit();
-            }
+            onCallEventReceived(CallEvent.Type.SESSION_TERMINATED,
+                    new CallEvent.EventRecord(reason));
         }
 
         @Override
         public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
             Log.d(this, "callSessionUssdMessageReceived - "
                     + "mode: " + mode + " ussdMessage: " + ussdMessage);
-
-            mEventRecords.put(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
+            onCallEventReceived(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
                     new CallEvent.EventRecord(mode, ussdMessage));
-
-            if (mExpectedEvent.is(CallEvent.Type.SESSION_TERMINATED)
-                    && ((CallEvent.SessionUssdMessageReceivedEvent) mExpectedEvent)
-                        .matchParameter(mode, ussdMessage)) {
-                mLatch.countDownAndInit();
-            }
         }
     }
 }

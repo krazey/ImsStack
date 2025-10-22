@@ -15,24 +15,47 @@
  */
 package com.android.imsstack.its.tests.call;
 
-import android.telephony.ims.ImsCallProfile;
-import android.telephony.ims.ImsReasonInfo;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 /**
  * This class represents events that can occur during calls.
- * It includes matchers to validate whether actual parameters align with expected values.
+ * It stores matchers to validate whether actual parameters align with expected values.
  */
-public class CallEvent {
+public final class CallEvent<T1, T2, T3> {
     private final @NonNull Type mEventType;
+    private final @Nullable Predicate<T1> mParam1Matcher;
+    private final @Nullable Predicate<T2> mParam2Matcher;
+    private final @Nullable Predicate<T3> mParam3Matcher;
 
     public CallEvent(@NonNull Type eventType) {
+        this(eventType, null, null);
+    }
+
+    public CallEvent(
+            @NonNull Type eventType,
+            @Nullable Predicate<T1> param1Matcher) {
+        this(eventType, param1Matcher, null);
+    }
+
+    public CallEvent(
+            @NonNull Type eventType,
+            @Nullable Predicate<T1> param1Matcher,
+            @Nullable Predicate<T2> param2Matcher) {
+        this(eventType, param1Matcher, param2Matcher, null);
+    }
+
+    public CallEvent(
+            @NonNull Type eventType,
+            @Nullable Predicate<T1> param1Matcher,
+            @Nullable Predicate<T2> param2Matcher,
+            @Nullable Predicate<T3> param3Matcher) {
         mEventType = eventType;
+        mParam1Matcher = param1Matcher;
+        mParam2Matcher = param2Matcher;
+        mParam3Matcher = param3Matcher;
     }
 
     /**
@@ -41,8 +64,16 @@ public class CallEvent {
      * @return True if this event's type equals the provided type.
      *         Always false if the type is {@link Type.NONE}.
      */
-    public final boolean is(Type eventType) {
+    public boolean is(Type eventType) {
         return mEventType != Type.NONE && mEventType == eventType;
+    }
+
+    /** Checks if the parameters match with the expectation. */
+    public boolean matchParameters(
+            @Nullable T1 param1, @Nullable T2 param2, @Nullable T3 param3) {
+        return (mParam1Matcher == null || mParam1Matcher.test(param1))
+                && (mParam2Matcher == null || mParam2Matcher.test(param2))
+                && (mParam3Matcher == null || mParam3Matcher.test(param3));
     }
 
     /** Types of the event. */
@@ -76,77 +107,7 @@ public class CallEvent {
         public EventRecord(Object param1, Object param2, Object param3) {
             this.param1 = param1;
             this.param2 = param2;
-            this.param2 = param3;
-        }
-    }
-
-    /** Event from {@link ImsMmTelFeatureWrapper.IncomingCallListener#onIncomingCall}. */
-    public static class MmTelIncomingCallEvent extends CallEvent {
-        public MmTelIncomingCallEvent() {
-            super(Type.MMTEL_INCOMING_CALL);
-        }
-    }
-
-    /** Event from {@link IImsCallSessionListener.Stub#callSessionInitiatingFailed}. */
-    public static class SessionInitiatingFailedEvent extends CallEvent {
-        private @NonNull Predicate<ImsReasonInfo> mReasonMatcher;
-
-        public SessionInitiatingFailedEvent(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            super(Type.SESSION_INITIATING_FAILED);
-            mReasonMatcher = reasonMatcher;
-        }
-
-        /** Checks if the parameters match with the expectation. */
-        public boolean matchParameter(@Nullable ImsReasonInfo reason) {
-            return mReasonMatcher.test(reason);
-        }
-    }
-
-    /** Event from {@link IImsCallSessionListener.Stub#callSessionInitiated}. */
-    public static class SessionInitiatedEvent extends CallEvent {
-        private @NonNull Predicate<ImsCallProfile> mProfileMatcher;
-
-        public SessionInitiatedEvent(@NonNull Predicate<ImsCallProfile> profileMatcher) {
-            super(Type.SESSION_INITIATED);
-            mProfileMatcher = profileMatcher;
-        }
-
-        /** Checks if the parameters match with the expectation. */
-        public boolean matchParameter(@Nullable ImsCallProfile profile) {
-            return mProfileMatcher.test(profile);
-        }
-    }
-
-    /** Event from {@link IImsCallSessionListener.Stub#callSessionTerminated}. */
-    public static class SessionTerminatedEvent extends CallEvent {
-        private @NonNull Predicate<ImsReasonInfo> mReasonMatcher;
-
-        public SessionTerminatedEvent(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            super(Type.SESSION_TERMINATED);
-            mReasonMatcher = reasonMatcher;
-        }
-
-        /** Checks if the parameters match with the expectation. */
-        public boolean matchParameter(@Nullable ImsReasonInfo reason) {
-            return mReasonMatcher.test(reason);
-        }
-    }
-
-    /** Event from {@link IImsCallSessionListener.Stub#callSessionUssdMessageReceived}. */
-    public static class SessionUssdMessageReceivedEvent extends CallEvent {
-        private @NonNull IntPredicate mModeMatcher;
-        private @NonNull Predicate<String> mUssdMessageMatcher;
-
-        public SessionUssdMessageReceivedEvent(
-                @NonNull IntPredicate modeMatcher, @NonNull Predicate<String> ussdMessageMatcher) {
-            super(Type.SESSION_USSD_MESSAGE_RECEIVED);
-            mModeMatcher = modeMatcher;
-            mUssdMessageMatcher = ussdMessageMatcher;
-        }
-
-        /** Checks if the parameters match with the expectation. */
-        public boolean matchParameter(int mode, @Nullable String ussdMessage) {
-            return mModeMatcher.test(mode) && mUssdMessageMatcher.test(ussdMessage);
+            this.param3 = param3;
         }
     }
 }
