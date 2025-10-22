@@ -182,6 +182,55 @@ typedef enum
     INACTIVE = 4,
 } MEDIA_PEM_TYPE;
 
+enum MediaNegoResult
+{
+    /** No error */
+    MEDIA_NEGO_NO_ERROR = 0,
+    /** error when the descriptor is invalid*/
+    MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR,
+    /** error when there is no negotiated codec */
+    MEDIA_NEGO_ERROR_NO_CODEC_MATCHED,
+    /** error when the ip version is not matched between offer and answer */
+    MEDIA_NEGO_ERROR_IP_MISMATCH,
+};
+
+/**
+ * @brief Represents the result of an SDP negotiation process.
+ *
+ * This struct encapsulates the outcome of an SDP negotiation, including the overall result,
+ * the types of media that were successfully negotiated, and the final direction for each
+ * media type.
+ *
+ * @note When the result is not MEDIA_NEGO_NO_ERROR, the direction and negotiated type
+ *       can be ignored as the negotiation has failed.
+ */
+struct SdpNegotiationResult
+{
+    /** The overall result of the negotiation. */
+    MediaNegoResult eResult = MEDIA_NEGO_NO_ERROR;
+    /** A bitmask of the successfully negotiated media types. */
+    MEDIA_CONTENT_TYPE eNegotiatedType = MEDIA_TYPE_INVALID;
+    /** The negotiated direction for the audio stream. */
+    MEDIA_DIRECTION eAudioDirection = MEDIA_DIRECTION_INVALID;
+    /** The negotiated direction for the video stream. */
+    MEDIA_DIRECTION eVideoDirection = MEDIA_DIRECTION_INVALID;
+    /** The negotiated direction for the text stream. */
+    MEDIA_DIRECTION eTextDirection = MEDIA_DIRECTION_INVALID;
+
+    SdpNegotiationResult(MediaNegoResult result = MEDIA_NEGO_NO_ERROR,
+            MEDIA_CONTENT_TYPE negotiatedType = MEDIA_TYPE_INVALID,
+            MEDIA_DIRECTION audioDirection = MEDIA_DIRECTION_INVALID,
+            MEDIA_DIRECTION videoDirection = MEDIA_DIRECTION_INVALID,
+            MEDIA_DIRECTION textDirection = MEDIA_DIRECTION_INVALID) :
+            eResult(result),
+            eNegotiatedType(negotiatedType),
+            eAudioDirection(audioDirection),
+            eVideoDirection(videoDirection),
+            eTextDirection(textDirection)
+    {
+    }
+};
+
 struct QosRequestParam
 {
 public:

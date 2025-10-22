@@ -20,6 +20,7 @@
 #include <gmock/gmock.h>
 
 #include <MediaNego.h>
+#include "MediaDef.h"
 
 class MockMediaNego : public MediaNego
 {
@@ -31,16 +32,12 @@ public:
     MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (OUT ISession * pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-                    IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
-                    IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
+                    IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+                    IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp, (IN ISession * pSession),
             (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSdp,
-            (IN ISession * pSession, OUT IMS_SINT32& nAudioDirection,
-                    OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
-                    OUT MediaNegoResult& errorReason),
-            (override));
+    MOCK_METHOD(SdpNegotiationResult, NegotiateSdp, (IN ISession * pSession), (override));
     MOCK_METHOD(void, FinalizeSdp, (IN ISession * pSession), (override));
     MOCK_METHOD(void, FinalizeNegotiation, (), (override));
     MOCK_METHOD(void, SetNegoState, (NEGO_STATE eNegoState), (override));

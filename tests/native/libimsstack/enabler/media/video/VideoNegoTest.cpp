@@ -320,49 +320,49 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleParseFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_FALSE));
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(VideoNegoTest, testNegotiateSdpInvalidArguments)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, nullptr, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, nullptr, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pVideoNego->NegotiateSdp(STATE_NEGOTIATED, nullptr, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pVideoNego->NegotiateSdp(STATE_NEGOTIATED, &objSessionDescriptor, nullptr, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pVideoNego->NegotiateSdp(STATE_OFFER_SENT, nullptr, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pVideoNego->NegotiateSdp(STATE_OFFER_SENT, &objSessionDescriptor, nullptr, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, nullptr, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, nullptr, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_NEGOTIATED, nullptr, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_NEGOTIATED, &objSessionDescriptor, nullptr, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_OFFER_SENT, nullptr, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_OFFER_SENT, &objSessionDescriptor, nullptr, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(VideoNegoTest, testNegotiateSdpIdleNegotiateFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_FALSE));
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     // setup the valid OA model
     MockMediaProfileFactory objMediaProfileFactory;
@@ -391,8 +391,8 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
 
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_SEND);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_SEND);
 
     ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
@@ -405,10 +405,10 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     m_pVideoNego->NegotiateSdp(
-            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
@@ -446,13 +446,13 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
 
     m_pVideoNego->NegotiateSdp(
-            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_SEND);
+            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_SEND);
 
     MockMediaProfileFactory::SetInstance(IMS_NULL);
 }
@@ -461,10 +461,10 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferReceivedFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     m_pVideoNego->NegotiateSdp(
-            STATE_OFFER_RECEIVED, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+            STATE_OFFER_RECEIVED, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(VideoNegoTest, testCleanupIncompleteOaModels)
@@ -484,11 +484,11 @@ TEST_F(VideoNegoTest, testGetNegotiatedPayloadValid)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_NE(m_pVideoNego->GetNegotiatedPayload(), IMS_NULL);
 }
 
@@ -496,11 +496,11 @@ TEST_F(VideoNegoTest, testGetNegotiatedRtpPortValid)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     ON_CALL(*m_pMockVideoSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_NE(m_pVideoNego->GetNegotiatedRtpPort(), -1);
 }
 

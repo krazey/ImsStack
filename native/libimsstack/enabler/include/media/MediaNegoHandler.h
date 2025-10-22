@@ -87,19 +87,27 @@ public:
     // --- SDP Negotiation Operations (Delegated to MediaNego) ---
 
     /**
-     * @brief Delegates SDP forming (offer/answer/re-offer) to the specified MediaNego instance.
+     * @brief Forms an SDP body for an outgoing offer, answer, or re-offer by delegating to the
+     * appropriate MediaNego instance.
+     *
+     * This method populates the provided `ISession` object with the necessary media lines (`m=`)
+     * and attributes based on the current negotiation state and the specified parameters.
+     *
      * @see MediaNego::FormSdp
      * @param nNegoId The ID of the MediaNego instance.
-     * @param pSession ISession instance for SDP manipulation.
-     * @param eType The media types involved.
-     * @param nAudioDirection Desired audio direction.
-     * @param nVideoDirection Desired video direction.
-     * @param nTextDirection Desired text direction.
-     * @param bEnforceReofferMode Flag for re-offer mode.
-     * @return IMS_BOOL IMS_TRUE on success, IMS_FALSE on failure (e.g., NegoId not found).
+     * @param pSession [out] The `ISession` object to be populated with the generated SDP.
+     * @param eType A bitmask of `MEDIA_CONTENT_TYPE` specifying the media types to include.
+     * @param eAudioDirection The desired `MEDIA_DIRECTION` for the audio stream.
+     * @param eVideoDirection The desired `MEDIA_DIRECTION` for the video stream.
+     * @param eTextDirection The desired `MEDIA_DIRECTION` for the text stream.
+     * @param bEnforceReofferMode If `IMS_TRUE`, forces the SDP to be generated with the full set of
+     *        local capabilities. This is typically used for re-offers.
+     * @return IMS_BOOL Returns `IMS_TRUE` on success, or `IMS_FALSE` on failure (e.g., if the
+     *         `nNegoId` is not found).
      */
     virtual IMS_BOOL FormSdp(IMS_UINTP nNegoId, OUT ISession* pSession, MEDIA_CONTENT_TYPE eType,
-            IMS_SINT32 nAudioDirection, IMS_SINT32 nVideoDirection, IMS_SINT32 nTextDirection = -1,
+            MEDIA_DIRECTION eAudioDirection, MEDIA_DIRECTION eVideoDirection,
+            MEDIA_DIRECTION eTextDirection = MEDIA_DIRECTION_INVALID,
             IMS_BOOL bEnforceReofferMode = IMS_FALSE);
 
     /**
@@ -116,16 +124,11 @@ public:
      * @brief Delegates SDP negotiation (offer/answer) to the specified MediaNego instance.
      * @see MediaNego::NegotiateSdp
      * @param nNegoId The ID of the MediaNego instance.
-     * @param pSession ISession instance containing the SDP to negotiate.
-     * @param nAudioDirection Output parameter for negotiated audio direction.
-     * @param nVideoDirection Output parameter for negotiated video direction.
-     * @param nTextDirection Output parameter for negotiated text direction.
-     * @param errorReason Output parameter for the reason if negotiation fails.
-     * @return IMS_BOOL IMS_TRUE on successful negotiation, IMS_FALSE otherwise.
+     * @param pSession The ISession instance containing the SDP to negotiate.
+     * @return SdpNegotiationResult A struct containing the negotiated media types, directions,
+     * and any error that occurred.
      */
-    virtual IMS_BOOL NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession,
-            OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
-            OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason);
+    virtual SdpNegotiationResult NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession);
     /**
      * @brief Delegates the cleanup of deleted media descriptors to the specified MediaNego
      * instance.

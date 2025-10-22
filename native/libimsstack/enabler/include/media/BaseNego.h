@@ -22,6 +22,7 @@
 #include "ImsSlot.h"
 #include "ISession.h"
 #include "MediaBaseProfile.h"
+#include "MediaDef.h"
 #include "media/IMediaDescriptor.h"
 
 class MediaEnvironment;
@@ -100,7 +101,7 @@ public:
      */
     virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT IMS_SINT32& eDirection);
+            OUT MEDIA_DIRECTION& eDirection);
 
     /**
      * @brief Get the local ip address

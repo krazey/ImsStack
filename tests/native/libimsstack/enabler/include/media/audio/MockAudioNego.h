@@ -39,7 +39,7 @@ public:
             (override));
     MOCK_METHOD(void, NegotiateSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-                    IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
+                    IN IMediaDescriptor* pDescriptor, OUT MEDIA_DIRECTION& eDirection),
             (override));
     MOCK_METHOD(void, CleanupIncompleteOaModels, (), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));

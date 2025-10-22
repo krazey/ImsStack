@@ -539,24 +539,15 @@ TEST_F(MediaNegoTest, testFormSdpFormSdpFailedText)
 
 TEST_F(MediaNegoTest, testNegotiateSdpWithoutMediaEnvironment)
 {
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
-
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
 }
 
 TEST_F(MediaNegoTest, testNegotiateSdpNullNegoAudio)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     MockIMedia objIMedia;
     MockIMediaDescriptor objIMediaDescriptor;
@@ -567,22 +558,16 @@ TEST_F(MediaNegoTest, testNegotiateSdpNullNegoAudio)
 
     m_objMediaNego.SetAudioNego(IMS_NULL);
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::ERROR_NO_CODEC_MATCHED);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
-    EXPECT_EQ(nAudioDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoTest, testNegotiateSdpNullNegoVideo)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     // success case 5: audio, video and text
     MockIMedia objIMediaAudio;
@@ -600,22 +585,16 @@ TEST_F(MediaNegoTest, testNegotiateSdpNullNegoVideo)
 
     m_objMediaNego.SetVideoNego(IMS_NULL);
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::ERROR_NO_CODEC_MATCHED);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
-    EXPECT_EQ(nVideoDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoTest, testNegotiateSdpNullNegoText)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     // success case 5: audio, video and text
     MockIMedia objIMediaAudio;
@@ -633,22 +612,16 @@ TEST_F(MediaNegoTest, testNegotiateSdpNullNegoText)
 
     m_objMediaNego.SetTextNego(IMS_NULL);
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::ERROR_NO_CODEC_MATCHED);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
-    EXPECT_EQ(nTextDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoTest, testNegotiateSdpFailedAudio)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     MockIMedia objIMedia;
     MockIMediaDescriptor objIMediaDescriptor;
@@ -663,9 +636,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpFailedAudio)
             .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_INVALID), Return()));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::ERROR_NO_CODEC_MATCHED);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
 }
 
@@ -673,11 +646,6 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessAudio)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     // success case
     MockIMedia objIMedia;
@@ -696,9 +664,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessAudio)
             .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_SEND), Return()));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_TRUE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::NO_ERROR);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_AUDIO);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_NO_ERROR);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
 }
 
@@ -706,11 +674,6 @@ TEST_F(MediaNegoTest, testNegotiateSdpFailedVideo)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     MockIMedia objIMedia;
     MockIMediaDescriptor objIMediaDescriptor;
@@ -725,9 +688,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpFailedVideo)
             .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_INVALID), Return()));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::ERROR_NO_CODEC_MATCHED);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
 }
 
@@ -735,11 +698,6 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessVideo)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     // success case
     MockIMedia objIMedia;
@@ -759,9 +717,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessVideo)
             .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_SEND), Return()));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_TRUE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::NO_ERROR);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_VIDEO);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_NO_ERROR);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
 }
 
@@ -769,11 +727,6 @@ TEST_F(MediaNegoTest, testNegotiateSdpFailedText)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     MockIMedia objIMedia;
     MockIMediaDescriptor objIMediaDescriptor;
@@ -788,9 +741,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpFailedText)
             .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_INVALID), Return()));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::ERROR_NO_CODEC_MATCHED);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
 }
 
@@ -798,11 +751,6 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessText)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     // success case
     MockIMedia objIMedia;
@@ -821,9 +769,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpSuccessText)
             .WillOnce(DoAll(SetArgReferee<3>(MEDIA_DIRECTION_SEND), Return()));
 
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
-    EXPECT_TRUE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::NO_ERROR);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_TEXT);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_NO_ERROR);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
 }
 
@@ -1077,9 +1025,6 @@ TEST_F(MediaNegoTest, testNegotiateSdpIpMismatch)
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
 
-    MediaNego::MediaNegoResult errorReason = MediaNego::NO_ERROR;
-    IMS_SINT32 nAudioDirection, nVideoDirection, nTextDirection;
-
     // Set up a media line with an IPv6 remote address
     MockIMedia objIMedia;
     MockIMediaDescriptor objIMediaDescriptor;
@@ -1097,29 +1042,21 @@ TEST_F(MediaNegoTest, testNegotiateSdpIpMismatch)
     m_objMediaNego.SetNegoState(STATE_OFFER_SENT);
 
     // Act
-    IMS_BOOL bResult = m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
 
     // Assert
     // Negotiation should fail because no media lines can be successfully negotiated.
-    EXPECT_FALSE(bResult);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
     // The specific error reason should be IP_MISMATCH.
-    EXPECT_EQ(errorReason, MediaNego::ERROR_IP_MISMATCH);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_IP_MISMATCH);
     // The state should not change from OFFER_SENT.
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
-    // No direction should be negotiated.
-    EXPECT_EQ(nAudioDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoTest, testNegotiateSdpWhenPreviewModeAndNegotiated)
 {
     SetupProfileExpectation();
     EXPECT_TRUE(m_objMediaNego.CreateProfile(m_pMediaEnvironment));
-
-    MediaNego::MediaNegoResult errorReason;
-    IMS_SINT32 nAudioDirection;
-    IMS_SINT32 nVideoDirection;
-    IMS_SINT32 nTextDirection;
 
     // success case
     MockIMedia objIMedia;
@@ -1141,9 +1078,9 @@ TEST_F(MediaNegoTest, testNegotiateSdpWhenPreviewModeAndNegotiated)
     m_objMediaNego.SetPreviewMode(IMS_TRUE);
     ON_CALL(m_objIsession, IsSdpOaInPreviewMode()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_TRUE(m_objMediaNego.NegotiateSdp(
-            &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    EXPECT_EQ(errorReason, MediaNego::NO_ERROR);
+    SdpNegotiationResult objResult = m_objMediaNego.NegotiateSdp(&m_objIsession);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_AUDIO);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_NO_ERROR);
     EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_NEGOTIATED);
     EXPECT_TRUE(m_objMediaNego.IsPreviewMode());
 }

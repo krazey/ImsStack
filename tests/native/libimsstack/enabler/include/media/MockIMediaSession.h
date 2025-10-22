@@ -20,6 +20,7 @@
 #include <gmock/gmock.h>
 
 #include "IMediaSession.h"
+#include "MediaDef.h"
 
 class MockIMediaSession : public IMediaSession
 {
@@ -33,15 +34,12 @@ public:
     MOCK_METHOD(IMS_BOOL, DestroyProfile, (IN IMS_UINTP nNegoID), (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN IMS_UINTP nNegoId, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-                    IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
-                    IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
+                    IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+                    IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp,
             (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSdp,
-            (IN IMS_UINTP nNegoID, IN ISession* pSession, OUT IMS_SINT32* nAudioDirection,
-                    OUT IMS_SINT32* nVideoDirection, OUT IMS_SINT32* nTextDirection,
-                    OUT MediaNego::MediaNegoResult& errorReason),
+    MOCK_METHOD(SdpNegotiationResult, NegotiateSdp, (IN IMS_UINTP nNegoId, IN ISession* pSession),
             (override));
     MOCK_METHOD(IMS_BOOL, RequestQos, (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));

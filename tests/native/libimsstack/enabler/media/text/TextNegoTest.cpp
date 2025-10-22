@@ -237,10 +237,10 @@ TEST_F(TextNegoTest, testFormReofferWithDirection)
     MockIMediaDescriptor objMediaDescriptor;
 
     // Negotiate first to have a previous state
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
 
     // Expect Generate to be called, and capture the profile to verify direction
     EXPECT_CALL(*m_pMockTextSdpGenerator, Generate(_, _, _))
@@ -263,10 +263,10 @@ TEST_F(TextNegoTest, testFormReofferDisabled)
     MockIMediaDescriptor objMediaDescriptor;
 
     // Negotiate first
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
 
     // Expect Generate to be called, and capture the profile to verify disabled state
     EXPECT_CALL(*m_pMockTextSdpGenerator, Generate(_, _, _))
@@ -292,10 +292,10 @@ TEST_F(TextNegoTest, testFormReofferEnforceReofferMode)
     MockIMediaDescriptor objMediaDescriptor;
 
     // Negotiate first
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
 
     // Expect Generate to be called. The key check is that it uses the base profile.
     // We can verify this by checking if the port is the original local port.
@@ -330,7 +330,7 @@ TEST_F(TextNegoTest, testFormReofferUpgradeFromDisabled)
     MockIMediaDescriptor objMediaDescriptor;
 
     // 1. First negotiation results in a disabled profile (port 0)
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     auto pPeerProfile = std::make_shared<TextProfile>();
     pPeerProfile->SetDataPort(0);  // Peer has port 0
     auto pNegoProfile = std::make_shared<TextProfile>();
@@ -340,7 +340,7 @@ TEST_F(TextNegoTest, testFormReofferUpgradeFromDisabled)
             .WillOnce(testing::DoAll(testing::SetArgPointee<3>(*pNegoProfile), Return(IMS_TRUE)));
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
 
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
 
     // 2. Now, form a re-offer to re-enable the stream (bDisable = false)
     EXPECT_CALL(*m_pMockTextSdpGenerator, Generate(_, _, _))
@@ -388,49 +388,49 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleParseFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_FALSE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(TextNegoTest, testNegotiateSdpInvalidArguments)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
-    m_pTextNego->NegotiateSdp(STATE_IDLE, nullptr, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, nullptr, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pTextNego->NegotiateSdp(STATE_NEGOTIATED, nullptr, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pTextNego->NegotiateSdp(STATE_NEGOTIATED, &objSessionDescriptor, nullptr, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pTextNego->NegotiateSdp(STATE_OFFER_SENT, nullptr, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
-    m_pTextNego->NegotiateSdp(STATE_OFFER_SENT, &objSessionDescriptor, nullptr, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, nullptr, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, nullptr, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_NEGOTIATED, nullptr, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_NEGOTIATED, &objSessionDescriptor, nullptr, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_OFFER_SENT, nullptr, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_OFFER_SENT, &objSessionDescriptor, nullptr, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(TextNegoTest, testNegotiateSdpIdleNegotiateFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_FALSE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     // setup the valid OA model
     MockMediaProfileFactory objMediaProfileFactory;
@@ -459,8 +459,8 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
 
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_RECEIVE);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_RECEIVE);
 
     ON_CALL(*m_pMockTextSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pTextNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
@@ -477,7 +477,7 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReject)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     // setup the valid OA model
     MockMediaProfileFactory objMediaProfileFactory;
@@ -505,8 +505,8 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReject)
 
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_RECEIVE);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_RECEIVE);
 
     ON_CALL(*m_pMockTextSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pTextNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
@@ -523,10 +523,10 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferSentFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     m_pTextNego->NegotiateSdp(
-            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(TextNegoTest, testNegotiateSdpOfferSentSuccess)
@@ -561,13 +561,13 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferSentSuccess)
     EXPECT_TRUE(m_pTextNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
 
     m_pTextNego->NegotiateSdp(
-            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_SEND);
+            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_SEND);
 
     MockMediaProfileFactory::SetInstance(IMS_NULL);
 }
@@ -576,10 +576,10 @@ TEST_F(TextNegoTest, testNegotiateSdpOfferReceivedFail)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
     m_pTextNego->NegotiateSdp(
-            STATE_OFFER_RECEIVED, &objSessionDescriptor, &objMediaDescriptor, nDirection);
-    EXPECT_EQ(nDirection, MEDIA_DIRECTION_INVALID);
+            STATE_OFFER_RECEIVED, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(TextNegoTest, testCleanupIncompleteOaModels)
@@ -599,11 +599,11 @@ TEST_F(TextNegoTest, testGetNegotiatedPayloadValid)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_NE(m_pTextNego->GetNegotiatedPayload(), IMS_NULL);
 }
 
@@ -611,11 +611,11 @@ TEST_F(TextNegoTest, testGetNegotiatedRtpPortValid)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    IMS_SINT32 nDirection;
+    MEDIA_DIRECTION eDirection;
 
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, nDirection);
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_NE(m_pTextNego->GetNegotiatedRtpPort(), -1);
 }
 

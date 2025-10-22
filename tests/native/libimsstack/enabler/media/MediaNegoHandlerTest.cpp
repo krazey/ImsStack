@@ -218,17 +218,17 @@ TEST_F(MediaNegoHandlerTest, FormSdpSuccess)
 {
     IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
     MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIOVIDEO;
-    IMS_SINT32 nAudioDir = MEDIA_DIRECTION_SEND_RECEIVE, nVideoDir = MEDIA_DIRECTION_SEND_RECEIVE,
-               nTextDir = MEDIA_DIRECTION_INACTIVE;
+    MEDIA_DIRECTION eAudioDir = MEDIA_DIRECTION_SEND_RECEIVE,
+                    eVideoDir = MEDIA_DIRECTION_SEND_RECEIVE, eTextDir = MEDIA_DIRECTION_INACTIVE;
     IMS_BOOL bEnforce = IMS_FALSE;
 
     EXPECT_CALL(*m_pMockMediaNego1,
-            FormSdp(&m_objMockSession, eType, nAudioDir, nVideoDir, nTextDir, bEnforce))
+            FormSdp(&m_objMockSession, eType, eAudioDir, eVideoDir, eTextDir, bEnforce))
             .WillOnce(Return(IMS_TRUE));
 
     EXPECT_EQ(IMS_TRUE,
             m_pHandler->FormSdp(
-                    nNegoId1, &m_objMockSession, eType, nAudioDir, nVideoDir, nTextDir, bEnforce));
+                    nNegoId1, &m_objMockSession, eType, eAudioDir, eVideoDir, eTextDir, bEnforce));
 }
 
 TEST_F(MediaNegoHandlerTest, FormSdpNegoNotFound)
@@ -260,84 +260,44 @@ TEST_F(MediaNegoHandlerTest, GetSupportedMediaTypesFromSdpNegoNotFound)
 TEST_F(MediaNegoHandlerTest, NegotiateSdpSuccess)
 {
     IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
-    IMS_SINT32 nAudioDirOut, nVideoDirOut, nTextDirOut;
-    MediaNego::MediaNegoResult eReasonOut;
-    IMS_SINT32 nExpectedAudioDir = MEDIA_DIRECTION_SEND_RECEIVE;
-    IMS_SINT32 nExpectedVideoDir = MEDIA_DIRECTION_INACTIVE;
-    IMS_SINT32 nExpectedTextDir = MEDIA_DIRECTION_SEND_RECEIVE;
-    MediaNego::MediaNegoResult eExpectedReason = MediaNego::NO_ERROR;
+    SdpNegotiationResult expectedResult(MEDIA_NEGO_NO_ERROR,
+            (MEDIA_CONTENT_TYPE)(MEDIA_TYPE_AUDIO | MEDIA_TYPE_TEXT), MEDIA_DIRECTION_SEND_RECEIVE,
+            MEDIA_DIRECTION_INACTIVE, MEDIA_DIRECTION_SEND_RECEIVE);
 
-    EXPECT_CALL(*m_pMockMediaNego1, NegotiateSdp(&m_objMockSession, _, _, _, _))
-            .WillOnce(DoAll(SetArgReferee<1>(nExpectedAudioDir),
-                    SetArgReferee<2>(nExpectedVideoDir), SetArgReferee<3>(nExpectedTextDir),
-                    SetArgReferee<4>(eExpectedReason), Return(IMS_TRUE)));
+    EXPECT_CALL(*m_pMockMediaNego1, NegotiateSdp(&m_objMockSession))
+            .WillOnce(Return(expectedResult));
 
-    EXPECT_EQ(IMS_TRUE,
-            m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession, &nAudioDirOut, &nVideoDirOut,
-                    &nTextDirOut, eReasonOut));
-    EXPECT_EQ(nExpectedAudioDir, nAudioDirOut);
-    EXPECT_EQ(nExpectedVideoDir, nVideoDirOut);
-    EXPECT_EQ(nExpectedTextDir, nTextDirOut);
-    EXPECT_EQ(eExpectedReason, eReasonOut);
+    SdpNegotiationResult objResult = m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession);
+
+    EXPECT_EQ(objResult.eNegotiatedType, expectedResult.eNegotiatedType);
+    EXPECT_EQ(objResult.eAudioDirection, expectedResult.eAudioDirection);
+    EXPECT_EQ(objResult.eVideoDirection, expectedResult.eVideoDirection);
+    EXPECT_EQ(objResult.eTextDirection, expectedResult.eTextDirection);
+    EXPECT_EQ(objResult.eResult, expectedResult.eResult);
 }
 
 TEST_F(MediaNegoHandlerTest, NegotiateSdpFailureFromMediaNego)
 {
     IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
-    IMS_SINT32 nAudioDirOut, nVideoDirOut, nTextDirOut;
-    MediaNego::MediaNegoResult eReasonOut;
-    MediaNego::MediaNegoResult eExpectedReason = MediaNego::ERROR_NO_CODEC_MATCHED;
+    SdpNegotiationResult expectedResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
 
-    EXPECT_CALL(*m_pMockMediaNego1, NegotiateSdp(&m_objMockSession, _, _, _, _))
-            .WillOnce(DoAll(
-                    SetArgReferee<1>(MEDIA_DIRECTION_INVALID),  // Set output dirs on failure
-                    SetArgReferee<2>(MEDIA_DIRECTION_INVALID),
-                    SetArgReferee<3>(MEDIA_DIRECTION_INVALID), SetArgReferee<4>(eExpectedReason),
-                    Return(IMS_FALSE)  // MediaNego indicates failure
-                    ));
+    EXPECT_CALL(*m_pMockMediaNego1, NegotiateSdp(&m_objMockSession))
+            .WillOnce(Return(expectedResult));
 
-    EXPECT_EQ(IMS_FALSE,
-            m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession, &nAudioDirOut, &nVideoDirOut,
-                    &nTextDirOut, eReasonOut));
-    EXPECT_EQ(eExpectedReason, eReasonOut);
-    // Check output directions are set appropriately on failure by MediaNego mock
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID, nAudioDirOut);
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID, nVideoDirOut);
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID, nTextDirOut);
+    SdpNegotiationResult objResult = m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession);
+
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    EXPECT_EQ(objResult.eAudioDirection, MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(objResult.eVideoDirection, MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(objResult.eTextDirection, MEDIA_DIRECTION_INVALID);
 }
 
 TEST_F(MediaNegoHandlerTest, NegotiateSdpNegoNotFound)
 {
-    IMS_SINT32 nAudioDirOut, nVideoDirOut, nTextDirOut;
-    MediaNego::MediaNegoResult eReasonOut;
-    EXPECT_EQ(IMS_FALSE,
-            m_pHandler->NegotiateSdp(9999, &m_objMockSession, &nAudioDirOut, &nVideoDirOut,
-                    &nTextDirOut, eReasonOut));
-    EXPECT_EQ(MediaNego::ERROR_INVALID_DESCRIPTOR, eReasonOut);  // Check specific error reason
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID,
-            nAudioDirOut);  // Check output params are set on handler failure
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID, nVideoDirOut);
-    EXPECT_EQ(MEDIA_DIRECTION_INVALID, nTextDirOut);
-}
-
-TEST_F(MediaNegoHandlerTest, NegotiateSdpNullOutputPtrs)
-{
-    IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
-    IMS_SINT32 nAudioDirOut, nVideoDirOut, nTextDirOut;
-    MediaNego::MediaNegoResult eReasonOut;
-    // No EXPECT_CALL on m_pMockMediaNego1 as it shouldn't be reached
-    EXPECT_EQ(IMS_FALSE,
-            m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession, IMS_NULL, &nVideoDirOut,
-                    &nTextDirOut, eReasonOut));
-    EXPECT_EQ(MediaNego::ERROR_INVALID_DESCRIPTOR, eReasonOut);
-    EXPECT_EQ(IMS_FALSE,
-            m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession, &nAudioDirOut, IMS_NULL,
-                    &nTextDirOut, eReasonOut));
-    EXPECT_EQ(MediaNego::ERROR_INVALID_DESCRIPTOR, eReasonOut);
-    EXPECT_EQ(IMS_FALSE,
-            m_pHandler->NegotiateSdp(nNegoId1, &m_objMockSession, &nAudioDirOut, &nVideoDirOut,
-                    IMS_NULL, eReasonOut));
-    EXPECT_EQ(MediaNego::ERROR_INVALID_DESCRIPTOR, eReasonOut);
+    SdpNegotiationResult objResult = m_pHandler->NegotiateSdp(9999, &m_objMockSession);
+    EXPECT_EQ(objResult.eResult, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    EXPECT_EQ(objResult.eNegotiatedType, MEDIA_TYPE_INVALID);
 }
 
 TEST_F(MediaNegoHandlerTest, FinalizeSdpSuccess)

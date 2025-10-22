@@ -163,13 +163,14 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
-        IN MEDIA_CONTENT_TYPE eType, IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
-        IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode)
+        IN MEDIA_CONTENT_TYPE eType, IN MEDIA_DIRECTION eAudioDirection,
+        IN MEDIA_DIRECTION eVideoDirection, IN MEDIA_DIRECTION eTextDirection,
+        IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormSdp() - NegoId[%" PFLS_x "], pSession[%" PFLS_x "], Type[%d]", nNegoId,
             pSession, eType);
-    IMS_TRACE_I("FormSdp() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
-            nVideoDirection, nTextDirection);
+    IMS_TRACE_I("FormSdp() - DIR = Audio[%d], Video[%d], Text[%d]", eAudioDirection,
+            eVideoDirection, eTextDirection);
     IMS_TRACE_D("FormSdp() - Type[%d], EnforceReofferMode[%d]", eType, bEnforceReofferMode, 0);
 
     if (m_pMediaNegoHandler == IMS_NULL)
@@ -178,8 +179,8 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession
         return IMS_FALSE;
     }
 
-    if (m_pMediaNegoHandler->FormSdp(nNegoId, pSession, eType, nAudioDirection, nVideoDirection,
-                nTextDirection, bEnforceReofferMode) == IMS_FALSE)
+    if (m_pMediaNegoHandler->FormSdp(nNegoId, pSession, eType, eAudioDirection, eVideoDirection,
+                eTextDirection, bEnforceReofferMode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "FormSdp() - FormSdp Failed", 0, 0, 0);
         return IMS_FALSE;
@@ -213,9 +214,8 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetSupportedMediaTypesFromSdp(
     return m_pMediaNegoHandler->GetSupportedMediaTypesFromSdp(nNegoId, pSession);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
-        OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
-        OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason)
+PUBLIC VIRTUAL SdpNegotiationResult MediaSession::NegotiateSdp(
+        IN IMS_UINTP nNegoId, IN ISession* pSession)
 {
     IMS_TRACE_I(
             "NegotiateSdp() - NegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
@@ -223,39 +223,34 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
     if (m_pMediaNegoHandler == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateSdp() - invalid MediaNegoHandler", 0, 0, 0);
-        return IMS_FALSE;
+        return SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     }
 
-    if (!m_pMediaNegoHandler->NegotiateSdp(
-                nNegoId, pSession, nAudioDirection, nVideoDirection, nTextDirection, errorReason))
-    {
-        IMS_TRACE_E(0, "NegotiateSdp() - fail to negotiate sdp, reason[%d]", errorReason, 0, 0);
-        return IMS_FALSE;
-    }
+    SdpNegotiationResult objResult = m_pMediaNegoHandler->NegotiateSdp(nNegoId, pSession);
 
     std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateSdp() - Can't find NegoId[%" PFLS_x "]", nNegoId, 0, 0);
-        return IMS_FALSE;
+        return SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     }
 
-    OpenMediaSessions(nNegoId, pMediaNego, GetNegotiatedMediaType(nNegoId));
+    OpenMediaSessions(nNegoId, pMediaNego, objResult.eNegotiatedType);
 
-    if (!(GetNegotiatedMediaType(nNegoId) & MEDIA_TYPE_VIDEO))
+    if (!(objResult.eNegotiatedType & MEDIA_TYPE_VIDEO))
     {
         CloseMediaSessions(MEDIA_TYPE_VIDEO);
     }
 
-    if (!(GetNegotiatedMediaType(nNegoId) & MEDIA_TYPE_TEXT))
+    if (!(objResult.eNegotiatedType & MEDIA_TYPE_TEXT))
     {
         CloseMediaSessions(MEDIA_TYPE_TEXT);
     }
 
-    IMS_TRACE_I("NegotiateSdp() - Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
-            *nVideoDirection, *nTextDirection);
-    return IMS_TRUE;
+    IMS_TRACE_I("NegotiateSdp() - Audio[%d], Video[%d], Text[%d]", objResult.eAudioDirection,
+            objResult.eVideoDirection, objResult.eTextDirection);
+    return objResult;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType)

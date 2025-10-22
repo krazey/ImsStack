@@ -76,21 +76,26 @@ public:
     virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoId) = 0;
 
     /**
-     * @brief Form the SDP to the target dialog with the direction parameters for each
-     * Audio/Video/TextSession
+     * @brief Forms an SDP body for an outgoing offer or answer.
      *
-     * @param nNegoId The identification of the session
-     * @param pSession ISession instance to get the SDP descriptor
-     * @param eMediaType The type of media
-     * @param nAudioDirection The direction of audio m-line in SDP to form
-     * @param nVideoDirection The direction of video m-line in SDP to form
-     * @param nTextDirection The direction of text m-line in SDP to form
-     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
-     * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
+     * This method populates the provided `ISession` object with SDP media lines (`m=`)
+     * based on the specified media types and directions. It handles different negotiation
+     * states, such as initial offers, answers to incoming offers, and re-offers.
+     *
+     * @param nNegoId The ID of the negotiation context to use.
+     * @param pSession [out] The `ISession` object that will be populated with the generated SDP.
+     * @param eMediaType A bitmask of `MEDIA_CONTENT_TYPE` specifying the media types to include.
+     * @param eAudioDirection The desired `MEDIA_DIRECTION` for the audio stream.
+     * @param eVideoDirection The desired `MEDIA_DIRECTION` for the video stream.
+     * @param eTextDirection The desired `MEDIA_DIRECTION` for the text stream.
+     * @param bEnforceReofferMode If `IMS_TRUE`, forces the SDP to be generated with the full set of
+     *        local capabilities, which is typically used for re-offers.
+     * @return IMS_BOOL Returns `IMS_TRUE` on success, or `IMS_FALSE` on failure.
      */
     virtual IMS_BOOL FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
-            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
-            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
+            IN MEDIA_CONTENT_TYPE eMediaType, IN MEDIA_DIRECTION eAudioDirection,
+            IN MEDIA_DIRECTION eVideoDirection,
+            IN MEDIA_DIRECTION eTextDirection = MEDIA_DIRECTION_INVALID,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) = 0;
 
     /**
@@ -104,21 +109,18 @@ public:
             IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 
     /**
-     * @brief Negotiate the SDP to the target dialog with the direction parameters for each
-     * Audio/Video/TextSession
+     * @brief Negotiates an incoming SDP offer or answer.
      *
-     * @param nNegoId The identification of the session
-     * @param pSession ISession instance to get the SDP descriptor
-     * @param eMediaType The type of media
-     * @param nAudioDirection The direction of audio m-line in SDP to negotiate
-     * @param nVideoDirection The direction of video m-line in SDP to negotiate
-     * @param nTextDirection The direction of text m-line in SDP to negotiate
-     * @param errorReason The error reason when the negotiation is failed
-     * @return IMS_BOOL Returns IMS_TRUE when negotiate SDP successfully
+     * This method processes the SDP from the provided `ISession`, negotiates the
+     * media parameters (codecs, direction, etc.) against the local capabilities,
+     * and updates the session accordingly.
+     *
+     * @param nNegoId The identification of the negotiation context.
+     * @param pSession The ISession instance containing the SDP to negotiate.
+     * @return SdpNegotiationResult A struct containing the result of the negotiation,
+     *         including the negotiated media types, directions, and any error that occurred.
      */
-    virtual IMS_BOOL NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
-            OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
-            OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) = 0;
+    virtual SdpNegotiationResult NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 
     /**
      * @brief request to registering QoS callback of the given session to java layer

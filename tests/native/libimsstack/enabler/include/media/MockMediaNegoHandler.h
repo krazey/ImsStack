@@ -20,6 +20,7 @@
 #include <gmock/gmock.h>
 
 #include <media/MediaNegoHandler.h>
+#include "MediaDef.h"
 
 /**
  * @brief Mock class for MediaNegoHandler using Google Mock.
@@ -41,15 +42,12 @@ public:
     MOCK_METHOD(void, ClearAllMediaNego, (), (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (IMS_UINTP nNegoId, OUT ISession* pSession, MEDIA_CONTENT_TYPE eType,
-                    IMS_SINT32 nAudioDirection, IMS_SINT32 nVideoDirection,
-                    IMS_SINT32 nTextDirection, IMS_BOOL bEnforceReofferMode),
+                    MEDIA_DIRECTION eAudioDirection, MEDIA_DIRECTION eVideoDirection,
+                    MEDIA_DIRECTION eTextDirection, IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp,
             (IMS_UINTP nNegoId, IN ISession* pSession), (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSdp,
-            (IMS_UINTP nNegoId, IN ISession* pSession, OUT IMS_SINT32* nAudioDirection,
-                    OUT IMS_SINT32* nVideoDirection, OUT IMS_SINT32* nTextDirection,
-                    OUT MediaNego::MediaNegoResult& errorReason),
+    MOCK_METHOD(SdpNegotiationResult, NegotiateSdp, (IMS_UINTP nNegoId, IN ISession* pSession),
             (override));
     MOCK_METHOD(void, FinalizeSdp, (IMS_UINTP nNegoId, IN ISession* pSession), (override));
     MOCK_METHOD(void, FinalizeNegotiation, (IMS_UINTP nNegoId), (override));

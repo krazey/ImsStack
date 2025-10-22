@@ -18,6 +18,7 @@
 #include "ISessionDescriptor.h"
 #include "ImsTypeDef.h"
 #include "MediaBaseProfile.h"
+#include "MediaDef.h"
 #include "MediaEnvironment.h"
 #include "MediaNegoUtil.h"
 #include "MediaProfileFactory.h"
@@ -143,20 +144,20 @@ PUBLIC VIRTUAL IMS_BOOL BaseNego::FormSdp(IN NEGO_STATE eNegoState,
 
 PUBLIC VIRTUAL void BaseNego::NegotiateSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT IMS_SINT32& nDirection)
+        OUT MEDIA_DIRECTION& eDirection)
 {
     IMS_TRACE_I("NegotiateSdp(): type[%d], state[%d], OaModel size[%d]", m_eType, eNegoState,
             m_listOaModel.GetSize());
-    nDirection = MEDIA_DIRECTION_INVALID;
+    eDirection = MEDIA_DIRECTION_INVALID;
 
     switch (eNegoState)
     {
         case STATE_IDLE:
         case STATE_NEGOTIATED:
-            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
+            eDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_OFFER_SENT:
-            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
+            eDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         default:
             break;

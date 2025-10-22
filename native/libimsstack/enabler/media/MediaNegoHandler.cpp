@@ -152,8 +152,8 @@ void MediaNegoHandler::ClearAllMediaNego()
 
 PUBLIC
 IMS_BOOL MediaNegoHandler::FormSdp(IMS_UINTP nNegoId, OUT ISession* pSession,
-        MEDIA_CONTENT_TYPE eType, IMS_SINT32 nAudioDirection, IMS_SINT32 nVideoDirection,
-        IMS_SINT32 nTextDirection, IMS_BOOL bEnforceReofferMode)
+        MEDIA_CONTENT_TYPE eType, MEDIA_DIRECTION eAudioDirection, MEDIA_DIRECTION eVideoDirection,
+        MEDIA_DIRECTION eTextDirection, IMS_BOOL bEnforceReofferMode)
 {
     std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
@@ -164,7 +164,7 @@ IMS_BOOL MediaNegoHandler::FormSdp(IMS_UINTP nNegoId, OUT ISession* pSession,
     }
 
     return pMediaNego->FormSdp(
-            pSession, eType, nAudioDirection, nVideoDirection, nTextDirection, bEnforceReofferMode);
+            pSession, eType, eAudioDirection, eVideoDirection, eTextDirection, bEnforceReofferMode);
 }
 
 PUBLIC
@@ -184,31 +184,16 @@ MEDIA_CONTENT_TYPE MediaNegoHandler::GetSupportedMediaTypesFromSdp(
 }
 
 PUBLIC
-IMS_BOOL MediaNegoHandler::NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession,
-        OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
-        OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason)
+SdpNegotiationResult MediaNegoHandler::NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession)
 {
-    if (!nAudioDirection || !nVideoDirection || !nTextDirection)
-    {
-        IMS_TRACE_E(0, "NegotiateSdp(): Output direction pointers are NULL", 0, 0, 0);
-        errorReason = MediaNego::ERROR_INVALID_DESCRIPTOR;
-        return IMS_FALSE;
-    }
-
     std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateSdp(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
-        errorReason = MediaNego::ERROR_INVALID_DESCRIPTOR;  // Indicate failure due to
-                                                            // missing Nego
-        *nAudioDirection = MEDIA_DIRECTION_INVALID;
-        *nVideoDirection = MEDIA_DIRECTION_INVALID;
-        *nTextDirection = MEDIA_DIRECTION_INVALID;
-        return IMS_FALSE;
+        return SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     }
 
-    return pMediaNego->NegotiateSdp(
-            pSession, *nAudioDirection, *nVideoDirection, *nTextDirection, errorReason);
+    return pMediaNego->NegotiateSdp(pSession);
 }
 
 PUBLIC
