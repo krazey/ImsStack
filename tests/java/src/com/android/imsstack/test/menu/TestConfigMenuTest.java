@@ -75,8 +75,6 @@ public class TestConfigMenuTest {
                     ImsPrivateProperties.Persistent.KEY_WIFI_TEST),
             Map.entry(TestConfigMenu.KEY_TEST_SIMULATED_IMS_HAL,
                     ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL),
-            Map.entry(TestConfigMenu.KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED,
-                    ImsPrivateProperties.Persistent.KEY_CARRIER_SIGNAL_PCO_TEST),
             Map.entry(TestConfigMenu.KEY_USER_AGENT_USE_PREDEFINED_UA_STRING,
                     ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING));
     // Pair of preference key and string property key.

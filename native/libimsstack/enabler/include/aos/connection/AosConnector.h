@@ -116,7 +116,6 @@ protected:
     IMS_BOOL IsPcscfChangeAvailable() const;
     IMS_BOOL IsPcscfConfigured() const;
     IMS_BOOL IsPcoWaitingRequired() const;
-    IMS_BOOL IsCarrierSignalPcoEnabled() const;
     IMS_BOOL IsPending() const;
     IMS_BOOL IsTerminating() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
