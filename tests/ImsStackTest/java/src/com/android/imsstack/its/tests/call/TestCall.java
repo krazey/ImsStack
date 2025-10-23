@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 
 import android.os.Bundle;
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.aidl.IImsCallSessionListener;
@@ -198,39 +199,148 @@ public class TestCall extends ServerFailureHandler {
         public void incomingCall() {
             mMmTelFeature.setIncomingCallListener(mIncomingCallListener);
 
-            mExpectedEvent = new CallEvent<>(CallEvent.Type.MMTEL_INCOMING_CALL);
-            mWait.run();
+            waitFor(new CallEvent<>(CallEvent.Type.MMTEL_INCOMING_CALL));
 
             mMmTelFeature.setIncomingCallListener(null);
         }
 
         @Override
         public void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            mExpectedEvent = new CallEvent<ImsReasonInfo, Void, Void>(
-                    CallEvent.Type.SESSION_INITIATING_FAILED, reasonMatcher);
-            mWait.run();
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_INITIATING_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void progressing(@NonNull Predicate<ImsStreamMediaProfile> profileMatcher) {
+            waitFor(new CallEvent<ImsStreamMediaProfile, Void, Void>(
+                    CallEvent.Type.SESSION_PROGRESSING, profileMatcher));
         }
 
         @Override
         public void initiated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
-            mExpectedEvent = new CallEvent<ImsCallProfile, Void, Void>(
-                    CallEvent.Type.SESSION_INITIATED, profileMatcher);
-            mWait.run();
+            waitFor(new CallEvent<ImsCallProfile, Void, Void>(
+                    CallEvent.Type.SESSION_INITIATED, profileMatcher));
         }
 
         @Override
         public void terminated(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
-            mExpectedEvent = new CallEvent<ImsReasonInfo, Void, Void>(
-                    CallEvent.Type.SESSION_TERMINATED, reasonMatcher);
-            mWait.run();
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_TERMINATED, reasonMatcher));
+        }
+
+        @Override
+        public void held(@NonNull Predicate<ImsCallProfile> profileMatcher) {
+            waitFor(new CallEvent<ImsCallProfile, Void, Void>(
+                    CallEvent.Type.SESSION_HELD, profileMatcher));
+        }
+
+        @Override
+        public void holdFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_HOLD_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void resumed(@NonNull Predicate<ImsCallProfile> profileMatcher) {
+            waitFor(new CallEvent<ImsCallProfile, Void, Void>(
+                    CallEvent.Type.SESSION_RESUMED, profileMatcher));
+        }
+
+        @Override
+        public void resumeFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_RESUME_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void mergeStarted(
+                @NonNull Predicate<IImsCallSession> sessionMatcher,
+                @NonNull Predicate<ImsCallProfile> profileMatcher) {
+            waitFor(new CallEvent<IImsCallSession, ImsCallProfile, Void>(
+                    CallEvent.Type.SESSION_MERGE_STARTED, sessionMatcher, profileMatcher));
+        }
+
+        @Override
+        public void mergeComplete(@NonNull Predicate<IImsCallSession> sessionMatcher) {
+            waitFor(new CallEvent<IImsCallSession, Void, Void>(
+                    CallEvent.Type.SESSION_MERGE_COMPLETE, sessionMatcher));
+        }
+
+        @Override
+        public void mergeFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_MERGE_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void updated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
+            waitFor(new CallEvent<ImsCallProfile, Void, Void>(
+                    CallEvent.Type.SESSION_UPDATED, profileMatcher));
+        }
+
+        @Override
+        public void updateFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_UPDATE_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void inviteParticipantsRequestDelivered() {
+            waitFor(new CallEvent<>(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_DELIVERED));
+        }
+
+        @Override
+        public void inviteParticipantsRequestFailed(
+                @NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void removeParticipantsRequestDelivered() {
+            waitFor(new CallEvent<>(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_DELIVERED));
+        }
+
+        @Override
+        public void removeParticipantsRequestFailed(
+                @NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_FAILED, reasonMatcher));
+        }
+
+        @Override
+        public void conferenceStateUpdated(@NonNull Predicate<ImsConferenceState> stateMatcher) {
+            waitFor(new CallEvent<ImsConferenceState, Void, Void>(
+                    CallEvent.Type.SESSION_CONFERENCE_STATE_UPDATED, stateMatcher));
         }
 
         @Override
         public void ussdMessageReceived(
                 @NonNull IntPredicate modeMatcher, @NonNull Predicate<String> ussdMessageMatcher) {
-            mExpectedEvent = new CallEvent<Integer, String, Void>(
+            waitFor(new CallEvent<Integer, String, Void>(
                     CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
-                    (obj) -> modeMatcher.test(obj), ussdMessageMatcher);
+                    (obj) -> modeMatcher.test(obj), ussdMessageMatcher));
+        }
+
+        @Override
+        public void rttMessageReceived(@NonNull Predicate<String> rttMessageMatcher) {
+            waitFor(new CallEvent<String, Void, Void>(
+                    CallEvent.Type.SESSION_RTT_MESSAGE_RECEIVED, rttMessageMatcher));
+        }
+
+        @Override
+        public void transferred() {
+            waitFor(new CallEvent<>(CallEvent.Type.SESSION_TRANSFERRED));
+        }
+
+        @Override
+        public void transferFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            waitFor(new CallEvent<ImsReasonInfo, Void, Void>(
+                    CallEvent.Type.SESSION_TRANSFER_FAILED, reasonMatcher));
+        }
+
+        private void waitFor(@NonNull CallEvent<?, ?, ?> event) {
+            mExpectedEvent = event;
             mWait.run();
         }
     }
@@ -252,6 +362,12 @@ public class TestCall extends ServerFailureHandler {
         }
 
         @Override
+        public void progressing(@NonNull Predicate<ImsStreamMediaProfile> profileMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_PROGRESSING,
+                    (record) -> profileMatcher.test((ImsStreamMediaProfile) record.param1));
+        }
+
+        @Override
         public void initiated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
             assertTriggered(CallEvent.Type.SESSION_INITIATED,
                     (record) -> profileMatcher.test((ImsCallProfile) record.param1));
@@ -264,12 +380,118 @@ public class TestCall extends ServerFailureHandler {
         }
 
         @Override
+        public void held(@NonNull Predicate<ImsCallProfile> profileMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_HELD,
+                    (record) -> profileMatcher.test((ImsCallProfile) record.param1));
+        }
+
+        @Override
+        public void holdFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_HOLD_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
+        }
+
+        @Override
+        public void resumed(@NonNull Predicate<ImsCallProfile> profileMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_RESUMED,
+                    (record) -> profileMatcher.test((ImsCallProfile) record.param1));
+        }
+
+        @Override
+        public void resumeFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_RESUME_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
+        }
+
+        @Override
+        public void mergeStarted(
+                @NonNull Predicate<IImsCallSession> sessionMatcher,
+                @NonNull Predicate<ImsCallProfile> profileMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_MERGE_STARTED,
+                    (record) -> sessionMatcher.test((IImsCallSession) record.param1)
+                            && profileMatcher.test((ImsCallProfile) record.param2));
+        }
+
+        @Override
+        public void mergeComplete(@NonNull Predicate<IImsCallSession> sessionMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_MERGE_COMPLETE,
+                    (record) -> sessionMatcher.test((IImsCallSession) record.param1));
+        }
+
+        @Override
+        public void mergeFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_MERGE_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
+        }
+
+        @Override
+        public void updated(@NonNull Predicate<ImsCallProfile> profileMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_UPDATED,
+                    (record) -> profileMatcher.test((ImsCallProfile) record.param1));
+        }
+
+        @Override
+        public void updateFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_UPDATE_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
+        }
+
+        @Override
+        public void inviteParticipantsRequestDelivered() {
+            assertTriggered(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_DELIVERED,
+                    (record) -> true);
+        }
+
+        @Override
+        public void inviteParticipantsRequestFailed(
+                @NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
+        }
+
+        @Override
+        public void removeParticipantsRequestDelivered() {
+            assertTriggered(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_DELIVERED,
+                    (record) -> true);
+        }
+
+        @Override
+        public void removeParticipantsRequestFailed(
+                @NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
+        }
+
+        @Override
+        public void conferenceStateUpdated(@NonNull Predicate<ImsConferenceState> stateMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_CONFERENCE_STATE_UPDATED,
+                    (record) -> stateMatcher.test((ImsConferenceState) record.param1));
+        }
+
+        @Override
         public void ussdMessageReceived(
                     @NonNull IntPredicate modeMatcher,
                     @NonNull Predicate<String> ussdMessageMatcher) {
             assertTriggered(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
                     (record) -> modeMatcher.test((int) record.param1)
                             && ussdMessageMatcher.test((String) record.param2));
+        }
+
+        @Override
+        public void rttMessageReceived(@NonNull Predicate<String> rttMessageMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_RTT_MESSAGE_RECEIVED,
+                    (record) -> rttMessageMatcher.test((String) record.param1));
+        }
+
+        @Override
+        public void transferred() {
+            assertTriggered(CallEvent.Type.SESSION_TRANSFERRED, (record) -> true);
+        }
+
+        @Override
+        public void transferFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher) {
+            assertTriggered(CallEvent.Type.SESSION_TRANSFER_FAILED,
+                    (record) -> reasonMatcher.test((ImsReasonInfo) record.param1));
         }
 
         /**
@@ -324,6 +546,13 @@ public class TestCall extends ServerFailureHandler {
         }
 
         @Override
+        public void callSessionProgressing(ImsStreamMediaProfile profile) {
+            Log.d(this, "callSessionProgressing - profile: " + profile);
+            onCallEventReceived(CallEvent.Type.SESSION_PROGRESSING,
+                    new CallEvent.EventRecord(profile));
+        }
+
+        @Override
         public void callSessionInitiated(ImsCallProfile profile) {
             Log.d(this, "callSessionInitiated - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_INITIATED,
@@ -338,11 +567,126 @@ public class TestCall extends ServerFailureHandler {
         }
 
         @Override
+        public void callSessionHeld(ImsCallProfile profile) {
+            Log.d(this, "callSessionHeld - profile: " + profile);
+            onCallEventReceived(CallEvent.Type.SESSION_HELD, new CallEvent.EventRecord(profile));
+        }
+
+        @Override
+        public void callSessionHoldFailed(ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionHoldFailed - reason: " + reasonInfo);
+            onCallEventReceived(CallEvent.Type.SESSION_HOLD_FAILED,
+                    new CallEvent.EventRecord(reasonInfo));
+        }
+
+        @Override
+        public void callSessionResumed(ImsCallProfile profile) {
+            Log.d(this, "callSessionResumed - profile: " + profile);
+            onCallEventReceived(CallEvent.Type.SESSION_RESUMED, new CallEvent.EventRecord(profile));
+        }
+
+        @Override
+        public void callSessionResumeFailed(ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionResumeFailed - reason: " + reasonInfo);
+            onCallEventReceived(CallEvent.Type.SESSION_RESUME_FAILED,
+                    new CallEvent.EventRecord(reasonInfo));
+        }
+
+        @Override
+        public void callSessionMergeStarted(IImsCallSession newSession, ImsCallProfile profile) {
+            Log.d(this, "callSessionMergeStarted - profile: " + profile);
+            onCallEventReceived(CallEvent.Type.SESSION_MERGE_STARTED,
+                    new CallEvent.EventRecord(newSession, profile));
+        }
+
+        @Override
+        public void callSessionMergeComplete(IImsCallSession newSession) {
+            Log.d(this, "callSessionMergeComplete");
+            onCallEventReceived(CallEvent.Type.SESSION_MERGE_COMPLETE,
+                    new CallEvent.EventRecord(newSession));
+        }
+
+        @Override
+        public void callSessionMergeFailed(ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionMergeFailed - reason: " + reasonInfo);
+            onCallEventReceived(CallEvent.Type.SESSION_MERGE_FAILED,
+                    new CallEvent.EventRecord(reasonInfo));
+        }
+
+        @Override
+        public void callSessionUpdated(ImsCallProfile profile) {
+            Log.d(this, "callSessionUpdated - profile: " + profile);
+            onCallEventReceived(CallEvent.Type.SESSION_UPDATED, new CallEvent.EventRecord(profile));
+        }
+
+        @Override
+        public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionUpdateFailed - reason: " + reasonInfo);
+            onCallEventReceived(
+                    CallEvent.Type.SESSION_UPDATE_FAILED, new CallEvent.EventRecord(reasonInfo));
+        }
+
+        @Override
+        public void callSessionInviteParticipantsRequestDelivered() {
+            Log.d(this, "callSessionInviteParticipantsRequestDelivered");
+            onCallEventReceived(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_DELIVERED,
+                    new CallEvent.EventRecord());
+        }
+
+        @Override
+        public void callSessionInviteParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionInviteParticipantsRequestFailed - reason: " + reasonInfo);
+            onCallEventReceived(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_FAILED,
+                    new CallEvent.EventRecord(reasonInfo));
+        }
+
+        @Override
+        public void callSessionRemoveParticipantsRequestDelivered() {
+            Log.d(this, "callSessionRemoveParticipantsRequestDelivered");
+            onCallEventReceived(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_DELIVERED,
+                    new CallEvent.EventRecord());
+        }
+
+        @Override
+        public void callSessionRemoveParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionRemoveParticipantsRequestFailed - reason: " + reasonInfo);
+            onCallEventReceived(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_FAILED,
+                    new CallEvent.EventRecord(reasonInfo));
+        }
+
+        @Override
+        public void callSessionConferenceStateUpdated(ImsConferenceState state) {
+            Log.d(this, "callSessionConferenceStateUpdated - state: " + state);
+            onCallEventReceived(CallEvent.Type.SESSION_CONFERENCE_STATE_UPDATED,
+                    new CallEvent.EventRecord(state));
+        }
+
+        @Override
         public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
             Log.d(this, "callSessionUssdMessageReceived - "
                     + "mode: " + mode + " ussdMessage: " + ussdMessage);
             onCallEventReceived(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
                     new CallEvent.EventRecord(mode, ussdMessage));
+        }
+
+        @Override
+        public void callSessionRttMessageReceived(String rttMessage) {
+            Log.d(this, "callSessionRttMessageReceived - rttMessage: " + rttMessage);
+            onCallEventReceived(CallEvent.Type.SESSION_RTT_MESSAGE_RECEIVED,
+                    new CallEvent.EventRecord(rttMessage));
+        }
+
+        @Override
+        public void callSessionTransferred() {
+            Log.d(this, "callSessionTransferred");
+            onCallEventReceived(CallEvent.Type.SESSION_TRANSFERRED, new CallEvent.EventRecord());
+        }
+
+        @Override
+        public void callSessionTransferFailed(@Nullable ImsReasonInfo reasonInfo) {
+            Log.d(this, "callSessionTransferFailed - reason: " + reasonInfo);
+            onCallEventReceived(CallEvent.Type.SESSION_TRANSFER_FAILED,
+                    new CallEvent.EventRecord(reasonInfo));
         }
     }
 }

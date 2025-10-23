@@ -586,6 +586,14 @@ public final class ImsCallSessionWrapper {
         public void callSessionInitiating(ImsCallProfile profile) {}
 
         /**
+         * Called when initiating a call session fails.
+         *
+         * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the failure.
+         */
+        @Override
+        public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {}
+
+        /**
          * Called when a call session is in progress.
          *
          * @param profile The media profile {@link ImsCallProfile} containing information about the
@@ -602,14 +610,6 @@ public final class ImsCallSessionWrapper {
          */
         @Override
         public void callSessionInitiated(ImsCallProfile profile) {}
-
-        /**
-         * Called when initiating a call session fails.
-         *
-         * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the failure.
-         */
-        @Override
-        public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {}
 
         /**
          * Called when the initiation of a call session fails after it has been initiated.
