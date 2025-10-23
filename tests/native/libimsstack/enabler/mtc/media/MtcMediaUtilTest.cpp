@@ -20,6 +20,7 @@
 #include "MediaDef.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
+#include "SdpMedia.h"
 #include "call/IMtcCall.h"
 #include "media/MtcMediaUtil.h"
 #include <algorithm>
@@ -256,6 +257,21 @@ TEST_F(MtcMediaUtilTest, GetMediaContentsFromCallType)
 
     eCallType = CallType::VIDEO_RTT;
     EXPECT_EQ(MtcMediaUtil::GetMediaContentsFromCallType(eCallType), MEDIA_TYPE_AUDIOVIDEOTEXT);
+}
+
+TEST_F(MtcMediaUtilTest, GetSdpMediaType)
+{
+    IMS_UINT32 eMediaType = MEDIATYPE_NONE;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_INVALID);
+
+    eMediaType = MEDIATYPE_AUDIO;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_AUDIO);
+
+    eMediaType = MEDIATYPE_VIDEO;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_VIDEO);
+
+    eMediaType = MEDIATYPE_TEXT;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_TEXT);
 }
 
 TEST_F(MtcMediaUtilTest, GetMediaServiceType)

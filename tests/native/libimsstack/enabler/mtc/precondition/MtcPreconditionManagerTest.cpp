@@ -559,13 +559,58 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsFalseIfRemoteNot
     pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
 
+    ImsList<IMedia*> lstMedias;
+    MockIMedia objAudioMedia, objVideoMedia;
+    lstMedias.Append(&objAudioMedia);
+    lstMedias.Append(&objVideoMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+    ON_CALL(objAudioMedia, GetMediaDescriptor()).WillByDefault(Return(&objMediaDescriptor));
+    MockIMediaDescriptor objVideoMediaDescriptor;
+    ON_CALL(objVideoMedia, GetMediaDescriptor()).WillByDefault(Return(&objVideoMediaDescriptor));
+    SdpMedia objSdpAudioMedia, objSdpVideoMedia;
+    objSdpAudioMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objSdpVideoMedia.SetType(SdpMedia::TYPE_VIDEO);
+    ON_CALL(objMediaDescriptor, GetMediaDescriptionEx()).WillByDefault(Return(&objSdpAudioMedia));
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionEx())
+            .WillByDefault(Return(&objSdpVideoMedia));
+
     EXPECT_CALL(objStatusTable,
             IsCurrentStatusEnabled(SdpMedia::TYPE_AUDIO, SdpPrecondition::STATUS_REMOTE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objStatusTable,
             IsCurrentStatusEnabled(SdpMedia::TYPE_VIDEO, SdpPrecondition::STATUS_REMOTE))
             .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_AUDIO))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_VIDEO))
+            .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_FALSE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsTrueIfRemoteNotIncludedInSdp)
+{
+    SetUpMockQosInfo();
+
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    ImsList<IMedia*> lstMedias;
+    MockIMedia objAudioMedia, objVideoMedia;
+    lstMedias.Append(&objAudioMedia);
+    lstMedias.Append(&objVideoMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+    ON_CALL(objAudioMedia, GetMediaDescriptor()).WillByDefault(Return(&objMediaDescriptor));
+    ON_CALL(objVideoMedia, GetMediaDescriptor()).WillByDefault(Return(&objMediaDescriptor));
+    SdpMedia objSdpAudioMedia, objSdpVideoMedia;
+    objSdpAudioMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objSdpVideoMedia.SetType(SdpMedia::TYPE_VIDEO);
+    ON_CALL(objMediaDescriptor, GetMediaDescriptionEx()).WillByDefault(Return(&objSdpAudioMedia));
+
+    ON_CALL(objMediaDescriptor, GetMediaDescriptionEx()).WillByDefault(Return(&objSdpAudioMedia));
+    EXPECT_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, _))
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -794,7 +839,7 @@ TEST_F(MtcPreconditionManagerTest,
 
 TEST_F(MtcPreconditionManagerTest, IsPreconditionIncludedInSdpInvokesSdpPreconditionHelperApi)
 {
-    EXPECT_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+    EXPECT_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_TRUE(pPreconditionManager->IsPreconditionIncludedInSdp(&objISession));
@@ -1111,7 +1156,7 @@ TEST_F(MtcPreconditionManagerTest,
     lstMedias.Append(nullptr);
     lstMedias.Append(&objAudioMedia);
     ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
-    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(&objISession))
             .WillByDefault(Return(NEGO_STATE::STATE_OFFER_SENT));
@@ -1366,7 +1411,7 @@ TEST_F(MtcPreconditionManagerTest,
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
@@ -1417,7 +1462,7 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
@@ -1467,7 +1512,7 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
@@ -1484,7 +1529,7 @@ TEST_F(MtcPreconditionManagerTest, UnsetsSupportingPreconditionOn183ReliableResp
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_RESPONSE));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession))
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillByDefault(Return(IMS_FALSE));
     AString strPrecondition = "precondition";
     ON_CALL(objMessageUtils, HasValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))

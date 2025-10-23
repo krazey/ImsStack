@@ -15,6 +15,7 @@
  */
 
 #include "MtcDef.h"
+#include "SdpMedia.h"
 #include "media/MtcMediaUtil.h"
 #include <vector>
 
@@ -219,6 +220,21 @@ PUBLIC GLOBAL MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromCallType(IN C
     }
 
     return eMediaContentTypes;
+}
+
+PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetSdpMediaType(IN IMS_UINT32 eMediaType)
+{
+    switch (eMediaType)
+    {
+        case MEDIATYPE_AUDIO:
+            return SdpMedia::TYPE_AUDIO;
+        case MEDIATYPE_VIDEO:
+            return SdpMedia::TYPE_VIDEO;
+        case MEDIATYPE_TEXT:
+            return SdpMedia::TYPE_TEXT;
+        default:
+            return SdpMedia::TYPE_INVALID;
+    }
 }
 
 PUBLIC GLOBAL MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceType eServiceType)

@@ -20,6 +20,7 @@
 #include "ISession.h"
 #include "ISipMessage.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/SdpPreconditionHelper.h"
@@ -37,8 +38,9 @@ public:
             IN ISession* piSession, IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf);
     virtual void RemovePreconditionSdp(IN ISession* piSession);
     virtual void FormFailurePreconditionSdp(IN ISession* piSession);
-    virtual IMS_UINT32 GetMediaType(IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState);
-    virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession) const;
+    virtual IMS_UINT32 GetMediaType(IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState) const;
+    virtual IMS_BOOL IsPreconditionIncludedInSdp(
+            IN ISession* piSession, IN IMS_UINT32 eMediaType = MEDIATYPE_NONE) const;
     virtual IMS_BOOL IsLocalResourceReservedInSdp(
             IN ISession* piSession, IN IMS_SINT32 nServiceMethod) const;
 
@@ -55,5 +57,8 @@ private:
     static IMediaDescriptor* GetMediaDescriptor(IN const IMedia* piMedia);
     static IMS_BOOL HasReservedResourceInSdp(
             IN const ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType);
+    static IMS_BOOL IsPreconditionIncludedInSdp(IN const IMediaDescriptor* piMediaDescriptor);
+    static IMS_BOOL HasMatchingRemoteMediaType(
+            IN const IMediaDescriptor* piMediaDescriptor, IN IMS_UINT32 eMediaType);
 };
 #endif
