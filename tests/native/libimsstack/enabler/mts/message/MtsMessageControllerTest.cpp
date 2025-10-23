@@ -1971,7 +1971,7 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsFailToGetContactHeader)
             SEQ_ID, bEmergencyNumber, eServiceType, RETRY_COUNT);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyEmergencySmsStateToAosOverEmergencyService)
+TEST_F(MtsMessageControllerTest, NotifyEmergencySmsStateToAos)
 {
     // Part 1: Send an emergency SMS and verify NotifyEmergencySmsStateToAos(true) is called.
     IMS_BOOL bEmergencyNumber = IMS_TRUE;
@@ -2175,6 +2175,8 @@ TEST_F(MtsMessageControllerTest, NotifyEmergencySmsStateToAosOnSipError)
     EXPECT_CALL(objMockEmergencyMtsService, NotifyEmergencySmsStateToAos(IMS_FALSE)).Times(1);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
+
+
 
 TEST_F(MtsMessageControllerTest, NotifyEmergencySmsStateToAosOnRpErrorOverNormalService)
 {

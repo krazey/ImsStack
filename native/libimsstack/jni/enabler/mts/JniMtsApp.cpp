@@ -89,6 +89,10 @@ PROTECTED VIRTUAL void JniMtsApp::HandleMessage(IN IMS_SINT32 nMsg, IN const Par
             TriggerSendMoSms(objParcel);
             break;
 
+        case IuMtsApp::NOTI_MTSENABLER_MO_SMS_TIMED_OUT:
+            TriggerNotifyMoSmsTimedOut();
+            break;
+
         default:
             break;
     }
@@ -177,4 +181,17 @@ void JniMtsApp::TriggerSendMoSms(IN const Parcel& objParcel)
 
     piMtsJni->SendMoSmsByServiceType(
             eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
+}
+
+PRIVATE
+void JniMtsApp::TriggerNotifyMoSmsTimedOut()
+{
+    IMtsJni* piMtsJni = GetNativeApp();
+    if (piMtsJni == IMS_NULL)
+    {
+        IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
+        return;
+    }
+
+    piMtsJni->NotifyMoSmsTimedOut();
 }

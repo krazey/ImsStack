@@ -40,6 +40,7 @@ private:
     IMtsJni* GetNativeApp();
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
+    void TriggerNotifyMoSmsTimedOut();
 
 private:
     JniMtsAppThread* m_pJniMtsAppThread;

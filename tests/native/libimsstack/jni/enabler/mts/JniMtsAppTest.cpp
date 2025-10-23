@@ -99,4 +99,14 @@ TEST_F(JniMtsAppTest, SendDataMoSms3gpp2)
     pJniApp->SendData(objParcel);
 }
 
+TEST_F(JniMtsAppTest, NotifyMoSmsTimedOut)
+{
+    objParcel.writeInt32(IuMtsApp::NOTI_MTSENABLER_MO_SMS_TIMED_OUT);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockMtsJni, NotifyMoSmsTimedOut()).Times(1);
+
+    pJniApp->SendData(objParcel);
+}
+
 }  // namespace android

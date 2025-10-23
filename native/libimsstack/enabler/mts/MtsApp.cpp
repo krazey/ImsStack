@@ -116,6 +116,13 @@ PUBLIC VIRTUAL void MtsApp::SendMoSmsByServiceType(IN SmsFormatType eSmsFormat,
     }
 }
 
+PUBLIC
+void MtsApp::NotifyMoSmsTimedOut()
+{
+    m_objMtsMessageController.TriggerEmergencySmsStateNotification(
+            IMS_FALSE, m_objMtsMessageController.GetLastEmergencyMessageReference());
+}
+
 PRIVATE void MtsApp::AttachJni()
 {
     JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTS, this);

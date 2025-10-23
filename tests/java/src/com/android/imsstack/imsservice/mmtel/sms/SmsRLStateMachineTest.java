@@ -547,6 +547,23 @@ public class SmsRLStateMachineTest {
                 mSmsRLStateMachine.getSendStatus(41));
     }
 
+    @Test
+    public void onTR1TimerExpired_notifyMoSmsTimedOut() {
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+        SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu, false);
+        mSmsRLStateMachine.mRPduData = moRPData;
+        mSmsRLStateMachine.mTpMr = mTpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
+
+        mSmsRLStateMachine.onTR1TimerExpired();
+
+        verify(mMtsController).notifyMoSmsTimedOut();
+        verify(mListener).notifyRLReportIndication(eq(mSmsRLStateMachine.mToken),
+                eq(mSmsRLStateMachine.mTpMr),
+                eq(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY),
+                eq(SmsManager.RESULT_ERROR_GENERIC_FAILURE), eq(0));
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+    }
+
     private static class TestSmsRLStateMachine extends SmsRLStateMachine {
         private boolean mIsImsRegisteredOnWifi = false;
         private boolean mIsRoaming = false;

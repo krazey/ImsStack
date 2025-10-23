@@ -272,6 +272,14 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDa
 
     m_piMtsServiceState->OnImsDisconnected(nReason);
 
+    MtsServiceType eServiceTypeUsed = IsSmsOverEmergencyPdnSupported()
+            ? MtsServiceType::EMERGENCY : MtsServiceType::NORMAL;
+    if (eServiceTypeUsed == m_eServiceType)
+    {
+        m_objContext.GetMessageController().TriggerEmergencySmsStateNotification(
+                IMS_FALSE, m_objContext.GetMessageController().GetLastEmergencyMessageReference());
+    }
+
     if (m_eServiceType == MtsServiceType::NORMAL)
     {
         // if ims data connection is disconnected, terminate all pending messages.
@@ -428,11 +436,6 @@ void MtsService::NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const
 {
     IMS_TRACE_I("NotifyEmergencySmsStateToAos", 0, 0, 0);
 
-    IMS_BOOL bSupportSmsOverEmergencyPdn =
-            ConfigService::GetConfigService()
-                    ->GetCarrierConfig(m_objContext.GetSlotId())
-                    ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL);
-
     if (m_piImsAos == IMS_NULL)
     {
         IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
@@ -447,7 +450,7 @@ void MtsService::NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const
     }
 
     EmergencyServicePdn eEmergencyServicePdn = EmergencyServicePdn::IMS;
-    if (bSupportSmsOverEmergencyPdn)
+    if (IsSmsOverEmergencyPdnSupported())
     {
         eEmergencyServicePdn = EmergencyServicePdn::EMERGENCY;
     }
@@ -701,4 +704,12 @@ MtsTrafficStartResult MtsService::StartMoTrafficIfNeeded()
         IMS_TRACE_E(0, "RadioTraffic was not allowed", 0, 0, 0);
         return MtsTrafficStartResult::TRAFFIC_NOT_ALLOWED;
     }
+}
+
+PRIVATE
+IMS_BOOL MtsService::IsSmsOverEmergencyPdnSupported() const
+{
+    return ConfigService::GetConfigService()
+            ->GetCarrierConfig(m_objContext.GetSlotId())
+            ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL);
 }

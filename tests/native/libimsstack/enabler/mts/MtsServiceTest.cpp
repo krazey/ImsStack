@@ -256,13 +256,39 @@ TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosConnecting)
 
 TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosDisconnected)
 {
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMessageController, GetLastEmergencyMessageReference())
+            .WillByDefault(Return(1));
+
     EXPECT_CALL(*pMockNormalServiceState, OnImsConnected()).Times(1);
     EXPECT_CALL(*pMockNormalServiceState, OnImsDisconnected(ImsAosReason::NONE)).Times(1);
+    EXPECT_CALL(objMockMessageController, TriggerEmergencySmsStateNotification(IMS_FALSE, _))
+            .Times(1);
     EXPECT_CALL(objMockMessageController, ClearAllMessages()).Times(1);
     IMS_SINT32 nDataFailureReason = 0;
 
     pNormalService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pNormalService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
+}
+
+TEST_F(MtsServiceTest, AosDisconnectedOnEmergencyService)
+{
+    IMS_SINT32 nDataFailureReason = 0;
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMessageController, GetLastEmergencyMessageReference())
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(*pMockEmergencyServiceState, OnImsDisconnected(ImsAosReason::NONE)).Times(1);
+    EXPECT_CALL(objMockMessageController, TriggerEmergencySmsStateNotification(IMS_FALSE, _))
+            .Times(1);
+    EXPECT_CALL(objMockMessageController, ClearAllMessages()).Times(0);
+
+    pEmergencyService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
 }
 
 TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosDisconnecting)

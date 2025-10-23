@@ -20,6 +20,7 @@
 #include "Engine.h"
 #include "GeolocationHelper.h"
 #include "GeolocationPidfCreator.h"
+#include "ImsTypeDef.h"
 #include "ServiceConfig.h"
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"

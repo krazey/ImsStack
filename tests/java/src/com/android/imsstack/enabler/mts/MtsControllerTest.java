@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.mts;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,6 +70,8 @@ public class MtsControllerTest {
     private TestMtsJni mMtsJni;
 
     private class TestMtsJni extends MtsJni {
+        Parcel mLastParcel;
+
         public TestMtsJni() {
             super();
         }
@@ -86,10 +89,7 @@ public class MtsControllerTest {
                 return;
             }
 
-            byte[] baData = parcel.marshall();
-
-            parcel.recycle();
-            parcel = null;
+            mLastParcel = parcel;
         }
     }
 
@@ -119,6 +119,9 @@ public class MtsControllerTest {
     public void tearDown() {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_ID);
+        if (mMtsJni.mLastParcel != null) {
+            mMtsJni.mLastParcel.recycle();
+        }
         mMtsJni.release(SLOT_ID);
         mMtsController.cleanup();
     }
@@ -218,6 +221,17 @@ public class MtsControllerTest {
 
         verify(mMockMtsControllerListener).notifyIncomingMessage(
                 eq(mSmsFormat), eq(pduData));
+    }
+
+    @Test
+    public void testNotifyMoSmsTimedOut() {
+        mMtsController.notifyMoSmsTimedOut();
+
+        assertNotNull(mMtsJni.mLastParcel);
+
+        mMtsJni.mLastParcel.setDataPosition(0);
+        int event = mMtsJni.mLastParcel.readInt();
+        assertEquals(MtsJni.NOTI_MTSENABLER_MO_SMS_TIMED_OUT, event);
     }
 
     private void waitForHandlerActionDelayed(Handler handler, long timeoutMillis, long delayMs) {

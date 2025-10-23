@@ -37,7 +37,6 @@ public class MtsController {
     public static final int REQUEST_REPORT_MO_STATUS = 1;
     // 2 : Request Report Mt SMS
     public static final int REQUEST_REPORT_MT_SMS = 2;
-    public static final int NOTIFICATION_MTS_SEND_MO_SMS = 101;
 
     /* GII-SMSImpl Message */
     public static final int MO_INVALID = 0;
@@ -237,6 +236,22 @@ public class MtsController {
         parcel.writeInt(mRetryCount);
         mMtsJni.sendMessage(parcel, mSlotId);
         return true;
+    }
+
+    /**
+     * Notifies the native that the MO SMS has timed out.
+     */
+    public void notifyMoSmsTimedOut() {
+        ImsLog.d(mSlotId, "notifyMoSmsTimedOut");
+
+        Parcel parcel = Parcel.obtain();
+        if (parcel == null) {
+            ImsLog.e(mSlotId, "parcel is null");
+            return;
+        }
+
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_MO_SMS_TIMED_OUT);
+        mMtsJni.sendMessage(parcel, mSlotId);
     }
 
     private void processNotifySendMoSmsError(int smsFormat, int seqId) {

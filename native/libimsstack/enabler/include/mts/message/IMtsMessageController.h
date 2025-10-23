@@ -72,6 +72,14 @@ public:
      */
     virtual void TriggerEmergencySmsStateNotification(IN IMS_BOOL bInitialized,
              IN IMS_SINT32 nMessageReference) = 0;
+
+    /**
+     * @brief Gets the last emergency message reference.
+     *
+     * @return The last emergency message reference or {@code INVALID_MESSAGE_REFERENCE}
+     *         if there is no last emergency message.
+     */
+    virtual IMS_SINT32 GetLastEmergencyMessageReference() const = 0;
 };
 
 #endif

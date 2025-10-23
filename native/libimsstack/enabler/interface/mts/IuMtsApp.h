@@ -28,6 +28,7 @@ class IuMtsApp
 public:
     // Event : Java to IMS
     static const IMS_SINT32 NOTI_MTSENABLER_SEND_MO_SMS = JAVA2MTSENABLER + 1;
+    static const IMS_SINT32 NOTI_MTSENABLER_MO_SMS_TIMED_OUT = JAVA2MTSENABLER + 2;
 
     // Event : IMS to Java
     static const IMS_UINT32 REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;

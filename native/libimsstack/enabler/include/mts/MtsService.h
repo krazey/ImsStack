@@ -97,6 +97,7 @@ private:
     IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
     IMS_UINT32 GetTrafficTypeOfService() const;
     IMS_BOOL IsEmergencySmsReadyToSend() const;
+    IMS_BOOL IsSmsOverEmergencyPdnSupported() const;
     MtsTrafficStartResult StartMtTraffic();
     MtsTrafficStartResult StartMoTrafficIfNeeded();
 

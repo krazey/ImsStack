@@ -58,6 +58,9 @@ public:
     void ClearAllMessages() override;
     void TriggerEmergencySmsStateNotification(
             IN IMS_BOOL bInitialized, IN IMS_SINT32 nMessageReference) override;
+    inline IMS_SINT32 GetLastEmergencyMessageReference() const override {
+        return m_nLastEmergencyMessageReference;
+    }
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;

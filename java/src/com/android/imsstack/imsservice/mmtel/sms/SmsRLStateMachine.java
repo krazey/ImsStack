@@ -360,6 +360,9 @@ public class SmsRLStateMachine {
                 log("handleMessage: token = " + smsRLStateMachine.mToken
                                                     + " Tp-MessageReference = "
                                                     + smsRLStateMachine.mTpMr);
+                if (smsRLStateMachine.mMtsController != null) {
+                    smsRLStateMachine.mMtsController.notifyMoSmsTimedOut();
+                }
                 smsRLStateMachine.mListener.notifyRLReportIndication(smsRLStateMachine.mToken,
                                                 smsRLStateMachine.mTpMr,
                                                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,

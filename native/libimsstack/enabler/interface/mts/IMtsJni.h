@@ -44,6 +44,15 @@ public:
     virtual void SendMoSmsByServiceType(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN IMS_UINT32 nRetryCount) = 0;
+
+    /**
+     * @brief Notifies that the T1 timer has expired for a mobile-originated SMS.
+     *
+     * This function is called when the T1 timer, which tracks the expected delivery report for an
+     * MO SMS, expires. It triggers procedures to handle the timeout, such as notifying the
+     * appropriate modules to clean up any pending emergency SMS state.
+     */
+    virtual void NotifyMoSmsTimedOut() = 0;
 };
 
 #endif
