@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "ImsAosParameter.h"
 #include "ImsTypeDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
@@ -134,6 +135,17 @@ TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidStatusCodeReturnsCon
     SetActionConfigs(SipStatusCode::SC_INVALID, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TIMEOUT});
     ON_CALL(objSipMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_INVALID));
 
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithRegistrationRestorationReturnsConfiguredAction)
+{
+    SetActionConfigs(SipStatusCode::SC_INVALID,
+            {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION});
+    ON_CALL(objSipMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_INVALID));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(1);
     EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
             EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
 }

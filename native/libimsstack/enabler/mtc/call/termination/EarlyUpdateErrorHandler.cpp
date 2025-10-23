@@ -20,6 +20,7 @@
 #include "ISipConfig.h"
 #include "ISipConfigV.h"
 #include "ISipHeader.h"
+#include "ImsAosParameter.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -49,6 +50,8 @@ const std::unordered_map<IMS_SINT32, EarlyUpdateErrorHandler::ActionFunc>
             &EarlyUpdateErrorHandler::HandleBlockCallByTimer},
     {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TIMEOUT,
             &EarlyUpdateErrorHandler::HandleTimeout},
+    {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION,
+            &EarlyUpdateErrorHandler::HandleRegistrationRestoration},
 };
 // clang-format on
 
@@ -152,6 +155,27 @@ CallReasonInfo EarlyUpdateErrorHandler::HandleTimeout(
 {
     IMS_TRACE_D("HandleTimeout", 0, 0, 0);
     return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
+}
+
+PRIVATE
+CallReasonInfo EarlyUpdateErrorHandler::HandleRegistrationRestoration(
+        [[maybe_unused]] IN const IMessage* piMessage) const
+{
+    IMS_TRACE_D("HandleRegistrationRestoration", 0, 0, 0);
+
+    ControlAos(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+
+    return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
+}
+
+PRIVATE
+void EarlyUpdateErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
+{
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
+    {
+        pAosConnector->Control(nCommand);
+    }
 }
 
 PRIVATE

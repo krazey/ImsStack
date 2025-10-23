@@ -50,6 +50,9 @@ private:
     CallReasonInfo HandleGlareCondition(IN const IMessage* piMessage) const;
     CallReasonInfo HandleBlockCallByTimer(IN const IMessage* piMessage) const;
     CallReasonInfo HandleTimeout(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleRegistrationRestoration(IN const IMessage* piMessage) const;
+
+    void ControlAos(IN IMS_UINT32 nCommand) const;
     IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
     IMS_BOOL IsRegisterWithNextPcscfAndRedialRequiredFor503(IN IMS_SINT32 nRetryAfter) const;
     void SetTimerForImsCallBlocking(IN IMS_SINT32 nRetryAfterInMillis) const;
