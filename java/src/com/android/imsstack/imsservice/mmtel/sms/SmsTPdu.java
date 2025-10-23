@@ -16,6 +16,7 @@
 
 package com.android.imsstack.imsservice.mmtel.sms;
 
+import android.os.SystemProperties;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 
@@ -534,6 +535,9 @@ public class SmsTPdu {
         }
 
         logd("  T-PDU Header: " + byteArrayToString(getTpduHeader()));
+        if (SystemProperties.getBoolean("dbg.ims.enable_pii_logging", false)) {
+            logd(" T-PDU User Data: " + byteArrayToString(mUserData));
+        }
     }
 
     private void appendOptionalParamsToLog() {
