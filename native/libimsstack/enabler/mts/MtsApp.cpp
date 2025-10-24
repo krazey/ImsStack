@@ -123,6 +123,12 @@ void MtsApp::NotifyMoSmsTimedOut()
             IMS_FALSE, m_objMtsMessageController.GetLastEmergencyMessageReference());
 }
 
+PUBLIC
+void MtsApp::NotifyMtSmsTimedOut(IN IMS_SINT32 nMessageRef)
+{
+    m_objMtsMessageController.ClearStaleMtSmsAndProcessNext(nMessageRef);
+}
+
 PRIVATE void MtsApp::AttachJni()
 {
     JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTS, this);

@@ -950,6 +950,33 @@ void MtsMessageController::TriggerEmergencySmsStateNotification(
     }
 }
 
+PUBLIC
+void MtsMessageController::ClearStaleMtSmsAndProcessNext(IN IMS_SINT32 nMessageRef)
+{
+    IMS_TRACE_I("ClearStaleMtSmsAndProcessNext: Clearing stale MT SMS for messageRef: %d",
+            nMessageRef, 0, 0);
+
+    if (m_objMsgList.IsEmpty())
+    {
+        m_bProcessingMsg = IMS_FALSE;
+        return;
+    }
+
+    IMtsMessage* piMtsMessage = Search(nMessageRef, MtsTransactionType::MESSAGE_TYPE_RECEIVE);
+
+    if (piMtsMessage != IMS_NULL && IsDeliverMessage(piMtsMessage->GetPageMessage()))
+    {
+        IMS_TRACE_I("ClearStaleMtSmsAndProcessNext: Found and removing stale message", 0, 0, 0);
+        CleanMtsMessage(piMtsMessage);
+        m_bProcessingMsg = IMS_FALSE;
+    }
+    else
+    {
+        IMS_TRACE_I("ClearStaleMtSmsAndProcessNext: Stale message not found with ref: %d",
+                nMessageRef, 0, 0);
+    }
+}
+
 PRIVATE void MtsMessageController::ReportTransmissionResult(
         IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId /*= -1*/)
 {

@@ -41,6 +41,7 @@ private:
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
     void TriggerNotifyMoSmsTimedOut();
+    void TriggerNotifyMtSmsTimedOut(IN const android::Parcel& objParcel);
 
 private:
     JniMtsAppThread* m_pJniMtsAppThread;

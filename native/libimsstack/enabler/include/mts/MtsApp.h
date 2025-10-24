@@ -68,6 +68,7 @@ public:
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN IMS_UINT32 nRetryCount) override;
     void NotifyMoSmsTimedOut() override;
+    void NotifyMtSmsTimedOut(IN IMS_SINT32 nMessageRef) override;
 
 private:
     void AttachJni();
