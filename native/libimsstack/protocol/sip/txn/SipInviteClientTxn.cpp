@@ -437,6 +437,7 @@ static SIP_BOOL ProceedingState_Receive2xxResponse(
 
     SipTxnKey* pTempTxnKey = new SipTxnKey(pFsmData->m_pSipMsgIn, pnError);
     SipTxnUtil::DeleteTxnKey(pTempTxnKey, SIP_TRUE);
+    pTempTxnKey->SipDelete();
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationTM = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_M);
@@ -519,6 +520,7 @@ static SIP_BOOL AcceptedState_Receive2xxResponse(
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTxnKey* pTempTxnKey = new SipTxnKey(pFsmData->m_pSipMsgIn, pnError);
     SipTxnUtil::DeleteTxnKey(pTempTxnKey, SIP_TRUE);
+    pTempTxnKey->SipDelete();
 
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
@@ -530,45 +532,13 @@ static SIP_BOOL AcceptedState_ReceiveFailureResponse(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    SipMessage* pMsgIn = pFsmData->m_pSipMsgIn;
-    SipTxnKey* pTempTxnKey = new SipTxnKey(pMsgIn, pnError);
+    SipTxnKey* pTempTxnKey = new SipTxnKey(pFsmData->m_pSipMsgIn, pnError);
     SipTxnUtil::DeleteTxnKey(pTempTxnKey, SIP_TRUE);
+    pTempTxnKey->SipDelete();
 
     pFsmData->m_pOutUserData = pTxn->GetUserData();
-    pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_IGNORE_RESP;
 
-    if (pFsmData->m_pTranspInfo != SIP_NULL)
-    {
-        SipMessage* pSentMsg = pFsmData->m_pTranspInfo->GetSentSipMsg();
-        if (pSentMsg != SIP_NULL && pSentMsg->GetMethodType() == SipMessage::METHOD_ACK)
-        {
-            pFsmData->m_eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
-            return SIP_TRUE;
-        }
-    }
-
-    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-
-    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
-    SipMessage* pSipAckMsg = SIP_NULL;
-
-    if (pCallback != SIP_NULL)
-    {
-        pSipAckMsg = pCallback->CreateAckRequest(pMsgIn, pTxn->GetUserData());
-    }
-
-    if (pSipAckMsg == SIP_NULL)
-    {
-        pTxn->PrepareACK(pFsmData->m_pSipMsgIn, SIP_FALSE, &pSipAckMsg);
-    }
-
-    if (pSipAckMsg == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Preparing ACK failed.", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    pFsmData->m_pSendSipMsg = pSipAckMsg;
     return SIP_TRUE;
 }
 
