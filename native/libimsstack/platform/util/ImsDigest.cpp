@@ -21,10 +21,10 @@
 
 typedef IMS_CHAR HASH[HASH_SIZE];
 
-LOCAL const IMS_CHAR MD5_SESS[] = "md5-sess";
-LOCAL const IMS_CHAR QOP_AUTH_INT[] = "auth-int";
+static const IMS_CHAR MD5_SESS[] = "md5-sess";
+static const IMS_CHAR QOP_AUTH_INT[] = "auth-int";
 
-LOCAL void imsDigest_ConvertBinToHex(IN const HASH hBin, OUT HASHHEX hHex);
+static void imsDigest_ConvertBinToHex(IN const HASH hBin, OUT HASHHEX hHex);
 
 GLOBAL void ImsDigest_CalculateA1(IN const AString& strAlgorithm, IN const AString& strUsername,
         IN const AString& strRealm, IN const AString& strPassword, IN const AString& strNonce,
@@ -147,7 +147,7 @@ GLOBAL void ImsDigest_CalculateResponse(IN const HASHHEX hA1,  // H(A1)
     imsDigest_ConvertBinToHex(hResponseLocal, hResponse);
 }
 
-LOCAL void imsDigest_ConvertBinToHex(IN const HASH hBin, OUT HASHHEX hHex)
+static void imsDigest_ConvertBinToHex(IN const HASH hBin, OUT HASHHEX hHex)
 {
     for (IMS_UINT32 i = 0; i < HASH_SIZE; i++)
     {

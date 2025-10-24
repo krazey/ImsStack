@@ -48,8 +48,7 @@ PRIVATE GLOBAL AString::Data AString::SHARED_EMPTY =
 };
 // clang-format on
 
-LOCAL
-IMS_SINT32 astring_CharToWideChar(IN const IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcLen,
+static IMS_SINT32 astring_CharToWideChar(IN const IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcLen,
         OUT IMS_WCHAR* pwszDst, IN IMS_SINT32 nDstLen)
 {
     if (nDstLen == 0)
@@ -83,8 +82,7 @@ IMS_SINT32 astring_CharToWideChar(IN const IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcL
     return nCountOfWChar;
 }
 
-LOCAL
-IMS_SINT32 astring_WideCharToChar(IN const IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSrcLen,
+static IMS_SINT32 astring_WideCharToChar(IN const IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSrcLen,
         OUT IMS_CHAR* pszDst, IN IMS_SINT32 nDstLen)
 {
     if (nDstLen == 0)
@@ -124,8 +122,7 @@ IMS_SINT32 astring_WideCharToChar(IN const IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSr
     return nCountOfChar;
 }
 
-LOCAL
-IMS_SINT64 astring_AToLL(IN const IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOk,
+static IMS_SINT64 astring_AToLL(IN const IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOk,
         OUT const IMS_CHAR** ppEndPtr)
 {
     const IMS_CHAR* p;
@@ -243,8 +240,7 @@ IMS_SINT64 astring_AToLL(IN const IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_
     return nAcc;
 }
 
-LOCAL
-IMS_UINT64 astring_AToULL(IN const IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOk,
+static IMS_UINT64 astring_AToULL(IN const IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOk,
         OUT const IMS_CHAR** ppEndPtr)
 {
     const IMS_CHAR* p;
@@ -368,8 +364,7 @@ IMS_UINT64 astring_AToULL(IN const IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IM
     return nAcc;
 }
 
-LOCAL
-AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
+static AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
 {
     // Length of MAX_UINT64 in base 2
     IMS_CHAR acBuffer[65] = {
@@ -424,14 +419,12 @@ AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
     return AString(pULL, 65 - (pULL - acBuffer));
 }
 
-LOCAL
-AString astring_LLToA(IN IMS_SINT64 nLL, IN IMS_SINT32 nBase)
+static AString astring_LLToA(IN IMS_SINT64 nLL, IN IMS_SINT32 nBase)
 {
     return astring_ULLToA(nLL < 0 ? -nLL : nLL, nBase);
 }
 
-LOCAL
-IMS_SINT32 astring_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
+static IMS_SINT32 astring_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
 {
     const IMS_SIZE_T nPage = 1 << 12;  // 4096 bytes
     IMS_SIZE_T nNumAlloc;
@@ -455,8 +448,7 @@ IMS_SINT32 astring_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
     return LONG_TO_INT(nNumAlloc - nExtra);
 }
 
-LOCAL
-AString& astring_Insert(
+static AString& astring_Insert(
         IN AString* pStr, IN IMS_SINT32 nOffset, IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount)
 {
     if ((nOffset < 0) || (nCount <= 0) || (pszValue == IMS_NULL))
@@ -484,8 +476,7 @@ AString& astring_Insert(
     return (*pStr);
 }
 
-LOCAL
-AString astring_LLToString(IN IMS_SINT64 nLL, IN IMS_SINT32 nPrecision = -1,
+static AString astring_LLToString(IN IMS_SINT64 nLL, IN IMS_SINT32 nPrecision = -1,
         IN IMS_SINT32 nBase = 10, IN IMS_SINT32 nWidth = -1, IN IMS_UINT32 nFlags = FLAG_NONE)
 {
     IMS_BOOL bPrecisionNotSpecified = IMS_FALSE;
@@ -594,8 +585,7 @@ AString astring_LLToString(IN IMS_SINT64 nLL, IN IMS_SINT32 nPrecision = -1,
     return strNumber;
 }
 
-LOCAL
-AString astring_ULLToString(IN IMS_UINT64 nULL, IN IMS_SINT32 nPrecision = -1,
+static AString astring_ULLToString(IN IMS_UINT64 nULL, IN IMS_SINT32 nPrecision = -1,
         IN IMS_SINT32 nBase = 10, IN IMS_SINT32 nWidth = -1, IN IMS_UINT32 nFlags = FLAG_NONE)
 {
     IMS_BOOL bPrecisionNotSpecified = IMS_FALSE;

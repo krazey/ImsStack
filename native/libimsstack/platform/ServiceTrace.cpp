@@ -20,7 +20,7 @@
 
 #define __IMS_TRACE_TAG_DEF__(ENUM, NAME, MODULE) {NAME, IMS_TRACE_MODULE_##MODULE},
 
-LOCAL const ImsTraceTag s_objImsTraceTag[IMS_TRACE_TAG_MAX + 1] = {
+static const ImsTraceTag TRACE_TAGS[IMS_TRACE_TAG_MAX + 1] = {
         {__IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT},
 
 #include "ITraceTagDef.h"
@@ -72,7 +72,7 @@ TraceService::TraceService() :
 {
     for (IMS_SINT32 i = 0; i < IMS_TRACE_TAG_MAX + 1; ++i)
     {
-        m_objTraceTag[i] = const_cast<ImsTraceTag*>(&s_objImsTraceTag[i]);
+        m_objTraceTag[i] = const_cast<ImsTraceTag*>(&TRACE_TAGS[i]);
     }
 
     s_nLoggableForDebug = ImsTrace::IsLoggable(ITrace::CAT_D);

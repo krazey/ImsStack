@@ -45,7 +45,7 @@ __IMS_TRACE_TAG_IPL__;
  * @brief Display all the ciphers available for a specific SSL structure.
  */
 #if defined(__DEBUG__)
-LOCAL void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
+static void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
 {
     AString strBuffer;
 

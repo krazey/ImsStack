@@ -50,8 +50,7 @@ __IMS_TRACE_TAG_IPL__;
 
 #define IMS_MAX_RETRY_COUNT_ON_BIND_FAILED 3
 
-LOCAL
-void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT32 nAddrLen,
+static void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT32 nAddrLen,
         OUT IpAddress& objIpAddr, OUT IMS_UINT32& nPort)
 {
     if (pstSockAddr == IMS_NULL)
@@ -102,8 +101,7 @@ void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT
 }
 
 // NETWORK_INTERFACE_FOR_SOCKET
-LOCAL
-void osSocket_SetNetworkForSocket(
+static void osSocket_SetNetworkForSocket(
         IN IMS_SINT32 nSlotId, IN IMS_SOCKET hSocket, IN IMS_CONNECTION hConnection)
 {
     if ((hSocket == INVALID_SOCKET) || (hConnection == 0))

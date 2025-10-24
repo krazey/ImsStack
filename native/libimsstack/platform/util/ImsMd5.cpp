@@ -89,7 +89,7 @@
     } while (0)
 
 // clang-format off
-LOCAL const IMS_UCHAR MD5_PADDING[64] = {
+static const IMS_UCHAR MD5_PADDING[64] = {
         0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -97,11 +97,12 @@ LOCAL const IMS_UCHAR MD5_PADDING[64] = {
 };
 // clang-format on
 
-LOCAL void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
-LOCAL void imsMd5_Encode(
+static void imsMd5_Decode(
+        IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
+static void imsMd5_Encode(
         IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
-LOCAL void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
-LOCAL void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]);
+static void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
+static void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]);
 
 GLOBAL void ImsMd5_Initialize(OUT ImsMd5Context* pContext)
 {
@@ -187,7 +188,7 @@ GLOBAL void ImsMd5_Finalize(
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
+static void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nSrcLen; i++, j += 4)
     {
@@ -199,7 +200,8 @@ LOCAL void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT 
 }
 
 // Encodes input (IMS_UINT32) into output (IMS_UCHAR). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsMd5_Encode(IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
+static void imsMd5_Encode(
+        IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nDestLen; i++, j += 4)
     {
@@ -210,7 +212,7 @@ LOCAL void imsMd5_Encode(IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT
     }
 }
 
-LOCAL void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
+static void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
 {
     for (IMS_SIZE_T i = 0; i < nCount; i++)
     {
@@ -218,7 +220,7 @@ LOCAL void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS
     }
 }
 
-LOCAL void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64])
+static void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64])
 {
     IMS_UINT32 a = anState[0];
     IMS_UINT32 b = anState[1];

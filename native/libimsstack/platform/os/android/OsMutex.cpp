@@ -22,7 +22,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-LOCAL void osMutex_TraceError(IN const IMS_CHAR* pszTag, IN IMS_SINT32 nError)
+static void osMutex_TraceError(IN const IMS_CHAR* pszTag, IN IMS_SINT32 nError)
 {
     switch (nError)
     {

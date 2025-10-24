@@ -21,8 +21,7 @@
 #include "ServiceThread.h"
 #include "SystemConfig.h"
 
-LOCAL
-IMS_BOOL ipAddress_ParseIpv4(IN const AString& strIp4, OUT IMS_UINT32* pnIp4)
+static IMS_BOOL ipAddress_ParseIpv4(IN const AString& strIp4, OUT IMS_UINT32* pnIp4)
 {
     ImsList<AString> objIpv4 = strIp4.Split('.');
 
@@ -57,8 +56,7 @@ IMS_BOOL ipAddress_ParseIpv4(IN const AString& strIp4, OUT IMS_UINT32* pnIp4)
     return IMS_TRUE;
 }
 
-LOCAL
-IMS_BOOL ipAddress_ParseIpv6(IN const AString& strIp6, OUT IMS_BYTE* pIp6)
+static IMS_BOOL ipAddress_ParseIpv6(IN const AString& strIp6, OUT IMS_BYTE* pIp6)
 {
     AStringArray objIpv6 = strIp6.Split(':');
     IMS_SINT32 nCount = objIpv6.GetCount();

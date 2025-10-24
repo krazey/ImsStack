@@ -22,22 +22,19 @@
 
 __IMS_TRACE_TAG_IPL__;
 
-LOCAL
-void osTimerService_AddListener(IN ISystemListener* piListener)
+static void osTimerService_AddListener(IN ISystemListener* piListener)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     piSystem->AddListener(SystemConstants::CATEGORY_TIMER, piListener, IMS_SLOT_0);
 }
 
-LOCAL
-void osTimerService_RemoveListener(IN ISystemListener* piListener)
+static void osTimerService_RemoveListener(IN ISystemListener* piListener)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     piSystem->RemoveListener(SystemConstants::CATEGORY_TIMER, piListener, IMS_SLOT_0);
 }
 
-LOCAL
-IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
+static IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     IMS_SINT32 nResult = piSystem->KillTimer(nTimerId);
@@ -45,8 +42,7 @@ IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }
 
-LOCAL
-IMS_BOOL osTimerService_SetTimer(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
+static IMS_BOOL osTimerService_SetTimer(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     IMS_SINT32 nResult = piSystem->SetTimer(nDuration, nTimerId);

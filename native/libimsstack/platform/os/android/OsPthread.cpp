@@ -28,8 +28,7 @@
 
 __IMS_TRACE_TAG_IPL__;
 
-LOCAL
-void osPthread_Run(IN OsPthread* pThread)
+static void osPthread_Run(IN OsPthread* pThread)
 {
     if (pThread == IMS_NULL)
     {
@@ -40,8 +39,7 @@ void osPthread_Run(IN OsPthread* pThread)
     pthread_exit(NULL);
 }
 
-LOCAL
-IMS_PVOID osPthread_ThreadProc(void* param)
+static IMS_PVOID osPthread_ThreadProc(void* param)
 {
     osPthread_Run(reinterpret_cast<OsPthread*>(param));
     return IMS_NULL;

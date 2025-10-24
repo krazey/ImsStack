@@ -57,8 +57,7 @@ static const IMS_CHAR* ACCESS_TYPE[] = {
         "DOCSIS",
 };
 
-LOCAL
-void GetAccessInfo(
+static void GetAccessInfo(
         IN const CGI_3GPP& objAi, IN const AString& strCellInfo, OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
@@ -92,8 +91,7 @@ void GetAccessInfo(
     }
 }
 
-LOCAL
-void GetAccessInfo(IN const UTRAN_CELL_ID_3GPP& objAi, IN const AString& strCellInfo,
+static void GetAccessInfo(IN const UTRAN_CELL_ID_3GPP& objAi, IN const AString& strCellInfo,
         OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
@@ -130,8 +128,7 @@ void GetAccessInfo(IN const UTRAN_CELL_ID_3GPP& objAi, IN const AString& strCell
     }
 }
 
-LOCAL
-void GetAccessInfo(IN const NR_UTRAN_CELL_ID_3GPP& objAi, IN const AString& strCellInfo,
+static void GetAccessInfo(IN const NR_UTRAN_CELL_ID_3GPP& objAi, IN const AString& strCellInfo,
         OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
@@ -168,8 +165,7 @@ void GetAccessInfo(IN const NR_UTRAN_CELL_ID_3GPP& objAi, IN const AString& strC
     }
 }
 
-LOCAL
-void GetAccessInfo(
+static void GetAccessInfo(
         IN const CI_3GPP2& objAi, IN const AString& strCellInfo, OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
@@ -210,8 +206,7 @@ void GetAccessInfo(
     }
 }
 
-LOCAL
-void GetAccessInfo(
+static void GetAccessInfo(
         IN const I_WLAN_NODE_ID& objAi, IN const AString& strCellInfo, OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
@@ -231,8 +226,7 @@ void GetAccessInfo(
     }
 }
 
-LOCAL
-IMS_BOOL GetHeaderFromAccessClass(
+static IMS_BOOL GetHeaderFromAccessClass(
         IN const AccessNetworkInfo& objAni, IN const AString& strCellInfo, OUT AString& strHeader)
 {
     if (!objAni.bIsAccessInfoRequired)
@@ -274,8 +268,7 @@ IMS_BOOL GetHeaderFromAccessClass(
     return IMS_TRUE;
 }
 
-LOCAL
-IMS_BOOL GetHeaderFromAccessType(
+static IMS_BOOL GetHeaderFromAccessType(
         IN const AccessNetworkInfo& objAni, IN const AString& strCellInfo, OUT AString& strHeader)
 {
     if (!objAni.bIsAccessInfoRequired)

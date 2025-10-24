@@ -49,7 +49,7 @@
     } while (0)
 
 // clang-format off
-LOCAL const IMS_UCHAR SHA1_PADDING[64] = {
+static const IMS_UCHAR SHA1_PADDING[64] = {
         0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -57,12 +57,12 @@ LOCAL const IMS_UCHAR SHA1_PADDING[64] = {
 };
 // clang-format on
 
-LOCAL void imsSha1_Decode(
+static void imsSha1_Decode(
         IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
-LOCAL void imsSha1_Encode(
+static void imsSha1_Encode(
         IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
-LOCAL void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
-LOCAL void imsSha1_Transform(IN IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64]);
+static void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
+static void imsSha1_Transform(IN IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64]);
 
 GLOBAL void ImsSha1_Initialize(OUT ImsSha1Context* pContext)
 {
@@ -151,7 +151,8 @@ GLOBAL void ImsSha1_Finalize(
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsSha1_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
+static void imsSha1_Decode(
+        IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nSrcLen; i++, j += 4)
     {
@@ -163,7 +164,7 @@ LOCAL void imsSha1_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT
 }
 
 // Encodes input (IMS_UINT32) into output (IMS_UCHAR). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsSha1_Encode(
+static void imsSha1_Encode(
         IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nDestLen; i++, j += 4)
@@ -175,7 +176,7 @@ LOCAL void imsSha1_Encode(
     }
 }
 
-LOCAL void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
+static void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
 {
     for (IMS_SIZE_T i = 0; i < nCount; i++)
     {
@@ -183,7 +184,7 @@ LOCAL void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IM
     }
 }
 
-LOCAL void imsSha1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64])
+static void imsSha1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64])
 {
     IMS_UINT32 A = anH[0];
     IMS_UINT32 B = anH[1];

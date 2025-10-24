@@ -63,14 +63,12 @@ public:
     ByteArray m_objResponse;
 };
 
-LOCAL
-OsUsim* osUsim_GetInstance(IN IMS_SINT32 nSlotId)
+static OsUsim* osUsim_GetInstance(IN IMS_SINT32 nSlotId)
 {
     return DYNAMIC_CAST(OsUsim*, PhoneInfoService::GetPhoneInfoService()->GetUsim(nSlotId));
 }
 
-LOCAL
-void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam* pParam)
+static void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam* pParam)
 {
     OsUsim* pUsim = osUsim_GetInstance(nSlotId);
     OsUsimDigestAka* pDigestAka = reinterpret_cast<OsUsimDigestAka*>(pParam->m_nOwner);
@@ -87,8 +85,7 @@ void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam
     pDigestAka->OnAuthResponseReceived(pParam->m_objResponse);
 }
 
-LOCAL
-void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
+static void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
 {
     if (pParam == IMS_NULL)
     {
@@ -109,8 +106,7 @@ void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
     delete pParam;
 }
 
-LOCAL
-void osUsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
+static void osUsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
 {
     if (piThread == IMS_NULL)
     {

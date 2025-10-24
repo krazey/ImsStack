@@ -32,8 +32,7 @@ using namespace android;
 using namespace android::os;
 
 #ifdef __IMS_DEBUG__
-LOCAL
-AString osCarrierConfig_GetStringFromIntVector(IN const ImsVector<IMS_SINT32>& objIntVector)
+static AString osCarrierConfig_GetStringFromIntVector(IN const ImsVector<IMS_SINT32>& objIntVector)
 {
     AStringBuffer objValue(32);
 
@@ -51,8 +50,7 @@ AString osCarrierConfig_GetStringFromIntVector(IN const ImsVector<IMS_SINT32>& o
     return static_cast<const AStringBuffer&>(objValue).GetString();
 }
 
-LOCAL
-AString osCarrierConfig_GetStringFromStringVector(IN const ImsVector<AString>& objStrVector)
+static AString osCarrierConfig_GetStringFromStringVector(IN const ImsVector<AString>& objStrVector)
 {
     AStringBuffer objValue(128);
 

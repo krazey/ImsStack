@@ -102,7 +102,7 @@ public:
     const IMS_CHAR* pszState;
 };
 
-LOCAL const OsIsimStateMap SIM_STATE_MAP[] = {
+static const OsIsimStateMap SIM_STATE_MAP[] = {
         {OsIsimStateParam::STATE_NOT_PRESENT,       "NOT_PRESENT"      },
         {OsIsimStateParam::STATE_NOT_READY,         "NOT_READY"        },
         {OsIsimStateParam::STATE_LOADED,            "LOADED"           },
@@ -112,14 +112,12 @@ LOCAL const OsIsimStateMap SIM_STATE_MAP[] = {
         {(-1),                                      IMS_NULL           }
 };
 
-LOCAL
-OsIsim* osIsim_GetInstance(IN IMS_SINT32 nSlotId)
+static OsIsim* osIsim_GetInstance(IN IMS_SINT32 nSlotId)
 {
     return DYNAMIC_CAST(OsIsim*, PhoneInfoService::GetPhoneInfoService()->GetIsim(nSlotId));
 }
 
-LOCAL
-void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthResponseParam* pParam)
+static void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthResponseParam* pParam)
 {
     OsIsim* pIsim = osIsim_GetInstance(nSlotId);
     OsIsimDigestAka* pDigestAka = reinterpret_cast<OsIsimDigestAka*>(pParam->m_nOwner);
@@ -221,8 +219,7 @@ void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthResponseParam
     }
 }
 
-LOCAL
-void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN const OsIsimStateParam* pParam)
+static void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN const OsIsimStateParam* pParam)
 {
     OsIsim* pIsim = osIsim_GetInstance(nSlotId);
     IMS_SINT32 nState = pIsim->GetState();
@@ -273,8 +270,7 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN const OsIsimStateParam* pP
     }
 }
 
-LOCAL
-void osIsim_HandleIsimEvent(IN IMS_SINT32 nSlotId, IN OsIsimParam* pParam)
+static void osIsim_HandleIsimEvent(IN IMS_SINT32 nSlotId, IN OsIsimParam* pParam)
 {
     if (pParam == IMS_NULL)
     {
@@ -298,8 +294,7 @@ void osIsim_HandleIsimEvent(IN IMS_SINT32 nSlotId, IN OsIsimParam* pParam)
     delete pParam;
 }
 
-LOCAL
-void osIsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsIsimParam* pParam)
+static void osIsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsIsimParam* pParam)
 {
     if (piThread == IMS_NULL)
     {

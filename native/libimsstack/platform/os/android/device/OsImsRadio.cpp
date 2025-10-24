@@ -109,8 +109,8 @@ public:
     IMS_BOOL m_bIsSupported;
 };
 
-LOCAL
-void osImsRadio_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsImsRadioParam* pParam)
+static void osImsRadio_SendMessage(
+        IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsImsRadioParam* pParam)
 {
     if (piThread == IMS_NULL)
     {
