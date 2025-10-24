@@ -256,31 +256,6 @@ public class RegistrationHelper {
     }
 
     /**
-     * Triggers the IMS stack into service with NR network.
-     *
-     * @param slotId The slot ID.
-     */
-    public void triggerInServiceWithNr(int slotId) {
-        ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForNrCs()
-                .addNetworkRegistrationInfoForNr()
-                .build();
-        triggerInServiceWithServiceState(slotId, ss);
-    }
-
-    /**
-     * Triggers the IMS stack into service with emergency-only network.
-     *
-     * @param slotId The slot ID.
-     */
-    public void triggerInServiceWithEmergencyOnly(int slotId) {
-        ServiceState ss = new ServiceStateBuilder()
-                .addNetworkRegistrationInfoForEmergencyOnly()
-                .build();
-        triggerInServiceWithServiceState(slotId, ss);
-    }
-
-    /**
      * Performs a change in the MmTel capability based on the provided request.
      *
      * @param request The capability change request. Must not be null.

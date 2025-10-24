@@ -19,6 +19,7 @@ import android.os.PersistableBundle;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.SimState;
 import android.telephony.data.ApnSetting;
@@ -28,6 +29,7 @@ import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.its.base.ServiceStateBuilder;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
 import com.android.imsstack.its.base.TestConstants;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
@@ -204,5 +206,44 @@ public class RegistrationTestBase extends ImsStackTestBase {
                 TestConstants.SLOT0, MSimUtils.INVALID_SUB_ID, simState);
 
         mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
+    }
+
+    /**
+     * Factory method to build a {@link ServiceState} object configured for NR.
+     * Includes both PS and potentially CS registration info for NR.
+     *
+     * @return A new {@link ServiceState} object configured for NR.
+     */
+    protected ServiceState buildNrServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+    }
+
+    /**
+     * Factory method to build a {@link ServiceState} object configured for simultaneous
+     * LTE PS and IWLAN network registration.
+     *
+     * @return A new {@link ServiceState} object configured for LTE PS + IWLAN.
+     */
+    protected ServiceState buildLteIwlanServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+    }
+
+    /**
+     * Factory method to build a {@link ServiceState} object configured for simultaneous
+     * NR and IWLAN network registration.
+     *
+     * @return A new {@link ServiceState} object configured for NR + IWLAN.
+     */
+    protected ServiceState buildNrIwlanServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNr()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
     }
 }
