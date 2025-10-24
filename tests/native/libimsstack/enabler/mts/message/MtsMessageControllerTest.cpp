@@ -19,6 +19,7 @@
 #include "IIpcan.h"
 #include "IPageMessage.h"
 #include "ImsTypeDef.h"
+#include "message/IMtsMessage.h"
 #include "MockIImsAos.h"
 #include "MockIImsAosInfo.h"
 #include "IuMtsApp.h"
@@ -69,6 +70,14 @@ public:
 
     IMS_UINT32 GetMessageCount() const { return m_objMsgList.GetSize(); }
     IMS_BOOL SendMessage(IN ImsMessage& objMsg) { return OnMessage(objMsg); }
+    IMtsMessage* GetMessageAt(IN IMS_UINT32 nIndex) const
+    {
+        if (nIndex >= m_objMsgList.GetSize())
+        {
+            return IMS_NULL;
+        }
+        return m_objMsgList.GetAt(nIndex);
+    }
 };
 
 class MtsMessageControllerTest : public ::testing::Test
@@ -2275,6 +2284,70 @@ TEST_F(MtsMessageControllerTest, NotifyEmergencySmsStateToAosOnSipErrorOverNorma
 
     EXPECT_CALL(objMockEmergencyMtsService, NotifyEmergencySmsStateToAos(IMS_FALSE)).Times(1);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
+}
+
+TEST_F(MtsMessageControllerTest, ClearStaleMtSmsAndProcessNext_WithQueuedMessage)
+{
+    // Setup for adding messages
+    MtsServiceType eServiceType = MtsServiceType::NORMAL;
+    AString strContentType = "application/vnd.3gpp.sms";
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
+    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
+    ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
+    objMessageBodies.Append(&objMockMessageBodyPart);
+
+    ByteArray objRpData1((IMS_BYTE)0x01);
+    objRpData1.Append((IMS_BYTE)0x03);
+    objRpData1.Append((IMS_BYTE)0x0F);
+
+    ByteArray objRpData2((IMS_BYTE)0x01);
+    objRpData2.Append((IMS_BYTE)0x04);
+    objRpData2.Append((IMS_BYTE)0x0F);
+
+    ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockPageMessage, GetPreviousRequest(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetHeaders(_)).WillByDefault(Return(objHeaders));
+    ON_CALL(objMockMessage, GetBodyParts()).WillByDefault(Return(objMessageBodies));
+    ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
+
+    // First message
+    EXPECT_CALL(objMockMessageBodyPart, GetContent())
+            .WillOnce(ReturnRef(objRpData1))
+            .WillRepeatedly(ReturnRef(objRpData2));
+
+    EXPECT_CALL(objJniMtsAppThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
+
+    // Process first message. It should be processed immediately.
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage, eServiceType);
+    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
+
+    // Process second message. It should be queued.
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage, eServiceType);
+    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 2);
+
+    // Call the method to test. Stale message with message reference 3 is removed.
+    pMtsMessageController->ClearStaleMtSmsAndProcessNext(3);
+    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
+
+    IMtsMessage* piRemainingMessage = pMtsMessageController->GetMessageAt(0);
+    ASSERT_NE(piRemainingMessage, IMS_NULL);
+    EXPECT_EQ(piRemainingMessage->GetMessageReference(), 4);
+
+    // Simulate the message loop processing the posted message.
+    // This should trigger processing of the queued message.
+    EXPECT_CALL(objJniMtsAppThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
+    ImsMessage objMsg(0, 0, 0);
+    pMtsMessageController->SendMessage(objMsg);
+
+    // The message is still in the list until an ACK is sent, but it has been processed.
+    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
 }
 
 }  // namespace android

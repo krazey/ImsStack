@@ -109,4 +109,16 @@ TEST_F(JniMtsAppTest, NotifyMoSmsTimedOut)
     pJniApp->SendData(objParcel);
 }
 
+TEST_F(JniMtsAppTest, SendDataNotifyMtSmsTimedOut)
+{
+    const IMS_SINT32 messageRef = 3;
+    objParcel.writeInt32(IuMtsApp::NOTI_MTSENABLER_MT_SMS_TIMED_OUT);
+    objParcel.writeInt32(messageRef);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockMtsJni, NotifyMtSmsTimedOut(messageRef)).Times(1);
+
+    pJniApp->SendData(objParcel);
+}
+
 }  // namespace android

@@ -444,7 +444,9 @@ public class SmsRLStateMachineTest {
                 mSmsRLStateMachine.getState());
 
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
+        mSmsRLStateMachine.mRpMr = 1;
         mSmsRLStateMachine.onTR2TimerExpired();
+        verify(mMtsController, times(1)).notifyMtSmsTimedOut(1);
         assertEquals(IDLE,
                 mSmsRLStateMachine.getState());
 
@@ -452,7 +454,6 @@ public class SmsRLStateMachineTest {
         mSmsRLStateMachine.onTR2TimerExpired();
         assertEquals(WAIT_FOR_RPACK_FROM_NW,
                 mSmsRLStateMachine.getState());
-        //TODO method is not implemented.
     }
 
     @Test

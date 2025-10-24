@@ -34,6 +34,7 @@ public:
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber, IN IMS_UINT32 nRetryCount),
             (override));
     MOCK_METHOD(void, NotifyMoSmsTimedOut, (), (override));
+    MOCK_METHOD(void, NotifyMtSmsTimedOut, (IN IMS_SINT32 nMessageRef), (override));
 
     // IEnablerService
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));

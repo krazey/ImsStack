@@ -234,6 +234,20 @@ public class MtsControllerTest {
         assertEquals(MtsJni.NOTI_MTSENABLER_MO_SMS_TIMED_OUT, event);
     }
 
+    @Test
+    public void testNotifyMtSmsTimedOut() {
+        int messageRef = 1;
+        mMtsController.notifyMtSmsTimedOut(messageRef);
+
+        assertNotNull(mMtsJni.mLastParcel);
+
+        mMtsJni.mLastParcel.setDataPosition(0);
+        int event = mMtsJni.mLastParcel.readInt();
+        assertEquals(MtsJni.NOTI_MTSENABLER_MT_SMS_TIMED_OUT, event);
+        int ref = mMtsJni.mLastParcel.readInt();
+        assertEquals(messageRef, ref);
+    }
+
     private void waitForHandlerActionDelayed(Handler handler, long timeoutMillis, long delayMs) {
         final CountDownLatch lock = new CountDownLatch(1);
         handler.postDelayed(lock::countDown, delayMs);
