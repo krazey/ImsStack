@@ -76,16 +76,16 @@ namespace SipStack
 {
 
 // SIP stack last error storage -- starts
-LOCAL SipEn_ErrorTypes s_eError;
-LOCAL SipTransactionCallback* s_pCallback = IMS_NULL;
+static SipEn_ErrorTypes s_eError;
+static SipTransactionCallback* s_pCallback = IMS_NULL;
 
-LOCAL inline void SIPStackError(IN SipEn_ErrorTypes eError)
+static void SIPStackError(IN SipEn_ErrorTypes eError)
 {
     s_eError = eError;
 }
 // SIP stack last error storage -- ends
 
-LOCAL void DeleteStackString(IN SIP_CHAR*& pszStr)
+static void DeleteStackString(IN SIP_CHAR*& pszStr)
 {
     if (pszStr != IMS_NULL)
     {
@@ -94,7 +94,7 @@ LOCAL void DeleteStackString(IN SIP_CHAR*& pszStr)
     }
 }
 
-LOCAL IMS_BOOL FormAddrSpec(
+static IMS_BOOL FormAddrSpec(
         IN const SipAddrSpec* pAddrSpec, IN IMS_BOOL bParams, OUT AStringBuffer& objStringBuffer)
 {
     if (pAddrSpec->Encode(objStringBuffer, bParams ? SIP_TRUE : SIP_FALSE) == SIP_FALSE)
@@ -105,7 +105,7 @@ LOCAL IMS_BOOL FormAddrSpec(
     return IMS_TRUE;
 }
 
-LOCAL IMS_BOOL GetParameter(
+static IMS_BOOL GetParameter(
         IN const SipHeaderBase* pHeader, IN const AString& strName, OUT SipNameValue*& pParam)
 {
     SIPStackError(EERR_NOERR);
