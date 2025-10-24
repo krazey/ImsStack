@@ -34,6 +34,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/ISilentRedialHelper.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/SilentRedialHelper.h"
 #include "call/extension/MtcExtensionSet.h"

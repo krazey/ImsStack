@@ -17,15 +17,15 @@
 #ifndef EMERGENCY_MESSAGE_FORMATTER_H_
 #define EMERGENCY_MESSAGE_FORMATTER_H_
 
-#include "IMtcService.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
 
 class AString;
 class IMtcCallContext;
 class ISession;
+enum class CallType;
+enum class ServiceType;
+enum class UpdateType;
 
 class EmergencyMessageFormatter : public MessageFormatter
 {

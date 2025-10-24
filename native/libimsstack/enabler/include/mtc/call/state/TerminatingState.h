@@ -18,8 +18,6 @@
 #define TERMINATING_STATE_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
 
 class TerminatingState : public MtcCallState

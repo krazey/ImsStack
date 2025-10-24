@@ -18,7 +18,6 @@
 #define OUTGOING_STATE_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/state/MtcCallState.h"
 #include <memory>
@@ -27,7 +26,6 @@ class AString;
 class IMessage;
 class IMtcCalContext;
 class IMtcSession;
-class SuppService;
 class UdpKeepAliveSender;
 enum class QosLossPolicy;
 

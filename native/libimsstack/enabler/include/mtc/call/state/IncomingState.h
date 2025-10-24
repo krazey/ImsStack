@@ -17,9 +17,7 @@
 #ifndef INCOMING_STATE_H_
 #define INCOMING_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/state/MtcCallState.h"
 
 class AString;

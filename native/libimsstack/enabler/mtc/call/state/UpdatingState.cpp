@@ -18,6 +18,7 @@
 #include "ICarrierConfig.h"
 #include "IMessage.h"
 #include "ISession.h"
+#include "MtcDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"

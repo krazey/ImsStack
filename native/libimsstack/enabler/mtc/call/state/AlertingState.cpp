@@ -18,6 +18,7 @@
 #include "IMessage.h"
 #include "ISession.h"
 #include "ISipHeader.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"

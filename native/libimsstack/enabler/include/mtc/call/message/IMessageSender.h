@@ -18,10 +18,10 @@
 #define INTERFACE_MESSAGE_SENDER_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
 
 struct CallReasonInfo;
+enum class CallType;
+enum class UpdateType;
 
 class IMessageSender
 {

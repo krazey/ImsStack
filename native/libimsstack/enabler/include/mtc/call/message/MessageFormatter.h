@@ -19,10 +19,6 @@
 
 #include "IReasonHeaderSetter.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
-#include "configuration/ConfigDef.h"
-
 class AString;
 class ICoreService;
 class IFeatureCaps;
@@ -31,6 +27,10 @@ class IMtcCallContext;
 class ISession;
 class ISipMessage;
 class MtcSupplementaryService;
+enum class CallType;
+enum class RejectType;
+enum class TerminateType;
+enum class UpdateType;
 struct CallReasonInfo;
 
 class MessageFormatter : public IReasonHeaderSetter

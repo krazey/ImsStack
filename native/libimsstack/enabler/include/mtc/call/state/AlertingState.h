@@ -17,9 +17,7 @@
 #ifndef ALERTING_STATE_H_
 #define ALERTING_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/state/MtcCallState.h"
 #include <memory>
 
@@ -28,6 +26,7 @@ class IMessage;
 class IMtcCalContext;
 class SuppService;
 class UdpKeepAliveSender;
+enum class CallType;
 enum class QosLossPolicy;
 struct MediaInfo;
 

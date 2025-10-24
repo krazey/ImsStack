@@ -21,7 +21,6 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
-#include "helper/IMtcAosStateListener.h"
 
 class AString;
 class IMessage;
@@ -32,6 +31,7 @@ class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
 class MtcSession;
+enum class MtcAosState;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;

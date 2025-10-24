@@ -18,7 +18,6 @@
 #define CALL_STATE_FACTORY_H_
 
 #include "ImsTypeDef.h"
-#include "call/MtcCall.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 

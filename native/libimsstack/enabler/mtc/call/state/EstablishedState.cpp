@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "IMessage.h"
+#include "ISession.h"
 #include "ISipClientConnection.h"
 #include "ISipServerConnection.h"
 #include "ServiceTrace.h"

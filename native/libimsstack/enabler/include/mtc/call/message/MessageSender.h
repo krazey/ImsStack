@@ -17,15 +17,14 @@
 #ifndef MESSAGE_SENDER_H_
 #define MESSAGE_SENDER_H_
 
-#include "MtcDef.h"
-#include "SipMethod.h"
-#include "call/IMtcCall.h"
 #include "call/message/IMessageSender.h"
 #include "call/message/MessageFormatter.h"
 #include "helper/TransactionTimerUpdateHelper.h"
 #include <memory>
 
 class ISession;
+enum class CallType;
+enum class UpdateType;
 struct CallReasonInfo;
 
 class MessageSender final : public IMessageSender

@@ -17,16 +17,14 @@
 #ifndef UPDATING_STATE_H_
 #define UPDATING_STATE_H_
 
-#include "CarrierConfig.h"
-#include "ISession.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
-#include "configuration/ConfigDef.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "precondition/QosDef.h"
 
+class ISession;
+class MtcConfigurationProxy;
+class UpdatingInfo;
 struct CallReasonInfo;
 struct MediaInfo;
 

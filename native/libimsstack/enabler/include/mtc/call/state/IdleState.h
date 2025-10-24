@@ -19,11 +19,9 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/MtcCallState.h"
 #include "conferencecall/ConferenceDef.h"
-#include "precondition/QosDef.h"
 #include <functional>
 #include <memory>
 

@@ -19,12 +19,12 @@
 
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
 #include "call/state/IMtcCallState.h"
 #include <functional>
 #include <memory>
 
 class IMutex;
+class IMtcCallContext;
 class IMtcCallStateFactory;
 class IMtcCallStateWatcher;
 

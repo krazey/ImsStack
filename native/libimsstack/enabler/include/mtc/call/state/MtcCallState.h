@@ -21,7 +21,6 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "SipStatusCode.h"
-#include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
