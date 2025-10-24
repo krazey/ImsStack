@@ -153,7 +153,8 @@ public:
             m_eCallDirection(eCallDirection),
             m_eRat(eRat),
             m_objMtcRadioConnectionListener(objMtcRadioConnectionListener),
-            m_objCallKeys()
+            m_objCallKeys(),
+            m_objResult(IMtcRadioChecker::CheckResult::Pending())
     {
     }
     ~MtcTrafficInfo() override = default;
@@ -173,6 +174,7 @@ private:
     IMS_SINT32 m_eRat;
     IMtcRadioConnectionListener& m_objMtcRadioConnectionListener;
     ImsList<CallKey> m_objCallKeys;
+    IMtcRadioChecker::CheckResult m_objResult;
 };
 
 #endif
