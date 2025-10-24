@@ -1226,6 +1226,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL[] =
                 KEY_IMS_VOICE_PREFIX
         "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "enable_registration_recovery_on_prack_timeout_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[] =
                 KEY_IMS_VOICE_PREFIX

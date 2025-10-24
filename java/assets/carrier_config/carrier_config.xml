@@ -745,6 +745,7 @@
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.use_carrier_specific_contact_header_for_options_response_bool" value="false"/>
     <boolean name="imsvoice.use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="false"/>
+    <boolean name="imsvoice.enable_registration_recovery_on_prack_timeout_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_when_call_rejected_by_server_error_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_when_call_retry_unavailable_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_when_bye_transaction_timeout_bool" value="false"/>

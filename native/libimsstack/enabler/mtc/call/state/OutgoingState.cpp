@@ -44,6 +44,7 @@
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/IMtcAosConnector.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
@@ -397,12 +398,29 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
     IMS_TRACE_D("SessionPrackDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);
 
     CallReasonInfo objReason = CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
+    IMS_BOOL bRestorationRequired;
     if (nStatusCode != SipStatusCode::SC_INVALID)
     {
         objReason.nCode = CODE_SIP_METHOD_NOT_ALLOWED;  // TODO: convert response code?
+        bRestorationRequired = IMS_FALSE;
     }
+    else
+    {
+        bRestorationRequired = m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL);
+    }
+
     HandleCancel(piSession, objReason);
     OnStartFailed(objReason);
+
+    if (bRestorationRequired)
+    {
+        const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+        if (pAosConnector)
+        {
+            pAosConnector->Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+        }
+    }
 
     return CallStateName::TERMINATING;
 }

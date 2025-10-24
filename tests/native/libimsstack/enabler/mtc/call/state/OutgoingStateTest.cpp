@@ -1942,6 +1942,44 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedTerminatesCallOnMultiDialog)
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedRegistrationRestorationByTimeout)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK)));
+    EXPECT_CALL(objAosConnector, Control).Times(1);
+
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedDoesNotRegistrationRestorationByTimeout)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK)));
+    EXPECT_CALL(objAosConnector, Control).Times(0);
+
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStopsTimersIfNot100)
 {
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));

@@ -1246,6 +1246,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "use_carrier_specific_contact_header_for_options_response_bool";
         public static final String KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL =
                 KEY_PREFIX + "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
+        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL =
+                KEY_PREFIX + "enable_registration_recovery_on_prack_timeout_bool";
         public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL =
                 KEY_PREFIX + "enable_registration_recovery_when_call_rejected_by_server_error_bool";
         public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL =
