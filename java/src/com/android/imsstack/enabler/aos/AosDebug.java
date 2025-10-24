@@ -1134,7 +1134,8 @@ public class AosDebug implements IAosDebug {
     class RegistrationListener implements IAosRegistrationListener {
 
         @Override
-        public void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
+        public void notifyRegistered(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
             logi(mSlotId, "notifyRegistered - regType:" + regType
                     + ", networkType:" + networkType
@@ -1145,8 +1146,8 @@ public class AosDebug implements IAosDebug {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, ReasonCode reason, String message,
-                int dataFailCause) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message, int dataFailCause) {
             logi(mSlotId, "notifyDeregistered - regType:" + regType
                     + ", networkType:" + networkType
                     + ", reason:" + reason.toString() + "message:" + message + ", dataFailCause:"
@@ -1156,19 +1157,21 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
+        public void notifyRegistering(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
             // Do nothing.
         }
 
         @Override
-        public void notifyDeregistering(int regType) {
+        public void notifyDeregistering(@RegistrationType.RegistrationTypeDef int regType) {
             // Do nothing.
         }
 
         @Override
         public void notifyTechnologyChangeFailed(
-                int regType, NetworkType networkType, ReasonCode reason, String message) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message) {
             // Do nothing.
         }
 
@@ -1178,8 +1181,8 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(
-                int capabilities, NetworkType networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(@Capability.CapabilityMask int capabilities,
+                NetworkType networkType, @CapabilityReason.CapabilityReasonDef int reason) {
             // Do nothing.
         }
 
@@ -1196,7 +1199,8 @@ public class AosDebug implements IAosDebug {
 
         @Override
         public void notifyImsFeatureChanged(
-                int regType, NetworkType networkType, int featureTagBits) {
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                @FeatureTagMask.FeatureTagMaskDef int featureTagBits) {
             // Do nothing.
         }
     }
