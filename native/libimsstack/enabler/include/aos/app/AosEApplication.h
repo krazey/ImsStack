@@ -95,6 +95,9 @@ protected:
     // IAoSConditionListener
     void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) override;
 
+    // IAosRegistrationListener
+    void Registration_StateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0) override;
+
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
     void CallTracker_ECallSessionReleased(IN IMS_BOOL bEstablished) override;

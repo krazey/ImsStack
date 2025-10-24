@@ -89,6 +89,7 @@ using ::testing::ReturnRef;
     using Base::ProcessReconfigTimerExpired;               \
     using Base::ProcessRegBlockedTimerExpired;             \
     using Base::ProcessRegStart;                           \
+    using Base::Registration_StateChanged;                 \
     using Base::SetAppState;                               \
     using Base::SetAppType;                                \
     using Base::SetImsCall;                                \
@@ -592,6 +593,37 @@ TEST_F(AosEApplicationTest, ProcessRegStop)
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
 }
 
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenStateIsReadyWithRegFailedMessage)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    m_pTestAosEApplication->Registration_StateChanged(
+            IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL);
+}
+
+TEST_F(AosEApplicationTest, IgnoreReleaseEPdnWhenStateIsReadyWithRegFailedMessageDuringCbm)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    ON_CALL(m_objMockIAosRegistration, IsInCallbackMode()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
+
+    m_pTestAosEApplication->Registration_StateChanged(
+            IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_FAILURE_GENERAL);
+}
+
+TEST_F(AosEApplicationTest, IgnoreReleaseEPdnWhenStateIsNotReadyWithRegTryingMessage)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+
+    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
+
+    m_pTestAosEApplication->Registration_StateChanged(
+            IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_FAILURE_GENERAL);
+}
+
 TEST_F(AosEApplicationTest, StateNotReady_Condition)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_NOTREADY);
@@ -841,6 +873,9 @@ TEST_F(AosEApplicationTest, StateReadyWhenProcessConnectionDeactivatedDuringCbm)
     ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_DEACTIVATED, 0);
     ON_CALL(m_objMockIAosRegistration, IsInCallbackMode()).WillByDefault(Return(IMS_TRUE));
 
+    EXPECT_CALL(m_objMockIAosHandle,
+            App_StateChanged(
+                    IAosApplication::APP_DISCONNECTED, AosReason::DATA_CONNECTION_MAINTAIN));
     m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
 
     EXPECT_EQ(m_pTestAosEApplication->GetAppState(), IAosApplication::STATE_READY);
@@ -876,6 +911,18 @@ TEST_F(AosEApplicationTest, ProcessConnectionUpdated)
     objMessageCnx.nLparam = AosConnector::REASON_NONE;
     m_pTestAosEApplication->StateConnecting_Connection(objMessageCnx);
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTING);
+}
+
+TEST_F(AosEApplicationTest, NotifyDisconnectStateWhenConnectionUpdateWithIpChanged)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_UPDATED, AosConnector::REASON_IP_CHANGED);
+    ON_CALL(m_objMockIAosRegistration, IsInCallbackMode()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosHandle,
+            App_StateChanged(
+                    IAosApplication::APP_DISCONNECTED, AosReason::DATA_CONNECTION_MAINTAIN));
+    m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
 }
 
 TEST_F(AosEApplicationTest, ProcessRegSucceeded)

@@ -468,7 +468,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionDeactivated(IN IMS_UINT
 {
     if (m_piRegistration->IsInCallbackMode())
     {
-        CleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+        ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
         if (!IsEmergencyBlocked())
         {
             SetAppState(STATE_READY);
@@ -497,12 +497,11 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
         case AosConnector::REASON_IP_CHANGED:
             if (m_piRegistration->IsInCallbackMode())
             {
-                CleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+                ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
                 if (!IsRegBlockInCbm())
                 {
                     SetAppState(STATE_CONNECTING);
                     m_piRegistration->Start();
-                    Report_StateChanged(IMS_FALSE);
                     SetRegBlockInCbm(IMS_TRUE);
                     return;
                 }
@@ -791,6 +790,20 @@ PROTECTED VIRTUAL void AosEApplication::Condition_RequestCommand(
     {
         AosApplication::Condition_RequestCommand(nCommand, nReason);
     }
+}
+
+PROTECTED VIRTUAL void AosEApplication::Registration_StateChanged(
+        IN IMS_UINT32 nResult, IN IMS_UINT32 nReason /* = 0 */)
+{
+    if (IsEqualOrLessState(STATE_READY) && nResult == IAosRegistration::RESULT_FAILURE)
+    {
+        if (!m_piRegistration->IsInCallbackMode())
+        {
+            ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+        }
+    }
+
+    AosApplication::Registration_StateChanged(nResult, nReason);
 }
 
 PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
