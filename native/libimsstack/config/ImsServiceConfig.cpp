@@ -18,13 +18,13 @@
 #include "ConfigUce.h"
 #include "ImsServiceConfig.h"
 
-LOCAL ImsServiceIdentifier s_objServiceIdentifiers[] = {
+static const ImsServiceIdentifier SERVICE_IDENTIFIERS[] = {
         {ImsAppId::MTC, ImsServiceId::MTC},
         {ImsAppId::MTS, ImsServiceId::MTS},
         {ImsAppId::UCE, ImsServiceId::UCE}
 };
 
-LOCAL ImsServiceIdentifier s_objEmergencyServiceIdentifiers[] = {
+static const ImsServiceIdentifier EMERGENCY_SERVICE_IDENTIFIERS[] = {
         {ImsAppId::MTC, ImsServiceId::MTC_EMERGENCY},
         {ImsAppId::MTS, ImsServiceId::MTS_EMERGENCY},
 };
@@ -118,8 +118,8 @@ PUBLIC GLOBAL ImsServiceProfile ImsServiceConfig::GetServiceProfile()
 {
     ImsServiceProfile objProfile = {0, IMS_NULL};
 
-    objProfile.nCount = sizeof(s_objServiceIdentifiers) / sizeof(s_objServiceIdentifiers[0]);
-    objProfile.pServiceIds = s_objServiceIdentifiers;
+    objProfile.nCount = sizeof(SERVICE_IDENTIFIERS) / sizeof(SERVICE_IDENTIFIERS[0]);
+    objProfile.pServiceIds = SERVICE_IDENTIFIERS;
 
     return objProfile;
 }
@@ -129,8 +129,8 @@ PUBLIC GLOBAL ImsServiceProfile ImsServiceConfig::GetEmergencyServiceProfile()
     ImsServiceProfile objProfile = {0, IMS_NULL};
 
     objProfile.nCount =
-            sizeof(s_objEmergencyServiceIdentifiers) / sizeof(s_objEmergencyServiceIdentifiers[0]);
-    objProfile.pServiceIds = s_objEmergencyServiceIdentifiers;
+            sizeof(EMERGENCY_SERVICE_IDENTIFIERS) / sizeof(EMERGENCY_SERVICE_IDENTIFIERS[0]);
+    objProfile.pServiceIds = EMERGENCY_SERVICE_IDENTIFIERS;
 
     return objProfile;
 }

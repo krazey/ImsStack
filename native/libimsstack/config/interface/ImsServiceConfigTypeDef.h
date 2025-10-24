@@ -60,7 +60,7 @@ struct ImsServiceProfile
     // Count of IMS services.
     IMS_UINT32 nCount;
     // List of IMS service's identifiers.
-    ImsServiceIdentifier* pServiceIds;
+    const ImsServiceIdentifier* pServiceIds;
 };
 
 // Data type for carrying the IMS service's identifier as a string.

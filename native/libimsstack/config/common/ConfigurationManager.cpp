@@ -28,11 +28,10 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-LOCAL
-const IMS_CHAR SUBSCRIBER_CONFIG_NAMES[] = "subscriber,subscriber_fake";
+static const IMS_CHAR SUBSCRIBER_CONFIG_NAMES[] = "subscriber,subscriber_fake";
 
 template <class T>
-LOCAL void configurationManager_DestroyConfig(IN T*& pBase)
+static void configurationManager_DestroyConfig(IN T*& pBase)
 {
     if (pBase != IMS_NULL)
     {
