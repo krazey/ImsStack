@@ -181,6 +181,50 @@ public:
     virtual IMS_SINT32 GetNegotiatedCodecBitrate(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType);
 
     /**
+     * @brief Get the negotiated codec bitrate (Kbps)
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param eMediaType The media type to form
+     * @return IMS_FLOAT Returns the bitrate of the negotiated codec (Kbps)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBitrateKbps(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the negotiated codec bandwidth (Khz)
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param eMediaType The media type to form
+     * @return IMS_FLOAT Returns the bandwidth of the negotiated codec (Khz)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBandwidthKhz(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the negotiated audio codec bitrate range
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param eMediaType The media type to form
+     * @param nBitrateStart The start of the bitrate range in kbps.
+     * @param nBitrateEnd The end of the bitrate range in kbps.
+     */
+    virtual void GetNegotiatedCodecBitrateRange(IN IMS_UINTP nNegoId,
+            IN MEDIA_CONTENT_TYPE eMediaType, OUT IMS_FLOAT& nBitrateStart,
+            OUT IMS_FLOAT& nBitrateEnd);
+
+    /**
+     * @brief Get the negotiated audio codec bandwidth range
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param eMediaType The media type to form
+     * @param nBandwidthStart The start of the bandwidth range in kHz.
+     * @param nBandwidthEnd The end of the bandwidth range in kHz.
+     */
+    virtual void GetNegotiatedCodecBandwidthRange(IN IMS_UINTP nNegoId,
+            IN MEDIA_CONTENT_TYPE eMediaType, OUT IMS_FLOAT& nBandwidthStart,
+            OUT IMS_FLOAT& nBandwidthEnd);
+
+    /**
      * @brief Gets the remote port for a specific media type.
      * @see AudioNego::GetRemotePort, VideoNego::GetRemotePort, TextNego::GetRemotePort
      * @param nNegoId The ID of the MediaNego instance.

@@ -228,6 +228,46 @@ public:
     virtual TEXT_CODEC GetNegotiatedTextQuality(void);
 
     /**
+     * @brief Get the negotiated codec bitrate (Kbps)
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @return IMS_FLOAT Returns the bitrate of the negotiated codec (Kbps)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBitrateKbps(IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the negotiated codec bandwidth (Khz)
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @return IMS_FLOAT Returns the bandwidth of the negotiated codec (Khz)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBandwidthKhz(IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the negotiated codec bitrate range
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @param nBitrateStart The start of the bitrate range
+     * @param nBitrateEnd The end of the bitrate range
+     */
+    virtual void GetNegotiatedCodecBitrateRange(IN MEDIA_CONTENT_TYPE eMediaType,
+            OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd);
+
+    /**
+     * @brief Get the negotiated codec bandwidth range
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @param nBandwidthStart The start of the bandwidth range
+     * @param nBandwidthEnd The end of the bandwidth range
+     */
+    virtual void GetNegotiatedCodecBandwidthRange(IN MEDIA_CONTENT_TYPE eMediaType,
+            OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd);
+
+    /**
      * @brief Get the media descriptor instance
      *
      * @param pIMedia

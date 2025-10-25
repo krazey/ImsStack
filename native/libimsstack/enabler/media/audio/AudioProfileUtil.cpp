@@ -315,6 +315,149 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
     return NO_MODESET;
 }
 
+PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetSmallestModesetInFmtp(
+        IN const AString& strCodec, IN AudioProfile::Payload* pPayload)
+{
+    const IMS_SINT32 NO_MODESET = -1;
+
+    if (pPayload == IMS_NULL)
+    {
+        return NO_MODESET;
+    }
+    if (!strCodec.EqualsIgnoreCase("AMR") && !strCodec.EqualsIgnoreCase("AMR-WB") &&
+            !strCodec.EqualsIgnoreCase("EVS"))
+    {
+        return NO_MODESET;
+    }
+
+    if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
+    {
+        auto pAmrFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp());
+        if (pAmrFmtp == IMS_NULL)
+        {
+            return NO_MODESET;
+        }
+
+        if (pAmrFmtp->GetModeSetList() == 0)
+        {
+            return 0;  // Smallest possible mode is 0
+        }
+        else
+        {
+            for (IMS_SINT32 nModeSet = 0; nModeSet <= 8; nModeSet++)
+            {
+                if (pAmrFmtp->GetModeSetList() & (1 << nModeSet))
+                {
+                    return nModeSet;
+                }
+            }
+        }
+    }
+    else if (strCodec.EqualsIgnoreCase("EVS"))
+    {
+        auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPayload->GetFmtp());
+        if (pEvsFmtp == IMS_NULL)
+        {
+            return NO_MODESET;
+        }
+
+        // Primary mode
+        if (pEvsFmtp->GetEvsModeSwitch() != 1)
+        {
+            if (pEvsFmtp->GetBrList() == 0)
+            {
+                return 0;  // Smallest possible bitrate index
+            }
+            else
+            {
+                for (IMS_SINT32 nBitrate = 0; nBitrate <= 11; nBitrate++)
+                {
+                    if (pEvsFmtp->GetBrList() & (1 << nBitrate))
+                    {
+                        return nBitrate;
+                    }
+                }
+            }
+        }
+        else  // AMR IO mode
+        {
+            if (pEvsFmtp->GetModeSetList() == 0)
+            {
+                return 0;  // Smallest possible mode is 0
+            }
+            else
+            {
+                for (IMS_SINT32 nModeSet = 0; nModeSet <= 8; nModeSet++)
+                {
+                    if (pEvsFmtp->GetModeSetList() & (1 << nModeSet))
+                    {
+                        return nModeSet;
+                    }
+                }
+            }
+        }
+    }
+
+    return NO_MODESET;
+}
+
+PUBLIC GLOBAL IMS_FLOAT AudioProfileUtil::GetBitrateFromAmrMode(
+        IN const AString& strCodec, IN IMS_SINT32 nMode)
+{
+    if (strCodec.EqualsIgnoreCase("AMR-WB"))
+    {
+        if (nMode >= 0 && nMode < 9)
+        {
+            return strtof(AUDIO_CODEC_BITRATE_STRING[1][nMode].GetStr(), nullptr);
+        }
+    }
+    else if (strCodec.EqualsIgnoreCase("AMR"))
+    {
+        if (nMode >= 0 && nMode < 8)
+        {
+            return strtof(AUDIO_CODEC_BITRATE_STRING[0][nMode].GetStr(), nullptr);
+        }
+    }
+    return 0.0f;
+}
+
+PUBLIC GLOBAL IMS_FLOAT AudioProfileUtil::GetBitrateFromEvsMode(
+        IN IMS_SINT32 nEvsModeSwitch, IN IMS_SINT32 nMode)
+{
+    if (nEvsModeSwitch != 1)  // Primary mode
+    {
+        if (nMode >= 0 && nMode < 9)  // EVS primary modes have different bitrates
+            return strtof(AUDIO_CODEC_BITRATE_STRING[2][nMode].GetStr(), nullptr);
+    }
+    else  // AMR-WB IO mode
+    {
+        if (nMode >= 0 && nMode < 9)
+            return strtof(AUDIO_CODEC_BITRATE_STRING[1][nMode].GetStr(), nullptr);
+    }
+    return 0.0f;
+}
+
+PUBLIC GLOBAL IMS_FLOAT AudioProfileUtil::GetEvsBandwidthKhz(IN IMS_UINT32 bwList)
+{
+    if (bwList & EVS_BW_FB)
+    {
+        return 20.0f;
+    }
+    else if (bwList & EVS_BW_SWB)
+    {
+        return 16.0f;
+    }
+    else if (bwList & EVS_BW_WB)
+    {
+        return 8.0f;
+    }
+    else if (bwList & EVS_BW_NB)
+    {
+        return 4.0f;
+    }
+    return 0.0f;
+}
+
 PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         IN const AString& strCodec, IN AudioProfile::Payload* pPayload)
 {

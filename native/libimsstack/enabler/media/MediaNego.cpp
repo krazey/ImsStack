@@ -670,6 +670,66 @@ TEXT_CODEC MediaNego::GetNegotiatedTextQuality()
 }
 
 PUBLIC
+IMS_FLOAT MediaNego::GetNegotiatedCodecBitrateKbps(IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        return m_pAudioNego->GetNegotiatedCodecBitrateKbps();
+    }
+
+    IMS_TRACE_E(0, "GetNegotiatedCodecBitrateKbps(): invalid media type or nego object", 0, 0, 0);
+    return 0;
+}
+
+PUBLIC
+IMS_FLOAT MediaNego::GetNegotiatedCodecBandwidthKhz(IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        return m_pAudioNego->GetNegotiatedCodecBandwidthKhz();
+    }
+
+    IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthKhz(): invalid media type or nego object", 0, 0, 0);
+    return 0;
+}
+
+PUBLIC
+void MediaNego::GetNegotiatedCodecBitrateRange(
+        IN MEDIA_CONTENT_TYPE eMediaType, OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd)
+{
+    nBitrateStart = 0;
+    nBitrateEnd = 0;
+
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        m_pAudioNego->GetNegotiatedCodecBitrateRange(nBitrateStart, nBitrateEnd);
+    }
+    else
+    {
+        IMS_TRACE_E(
+                0, "GetNegotiatedCodecBitrateRange(): invalid media type or nego object", 0, 0, 0);
+    }
+}
+
+PUBLIC
+void MediaNego::GetNegotiatedCodecBandwidthRange(IN MEDIA_CONTENT_TYPE eMediaType,
+        OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd)
+{
+    nBandwidthStart = 0;
+    nBandwidthEnd = 0;
+
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        m_pAudioNego->GetNegotiatedCodecBandwidthRange(nBandwidthStart, nBandwidthEnd);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthRange(): invalid media type or nego object", 0,
+                0, 0);
+    }
+}
+
+PUBLIC
 MEDIA_DIRECTION MediaNego::GetNegotiatedAudioDirection()
 {
     return (m_pAudioNego != IMS_NULL) ? m_pAudioNego->GetNegotiatedDirection()

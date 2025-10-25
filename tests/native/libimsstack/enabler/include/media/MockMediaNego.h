@@ -55,6 +55,14 @@ public:
     MOCK_METHOD(AUDIO_CODEC, GetNegotiatedAudioQuality, (), (override));
     MOCK_METHOD(VIDEO_RESOLUTION, GetNegotiatedVideoQuality, (), (override));
     MOCK_METHOD(TEXT_CODEC, GetNegotiatedTextQuality, (), (override));
+    MOCK_METHOD(IMS_FLOAT, GetNegotiatedCodecBitrateKbps, (IN MEDIA_CONTENT_TYPE eMediaType),
+            (override));
+    MOCK_METHOD(IMS_FLOAT, GetNegotiatedCodecBandwidthKhz, (IN MEDIA_CONTENT_TYPE eMediaType),
+            (override));
+    MOCK_METHOD(void, GetNegotiatedCodecBitrateRange,
+            (IN MEDIA_CONTENT_TYPE, OUT IMS_FLOAT&, OUT IMS_FLOAT&), (override));
+    MOCK_METHOD(void, GetNegotiatedCodecBandwidthRange,
+            (IN MEDIA_CONTENT_TYPE, OUT IMS_FLOAT&, OUT IMS_FLOAT&), (override));
     MOCK_METHOD(IMediaDescriptor*, GetMediaDescriptor, (IN IMedia * pIMedia), (override));
     MOCK_METHOD(IMS_BOOL, IsForking, (), (override));
     MOCK_METHOD(void, SetPreviewMode, (IMS_BOOL bIsPreview), (override));

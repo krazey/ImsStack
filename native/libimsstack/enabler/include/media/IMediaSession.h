@@ -268,6 +268,42 @@ public:
      * @param nNegoId The ID of the MediaNego instance.
      */
     virtual IMS_BOOL IsPreviewMode(IMS_UINTP nNegoId) = 0;
+
+    /**
+     * @brief Get the negotiated codec bitrate (Kbps)
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @return IMS_FLOAT Returns the bitrate of the negotiated codec (Kbps)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBitrateKbps(IN IMS_UINTP nNegoId) = 0;
+
+    /**
+     * @brief Get the negotiated codec bandwidth (Khz)
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @return IMS_FLOAT Returns the bandwidth of the negotiated codec (Khz)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBandwidthKhz(IN IMS_UINTP nNegoId) = 0;
+
+    /**
+     * @brief Get the negotiated audio codec bitrate range
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param nBitrateStart The start of the bitrate range in kbps.
+     * @param nBitrateEnd The end of the bitrate range in kbps.
+     */
+    virtual void GetNegotiatedCodecBitrateRange(
+            IN IMS_UINTP nNegoId, OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd) = 0;
+
+    /**
+     * @brief Get the negotiated audio codec bandwidth range
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param nBandwidthStart The start of the bandwidth range in kHz.
+     * @param nBandwidthEnd The end of the bandwidth range in kHz.
+     */
+    virtual void GetNegotiatedCodecBandwidthRange(
+            IN IMS_UINTP nNegoId, OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd) = 0;
 };
 
 #endif

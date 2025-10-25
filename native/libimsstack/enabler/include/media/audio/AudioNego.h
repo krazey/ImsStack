@@ -56,6 +56,38 @@ public:
     virtual AUDIO_CODEC_BITRATE GetNegotiatedAudioCodecRate(void);
 
     /**
+     * @brief Get the negotiated codec bitrate (Kbps)
+     *
+     * @return IMS_FLOAT Returns the bitrate of the negotiated codec (Kbps)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBitrateKbps(void);
+
+    /**
+     * @brief Get the negotiated codec bandwidth (Khz)
+     *
+     * @return IMS_FLOAT Returns the bandwidth of the negotiated codec (Khz)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBandwidthKhz(void);
+
+    /**
+     * @brief Get the negotiated audio codec bitrate range
+     *
+     * @param nBitrateStart The start of the bitrate range in kbps.
+     * @param nBitrateEnd The end of the bitrate range in kbps.
+     */
+    virtual void GetNegotiatedCodecBitrateRange(
+            OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd);
+
+    /**
+     * @brief Get the negotiated audio codec bandwidth range
+     *
+     * @param nBandwidthStart The start of the bandwidth range in kHz.
+     * @param nBandwidthEnd The end of the bandwidth range in kHz.
+     */
+    virtual void GetNegotiatedCodecBandwidthRange(
+            OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd);
+
+    /**
      * @brief Get if the telephony-event is negotiated
      */
     virtual IMS_BOOL HasNegotiatedDtmf(void);
