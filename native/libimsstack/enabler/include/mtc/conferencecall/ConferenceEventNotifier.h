@@ -18,7 +18,7 @@
 #define CONFERENCE_EVENT_NOTIFIER_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
 class IJniMtcCallThread;

@@ -20,12 +20,11 @@
 #include "CallReasonInfo.h"
 #include "ITimer.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCallManager.h"
+#include "call/IMtcCall.h"
 #include "ect/IEctReferenceListener.h"
 #include <memory>
 
 class IMtcContext;
-class IMtcCall;
 class IEctControllerListener;
 class EctFactory;
 class EctReference;

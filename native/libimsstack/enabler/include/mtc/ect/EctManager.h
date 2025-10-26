@@ -17,7 +17,7 @@
 #ifndef ECT_MANAGER_H_
 #define ECT_MANAGER_H_
 
-#include "call/IMtcCallManager.h"
+#include "ImsTypeDef.h"
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
 #include "ect/IEctControllerListener.h"

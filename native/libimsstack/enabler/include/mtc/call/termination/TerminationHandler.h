@@ -19,10 +19,10 @@
 
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
-#include "utility/IMessageUtils.h"
 
 class IMtcCallContext;
 class ISession;
+struct ReasonHeaderValue;
 
 class TerminationHandler final
 {

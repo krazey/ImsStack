@@ -17,9 +17,10 @@
 #ifndef NORMAL_DIALING_PLAN_H_
 #define NORMAL_DIALING_PLAN_H_
 
-#include "AString.h"
-#include "ImsIdentity.h"
+#include "ImsTypeDef.h"
 
+class AString;
+class AccessNetworkInfo;
 class IMtcContext;
 class ImsIdentityProxy;
 

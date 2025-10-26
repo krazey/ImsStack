@@ -18,12 +18,13 @@
 #define CONFERENCE_INFO_UPDATER_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceInfo.h"
 
 class ConferenceFactory;
 class ConferenceParticipantList;
 class MtcConfigurationProxy;
+struct ConfUser;
 
 enum class MatchingPolicy
 {

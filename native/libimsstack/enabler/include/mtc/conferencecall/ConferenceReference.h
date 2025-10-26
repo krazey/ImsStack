@@ -17,17 +17,17 @@
 #ifndef CONFERENCE_REFERENCE_H_
 #define CONFERENCE_REFERENCE_H_
 
-#include "ImsList.h"
 #include "AString.h"
 #include "IReferenceListener.h"
-#include "MtcDef.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/IConferenceReference.h"
 
 class CallConnectionIdManager;
-class IReference;
-class IMtcContext;
 class IConferenceReferenceListener;
+class IMtcContext;
+class IReference;
 
 class ConferenceReference final : public IReferenceListener, public IConferenceReference
 {

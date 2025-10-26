@@ -20,12 +20,13 @@
 #include "CallReasonInfo.h"
 #include "ITimer.h"
 #include "ImsList.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
-#include "conferencecall/ConferenceDef.h"
-#include "conferencecall/IConferenceOperationQueueListener.h"
+#include "ImsTypeDef.h"
 
+class IConferenceOperationQueueListener;
+class SuppService;
 struct CallInfo;
+struct ConfUser;
+struct MediaInfo;
 
 struct CallStartOperationParams
 {

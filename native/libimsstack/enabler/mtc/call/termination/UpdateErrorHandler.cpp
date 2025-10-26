@@ -24,6 +24,7 @@
 #include "ServiceTrace.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
 #include "call/termination/UpdateErrorHandler.h"

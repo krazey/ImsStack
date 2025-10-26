@@ -22,13 +22,12 @@
 #include "ImsTypeDef.h"
 #include "ServicePhoneInfo.h"
 #include "SipStatusCode.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include <optional>
 #include <unordered_map>
 
-class IMessage;
 class IMtcCallContext;
 class ISession;
+class MtcConfigurationProxy;
 
 /*
  * It handles error responses for emergency routing emergency call when

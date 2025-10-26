@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "DocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
 #include "IDocument.h"

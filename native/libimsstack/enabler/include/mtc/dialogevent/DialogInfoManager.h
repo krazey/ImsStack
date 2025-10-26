@@ -17,12 +17,13 @@
 #ifndef DIALOG_INFO_MANAGER_H_
 #define DIALOG_INFO_MANAGER_H_
 
-#include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/IDialogInfoManager.h"
 #include <memory>
+
+class AString;
 
 class DialogInfoManager final : public IDialogInfoManager
 {

@@ -18,9 +18,11 @@
 #define INTERFACE_CONFERENCE_CONTROLLER_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 
 class ConferenceParticipantList;
+class SuppService;
+struct MediaInfo;
 
 enum class IndividualCallState
 {

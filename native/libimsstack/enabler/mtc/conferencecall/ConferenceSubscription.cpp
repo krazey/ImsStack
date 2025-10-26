@@ -41,6 +41,7 @@
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceSubscription.h"
+#include "conferencecall/IConferenceSubscriptionListener.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"

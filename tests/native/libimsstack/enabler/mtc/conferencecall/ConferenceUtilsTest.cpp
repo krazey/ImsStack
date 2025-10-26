@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "conferencecall/ConferenceUtils.h"
 #include <gtest/gtest.h>
 

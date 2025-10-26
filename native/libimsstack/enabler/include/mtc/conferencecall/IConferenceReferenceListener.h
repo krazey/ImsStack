@@ -17,7 +17,7 @@
 #ifndef INTERFACE_CONFERENCE_REFERENCE_LISTENER_H_
 #define INTERFACE_CONFERENCE_REFERENCE_LISTENER_H_
 
-#include "SipStatusCode.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/IConferenceReference.h"
 
 class IConferenceReferenceListener

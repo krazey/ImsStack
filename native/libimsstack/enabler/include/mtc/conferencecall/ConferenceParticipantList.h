@@ -18,11 +18,11 @@
 #define CONFERENCE_PARTICIPANT_LIST_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceDef.h"
-#include "conferencecall/IConferenceReference.h"
 
 class CallConnectionIdManager;
+class IConferenceReference;
 class IMtcCallManager;
 
 class ConferenceParticipantList

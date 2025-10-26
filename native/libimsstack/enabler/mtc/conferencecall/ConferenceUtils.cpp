@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"

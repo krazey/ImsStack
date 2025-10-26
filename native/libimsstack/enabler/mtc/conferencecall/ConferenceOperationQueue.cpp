@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+#include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
+#include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
+#include "conferencecall/IConferenceOperationQueueListener.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

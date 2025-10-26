@@ -19,6 +19,7 @@
 #include "call/CallConnectionIdManager.h"
 #include "call/IMtcCallManager.h"
 #include "conferencecall/ConferenceParticipantList.h"
+#include "conferencecall/IConferenceReference.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

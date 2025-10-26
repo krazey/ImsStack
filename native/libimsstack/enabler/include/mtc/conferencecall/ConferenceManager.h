@@ -18,15 +18,14 @@
 #define CONFERENCE_MANAGER_H_
 
 #include "ImsMap.h"
-#include "call/CallConnectionIdManager.h"
-#include "call/IMtcCallManager.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceController.h"
-#include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceManager.h"
 #include "helper/ObjectAsyncDestroyer.h"
 
+class CallConnectionIdManager;
 class IMtcContext;
 enum class ConferenceType;
 

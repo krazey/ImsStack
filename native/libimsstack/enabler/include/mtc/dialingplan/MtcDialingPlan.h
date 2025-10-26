@@ -18,7 +18,7 @@
 #define MTC_DIALING_PLAN_H_
 
 #include "AString.h"
-#include "ImsIdentity.h"
+#include "ImsTypeDef.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
 

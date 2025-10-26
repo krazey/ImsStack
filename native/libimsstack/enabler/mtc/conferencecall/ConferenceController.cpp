@@ -22,6 +22,7 @@
 #include "ISipHeader.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
+#include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "call/CallConnectionIdManager.h"

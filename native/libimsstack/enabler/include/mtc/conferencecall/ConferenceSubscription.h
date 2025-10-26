@@ -18,13 +18,12 @@
 #define CONFERENCE_SUBSCRIPTION_H_
 
 #include "ISubscriptionListener.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "conferencecall/IConferenceSubscriptionListener.h"
 
 class ConferenceFactory;
 class ConferenceParticipantList;
-class ISession;
-class ICoreService;
+class IConferenceSubscriptionListener;
 class ISubscription;
 class IMtcContext;
 enum class SubscriptionState;

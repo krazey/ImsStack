@@ -19,8 +19,8 @@
 
 #include "IMtcCallStateListener.h"
 #include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "SipStatusCode.h"
-#include "call/IMtcUiNotifier.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/ConferenceParticipantList.h"
@@ -28,6 +28,7 @@
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceOperationQueueListener.h"
+#include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
 #include "helper/IMtcTimerListener.h"
@@ -35,10 +36,10 @@
 #include <memory>
 
 class IMtcContext;
-class IConferenceReference;
 class SuppService;
 class CallConnectionIdManager;
 class ConferenceFactory;
+class ConferenceSubscription;
 struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;

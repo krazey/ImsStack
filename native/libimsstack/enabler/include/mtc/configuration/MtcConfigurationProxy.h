@@ -22,12 +22,10 @@
 #include "ImsTypeDef.h"
 #include "ImsVector.h"
 #include "configuration/ConfigCache.h"
-#include "configuration/ConfigDef.h"
 #include <memory>
 #include <optional>
 #include <variant>
 
-class ConfigCache;
 class ICarrierConfig;
 
 using ConfigEmergency = CarrierConfig::ImsEmergency;
