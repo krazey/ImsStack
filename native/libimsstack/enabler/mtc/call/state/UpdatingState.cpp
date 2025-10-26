@@ -18,6 +18,7 @@
 #include "ICarrierConfig.h"
 #include "IMessage.h"
 #include "ISession.h"
+#include "MediaDef.h"
 #include "MtcDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
@@ -685,7 +686,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
         return IMS_SUCCESS;
     }
 
-    if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+    if (m_objContext.GetMediaManager().NegotiateSdp(piSession).eResult != MEDIA_NEGO_NO_ERROR)
     {
         IMS_TRACE_E(0, "Negotiation failed. Keep the call just in case there is RTP.", 0, 0, 0);
     }

@@ -19,6 +19,7 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
 #include "MtcDef.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
@@ -217,7 +218,7 @@ protected:
     const CallReasonInfo GetAudioInactivityReasonOnMediaDataFailed() const;
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessage) const;
-    static const CallReasonInfo GetReasonByNegotiationResult(IN NegotiationResult eNegoResult);
+    static const CallReasonInfo GetReasonByNegotiationResult(IN MediaNegoResult eNegoResult);
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
     IMS_BOOL IsRprRequired() const;

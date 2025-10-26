@@ -19,6 +19,7 @@
 #include "IConfiguration.h"
 #include "ISession.h"
 #include "ImsVector.h"
+#include "MediaDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -144,14 +145,14 @@ protected:
     }
 
     void SetNegotiateSdpFailure(
-            IN MockIMessage& objMessage, IN const NegotiationResult& eNegoResult)
+            IN MockIMessage& objMessage, IN const SdpNegotiationResult& objNegoResult)
     {
         ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMediaManager, GetNegotiationState(&objSession))
                 .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
         const SipMethod objMethod(SipMethod::ACK);
         ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
-        ON_CALL(objMediaManager, NegotiateSdp(&objSession)).WillByDefault(Return(eNegoResult));
+        ON_CALL(objMediaManager, NegotiateSdp(&objSession)).WillByDefault(Return(objNegoResult));
     }
 
     void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
@@ -1236,8 +1237,24 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNegoFailed)
 
 TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNoCodecMatched)
 {
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+    EXPECT_CALL(objMtcSession,
+            Reject(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED)));
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfInvalidDescriptor)
+{
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
@@ -1246,24 +1263,7 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNoCodecMatched)
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
     EXPECT_CALL(objMtcSession,
             Reject(CallReasonInfo(
-                    CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED)));
-
-    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
-}
-
-TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfInvalidDescriptor)
-{
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
-    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
-            .WillByDefault(Return(&objMessage));
-
-    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
-    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
-    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
-    EXPECT_CALL(objMtcSession,
-            Reject(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS,
-                    NegotiationResult::ERROR_INVALID_DESCRIPTOR)));
+                    CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR)));
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
 }

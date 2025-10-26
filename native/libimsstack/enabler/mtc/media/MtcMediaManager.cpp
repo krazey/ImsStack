@@ -331,8 +331,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
 
     const MediaInfo& objMediaInfo = GetMediaInfo(*piSession);
     IMS_BOOL bResult = m_piMediaSession->FormSdp(nNegoId, piSession, eContents,
-            objMediaInfo.eAudioDirection, objMediaInfo.eVideoDirection, objMediaInfo.eTextDirection,
-            bAnswerForOfferlessReInvite);
+            static_cast<MEDIA_DIRECTION>(objMediaInfo.eAudioDirection),
+            static_cast<MEDIA_DIRECTION>(objMediaInfo.eVideoDirection),
+            static_cast<MEDIA_DIRECTION>(objMediaInfo.eTextDirection), bAnswerForOfferlessReInvite);
 
     if (!bResult)
     {
@@ -346,27 +347,23 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     return (bResult) ? IMS_SUCCESS : IMS_FAILURE;
 }
 
-PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
+PUBLIC VIRTUAL SdpNegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
 {
-    MediaNego::MediaNegoResult eErrorReason = MediaNego::MediaNegoResult::NO_ERROR;
-    IMS_SINT32 eAudioDirection = DIRECTION_INVALID;
-    IMS_SINT32 eVideoDirection = DIRECTION_INVALID;
-    IMS_SINT32 eTextDirection = DIRECTION_INVALID;
-
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
-    m_piMediaSession->NegotiateSdp(
-            nNegoId, piSession, &eAudioDirection, &eVideoDirection, &eTextDirection, eErrorReason);
+    SdpNegotiationResult objResult = m_piMediaSession->NegotiateSdp(nNegoId, piSession);
 
-    IMS_TRACE_D("NegotiateSdp : [%s]", MtcMediaStringUtils::ConvertNegoType(eErrorReason), 0, 0);
+    IMS_TRACE_D("NegotiateSdp : media type [%s], result [%s]",
+            MtcMediaStringUtils::ConvertContentType(objResult.eNegotiatedType),
+            MtcMediaStringUtils::ConvertNegoType(objResult.eResult), 0);
 
-    if (eErrorReason != NegotiationResult::NO_ERROR)
+    if (objResult.eResult != MEDIA_NEGO_NO_ERROR)
     {
-        return eErrorReason;
+        return objResult;
     }
 
-    MediaInfo objInfo(eAudioDirection, eVideoDirection, eTextDirection,
-            GetNegotiatedQuality(piSession, MEDIATYPE_AUDIO),
+    MediaInfo objInfo(objResult.eAudioDirection, objResult.eVideoDirection,
+            objResult.eTextDirection, GetNegotiatedQuality(piSession, MEDIATYPE_AUDIO),
             GetNegotiatedQuality(piSession, MEDIATYPE_VIDEO),
             MtcMediaUtil::GetGttModeFromTextQuality(
                     GetNegotiatedQuality(piSession, MEDIATYPE_TEXT)),
@@ -375,10 +372,10 @@ PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSe
 
     if (GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
     {
-        m_piMediaSession->RequestQos(nNegoId, m_piMediaSession->GetNegotiatedMediaType(nNegoId));
+        m_piMediaSession->RequestQos(nNegoId, objResult.eNegotiatedType);
     }
 
-    return eErrorReason;
+    return objResult;
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::RestoreSdp(IN ISession* piSession)

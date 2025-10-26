@@ -18,9 +18,9 @@
 #define MOCK_I_MTC_MEDIA_MANAGER_H_
 
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
 #include "helper/ISrvccStateListener.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MediaNego.h"
 #include <gmock/gmock.h>
 
 class IMediaQosEventListener;
@@ -56,7 +56,7 @@ public:
             (IN ISession* piSession, IN CallType eCallType,
                     IN IMS_BOOL bAnswerForOfferlessReInvite),
             (override));
-    MOCK_METHOD(NegotiationResult, NegotiateSdp, (IN ISession* piSession), (override));
+    MOCK_METHOD(SdpNegotiationResult, NegotiateSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, RestoreSdp, (IN ISession* piSession), (override));
     MOCK_METHOD(void, FinalizeSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, UpdatePemType, (IN ISession* piSession, IN IMessage* piMessage), (override));

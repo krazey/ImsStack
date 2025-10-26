@@ -25,7 +25,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsIdentity.h"
-#include "MediaNego.h"
+#include "MediaDef.h"
 #include "MtcDef.h"
 #include "Replaces.h"
 #include "ServiceTrace.h"
@@ -691,7 +691,7 @@ void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
         {
             IMS_TRACE_D("SetHeadersForReject : CODE_REJECT_UNSUPPORTED_SDP_HEADERS", 0, 0, 0);
             // RFC 3261 20.43
-            const AString strWarning = objReason.nExtraCode == MediaNego::ERROR_IP_MISMATCH
+            const AString strWarning = objReason.nExtraCode == MEDIA_NEGO_ERROR_IP_MISMATCH
                     ? "301 IMS-client \"Incompatible network address formats\""
                     : "305 IMS-client \"Incompatible media format\"";
             m_objContext.GetMessageUtils().SetHeader(
