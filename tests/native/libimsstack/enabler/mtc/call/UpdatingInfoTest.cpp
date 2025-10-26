@@ -41,6 +41,7 @@ protected:
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objSession));
         ON_CALL(objSession, GetISession()).WillByDefault(ReturnRef(objISession));
         ON_CALL(objCallContext, GetMediaManager()).WillByDefault(ReturnRef(objMediaManager));
+        pUpdatingInfo = IMS_NULL;
     }
 
     virtual void TearDown() override { delete pUpdatingInfo; }
