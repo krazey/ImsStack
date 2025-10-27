@@ -25,8 +25,7 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-LOCAL
-void virtualSessionImpl_MethodNotSupported()
+static void virtualSessionImpl_MethodNotSupported()
 {
     IMS_TRACE_I("Method call is not supported...", 0, 0, 0);
 }

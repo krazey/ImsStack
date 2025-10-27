@@ -23,7 +23,7 @@
 
 __IMS_TRACE_TAG_SIP_CORE__;
 
-LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR* pszEnd)
+static void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR* pszEnd)
 {
     while ((pszStart <= pszEnd) && IMS_ISSPACE(*pszStart))
     {
@@ -31,7 +31,7 @@ LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR*
     }
 }
 
-LOCAL inline void StripTrailingLWS(IN const IMS_CHAR* pszStart, IN_OUT IMS_CHAR*& pszEnd)
+static void StripTrailingLWS(IN const IMS_CHAR* pszStart, IN_OUT IMS_CHAR*& pszEnd)
 {
     while ((pszEnd >= pszStart) && IMS_ISSPACE(*pszEnd))
     {
