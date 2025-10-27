@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "Engine.h"
+#include "IConfiguration.h"
+#include "ImsTypeDef.h"
 #include "MockICoreService.h"
 #include "MockIReference.h"
 #include "MockISession.h"
 #include "MockISipServerConnection.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "TestTimerService.h"
 #include "call/IMtcCall.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include <gtest/gtest.h>
@@ -35,6 +41,9 @@ using ::testing::Return;
 
 LOCAL const CallKey CALL_KEY_1 = 1;
 LOCAL const CallKey CALL_KEY_2 = 2;
+LOCAL const IMS_SINT32 TIME_TIMER_F_MILLIS = 10000;
+// SessionInterfaceHolder#TERMINATED_TRANSACTION_MARGIN_MS = 2000
+LOCAL const IMS_SINT32 TRANSACTION_GUARD_TIME_MILLIS = TIME_TIMER_F_MILLIS + 2000;
 
 namespace android
 {
@@ -47,6 +56,7 @@ public:
     MockIInterfaceHolderListener objListener;
     MockISession objMockISession;
     TestTimerService objTimerService;
+    TestConfigService objConfigService;
     MockITimer objMockITimer;
 
 protected:
@@ -55,6 +65,14 @@ protected:
         objTimerService.SetTimer(&objMockITimer);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_TIMER, &objTimerService);
+
+        objConfigService.SetCarrierConfig(&(objConfigService.GetMockCarrierConfig()));
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+        ON_CALL(objConfigService.GetMockCarrierConfig(),
+                GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
+                .WillByDefault(Return(TIME_TIMER_F_MILLIS));
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
         pHolder = new SessionInterfaceHolder();
     }
 
@@ -62,6 +80,7 @@ protected:
     {
         delete pHolder;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
     }
 };
 
@@ -92,7 +111,8 @@ TEST_F(SessionInterfaceHolderTest, HolderDoesNothingForUnexpectedSessionListener
     pHolder->SessionRprReceived(&objMockISession, 0);
     pHolder->SessionTransactionReceived(&objMockISession, &objMockServerConnection);
 
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
+    EXPECT_CALL(objMockITimer, SetTimer(_, _)).Times(0);
+    EXPECT_CALL(objMockITimer, KillTimer()).Times(0);
 }
 
 TEST_F(SessionInterfaceHolderTest, SendsAckAndTerminatesIfSessionStarted)
@@ -103,40 +123,17 @@ TEST_F(SessionInterfaceHolderTest, SendsAckAndTerminatesIfSessionStarted)
     pHolder->SessionStarted(&objMockISession);
 }
 
-TEST_F(SessionInterfaceHolderTest, StopsTimerIfSessionStartFailed)
-{
-    EXPECT_CALL(objMockISession, Destroy()).Times(1);
-
-    pHolder->AddISession(CALL_KEY_1, &objMockISession);
-    pHolder->SessionStartFailed(&objMockISession);
-
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
-    EXPECT_EQ(pHolder->GetSessionCount(), 0);
-}
-
-TEST_F(SessionInterfaceHolderTest, StopsTimerIfSessionTerminated)
-{
-    EXPECT_CALL(objMockISession, Destroy()).Times(1);
-
-    pHolder->AddISession(CALL_KEY_1, &objMockISession);
-    pHolder->SessionTerminated(&objMockISession);
-
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
-    EXPECT_EQ(pHolder->GetSessionCount(), 0);
-}
-
-TEST_F(SessionInterfaceHolderTest, AddAndReleaseStartsTimer)
+TEST_F(SessionInterfaceHolderTest, AddAndReleaseStartsTimerWithTimerFAndMargin)
 {
     ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
 
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
     pHolder->AddISession(CALL_KEY_1, &objMockISession);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 
+    EXPECT_CALL(objMockITimer, SetTimer(TRANSACTION_GUARD_TIME_MILLIS, pHolder));
     pHolder->ReleaseISession(&objMockISession);
-    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 }
 
@@ -148,14 +145,13 @@ TEST_F(SessionInterfaceHolderTest, AddAndReleaseWithTerminatedStopsTimer)
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
     pHolder->AddISession(CALL_KEY_1, &objMockISession);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 
+    EXPECT_CALL(objMockITimer, SetTimer(TRANSACTION_GUARD_TIME_MILLIS, pHolder));
     pHolder->ReleaseISession(&objMockISession);
-    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
 
+    EXPECT_CALL(objMockITimer, KillTimer());
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_FALSE);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 }
 
@@ -171,10 +167,9 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseStartsTimer)
     const ISession* piSession =
             pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
     EXPECT_EQ(piSession, &objMockISession);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
 
+    EXPECT_CALL(objMockITimer, SetTimer(TRANSACTION_GUARD_TIME_MILLIS, pHolder));
     pHolder->ReleaseISession(&objMockISession);
-    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 }
 
@@ -190,15 +185,14 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTimerExpiredStopsTimer)
     const ISession* piSession =
             pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
     EXPECT_EQ(piSession, &objMockISession);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
 
+    EXPECT_CALL(objMockITimer, SetTimer(TRANSACTION_GUARD_TIME_MILLIS, pHolder));
     pHolder->ReleaseISession(&objMockISession);
-    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 
+    EXPECT_CALL(objMockITimer, KillTimer());
     pHolder->Timer_TimerExpired(&objMockITimer);
 
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 }
 
@@ -215,13 +209,12 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTerminatedStopsTimer)
     const ISession* piSession =
             pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
     EXPECT_EQ(piSession, &objMockISession);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
 
+    EXPECT_CALL(objMockITimer, SetTimer(TRANSACTION_GUARD_TIME_MILLIS, pHolder));
     pHolder->ReleaseISession(&objMockISession);
-    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
 
+    EXPECT_CALL(objMockITimer, KillTimer());
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_FALSE);
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 }
 
@@ -256,10 +249,10 @@ TEST_F(SessionInterfaceHolderTest,
 
     pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
 
-    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     ON_CALL(objMockISession, GetState).WillByDefault(Return(ISession::STATE_TERMINATING));
+
+    EXPECT_CALL(objMockITimer, SetTimer(TRANSACTION_GUARD_TIME_MILLIS, pHolder));
     pHolder->ReleaseISession(&objMockISession, IMS_FALSE, IMS_TRUE);
-    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
 
     // ISession#Destroy() is invoked by the Destructor so clears the expectations.
     Mock::VerifyAndClearExpectations(&objMockISession);
@@ -331,7 +324,7 @@ TEST_F(SessionInterfaceHolderTest, ListenerIsNotifiedOnlyIfAllInterfacesInSameCa
     }
 }
 
-TEST_F(SessionInterfaceHolderTest, AllListenerIsNotifedIfOneListenerRemovesItself)
+TEST_F(SessionInterfaceHolderTest, AllListenerIsNotifiedIfOneListenerRemovesItself)
 {
     MockIInterfaceHolderListener objListener2;
     pHolder->AddListener(&objListener);
@@ -353,6 +346,25 @@ TEST_F(SessionInterfaceHolderTest, AllListenerIsNotifedIfOneListenerRemovesItsel
 
     pHolder->AddISession(CALL_KEY_1, &objMockISession);
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE, IMS_TRUE);
+}
+
+TEST_F(SessionInterfaceHolderTest, ReleaseISessionDoesNotStartTimerIfSessionIsNull)
+{
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+
+    EXPECT_CALL(objMockITimer, SetTimer(_, _)).Times(0);
+    pHolder->ReleaseISession(IMS_NULL, IMS_FALSE, IMS_FALSE);
+}
+
+TEST_F(SessionInterfaceHolderTest, ReleaseISessionDoesNotStartTimerIfCalledTwice)
+{
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+
+    EXPECT_CALL(objMockITimer, SetTimer(_, _));
+    pHolder->ReleaseISession(&objMockISession, IMS_FALSE, IMS_FALSE);
+
+    EXPECT_CALL(objMockITimer, SetTimer(_, _)).Times(0);
+    pHolder->ReleaseISession(&objMockISession, IMS_FALSE, IMS_FALSE);
 }
 
 }  // namespace android

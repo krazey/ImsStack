@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ICoreService.h"
-#include "IMessage.h"
+#include "ISession.h"
+#include "ISipConfigV.h"
 #include "ITimer.h"
 #include "ImsList.h"
+#include "ImsTypeDef.h"
+#include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
@@ -29,9 +34,16 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 SessionInterfaceHolder::SessionInterfaceHolder() :
+        m_nTransactionGuardTimeMillis(0),
         m_objListeners(ImsList<IInterfaceHolderListener*>())
 {
     IMS_TRACE_D("+SessionInterfaceHolder", 0, 0, 0);
+    m_nTransactionGuardTimeMillis =
+            Engine::GetConfiguration()
+                    ->GetSipConfig(ThreadService::GetCurrentSlotId(IMS_SLOT_0))
+                    ->GetSipConfigV()
+                    ->GetTimerValue(ISipConfigV::TIMER_F) +
+            TERMINATED_TRANSACTION_MARGIN_MS;
 }
 
 PUBLIC
@@ -208,7 +220,7 @@ IMS_BOOL SessionInterfaceHolder::IsReadyToDestroy(
 PRIVATE
 void SessionInterfaceHolder::StartTimer(IN const ISession* piSession)
 {
-    IMS_TRACE_D("StartTimer", 0, 0, 0);
+    IMS_TRACE_D("StartTimer [%d]", m_nTransactionGuardTimeMillis, 0, 0);
 
     for (const auto& sessionRecord : m_objSessionRecords)
     {
@@ -220,7 +232,7 @@ void SessionInterfaceHolder::StartTimer(IN const ISession* piSession)
             }
 
             sessionRecord.second->piTimer = TimerService::GetTimerService()->CreateTimer();
-            sessionRecord.second->piTimer->SetTimer(TIME_TRANSACTION_TERMINATED_GUARD, this);
+            sessionRecord.second->piTimer->SetTimer(m_nTransactionGuardTimeMillis, this);
             return;
         }
     }

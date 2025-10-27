@@ -73,11 +73,7 @@ public:
     virtual void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bEnforceDestroy,
             IN IMS_BOOL bSessionTerminatedOrStartFailed);
 
-    inline virtual IMS_BOOL IsTimerExist(IN ISession* piSession) const
-    {
-        return GetTimer(piSession) != IMS_NULL;
-    }
-
+    // For Unit Test.
     inline virtual IMS_UINT32 GetSessionCount() const { return m_objSessionRecords.size(); }
 
 private:
@@ -104,10 +100,11 @@ private:
         ITimer* piTimer;
     };
 
+    IMS_SINT32 m_nTransactionGuardTimeMillis;
     ImsList<IInterfaceHolderListener*> m_objListeners;
     std::unordered_multimap<CallKey, SessionRecord*> m_objSessionRecords;
 
-    static const IMS_UINT32 TIME_TRANSACTION_TERMINATED_GUARD = 128000;
+    static const IMS_UINT32 TERMINATED_TRANSACTION_MARGIN_MS = 2000;
 };
 
 #endif

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "MockISession.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
@@ -30,7 +32,11 @@ public:
     MtcSipInterfaceFactory* pFactory;
 
 protected:
-    virtual void SetUp() override { pFactory = new MtcSipInterfaceFactory(); }
+    virtual void SetUp() override
+    {
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
+        pFactory = new MtcSipInterfaceFactory();
+    }
 
     virtual void TearDown() override { delete pFactory; }
 };
