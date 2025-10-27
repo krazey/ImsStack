@@ -53,6 +53,7 @@
     </int-array>
 
     <!-- Aos -->
+    <boolean name="ims.ignore_mtu_from_network_bool" value="false"/>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="false"/>
     <boolean name="ims.use_tcp_transport_for_register_bool" value="false"/>
     <int name="ims.isim_index_for_impu_int" value="1"/>

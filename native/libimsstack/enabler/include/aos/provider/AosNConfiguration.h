@@ -90,6 +90,7 @@ public:
     IMS_BOOL IsGibaSupportedForERegInRoaming() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
+    IMS_BOOL IsIgnoreMtuFromNetwork() const override;
     IMS_BOOL IsImsiBasedUriPrioritized() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
     IMS_BOOL IsInitSubUponSubTerminated() const override;

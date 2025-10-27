@@ -262,6 +262,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISH
         KEY_IMS_PREFIX "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[] =
         KEY_IMS_PREFIX "hold_reg_with_ipcan_changed_during_ims_call_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_IGNORE_MTU_FROM_NETWORK_BOOL[] =
+        KEY_IMS_PREFIX "ignore_mtu_from_network_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[] =
         KEY_IMS_PREFIX "ims_dereg_on_3g_network_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMSI_BASED_URI_PRIORITIZED_BOOL[] =

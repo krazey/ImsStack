@@ -545,6 +545,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUseRegInfoContactWithoutUriCheck() 
     return m_objAsset.bUseRegInfoContactWithoutUriCheck;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIgnoreMtuFromNetwork() const
+{
+    return m_objAsset.bIgnoreMtuFromNetwork;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType) const
 {
     return m_objAsset.objTestMode.Contains(nType);
@@ -1671,6 +1676,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
+    m_objAsset.bIgnoreMtuFromNetwork =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_IGNORE_MTU_FROM_NETWORK_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =

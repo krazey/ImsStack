@@ -776,6 +776,14 @@ public:
     virtual IMS_BOOL IsUseRegInfoContactWithoutUriCheck() const = 0;
 
     /**
+     * @brief Check if MTU from network is ignored.
+     *
+     * @return IMS_TRUE if ignored, IMS_FALSE if considered.
+     * @see {@code ims.ignore_mtu_from_network_bool}
+     */
+    virtual IMS_BOOL IsIgnoreMtuFromNetwork() const = 0;
+
+    /**
      * @brief Flag specifying if test mode is enabled.
      *
      * @param nType The test mode type to be enabled.\n

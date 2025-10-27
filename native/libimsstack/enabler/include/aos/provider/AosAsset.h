@@ -35,6 +35,7 @@ public:
             bERegWithOnlyTcpInRoaming(IMS_FALSE),
             bERegUsingFirstImpuInIsim(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
+            bIgnoreMtuFromNetwork(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
             bImsiBasedUriPrioritized(IMS_FALSE),
@@ -149,6 +150,7 @@ public:
     IMS_BOOL bERegWithOnlyTcpInRoaming;
     IMS_BOOL bERegUsingFirstImpuInIsim;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
+    IMS_BOOL bIgnoreMtuFromNetwork;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
     IMS_BOOL bImsiBasedUriPrioritized;
