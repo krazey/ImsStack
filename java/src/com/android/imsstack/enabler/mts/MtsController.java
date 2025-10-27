@@ -254,6 +254,19 @@ public class MtsController {
         mMtsJni.sendMessage(parcel, mSlotId);
     }
 
+    public void notifyMtSmsTimedOut(int messageRef) {
+        ImsLog.d(mSlotId, "notifyMtSmsTimedOut, messageRef: " + messageRef);
+        Parcel parcel = Parcel.obtain();
+        if (parcel == null) {
+            ImsLog.e(mSlotId, "parcel is null");
+            return;
+        }
+
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_MT_SMS_TIMED_OUT);
+        parcel.writeInt(messageRef);
+        mMtsJni.sendMessage(parcel, mSlotId);
+    }
+
     private void processNotifySendMoSmsError(int smsFormat, int seqId) {
         ImsLog.d(mSlotId, "");
 

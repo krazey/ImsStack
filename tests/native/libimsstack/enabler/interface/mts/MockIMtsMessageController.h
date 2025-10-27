@@ -38,6 +38,7 @@ public:
     MOCK_METHOD(void, TriggerEmergencySmsStateNotification,
             (IN IMS_BOOL bInitialized, IN IMS_SINT32 nMessageReference), (override));
     MOCK_METHOD(IMS_SINT32, GetLastEmergencyMessageReference, (), (const, override));
+    MOCK_METHOD(void, ClearStaleMtSmsAndProcessNext, (IN IMS_SINT32 nMessageRef), (override));
 };
 
 #endif

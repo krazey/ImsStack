@@ -80,6 +80,16 @@ public:
      *         if there is no last emergency message.
      */
     virtual IMS_SINT32 GetLastEmergencyMessageReference() const = 0;
+
+    /**
+     * @brief Clears stale MT SMS and processes the next message.
+     *
+     * This function is used to clear stale MT SMS that are not acknowledged by the framework and
+     * process the next message.
+     *
+     * @param nMessageRef The message reference of the timed-out MT SMS.
+     */
+    virtual void ClearStaleMtSmsAndProcessNext(IN IMS_SINT32 nMessageRef) = 0;
 };
 
 #endif

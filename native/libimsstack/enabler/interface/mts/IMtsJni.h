@@ -53,6 +53,15 @@ public:
      * appropriate modules to clean up any pending emergency SMS state.
      */
     virtual void NotifyMoSmsTimedOut() = 0;
+
+    /**
+     * @brief Notifies that an MT SMS has timed out.
+     *
+     * This function is used to notify the native layer that an MT SMS has timed out.
+     *
+     * @param nMessageRef The message reference of the timed-out MT SMS.
+     */
+    virtual void NotifyMtSmsTimedOut(IN IMS_SINT32 nMessageRef) = 0;
 };
 
 #endif

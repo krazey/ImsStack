@@ -54,6 +54,7 @@ public class SmsRLStateMachine {
     public int mToken;
     public int mMessageType;
     public int mRetryCount = 0;
+    public int mRpMr;
     public SmsRPdu mRPduData;
     public String mPSISmsc;
     public String mDestinationAddress;
@@ -211,6 +212,7 @@ public class SmsRLStateMachine {
                     loge("Listener is null");
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
+                smsRLStateMachine.mRpMr = mtRPData.getMessageRef();
 
                 /** Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
                  * else the parser will throw exception. So prepending TPdu with
@@ -478,8 +480,11 @@ public class SmsRLStateMachine {
             @Override
             public void onTR2TimerExpired(SmsRLStateMachine smsRLStateMachine) {
                 logi("onTR2TimerExpired");
+                if (smsRLStateMachine.mMtsController != null) {
+                    smsRLStateMachine.mMtsController.notifyMtSmsTimedOut(
+                            smsRLStateMachine.mRpMr);
+                }
                 smsRLStateMachine.setState(IDLE);
-                //TODO: Send an RP-Error back to network
             }
         }
     }

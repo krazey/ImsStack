@@ -36,6 +36,7 @@ public class MtsJni {
 
     public static final int NOTI_MTSENABLER_SEND_MO_SMS = JAVA2MTSENABLER + 1;
     public static final int NOTI_MTSENABLER_MO_SMS_TIMED_OUT = JAVA2MTSENABLER + 2;
+    public static final int NOTI_MTSENABLER_MT_SMS_TIMED_OUT = JAVA2MTSENABLER + 3;
 
     private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
     private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;

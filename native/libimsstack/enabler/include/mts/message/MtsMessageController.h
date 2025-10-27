@@ -58,6 +58,7 @@ public:
     void ClearAllMessages() override;
     void TriggerEmergencySmsStateNotification(
             IN IMS_BOOL bInitialized, IN IMS_SINT32 nMessageReference) override;
+    void ClearStaleMtSmsAndProcessNext(IN IMS_SINT32 nMessageRef) override;
     inline IMS_SINT32 GetLastEmergencyMessageReference() const override {
         return m_nLastEmergencyMessageReference;
     }
