@@ -97,7 +97,7 @@ private:
             IN VideoProfile::CapaNego* pPeerCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
     IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
-            IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload** pNegoPayload);
+            IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload);
     IMS_BOOL MakeNegotiatedBandwidth(IN const VideoConfiguration* pConfig,
             IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);
