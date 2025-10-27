@@ -662,16 +662,16 @@ public class DcApnTest {
                 .setState(TelephonyManager.DATA_SUSPENDED)
                 .setNetworkType(TelephonyManager.NETWORK_TYPE_LTE)
                 .setApnSetting(new ApnSetting.Builder()
-                        .setApnTypeBitmask(ApnSetting.TYPE_IMS)
+                        .setApnTypeBitmask(ApnSetting.TYPE_XCAP)
                         .setApnName("TestApn")
                         .setEntryName("Test")
                         .setProtocol(ApnSetting.PROTOCOL_IPV6)
                         .build())
                 .build();
-        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+        mDcApn.setApn(EApnType.XCAP.getType(), mMockIApn);
 
         mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
-        verify(mMockIApn, never()).sendMessage(any(Message.class));
+        verify(mMockIApn).sendMessage(any(Message.class));
     }
 
     @Test

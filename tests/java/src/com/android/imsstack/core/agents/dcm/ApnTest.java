@@ -612,57 +612,6 @@ public class ApnTest {
     }
 
     @Test
-    public void testUpdateDataState() throws Exception {
-        // update to DATA_CONNECTED when mPreciseDcState is DATA_CONNECTED
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-
-        // update to DATA_DISCONNECTED when mPreciseDcState is DATA_DISCONNECTED
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_DISCONNECTED;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-
-        // update to DATA_CONNECTED when mPreciseDcState is DATA_SUSPENDED
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_SUSPENDED;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-
-        // update to DATA_DISCONNECTED when mPreciseDcState is DATA_UNKNOWN
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-
-        // update to DATA_CONNECTED when mPreciseDcState is DATA_DISCONNECTING
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_DISCONNECTING;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-
-        // update to DATA_DISCONNECTED when mPreciseDcState is DATA_CONNECTING
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-
-        // update to DATA_CONNECTED when mPreciseDcState is DATA_HANDOVER_IN_PROGRESS
-        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_HANDOVER_IN_PROGRESS;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-
-        // Not update when mPreciseDcState is same with current data state
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
-        mApn.updateDataState();
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-    }
-
-    @Test
     public void testSendDataStateUpdateMessage() throws Exception {
         replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
 
@@ -906,6 +855,43 @@ public class ApnTest {
         verify(mMockMsgProc).procMsg(any(Message.class));
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mApn.mNetworkType);
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_suspendedAndRegisteredForSuspended()
+            throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_SUSPENDED, mMockMsgProc);
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_SUSPENDED,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc).procMsg(any(Message.class));
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType);
+        assertEquals(TelephonyManager.DATA_SUSPENDED, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_suspendedButNotRegisteredForSuspended()
+            throws Exception {
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_SUSPENDED,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc, never()).procMsg(any(Message.class));
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType); // Ignore SUSPENDED.
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mPreciseDcState);
     }
 
     @Test

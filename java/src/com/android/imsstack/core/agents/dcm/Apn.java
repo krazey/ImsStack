@@ -79,6 +79,7 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int EVENT_NETWORK_LOSING = 105;
     protected static final int EVENT_NETWORK_UNAVAILABLE = 106;
     protected static final int EVENT_NETWORK_LOST = 107;
+    protected static final int EVENT_NETWORK_SUSPENDED = 108;
 
     protected static final int EVENT_IP_CHANGED = 1001;
     protected static final int EVENT_PCSCF_CHANGED = 1002;
@@ -112,6 +113,8 @@ public abstract class Apn extends Handler implements IApn {
                 "NETWORK_UNAVAILABLE");
         sEventToString.put(EVENT_NETWORK_LOST,
                 "NETWORK_LOST");
+        sEventToString.put(EVENT_NETWORK_SUSPENDED,
+                "NETWORK_SUSPENDED");
 
         sEventToString.put(EVENT_IP_CHANGED,
                 "IP_CHANGED");
@@ -533,22 +536,6 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         return true;
-    }
-
-    protected void updateDataState() {
-        int dataState = isConnected() ? TelephonyManager.DATA_CONNECTED
-                : TelephonyManager.DATA_DISCONNECTED;
-
-        if (mDataState != dataState) {
-            ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + dataState);
-
-            setDataState(dataState);
-            if (mDataState == TelephonyManager.DATA_CONNECTED) {
-                notifyDataConnectionIpcanChanged(mNetworkType);
-            }
-            sendDataStateUpdateMessage(mType, EDataState.convertIntTypeToEnum(
-                    (EDataState.convertFromTMtoImsType(mDataState))));
-        }
     }
 
     /**
@@ -1145,6 +1132,11 @@ public abstract class Apn extends Handler implements IApn {
                     mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
                     updateCrossSimStatus(mNetworkType);
                     break;
+                case TelephonyManager.DATA_SUSPENDED:
+                    if (!handleNetworkSuspended()) {
+                        return;
+                    }
+                    break;
                 default:
                     // no-op
                     break;
@@ -1181,6 +1173,21 @@ public abstract class Apn extends Handler implements IApn {
             msg.what = EVENT_DATA_CONNECTION_FAILED;
             msg.obj = causeCode;
             sendMessage(msg);
+        }
+
+        private boolean handleNetworkSuspended() {
+            if (mMapMsgHandler.get(EVENT_NETWORK_SUSPENDED) == null) {
+                // Ignore DATA_SUSPENDED unless XCAP APN.
+                return false;
+            }
+
+            ImsLog.i(mSlotId, "handleNetworkSuspended");
+
+            Message msg = Message.obtain();
+            msg.what = EVENT_NETWORK_SUSPENDED;
+            sendMessage(msg);
+
+            return true;
         }
 
         private boolean isIpcanChanged(int networkToCheck) {

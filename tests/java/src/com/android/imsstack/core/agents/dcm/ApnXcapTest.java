@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
@@ -204,22 +205,69 @@ public class ApnXcapTest {
     }
 
     @Test
-    public void testHandleIpChanged_notConnected() throws Exception {
-        // if data state is not connected and do not wait IPv6 address, ignore event
+    public void testHandleNetworkSuspended() throws Exception {
+        replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        // if data state is already DATA_DISCONNECTED, ignore event
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnXcap.getDataState());
+        mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_SUSPENDED);
+        mTestableLooper.processAllMessages();
+
+        // if data state is not DATA_DISCONNECTED, notify that the data connection state change is
+        // disconnected.
+        mApnXcap.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_IPV6_ADDRESS,
+                mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
+        mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_SUSPENDED);
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnXcap.getDataState());
+        verify(mMockIDcNetWatcher, times(2)).notifyDataConnectionState(
+                EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
+        verify(mMockISystem, times(2)).notifyDataConnectionStateChanged(
+                EApnType.XCAP.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
+    }
+
+    @Test
+    public void testHandleIpChanged_whenConnected() throws Exception {
+        // If mDataState is DATA_CONNECTED, notify EDataState.DATA_STATE_IP_CHANGED.
+        mApnXcap.setDataState(TelephonyManager.DATA_CONNECTED);
+
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        // if data state is not connected and wait IPv6 address, update data state
+        verify(mMockISystem).notifyDataConnectionStateChanged(
+                EApnType.XCAP.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
+    }
+
+    @Test
+    public void testHandleIpChanged_whenNotConnectedAndWaitingIpv6() throws Exception {
+        // If data state is not connected and wait IPv6 address, notify
+        // EDataState.DATA_STATE_CONNECTED.
+        mApnXcap.setDataState(TelephonyManager.DATA_DISCONNECTED);
         mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_IPV6_ADDRESS,
                 mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
-        mApnXcap.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
         assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
+    }
+
+    @Test
+    public void testHandleIpChanged_whenNotConnectedAndNotWaitingIpv6() throws Exception {
+        // If data state is not connected and wait IPv6 address, do nothing.
+        mApnXcap.setDataState(TelephonyManager.DATA_DISCONNECTED);
+
+        mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
+        mTestableLooper.processAllMessages();
+
+        verifyNoMoreInteractions(mMockISystem);
     }
 
     @Test
@@ -255,14 +303,14 @@ public class ApnXcapTest {
     }
 
     @Test
-    public void testHandleWaitingIpv6Address() throws Exception {
-        // if updated data state is DATA_DISCONNECTED, ignore event
-        mApnXcap.mPreciseDcState = TelephonyManager.DATA_DISCONNECTED;
+    public void testHandleWaitingIpv6Address() {
+        // If mDataState is DATA_CONNECTED, ignore event.
+        mApnXcap.setDataState(TelephonyManager.DATA_CONNECTED);
         mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_IPV6_ADDRESS);
         mTestableLooper.processAllMessages();
 
-        // if updated data state is DATA_CONNECTED, notify data connection state change
-        mApnXcap.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+        // If mDataState is not DATA_CONNECTED, notify data connection state change
+        mApnXcap.setDataState(TelephonyManager.DATA_DISCONNECTED);
         mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_IPV6_ADDRESS);
         mTestableLooper.processAllMessages();
 
