@@ -277,13 +277,18 @@ IMS_BOOL AosConnector::IsPcscfConfigured() const
 PROTECTED
 IMS_BOOL AosConnector::IsPcoWaitingRequired() const
 {
-    IMS_BOOL bResult = IMS_FALSE;
+    if (IsEmergencyType())
+    {
+        return IMS_FALSE;
+    }
 
     IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
-    if (GET_N_CONFIG(nSlotId) != IMS_NULL && GET_N_CONFIG(nSlotId)->IsSupportLimitedAdminSmsMode())
+    if (GET_N_CONFIG(nSlotId) == IMS_NULL || !GET_N_CONFIG(nSlotId)->IsSupportLimitedAdminSmsMode())
     {
-        bResult = m_piConnection->GetCarrierSignalPcoValue() == PCO_INVALID_VALUE;
+        return IMS_FALSE;
     }
+
+    IMS_BOOL bResult = (m_piConnection->GetCarrierSignalPcoValue() == PCO_INVALID_VALUE);
 
     A_IMS_TRACE_D(APPPROFILE, "IsPcoWaitingRequired : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
