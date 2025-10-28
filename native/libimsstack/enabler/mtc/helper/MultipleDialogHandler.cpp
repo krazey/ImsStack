@@ -46,6 +46,7 @@ void MultipleDialogHandler::OnStarted(
             continue;
         }
         IMS_TRACE_D("OnStarted remove[%d]", i, 0, 0);
+        piMtcSession->SetSessionTerminatedOrStartFailed();
         objContext.RemoveSession(*piMtcSession);
     }
 }

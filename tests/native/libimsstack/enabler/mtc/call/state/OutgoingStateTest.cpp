@@ -1028,6 +1028,7 @@ TEST_F(OutgoingStateTest, SessionStartedRemovesInactiveSessions)
     ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
             .WillByDefault(Return(IMS_TRUE));
 
+    EXPECT_CALL(objMtcSession2, SetSessionTerminatedOrStartFailed);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(0);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession2))).Times(1);
 
