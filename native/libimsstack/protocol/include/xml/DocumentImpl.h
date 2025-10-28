@@ -16,9 +16,9 @@
 #ifndef DOCUMENT_IMPL_H_
 #define DOCUMENT_IMPL_H_
 
+#include "libxml/xpath.h"
+
 #include "IDocument.h"
-#include "XmlApiTree.h"
-#include "XmlApiXPath.h"
 
 class Document;
 

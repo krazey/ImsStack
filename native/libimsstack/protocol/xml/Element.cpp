@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AString.h"
+
 #include "AttrImpl.h"
 #include "Element.h"
 #include "IElement.h"
+#include "NamedNodeMap.h"
+#include "NodeList.h"
 
 PUBLIC
 Element::Element(IN xmlNodePtr pstNode, IN IElement* piElement) :

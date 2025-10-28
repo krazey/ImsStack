@@ -16,8 +16,9 @@
 #ifndef DOM_DOCUMENT_BUILDER_FACTORY_H_
 #define DOM_DOCUMENT_BUILDER_FACTORY_H_
 
-#include "DocumentBuilder.h"
 #include "DocumentBuilderFactory.h"
+
+class DocumentBuilder;
 
 /**
  * @brief This class provides a factory API that enables XML applications to obtain a parser

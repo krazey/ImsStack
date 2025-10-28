@@ -16,8 +16,9 @@
 #ifndef TEXT_IMPL_H_
 #define TEXT_IMPL_H_
 
+#include "libxml/tree.h"
+
 #include "IText.h"
-#include "XmlApiTree.h"
 
 class INode;
 class Text;

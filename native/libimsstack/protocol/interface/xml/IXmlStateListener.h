@@ -16,8 +16,6 @@
 #ifndef INTERFACE_XML_STATE_LISTENER_H_
 #define INTERFACE_XML_STATE_LISTENER_H_
 
-#include "ImsTypeDef.h"
-
 class IXmlStateListener
 {
 protected:

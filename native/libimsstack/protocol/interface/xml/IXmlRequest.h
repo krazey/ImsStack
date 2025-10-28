@@ -16,7 +16,7 @@
 #ifndef INTERFACE_XML_REQUEST_H_
 #define INTERFACE_XML_REQUEST_H_
 
-#include "AString.h"
+class AString;
 
 class IXmlRequest
 {

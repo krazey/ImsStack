@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
+#include "IDocument.h"
 #include "IXmlTransactionProvider.h"
 #include "ServiceMemory.h"
 #include "ServiceMessage.h"

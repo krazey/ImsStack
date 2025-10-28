@@ -16,6 +16,8 @@
 #ifndef DOCUMENT_BUILDER_FACTORY_H_
 #define DOCUMENT_BUILDER_FACTORY_H_
 
+#include "ImsTypeDef.h"
+
 class DocumentBuilder;
 
 /**
