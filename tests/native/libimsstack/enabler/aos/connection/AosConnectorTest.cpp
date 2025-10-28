@@ -386,10 +386,6 @@ TEST_F(AosConnectorTest, DoNotWaitForIpv6IfCanNotOptainIpv6PcscfWhenStateChanged
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
     ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(1));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue())
@@ -417,10 +413,6 @@ TEST_F(AosConnectorTest, WaitForIpv6IfPcscfDiscoveryOtherThanPcoIsPossibleWhenSt
 TEST_F(AosConnectorTest, WaitForPcoIfRequiredWhenStateChangedToActive)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(1));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue())
@@ -437,10 +429,6 @@ TEST_F(AosConnectorTest, WaitForPendingOperationCompleteWhenStateChangedToActive
 {
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_PCSCF_CONFIG_READY);
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(0));
 
     // not trying configure PCSCF and wait for pending feature processing
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_)).Times(0);
@@ -451,10 +439,6 @@ TEST_F(AosConnectorTest, WaitForPendingOperationCompleteWhenStateChangedToActive
 TEST_F(AosConnectorTest, WaitForPcscfConfigureIfPcscfConfigureFailWhenStateChangedToActive)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(0));
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, IsAsyncDnsDiscovery()).WillByDefault(Return(IMS_FALSE));
@@ -476,10 +460,6 @@ TEST_F(AosConnectorTest, NotifyActivatedIfPcscfConfigureSucceedWhenStateChangedT
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(0));
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
@@ -887,10 +867,6 @@ TEST_F(AosConnectorTest, WaitForPcoIfRequiredWhenIpv6TimerExpired)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_IPV6_DELAY);
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(1));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue())
@@ -908,10 +884,6 @@ TEST_F(AosConnectorTest, WaitForDataConnectionWhenIpv6TimerExpired)
     m_pAosConnector->SetDataConnected(IMS_FALSE);
     m_pAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_IPV6_DELAY);
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(0));
 
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_)).Times(0);
 
@@ -927,10 +899,7 @@ TEST_F(AosConnectorTest, NotifyActivatedIfPcscfAndLocalAddressIsAvailableWhenIpv
     m_pAosConnector->SetDataConnected(IMS_TRUE);
     m_pAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_IPV6_DELAY);
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistentInt(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
-            .WillByDefault(Return(0));
+
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_TRUE));

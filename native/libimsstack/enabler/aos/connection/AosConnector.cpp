@@ -279,11 +279,6 @@ IMS_BOOL AosConnector::IsPcoWaitingRequired() const
 {
     IMS_BOOL bResult = IMS_FALSE;
 
-    if (!IsCarrierSignalPcoEnabled())
-    {
-        return bResult;
-    }
-
     IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
     if (GET_N_CONFIG(nSlotId) != IMS_NULL && GET_N_CONFIG(nSlotId)->IsSupportLimitedAdminSmsMode())
     {
@@ -292,14 +287,6 @@ IMS_BOOL AosConnector::IsPcoWaitingRequired() const
 
     A_IMS_TRACE_D(APPPROFILE, "IsPcoWaitingRequired : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
-}
-
-PROTECTED
-IMS_BOOL AosConnector::IsCarrierSignalPcoEnabled() const
-{
-    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
-    return (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
-                    ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, nSlotId) == 1);
 }
 
 PROTECTED

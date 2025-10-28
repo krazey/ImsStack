@@ -270,11 +270,6 @@ public final class ImsPrivateProperties {
          * Value: boolean (true / false)
          */
         public static final String KEY_TEST_SIMULATED_IMS_HAL = "test_simulated_ims_hal";
-        /**
-         * Carrier signal PCO test configuration.
-         * Value: int (1 / 0)
-         */
-        public static final String KEY_CARRIER_SIGNAL_PCO_TEST = "carrier_signal_pco_test";
 
         // Release properties
         /**
@@ -463,7 +458,6 @@ public final class ImsPrivateProperties {
             KEY_PREF_KR_ENABLER,
             KEY_WIFI_TEST,
             KEY_TEST_SIMULATED_IMS_HAL,
-            KEY_CARRIER_SIGNAL_PCO_TEST,
             KEY_TEST_IMS_DISABLED,
             KEY_TEST_DEBUG_ENABLED,
             KEY_TEST_DEBUG_SCREEN_ENABLED,
