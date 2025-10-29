@@ -366,12 +366,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         synchronized (mLock) {
             mCallback.setListener(listener);
-
-            // TIMING_ISSUE
-            if ((listener != null) && (mImmediateCallEndReason != null)) {
-                log("Call is already terminated");
-                notifyCallStartFailed(mImmediateCallEndReason);
-            }
         }
 
         // Notify the supplementary service for call forwarding if present.
@@ -416,6 +410,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
+        mCallDetails.set(CallDetails.TELEPHONY_LISTENING);
+
         if (mCall.isEmergencyCall()) {
 
             @EmergencyCallRouting
@@ -423,20 +419,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee,
                     mtcApp.getMtcEmergencyServiceManager().getNetworkCountryIso());
             mtcApp.openEmergencyService(mCall, emergencyRouting);
-        }
-
-        int state = getState();
-
-        if ((state != ImsCallSessionImplBase.State.IDLE)
-                && (state != ImsCallSessionImplBase.State.INITIATED)) {
-            if (notifyCallStartFailedIfAlreadyTerminated()) {
-                return;
-            }
-
-            // FIXME: notify the event result - Illegal state
-            loge("start :: Illegal state; callId=" + getCallId() +
-                    ", state=" + ImsCallSessionImplBase.State.toString(state));
-            return;
         }
 
         // Handles an emergency call as a normal call
@@ -493,19 +475,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
-        int state = getState();
-
-        if ((state != ImsCallSessionImplBase.State.IDLE)
-                && (state != ImsCallSessionImplBase.State.INITIATED)) {
-            if (notifyCallStartFailedIfAlreadyTerminated()) {
-                return;
-            }
-
-            // FIXME: notify the event result - Illegal state
-            loge("startConference :: Illegal state; callId=" + getCallId() +
-                    ", state=" + ImsCallSessionImplBase.State.toString(state));
-            return;
-        }
+        mCallDetails.set(CallDetails.TELEPHONY_LISTENING);
 
         mCall.startConference(ImsCallUtils.getCallTypeFromProfile(
                 profile.getCallType(), profile.getMediaProfile().isRttCall()),
@@ -1285,7 +1255,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if (mCall.isTerminatedByAutoRejectedCall()) {
             log("alertUser for Auto Rejected Call");
-            // send delayed message to terminate.
             int code = ImsReasonInfo.CODE_UNSPECIFIED;
             String callDisconnectCause = mCallProfile.getCallExtra(
                     ImsCallProfile.EXTRA_CALL_DISCONNECT_CAUSE, null);
@@ -1297,12 +1266,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
             }
 
-            ImsReasonInfo reasonInfo =  ImsCallUtils.createReasonInfo(code, 0, "", 0);
-            if (checkAndSetImmediateCallEndReason(reasonInfo)) {
-                return;
-            }
-
-            notifyCallStartFailed(reasonInfo);
+            notifyCallStartFailed(ImsCallUtils.createReasonInfo(
+                    code, 0, "", ImsCallUtils.FLAG_REASON_INFO_NONE));
             return;
         }
 
@@ -1321,8 +1286,15 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
      */
     public void onIncomingcallNotified(boolean isHandled) {
         log("onIncomingcallNotified isHandled: " +  isHandled);
-
         if (isHandled) {
+            mCallDetails.set(CallDetails.TELEPHONY_LISTENING);
+
+            if (mImmediateCallEndReason != null) {
+                log("Call end reason :: " + mImmediateCallEndReason);
+                notifyCallStartFailed(mImmediateCallEndReason);
+                return;
+            }
+
             alertUser();
         } else {
             reject(ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
@@ -2447,35 +2419,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 != MtcCallUtils.isGttEnabled(mi.gttMode));
     }
 
-    private boolean checkAndSetImmediateCallEndReason(final ImsReasonInfo reasonInfo) {
-        int state = getState();
-
-        synchronized (mLock) {
-            if (!mCallback.hasListener()) {
-                // TIMING_ISSUE :: if incoming call is sent to the framework
-                // and the call is terminated by the remote end immediately,
-                // the listener is null. So, when the framework sets the listener,
-                // the call setup failure should be notified to the framework.
-                mImmediateCallEndReason = reasonInfo;
-                return true;
-            } else if ((state == ImsCallSessionImplBase.State.IDLE)
-                    || (state == ImsCallSessionImplBase.State.INITIATED)) {
-                if (((mMoPendingCall != null) && !mMoPendingCall.isIdle())
-                        || ((mLocationBasedCall != null) && !mLocationBasedCall.isIdle())
-                        || ((mUsatBasedCall != null) && !mUsatBasedCall.isIdle())) {
-                    return false;
-                }
-
-                // TIMING_ISSUE :: The call can't be initiated and StartFailed
-                // event can be came before calling start(...) method.
-                mImmediateCallEndReason = reasonInfo;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static void updateMediaProfile(
             ImsCallProfile toProfile, ImsCallProfile fromProfile) {
         if (toProfile == null || fromProfile == null) {
@@ -2596,6 +2539,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
          */
         public static final int RTT_TURNING_ON = 0x10000000;
         public static final int RTT_TURNING_OFF = 0x20000000;
+
+        /**
+         * Indicates that the Telephony is ready to receive callbacks.
+         */
+        public static final int TELEPHONY_LISTENING = 0x40000000;
         /**
          * Indicates that the call end event is passed to the framework or not.
          */
@@ -3499,8 +3447,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsCallUtils.refineCallReasonInfoForCode(mCallContext, mCallProfile, callReasonInfo);
 
-            if (checkAndSetImmediateCallEndReason(ImsCallUtils.createReasonInfo(
-                        callReasonInfo, ImsCallUtils.FLAG_REASON_INFO_ALL))) {
+            if (!mCallDetails.is(CallDetails.TELEPHONY_LISTENING)) {
+                mImmediateCallEndReason = ImsCallUtils.createReasonInfo(
+                        callReasonInfo, ImsCallUtils.FLAG_REASON_INFO_ALL);
                 setState(ImsCallSessionImplBase.State.TERMINATED);
                 return;
             }
