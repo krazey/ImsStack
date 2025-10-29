@@ -200,17 +200,16 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
     }
 
+    pVideoConfig->setFramerate(pNegoProfile->GetFrameRate());
+
     if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
     {
         auto pNegoFmtp = std::static_pointer_cast<VideoProfile::AvcFmtp>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_AVC);
         pVideoConfig->setCodecProfile(convertAvcProfile((pNegoFmtp->GetProfile())));
-
         /** TODO: check the case for setting AVC_LEVEL_1B */
         pVideoConfig->setCodecLevel(convertAvcLevel(pNegoFmtp->GetLevel()));
-
-        pVideoConfig->setFramerate(pNegoFmtp->GetFramerate());
         pVideoConfig->setBitrate(pNegoFmtp->GetBitrate());
         pVideoConfig->setPacketizationMode(pNegoFmtp->GetPacketizationMode());
 
@@ -227,11 +226,8 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
         pVideoConfig->setCodecProfile(convertHevcProfile((pNegoFmtp->GetProfile())));
-
         /** The levelId received from sdp profile should be converted to a value divided by 3. */
         pVideoConfig->setCodecLevel(convertHevcLevel(pNegoFmtp->GetLevel() / 3));
-
-        pVideoConfig->setFramerate(pNegoFmtp->GetFramerate());
         pVideoConfig->setBitrate(pNegoFmtp->GetBitrate());
         pVideoConfig->setPacketizationMode(pNegoFmtp->GetPacketizationMode());
 
@@ -289,24 +285,19 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
 
     pVideoConfig->setRtcpFbType(nRtcpFbAttr);
 
-    IMS_TRACE_D("UpdateRtpConfig() - VideoMode[%d], Codectype[%d]", pVideoConfig->getVideoMode(),
-            pVideoConfig->getCodecType(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - Framerate[%d], Bitrate[%d]", pVideoConfig->getFramerate(),
-            pVideoConfig->getBitrate(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - CodecProfile[%d], CodecLevel[%d], Sprop[%s]",
-            pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(),
-            pVideoConfig->getCodecSprop().c_str());
-    IMS_TRACE_D("UpdateRtpConfig() - IntraFrameInterval[%d], PacketizationMode[%d]",
-            pVideoConfig->getIntraFrameInterval(), pVideoConfig->getPacketizationMode(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - CameraId[%d], CameraZoom[%d]", pVideoConfig->getCameraId(),
-            pVideoConfig->getCameraZoom(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - ResolutionWidth[%d], ResolutionHeight[%d]",
-            pVideoConfig->getResolutionWidth(), pVideoConfig->getResolutionHeight(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - PauseImagePath[%s], DeviceOrientationDegree[%d]",
-            pVideoConfig->getPauseImagePath().c_str(), pVideoConfig->getDeviceOrientationDegree(),
-            0);
-    IMS_TRACE_D("UpdateRtpConfig() - CvoValue[%d], RtcpFbType[%d]", pVideoConfig->getCvoValue(),
-            pVideoConfig->getRtcpFbType(), 0);
+    IMS_TRACE_D("UpdateRtpConfig: Mode[%d], Codec[%d], Profile[%d]", pVideoConfig->getVideoMode(),
+            pVideoConfig->getCodecType(), pVideoConfig->getCodecProfile());
+    IMS_TRACE_D("UpdateRtpConfig: Level[%d], FrameRate[%d], Bitrate[%d]",
+            pVideoConfig->getCodecLevel(), pVideoConfig->getFramerate(),
+            pVideoConfig->getBitrate());
+    IMS_TRACE_D("UpdateRtpConfig: PktMode[%d], I-Int[%d]", pVideoConfig->getPacketizationMode(),
+            pVideoConfig->getIntraFrameInterval(), 0);
+    IMS_TRACE_D("UpdateRtpConfig: Resolution[%dx%d]", pVideoConfig->getResolutionWidth(),
+            pVideoConfig->getResolutionHeight(), 0);
+    IMS_TRACE_D("UpdateRtpConfig: CamId[%d], Zoom[%d], Cvo[%d]", pVideoConfig->getCameraId(),
+            pVideoConfig->getCameraZoom(), pVideoConfig->getCvoValue());
+    IMS_TRACE_D("UpdateRtpConfig: RtcpFb[%d], Sprop[%s]", pVideoConfig->getRtcpFbType(),
+            pVideoConfig->getCodecSprop().c_str(), 0);
 
     return IMS_TRUE;
 }
