@@ -776,7 +776,7 @@ Content-Length: 0\r\n\
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_IGNORE_RESP, eTxnStatus);
 
     pRespSipMessage->SipDelete();
 

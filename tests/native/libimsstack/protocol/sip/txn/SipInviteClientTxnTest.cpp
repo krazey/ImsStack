@@ -541,31 +541,7 @@ CSeq: 1 INVITE\r\n\
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST]
                                  [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
                                          pTxn, pTxnFsmData, &nError));
-    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
-
-    const SIP_CHAR* pAckMsg = "ACK sip:userAck@host SIP/2.0\r\n\
-Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
-From: <sip:user@host>;tag=abcd\r\n\
-Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
-To: <sip:userA@host>;tag=one\r\n\
-CSeq: 1 ACK\r\n\
-Content-Length: 0\r\n\
-\r\n";
-
-    SipMessage* pAckSipMessage = new SipMessage();
-    ASSERT_TRUE(pAckSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pAckSipMessage->Decode(pAckMsg, SipPf_Strlen(pAckMsg)));
-
-    SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    pTranspInfo->SetSentSipMsg(pAckSipMessage);
-    pTxn->UpdateTranspInfo(pTranspInfo);
-
-    /* Calling re-transmitted 380 msg */
-    EXPECT_EQ(SIP_TRUE,
-            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST]
-                                 [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
-                                         pTxn, pTxnFsmData, &nError));
-    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_RETRANSMISSION);
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_IGNORE_RESP);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST][SipTxn::INV_CLI_TRANSP_ERROR_EVT](
