@@ -931,6 +931,54 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthASPeerLower)
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 800);
 }
 
+TEST_F(VideoProfileNegotiatorTest, NegotiateFrameRate)
+{
+    // Arrange
+    // Case 1: Negotiated payload framerate is higher than peer's profile framerate.
+    m_pPeerProfile->SetFrameRate(15);
+    VideoProfile::Payload* pLocalPayload1 =
+            AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31);
+    auto pLocalFmtp1 = std::static_pointer_cast<VideoProfile::AvcFmtp>(pLocalPayload1->GetFmtp());
+    pLocalFmtp1->SetFramerate(30);
+
+    VideoProfile::Payload* pPeerPayload1 =
+            AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 31);
+    auto pPeerFmtp1 = std::static_pointer_cast<VideoProfile::AvcFmtp>(pPeerPayload1->GetFmtp());
+    pPeerFmtp1->SetFramerate(30);
+
+    // Act
+    IMS_BOOL bResult1 = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult1);
+    // The final framerate should be the higher one from the negotiated payload.
+    EXPECT_EQ(m_pNegotiatedProfile->GetFrameRate(), 30);
+
+    // Arrange
+    // Case 2: Peer's profile framerate is higher.
+    m_pLocalProfile->DeletePayloads();
+    m_pPeerProfile->DeletePayloads();
+    m_pNegotiatedProfile = std::make_unique<VideoProfile>();
+
+    m_pPeerProfile->SetFrameRate(25);
+    VideoProfile::Payload* pLocalPayload2 =
+            AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31);
+    auto pLocalFmtp2 = std::static_pointer_cast<VideoProfile::AvcFmtp>(pLocalPayload2->GetFmtp());
+    pLocalFmtp2->SetFramerate(20);
+
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 31);
+
+    // Act
+    IMS_BOOL bResult2 = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult2);
+    // The final framerate should be the higher one from the peer's profile.
+    EXPECT_EQ(m_pNegotiatedProfile->GetFrameRate(), 25);
+}
+
 TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthASLocalLower)
 {
     // Arrange

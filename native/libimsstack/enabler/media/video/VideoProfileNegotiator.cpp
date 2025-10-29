@@ -85,7 +85,7 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
     NegotiateAvpf(pLocalProfile, pPeerProfile, pNegotiatedProfile);
     NegotiateTransportType(pNegotiatedProfile);
 
-    IMS_SINT32 nNegotiatedMaxFrameRate = 0;
+    IMS_SINT32 nNegotiatedMaxFrameRate = pPeerProfile->GetFrameRate();
     IMS_BOOL bNegotiatedPayload = NegotiatePayload(
             pLocalProfile, pPeerProfile, pNegotiatedProfile, &nNegotiatedMaxFrameRate);
 

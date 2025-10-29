@@ -274,6 +274,23 @@ TEST_F(VideoSessionTest, testUpdateRtpConfigPayloadType)
     EXPECT_EQ(pVideoConfig->getRxPayloadTypeNumber(), kPeerPayloadNum);
 }
 
+TEST_F(VideoSessionTest, testUpdateRtpConfigFrameRate)
+{
+    // Arrange
+    const int32_t kExpectedFrameRate = 25;
+    m_objNegoProfile.SetFrameRate(kExpectedFrameRate);
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+    // Act
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_FALSE));
+
+    // Assert
+    VideoConfig* pVideoConfig = reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig());
+    ASSERT_TRUE(pVideoConfig != IMS_NULL);
+    EXPECT_EQ(pVideoConfig->getFramerate(), kExpectedFrameRate);
+}
+
 TEST_F(VideoSessionTest, testSetMtu)
 {
     const IMS_UINT32 MTU = 1400;
