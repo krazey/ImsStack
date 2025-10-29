@@ -21,9 +21,17 @@
 
     <!-- Ims General -->
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <boolean name="ims.allow_session_timer_turn_off_bool" value="true"/>
     <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="true"/>
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="200"/>
+    <boolean name="ims.location_allow_mock_location_update_bool" value="true"/>
+    <int name="ims.location_acquisition_policy_int" value="86672"/>
+    <int name="ims.location_address_resolution_time_millis_int" value="3000"/>
+    <int name="ims.location_geodetic_shape_int" value="1"/>
+    <int name="ims.location_validity_period_min_int" value="30"/>
+    <int name="ims.location_address_validity_period_min_int" value="30"/>
+    <int name="ims.location_tolerable_distance_int" value="150"/>
 
     <!-- Aos -->
     <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="false"/>
@@ -77,9 +85,6 @@
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="0"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="1"/>
-    </int-array>
 
     <!-- Uce -->
     <int name="imsuce.anonymous_fetch_method_int" value="0"/>
@@ -134,6 +139,25 @@
         <item value="811"/>
     </int-array>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
+        <item value="403:13,7"/> <!-- TERMINATE_BY_REASON_HEADER_TEXT, HANDLE_FORBIDDEN_BY_POLICY  -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+        <item value="500:3,12"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE -->
+        <item value="503:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="0"/>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="0"/>
@@ -159,7 +183,6 @@
     <string name="imsvoice.call_reject_reason_phrase_no_answer_by_user_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
-    <int name="imsvt.convert_remote_response_timer_millis_int" value="15000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="12000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="1"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>
@@ -175,6 +198,7 @@
     <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="true"/>
     <int name="imsvoice.conference_drop_refer_to_uri_source_type_int" value="1"/>
     <boolean name="imswfc.enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
+    <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
     <int name="imsvoice.media_type_for_offerless_reinvite_int" value="2"/>
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
@@ -220,7 +244,7 @@
         <item value="2"/> <!-- NON_EMERGENCY_ON_WIFI -->
         <item value="1"/> <!-- EMERGENCY_ON_WIFI -->
         <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
-        <item value="0"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
         <item value="2"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
         <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
     </int-array>
@@ -231,6 +255,7 @@
     <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="false"/>
     <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
     <boolean name="imsvoice.suppinfo_cdiv_cause_required_bool" value="true"/>
+    <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b; I-wlan-node-id=#AID#</string>
     <string-array name="imsemergency.reject_code_and_reason_code_set_string_array" num="1">
         <item value="503:1622"/>
     </string-array>
