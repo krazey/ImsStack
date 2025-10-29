@@ -44,7 +44,8 @@ public final class ApnXcap extends Apn {
         super(context, slotId, EApnType.XCAP);
 
         registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkUnavailable());
+        registerHandler(EVENT_NETWORK_SUSPENDED, new HandleNetworkUnavailable());
         registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
         registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
         registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
@@ -139,7 +140,7 @@ public final class ApnXcap extends Apn {
         }
     }
 
-    private final class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkUnavailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -152,7 +153,6 @@ public final class ApnXcap extends Apn {
                 ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
-
                 sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
 
                 disconnect();
@@ -166,7 +166,6 @@ public final class ApnXcap extends Apn {
             ImsLog.i(mSlotId, "ip is changed");
 
             if (getDataState() == TelephonyManager.DATA_CONNECTED) {
-
                 if (!isIpChanged()) {
                     ImsLog.i(mSlotId, "ip is changed but ip address is same");
                     return;
@@ -183,7 +182,8 @@ public final class ApnXcap extends Apn {
 
             removeMessages(EVENT_WAITING_IPV6_ADDRESS);
 
-            updateDataState();
+            setDataState(TelephonyManager.DATA_CONNECTED);
+            sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECTED);
         }
     }
 
@@ -191,7 +191,14 @@ public final class ApnXcap extends Apn {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "apn is delayed, data is updated");
-            updateDataState();
+
+            if (getDataState() == TelephonyManager.DATA_CONNECTED) {
+                ImsLog.i(mSlotId, "apn is already connected");
+                return;
+            }
+
+            setDataState(TelephonyManager.DATA_CONNECTED);
+            sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECTED);
         }
     }
 

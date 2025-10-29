@@ -743,10 +743,6 @@ public class DcApn implements IDcApn {
                 PreciseDataConnectionState dataConnectionState) {
             ImsLog.d(mSlotId, "onPreciseDataConnectionStateChanged :: " + dataConnectionState);
 
-            if (dataConnectionState.getState() == TelephonyManager.DATA_SUSPENDED) {
-                return;
-            }
-
             ApnSetting apnSetting = dataConnectionState.getApnSetting();
             if (apnSetting == null) {
                 ImsLog.i(mSlotId, "Invalid apnSetting");
