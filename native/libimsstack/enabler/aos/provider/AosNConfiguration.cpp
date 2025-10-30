@@ -680,6 +680,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsSignallingDscp() const
     return m_objAsset.nImsSignallingDscp;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetMaxAllowedNetworkMtu() const
+{
+    return m_objAsset.nMaxAllowedNetworkMtu;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() const
 {
     return m_objCarrierConfig.nRegistrationPrivateHeader;
@@ -1780,6 +1785,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT);
     m_objAsset.nImsPreferredIpType = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objAsset.nImsSignallingDscp = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT);
+    m_objAsset.nMaxAllowedNetworkMtu =
+            piCc->GetInt(CarrierConfig::Ims::KEY_MAX_ALLOWED_NETWORK_MTU_INT);
     m_objAsset.nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam = piCc->GetInt(CarrierConfig::
                     Ims::KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT);
     m_objAsset.nRegActualWaitTimePolicy =

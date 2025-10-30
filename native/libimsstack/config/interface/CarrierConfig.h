@@ -199,6 +199,7 @@ public:
         static const IMS_CHAR KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT[];
         static const IMS_CHAR KEY_IMS_PREFERRED_IPTYPE_INT[];
         static const IMS_CHAR KEY_IMS_SIGNALLING_DSCP_INT[];
+        static const IMS_CHAR KEY_MAX_ALLOWED_NETWORK_MTU_INT[];
         static const IMS_CHAR
                 KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT[];
         static const IMS_CHAR KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[];

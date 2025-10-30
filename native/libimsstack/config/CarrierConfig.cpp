@@ -323,6 +323,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT[] =
         KEY_IMS_PREFIX "ims_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT[] =
         KEY_IMS_PREFIX "ims_signalling_dscp_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_MAX_ALLOWED_NETWORK_MTU_INT[] =
+        KEY_IMS_PREFIX "max_allowed_network_mtu_int";
 const IMS_CHAR CarrierConfig::Ims::
         KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT[] = KEY_IMS_PREFIX
         "pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int";

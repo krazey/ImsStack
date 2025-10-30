@@ -139,6 +139,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetWaitTimeMillisForReleaseEPdnAfterECallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetMaxAllowedNetworkMtu, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam, (),
             (const, override));

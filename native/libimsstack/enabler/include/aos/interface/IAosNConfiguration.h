@@ -1123,6 +1123,18 @@ public:
     virtual IMS_SINT32 GetImsSignallingDscp() const = 0;
 
     /**
+     * @brief Get the max allowed network MTU.
+     *
+     *        If Network assigns MTU large than GetMaxAllowedNetworkMtu(), it will be
+     *        limited to GetMaxAllowedNetworkMtu() to avoid UE use wrong transport
+     *        type to send SIP message.
+     *
+     * @return IMS_SINT32 Returns the max allowed network MTU
+     * @see {@code ims.max_allowed_network_mtu_int}
+     */
+    virtual IMS_SINT32 GetMaxAllowedNetworkMtu() const = 0;
+
+    /**
      * @brief Indicate whether private header like P-Cellular-Network-Info or
      *        P-Last-Access-Network-Info is supported during the registration over WiFi
      *

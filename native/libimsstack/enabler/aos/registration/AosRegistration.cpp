@@ -2622,22 +2622,30 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
         return;
     }
 
-    const IMS_SINT32 nMtu = m_piContext->GetConnection()->GetMtu();
+    IMS_SINT32 nMtu = m_piContext->GetConnection()->GetMtu();
+    const IMS_SINT32 nMaxMtu =
+            GET_N_CONFIG(m_nSlotId)->GetMaxAllowedNetworkMtu();
     const IMS_SINT32 nSipThresholdSize =
             GET_N_CONFIG(m_nSlotId)->GetSipMessageThresholdForTransportChange();
     const IMS_BOOL bEpdgEnabled = m_piContext->GetConnection()->IsEpdgEnabled();
     IMS_SINT32 nLength = 0;
+
     if (nMtu > 0 && nMtu > nSipThresholdSize)
     {
         /*
-            If there's a valid MTU, apply it as MTU - SIP threshold size.
-            However, if EPDG, IPv6, and MTU exceeds MTU_MAX_SIZE_VIA_WIFI, then apply the MTU
-            as MTU_MAX_SIZE_VIA_WIFI.
+            1. If the MTU size is large than the max MTU, limit it to the max MTU.
+            2. If there's a valid MTU, apply it as MTU - SIP threshold size.
+            3. However, if EPDG, IPv6, and MTU exceeds MTU_MAX_SIZE_VIA_WIFI, then apply the MTU
+               as MTU_MAX_SIZE_VIA_WIFI.
         */
-        nLength = nMtu - nSipThresholdSize;
+        nMtu = (nMtu < nMaxMtu) ? nMtu : nMaxMtu;
         if (bEpdgEnabled && m_objIpa.IsIPv6Address() && nMtu > MTU_MAX_SIZE_VIA_WIFI)
         {
             nLength = MTU_MAX_SIZE_VIA_WIFI - nSipThresholdSize;
+        }
+        else
+        {
+            nLength = nMtu - nSipThresholdSize;
         }
     }
     else
@@ -2646,7 +2654,7 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
         {
             // Apply the following SIP MTU configuration in cases of invalid MTU and cellular.
             nLength = (m_objIpa.IsIPv6Address()) ? GET_N_CONFIG(m_nSlotId)->GetIpv6MtuSize()
-                                                 : GET_N_CONFIG(m_nSlotId)->GetIpv4MtuSize();
+                                                : GET_N_CONFIG(m_nSlotId)->GetIpv4MtuSize();
         }
     }
 

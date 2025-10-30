@@ -500,6 +500,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ims_preferred_iptype_int";
         public static final String KEY_IMS_SIGNALLING_DSCP_INT =
                 KEY_PREFIX + "ims_signalling_dscp_int";
+        public static final String KEY_MAX_ALLOWED_NETWORK_MTU_INT =
+                KEY_PREFIX + "max_allowed_network_mtu_int";
         public static final String
                 KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT =
                 KEY_PREFIX
