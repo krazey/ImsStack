@@ -332,8 +332,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     public void changeCapabilities(@NonNull CapabilityPairs pairs) {
         Objects.requireNonNull(pairs, "listener must not be null");
 
-        adjustCapabilities(pairs);
-
         if (mCapabilityPairs != null && mCapabilityPairs.equals(pairs)) {
             return;
         }
@@ -814,18 +812,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void notifySimStateChanged(@Sim.State int simState) {
         mLocalLog.log("J2N_NOTIFY_SIM_STATE_CHANGED: simState=" + simState);
         sendRequest(IIAosService.J2N_NOTIFY_SIM_STATE_CHANGED, simState);
-    }
-
-    private void adjustCapabilities(CapabilityPairs pairs) {
-        /*
-         * Note : If LTE/NR-VIDEO capability is enabled, add IWLAN-VIDEO capability.
-         */
-        if (pairs.hasCapability(NetworkType.LTE, Capability.VIDEO)
-                || pairs.hasCapability(NetworkType.NR, Capability.VIDEO)) {
-            ImsLog.d("Add Capability - IWLAN-VIDEO");
-            pairs.addCapability(NetworkType.IWLAN,
-                    Capability.VIDEO);
-        }
     }
 
     private void updateRegisteredNetworkType(NetworkType networkType) {

@@ -20,6 +20,8 @@ import static android.provider.Settings.Global.DATA_ROAMING;
 
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.PersistableBundle;
+import android.os.SystemProperties;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -35,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -385,10 +388,13 @@ public class ImsRegistrationTracker {
                     }
                 }
             }
-
-            if (!isIgnoreDataEnabledChangedForVideoCalls()) {
+            /*
+             * Note : To support TMO/VZW data roaming case, until framework supports.
+             */
+            if (!getBooleanCarrierConfig(
+                    CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
                 if (!isMobileDataEnabled()) {
-                    if (capability == Capability.VIDEO) {
+                    if ((capability == Capability.VIDEO) && (networkType != NetworkType.IWLAN)) {
                         logi("Mobile data is off :: ignoring video capability");
                         continue;
                     }
@@ -401,13 +407,17 @@ public class ImsRegistrationTracker {
                 ImsLog.d("Add text Capability");
                 capabilityPairs.addCapability(networkType, Capability.TEXT);
             }
-
-            if (((networkType == NetworkType.LTE) && (capability == Capability.VIDEO))
-                    || ((networkType == NetworkType.NR) && (capability == Capability.VIDEO))) {
-                ImsLog.d("Add Capability - IWLAN-VIDEO");
-                capabilityPairs.addCapability(NetworkType.IWLAN, Capability.VIDEO);
-            }
         }
+        /*
+         * Note : VZ_REQ_VOWIFI_6258874 support, add IWLAN-VIDEO capability when WFC-OFF.
+         */
+        if (getBooleanCarrierConfig(
+                    CarrierConfig.ImsWfc.KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)
+                    && isVtEnabled()) {
+            ImsLog.d("Add Capability - IWLAN-VIDEO when WFC-OFF");
+            capabilityPairs.addCapability(NetworkType.IWLAN, Capability.VIDEO);
+        }
+
         logi("Final Capabilities" + capabilityPairs);
         return capabilityPairs;
     }
@@ -423,7 +433,8 @@ public class ImsRegistrationTracker {
         }
 
         addNetWatcherListener();
-        if (!isIgnoreDataEnabledChangedForVideoCalls()) {
+        if (!getBooleanCarrierConfig(
+                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
             registerDataRoamingSettingObserver();
         }
     }
@@ -447,7 +458,7 @@ public class ImsRegistrationTracker {
     }
 
     private CapabilityPairs createSmsCapabilityPairs() {
-        if (isSmsCapabilitySupported()) {
+        if (getBooleanCarrierConfig(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL)) {
             int[] supportedRats = getSmsSupportedRats();
 
             if (supportedRats.length > 0) {
@@ -461,7 +472,8 @@ public class ImsRegistrationTracker {
                     } else if (supportedRats[i] == AccessNetworkType.NGRAN) {
                         capabilityPairs.addCapability(NetworkType.NR, Capability.SMS);
                     } else if (supportedRats[i] == AccessNetworkType.IWLAN) {
-                        if (!isRoaming() || isSmsCapabilitySupportedInWifiRoaming()) {
+                        if (!isRoaming() || getBooleanCarrierConfig(CarrierConfig
+                                .ImsSms.KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL)) {
                             capabilityPairs.addCapability(NetworkType.IWLAN, Capability.SMS);
                         }
                     }
@@ -473,6 +485,33 @@ public class ImsRegistrationTracker {
         return null;
     }
 
+    private boolean getBooleanCarrierConfig(String key) {
+        ConfigInterface config = getConfigInterface(mContext.getSlotId());
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        return cc != null && cc.getBoolean(key);
+    }
+
+    private boolean isVtEnabled() {
+        if (SystemProperties.getInt("persist.dbg.vt_avail_ovr"
+                + Integer.toString(mContext.getPhoneId()), -1) == 1
+                || SystemProperties.getInt("persist.dbg.vt_avail_ovr", -1) == 1) {
+            return true;
+        }
+
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        if (ccmp == null) {
+            return false;
+        }
+
+        PersistableBundle b = ccmp.getConfigForSubId(mContext.getSubId(),
+                CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL);
+
+        return AppContext.getInstance().getResources().getBoolean(
+                com.android.internal.R.bool.config_device_vt_available)
+                && (b != null) && b.getBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL);
+    }
+
     private boolean isRttSupported() {
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
         if (isr != null) {
@@ -481,9 +520,7 @@ public class ImsRegistrationTracker {
                     && (configImpl.getConfigInt(ProvisioningManager.KEY_RTT_ENABLED)
                             == ProvisioningManager.PROVISIONING_VALUE_ENABLED)) {
                 if (isRoaming()) {
-                    ConfigInterface config = getConfigInterface(mContext.getSlotId());
-                    CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
-                    return cc != null && cc.getBoolean(
+                    return getBooleanCarrierConfig(
                             CarrierConfigManager.KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL);
                 }
                 return true;
@@ -526,13 +563,6 @@ public class ImsRegistrationTracker {
         return (dcnw != null) ? dcnw.isRoaming() : false;
     }
 
-    private boolean isSmsCapabilitySupported() {
-        ConfigInterface config = getConfigInterface(mContext.getSlotId());
-        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
-        return cc != null && cc.getBoolean(
-                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
-    }
-
     private int[] getSmsSupportedRats() {
         ConfigInterface config = getConfigInterface(mContext.getSlotId());
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
@@ -546,30 +576,12 @@ public class ImsRegistrationTracker {
         return supportedRats != null ? supportedRats : new int[0];
     }
 
-    private boolean isSmsCapabilitySupportedInWifiRoaming() {
-        ConfigInterface config = getConfigInterface(mContext.getSlotId());
-        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
-        return cc != null && cc.getBoolean(
-                CarrierConfig.ImsSms
-                .KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL);
-    }
-
     private boolean isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming() {
         ConfigInterface config = getConfigInterface(mContext.getSlotId());
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
         return cc != null && cc.getBoolean(
                 CarrierConfig.ImsWfc
                 .KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL);
-    }
-
-    private boolean isIgnoreDataEnabledChangedForVideoCalls() {
-        ConfigInterface config = getConfigInterface(mContext.getSlotId());
-        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
-        if (cc != null && cc.getBoolean(
-                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
-            return true;
-        }
-        return false;
     }
 
     private void registerDataRoamingSettingObserver() {

@@ -273,48 +273,6 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void changeCapabilities_lteVideo() {
-        byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 2,
-                IAosRegistrationListener.NetworkType.LTE.getValue(),
-                IAosRegistrationListener.Capability.VIDEO,
-                IAosRegistrationListener.NetworkType.IWLAN.getValue(),
-                IAosRegistrationListener.Capability.VIDEO);
-        CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VIDEO);
-
-        mAosService.changeCapabilities(pairs);
-
-        verify(mMockJniIms).sendData(mNativeObject, capabilityData);
-        assertTrue(mAosService.getCapabilityPairs().hasCapability(
-                IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VIDEO));
-        assertTrue(mAosService.getCapabilityPairs().hasCapability(
-                IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO));
-    }
-
-    @Test
-    public void changeCapabilities_nrVideo() {
-        byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 2,
-                IAosRegistrationListener.NetworkType.NR.getValue(),
-                IAosRegistrationListener.Capability.VIDEO,
-                IAosRegistrationListener.NetworkType.IWLAN.getValue(),
-                IAosRegistrationListener.Capability.VIDEO);
-        CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.Capability.VIDEO);
-
-        mAosService.changeCapabilities(pairs);
-
-        verify(mMockJniIms).sendData(mNativeObject, capabilityData);
-        assertTrue(mAosService.getCapabilityPairs().hasCapability(
-                IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.Capability.VIDEO));
-        assertTrue(mAosService.getCapabilityPairs().hasCapability(
-                IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO));
-    }
-
-    @Test
     public void controlRegistration() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START.getValue(),

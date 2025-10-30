@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
 import android.telephony.DataFailCause;
@@ -50,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -101,6 +103,7 @@ public class ImsRegistrationTrackerTest {
     private MockIAosRegistration mAosReg;
     private ContextFixture mContextFixture;
     private TelephonyManagerProxy mTelephonyManagerProxy;
+    private CarrierConfigManagerProxy mCarrierConfigManagerProxy;
 
     @Mock SettingsProxy mSettingsProxy;
     @Mock CarrierConfig mMockCarrierConfig;
@@ -129,6 +132,8 @@ public class ImsRegistrationTrackerTest {
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mSettingsProxy);
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        mCarrierConfigManagerProxy = mTestAppContext.getSystemServiceProxy(
+                CarrierConfigManagerProxy.class);
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(true);
         when(mMockBaseContext.getSlotId()).thenReturn(SLOT0);
         when(mMockBaseContext.getPhoneId()).thenReturn(SLOT0);
@@ -780,6 +785,7 @@ public class ImsRegistrationTrackerTest {
         when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataRoamingEnabled()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(true);
+        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
 
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
@@ -789,6 +795,25 @@ public class ImsRegistrationTrackerTest {
         CapabilityPairs capabilityPairs = new CapabilityPairs(
                 IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.VIDEO);
+
+        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        // VZW case
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
+
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
+                .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
+                .thenReturn(true);
+
+        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
+        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
 
         capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
                 IAosRegistrationListener.Capability.VIDEO);
@@ -804,8 +829,36 @@ public class ImsRegistrationTrackerTest {
 
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(false);
 
+        // TMO case
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
+                .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
+                .thenReturn(false);
+
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
         assertEquals(new CapabilityPairs(), mRegTracker.createCapabilityPairsFromCapabilities());
+
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+
+        capabilityPairs = new CapabilityPairs(
+                IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.VOICE);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.VIDEO);
+
+        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(null);
+
+        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
     }
 
     @Test
@@ -896,10 +949,16 @@ public class ImsRegistrationTrackerTest {
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager
                 .KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)))
                 .thenReturn(true);
-
         when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataRoamingEnabled()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(true);
+        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
+        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
+                .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
+                .thenReturn(true);
 
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
@@ -976,6 +1035,11 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testchangeCapabilities_all() {
+        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
+        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
+
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
@@ -985,6 +1049,9 @@ public class ImsRegistrationTrackerTest {
                 ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
         enableCapabilities.add(new CapabilityPair(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
                 ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
         enableCapabilities.add(new CapabilityPair(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
