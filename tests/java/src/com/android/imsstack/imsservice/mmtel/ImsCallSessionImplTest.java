@@ -572,14 +572,15 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertTrue(mCallDetails.is(mCallDetails.ON_UNHOLDING));
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.RENEGOTIATING);
         verify(mMockMtcCall, times(1)).resume(mMediaInfoCaptor.capture());
-        assertTrue(mMediaInfoCaptor.getValue().ADir == ImsStreamMediaProfile.DIRECTION_RECEIVE);
+        assertTrue(mMediaInfoCaptor.getValue().audioDir == ImsStreamMediaProfile.DIRECTION_RECEIVE);
 
         mCallFeaturemap.put(ImsCallSessionImpl.CF_VIDEO_HOLD_WITH_INACTIVE, true);
         mImsCallSession.resume(imsStreamMediaProfile);
         assertTrue(mCallDetails.is(mCallDetails.ON_UNHOLDING));
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.RENEGOTIATING);
         verify(mMockMtcCall, times(2)).resume(mMediaInfoCaptor.capture());
-        assertTrue(mMediaInfoCaptor.getValue().VDir == ImsStreamMediaProfile.DIRECTION_INACTIVE);
+        assertTrue(mMediaInfoCaptor.getValue().videoDir
+                == ImsStreamMediaProfile.DIRECTION_INACTIVE);
 
         mImsCallSession = createImsCallSession("3");
         when(mMockMtcCall.isOnHeld()).thenReturn(false);
@@ -589,7 +590,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertTrue(mCallDetails.is(mCallDetails.ON_UNHOLDING));
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.RENEGOTIATING);
         verify(mMockMtcCall, times(3)).resume(mMediaInfoCaptor.capture());
-        assertTrue(mMediaInfoCaptor.getValue().VDir == ImsStreamMediaProfile.DIRECTION_RECEIVE);
+        assertTrue(mMediaInfoCaptor.getValue().videoDir == ImsStreamMediaProfile.DIRECTION_RECEIVE);
 
         when(mMockMtcCall.isOnHeld()).thenReturn(false);
         when(mVideoCallSession.isCameraOn()).thenReturn(true);
@@ -599,7 +600,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertTrue(mCallDetails.is(mCallDetails.ON_UNHOLDING));
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.RENEGOTIATING);
         verify(mMockMtcCall, times(4)).resume(mMediaInfoCaptor.capture());
-        assertTrue(mMediaInfoCaptor.getValue().VDir == ImsStreamMediaProfile.DIRECTION_SEND);
+        assertTrue(mMediaInfoCaptor.getValue().videoDir == ImsStreamMediaProfile.DIRECTION_SEND);
 
         when(mMockMtcCall.is1WayVideo()).thenReturn(false);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_ONE_WAY_VIDEO_LOCAL, false);
@@ -608,7 +609,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertTrue(mCallDetails.is(mCallDetails.ON_UNHOLDING));
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.RENEGOTIATING);
         verify(mMockMtcCall, times(5)).resume(mMediaInfoCaptor.capture());
-        assertTrue(mMediaInfoCaptor.getValue().VDir == ImsStreamMediaProfile.DIRECTION_RECEIVE);
+        assertTrue(mMediaInfoCaptor.getValue().videoDir == ImsStreamMediaProfile.DIRECTION_RECEIVE);
     }
 
     @Test
@@ -970,7 +971,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsCallSessionImplBase.class), any(ImsSuppServiceNotification.class));
 
         MediaInfo mediaInfo = new MediaInfo();
-        mediaInfo.AQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
+        mediaInfo.audioQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
         SuppService suppServiceCw = new SuppService();
         suppServiceCw.type = SuppInfo.SUPP_TYPE_CW;
         suppServiceCw.boolValue = true;
@@ -1040,7 +1041,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(byte[].class), anyString());
 
         //verify onTtyModeReceived() onwards
-        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_FULL;
+        mMockMediaInfo.gttMode = MediaInfo.GTTMODE_FULL;
         mImsCallSession = createImsCallSession("2");
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, true);
         mImsCallSession.getCallListenerProxy().onCallStarted(mMockMtcCall, mMockCallInfo,
@@ -1214,7 +1215,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, never()).invokeHeld(any(ImsCallSessionImplBase.class),
                 any(ImsCallProfile.class));
 
-        mMockMediaInfo.GTTMode = ImsStreamMediaProfile.RTT_MODE_FULL;
+        mMockMediaInfo.gttMode = ImsStreamMediaProfile.RTT_MODE_FULL;
         mImsCallSession.setConferenceProxy(null);
         mImsCallSession.getCallListenerProxy().onCallHeld(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo, mockSuppInfo);
@@ -1386,7 +1387,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     public void testOnCallUpdatedWithoutMultiparty() {
         mImsCallSession.setConferenceProxy(null);
 
-        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        mMockMediaInfo.gttMode = MediaInfo.GTTMODE_INACTIVE;
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
 
         MediaInfo mNewMockMediaInfo = Mockito.mock(MediaInfo.class);
@@ -1402,12 +1403,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     public void testOnCallUpdatedWithMultiparty() {
         mImsCallSession.setConferenceProxy(null);
 
-        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        mMockMediaInfo.gttMode = MediaInfo.GTTMODE_INACTIVE;
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
 
         mMockCallInfo.isConf = true;
         MediaInfo mNewMockMediaInfo = Mockito.mock(MediaInfo.class);
-        mNewMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        mNewMockMediaInfo.gttMode = MediaInfo.GTTMODE_INACTIVE;
         SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
 
         mImsCallSession.getCallListenerProxy().onCallUpdated(mMockMtcCall, mMockCallInfo,
@@ -1430,12 +1431,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertEquals(IUMtcCall.CALLTYPE_RTT, ImsCallUtils.getCallTypeFromProfile(
                 mImsCallProfile.getCallType(), mImsCallProfile.getMediaProfile().isRttCall()));
 
-        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_FULL;
+        mMockMediaInfo.gttMode = MediaInfo.GTTMODE_FULL;
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
 
         MediaInfo mNewMockMediaInfo = Mockito.mock(MediaInfo.class);
-        mNewMockMediaInfo.ADir = MediaInfo.DIRECTION_RECEIVE;
-        mNewMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        mNewMockMediaInfo.audioDir = MediaInfo.DIRECTION_RECEIVE;
+        mNewMockMediaInfo.gttMode = MediaInfo.GTTMODE_INACTIVE;
         SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
         mImsCallSession.getCallListenerProxy().onCallUpdateReceived(
                     mMockMtcCall, mMockCallInfo, mNewMockMediaInfo, mockSuppInfo);
@@ -1447,7 +1448,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockMtcCall).accept(callTypeCaptor.capture(), mediaInfoCaptor.capture());
         int callType = callTypeCaptor.getValue();
         assertEquals(IUMtcCall.CALLTYPE_VOIP, callType);
-        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfoCaptor.getValue().ADir);
+        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfoCaptor.getValue().audioDir);
     }
 
     @Test

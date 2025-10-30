@@ -213,8 +213,8 @@ public class ImsCallUtils {
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL,
                 MtcCallInfo.isCrossSim(ci));
 
-        boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.AQuality);
-        boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.AQuality);
+        boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.audioQuality);
+        boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.audioQuality);
 
         if (isAudioHD || isAudioUHD) {
             profile.setCallRestrictCause(ImsCallProfile.CALL_RESTRICT_CAUSE_NONE);

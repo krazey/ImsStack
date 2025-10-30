@@ -289,9 +289,9 @@ public final class ImsTestHelper {
 
                 // 0 : callType
                 // 1 ~ 2 : audio/video/text direction
-                mediaInfo.ADir = extras[1];
-                mediaInfo.VDir = extras[2];
-                mediaInfo.TDir = extras[3];
+                mediaInfo.audioDir = extras[1];
+                mediaInfo.videoDir = extras[2];
+                mediaInfo.textDir = extras[3];
                 sTempCall.start(extras[0], callee, callee, mediaInfo, new SuppInfo());
                 return;
             } else if (command == 103) {
@@ -317,9 +317,9 @@ public final class ImsTestHelper {
                 }
 
                 MediaInfo mediaInfo = new MediaInfo();
-                mediaInfo.ADir = extras[1];
-                mediaInfo.VDir = extras[2];
-                mediaInfo.TDir = extras[3];
+                mediaInfo.audioDir = extras[1];
+                mediaInfo.videoDir = extras[2];
+                mediaInfo.textDir = extras[3];
                 sTempCall.accept(extras[0], mediaInfo);
                 return;
             } else if (command == 106) {

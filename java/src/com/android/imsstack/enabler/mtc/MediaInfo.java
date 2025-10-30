@@ -23,12 +23,12 @@ import com.android.imsstack.util.ImsLog;
 
 public class MediaInfo implements Parcelable {
 
-    public int            AQuality;
-    public int            VQuality;
-    public int            ADir;
-    public int            VDir;
-    public int            TDir;
-    public int            GTTMode;
+    public int audioQuality;
+    public int videoQuality;
+    public int audioDir;
+    public int videoDir;
+    public int textDir;
+    public int gttMode;
 
     // Audio Quality
     public static final int AUDIO_QUALITY_NONE = 0;
@@ -79,22 +79,22 @@ public class MediaInfo implements Parcelable {
 
     //------------------------------------------------------------------------------------------//
     public MediaInfo() {
-        AQuality = AUDIO_QUALITY_NONE;
-        VQuality = VIDEO_QUALITY_NONE;
-        ADir = DIRECTION_INACTIVE;
-        VDir = DIRECTION_INVALID;
-        TDir = DIRECTION_INVALID;
-        GTTMode = GTTMODE_INVALID;
+        audioQuality = AUDIO_QUALITY_NONE;
+        videoQuality = VIDEO_QUALITY_NONE;
+        audioDir = DIRECTION_INACTIVE;
+        videoDir = DIRECTION_INVALID;
+        textDir = DIRECTION_INVALID;
+        gttMode = GTTMODE_INVALID;
 
         logLn("init");
     }
     public MediaInfo(MediaInfo mediaInfo) {
-        AQuality = mediaInfo.AQuality;
-        VQuality = mediaInfo.VQuality;
-        ADir = mediaInfo.ADir;
-        VDir = mediaInfo.VDir;
-        TDir = mediaInfo.TDir;
-        GTTMode = mediaInfo.GTTMode;
+        audioQuality = mediaInfo.audioQuality;
+        videoQuality = mediaInfo.videoQuality;
+        audioDir = mediaInfo.audioDir;
+        videoDir = mediaInfo.videoDir;
+        textDir = mediaInfo.textDir;
+        gttMode = mediaInfo.gttMode;
 
         logLn("init");
     }
@@ -104,44 +104,44 @@ public class MediaInfo implements Parcelable {
     }
 
     public MediaInfo(int _AQuality, int _VQuality, int _ADir, int _VDir, int _TDir, int _GTTMode) {
-        AQuality = _AQuality;
-        VQuality = _VQuality;
-        ADir = _ADir;
-        VDir = _VDir;
-        TDir = _TDir;
-        GTTMode = _GTTMode;
+        audioQuality = _AQuality;
+        videoQuality = _VQuality;
+        audioDir = _ADir;
+        videoDir = _VDir;
+        textDir = _TDir;
+        gttMode = _GTTMode;
 
         logLn("init");
     }
 
     public void update(MediaInfo mediaInfo) {
-        AQuality = mediaInfo.AQuality;
-        VQuality = mediaInfo.VQuality;
-        ADir = mediaInfo.ADir;
-        VDir = mediaInfo.VDir;
-        TDir = mediaInfo.TDir;
-        GTTMode = mediaInfo.GTTMode;
+        audioQuality = mediaInfo.audioQuality;
+        videoQuality = mediaInfo.videoQuality;
+        audioDir = mediaInfo.audioDir;
+        videoDir = mediaInfo.videoDir;
+        textDir = mediaInfo.textDir;
+        gttMode = mediaInfo.gttMode;
 
         logLn("update");
     }
 
     public void logLn(String tag) {
-        ImsLog.i(tag + " - AQuality : " + AQuality
-                + " VQuality : " + VQuality
-                + " ADir : " + ADir
-                + " VDir : " + VDir
-                + " TDir : " + TDir
-                + " GTTMode : " + GTTMode
+        ImsLog.i(tag + " - audioQuality : " + audioQuality
+                + " videoQuality : " + videoQuality
+                + " audioDir : " + audioDir
+                + " videoDir : " + videoDir
+                + " textDir : " + textDir
+                + " gttMode : " + gttMode
                  );
     }
 
     public void readFromParcel(Parcel source) {
-        AQuality = source.readInt();
-        VQuality = source.readInt();
-        ADir = source.readInt();
-        VDir = source.readInt();
-        TDir = source.readInt();
-        GTTMode = source.readInt();
+        audioQuality = source.readInt();
+        videoQuality = source.readInt();
+        audioDir = source.readInt();
+        videoDir = source.readInt();
+        textDir = source.readInt();
+        gttMode = source.readInt();
 
         logLn("read");
     }
@@ -149,12 +149,12 @@ public class MediaInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         logLn("write");
 
-        dest.writeInt(AQuality);
-        dest.writeInt(VQuality);
-        dest.writeInt(ADir);
-        dest.writeInt(VDir);
-        dest.writeInt(TDir);
-        dest.writeInt(GTTMode);
+        dest.writeInt(audioQuality);
+        dest.writeInt(videoQuality);
+        dest.writeInt(audioDir);
+        dest.writeInt(videoDir);
+        dest.writeInt(textDir);
+        dest.writeInt(gttMode);
     }
 
     public int describeContents() {

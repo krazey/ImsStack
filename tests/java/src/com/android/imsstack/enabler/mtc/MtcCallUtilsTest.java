@@ -43,28 +43,28 @@ public class MtcCallUtilsTest {
         callInfo.callType = IUMtcCall.CALLTYPE_VIDEO_RTT;
         callInfo.isConf = true;
         MediaInfo mediaInfo = new MediaInfo();
-        mediaInfo.ADir = MediaInfo.DIRECTION_RECEIVE;
-        mediaInfo.TDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_RECEIVE;
+        mediaInfo.textDir = MediaInfo.DIRECTION_SEND;
 
         MediaInfo createdMediaInfo = MtcCallUtils.createHoldMedia(callInfo, mediaInfo, true, true);
 
-        assertEquals(MediaInfo.DIRECTION_INACTIVE, createdMediaInfo.ADir);
-        assertEquals(MediaInfo.DIRECTION_INACTIVE, createdMediaInfo.VDir);
-        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.TDir);
-        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.GTTMode);
+        assertEquals(MediaInfo.DIRECTION_INACTIVE, createdMediaInfo.audioDir);
+        assertEquals(MediaInfo.DIRECTION_INACTIVE, createdMediaInfo.videoDir);
+        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.textDir);
+        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.gttMode);
 
-        mediaInfo.VDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
         callInfo.isConf = false;
-        mediaInfo.GTTMode = MediaInfo.GTTMODE_VCO;
+        mediaInfo.gttMode = MediaInfo.GTTMODE_VCO;
 
         createdMediaInfo = MtcCallUtils.createHoldMedia(callInfo, mediaInfo, false, true);
 
-        assertEquals(MediaInfo.DIRECTION_SEND, createdMediaInfo.VDir);
-        assertEquals(MediaInfo.DIRECTION_INACTIVE, createdMediaInfo.TDir);
+        assertEquals(MediaInfo.DIRECTION_SEND, createdMediaInfo.videoDir);
+        assertEquals(MediaInfo.DIRECTION_INACTIVE, createdMediaInfo.textDir);
 
         createdMediaInfo = MtcCallUtils.createHoldMedia(callInfo, mediaInfo, false, false);
 
-        assertEquals(MediaInfo.DIRECTION_SEND, createdMediaInfo.TDir);
+        assertEquals(MediaInfo.DIRECTION_SEND, createdMediaInfo.textDir);
     }
 
     @Test
@@ -73,24 +73,24 @@ public class MtcCallUtilsTest {
         callInfo.callType = IUMtcCall.CALLTYPE_VIDEO_RTT;
         callInfo.isConf = true;
         MediaInfo mediaInfo = new MediaInfo();
-        mediaInfo.ADir = MediaInfo.DIRECTION_INACTIVE;
-        mediaInfo.TDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_INACTIVE;
+        mediaInfo.textDir = MediaInfo.DIRECTION_SEND;
 
         MediaInfo createdMediaInfo = MtcCallUtils.createUnholdMedia(callInfo, mediaInfo, true);
 
-        assertEquals(MediaInfo.DIRECTION_RECEIVE, createdMediaInfo.ADir);
-        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, createdMediaInfo.VDir);
-        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.TDir);
-        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.GTTMode);
+        assertEquals(MediaInfo.DIRECTION_RECEIVE, createdMediaInfo.audioDir);
+        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, createdMediaInfo.videoDir);
+        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.textDir);
+        assertEquals(MediaInfo.DIRECTION_INVALID, createdMediaInfo.gttMode);
 
-        mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
         callInfo.isConf = false;
-        mediaInfo.GTTMode = MediaInfo.GTTMODE_VCO;
+        mediaInfo.gttMode = MediaInfo.GTTMODE_VCO;
 
         createdMediaInfo = MtcCallUtils.createUnholdMedia(callInfo, mediaInfo, false);
 
-        assertEquals(MediaInfo.DIRECTION_RECEIVE, createdMediaInfo.VDir);
-        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, createdMediaInfo.TDir);
+        assertEquals(MediaInfo.DIRECTION_RECEIVE, createdMediaInfo.videoDir);
+        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, createdMediaInfo.textDir);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.hasVideoQuality(mediaInfo));
 
-        mediaInfo.VQuality = MediaInfo.VIDEO_QUALITY_QCIF;
+        mediaInfo.videoQuality = MediaInfo.VIDEO_QUALITY_QCIF;
 
         assertTrue(MtcCallUtils.hasVideoQuality(mediaInfo));
     }
@@ -117,8 +117,8 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.is1WayVideo(mediaInfo));
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND_RECEIVE;
-        mediaInfo.VDir  = MediaInfo.DIRECTION_SEND;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.videoDir  = MediaInfo.DIRECTION_SEND;
 
         assertTrue(MtcCallUtils.is1WayVideo(mediaInfo));
     }
@@ -129,8 +129,8 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.is1WayVideoByRemoteEnd(mediaInfo));
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND_RECEIVE;
-        mediaInfo.VDir  = MediaInfo.DIRECTION_RECEIVE;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.videoDir  = MediaInfo.DIRECTION_RECEIVE;
 
         assertTrue(MtcCallUtils.is1WayVideoByRemoteEnd(mediaInfo));
     }
@@ -192,13 +192,13 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.isHoldMediaOnVideoCall(mediaInfo,  true));
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND;
-        mediaInfo.VDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_SEND;
 
         assertFalse(MtcCallUtils.isHoldMediaOnVideoCall(mediaInfo, true));
         assertTrue(MtcCallUtils.isHoldMediaOnVideoCall(mediaInfo, false));
 
-        mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
 
         assertTrue(MtcCallUtils.isHoldMediaOnVideoCall(mediaInfo, true));
     }
@@ -209,13 +209,13 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.isHoldMediaOnVideoCallByRemoteEnd(mediaInfo,  true));
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_RECEIVE;
-        mediaInfo.VDir = MediaInfo.DIRECTION_RECEIVE;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_RECEIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_RECEIVE;
 
         assertFalse(MtcCallUtils.isHoldMediaOnVideoCallByRemoteEnd(mediaInfo, true));
         assertTrue(MtcCallUtils.isHoldMediaOnVideoCallByRemoteEnd(mediaInfo, false));
 
-        mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
 
         assertTrue(MtcCallUtils.isHoldMediaOnVideoCallByRemoteEnd(mediaInfo, true));
     }
@@ -226,13 +226,13 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.isUnholdMediaOnVideoCall(mediaInfo,  true));
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND_RECEIVE;
-        mediaInfo.VDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
 
         assertTrue(MtcCallUtils.isUnholdMediaOnVideoCall(mediaInfo, true));
         assertTrue(MtcCallUtils.isUnholdMediaOnVideoCall(mediaInfo, false));
 
-        mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
 
         assertTrue(MtcCallUtils.isUnholdMediaOnVideoCall(mediaInfo, true));
     }
@@ -243,8 +243,8 @@ public class MtcCallUtilsTest {
 
         assertFalse(MtcCallUtils.isUnholdMediaOnVideoCallByRemoteEnd(mediaInfo));
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND;
-        mediaInfo.VDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_SEND;
 
         assertTrue(MtcCallUtils.isUnholdMediaOnVideoCallByRemoteEnd(mediaInfo));
     }
@@ -299,28 +299,28 @@ public class MtcCallUtilsTest {
     @Test
     public void testReverseMediaDirection() {
         MediaInfo mediaInfo = new MediaInfo();
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND_RECEIVE;
-        mediaInfo.VDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
 
         MtcCallUtils.reverseMediaDirection(mediaInfo);
 
-        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, mediaInfo.ADir);
-        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, mediaInfo.VDir);
+        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, mediaInfo.audioDir);
+        assertEquals(MediaInfo.DIRECTION_SEND_RECEIVE, mediaInfo.videoDir);
 
-        mediaInfo.ADir = MediaInfo.DIRECTION_RECEIVE;
-        mediaInfo.VDir = MediaInfo.DIRECTION_RECEIVE;
-
-        MtcCallUtils.reverseMediaDirection(mediaInfo);
-
-        assertEquals(MediaInfo.DIRECTION_SEND, mediaInfo.ADir);
-        assertEquals(MediaInfo.DIRECTION_SEND, mediaInfo.VDir);
-
-        mediaInfo.ADir = MediaInfo.DIRECTION_SEND;
-        mediaInfo.VDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.audioDir = MediaInfo.DIRECTION_RECEIVE;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_RECEIVE;
 
         MtcCallUtils.reverseMediaDirection(mediaInfo);
 
-        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfo.ADir);
-        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfo.VDir);
+        assertEquals(MediaInfo.DIRECTION_SEND, mediaInfo.audioDir);
+        assertEquals(MediaInfo.DIRECTION_SEND, mediaInfo.videoDir);
+
+        mediaInfo.audioDir = MediaInfo.DIRECTION_SEND;
+        mediaInfo.videoDir = MediaInfo.DIRECTION_SEND;
+
+        MtcCallUtils.reverseMediaDirection(mediaInfo);
+
+        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfo.audioDir);
+        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfo.videoDir);
     }
 }

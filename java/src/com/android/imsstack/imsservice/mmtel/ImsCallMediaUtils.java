@@ -116,11 +116,11 @@ public class ImsCallMediaUtils {
     }
 
     public static ImsStreamMediaProfile createMediaProfileFromMediaInfo(final MediaInfo mi) {
-        int audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.AQuality);
-        int audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.ADir);
-        int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.VQuality);
-        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.VDir);
-        int rttMode = getRttModeFromGTTMode(mi.GTTMode);
+        int audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.audioQuality);
+        int audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.audioDir);
+        int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.videoQuality);
+        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.videoDir);
+        int rttMode = getRttModeFromGTTMode(mi.gttMode);
 
         if (videoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE) {
             videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
@@ -134,7 +134,7 @@ public class ImsCallMediaUtils {
         int videoState = VideoProfile.STATE_AUDIO_ONLY;
 
         if (MtcCallUtils.hasVideoQuality(mi)) {
-            switch (mi.VDir) {
+            switch (mi.videoDir) {
             case MediaInfo.DIRECTION_INACTIVE:
                 videoState = VideoProfile.STATE_PAUSED;
                 break;
@@ -365,8 +365,8 @@ public class ImsCallMediaUtils {
             return false;
         }
 
-        int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.VQuality);
-        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.VDir);
+        int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.videoQuality);
+        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.videoDir);
 
         return (videoQuality != profile.getVideoQuality())
                 || (videoDirection != profile.getVideoDirection());
@@ -374,15 +374,15 @@ public class ImsCallMediaUtils {
 
     public static void setGttInfo(MediaInfo mi, int tDirection, int gttMode) {
         if (mi != null) {
-            mi.TDir = tDirection;
-            mi.GTTMode = gttMode;
+            mi.textDir = tDirection;
+            mi.gttMode = gttMode;
         }
     }
 
     public static void setRttInfo(MediaInfo mi, int tDirection, boolean isRttOn) {
         if (mi != null) {
-            mi.TDir = tDirection;
-            mi.GTTMode = isRttOn ? MediaInfo.GTTMODE_FULL : MediaInfo.GTTMODE_INVALID;
+            mi.textDir = tDirection;
+            mi.gttMode = isRttOn ? MediaInfo.GTTMODE_FULL : MediaInfo.GTTMODE_INVALID;
         }
     }
 
@@ -411,11 +411,11 @@ public class ImsCallMediaUtils {
         int rttMode = ImsStreamMediaProfile.RTT_MODE_DISABLED;
 
         if (mi != null) {
-            audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.AQuality);
-            audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.ADir);
-            videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.VQuality);
-            videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.VDir);
-            rttMode = getRttModeFromGTTMode(mi.GTTMode);
+            audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.audioQuality);
+            audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.audioDir);
+            videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.videoQuality);
+            videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.videoDir);
+            rttMode = getRttModeFromGTTMode(mi.gttMode);
 
             if (videoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE) {
                 videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
@@ -472,11 +472,11 @@ public class ImsCallMediaUtils {
 
     public static void updateCallProfileFromMediaInfo(ICallContext context,
             ImsCallProfile profile, final MediaInfo mi) {
-        int audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.AQuality);
-        int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.VQuality);
-        int rttMode = getRttModeFromGTTMode(mi.GTTMode);
-        int audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.ADir);
-        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.VDir);
+        int audioQuality = getAudioQualityFromMediaInfoForMediaProfile(mi.audioQuality);
+        int videoQuality = getVideoQualityFromMediaInfoForMediaProfile(mi.videoQuality);
+        int rttMode = getRttModeFromGTTMode(mi.gttMode);
+        int audioDirection = getDirectionFromMediaInfoForMediaProfile(mi.audioDir);
+        int videoDirection = getDirectionFromMediaInfoForMediaProfile(mi.videoDir);
 
         profile.getMediaProfile().copyFrom(new ImsStreamMediaProfile(audioQuality, audioDirection,
                 videoQuality, videoDirection, rttMode));
@@ -485,8 +485,8 @@ public class ImsCallMediaUtils {
 
     public static void updateCallProfileFromMediaInfoForRtt(ImsCallProfile profile,
             final MediaInfo mi) {
-        profile.getMediaProfile().setRttMode(getRttModeFromGTTMode(mi.GTTMode));
-        profile.setCallExtraInt(MEDIA_TEXT_DIRECTION, mi.TDir);
+        profile.getMediaProfile().setRttMode(getRttModeFromGTTMode(mi.gttMode));
+        profile.setCallExtraInt(MEDIA_TEXT_DIRECTION, mi.textDir);
     }
 
     private static MediaInfo createMediaInfoForVideoCallOnCallAccept(
