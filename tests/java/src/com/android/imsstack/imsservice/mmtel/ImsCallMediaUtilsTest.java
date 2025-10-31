@@ -18,6 +18,8 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -26,10 +28,12 @@ import android.telecom.VideoProfile;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.util.Range;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.mtc.AudioCodecAttributes;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 
@@ -45,6 +49,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class ImsCallMediaUtilsTest {
     private static final int SLOT_ID = 0;
+    private static final float DELTA = 0.001f;
 
     //Mocked classes
     @Mock CarrierConfig mMockCarrierConfig;
@@ -87,31 +92,31 @@ public class ImsCallMediaUtilsTest {
         profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).audioDir,
                 MediaInfo.DIRECTION_INVALID);
 
         profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).audioDir,
                 MediaInfo.DIRECTION_INACTIVE);
 
         profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).audioDir,
                 MediaInfo.DIRECTION_RECEIVE);
 
         profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_SEND;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).audioDir,
                 MediaInfo.DIRECTION_SEND);
 
         profile.getMediaProfile().mAudioDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).ADir,
+                        profile, ImsCallProfile.CALL_TYPE_VOICE, 0, 0).audioDir,
                 MediaInfo.DIRECTION_SEND_RECEIVE);
     }
 
@@ -122,31 +127,31 @@ public class ImsCallMediaUtilsTest {
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_INVALID);
 
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_INACTIVE);
 
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_RECEIVE);
 
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_SEND;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_SEND);
 
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).VDir,
+                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_SEND_RECEIVE);
     }
 
@@ -159,7 +164,7 @@ public class ImsCallMediaUtilsTest {
 
         MediaInfo mediaInfo = ImsCallMediaUtils.createMediaInfoFromMediaProfile(
                 imsStreamMediaProfile);
-        assertEquals(mediaInfo.AQuality, ImsStreamMediaProfile.AUDIO_QUALITY_AMR);
+        assertEquals(mediaInfo.audioQuality, ImsStreamMediaProfile.AUDIO_QUALITY_AMR);
     }
 
     @Test
@@ -167,7 +172,7 @@ public class ImsCallMediaUtilsTest {
         VideoProfile videoProfile = new VideoProfile(VideoProfile.STATE_TX_ENABLED,
                 VideoProfile.QUALITY_HIGH);
         MediaInfo mediaInfo = ImsCallMediaUtils.createMediaInfoFromVideoProfile(videoProfile);
-        assertEquals(mediaInfo.VDir, MediaInfo.DIRECTION_SEND);
+        assertEquals(mediaInfo.videoDir, MediaInfo.DIRECTION_SEND);
     }
 
     @Test
@@ -612,13 +617,13 @@ public class ImsCallMediaUtilsTest {
 
         ImsCallMediaUtils.setGttInfo(mediaInfo, MediaInfo.DIRECTION_SEND_RECEIVE,
                 MediaInfo.GTTMODE_FULL);
-        assertEquals(mediaInfo.TDir, MediaInfo.DIRECTION_SEND_RECEIVE);
-        assertEquals(mediaInfo.GTTMode, MediaInfo.GTTMODE_FULL);
+        assertEquals(mediaInfo.textDir, MediaInfo.DIRECTION_SEND_RECEIVE);
+        assertEquals(mediaInfo.gttMode, MediaInfo.GTTMODE_FULL);
 
         ImsCallMediaUtils.setGttInfo(null, MediaInfo.DIRECTION_INACTIVE,
                 MediaInfo.GTTMODE_INVALID);
-        assertEquals(mediaInfo.TDir, MediaInfo.DIRECTION_SEND_RECEIVE);
-        assertEquals(mediaInfo.GTTMode, MediaInfo.GTTMODE_FULL);
+        assertEquals(mediaInfo.textDir, MediaInfo.DIRECTION_SEND_RECEIVE);
+        assertEquals(mediaInfo.gttMode, MediaInfo.GTTMODE_FULL);
     }
 
     @Test
@@ -629,12 +634,12 @@ public class ImsCallMediaUtilsTest {
                 MediaInfo.GTTMODE_INVALID);
 
         ImsCallMediaUtils.setRttInfo(mediaInfo, MediaInfo.DIRECTION_SEND_RECEIVE, true);
-        assertEquals(mediaInfo.TDir, MediaInfo.DIRECTION_SEND_RECEIVE);
-        assertEquals(mediaInfo.GTTMode, MediaInfo.GTTMODE_FULL);
+        assertEquals(mediaInfo.textDir, MediaInfo.DIRECTION_SEND_RECEIVE);
+        assertEquals(mediaInfo.gttMode, MediaInfo.GTTMODE_FULL);
 
         ImsCallMediaUtils.setRttInfo(mediaInfo, MediaInfo.DIRECTION_SEND_RECEIVE, false);
-        assertEquals(mediaInfo.TDir, MediaInfo.DIRECTION_SEND_RECEIVE);
-        assertEquals(mediaInfo.GTTMode, MediaInfo.GTTMODE_INVALID);
+        assertEquals(mediaInfo.textDir, MediaInfo.DIRECTION_SEND_RECEIVE);
+        assertEquals(mediaInfo.gttMode, MediaInfo.GTTMODE_INVALID);
     }
 
     @Test
@@ -686,9 +691,9 @@ public class ImsCallMediaUtilsTest {
         ICallContext context = Mockito.mock(ICallContext.class);
         ImsCallProfile profile = new ImsCallProfile();
         MediaInfo mediaInfo = Mockito.mock(MediaInfo.class);
-        mediaInfo.AQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
-        mediaInfo.VQuality = ImsStreamMediaProfile.VIDEO_QUALITY_QCIF;
-        mediaInfo.GTTMode = ImsStreamMediaProfile.RTT_MODE_DISABLED;
+        mediaInfo.audioQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
+        mediaInfo.videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_QCIF;
+        mediaInfo.gttMode = ImsStreamMediaProfile.RTT_MODE_DISABLED;
         when(mMockCarrierConfig.getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false))
                 .thenReturn(true);
         ImsCallMediaUtils.updateCallProfileFromMediaInfo(context, profile, mediaInfo);
@@ -698,5 +703,59 @@ public class ImsCallMediaUtilsTest {
         assertEquals(profile.getMediaProfile().mVideoQuality,
                 ImsStreamMediaProfile.VIDEO_QUALITY_QCIF);
         assertEquals(profile.getMediaProfile().mRttMode, ImsStreamMediaProfile.RTT_MODE_DISABLED);
+    }
+
+    @Test
+    public void testUpdateCallProfileFromMediaInfoForAudioCodecAttributes() {
+        ImsCallProfile profile = new ImsCallProfile();
+        MediaInfo mediaInfo = new MediaInfo();
+
+        // Test with null AudioCodecAttributes
+        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mediaInfo);
+        assertNull(profile.getMediaProfile().getAudioCodecAttributes());
+
+        // Test with non-null AudioCodecAttributes
+        AudioCodecAttributes fromAttributes =
+                new AudioCodecAttributes(64f, 32f, 128f, 16f, 8f, 24f);
+        mediaInfo.setAudioCodecAttributes(fromAttributes);
+
+        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mediaInfo);
+
+        android.telephony.ims.AudioCodecAttributes toAttributes =
+                profile.getMediaProfile().getAudioCodecAttributes();
+        assertNotNull(toAttributes);
+        assertEquals(64, toAttributes.getBitrateKbps(), DELTA);
+        assertEquals(new Range<>(32f, 128f), toAttributes.getBitrateRangeKbps());
+        assertEquals(16, toAttributes.getBandwidthKhz(), DELTA);
+        assertEquals(new Range<>(8f, 24f), toAttributes.getBandwidthRangeKhz());
+    }
+
+    @Test
+    public void testUpdateCallProfileForAudioCodecAttributes() {
+        ImsCallProfile toProfile = new ImsCallProfile();
+        ImsCallProfile fromProfile = new ImsCallProfile();
+
+        // Test with null AudioCodecAttributes in fromProfile
+        fromProfile.getMediaProfile().setAudioCodecAttributes(null);
+        ImsCallMediaUtils.updateCallProfileForAudioCodecAttributes(toProfile, fromProfile);
+        assertNull(toProfile.getMediaProfile().getAudioCodecAttributes());
+
+        // Test with non-null AudioCodecAttributes in fromProfile
+        Range<Float> bitrateRange = new Range<>(32f, 128f);
+        Range<Float> bandwidthRange = new Range<>(8f, 24f);
+        android.telephony.ims.AudioCodecAttributes fromAttributes =
+                new android.telephony.ims.AudioCodecAttributes(64, bitrateRange, 16,
+                        bandwidthRange);
+        fromProfile.getMediaProfile().setAudioCodecAttributes(fromAttributes);
+
+        ImsCallMediaUtils.updateCallProfileForAudioCodecAttributes(toProfile, fromProfile);
+
+        android.telephony.ims.AudioCodecAttributes toAttributes =
+                toProfile.getMediaProfile().getAudioCodecAttributes();
+        assertNotNull(toAttributes);
+        assertEquals(64, toAttributes.getBitrateKbps(), DELTA);
+        assertEquals(bitrateRange, toAttributes.getBitrateRangeKbps());
+        assertEquals(16, toAttributes.getBandwidthKhz(), DELTA);
+        assertEquals(bandwidthRange, toAttributes.getBandwidthRangeKhz());
     }
 }

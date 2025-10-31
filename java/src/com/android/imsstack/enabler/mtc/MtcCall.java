@@ -661,17 +661,17 @@ public class MtcCall extends Call implements ConferenceTracker {
             sb.append(", { mediaInfo=null }");
         } else {
             sb.append(", { AQ=");
-            sb.append(mMediaInfo.AQuality);
+            sb.append(mMediaInfo.audioQuality);
             sb.append(", AD=");
-            sb.append(mMediaInfo.ADir);
+            sb.append(mMediaInfo.audioDir);
             sb.append(", VQ=");
-            sb.append(mMediaInfo.VQuality);
+            sb.append(mMediaInfo.videoQuality);
             sb.append(", VD=");
-            sb.append(mMediaInfo.VDir);
+            sb.append(mMediaInfo.videoDir);
             sb.append(", TD=");
-            sb.append(mMediaInfo.TDir);
+            sb.append(mMediaInfo.textDir);
             sb.append(", GTT=");
-            sb.append(mMediaInfo.GTTMode);
+            sb.append(mMediaInfo.gttMode);
             sb.append(" }");
         }
 

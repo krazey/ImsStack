@@ -2146,8 +2146,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 gttDirection = mProposedCallProfile.getCallExtraInt(
                         ImsCallMediaUtils.MEDIA_TEXT_DIRECTION, MediaInfo.DIRECTION_INVALID);
             } else {
-                gttMode = mCall.getMediaInfo().GTTMode;
-                gttDirection = mCall.getMediaInfo().TDir;
+                gttMode = mCall.getMediaInfo().gttMode;
+                gttDirection = mCall.getMediaInfo().textDir;
             }
 
             if (!MtcCallUtils.isGttEnabled(gttMode)) {
@@ -2332,9 +2332,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         boolean hdVoice = false;
         boolean uhdVoice = false;
 
-        if ((mediaInfo != null) && MtcCallUtils.isAudioEvsCategory(mediaInfo.AQuality)) {
-            hdVoice = MtcCallUtils.isAudioHDQuality(mediaInfo.AQuality);
-            uhdVoice = MtcCallUtils.isAudioUHDQuality(mediaInfo.AQuality);
+        if ((mediaInfo != null) && MtcCallUtils.isAudioEvsCategory(mediaInfo.audioQuality)) {
+            hdVoice = MtcCallUtils.isAudioHDQuality(mediaInfo.audioQuality);
+            uhdVoice = MtcCallUtils.isAudioUHDQuality(mediaInfo.audioQuality);
         } else {
             hdVoice = ImsCallMediaUtils.isAudioHDQuality(
                     profile.getMediaProfile().getAudioQuality());
@@ -2344,7 +2344,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if ("LGU".equals(ImsPrivateProperties.getSimOperator(mCallContext.getSlotId()))) {
             // All the EVS qualities should be an UHD voice based on LGU+ requirement.
-            if (((mediaInfo != null) && MtcCallUtils.isAudioEvsCategory(mediaInfo.AQuality))
+            if (((mediaInfo != null) && MtcCallUtils.isAudioEvsCategory(mediaInfo.audioQuality))
                     || ImsCallMediaUtils.isAudioEvsCategory(
                             profile.getMediaProfile().getAudioQuality())) {
                 if (!uhdVoice) {
@@ -2462,7 +2462,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private boolean isRttChanged(MediaInfo mi) {
         return (mCallProfile.getMediaProfile().isRttCall()
-                != MtcCallUtils.isGttEnabled(mi.GTTMode));
+                != MtcCallUtils.isGttEnabled(mi.gttMode));
     }
 
     private boolean checkAndSetImmediateCallEndReason(final ImsReasonInfo reasonInfo) {
@@ -2510,6 +2510,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 fromProfile.getMediaProfile().getVideoQuality(),
                 toProfile.getMediaProfile().getVideoDirection(),
                 fromProfile.getMediaProfile().getRttMode()));
+        ImsCallMediaUtils.updateCallProfileForAudioCodecAttributes(toProfile, fromProfile);
     }
 
     private static boolean shouldUpdateVideoCapabilityBeforeModifyRequest(
@@ -3285,7 +3286,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 MediaInfo mi = mCall.getMediaInfo();
 
-                if (MtcCallUtils.isGttEnabled(mi.GTTMode)) {
+                if (MtcCallUtils.isGttEnabled(mi.gttMode)) {
                     log("TTY mode is already enabled");
                     return;
                 }
@@ -3481,7 +3482,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mCallback.invokeStarted(ImsCallSessionImpl.this, profile);
 
             // Handle TTY mode related operations
-            onTtyModeReceived(mediaInfo.GTTMode, true);
+            onTtyModeReceived(mediaInfo.gttMode, true);
             updateLocalTtyMode();
 
             if (mCallDetails.is(CallDetails.MO)) {
@@ -3783,9 +3784,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 if (direction == ImsStreamMediaProfile.DIRECTION_INACTIVE) {
                     isLocalHoldToneEnforced = false;
                 } else if (direction == ImsStreamMediaProfile.DIRECTION_RECEIVE) {
-                    if (mediaInfo.ADir == MediaInfo.DIRECTION_INACTIVE) {
+                    if (mediaInfo.audioDir == MediaInfo.DIRECTION_INACTIVE) {
                         isLocalHoldToneEnforced = false;
-                    } else if (mediaInfo.ADir == MediaInfo.DIRECTION_RECEIVE) {
+                    } else if (mediaInfo.audioDir == MediaInfo.DIRECTION_RECEIVE) {
                         isOnHeld = true;
                     }
                 }
@@ -4049,7 +4050,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             notifyCallSessionMultipartyStateChanged(conferenceExtendedByRemote);
 
             // Handle TTY mode related operations
-            onTtyModeReceived(mediaInfo.GTTMode, false);
+            onTtyModeReceived(mediaInfo.gttMode, false);
             updateLocalTtyMode();
         }
 
@@ -4072,8 +4073,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             boolean conferenceExtendedByRemote = isConferenceExtended(callInfo);
-            onRttChanged(MtcCallUtils.isGttEnabled(mediaInfo.GTTMode),
-                    MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode));
+            onRttChanged(MtcCallUtils.isGttEnabled(mediaInfo.gttMode),
+                    MtcCallUtils.isGttEnabled(mCall.getMediaInfo().gttMode));
 
             int oldState = getState();
 
@@ -4103,7 +4104,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             notifyCallSessionMultipartyStateChanged(conferenceExtendedByRemote);
 
             // Handle TTY mode related operations
-            onTtyModeReceived(mediaInfo.GTTMode, false);
+            onTtyModeReceived(mediaInfo.gttMode, false);
             updateLocalTtyMode();
         }
 
@@ -4220,8 +4221,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (isCallFeatureSupported(CF_TTY)) {
                 mProposedCallProfile.setCallExtraInt(
-                        ImsCallMediaUtils.MEDIA_TEXT_DIRECTION, mediaInfo.TDir);
-                mProposedCallProfile.setCallExtraInt(MEDIA_GTT_MODE, mediaInfo.GTTMode);
+                        ImsCallMediaUtils.MEDIA_TEXT_DIRECTION, mediaInfo.textDir);
+                mProposedCallProfile.setCallExtraInt(MEDIA_GTT_MODE, mediaInfo.gttMode);
             }
 
             if (ImsCallUtils.isCallTypeChanged(mCallProfile, callInfo)) {
@@ -4259,14 +4260,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // FIXME: Consider the priority of RTT Upgrade vs. VT Upgrade
-            if (MtcCallUtils.isGttEnabled(mediaInfo.GTTMode)
-                    && !MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
+            if (MtcCallUtils.isGttEnabled(mediaInfo.gttMode)
+                    && !MtcCallUtils.isGttEnabled(mCall.getMediaInfo().gttMode)) {
                 log("onCallUpdateReceived :: RTT upgrade request");
                 mCallback.invokeRttModifyRequestReceived(
                         ImsCallSessionImpl.this, mProposedCallProfile);
                 return;
-            } else if (!MtcCallUtils.isGttEnabled(mediaInfo.GTTMode)
-                    && MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
+            } else if (!MtcCallUtils.isGttEnabled(mediaInfo.gttMode)
+                    && MtcCallUtils.isGttEnabled(mCall.getMediaInfo().gttMode)) {
                 log("onCallUpdateReceived :: RTT downgrade request");
                 postAndRunTask(new Runnable() {
                     @Override
@@ -4646,30 +4647,30 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         log("onVideoCallResumeReceived :: on-hold");
                     } else if ((mVideoCallSession != null)
                             && !mVideoCallSession.isCameraOn()) {
-                        if (mediaInfo.VDir == MediaInfo.DIRECTION_SEND_RECEIVE) {
+                        if (mediaInfo.videoDir == MediaInfo.DIRECTION_SEND_RECEIVE) {
                             if (mVideoCallSession.isMultitaskingState()) {
                                 log("onVideoCallResumeReceived :: inactive");
-                                mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+                                mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
                             } else {
                                 log("onVideoCallResumeReceived :: recvonly");
-                                mediaInfo.VDir = MediaInfo.DIRECTION_RECEIVE;
+                                mediaInfo.videoDir = MediaInfo.DIRECTION_RECEIVE;
                             }
-                        } else if (mediaInfo.VDir == MediaInfo.DIRECTION_SEND) {
+                        } else if (mediaInfo.videoDir == MediaInfo.DIRECTION_SEND) {
                             log("onVideoCallResumeReceived :: call type is changed");
                             MtcCallInfo.setCallType(callInfo, IUMtcCall.CALLTYPE_VOIP);
-                            mediaInfo.VDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+                            mediaInfo.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
                         }
                     } else if ((mVideoCallSession != null)
                             && mVideoCallSession.isMultitaskingState()) {
                         log("onVideoCallResumeReceived :: inactive by multitasking");
-                        mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+                        mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
                     }
 
                     call.accept(MtcCallInfo.getCallType(callInfo), mediaInfo);
 
                     if (MtcCallInfo.getCallType(callInfo) == IUMtcCall.CALLTYPE_VOIP) {
-                        mediaInfo.VQuality = MediaInfo.VIDEO_QUALITY_NONE;
-                        mediaInfo.VDir = MediaInfo.DIRECTION_INVALID;
+                        mediaInfo.videoQuality = MediaInfo.VIDEO_QUALITY_NONE;
+                        mediaInfo.videoDir = MediaInfo.DIRECTION_INVALID;
                     }
 
                     onCallResumeReceived(call, callInfo, mediaInfo, suppInfo);
@@ -4686,11 +4687,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                     if (call.isOnHold()) {
                         if (isCallFeatureSupported(CF_AUDIO_HOLD_WITH_INACTIVE)) {
-                            mediaInfo.ADir = MediaInfo.DIRECTION_INACTIVE;
-                        } else if (mediaInfo.ADir == MediaInfo.DIRECTION_SEND_RECEIVE) {
-                            mediaInfo.ADir = MediaInfo.DIRECTION_SEND;
-                        } else if (mediaInfo.ADir == MediaInfo.DIRECTION_RECEIVE) {
-                            mediaInfo.ADir = MediaInfo.DIRECTION_INACTIVE;
+                            mediaInfo.audioDir = MediaInfo.DIRECTION_INACTIVE;
+                        } else if (mediaInfo.audioDir == MediaInfo.DIRECTION_SEND_RECEIVE) {
+                            mediaInfo.audioDir = MediaInfo.DIRECTION_SEND;
+                        } else if (mediaInfo.audioDir == MediaInfo.DIRECTION_RECEIVE) {
+                            mediaInfo.audioDir = MediaInfo.DIRECTION_INACTIVE;
                         }
                     }
 
