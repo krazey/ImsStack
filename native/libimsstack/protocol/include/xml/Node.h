@@ -16,14 +16,13 @@
 #ifndef NODE_H_
 #define NODE_H_
 
+#include "libxml/tree.h"
+
 #include "INode.h"
-#include "NamedNodeMap.h"
-#include "NodeList.h"
-#include "XmlApiParser.h"
-#include "XmlApiTree.h"
-#include "XmlApiXPath.h"
 
 class IDocument;
+class NamedNodeMap;
+class NodeList;
 
 class Node : public INode
 {

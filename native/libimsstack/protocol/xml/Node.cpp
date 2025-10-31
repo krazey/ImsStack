@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AString.h"
 #include "ImsLib.h"
 #include "ServiceTrace.h"
 
 #include "ElementImpl.h"
 #include "IDocument.h"
+#include "NamedNodeMap.h"
 #include "Node.h"
+#include "NodeList.h"
 #include "TextImpl.h"
 
 #ifdef __IMS_XML_DEBUG__

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ServiceTrace.h"
+
 #include "DomDocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
-#include "ServiceTrace.h"
 #include "XmlApi.h"
 
 PRIVATE

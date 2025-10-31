@@ -16,8 +16,9 @@
 #ifndef ATTR_IMPL_H_
 #define ATTR_IMPL_H_
 
+#include "libxml/tree.h"
+
 #include "IAttr.h"
-#include "XmlApiTree.h"
 
 class Attr;
 class IDocument;

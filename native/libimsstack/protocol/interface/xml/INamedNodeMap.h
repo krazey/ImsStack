@@ -16,7 +16,10 @@
 #ifndef INTERFACE_NAMED_NODE_MAP_H
 #define INTERFACE_NAMED_NODE_MAP_H
 
-#include "INode.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class INode;
 
 /**
  * @brief This class represents an entity, either parsed or unparsed, in an XML document.

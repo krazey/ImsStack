@@ -16,8 +16,9 @@
 #ifndef ELEMENT_IMPL_H_
 #define ELEMENT_IMPL_H_
 
+#include "libxml/tree.h"
+
 #include "IElement.h"
-#include "XmlApiTree.h"
 
 class Element;
 class INamedNodeMap;

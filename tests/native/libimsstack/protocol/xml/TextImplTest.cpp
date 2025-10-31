@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "DocumentBuilder.h"
 #include "DocumentImpl.h"
 #include "DomDocumentBuilderFactory.h"
@@ -23,7 +25,6 @@
 #include "INodeList.h"
 #include "IText.h"
 #include "TextImpl.h"
-#include "XmlApiParser.h"
 
 namespace android
 {

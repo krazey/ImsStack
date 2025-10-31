@@ -16,6 +16,8 @@
 #ifndef DOCUMENT_H_
 #define DOCUMENT_H_
 
+#include "libxml/xpath.h"
+
 #include "Node.h"
 
 class IAttr;

@@ -15,11 +15,14 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "DocumentBuilder.h"
 #include "DocumentImpl.h"
 #include "DomDocumentBuilderFactory.h"
 #include "ImsStrLib.h"
 #include "XmlApiParser.h"
+#include "XmlApiXPath.h"
 
 namespace android
 {
