@@ -48,11 +48,15 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 
     VideoProfile* pProfile = static_cast<VideoProfile*>(pBaseProfile);
 
-    GeneratePayload(pDescriptor, pProfile);
-    GenerateDirection(pDescriptor, pProfile);
-    GenerateFrameRate(pDescriptor, pProfile);
-    GenerateCvo(pDescriptor, pProfile);
-    GenerateCapaNegoAttribute(pDescriptor, pProfile);
+    if (pProfile->GetDataPort() != 0)
+    {
+        GeneratePayload(pDescriptor, pProfile);
+        GenerateDirection(pDescriptor, pProfile);
+        GenerateFrameRate(pDescriptor, pProfile);
+        GenerateCvo(pDescriptor, pProfile);
+        GenerateCapaNegoAttribute(pDescriptor, pProfile);
+    }
+
     return IMS_TRUE;
 }
 

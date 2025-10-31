@@ -50,11 +50,14 @@ void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessio
     // ------"m=audio xxxx RTP/AVP 104 110 105 102 108 100"
     SetSdpMediaDescription(pDescriptor, pProfile);
 
-    // make bandwidth
-    // ------"b=AS:xx"
-    // ------"b=AS:xx"
-    // ------"b=AS:xx"
-    SetSdpMediaBandwidth(pDescriptor, pProfile);
+    if (pProfile->GetDataPort() != 0)
+    {
+        // make bandwidth
+        // ------"b=AS:xx"
+        // ------"b=AS:xx"
+        // ------"b=AS:xx"
+        SetSdpMediaBandwidth(pDescriptor, pProfile);
+    }
 }
 
 PROTECTED

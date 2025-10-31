@@ -19,9 +19,11 @@
 #include "video/VideoSdpGenerator.h"
 #include "video/VideoProfile.h"
 
+#include "core/MockISessionDescriptor.h"
 #include "core/media/MockIMediaDescriptor.h"
 
 using ::testing::_;
+using ::testing::Return;
 
 const AString STR_PROFILE_LEVEL_ID = "profile-level-id=42C00C";
 const AString STR_SPROP_PRAMSET = "sprop-parameter-sets=Z0LAFukDwKMg,aM4G4g==";
@@ -219,6 +221,7 @@ class VideoSdpGeneratorTest : public VideoSdpGenerator, public ::testing::Test
 {
 public:
     std::unique_ptr<VideoProfile> m_pProfile;
+    std::unique_ptr<MockISessionDescriptor> m_pSessionDescriptor;
     std::unique_ptr<MockIMediaDescriptor> m_pDescriptor;
 
 protected:
@@ -226,6 +229,7 @@ protected:
     {
         m_pProfile = std::make_unique<VideoProfile>();
         m_pDescriptor = std::make_unique<MockIMediaDescriptor>();
+        m_pSessionDescriptor = std::make_unique<MockISessionDescriptor>();
     }
 
     virtual void TearDown() override {}
@@ -305,4 +309,20 @@ TEST_F(VideoSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
     rtpMapObj.SetPayloadNumber(99);
     rtpMapObj.SetSamplingRate(90000);
     EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
+}
+
+TEST_F(VideoSdpGeneratorTest, TestGenerateWithDataPortZero)
+{
+    // Set data port to 0
+    m_pProfile->SetDataPort(0);
+
+    // Set expectations for GenerateCommonAttributes
+    EXPECT_CALL(*m_pDescriptor, SetBandwidthInfo(_)).Times(1);
+    EXPECT_CALL(*m_pSessionDescriptor, GetLocalAddress()).WillRepeatedly(Return(IpAddress::NONE));
+    EXPECT_CALL(*m_pSessionDescriptor, SetConnectionAddress(_)).Times(1);
+    EXPECT_CALL(*m_pSessionDescriptor, SetOriginAddress(_)).Times(1);
+    EXPECT_CALL(*m_pDescriptor, SetMediaDescription(_, _, _, _)).Times(1);
+    EXPECT_CALL(*m_pDescriptor, SetMediaFormat(_)).Times(0);
+
+    EXPECT_TRUE(Generate(m_pSessionDescriptor.get(), m_pDescriptor.get(), m_pProfile.get()));
 }
