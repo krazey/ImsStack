@@ -37,8 +37,8 @@ public:
     inline MediaInfo& GetModifyingInfo() { return m_objModifyingInfo; }
     inline MediaInfo& GetAlertingInfo() { return m_objAlertingInfo; }
     inline MediaInfo& GetModifiedInfo() { return m_objModifiedInfo; }
-    inline IMS_BOOL IsModifier() { return m_bModifier; }
-    inline IMS_BOOL IsAlerted() { return m_bAlerted; }
+    inline IMS_BOOL IsModifier() const { return m_bModifier; }
+    inline IMS_BOOL IsAlerted() const { return m_bAlerted; }
     inline void SetTargetCallType(IN CallType eCallType) { m_eTargetCallType = eCallType; }
     inline void SetRequestingType(IN UpdateType eType) { m_eRequestingType = eType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
