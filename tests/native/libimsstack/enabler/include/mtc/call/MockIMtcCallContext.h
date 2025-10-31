@@ -58,6 +58,7 @@ public:
     MOCK_METHOD(IMS_UINTP, GetCallKey, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEstablished, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsHeldByMe, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsOnUnconfirmedRemoteHold, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUssi, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCsfbAvailable, (), (override));
     MOCK_METHOD(CallInfo&, GetCallInfo, (), (override));
@@ -80,6 +81,7 @@ public:
     MOCK_METHOD(IMtcCall&, GetCall, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
+    MOCK_METHOD(void, SetUnconfirmedRemoteHold, (IMS_BOOL), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession* piSession), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (), (override));
     MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const ImsList<IMtcBlockRule*>& lstRules),

@@ -70,6 +70,18 @@ public:
     virtual IMS_BOOL IsHeldByMe() const = 0;
 
     /**
+     * @brief Checks if the call is in an unconfirmed remote hold state.
+     *
+     * When the UE requests a hold, some networks respond with "inactive" media
+     * direction. In this scenario, the UE cannot determine if the remote party is also on
+     * hold. This flag indicates that ambiguous state.
+     *
+     * @return {@code IMS_TRUE} if the call is in an unconfirmed remote hold state,
+     *         {@code IMS_FALSE} otherwise.
+     */
+    virtual IMS_BOOL IsOnUnconfirmedRemoteHold() const = 0;
+
+    /**
      * @brief Checks
      *
      * @return
@@ -216,12 +228,22 @@ public:
      * @return
      */
     virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
+
     /**
      * @brief Sets
      *
      * @param bHeldByMe
      */
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
+
+    /**
+     * @brief Sets the unconfirmed remote hold status for the call.
+     *
+     * @param bUnconfirmedRemoteHold {@code IMS_TRUE} to indicate the call is in an unconfirmed
+     *        remote hold state, {@code IMS_FALSE} otherwise.
+     * @see IsOnUnconfirmedRemoteHold
+     */
+    virtual void SetUnconfirmedRemoteHold(IN IMS_BOOL bUnconfirmedRemoteHold) = 0;
 
     /**
      * @brief Creates
