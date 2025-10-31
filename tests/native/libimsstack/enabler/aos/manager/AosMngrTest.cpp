@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 
 #include "manager/AosMngr.h"
+#include "provider/AosStaticConfig.h"
 
 class AosMngrTest : public ::testing::Test
 {
@@ -42,6 +43,11 @@ protected:
 
     void SetStaticConfig(AosStaticConfig* objStaticConfig)
     {
+        if (m_pAosMngr->m_pStaticConfig != nullptr)
+        {
+            m_pAosMngr->m_pStaticConfig->Destroy();
+        }
+
         m_pAosMngr->m_pStaticConfig = objStaticConfig;
     }
 
@@ -54,20 +60,21 @@ TEST_F(AosMngrTest, Constructor_Test)
     EXPECT_TRUE(GetBuildDirector() != IMS_NULL);
 }
 
-TEST_F(AosMngrTest, GetAosHandle_Test1)
+TEST_F(AosMngrTest, GetAosHandleReturnsNullIfStaticConfigIsNull)
 {
-    // Test1: static config is null
-    // Expectation: return null
-
+    // GIVEN
     SetStaticConfig(IMS_NULL);
+
+    // WHEN & THEN
     EXPECT_EQ(m_pAosMngr->GetAosHandle(m_strAppId, m_strServiceId), nullptr);
 }
-/*
-TEST_F(AosMngrTest, GetAosHandle_Test2)
-{
-    // Test2: static profile is null
-    // Expectation: return null
 
-    // TODO: Need a way that can make pProfile IMS_NULL
+TEST_F(AosMngrTest, GetAosHandleReturnsNullIfStaticProfileIsNull)
+{
+    // GIVEN
+    AosStaticConfig* pStaticConfig = new AosStaticConfig();
+    SetStaticConfig(pStaticConfig);
+
+    // WHEN & THEN
+    EXPECT_EQ(m_pAosMngr->GetAosHandle(m_strAppId, m_strServiceId), nullptr);
 }
-*/
