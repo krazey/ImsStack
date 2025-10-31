@@ -249,7 +249,6 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedRtpPort()
 
     if (pOaModel == IMS_NULL)
     {
-        IMS_TRACE_E(0, "GetNegotiatedRtpPort(): type[%d], invalid OA model", m_eType, 0, 0);
         return -1;
     }
 

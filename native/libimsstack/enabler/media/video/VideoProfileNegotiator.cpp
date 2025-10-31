@@ -233,10 +233,9 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
     std::shared_ptr<VideoProfile::VideoFmtp> pNegotiatedFmtp = IMS_NULL;
 
     IMS_TRACE_D("NegotiatePayload(): local payload count[%d], peer payload count[%d]",
-            pLocalProfile->GetPayloadList().GetSize(), pPeerProfile->GetPayloadList().GetSize(), 0);
+            pLocalProfile->GetPayloadListSize(), pPeerProfile->GetPayloadListSize(), 0);
 
-    for (IMS_UINT32 nPeerIndex = 0; nPeerIndex < pPeerProfile->GetPayloadList().GetSize();
-            nPeerIndex++)
+    for (IMS_UINT32 nPeerIndex = 0; nPeerIndex < pPeerProfile->GetPayloadListSize(); nPeerIndex++)
     {
         if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
         {
@@ -299,13 +298,14 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
 
     VideoProfile::Payload* pNegotiatedPayload = IMS_NULL;
 
-    if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
+    if (pNegotiatedProfile->GetPayloadListSize() > 0)
     {
         pNegotiatedPayload = pNegotiatedProfile->GetPayloadAt(0);
     }
-    else  // negotiated payload is not exist, use temporary payload
+    else if (pTempPayload != IMS_NULL && pMatchedPeerPayload != IMS_NULL)
     {
         pNegotiatedPayload = new VideoProfile::Payload();
+
         if (MakeNegotiatedPayload(pTempPayload, pMatchedPeerPayload, pNegotiatedPayload))
         {
             pNegotiatedProfile->AddPayload(pNegotiatedPayload);
@@ -315,9 +315,15 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
         {
             delete pNegotiatedPayload;
             IMS_TRACE_E(0, "NegotiatePayload(): fail to negotiate payload, size[%d]",
-                    pNegotiatedProfile->GetPayloadList().GetSize(), 0, 0);
+                    pNegotiatedProfile->GetPayloadListSize(), 0, 0);
             return IMS_FALSE;
         }
+    }
+    else
+    {
+        IMS_TRACE_E(0, "NegotiatePayload(): fail to negotiate payload, size[%d]",
+                pNegotiatedProfile->GetPayloadListSize(), 0, 0);
+        return IMS_FALSE;
     }
 
     NegotiateRtcpFb(pNegotiatedProfile, pLocalPayload, pPeerPayload, pNegotiatedPayload);
