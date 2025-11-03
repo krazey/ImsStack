@@ -286,4 +286,25 @@ public interface Sim {
                 return "UNKNOWN";
         }
     }
+
+    /** Returns a string representation by the given ISIM state. */
+    static String isimStateToString(@Sim.IsimState int state) {
+        switch (state) {
+            case Sim.ISIM_STATE_NOT_PRESENT:
+                return "NOT_PRESENT";
+            case Sim.ISIM_STATE_NOT_READY:
+                return "NOT_READY";
+            case Sim.ISIM_STATE_LOADED:
+                return "LOADED";
+            case Sim.ISIM_STATE_REFRESH_STARTED:
+                return "REFRESH_STARTED";
+            case Sim.ISIM_STATE_REFRESH_COMPLETED:
+                return "REFRESH_COMPLETED";
+            case Sim.ISIM_STATE_REMOVED:
+                return "SIM_REMOVED";
+            case Sim.ISIM_STATE_UNKNOWN: // FALL-THROUGH
+            default:
+                return "UNKNOWN";
+        }
+    }
 }
