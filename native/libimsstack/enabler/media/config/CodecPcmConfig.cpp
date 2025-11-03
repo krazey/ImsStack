@@ -35,8 +35,3 @@ PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* /* piCc */)
 {
     return IMS_TRUE;
 }
-
-PUBLIC VIRTUAL void CodecPcmConfig::ToDebugString() const
-{
-    CodecConfig::ToDebugString();
-}

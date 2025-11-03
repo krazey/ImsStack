@@ -147,7 +147,7 @@ PRIVATE void MediaSdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor*
 }
 
 PRIVATE void MediaSdpGenerator::SetSdpSessionIpAddress(
-        OUT ISessionDescriptor* pSessionDescriptor, IN MediaBaseProfile* pProfile)
+        OUT ISessionDescriptor* pSessionDescriptor, IN const MediaBaseProfile* pProfile)
 {
     if (pSessionDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {

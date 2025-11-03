@@ -42,11 +42,6 @@ public:
      * Return false if the create function is failed
      */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
-    /**
-     * @brief Print debug string
-     *
-     */
-    virtual void ToDebugString() const override;
 };
 
 #endif
