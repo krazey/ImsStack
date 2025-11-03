@@ -18,27 +18,14 @@
 #define MEDIA_RESOURCE_MANAGER_H_
 
 #include "ImsList.h"
-#include "IpAddress.h"
-#include "IMediaNetworkConnectionListener.h"
 
 class MediaConfiguration;
-class MediaNetworkConnectionWatcher;
 
-class MediaResourceManager : public IMediaNetworkConnectionListener
+class MediaResourceManager
 {
 public:
-    enum
-    {
-        /** The internet pdn type */
-        PDN_INTERNET = 0,
-        /** The IMS pdn type */
-        PDN_IMS,
-        /** The emergency pdn type */
-        PDN_EMERGENCY,
-    };  // PDN Type
-
-    explicit MediaResourceManager(IN IMS_SINT32 nSlotId = 0);
-    virtual ~MediaResourceManager() override;
+    explicit MediaResourceManager();
+    virtual ~MediaResourceManager();
 
     /**
      * @brief Get the random port number from the configuration which is not redundant with port
@@ -65,35 +52,8 @@ public:
      */
     virtual IMS_BOOL ReleaseRtpPort(IN IMS_UINT32 nPort);
 
-    /**
-     * @brief Update pdn type and register network connection watcher to get the connection change
-     *
-     * @param nPDNType The pdn type to change
-     * @param objIpAddress The local ip address
-     */
-    virtual IMS_BOOL UpdatePdn(IN IMS_SINT32 nPDNType, IN const IpAddress& objIpAddress);
-
-    /** Get the current network type connected */
-    IMS_SINT32 GetNetworkType();
-
-    /** Get the MTU size */
-    IMS_SINT32 GetMtu();
-
-    /** Get the rtp fragment size from mtu */
-    IMS_SINT32 GetRtpFragmentSize();
-
-    /* IMediaNetworkConnectionListener Interface Impl */
-    void OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType) override;
-    void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
-
 protected:
-    IMS_SINT32 m_nSlotId;
-    IMS_SINT32 m_nPdnType;
-    IMS_BOOL m_bIsIpv6;
-    IMS_SINT32 m_nNetworkType;
-    IMS_SINT32 m_nMtu;
     ImsList<IMS_UINT32> m_lstUsedRtpPort;
-    MediaNetworkConnectionWatcher* m_pNetworkConnectionWatcher;
 };
 
 #endif

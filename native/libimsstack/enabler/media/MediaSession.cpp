@@ -15,6 +15,7 @@
  */
 
 #include "MediaSession.h"
+
 #include "IMediaSessionClientListener.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
@@ -23,16 +24,22 @@
 #include "MediaNegoHandler.h"
 #include "MediaManager.h"
 #include "MediaNegoUtil.h"
-#include "MediaResourceManager.h"
+#include "MediaNetworkConnectionWatcher.h"
 #include "ServiceTrace.h"
+#include "audio/AudioController.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfigUtil.h"
-#include "audio/AudioController.h"
-#include "audio/AudioSession.h"
 #include "text/TextController.h"
 #include "video/VideoController.h"
 
 __IMS_TRACE_TAG_MEDIA__;
+
+#define MTU_MOBILE     1500
+#define MTU_EPDG       1280
+#define SIZE_OF_IP_SEC 60
+#define SIZE_OF_IPV6   60
+#define SIZE_OF_IPV4   40
+#define SIZE_OF_RTP    20 + 8  // rtp + header extension (cvo)
 
 using namespace android::telephony::imsmedia;
 
@@ -40,7 +47,6 @@ PUBLIC
 MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServiceType,
         IService* pIService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_nCurrentAccessNetwork(MEDIA_NETWORK_NONE),
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(std::make_shared<MediaEnvironment>(eNetwork, eServiceType, pIService)),
@@ -57,6 +63,13 @@ MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServ
             "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
 
     CreateMediaConfig(eServiceType);
+
+    m_pNetworkConnectionWatcher = std::make_shared<MediaNetworkConnectionWatcher>(
+            m_pEnvironment->pIService->GetIpAddress());
+    m_pNetworkConnectionWatcher->SetListener(this);
+    m_nCurrentAccessNetwork = m_pNetworkConnectionWatcher->GetNetworkType();
+    IMS_TRACE_D("+MediaSession() - Network[%d], Mtu[%d]", m_nCurrentAccessNetwork,
+            m_pNetworkConnectionWatcher->GetMtu(), 0);
 }
 
 PUBLIC VIRTUAL MediaSession::~MediaSession()
@@ -82,12 +95,6 @@ MEDIA_NETWORK_TYPE MediaSession::GetNetworkType()
     }
 
     return MEDIA_NETWORK_NONE;
-}
-
-PUBLIC void MediaSession::SetCurrentAccessNetwork(IN IMS_UINT32 nAccessNetwork)
-{
-    m_nCurrentAccessNetwork = nAccessNetwork;
-    IMS_TRACE_I("SetCurrentAccessNetwork[%d]", m_nCurrentAccessNetwork, 0, 0);
 }
 
 PUBLIC void MediaSession::SetMediaNegoHandler(std::shared_ptr<MediaNegoHandler> pMediaNegoHandler)
@@ -386,19 +393,21 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
     return IMS_TRUE;
 }
 
-PROTECTED
-IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
+PUBLIC
+void MediaSession::OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType)
 {
-    const ImsMediaMsgParam* pMediaMsgParam = reinterpret_cast<ImsMediaMsgParam*>(pParam);
+    IMS_TRACE_D(
+            "OnNetworkConnectionChanged(): CallKey[%d], NetworkType[%d]", m_nCallKey, nRatType, 0);
 
-    if (pMediaMsgParam == IMS_NULL || m_pAudioController == IMS_NULL ||
-            m_pVideoController == IMS_NULL || m_pTextController == IMS_NULL)
+    if (m_pAudioController == IMS_NULL || m_pVideoController == IMS_NULL ||
+            m_pTextController == IMS_NULL)
     {
-        IMS_TRACE_E(0, "OnChangeNetworkConnection() - invalid parameter", 0, 0, 0);
-        return IMS_FALSE;
+        IMS_TRACE_E(
+                0, "OnChangeNetworkConnection(): CallKey[%d], null parameters", m_nCallKey, 0, 0);
+        return;
     }
 
-    IMS_UINT32 nAccessNetwork = pMediaMsgParam->m_nValue;
+    IMS_UINT32 nAccessNetwork = nRatType;
     m_nCurrentAccessNetwork = nAccessNetwork;
 
     if (m_pAudioController->IsSessionOpened())
@@ -415,38 +424,18 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
     {
         m_pTextController->UpdateAccessNetwork(nAccessNetwork);
     }
-
-    return IMS_TRUE;
 }
 
-PROTECTED
-IMS_BOOL MediaSession::OnMediaMtuChanged()
+PUBLIC
+void MediaSession::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
 {
+    IMS_TRACE_D("OnMediaMtuChanged(): CallKey[%d], Mtu[%d]", m_nCallKey, nMtu, 0);
+
     if (m_pVideoController->IsSessionOpened())
     {
-        m_pVideoController->SetMtu(GetMtu());
+        m_pVideoController->SetMtu(nMtu);
         m_pVideoController->UpdateSession();
     }
-
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_SINT32 MediaSession::GetMtu()
-{
-    IMS_SINT32 nMtu = -1;
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-    if (pMediaManager != IMS_NULL)
-    {
-        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-        if (pResourceMngr != IMS_NULL)
-        {
-            nMtu = pResourceMngr->GetRtpFragmentSize();
-        }
-    }
-
-    return nMtu;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
@@ -863,12 +852,6 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
         case IJniMedia::CHANGE_ORIENTATION_CMD:
             bRet = m_pVideoController->SendMessage(nMsg, pParam);
             break;
-        case IJniMedia::CHANGE_NETWORK_CONNECTION:
-            bRet = OnChangeNetworkConnection(pParam);
-            break;
-        case IJniMedia::CHANGE_MTU:
-            bRet = OnMediaMtuChanged();
-            break;
         case IJniMedia::NOTIFY_ANBR_RECEIVED:
             bRet = OnNotifyAnbrReceived(pParam);
             break;
@@ -1227,6 +1210,8 @@ void MediaSession::OpenMediaSessions(
         {
             IMS_TRACE_E(0, "OpenMediaSessions() - Video OpenSession Failed", 0, 0, 0);
         }
+
+        m_pVideoController->SetMtu(GetRtpFragmentSize());
     }
 
     // text
@@ -1323,4 +1308,33 @@ void MediaSession::CloseMediaSessions(MEDIA_CONTENT_TYPE eType)
             IMS_TRACE_E(0, "CloseMediaSessions() - failed to close text", 0, 0, 0);
         }
     }
+}
+
+PRIVATE
+IMS_SINT32 MediaSession::GetRtpFragmentSize()
+{
+    IMS_SINT32 nMtu = 0;
+    IMS_BOOL bIsIpv6 =
+            m_pEnvironment != IMS_NULL && m_pEnvironment->pIService->GetIpAddress().IsIpv6Address()
+            ? IMS_TRUE
+            : IMS_FALSE;
+
+    if (m_pNetworkConnectionWatcher != IMS_NULL)
+    {
+        nMtu = m_pNetworkConnectionWatcher->GetMtu();
+    }
+
+    if (nMtu == 0)
+    {
+        nMtu = (GetNetworkType() == MediaNetworkConnectionWatcher::IWLAN) ? MTU_EPDG : MTU_MOBILE;
+    }
+
+    nMtu -= SIZE_OF_IP_SEC;
+    nMtu -= bIsIpv6 ? SIZE_OF_IPV6 : SIZE_OF_IPV4;
+    nMtu -= SIZE_OF_RTP;
+
+    IMS_TRACE_D("GetRtpFragmentSize() - mtu[%d], IsIpv6[%d], network type[%d]", nMtu, bIsIpv6,
+            GetNetworkType());
+
+    return nMtu;
 }

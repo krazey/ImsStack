@@ -14,21 +14,29 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ServiceNetwork.h"
+#include "MediaNetworkConnectionWatcher.h"
 
 #include "IMediaNetworkConnectionListener.h"
-#include "MediaNetworkConnectionWatcher.h"
+#include "ServiceTrace.h"
+#include "ServiceNetwork.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
         IN const IpAddress& objIpAddress) :
         m_piListener(IMS_NULL),
-        m_pNetConnection(NetworkService::GetNetworkService()->FindConnection(objIpAddress)),
+        m_pNetConnection(IMS_NULL),
         m_nMediaConnectionType(0),
         m_nMtu(0)
 {
+    m_pNetConnection = NetworkService::GetNetworkService()->FindConnection(objIpAddress);
+
+    if (m_pNetConnection == IMS_NULL)
+    {
+        IMS_TRACE_D("MediaNetworkConnectionWatcher(): FindConnection failed", 0, 0, 0);
+        return;
+    }
+
     UpdateParameters(m_pNetConnection);
 
     if (m_pNetConnection != IMS_NULL)
@@ -39,7 +47,7 @@ PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
 
 PUBLIC VIRTUAL MediaNetworkConnectionWatcher::~MediaNetworkConnectionWatcher()
 {
-    IMS_TRACE_D("~NetConnectionWatcher()", 0, 0, 0);
+    IMS_TRACE_D("~MediaNetworkConnectionWatcher()", 0, 0, 0);
 
     if (m_pNetConnection != IMS_NULL)
     {
@@ -163,6 +171,7 @@ PRIVATE void MediaNetworkConnectionWatcher::UpdateParameters(IN INetworkConnecti
 {
     if (pNetConnection == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateParameters() - pNetConnection is null", 0, 0, 0);
         return;
     }
 

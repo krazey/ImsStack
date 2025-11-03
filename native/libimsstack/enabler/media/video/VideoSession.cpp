@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-#include "MediaDef.h"
-#include "ServiceTrace.h"
-
-#include "IMediaSessionListener.h"
-#include "IJniMedia.h"
-#include "MediaManager.h"
-#include "MediaResourceManager.h"
-#include "config/VideoConfiguration.h"
 #include "video/VideoSession.h"
+
+#include "MediaDef.h"
+#include "IJniMedia.h"
+#include "IMediaSessionListener.h"
+#include "ServiceTrace.h"
+#include "config/VideoConfiguration.h"
 #include "video/VideoProfileUtil.h"
 
 #include <VideoConfig.h>
@@ -87,19 +85,6 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
     if (GetConfiguration() != IMS_NULL)
     {
         pVideoConfig->setDscp(GetConfiguration()->GetVideoDscp());
-    }
-    pVideoConfig->setMaxMtuBytes(1500);
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-    if (pMediaManager != IMS_NULL)
-    {
-        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-        if (pResourceMngr != IMS_NULL)
-        {
-            pVideoConfig->setMaxMtuBytes(pResourceMngr->GetRtpFragmentSize());
-        }
     }
 
     IMS_SINT32 nVideoDirection;
