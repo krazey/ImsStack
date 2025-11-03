@@ -61,7 +61,7 @@ protected:
 private:
     void ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor);
     void SetSdpSessionIpAddress(
-            OUT ISessionDescriptor* pSessionDescriptor, IN MediaBaseProfile* pProfile);
+            OUT ISessionDescriptor* pSessionDescriptor, IN const MediaBaseProfile* pProfile);
     void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
     void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
 
