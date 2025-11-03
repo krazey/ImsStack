@@ -105,6 +105,7 @@ private:
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
     void CleanMtsMessageWithRpMr(IN IMS_SINT32 nMrOfRp);
     void CleanMtsMessageWithInReplyTo(IN const IPageMessage* piPageMessage);
+    void CleanMtsMessageWithMessageReference(IN const IPageMessage* piPageMessage);
     void CleanRetryContent();
     void TerminateAllMessages();
     void TerminateMessage(IN IMtsMessage* piMtsMessage);

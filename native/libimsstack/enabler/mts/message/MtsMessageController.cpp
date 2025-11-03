@@ -461,7 +461,8 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
 
     // When SIP MESSAGE(RP-ACK) is received before SIP 202 Accepted,
     // remove the MtsMessage(RP-DATA) for further MO SMS request.
-    CleanMtsMessageWithInReplyTo(piPageMessage);
+    // CleanMtsMessageWithInReplyTo(piPageMessage);
+    CleanMtsMessageWithMessageReference(piPageMessage);
 
     IMtsMessage* piMtsMessage = new MtsMessage(m_objContext.GetSlotId());
     AString strImpu = pMtsICoreService->GetAuthorizedUserId().GetUri();
@@ -1135,6 +1136,60 @@ PRIVATE void MtsMessageController::CleanMtsMessageWithInReplyTo(
 }
 
 PRIVATE
+void MtsMessageController::CleanMtsMessageWithMessageReference(
+        IN const IPageMessage* piPageMessage)
+{
+    if (piPageMessage == IMS_NULL)
+    {
+        return;
+    }
+
+    const IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    if (piMessage == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsList<IMessageBodyPart*> objMessageBodies = piMessage->GetBodyParts();
+    if (objMessageBodies.IsEmpty())
+    {
+        return;
+    }
+
+    AString strContentType =
+            objMessageBodies.GetAt(0)->GetHeader(AString(SipHeaderName::CONTENT_TYPE));
+    SmsFormatType eContentSmsType =
+            m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->FormContentTypeStrToEnum(
+                    strContentType);
+
+    if (eContentSmsType != SmsFormatType::SMSFORMAT_3GPP)
+    {
+        return;
+    }
+    const ByteArray& objContent = objMessageBodies.GetAt(0)->GetContent();
+
+    IMS_SINT32 nGsmMti = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
+            SmsFormatType::SMSFORMAT_3GPP, objContent);
+
+    if (nGsmMti != SMS_3GPP_MTI_RP_ACK_FROM_N && nGsmMti != SMS_3GPP_MTI_RP_ERROR_FROM_N)
+    {
+        return;
+    }
+
+    IMS_SINT32 nMrOfRp = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent);
+    IMtsMessage* piMtsMessage = Search(nMrOfRp, MtsTransactionType::MESSAGE_TYPE_SEND);
+
+    if (piMtsMessage != IMS_NULL)
+    {
+        IMS_TRACE_I("CleanMtsMessageWithMessageReference: Found and removing pending MO message "
+                    "with MR [%d]",
+                nMrOfRp, 0, 0);
+        Remove(piMtsMessage);
+        delete piMtsMessage;
+    }
+}
+
+PRIVATE
 void MtsMessageController::CleanRetryContent()
 {
     delete m_pRetryContent;
@@ -1380,7 +1435,8 @@ PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN const IPageMessage* p
         return IMS_FALSE;
     }
 
-    AString strContentType = objMessageBodies.GetAt(0)->GetHeader(AString("Content-Type"));
+    AString strContentType =
+            objMessageBodies.GetAt(0)->GetHeader(AString(SipHeaderName::CONTENT_TYPE));
     SmsFormatType nContentSmsType =
             m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->FormContentTypeStrToEnum(
                     strContentType);
