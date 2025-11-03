@@ -16,5 +16,6 @@
 -->
 <carrier_config>
     <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_insert_new_rule_bool" value="true"/>
     <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
 </carrier_config>
