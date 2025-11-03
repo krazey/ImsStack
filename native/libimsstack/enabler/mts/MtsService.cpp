@@ -272,7 +272,7 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDa
 
     m_piMtsServiceState->OnImsDisconnected(nReason);
 
-    MtsServiceType eServiceTypeUsed = IsSmsOverEmergencyPdnSupported()
+    MtsServiceType eServiceTypeUsed = ShouldUseEmergencyPdnForSms()
             ? MtsServiceType::EMERGENCY : MtsServiceType::NORMAL;
     if (eServiceTypeUsed == m_eServiceType)
     {
@@ -450,7 +450,7 @@ void MtsService::NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const
     }
 
     EmergencyServicePdn eEmergencyServicePdn = EmergencyServicePdn::IMS;
-    if (IsSmsOverEmergencyPdnSupported())
+    if (ShouldUseEmergencyPdnForSms())
     {
         eEmergencyServicePdn = EmergencyServicePdn::EMERGENCY;
     }
@@ -707,9 +707,10 @@ MtsTrafficStartResult MtsService::StartMoTrafficIfNeeded()
 }
 
 PRIVATE
-IMS_BOOL MtsService::IsSmsOverEmergencyPdnSupported() const
+IMS_BOOL MtsService::ShouldUseEmergencyPdnForSms() const
 {
     return ConfigService::GetConfigService()
             ->GetCarrierConfig(m_objContext.GetSlotId())
-            ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL);
+            ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL)
+            && !m_objContext.GetNetworkTracker().IsInRoamingState();
 }
