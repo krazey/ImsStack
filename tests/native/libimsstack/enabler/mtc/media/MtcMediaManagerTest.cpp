@@ -1542,3 +1542,67 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpPopulatesAudioCodecAttributes)
     EXPECT_FLOAT_EQ(objAudioCodecAttributes.nBandwidthStartKhz, nBandwidthStartKhz);
     EXPECT_FLOAT_EQ(objAudioCodecAttributes.nBandwidthEndKhz, nBandwidthEndKhz);
 }
+
+TEST_F(MtcMediaManagerTest, SetMediaInfoUpdatesAudioCodecAttributes)
+{
+    const IMS_UINTP nNegoId = 123;
+    const float nBitrateKbps = 64.0f;
+    const float nBandwidthKhz = 16.0f;
+    const float nBitrateStartKbps = 32.0f;
+    const float nBitrateEndKbps = 128.0f;
+    const float nBandwidthStartKhz = 8.0f;
+    const float nBandwidthEndKhz = 24.0f;
+    MediaInfo objMediaInfo;
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(nNegoId));
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBitrateKbps(nNegoId))
+            .WillOnce(Return(nBitrateKbps));
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBandwidthKhz(nNegoId))
+            .WillOnce(Return(nBandwidthKhz));
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBitrateRange(nNegoId, _, _))
+            .WillOnce(
+                    DoAll(SetArgReferee<1>(nBitrateStartKbps), SetArgReferee<2>(nBitrateEndKbps)));
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBandwidthRange(nNegoId, _, _))
+            .WillOnce(DoAll(
+                    SetArgReferee<1>(nBandwidthStartKhz), SetArgReferee<2>(nBandwidthEndKhz)));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+
+    const MediaInfo& objResultMediaInfo = pMediaManager->GetMediaInfo(objISession);
+    const AudioCodecAttributes& objResultAttributes = objResultMediaInfo.objAudioCodecAttributes;
+
+    EXPECT_EQ(objResultAttributes.nBitrateKbps, nBitrateKbps);
+    EXPECT_EQ(objResultAttributes.nBandwidthKhz, nBandwidthKhz);
+    EXPECT_EQ(objResultAttributes.nBitrateStartKbps, nBitrateStartKbps);
+    EXPECT_EQ(objResultAttributes.nBitrateEndKbps, nBitrateEndKbps);
+    EXPECT_EQ(objResultAttributes.nBandwidthStartKhz, nBandwidthStartKhz);
+    EXPECT_EQ(objResultAttributes.nBandwidthEndKhz, nBandwidthEndKhz);
+}
+
+TEST_F(MtcMediaManagerTest, SetMediaInfoDoesNotUpdateAudioCodecAttributesWhenNotEmpty)
+{
+    MediaInfo objMediaInfo;
+    AudioCodecAttributes objTempAttributes(24.4f, 7.2f, 24.4f, 16.0f, 8.0f, 16.0f);
+    objMediaInfo.objAudioCodecAttributes = objTempAttributes;
+
+    EXPECT_CALL(*pMediaProfileManager, GetNegoId(_)).Times(0);
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBitrateKbps(_)).Times(0);
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBandwidthKhz(_)).Times(0);
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBitrateRange(_, _, _)).Times(0);
+    EXPECT_CALL(objMediaSession, GetNegotiatedCodecBandwidthRange(_, _, _)).Times(0);
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+
+    const MediaInfo& objResultMediaInfo = pMediaManager->GetMediaInfo(objISession);
+    EXPECT_EQ(objResultMediaInfo.objAudioCodecAttributes, objTempAttributes);
+}
+
+TEST_F(MtcMediaManagerTest, SetMediaInfoDoesNotUpdateAudioCodecAttributesWhenNegoIdIsUndefined)
+{
+    MediaInfo objMediaInfo;
+
+    EXPECT_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillOnce(Return(UNDEFINED_NEGO_ID));
+    pMediaManager->SetMediaInfo(objISession, objMediaInfo);
+
+    const MediaInfo& objResultMediaInfo = pMediaManager->GetMediaInfo(objISession);
+    EXPECT_EQ(objResultMediaInfo.objAudioCodecAttributes, AudioCodecAttributes());
+}

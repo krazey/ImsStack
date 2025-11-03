@@ -158,18 +158,27 @@ PUBLIC VIRTUAL void MtcMediaManager::SetQosListener(IN IMediaQosEventListener* p
 PUBLIC VIRTUAL void MtcMediaManager::SetMediaInfo(
         IN const ISession& objISession, IN const MediaInfo& objInfo)
 {
-    SessionMedia* pSessionMedia = GetSessionMedia(objISession);
+    MediaInfo objNewMediaInfo(objInfo);
+    if (objInfo.objAudioCodecAttributes == AudioCodecAttributes() &&
+            GetMediaNegoId(&objISession) != UNDEFINED_NEGO_ID)
+    {
+        IMS_TRACE_D("SetMediaInfo : AudioCodecAttributes is empty, populating with negotiated "
+                    "attributes",
+                0, 0, 0);
+        objNewMediaInfo.objAudioCodecAttributes = GetNegotiatedAudioCodecAttributes(objISession);
+    }
 
+    SessionMedia* pSessionMedia = GetSessionMedia(objISession);
     if (pSessionMedia == IMS_NULL)
     {
-        pSessionMedia = new SessionMedia(objInfo);
+        pSessionMedia = new SessionMedia(objNewMediaInfo);
         m_objSessionMedias.Add(&objISession, pSessionMedia);
         IMS_TRACE_D(
                 "SetMediaInfo : SessionMedia is added [%d]", m_objSessionMedias.GetSize(), 0, 0);
     }
     else
     {
-        pSessionMedia->SetMediaInfo(objInfo);
+        pSessionMedia->SetMediaInfo(objNewMediaInfo);
         IMS_TRACE_D(
                 "SetMediaInfo : SessionMedia is updated [%d]", m_objSessionMedias.GetSize(), 0, 0);
     }
