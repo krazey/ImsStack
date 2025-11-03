@@ -18,7 +18,6 @@
 #define MTC_SIP_INTERFACE_FACTORY_H_
 
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"

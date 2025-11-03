@@ -19,6 +19,7 @@
 #include "IJniMtcServiceThread.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "ServiceTrace.h"

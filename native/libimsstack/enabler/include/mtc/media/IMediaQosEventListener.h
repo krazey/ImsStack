@@ -18,7 +18,6 @@
 #define INTERFACE_MEDIA_QOS_EVENT_LISTENER_H_
 
 #include "ImsTypeDef.h"
-#include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 
 class ISession;

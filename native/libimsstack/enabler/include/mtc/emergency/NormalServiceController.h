@@ -22,7 +22,6 @@
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
-#include "helper/IMtcAosStateListener.h"
 
 class IMtcContext;
 

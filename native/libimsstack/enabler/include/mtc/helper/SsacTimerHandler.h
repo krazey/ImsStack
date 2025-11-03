@@ -17,7 +17,6 @@
 #ifndef SSAC_TIMER_HANDLER_H_
 #define SSAC_TIMER_HANDLER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/IPassiveTimerListener.h"

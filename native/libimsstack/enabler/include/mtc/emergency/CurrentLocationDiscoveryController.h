@@ -17,7 +17,6 @@
 #ifndef CURRENT_LOCATION_DISCOVERY_CONTROLLER_H_
 #define CURRENT_LOCATION_DISCOVERY_CONTROLLER_H_
 
-#include "IRetryTaskHelperListener.h"
 #include "ImsTypeDef.h"
 #include "RetryCmd.h"
 #include <memory>

@@ -17,9 +17,6 @@
 #ifndef INTERFACE_MTC_SIP_INTERFACE_FACTORY_H_
 #define INTERFACE_MTC_SIP_INTERFACE_FACTORY_H_
 
-#include "ImsTypeDef.h"
-#include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
-
 class SessionInterfaceHolder;
 class ReferenceInterfaceHolder;
 class SubscriptionInterfaceHolder;

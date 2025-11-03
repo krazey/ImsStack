@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "helper/MtcPermanentSupplementaryService.h"

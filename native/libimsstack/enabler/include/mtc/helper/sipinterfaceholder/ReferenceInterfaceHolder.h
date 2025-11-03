@@ -18,9 +18,9 @@
 #define REFERENCE_INTERFACE_HOLDER_H_
 
 #include "IReferenceListener.h"
+#include "ITimer.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "ServiceTimer.h"
 
 class ISession;
 class ICoreService;

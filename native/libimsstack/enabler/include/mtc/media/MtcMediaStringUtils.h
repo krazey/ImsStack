@@ -22,7 +22,6 @@
 #include "MediaDef.h"
 #include "MediaNego.h"
 #include "MtcDef.h"
-#include "call/IMtcCall.h"
 #include <unordered_map>
 
 class MtcMediaStringUtils

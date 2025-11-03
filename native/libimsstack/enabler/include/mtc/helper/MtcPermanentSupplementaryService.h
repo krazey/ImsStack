@@ -17,11 +17,12 @@
 #ifndef MTC_PERMANENT_SUPPLEMENTARY_SERVICE_H_
 #define MTC_PERMANENT_SUPPLEMENTARY_SERVICE_H_
 
-#include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "utility/SuppServiceUtils.h"
+
+class AString;
 
 class MtcPermanentSupplementaryService final
 {

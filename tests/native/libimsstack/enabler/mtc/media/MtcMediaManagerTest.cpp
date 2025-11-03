@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "MediaManager.h"
 #include "ISipHeader.h"
 #include "MediaDef.h"
