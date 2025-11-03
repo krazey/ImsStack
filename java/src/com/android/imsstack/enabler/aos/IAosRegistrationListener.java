@@ -245,11 +245,6 @@ public interface IAosRegistrationListener {
             return mValue;
         }
 
-        @Override
-        public String toString() {
-            return name();
-        }
-
         /**
          * Returns the NetworkType enum constant corresponding to the given integer value.
          *
@@ -753,6 +748,18 @@ public interface IAosRegistrationListener {
                 CapabilityReason.SUCCESS
         })
         public @interface CapabilityReasonDef {}
+
+        /**
+         * @param reason The capability reason code.
+         * @return A string representation of the capability reason.
+         */
+        public static String toString(@CapabilityReasonDef int reason) {
+            return switch (reason) {
+                case ERROR_GENERIC -> "ERROR_GENERIC";
+                case SUCCESS -> "SUCCESS";
+                default -> "UNKNOWN(" + reason + ")";
+            };
+        }
     }
 
     /**
