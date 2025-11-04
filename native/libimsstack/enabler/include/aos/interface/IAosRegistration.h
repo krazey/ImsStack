@@ -21,6 +21,7 @@
 class AString;
 class IAosRegistrationListener;
 
+enum class EmergencyServicePdn;
 enum class AosNetworkType;
 enum class AosRegistrationType;
 enum class AosReasonCode;
@@ -78,6 +79,15 @@ public:
      * @param nReason Indicate the detail reason. (@see REASON_XXX enum)
      */
     virtual void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) = 0;
+
+    /**
+     * @brief Notify the emergency sms state.
+     *
+     * @param bIsInitialized Indicated whether emergency sms is initialized or done.
+     * @param ePdnType Indicated the pdn type used for the emergency sms.
+     */
+    virtual void NotifyEmergencySmsState(
+            IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) = 0;
 
     /**
      * @brief Get the registration mode. (@see MODE_XXX enum)

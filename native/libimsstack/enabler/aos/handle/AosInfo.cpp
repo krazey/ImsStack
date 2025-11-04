@@ -247,17 +247,12 @@ PRIVATE VIRTUAL void AosInfo::NotifyPublishState(IN IMS_BOOL bIsStarted)
 }
 
 PRIVATE VIRTUAL void AosInfo::NotifyEmergencySmsState(
-        IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn /* ePdnType */)
+        IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType)
 {
-    // TODO(b/444285663): Implement logic to handle different PDN types.
+    m_piContext->GetRegistration()->NotifyEmergencySmsState(bIsInitialized, ePdnType);
     if (bIsInitialized)
     {
-        m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
         m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ESMS_INIT);
-    }
-    else
-    {
-        m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_DONE);
     }
 }
 
