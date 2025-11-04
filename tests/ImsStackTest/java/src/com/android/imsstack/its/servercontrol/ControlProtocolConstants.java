@@ -37,6 +37,7 @@ public class ControlProtocolConstants {
     public static final String MESSAGE_SDP = "message-sdp=";
     public static final String MESSAGE_XML = "message-xml=";
     public static final String SDP_COPY = "copy";
+    public static final String SDP_COPY_WITHOUT_PRECONDITION = "copyRemoteSdpWithoutPrecondition";
 
     // Target message ID
     public static final String MESSAGE_ID = "message-id=";
