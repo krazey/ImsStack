@@ -55,6 +55,7 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
         mDefaultConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
         mDefaultConfig.putBoolean(
                 CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
+        mDefaultConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, true);
     }
 
     @Override
