@@ -90,6 +90,8 @@ protected:
             OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
     IMS_BOOL ParseBwRecv(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
+    void SetEvsFullBr(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
+    void SetEvsFullBw(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
     void SetEvsBrVisible(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
     void SetEvsBwVisible(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
     IMS_BOOL ParseTelephoneEventFmtp(
