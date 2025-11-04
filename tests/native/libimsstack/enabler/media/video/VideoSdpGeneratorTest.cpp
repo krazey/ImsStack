@@ -311,12 +311,12 @@ TEST_F(VideoSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
     EXPECT_FALSE(GenerateRtpMap(rtpMap, payloadNum, rtpMapObj));
 }
 
-TEST_F(VideoSdpGeneratorTest, TestGenerateWithDataPortZero)
+TEST_F(VideoSdpGeneratorTest, TestGenerateOmitAttributes)
 {
     // Set data port to 0
     m_pProfile->SetDataPort(0);
-
-    // Set expectations for GenerateCommonAttributes
+    m_pProfile->SetOmitAttributes(IMS_FALSE);
+    // Set expectations for GenerateCommonAttributes and other attribute generators
     EXPECT_CALL(*m_pDescriptor, SetBandwidthInfo(_)).Times(1);
     EXPECT_CALL(*m_pSessionDescriptor, GetLocalAddress()).WillRepeatedly(Return(IpAddress::NONE));
     EXPECT_CALL(*m_pSessionDescriptor, SetConnectionAddress(_)).Times(1);

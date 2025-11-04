@@ -176,7 +176,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateBasicSuccess)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_NE(m_pNegotiatedProfile->GetDataPort(), 0);  // Port should be non-zero
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(),
             MEDIA_DIRECTION_SEND_RECEIVE);  // Example expected direction
@@ -206,11 +206,12 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateNoCommonCodec)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Peer payload is copied
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Peer payload is copied
     EXPECT_EQ(m_pNegotiatedProfile->GetIpAddress(), m_pLocalProfile->GetIpAddress());
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
     EXPECT_NE(m_pNegotiatedProfile->GetRtcpInterval(), 0);
+    EXPECT_TRUE(m_pNegotiatedProfile->IsOmitAttributes());
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateNoPeerPayloads)
@@ -225,11 +226,12 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateNoPeerPayloads)
     // Assert
     EXPECT_TRUE(bResult);
     // When no peer payloads, ResetNegotiatedProfile copies the local profile.
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetIpAddress(), m_pLocalProfile->GetIpAddress());
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
     EXPECT_NE(m_pNegotiatedProfile->GetRtcpInterval(), 0);
+    EXPECT_TRUE(m_pNegotiatedProfile->IsOmitAttributes());
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiatePeerPortZero)
@@ -246,9 +248,10 @@ TEST_F(VideoProfileNegotiatorTest, NegotiatePeerPortZero)
     // Assert
     EXPECT_TRUE(bResult);  // Negotiation should still "succeed" but bResult in port 0
     // When IP/Port negotiation fails, ResetNegotiatedProfile is called.
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Local payload is copied
-    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);               // Port is reset
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Local payload is copied
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);         // Port is reset
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    EXPECT_FALSE(m_pNegotiatedProfile->IsOmitAttributes());
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvpf)
@@ -270,7 +273,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvpf)
     EXPECT_TRUE(bResult);
     EXPECT_TRUE(m_pNegotiatedProfile->IsAvpfSupported());
     EXPECT_EQ(m_pNegotiatedProfile->GetTransportType(), "RTP/AVPF");
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     // Add more checks for RTCP-FB attributes if needed
 }
 
@@ -305,8 +308,8 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateLocalPortZero)
     // Assert
     EXPECT_TRUE(bResult);  // Negotiation "succeeds" but bResults in port 0
     // When IP/Port negotiation fails, ResetNegotiatedProfile is called.
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Local payload is copied
-    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);               // Port is reset
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Local payload is copied
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);         // Port is reset
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
 }
 
@@ -327,7 +330,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_NE(m_pNegotiatedProfile->GetDataPort(), 0);  // Port should be non-zero
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(),
             MEDIA_DIRECTION_SEND_RECEIVE);  // Example expected direction
@@ -364,7 +367,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMatchedInMultipleItems)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -393,7 +396,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -421,7 +424,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchPeerLower)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -453,7 +456,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateMultipleAvcLevelPeerPickMiddle)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -485,7 +488,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateMultipleAvcLevelPeerPickLast)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -512,7 +515,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcPeerResolutionNotSpecified)
 
     // Assert
     EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
@@ -542,7 +545,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
 
     // Assert
     EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
@@ -572,7 +575,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosestCIFAndQV
 
     // Assert
     EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
@@ -601,7 +604,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -629,7 +632,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchPeerLower)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -655,7 +658,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcPeerResolutionNotSpecified)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1) << "Assert by the no payload";
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1) << "Assert by the no payload";
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -681,7 +684,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateHevcResolutionMismatch)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1) << "Assert by the no payload";
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1) << "Assert by the no payload";
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -707,7 +710,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateAnswerSentBasicSuccess)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     // Should use local pPayload number in answer scenario
@@ -795,7 +798,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateRtcpFbAllSupported)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_NE(pNegoPayload, nullptr);
     EXPECT_TRUE(m_pNegotiatedProfile->IsAvpfSupported());
@@ -865,7 +868,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiatePacketizationMode)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
 
     VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
@@ -891,7 +894,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionOfferPeerSend)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_RECEIVE);  // We should receive
 }
 
@@ -908,7 +911,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionOfferPeerReceive)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     // If peer offers RECEIVE, we should negotiate to SEND
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND);
 }
@@ -1010,7 +1013,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionAnswerPeerReceive)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND);  // We should send
 }
 
@@ -1027,6 +1030,6 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionInactive)
 
     // Assert
     EXPECT_TRUE(bResult);
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
 }

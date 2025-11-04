@@ -50,7 +50,7 @@ void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessio
     // ------"m=audio xxxx RTP/AVP 104 110 105 102 108 100"
     SetSdpMediaDescription(pDescriptor, pProfile);
 
-    if (pProfile->GetDataPort() != 0)
+    if (!pProfile->IsOmitAttributes())
     {
         // make bandwidth
         // ------"b=AS:xx"
