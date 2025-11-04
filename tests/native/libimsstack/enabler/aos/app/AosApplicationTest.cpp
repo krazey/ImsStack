@@ -1306,9 +1306,6 @@ TEST_F(AosApplicationTest, RequestCmd)
     // ImsAosControl::REGISTER_STOP
     EXPECT_TRUE(m_pAosApplication->RequestCmd(ImsAosControl::REGISTER_STOP));
 
-    // ImsAosControl::REGISTER_STOP_BY_ROAMING
-    EXPECT_TRUE(m_pAosApplication->RequestCmd(ImsAosControl::REGISTER_STOP_BY_ROAMING));
-
     // ImsAosControl::REGISTER_REINITIATE
     EXPECT_TRUE(m_pAosApplication->RequestCmd(ImsAosControl::REGISTER_REINITIATE));
 

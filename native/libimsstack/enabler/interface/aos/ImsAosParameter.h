@@ -40,8 +40,6 @@ public:
         REGISTER_REFRESH,
         /// A de-registration is attempted.
         REGISTER_STOP,
-        /// A de-registration is attempted, and registration is blocked for a specific period.
-        REGISTER_STOP_BY_ROAMING,
         /**
          * An initial registration is attempted after the previous registration is destroyed.
          *

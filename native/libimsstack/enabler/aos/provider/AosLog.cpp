@@ -141,9 +141,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
         case ImsAosControl::REGISTER_STOP:
             return "REGISTER_STOP";
 
-        case ImsAosControl::REGISTER_STOP_BY_ROAMING:
-            return "REGISTER_STOP_BY_ROAMING";
-
         case ImsAosControl::REGISTER_REINITIATE:
             return "REGISTER_REINITIATE";
 
