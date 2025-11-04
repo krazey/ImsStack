@@ -17,21 +17,20 @@
 #ifndef MTC_MEDIA_MANAGER_H_
 #define MTC_MEDIA_MANAGER_H_
 
-#include "IMediaSession.h"
-#include "IMessage.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MediaDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
 #include "helper/ISrvccStateListener.h"
-#include "media/IMediaReportEventListener.h"
 #include "media/IMediaSessionClientListener.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MtcMediaProfileManager.h"
 
+class IMediaSession;
+class IMediaReportEventListener;
+class IMessage;
+class IMtcCallContext;
 class MediaManager;
+class MtcMediaProfileManager;
 
 class SessionMedia
 {

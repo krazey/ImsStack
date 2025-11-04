@@ -20,7 +20,6 @@
 #include "AString.h"
 #include "ByteArray.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 
 class IMessage;
 class IMtcCallContext;

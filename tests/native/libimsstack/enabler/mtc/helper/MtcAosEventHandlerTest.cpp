@@ -17,6 +17,7 @@
 #include "IIpcan.h"
 #include "IMtcContext.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"

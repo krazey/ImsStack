@@ -17,8 +17,9 @@
 #ifndef INTERFACE_MEDIA_REPORT_EVENT_LISTENER_H_
 #define INTERFACE_MEDIA_REPORT_EVENT_LISTENER_H_
 
-#include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
+
+struct CallReasonInfo;
 
 class IMediaReportEventListener
 {

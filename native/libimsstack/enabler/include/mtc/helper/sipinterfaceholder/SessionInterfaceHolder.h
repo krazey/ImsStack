@@ -18,8 +18,8 @@
 #define SESSION_INTERFACE_HOLDER_H_
 
 #include "ISessionListener.h"
+#include "ITimer.h"
 #include "ImsList.h"
-#include "ServiceTimer.h"
 #include "call/IMtcCall.h"
 #include <unordered_map>
 
