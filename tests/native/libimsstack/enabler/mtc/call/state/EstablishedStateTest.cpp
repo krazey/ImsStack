@@ -746,6 +746,7 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
             GetBoolean(ConfigVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VOIP));
     EXPECT_CALL(objMockPreconditionManager, OnSdpReceived(&objMockISession)).Times(1);
     EXPECT_CALL(objUiNotifier, SendIncomingResume).Times(1);
     EXPECT_CALL(objTimerWrapper, Start(_, _)).Times(1);

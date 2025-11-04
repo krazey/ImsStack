@@ -1492,6 +1492,29 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRequirePrackAnd
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
 }
 
+TEST_F(IdleStateTest, OnAttachedUpdatesCallTypeToNegotiatedType)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_IDLE));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objSession))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("no100rel")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objMtcSession, SetCallType(CallType::VT));
+    EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
+}
+
 TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceived)
 {
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
