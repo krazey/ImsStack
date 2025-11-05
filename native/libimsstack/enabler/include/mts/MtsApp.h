@@ -72,7 +72,7 @@ public:
 
 private:
     void AttachJni();
-    IMS_BOOL IsEmergencySmsOverImsSupported() const;
+    IMS_BOOL ShouldUseEmergencyPdnForSms() const;
 
     IMS_SINT32 m_nSlotId;
     MtsService m_objNormalService;

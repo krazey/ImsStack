@@ -104,7 +104,7 @@ PUBLIC VIRTUAL void MtsApp::SendMoSmsByServiceType(IN SmsFormatType eSmsFormat,
         IN ByteArray* pContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
         IN IMS_BOOL bEmergencyNumber, IN IMS_UINT32 nRetryCount)
 {
-    if (bEmergencyNumber && IsEmergencySmsOverImsSupported())
+    if (bEmergencyNumber && ShouldUseEmergencyPdnForSms())
     {
         m_objEmergencyService.SendMoSms(
                 eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
@@ -135,8 +135,9 @@ PRIVATE void MtsApp::AttachJni()
 }
 
 PRIVATE
-IMS_BOOL MtsApp::IsEmergencySmsOverImsSupported() const
+IMS_BOOL MtsApp::ShouldUseEmergencyPdnForSms() const
 {
     return ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
-            CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL);
+            CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL)
+            && !m_objMtsNetworkTracker.IsInRoamingState();
 }

@@ -259,6 +259,7 @@ TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosDisconnected)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMessageController, GetLastEmergencyMessageReference())
             .WillByDefault(Return(1));
 
@@ -280,6 +281,7 @@ TEST_F(MtsServiceTest, AosDisconnectedOnEmergencyService)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMessageController, GetLastEmergencyMessageReference())
             .WillByDefault(Return(1));
 
@@ -289,6 +291,44 @@ TEST_F(MtsServiceTest, AosDisconnectedOnEmergencyService)
     EXPECT_CALL(objMockMessageController, ClearAllMessages()).Times(0);
 
     pEmergencyService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
+}
+
+TEST_F(MtsServiceTest, AosDisconnectedOnEmergencyServiceWhenRoaming)
+{
+    IMS_SINT32 nDataFailureReason = 0;
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMessageController, GetLastEmergencyMessageReference())
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(*pMockEmergencyServiceState, OnImsDisconnected(ImsAosReason::NONE)).Times(1);
+    EXPECT_CALL(objMockMessageController, TriggerEmergencySmsStateNotification(IMS_FALSE, _))
+            .Times(0);
+    EXPECT_CALL(objMockMessageController, ClearAllMessages()).Times(0);
+
+    pEmergencyService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
+}
+
+TEST_F(MtsServiceTest, AosDisconnectedOnNormalServiceWhenRoaming)
+{
+    IMS_SINT32 nDataFailureReason = 0;
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMessageController, GetLastEmergencyMessageReference())
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(*pMockNormalServiceState, OnImsDisconnected(ImsAosReason::NONE)).Times(1);
+    EXPECT_CALL(objMockMessageController, TriggerEmergencySmsStateNotification(IMS_FALSE, _))
+            .Times(1);
+    EXPECT_CALL(objMockMessageController, ClearAllMessages()).Times(1);
+
+    pNormalService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
 }
 
 TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosDisconnecting)
@@ -744,6 +784,7 @@ TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWithImsPdn)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::IMS))
             .Times(1);
@@ -756,12 +797,26 @@ TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWithEmergencyPdn)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(
             objMockIImsAosInfo, NotifyEmergencySmsState(IMS_FALSE, EmergencyServicePdn::EMERGENCY))
             .Times(1);
 
     pEmergencyService->NotifyEmergencySmsStateToAos(IMS_FALSE);
+}
+
+TEST_F(MtsServiceTest, NotifyEmergencySmsStateToAosWithImsPdnWhenRoaming)
+{
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockNetworkTracker, IsInRoamingState()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::IMS))
+            .Times(1);
+
+    pEmergencyService->NotifyEmergencySmsStateToAos(IMS_TRUE);
 }
 
 }  // namespace android
