@@ -191,7 +191,7 @@ public final class SimAgent implements SimInterface {
         if (system != null) {
             system.notifyIsimState(
                     NOTIFICATION_ISIM_STATE_CHANGED,
-                    isimStateToString(Sim.ISIM_STATE_REMOVED));
+                    Sim.isimStateToString(Sim.ISIM_STATE_REMOVED));
         }
 
         if (mNativeStateListener != null) {
@@ -347,7 +347,7 @@ public final class SimAgent implements SimInterface {
      * Returns the ISIM state as a string.
      */
     public String getIsimStateString() {
-        return isimStateToString(getIsimState());
+        return Sim.isimStateToString(getIsimState());
     }
 
     /**
@@ -406,7 +406,7 @@ public final class SimAgent implements SimInterface {
         logi(this, "handleSimApplicationStateChanged - slotId=" + slotId
                 + ", subId=" + subId + ", newState=" + Sim.stateToString(state)
                 + ", state=" + Sim.stateToString(getSimState())
-                + ", isimState=" + isimStateToString(getIsimState()));
+                + ", isimState=" + Sim.isimStateToString(getIsimState()));
 
         if (mSlotId == slotId) {
             int simState = Sim.getSimStateFromTelephonySimState(state);
@@ -644,7 +644,7 @@ public final class SimAgent implements SimInterface {
         if (system != null) {
             system.notifyIsimState(
                     NOTIFICATION_ISIM_STATE_CHANGED,
-                    isimStateToString(state));
+                    Sim.isimStateToString(state));
         }
 
         // Notifies the applications that the ISIM state is changed.
@@ -659,8 +659,8 @@ public final class SimAgent implements SimInterface {
                 newIsimState = Sim.ISIM_STATE_LOADED;
             }
 
-            logi(this, "IsimState: "
-                    + isimStateToString(mIsimState) + " >> " + isimStateToString(newIsimState));
+            logi(this, "IsimState: " + Sim.isimStateToString(mIsimState) + " >> "
+                    + Sim.isimStateToString(newIsimState));
 
             mIsimState = newIsimState;
 
@@ -796,25 +796,5 @@ public final class SimAgent implements SimInterface {
 
     private static ISystem getSystem(int slotId) {
         return SystemInterface.getInstance().getSystem(slotId);
-    }
-
-    private static String isimStateToString(@Sim.IsimState int state) {
-        switch (state) {
-            case Sim.ISIM_STATE_NOT_PRESENT:
-                return "NOT_PRESENT";
-            case Sim.ISIM_STATE_NOT_READY:
-                return "NOT_READY";
-            case Sim.ISIM_STATE_LOADED:
-                return "LOADED";
-            case Sim.ISIM_STATE_REFRESH_STARTED:
-                return "REFRESH_STARTED";
-            case Sim.ISIM_STATE_REFRESH_COMPLETED:
-                return "REFRESH_COMPLETED";
-            case Sim.ISIM_STATE_REMOVED:
-                return "SIM_REMOVED";
-            case Sim.ISIM_STATE_UNKNOWN: // fall through
-            default:
-                return "UNKNOWN";
-        }
     }
 }
