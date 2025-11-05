@@ -23,12 +23,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.Looper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
@@ -45,6 +49,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.StringWriter;
 
 @RunWith(JUnit4.class)
 public class AosFactoryTest {
@@ -185,29 +191,51 @@ public class AosFactoryTest {
     }
 
     @Test
-    public void dump_delegatesToAosServiceWhenExists() {
-        // GIVEN
-        mAosFactory.replaceService(SLOT0, mMockAosService);
-        IndentingPrintWriter mockPrintWriter = mock(IndentingPrintWriter.class);
+    @SmallTest
+    public void dumpDelegatesToAllChildServices() {
+        // GIVEN: All dumpable components are mocked
+        AosService mockAosService = mock(AosService.class);
 
-        // WHEN
-        mAosFactory.dump(SLOT0, mockPrintWriter);
+        // GIVEN: The mocks are injected into the factory using the helper methods
+        mAosFactory.replaceService(SLOT0, mockAosService);
 
-        // THEN
-        verify(mMockAosService).dump(mockPrintWriter);
+        // GIVEN: Prepare tools to capture the dump output
+        final String dumpsysIndentPrefix = "  ";
+        StringWriter stringWriter = new StringWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(stringWriter, dumpsysIndentPrefix);
+
+        // WHEN: The factory's dump() method is called
+        mAosFactory.dump(SLOT0, pw);
+        pw.flush();
+        String output = stringWriter.toString();
+
+        // THEN: The output contains the factory's header
+        assertTrue("Output should contain the 'Aos:' header", output.contains("Aos:"));
+
+        // THEN: Verify dump() was called exactly once on ALL mocked components
+        verify(mockAosService, times(1)).dump(pw);
     }
 
     @Test
-    public void dump_doesNothingWhenServiceNotExists() {
-        // GIVEN: No AosService is present for SLOT0.
-        assertNull(mAosFactory.getAosInfo(SLOT0));
-        IndentingPrintWriter mockPrintWriter = mock(IndentingPrintWriter.class);
+    @SmallTest
+    public void dumpDoesNothingWhenServicesAreNull() {
+        // GIVEN: Ensure the factory is clean for SLOT0
+        mAosFactory.cleanup(SLOT0);
 
-        // WHEN
-        mAosFactory.dump(SLOT0, mockPrintWriter);
+        IndentingPrintWriter pw = mock(IndentingPrintWriter.class);
 
-        // THEN
-        verify(mMockAosService, never()).dump(mockPrintWriter);
+        // WHEN: The factory's dump() method is called
+        mAosFactory.dump(SLOT0, pw);
+
+        // THEN: Verify that only the header, indent, and de-indent calls occurred,
+        // and *nothing* else (meaning no child dump() methods were called).
+        verify(pw, times(1)).println("Aos:");
+        verify(pw, times(1)).increaseIndent();
+        verify(pw, times(1)).decreaseIndent();
+
+        // Verify that no other interactions (like printing from child services)
+        // happened on the print writer.
+        verifyNoMoreInteractions(pw);
     }
 
     private void setDebugScreenEnabled(boolean isEnabled, int slotId) {

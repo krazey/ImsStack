@@ -44,6 +44,8 @@ import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.ArraySet;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
@@ -57,12 +59,15 @@ import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
+import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.ImsStackRegistry;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
@@ -72,8 +77,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1319,6 +1326,83 @@ public class ImsRegistrationTrackerTest {
             serviceManager.dispose();
             ImsServiceManager.setDefault(oldServiceManager);
         }
+    }
+
+    @Test
+    @SmallTest
+    public void dumpVerifiesPresenceOfKey() {
+        // GIVEN: A mocked AosService is injected into the factory to intercept nested dump calls
+        AosService mockAosService = Mockito.mock(AosService.class);
+        AosFactory.getInstance().replaceService(SLOT0, mockAosService);
+
+        // GIVEN: The tracker is registered to set its internal state (mFeatures, networkType)
+        int features = IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO;
+        IAosRegistrationListener.NetworkType network = IAosRegistrationListener.NetworkType.LTE;
+
+        mAosRegListener.notifyRegistered(
+                IAosRegistrationListener.RegistrationType.NORMAL,
+                network, features, new ArraySet<>());
+
+        // GIVEN: An event occurs to populate the LocalLog
+
+        // Capture the NetWatcherListener registered during init
+        ArgumentCaptor<IDcNetWatcher.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mMockIDcNetWatcher).addListener(listenerCaptor.capture());
+        IDcNetWatcher.Listener netListener = listenerCaptor.getValue();
+        assertNotNull(netListener);
+
+        // Trigger the roaming event
+        netListener.onRoamingStateChanged(true);
+
+        // Capture and run the Runnable posted to the mock handler to populate the log
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler).post(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+
+        // GIVEN: Prepare tools to capture the dump output
+        final String dumpsysIndentPrefix = "  ";
+        StringWriter stringWriter = new StringWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(stringWriter, dumpsysIndentPrefix);
+
+        // WHEN: The dump() method is called
+        mRegTracker.dump(pw);
+        pw.flush();
+        String output = stringWriter.toString();
+
+
+        // THEN: The output string loosely contains all key information
+
+        // Check for section header
+        assertTrue("Output should contain the 'Registration:' header",
+                output.contains("Registration:"));
+
+        // Check for key state values
+        assertTrue("Dump should contain the correct registered features",
+                output.contains("registered="
+                        + IAosRegistrationListener.FeatureTagMask.toString(features)));
+        assertTrue("Dump should contain the correct network type",
+                output.contains("networkType=" + network));
+
+        // Check for log header
+        assertTrue("Output should contain the 'Most recent logs:' header",
+                output.contains("Most recent logs:"));
+
+        // Check for log content from onRoamingStateChanged
+        String expectedLog = "RoamingStateChanged: roaming=true";
+        assertTrue("Dump should contain the roaming log",
+                output.contains(expectedLog));
+
+        // THEN: Verify that the nested AosFactory.dump() (which calls AosService.dump()) was made
+        ArgumentCaptor<IndentingPrintWriter> captor =
+                ArgumentCaptor.forClass(IndentingPrintWriter.class);
+
+        // This verifies that AosFactory.dump() was called, which in turn calls mock service's dump
+        verify(mockAosService).dump(captor.capture());
+
+        // Verify the *same* print writer was passed down to the nested call
+        assertEquals(pw, captor.getValue());
     }
 
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {

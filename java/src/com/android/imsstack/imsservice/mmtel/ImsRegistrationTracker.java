@@ -54,10 +54,12 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
+import com.android.imsstack.imsservice.mmtel.config.base.ConfigUtils;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.IndentingPrintWriter;
+import com.android.imsstack.util.LocalLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -79,6 +81,9 @@ public class ImsRegistrationTracker {
         public void onCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
     };
 
+    private static final int MAX_LOG_LINES = 50;
+    private final LocalLog mLocalLog = new LocalLog(MAX_LOG_LINES);
+
     private final IContext mContext;
     private final ImsRegistrationImpl mRegImpl;
     private IRegistrationFeatureListener mFeatureListener;
@@ -98,6 +103,10 @@ public class ImsRegistrationTracker {
                 if ((item == ProvisioningManager.KEY_RTT_ENABLED)
                         || isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
                     logi("onImsConfigurationChanged:: changed item" + item);
+
+                    mLocalLog.log("ImsConfiguration Changed="
+                            + ConfigUtils.getProvisioningItem(item));
+
                     CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
                     if (capabilityPairs != null) {
                         mRegTracker.changeCapabilities(capabilityPairs);
@@ -260,8 +269,7 @@ public class ImsRegistrationTracker {
 
     public void changeCapabilities(List<CapabilityPair> enabledCaps,
             List<CapabilityPair> disabledCaps) {
-        logi("changeCapabilities::enabledCaps "
-                + enabledCaps + " disabledCaps " + disabledCaps);
+        logi("changeCapabilities::enabledCaps " + enabledCaps + " disabledCaps " + disabledCaps);
 
         if (disabledCaps != null) {
             for (int i = 0; i < disabledCaps.size(); ++i) {
@@ -315,6 +323,11 @@ public class ImsRegistrationTracker {
         pw.increaseIndent();
         pw.println("registered=" + FeatureTagMask.toString(mFeatures));
         pw.println("networkType=" + getRegisteredNetworkType());
+        pw.println("Most recent logs:");
+        pw.increaseIndent();
+        mLocalLog.dump(pw);
+        pw.decreaseIndent();
+
         AosFactory.getInstance().dump(mContext.getSlotId(), pw);
         pw.decreaseIndent();
     }
@@ -557,6 +570,8 @@ public class ImsRegistrationTracker {
         mDataRoamingSettingObserver = new ContentObserver(mContext.getDefaultHandler()) {
             @Override
             public void onChange(boolean bChange) {
+                mLocalLog.log("DataRoamingSetting changed=" + bChange);
+
                 CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
                 if (capabilityPairs != null) {
                     mRegTracker.changeCapabilities(capabilityPairs);
@@ -573,6 +588,9 @@ public class ImsRegistrationTracker {
      */
     public void onDeregistrationTriggered(int reason) {
         logi("DeregistrationTriggered :: request from framework" + reason);
+        mLocalLog.log("DeregistrationTriggered :: request from framework="
+                + IAosRegistration.Cause.of(reason));
+
         mRegTracker.controlRegistration(reason);
     }
 
@@ -640,6 +658,8 @@ public class ImsRegistrationTracker {
         @Override
         public void onRoamingStateChanged(boolean roaming) {
             mContext.getDefaultHandler().post(() -> {
+                mLocalLog.log("RoamingStateChanged: roaming=" + roaming);
+
                 CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
                 if (capabilityPairs != null) {
                     mRegTracker.changeCapabilities(capabilityPairs);
