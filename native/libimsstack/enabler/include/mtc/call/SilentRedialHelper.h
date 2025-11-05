@@ -46,7 +46,7 @@ public:
 
     // ISilentRedialHelper implementation
     CallReasonInfo Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) override;
-    inline IMS_UINT32 GetType() override { return m_nType; }
+    inline IMS_UINT32 GetType() const override { return m_nType; }
 
     // IMtcCallStateListener implementation
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,

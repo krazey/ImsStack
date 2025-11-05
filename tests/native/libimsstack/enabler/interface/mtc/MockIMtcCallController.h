@@ -84,6 +84,7 @@ public:
             (IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation), (override));
     MOCK_METHOD(ISilentRedialHelper&, GetRedialHelper, (
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason), (override));
+    MOCK_METHOD(const ISilentRedialHelper*, GetActiveRedialHelper, (), (const, override));
     MOCK_METHOD(void, ReleaseRedialHelper, (), (override));
 
     // IEnablerService interface

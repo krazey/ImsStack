@@ -94,6 +94,7 @@ public:
 
     ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) override;
+    const ISilentRedialHelper* GetActiveRedialHelper() const override;
     void ReleaseRedialHelper() override;
 
 private:

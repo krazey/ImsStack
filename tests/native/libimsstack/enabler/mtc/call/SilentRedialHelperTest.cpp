@@ -287,6 +287,21 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRedialByRttEmergencyRejection)
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
 }
 
+TEST_F(SilentRedialHelperTest, CreateHelperWithRedialByNextPcscfOnceType)
+{
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+}
+
 TEST_F(SilentRedialHelperTest, IsSameRedialTypeReturnsComparisonResult)
 {
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);

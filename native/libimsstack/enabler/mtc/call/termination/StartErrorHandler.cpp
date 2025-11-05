@@ -20,6 +20,7 @@
 #include "IConfiguration.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
+#include "IMtcCallController.h"
 #include "ISession.h"
 #include "ISipConfig.h"
 #include "ISipConfigV.h"
@@ -35,6 +36,7 @@
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
+#include "call/ISilentRedialHelper.h"
 #include "call/MtcCallManager.h"
 #include "call/radio/IMtcRadioChecker.h"
 #include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
@@ -90,6 +92,8 @@ const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
             &StartErrorHandler::HandleRegistrationToAlternatePcscf},
     {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF,
             &StartErrorHandler::HandleSilentReinviteToAlternatePcscf},
+    {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE,
+            &StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce},
 };
 // clang-format on
 
@@ -109,6 +113,18 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
     if (m_objContext.GetCallInfo().IsEmergency())
     {
         return EmergencyStartErrorHandler(m_objContext, m_objSession).Handle(piMessage);
+    }
+
+    if (ShouldTerminateWithoutActionConfig(m_objContext))
+    {
+        if (IsTransactionTimeout(piMessage))
+        {
+            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+        }
+        else
+        {
+            return GetDefaultCallReasonInfo(m_objContext, *piMessage);
+        }
     }
 
     if (IsTransactionTimeout(piMessage))
@@ -182,6 +198,25 @@ PUBLIC GLOBAL IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(
         nExtraCode = objMessage.GetStatusCode();
     }
     return nExtraCode;
+}
+
+PUBLIC GLOBAL IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
+{
+    return piMessage == IMS_NULL;
+}
+
+PUBLIC GLOBAL IMS_BOOL StartErrorHandler::ShouldTerminateWithoutActionConfig(
+        IN IMtcCallContext& objContext)
+{
+    const ISilentRedialHelper* pRedialHelper =
+            objContext.GetCallController().GetActiveRedialHelper();
+    if (pRedialHelper && pRedialHelper->GetType() == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE)
+    {
+        IMS_TRACE_I("ShouldTerminateWithoutActionConfig : REDIAL_WITH_NEXT_PCSCF_ONCE", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfoWithExtraMessage(
@@ -613,6 +648,27 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscf(
 }
 
 PRIVATE
+CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
+        IN [[maybe_unused]] const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
+
+    if (HasActiveCalls())
+    {
+        return CallReasonInfo(CODE_NONE);
+    }
+
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (!pAosConnector)
+    {
+        return CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR);
+    }
+
+    pAosConnector->RegisterWithNextPcscf(0);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+}
+
+PRIVATE
 CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
 {
     IMS_TRACE_I("RegisterAfterMayPerformCsfb", 0, 0, 0);
@@ -626,12 +682,6 @@ CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
 
     ReinitiateRegistrationWithStoredWaitTime();
     return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
-{
-    return piMessage == IMS_NULL;
 }
 
 PRIVATE

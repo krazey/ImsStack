@@ -130,7 +130,7 @@ protected:
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 
         ON_CALL(objCallContext, GetCallController).WillByDefault(ReturnRef(objController));
-        ON_CALL(objController, GetRedialHelper).WillByDefault(ReturnRef(objRedialHelper));
+        ON_CALL(objController, GetRedialHelper(_, _)).WillByDefault(ReturnRef(objRedialHelper));
         ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
         objSessions.Append(&objMtcSession);
@@ -2900,4 +2900,32 @@ TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroUssiCall)
 
     CallStateName nextState = pOutgoingState->SessionStarted(&objSession);
     EXPECT_EQ(nextState, CallStateName::ESTABLISHED);
+}
+
+TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentRedialWithNextPcscfOnce)
+{
+    ON_CALL(objService, GetSrvccState()).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    SetActionConfigs(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_503,
+            {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE});
+
+    CallReasonInfo expectedReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+    EXPECT_CALL(objController, GetRedialHelper(Ref(objCallContext), expectedReason)).Times(1);
+    EXPECT_CALL(objTimer,
+            Start(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL, 1000));
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
+
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objRedialHelper, Redial(ISilentRedialHelper::INTERVAL_BY_TYPE))
+            .WillOnce(Return(CallReasonInfo(CODE_NONE)));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }

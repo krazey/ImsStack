@@ -26,6 +26,7 @@
 #include "ImsEventDef.h"
 #include "ImsVector.h"
 #include "MockIMessage.h"
+#include "MockIMtcCallController.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -39,6 +40,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
+#include "call/MockISilentRedialHelper.h"
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockMtcConfigurationProxy.h"
@@ -100,6 +102,8 @@ public:
     MockIMtcCallManager objCallManager;
     MockEpsFallbackTrigger objEpsFbTrigger;
     ImsVector<AString> objActionSets;
+    MockISilentRedialHelper objRedialHelper;
+    MockIMtcCallController objCallController;
 
     StartErrorHandler* pHandler;
 
@@ -133,6 +137,9 @@ protected:
         ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(objEpsFbTrigger));
+
+        ON_CALL(objCallContext, GetCallController).WillByDefault(ReturnRef(objCallController));
+        ON_CALL(objCallController, GetActiveRedialHelper()).WillByDefault(Return(nullptr));
 
         objCallInfo.eEmergencyType = EmergencyType::NONE;
         pHandler = new StartErrorHandler(objCallContext, objSession);
@@ -1350,4 +1357,89 @@ TEST_F(StartErrorHandlerTest, ExtraMessageIsSetByQ850NoTextReasonHeader)
     SetMessageCode(SipStatusCode::SC_408);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_TIMEOUT, 18, strFormattedMessage));
 }
+
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfOnceInitiatesSingleRetry)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ImsList<IMtcCall*> objNoCalls;
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objNoCalls));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
+}
+
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfOnceWithActiveCallReturnsNone)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ImsList<IMtcCall*> objActiveCalls;
+    MockIMtcCall objCall;
+    objActiveCalls.Append(&objCall);
+
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objActiveCalls));
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
+
+    EXPECT_FALSE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
+}
+
+TEST_F(StartErrorHandlerTest,
+        HandleSilentReinviteToAlternatePcscfOnceReturnsInternalErrorIfAosConnectorIsNull)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(nullptr));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_INTERNAL_ERROR));
+}
+
+TEST_F(StartErrorHandlerTest, ShouldTerminateWithoutActionConfigCheckIfRetryFails)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+
+    ON_CALL(objCallController, GetActiveRedialHelper()).WillByDefault(Return(&objRedialHelper));
+    ON_CALL(objRedialHelper, GetType())
+            .WillByDefault(Return(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
+
+    SetTransactionTimeout();
+
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+}
+
+TEST_F(StartErrorHandlerTest, ShouldTerminateWithoutActionConfigCheckIfNonOnceRetryInProgress)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ImsList<IMtcCall*> objNoCalls;
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objNoCalls));
+    ON_CALL(objCallController, GetActiveRedialHelper()).WillByDefault(Return(&objRedialHelper));
+    ON_CALL(objRedialHelper, GetType()).WillByDefault(Return(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
+}
+
+TEST_F(StartErrorHandlerTest, IsTransactionTimeout)
+{
+    EXPECT_FALSE(pHandler->IsTransactionTimeout(pMessage));
+
+    SetTransactionTimeout();
+    EXPECT_TRUE(pHandler->IsTransactionTimeout(pMessage));
+}
+
 }  // namespace android

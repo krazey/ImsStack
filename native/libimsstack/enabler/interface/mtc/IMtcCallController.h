@@ -305,6 +305,16 @@ public:
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) = 0;
 
     /**
+     * @brief Gets the currently active SilentRedialHelper instance.
+     *
+     * This function returns the pointer to the helper object that is currently managing a redial
+     * sequence, without creating a new one.
+     *
+     * @return Pointer to ISilentRedialHelper if one exists, otherwise nullptr.
+     */
+    virtual const ISilentRedialHelper* GetActiveRedialHelper() const = 0;
+
+    /**
      * @brief Releases
      *
      */

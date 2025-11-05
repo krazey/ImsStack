@@ -42,12 +42,10 @@ public:
      * Gets the type of redial.
      *
      * This method retrieves the type of redial used by the implementation.
-     * This information is intended for unit testing purposes only and should not be used in
-     * production code.
      *
      * @return An integer value representing the redial type.
      */
-    virtual IMS_UINT32 GetType() = 0;
+    virtual IMS_UINT32 GetType() const = 0;
 
     static const IMS_SINT32 INTERVAL_BY_TYPE = -1;
 };

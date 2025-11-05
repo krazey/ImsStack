@@ -285,6 +285,12 @@ ISilentRedialHelper& MtcCallController::GetRedialHelper(
 }
 
 PUBLIC
+const ISilentRedialHelper* MtcCallController::GetActiveRedialHelper() const
+{
+    return m_pRedialHelper;
+}
+
+PUBLIC
 void MtcCallController::ReleaseRedialHelper()
 {
     delete m_pRedialHelper;

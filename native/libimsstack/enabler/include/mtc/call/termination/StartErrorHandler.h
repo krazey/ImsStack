@@ -50,6 +50,8 @@ public:
             IN IMtcCallContext& objContext, IN IMS_SINT32 nStatusCode);
     static IMS_SINT32 GetDefaultExtraCode(
             IN IMtcCallContext& objContext, IN const IMessage& objMessage);
+    static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
+    static IMS_BOOL ShouldTerminateWithoutActionConfig(IN IMtcCallContext& objContext);
 
 private:
     static CallReasonInfo GetDefaultCallReasonInfoWithExtraMessage(
@@ -72,10 +74,10 @@ private:
     CallReasonInfo HandleTerminateByReasonHeaderText(IN const IMessage& objMessage) const;
     CallReasonInfo HandleRegistrationToAlternatePcscf(IN const IMessage& objMessage) const;
     CallReasonInfo HandleSilentReinviteToAlternatePcscf(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleSilentReinviteToAlternatePcscfOnce(IN const IMessage& objMessage) const;
 
     CallReasonInfo RegisterAfterMayPerformCsfb() const;
 
-    static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;

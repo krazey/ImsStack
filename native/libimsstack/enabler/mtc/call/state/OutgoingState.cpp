@@ -933,6 +933,7 @@ CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& o
     switch (objReason.nExtraCode)
     {
         case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF:
+        case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE:
             m_bWaitingServiceConnectedForRedial = IMS_TRUE;
             m_objContext.GetTimer().Start(TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
                     m_objContext.GetConfigurationProxy().GetInt(

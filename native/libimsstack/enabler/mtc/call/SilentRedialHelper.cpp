@@ -199,6 +199,10 @@ void SilentRedialHelper::SetRedialDetail()
             m_nInterval = 0;
             m_nMaxCount = NO_LIMIT;
             return;
+        case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE:
+            m_nInterval = 0;
+            m_nMaxCount = 1;
+            return;
         default:
             return;
     }

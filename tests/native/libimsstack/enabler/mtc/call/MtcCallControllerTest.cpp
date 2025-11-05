@@ -574,3 +574,15 @@ TEST_F(MtcCallControllerTest, ReleaseRedialHelperDeletesSilentRedialHelper)
     // nothing to check : cannot check address
     EXPECT_EQ(nType1, objRedialHelper2.GetType());
 }
+
+TEST_F(MtcCallControllerTest, GetActiveRedialHelper)
+{
+    pCallController->ReleaseRedialHelper();
+    const ISilentRedialHelper* pNullRedialHelper = pCallController->GetActiveRedialHelper();
+    EXPECT_EQ(pNullRedialHelper, nullptr);
+
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    ISilentRedialHelper& objRedialHelper = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper* pActiveRedialHelper = pCallController->GetActiveRedialHelper();
+    EXPECT_EQ(&objRedialHelper, pActiveRedialHelper);
+}
