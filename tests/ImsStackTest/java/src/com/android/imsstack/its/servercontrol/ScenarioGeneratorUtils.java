@@ -89,6 +89,26 @@ public class ScenarioGeneratorUtils {
     }
 
     /**
+     * Adds a client message that is disallowed for a certain duration.
+     *
+     * @param name The name of this disallowance rule.
+     *             It is used to identify the rule when a failure occurs.
+     * @param methodOrCode The SIP method or response code.
+     * @param durationMillis The duration in milliseconds for which the message is disallowed.
+     */
+    public void addDisallowedMessage(String name, String methodOrCode, int durationMillis) {
+        mScenarioBuilder.addMessage(new ClientMessage.Builder()
+                .setMethodOrCode(methodOrCode)
+                .setDisallowance(true, name)
+                .build());
+        mScenarioBuilder.addMessage(new ClientMessage.Builder()
+                .setMethodOrCode(methodOrCode)
+                .setDisallowance(false, name)
+                .addConfig(ControlProtocolConstants.CONFIG_DELAY, String.valueOf(durationMillis))
+                .build());
+    }
+
+    /**
      * Finalizes and builds the scenario with all added messages.
      *
      * @return The constructed Scenario instance.
