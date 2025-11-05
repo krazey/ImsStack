@@ -198,8 +198,6 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::REGISTER_STOP:  // FALL-THROUGH
-        case ImsAosControl::REGISTER_STOP_BY_ROAMING:
-            // TODO : check the roaming operation for REGISTER_STOP_BY_ROAMING
             ProcessDisconnectingState();
             PostMessage(MSG_REG_STOP, 0, 0);
             break;
