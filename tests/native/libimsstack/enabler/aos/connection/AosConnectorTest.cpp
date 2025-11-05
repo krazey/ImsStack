@@ -50,6 +50,7 @@ using ::testing::SetArgPointee;
     using Base::SetDataConnected;                   \
     using Base::SetEmergencyType;                   \
     using Base::IsDataConnected;                    \
+    using Base::IsPcoWaitingRequired;               \
     using Base::IsTimerRunning;                     \
     using Base::CheckIpChangedForEmergency;         \
     using Base::CheckIpaAndProcessReadyRecovery;    \
@@ -1190,4 +1191,83 @@ TEST_F(AosConnectorTest, DoNothingIfNoAvailablePcscfExistWhenProcessPendingPcscf
 
     m_pAosConnector->ProcessPendingPcscfChange();
     EXPECT_FALSE(m_pAosConnector->GetPcscfChangeIgnored());
+}
+
+TEST_F(AosConnectorTest, ReturnFalseForEmergencyTypeWhenCheckingIsPcoWaitingRequired)
+{
+    // Set emergency type to true to simulate an emergency registration
+    m_pAosConnector->SetEmergencyType(IMS_TRUE);
+
+    // N-config and connection PCO value should not be checked for emergency type
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue()).Times(0);
+
+    // Expect the method to return false, bypassing the PCO waiting logic
+    EXPECT_FALSE(m_pAosConnector->IsPcoWaitingRequired());
+}
+
+TEST_F(AosConnectorTest, ReturnFalseIfNConfigIsNullWhenCheckingIsPcoWaitingRequired)
+{
+    // Set emergency type to false to proceed with normal checks
+    m_pAosConnector->SetEmergencyType(IMS_FALSE);
+
+    // Simulate that N-Configuration is not available
+    AosProvider::GetInstance()->SetNConfiguration(IMS_NULL, SLOT_ID);
+
+    // The connection's PCO value should not be checked if N-config is null
+    EXPECT_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue()).Times(0);
+
+    // Expect the method to return false
+    EXPECT_FALSE(m_pAosConnector->IsPcoWaitingRequired());
+}
+
+TEST_F(AosConnectorTest,
+       ReturnFalseIfLimitedAdminSmsModeNotSupportedWhenCheckingIsPcoWaitingRequired)
+{
+    // Set emergency type to false
+    m_pAosConnector->SetEmergencyType(IMS_FALSE);
+
+    // Mock N-Configuration to indicate that limited admin SMS mode is not supported
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // The connection's PCO value should not be checked if the feature is not supported
+    EXPECT_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue()).Times(0);
+
+    // Expect the method to return false
+    EXPECT_FALSE(m_pAosConnector->IsPcoWaitingRequired());
+}
+
+TEST_F(AosConnectorTest,
+       ReturnTrueIfPcoIsInvalidWhenCheckingIsPcoWaitingRequired)
+{
+    // Set emergency type to false
+    m_pAosConnector->SetEmergencyType(IMS_FALSE);
+
+    // Mock N-Configuration to indicate that limited admin SMS mode is supported
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // Mock the connection to return an invalid PCO value, requiring a wait
+    ON_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue())
+            .WillByDefault(Return(AosConnector::PCO_INVALID_VALUE));
+
+    // Expect the method to return true, indicating that waiting for PCO is required
+    EXPECT_TRUE(m_pAosConnector->IsPcoWaitingRequired());
+}
+
+TEST_F(AosConnectorTest, ReturnFalseIfPcoIsValidWhenCheckingIsPcoWaitingRequired)
+{
+    // Set emergency type to false
+    m_pAosConnector->SetEmergencyType(IMS_FALSE);
+
+    // Mock N-Configuration to indicate that limited admin SMS mode is supported
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // Mock the connection to return a valid PCO value
+    ON_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue()).WillByDefault(Return(5));
+
+    // Expect the method to return false, as a valid PCO value is present
+    EXPECT_FALSE(m_pAosConnector->IsPcoWaitingRequired());
 }
