@@ -316,9 +316,10 @@ public interface IAosRegistration {
         @Override
         public String toString() {
             return getCapabilities().entrySet().stream().map(
-                entry -> "(Network=" + entry.getKey() + ", Capabilities=" + entry.getValue() + ")")
-                .collect(Collectors.joining(
-                        ", ", "{ Size=" + getCapabilities().size() + ", ", " }"));
+                    entry -> "(Network=" + entry.getKey() + ", Capabilities="
+                            + IAosRegistrationListener.Capability.toString(entry.getValue()) + ")")
+                    .collect(Collectors.joining(
+                            ", ", "{ Size=" + getCapabilities().size() + ", ", " }"));
         }
     }
 }
