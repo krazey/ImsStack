@@ -35,7 +35,6 @@ public:
             bERegWithOnlyTcpInRoaming(IMS_FALSE),
             bERegUsingFirstImpuInIsim(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
-            bIgnoreMtuFromNetwork(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
             bImsiBasedUriPrioritized(IMS_FALSE),
@@ -92,6 +91,7 @@ public:
             nImsEstablishmentTimeForNrSec(180),
             nImsPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
             nImsSignallingDscp(46),
+            nMaxAllowedNetworkMtu(1500),
             nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam(0),
             nRegActualWaitTimePolicy(CarrierConfig::Ims::AWT_POLICY_RFC_RULE),
             nRegDefaultWaitTime(0),
@@ -150,7 +150,6 @@ public:
     IMS_BOOL bERegWithOnlyTcpInRoaming;
     IMS_BOOL bERegUsingFirstImpuInIsim;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
-    IMS_BOOL bIgnoreMtuFromNetwork;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
     IMS_BOOL bImsiBasedUriPrioritized;
@@ -206,6 +205,7 @@ public:
     IMS_SINT32 nImsEstablishmentTimeForNrSec;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
+    IMS_SINT32 nMaxAllowedNetworkMtu;
     IMS_SINT32 nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam;
     IMS_SINT32 nRegActualWaitTimePolicy;
     IMS_SINT32 nRegDefaultWaitTime;

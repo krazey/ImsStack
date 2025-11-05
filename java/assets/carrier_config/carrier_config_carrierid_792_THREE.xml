@@ -16,5 +16,5 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="ims.ignore_mtu_from_network_bool" value="true"/>
+    <int name="ims.max_allowed_network_mtu_int" value="1358"/>
 </carrier_config>

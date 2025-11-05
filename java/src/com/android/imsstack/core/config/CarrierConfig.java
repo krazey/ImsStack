@@ -438,8 +438,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 KEY_PREFIX + "hold_reg_with_ipcan_changed_during_ims_call_bool";
-        public static final String KEY_IGNORE_MTU_FROM_NETWORK_BOOL =
-                KEY_PREFIX + "ignore_mtu_from_network_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
                 KEY_PREFIX + "ims_dereg_on_3g_network_bool";
         public static final String KEY_IMSI_BASED_URI_PRIORITIZED_BOOL =
@@ -502,6 +500,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ims_preferred_iptype_int";
         public static final String KEY_IMS_SIGNALLING_DSCP_INT =
                 KEY_PREFIX + "ims_signalling_dscp_int";
+        public static final String KEY_MAX_ALLOWED_NETWORK_MTU_INT =
+                KEY_PREFIX + "max_allowed_network_mtu_int";
         public static final String
                 KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT =
                 KEY_PREFIX

@@ -597,9 +597,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::KEY_IGNORE_MTU_FROM_NETWORK_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
@@ -797,6 +794,8 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT, -1))
             .WillOnce(Return(46));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_MAX_ALLOWED_NETWORK_MTU_INT, -1))
+            .WillOnce(Return(1500));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::
                             KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT,
@@ -1055,7 +1054,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->UseWfcCountryCodeAvailabilityCheck());
     EXPECT_FALSE(m_pAosNConfiguration->IsVideoOverWifiSupportedWithoutVoice());
     EXPECT_TRUE(m_pAosNConfiguration->IsUseRegInfoContactWithoutUriCheck());
-    EXPECT_TRUE(m_pAosNConfiguration->IsIgnoreMtuFromNetwork());
     EXPECT_FALSE(m_pAosNConfiguration->IsTestModeEnabled(
             CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION));
     EXPECT_FALSE(m_pAosNConfiguration->ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall());
@@ -1070,6 +1068,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_EQ(180, m_pAosNConfiguration->GetImsEstablishmentTimeForNr());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, m_pAosNConfiguration->GetImsSignallingDscp());
+    EXPECT_EQ(1500, m_pAosNConfiguration->GetMaxAllowedNetworkMtu());
     EXPECT_EQ(0, m_pAosNConfiguration->GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegActualWaitTimePolicy());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegDefaultWaitTime());

@@ -545,11 +545,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUseRegInfoContactWithoutUriCheck() 
     return m_objAsset.bUseRegInfoContactWithoutUriCheck;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIgnoreMtuFromNetwork() const
-{
-    return m_objAsset.bIgnoreMtuFromNetwork;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType) const
 {
     return m_objAsset.objTestMode.Contains(nType);
@@ -683,6 +678,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsSignallingDscp() const
 {
     return m_objAsset.nImsSignallingDscp;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetMaxAllowedNetworkMtu() const
+{
+    return m_objAsset.nMaxAllowedNetworkMtu;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() const
@@ -1676,8 +1676,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
-    m_objAsset.bIgnoreMtuFromNetwork =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_IGNORE_MTU_FROM_NETWORK_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =
@@ -1787,6 +1785,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT);
     m_objAsset.nImsPreferredIpType = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objAsset.nImsSignallingDscp = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT);
+    m_objAsset.nMaxAllowedNetworkMtu =
+            piCc->GetInt(CarrierConfig::Ims::KEY_MAX_ALLOWED_NETWORK_MTU_INT);
     m_objAsset.nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam = piCc->GetInt(CarrierConfig::
                     Ims::KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT);
     m_objAsset.nRegActualWaitTimePolicy =

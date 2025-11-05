@@ -90,7 +90,6 @@ public:
     IMS_BOOL IsGibaSupportedForERegInRoaming() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
-    IMS_BOOL IsIgnoreMtuFromNetwork() const override;
     IMS_BOOL IsImsiBasedUriPrioritized() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
     IMS_BOOL IsInitSubUponSubTerminated() const override;
@@ -152,6 +151,7 @@ public:
     IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const override;
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
+    IMS_SINT32 GetMaxAllowedNetworkMtu() const override;
     IMS_SINT32 GetRegistrationPrivateHeader() const override;
     IMS_SINT32 GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam() const override;
     IMS_SINT32 GetRegActualWaitTimePolicy() const override;

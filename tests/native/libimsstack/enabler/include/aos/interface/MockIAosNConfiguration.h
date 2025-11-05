@@ -111,7 +111,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsWfcErrorMessageSupported, (IN IMS_SINT32 nError), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoSupportedForEmergencyReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUseRegInfoContactWithoutUriCheck, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsIgnoreMtuFromNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTestModeEnabled, (IN IMS_SINT32 nType), (const, override));
     MOCK_METHOD(IMS_BOOL, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall, (), (const, override));
 
@@ -140,6 +139,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetWaitTimeMillisForReleaseEPdnAfterECallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetMaxAllowedNetworkMtu, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam, (),
             (const, override));

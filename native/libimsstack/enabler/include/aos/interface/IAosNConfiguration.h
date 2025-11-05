@@ -776,14 +776,6 @@ public:
     virtual IMS_BOOL IsUseRegInfoContactWithoutUriCheck() const = 0;
 
     /**
-     * @brief Check if MTU from network is ignored.
-     *
-     * @return IMS_TRUE if ignored, IMS_FALSE if considered.
-     * @see {@code ims.ignore_mtu_from_network_bool}
-     */
-    virtual IMS_BOOL IsIgnoreMtuFromNetwork() const = 0;
-
-    /**
      * @brief Flag specifying if test mode is enabled.
      *
      * @param nType The test mode type to be enabled.\n
@@ -1129,6 +1121,18 @@ public:
      * @see {@code ims.ims_signalling_dscp_int}
      */
     virtual IMS_SINT32 GetImsSignallingDscp() const = 0;
+
+    /**
+     * @brief Get the max allowed network MTU.
+     *
+     *        If Network assigns MTU large than GetMaxAllowedNetworkMtu(), it will be
+     *        limited to GetMaxAllowedNetworkMtu() to avoid UE use wrong transport
+     *        type to send SIP message.
+     *
+     * @return IMS_SINT32 Returns the max allowed network MTU
+     * @see {@code ims.max_allowed_network_mtu_int}
+     */
+    virtual IMS_SINT32 GetMaxAllowedNetworkMtu() const = 0;
 
     /**
      * @brief Indicate whether private header like P-Cellular-Network-Info or
