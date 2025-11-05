@@ -52,9 +52,6 @@ IMS_SINT32 MtsAosUtils::ConvertToAosControl(IN IMS_SINT32 nPolicy)
         case MtsRegRecoveryPolicy::REGISTER_STOP:
             return ImsAosControl::REGISTER_STOP;
 
-        case MtsRegRecoveryPolicy::REGISTER_STOP_BY_ROAMING:
-            return ImsAosControl::REGISTER_STOP_BY_ROAMING;
-
         case MtsRegRecoveryPolicy::REGISTER_REINITIATE:
             return ImsAosControl::REGISTER_REINITIATE;
 
