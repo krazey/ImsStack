@@ -41,22 +41,23 @@ public:
     ImsList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId, IN const AString& strSrvId);
     ImsList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId);
 
+protected:
+    void DestroyStaticConfig();
+
 private:
     void CreateStaticConfig();
     void CreateAos();
-    void DestroyStaticConfig();
     void DestroyAos();
 
     IAosBuilder* AosBuilderFactory();
+
+protected:
+    AosBuildDirector* m_pBuildDirector;
+    AosStaticConfig* m_pStaticConfig;
 
 private:
     IMS_SINT32 m_nSlotId;
     ImsList<AString> m_objAppId;
     ImsMap<AString, IAosAppContext*> m_objAppContext;
-    AosBuildDirector* m_pBuildDirector;
-    AosStaticConfig* m_pStaticConfig;
-
-private:
-    friend class AosMngrTest;
 };
 #endif  // AOS_MNGR_H_

@@ -30,11 +30,11 @@ __IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosMngr::AosMngr(IN IMS_SINT32 nSlotId) :
+        m_pBuildDirector(IMS_NULL),
+        m_pStaticConfig(IMS_NULL),
         m_nSlotId(nSlotId),
         m_objAppId(ImsList<AString>()),
-        m_objAppContext(ImsMap<AString, IAosAppContext*>()),
-        m_pBuildDirector(IMS_NULL),
-        m_pStaticConfig(IMS_NULL)
+        m_objAppContext(ImsMap<AString, IAosAppContext*>())
 {
     CreateStaticConfig();
 
@@ -177,6 +177,16 @@ ImsList<IAosHandle*> AosMngr::GetAllAosHandles(IN const AString& strAppId)
     return objHandles;
 }
 
+PROTECTED
+void AosMngr::DestroyStaticConfig()
+{
+    if (m_pStaticConfig != IMS_NULL)
+    {
+        m_pStaticConfig->Destroy();
+        m_pStaticConfig = IMS_NULL;
+    }
+}
+
 PRIVATE
 void AosMngr::CreateStaticConfig()
 {
@@ -245,16 +255,6 @@ void AosMngr::CreateAos()
 
     IMS_TRACE_I("[SLOT%d] CreateAos :: (%s) creation is completed", m_nSlotId, strLog.GetStr(), 0);
     delete piAosBuilder;
-}
-
-PRIVATE
-void AosMngr::DestroyStaticConfig()
-{
-    if (m_pStaticConfig != IMS_NULL)
-    {
-        m_pStaticConfig->Destroy();
-        m_pStaticConfig = IMS_NULL;
-    }
 }
 
 PRIVATE
