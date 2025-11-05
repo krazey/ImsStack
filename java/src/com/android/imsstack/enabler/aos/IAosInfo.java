@@ -372,5 +372,19 @@ public interface IAosInfo {
         public int getValue() {
             return mValue;
         }
+
+        /**
+         * Returns a string representation of this state, including both its
+         * symbolic name and its integer value (e.g., "START(1)").
+         * This format is useful for logging, debugging, and dumpsys output,
+         * providing more context than just the name.
+         *
+         * @return The string representation of the enum in "NAME(VALUE)" format
+         * (e.g., "START(1)").
+         */
+        @Override
+        public String toString() {
+            return this.name() + "(" + mValue + ")";
+        }
     }
 }
