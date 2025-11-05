@@ -119,6 +119,26 @@ public:
         STATE_MAX,
     };
 
+    enum
+    {
+        /**
+         * Not roaming, registered in home network.
+         */
+        ROAMING_TYPE_NOT_ROAMING = 0,
+        /**
+         * registered in a roaming network, but can not tell if it's domestic or international.
+         */
+        ROAMING_TYPE_UNKNOWN = 1,
+        /**
+         * registered in a domestic roaming network
+         */
+        ROAMING_TYPE_DOMESTIC = 2,
+        /**
+         * registered in an international roaming network
+         */
+        ROAMING_TYPE_INTERNATIONAL = 3,
+    };
+
 public:
     virtual IMS_UINT32 GetNetworkStatus(IN const AString& strProfile) = 0;
     virtual NETRADIO_ENTYPE GetNetRadioTechType(

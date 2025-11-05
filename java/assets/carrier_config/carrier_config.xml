@@ -270,15 +270,19 @@
         <item value="699:"/>
     </string-array>
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
-    <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="8">
+    <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="12">
         <item value=""/> <!-- REG_MODE_NORMAL -->
         <item value=""/> <!-- REG_MODE_ADMIN -->
         <item value=""/> <!-- REG_MODE_INTERNAL -->
         <item value=""/> <!-- REG_MODE_NOUICC -->
-        <item value=""/> <!-- REG_MODE_NORMAL and roaming -->
-        <item value=""/> <!-- REG_MODE_ADMIN and roaming -->
-        <item value=""/> <!-- REG_MODE_INTERNAL and roaming -->
-        <item value=""/> <!-- REG_MODE_NOUICC and roaming -->
+        <item value=""/> <!-- REG_MODE_NORMAL and domestic roaming -->
+        <item value=""/> <!-- REG_MODE_ADMIN and domestic roaming -->
+        <item value=""/> <!-- REG_MODE_INTERNAL and domestic roaming -->
+        <item value=""/> <!-- REG_MODE_NOUICC and domestic roaming -->
+        <item value=""/> <!-- REG_MODE_NORMAL and international roaming -->
+        <item value=""/> <!-- REG_MODE_ADMIN and international roaming -->
+        <item value=""/> <!-- REG_MODE_INTERNAL and international roaming -->
+        <item value=""/> <!-- REG_MODE_NOUICC and international roaming -->
     </string-array>
     <string-array name="imsemergency.p_preferred_identity_header_in_invite_string_array" num="4">
         <item value=""/> <!-- REG_MODE_NORMAL -->
