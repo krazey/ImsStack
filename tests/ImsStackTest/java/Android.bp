@@ -17,8 +17,8 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_test {
-    name: "ImsStackTest",
+java_defaults {
+    name: "ims_stack_test_defaults",
     certificate: "platform",
     platform_apis: true,
     manifest: "AndroidManifest.xml",
@@ -53,7 +53,6 @@ android_test {
         "libimsstack",
     ],
     test_suites: ["general-tests"],
-    //test_config: "AndroidTest.xml",
 }
 
 java_library {
@@ -65,4 +64,16 @@ java_library {
     srcs: [
         "proto/scm.proto",
     ],
+}
+
+android_test {
+    name: "ImsStackTest",
+    defaults: ["ims_stack_test_defaults"],
+    test_config: "AndroidTest.xml",
+}
+
+android_test {
+    name: "ImsStackPresubmitTest",
+    defaults: ["ims_stack_test_defaults"],
+    test_config: "AndroidPresubmitTest.xml",
 }
