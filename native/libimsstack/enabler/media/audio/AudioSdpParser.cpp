@@ -165,6 +165,7 @@ IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
     AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
     std::shared_ptr<AudioProfile::AudioFmtp> pFmtp = IMS_NULL;
     IMS_BOOL bIsEvs = IMS_FALSE;
+    IMS_BOOL bFmtpParsed = IMS_FALSE;
 
     if (strCodecName.EqualsIgnoreCase("AMR-WB") || strCodecName.EqualsIgnoreCase("AMR"))
     {
@@ -211,16 +212,26 @@ IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
             continue;
         }
 
-        if (!ParseAudioFmtp(objSplitEqual, pFmtp))
+        bool bAudioFmtpParsed = ParseAudioFmtp(objSplitEqual, pFmtp);
+
+        if (!bAudioFmtpParsed)
         {
             if (bIsEvs)
             {
-                ParseEvsFmtp(objSplitEqual, std::static_pointer_cast<AudioProfile::EvsFmtp>(pFmtp));
+                bFmtpParsed = ParseEvsFmtp(objSplitEqual,
+                                      std::static_pointer_cast<AudioProfile::EvsFmtp>(pFmtp)) ||
+                        bFmtpParsed;
             }
-            else
+            else  // AMR
             {
-                ParseAmrFmtp(objSplitEqual, std::static_pointer_cast<AudioProfile::AmrFmtp>(pFmtp));
+                bFmtpParsed = ParseAmrFmtp(objSplitEqual,
+                                      std::static_pointer_cast<AudioProfile::AmrFmtp>(pFmtp)) ||
+                        bFmtpParsed;
             }
+        }
+        else
+        {
+            bFmtpParsed = bFmtpParsed || bAudioFmtpParsed;
         }
     }
 
@@ -230,9 +241,12 @@ IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         SetEvsBwVisible(std::static_pointer_cast<AudioProfile::EvsFmtp>(pFmtp));
     }
 
-    pPayload->SetFmtp(pFmtp);
+    if (!bIsEvs || bFmtpParsed)
+    {
+        pPayload->SetFmtp(pFmtp);
+    }
 
-    return IMS_TRUE;
+    return bFmtpParsed;
 }
 
 PROTECTED
@@ -269,70 +283,32 @@ IMS_BOOL AudioSdpParser::ParseAudioFmtp(IN const ImsList<AString>& objSplitEqual
 }
 
 PROTECTED
-void AudioSdpParser::ParseAmrFmtp(
+IMS_BOOL AudioSdpParser::ParseAmrFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::AmrFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
-    ParseOctetAlign(objSplitEqual, pFmtp);
+    return ParseOctetAlign(objSplitEqual, pFmtp);
 }
 
 PROTECTED
-void AudioSdpParser::ParseEvsFmtp(
+IMS_BOOL AudioSdpParser::ParseEvsFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
-    if (ParseDtx(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseHfOnly(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseEvsSwitchMode(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseBr(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseBw(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseCmr(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseChAwMode(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseBrSend(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseBrRecv(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseBwSend(objSplitEqual, pFmtp))
-    {
-        return;
-    }
-    if (ParseBwRecv(objSplitEqual, pFmtp))
-    {
-        return;
-    }
+    return ParseDtx(objSplitEqual, pFmtp) || ParseHfOnly(objSplitEqual, pFmtp) ||
+            ParseEvsSwitchMode(objSplitEqual, pFmtp) || ParseBr(objSplitEqual, pFmtp) ||
+            ParseBw(objSplitEqual, pFmtp) || ParseCmr(objSplitEqual, pFmtp) ||
+            ParseChAwMode(objSplitEqual, pFmtp) || ParseBrSend(objSplitEqual, pFmtp) ||
+            ParseBrRecv(objSplitEqual, pFmtp) || ParseBwSend(objSplitEqual, pFmtp) ||
+            ParseBwRecv(objSplitEqual, pFmtp);
 }
 
 PROTECTED
@@ -462,13 +438,13 @@ IMS_BOOL AudioSdpParser::ParseMaxRed(IN const ImsList<AString>& objSplitEqual,
 }
 
 PROTECTED
-void AudioSdpParser::ParseOctetAlign(
+IMS_BOOL AudioSdpParser::ParseOctetAlign(
         IN const ImsList<AString>& objSplitEqual, OUT std::shared_ptr<AudioProfile::AmrFmtp> pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
         IMS_TRACE_E(0, "ParseOctetAlign(): invalid arguments", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     if (objSplitEqual.GetAt(0).Equals("octet-align"))
@@ -478,7 +454,10 @@ void AudioSdpParser::ParseOctetAlign(
 
         IMS_TRACE_D("ParseOctetAlign(): octet-align[%d], visible[%d]", pFmtp->GetOctetAlign(),
                 pFmtp->IsOctetAlignVisible(), 0);
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 PROTECTED

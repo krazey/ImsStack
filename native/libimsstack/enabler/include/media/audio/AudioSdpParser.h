@@ -52,9 +52,9 @@ protected:
             IN const AString& strCodecName);
     IMS_BOOL ParseAudioFmtp(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp);
-    void ParseAmrFmtp(IN const ImsList<AString>& objSplitEqual,
+    IMS_BOOL ParseAmrFmtp(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::AmrFmtp> pFmtp);
-    void ParseEvsFmtp(IN const ImsList<AString>& objSplitEqual,
+    IMS_BOOL ParseEvsFmtp(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);
     IMS_BOOL ParseModeSet(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp);
@@ -66,7 +66,7 @@ protected:
             OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp);
     IMS_BOOL ParseMaxRed(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp);
-    void ParseOctetAlign(IN const ImsList<AString>& objSplitEqual,
+    IMS_BOOL ParseOctetAlign(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::AmrFmtp> pFmtp);
     IMS_BOOL ParseDtx(IN const ImsList<AString>& objSplitEqual,
             OUT std::shared_ptr<AudioProfile::EvsFmtp> pFmtp);

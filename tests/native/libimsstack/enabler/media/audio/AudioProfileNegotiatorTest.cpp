@@ -189,7 +189,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
     EXPECT_EQ(m_pLocalProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kLocalPayload);
 }
 
-TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerNoFmtpReturnsTrue)
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerNoFmtpSamePayloadNumber)
 {
     // Arrange
     // Local profile has a complete EVS payload
@@ -211,13 +211,43 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerNoFmtpReturnsTrue)
             IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
-    EXPECT_FALSE(bResult);
+    EXPECT_TRUE(bResult);
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
 
     // When peer fmtp is null, the local fmtp should be copied to the negotiated payload.
+    EXPECT_EQ(*pNegoPayload->GetFmtp(), *m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerNoFmtpDifferentPayloadNumber)
+{
+    // Arrange
+    // Local profile has a complete EVS payload
+    m_pLocalProfile->AddPayload(CreateEvsPayload(98, 0x0F, 0xFFF));
+
+    // Peer profile has an EVS payload but its fmtp is null and a different payload number
+    AudioProfile::Payload* pPeerEvsPayload = new AudioProfile::Payload();
+    pPeerEvsPayload->GetRtpMap().SetPayloadType("EVS");
+    pPeerEvsPayload->GetRtpMap().SetSamplingRate(16000);
+    pPeerEvsPayload->GetRtpMap().SetPayloadNumber(100);  // Different payload number
+    pPeerEvsPayload->SetFmtp(nullptr);                   // No fmtp
+    m_pPeerProfile->AddPayload(pPeerEvsPayload);
+
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6018);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_FALSE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(*pNegoPayload->GetFmtp(), *m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
 }
 

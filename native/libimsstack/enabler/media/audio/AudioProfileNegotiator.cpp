@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include "audio/AudioProfileNegotiator.h"
+
 #include <algorithm>
 #include <array>
-
-#include "audio/AudioProfileNegotiator.h"
 
 #include "MediaProfileUtil.h"
 #include "ServiceTrace.h"
@@ -313,10 +313,15 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile::Pay
     std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp =
             std::static_pointer_cast<AudioProfile::EvsFmtp>(pPeerPayload->GetFmtp());
 
+    auto pNegotiatedPayload = new AudioProfile::Payload();
+    pNegotiatedPayload->SetRtpMap(pPeerPayload->GetRtpMap());
+
     if (pPeerFmtp == IMS_NULL)
     {
-        IMS_TRACE_I("NegotiateEvs(): peer fmtp is invalid", 0, 0, 0);
-        return IMS_NULL;
+        IMS_TRACE_I("NegotiateEvsFmtp(): peer fmtp is invalid, use local fmtp", 0, 0, 0);
+        pNegotiatedPayload->SetFmtp(pLocalFmtp);
+        pNegotiatedProfile->AddPayload(pNegotiatedPayload);
+        return pNegotiatedPayload;
     }
 
     IMS_UINT32 nBandwidthNegoList, nBitrateNegoList, nModeSetNegoList;
@@ -331,15 +336,14 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile::Pay
 
     if (!bModeMatched)
     {
-        IMS_TRACE_I("NegotiateEvs(): no matching payloads", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateEvs(): no matching fmtp", 0, 0, 0);
+        delete pNegotiatedPayload;
         return IMS_NULL;
     }
 
     std::shared_ptr<AudioProfile::EvsFmtp> pEvsFmtp = NegotiateEvsFmtp(
             pLocalPayload, pPeerPayload, nBandwidthNegoList, nBitrateNegoList, nModeSetNegoList);
 
-    auto pNegotiatedPayload = new AudioProfile::Payload();
-    pNegotiatedPayload->SetRtpMap(pPeerPayload->GetRtpMap());
     pNegotiatedPayload->SetFmtp(pEvsFmtp);
     pNegotiatedProfile->AddPayload(pNegotiatedPayload);
 
@@ -1015,7 +1019,9 @@ IMS_BOOL AudioProfileNegotiator::FindMatchingEvsPayload(
 
         if (pLocalPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
-            if (FindMatchedEvsFmtp(pLocalPayload, pPeerPayload))
+            if (pLocalPayload->GetRtpMap().GetPayloadNumber() ==
+                            pPeerPayload->GetRtpMap().GetPayloadNumber() ||
+                    FindMatchedEvsFmtp(pLocalPayload, pPeerPayload))
             {
                 pLocalPayload->GetRtpMap().SetPayloadNumber(
                         pPeerPayload->GetRtpMap().GetPayloadNumber());
