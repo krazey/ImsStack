@@ -92,8 +92,6 @@
         <item value="5"/>
         <item value="3"/>
     </int-array>
-    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
 
     <!-- Ut/Xcap -->
     <int-array name="imsss.ut_http_temporary_error_code_int_array" num="3">

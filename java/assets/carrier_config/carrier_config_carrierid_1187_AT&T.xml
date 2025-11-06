@@ -259,8 +259,6 @@
     </string-array>
     <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
     <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
-    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="20000"/>
     <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
         <item value="35000"/>
         <item value="16000"/>

@@ -260,8 +260,6 @@
     </string-array>
     <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
     <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
-    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="20000"/>
 
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="0"/>

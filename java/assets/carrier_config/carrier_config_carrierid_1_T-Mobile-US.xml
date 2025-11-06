@@ -387,8 +387,6 @@
         <item value="2"/>
         <item value="2"/>
     </int-array>
-    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
 
     <!-- Mts -->
     <int-array name="imssms.sms_geolocation_pidf_in_sip_message_support_int_array" num="2">
