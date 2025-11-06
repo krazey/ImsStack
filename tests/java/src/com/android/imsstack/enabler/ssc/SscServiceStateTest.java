@@ -71,6 +71,7 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.enabler.ssc.SscServiceState.SscCrossSimDataStateListener;
 import com.android.imsstack.enabler.ssc.SscServiceState.SscMobileDataStateListener;
@@ -969,7 +970,8 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
-        mSscServiceState.mRegiStateListener.notifyRegistered(0, NetworkType.LTE, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistered(
+                RegistrationType.NORMAL, NetworkType.LTE, 0, null);
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -985,7 +987,8 @@ public class SscServiceStateTest {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
 
-        mSscServiceState.mRegiStateListener.notifyRegistered(0, NetworkType.LTE, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistered(
+                RegistrationType.NORMAL, NetworkType.LTE, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1001,7 +1004,8 @@ public class SscServiceStateTest {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
 
-        mSscServiceState.mRegiStateListener.notifyRegistering(0, NetworkType.LTE, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistering(
+                RegistrationType.NORMAL, NetworkType.LTE, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1018,7 +1022,7 @@ public class SscServiceStateTest {
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
         mSscServiceState.mRegiStateListener.notifyDeregistered(
-                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
+                RegistrationType.NORMAL, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
                 android.telephony.DataFailCause.NONE);
         processAllMessages();
 
@@ -1037,7 +1041,7 @@ public class SscServiceStateTest {
         mSscServiceState.mRegiStateListener.mImsRegistrationState = true;
 
         mSscServiceState.mRegiStateListener.notifyDeregistered(
-                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
+                RegistrationType.NORMAL, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
                 android.telephony.DataFailCause.NONE);
         processAllMessages();
 
@@ -1053,7 +1057,7 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
         createAndInitSscServiceState();
 
-        mSscServiceState.mRegiStateListener.notifyDeregistering(0);
+        mSscServiceState.mRegiStateListener.notifyDeregistering(RegistrationType.NORMAL);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1067,7 +1071,7 @@ public class SscServiceStateTest {
 
         createAndInitSscServiceState();
         mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(
-                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
+                RegistrationType.NORMAL, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1093,7 +1097,8 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
         createAndInitSscServiceState();
 
-        mSscServiceState.mRegiStateListener.notifyCapabilitiesUpdateFailed(0, NetworkType.LTE, 0);
+        mSscServiceState.mRegiStateListener.notifyCapabilitiesUpdateFailed(
+                RegistrationType.NORMAL, NetworkType.LTE, 0);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1106,10 +1111,54 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
         createAndInitSscServiceState();
 
-        mSscServiceState.mRegiStateListener.notifyImsFeatureChanged(0, NetworkType.LTE, 0);
+        mSscServiceState.mRegiStateListener.notifyImsFeatureChanged(
+                RegistrationType.NORMAL, NetworkType.LTE, 0);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
+    }
+
+    @Test
+    public void testRegistrationListener_notifyRegistered_nonNormalRegistration() {
+        // Verifies that registration notifications with a non-NORMAL type are ignored.
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
+        when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
+        createAndInitSscServiceState();
+        mSscServiceState.mUtAvailability = false;
+        mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
+
+        // Call notifyRegistered with a non-NORMAL registration type (e.g., EMERGENCY)
+        mSscServiceState.mRegiStateListener.notifyRegistered(
+                RegistrationType.EMERGENCY, NetworkType.LTE, 0, null);
+        processAllMessages();
+
+        // Verify that no state change or notification occurs
+        verify(mMockUtInterface, times(1)).onServiceStateChanged(); // Only from init
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mRegiStateListener.getImsRegistrationState());
+    }
+
+    @Test
+    public void testRegistrationListener_notifyDeregistered_nonNormalRegistration() {
+        // Verifies that deregistration notifications with a non-NORMAL type are ignored.
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
+        when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
+        createAndInitSscServiceState();
+        mSscServiceState.mUtAvailability = true;
+        mSscServiceState.mRegiStateListener.mImsRegistrationState = true;
+
+        // Call notifyDeregistered with a non-NORMAL registration type (e.g., EMERGENCY)
+        mSscServiceState.mRegiStateListener.notifyDeregistered(
+                RegistrationType.EMERGENCY, NetworkType.LTE, ReasonCode.UNSPECIFIED, null,
+                android.telephony.DataFailCause.NONE);
+        processAllMessages();
+
+        // Verify that no state change or notification occurs
+        verify(mMockUtInterface, times(1)).onServiceStateChanged(); // Only from init
+        assertEquals(true, mSscServiceState.isUtAvailable());
+        assertEquals(true, mSscServiceState.mRegiStateListener.getImsRegistrationState());
     }
 
     @Test
