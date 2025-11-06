@@ -274,3 +274,38 @@ TEST_F(AudioSdpParserTest, ParseAnbrNotSupported)
 
     EXPECT_FALSE(objProfile.IsAnbrSupported());
 }
+TEST_F(AudioSdpParserTest, ParsePayloadsEvsWithoutbrbw)
+{
+    TestableAudioSdpParser objParser;
+    AudioProfile objProfile;
+    ImsList<SdpMediaFormat*> lstMediaFormats;
+
+    // Mock EVS codec
+    auto pEvsCodec = std::make_unique<SdpAvCodec>();
+    pEvsCodec->SetParameters("98 EVS/16000", "98 cmr=1");
+
+    lstMediaFormats.Append(pEvsCodec.get());
+
+    const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
+    ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
+            .WillByDefault(ReturnRef(constListMediaFormats));
+
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
+
+    // Expect 1 payload to be added
+    ASSERT_EQ(objProfile.GetPayloadList().GetSize(), 1);
+
+    // Verify EVS payload
+    AudioProfile::Payload* pEvsPayload = objProfile.GetPayloadAt(0);
+    ASSERT_NE(pEvsPayload, nullptr);
+    EXPECT_EQ(pEvsPayload->GetRtpMap().GetPayloadNumber(), 98);
+    EXPECT_TRUE(pEvsPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"));
+    EXPECT_EQ(pEvsPayload->GetRtpMap().GetSamplingRate(), 16000);
+
+    auto pEvsFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pEvsPayload->GetFmtp());
+    ASSERT_NE(pEvsFmtp, nullptr);
+    EXPECT_EQ(pEvsFmtp->GetBrList(), 0x0FFF);
+    EXPECT_EQ(pEvsFmtp->GetBwList(), 0x0F);
+    EXPECT_EQ(pEvsFmtp->GetCmr(), 1);
+    EXPECT_TRUE(pEvsFmtp->IsCmrVisible());
+}
