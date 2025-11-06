@@ -96,6 +96,7 @@ private:
     void StopTimer();
     void UpdateCallType();
     void CheckPreconditionAndNotifyIncomingUpdate(IN ISession* piSession);
+    void HandleUnconfirmedRemoteHold(IN UpdatingInfo& objUpdatingInfo);
 };
 
 #endif

@@ -139,6 +139,7 @@ public:
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
     inline IMS_BOOL IsEstablished() const override { return m_bEstablished; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
+    inline IMS_BOOL IsOnUnconfirmedRemoteHold() const override { return m_bUnconfirmedRemoteHold; }
     inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
     IMS_BOOL IsCsfbAvailable() override;
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
@@ -266,6 +267,10 @@ public:
     // end of IMtcContext
 
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_bHeldByMe = bHeldByMe; }
+    inline void SetUnconfirmedRemoteHold(IN IMS_BOOL bUnconfirmedRemoteHold) override
+    {
+        m_bUnconfirmedRemoteHold = bUnconfirmedRemoteHold;
+    }
 
     void SessionAlerting(IN ISession* piSession) override;
     void SessionReferenceReceived(IN ISession* piSession, IN IReference* piReference) override;
@@ -343,6 +348,7 @@ private:
 
     IMS_BOOL m_bEstablished;
     IMS_BOOL m_bHeldByMe;
+    IMS_BOOL m_bUnconfirmedRemoteHold;
 
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;

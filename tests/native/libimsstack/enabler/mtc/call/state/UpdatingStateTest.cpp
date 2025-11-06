@@ -1540,3 +1540,37 @@ TEST_F(UpdatingStateTest, IsPreconditionRequiredReturnsFalseIfConfigIsOff)
 
     EXPECT_FALSE(UpdatingState::IsPreconditionRequired(*pConfigurationProxy, *pUpdatingInfo));
 }
+
+TEST_F(UpdatingStateTest, SessionUpdatedSetsUnconfirmedRemoteHold)
+{
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+    pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_INACTIVE;
+
+    EXPECT_CALL(objContext, SetUnconfirmedRemoteHold(IMS_TRUE));
+
+    pUpdatingState->SessionUpdated(&objSession);
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedResetsUnconfirmedRemoteHoldIfResumedBy)
+{
+    ON_CALL(objContext, IsOnUnconfirmedRemoteHold).WillByDefault(Return(IMS_TRUE));
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_INACTIVE;
+    pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_SEND;
+
+    EXPECT_CALL(objContext, SetUnconfirmedRemoteHold(IMS_FALSE));
+
+    pUpdatingState->SessionUpdated(&objSession);
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedRecoversFromUnconfirmedRemoteHoldAfterResume)
+{
+    ON_CALL(objContext, IsOnUnconfirmedRemoteHold).WillByDefault(Return(IMS_TRUE));
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_INACTIVE;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_RECEIVE;
+
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Resume(_));
+    EXPECT_CALL(objContext, SetUnconfirmedRemoteHold(IMS_FALSE));
+
+    pUpdatingState->SessionUpdated(&objSession);
+}

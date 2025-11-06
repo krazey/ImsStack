@@ -732,10 +732,10 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 {
     IMS_TRACE_D("HandleModificationSucceeded", 0, 0, 0);
 
-    IMS_BOOL bModified = m_objContext.GetUpdatingInfo().IsModified();
+    UpdatingInfo& objUpdatingInfo = m_objContext.GetUpdatingInfo();
     CallStateName eCallStateName;
 
-    if (m_objContext.GetUpdatingInfo().IsModifier())
+    if (objUpdatingInfo.IsModifier())
     {
         eCallStateName = HandleRequestedModificationSucceeded();
     }
@@ -745,13 +745,14 @@ CallStateName UpdatingState::HandleModificationSucceeded()
     }
 
     NotifyHoldResumeState();
+    HandleUnconfirmedRemoteHold(objUpdatingInfo);
 
     if (eCallStateName == CallStateName::ESTABLISHED)
     {
         ISession* piSession = &m_objContext.GetSession()->GetISession();
         m_objContext.GetMediaManager().Run(piSession, IMS_NULL, IMS_FALSE);
 
-        if (bModified)
+        if (objUpdatingInfo.IsModified())
         {
             m_objContext.GetPreconditionManager().OnCallModified(piSession);
         }
@@ -976,5 +977,34 @@ void UpdatingState::CheckPreconditionAndNotifyIncomingUpdate(IN ISession* piSess
             m_objContext.GetPreconditionManager().IsAvailableToAlertUser(piSession))
     {
         SendIncomingUpdateToUi(m_objContext.GetMediaManager().GetNegotiatedCallType(piSession));
+    }
+}
+
+PRIVATE
+void UpdatingState::HandleUnconfirmedRemoteHold(IN UpdatingInfo& objUpdatingInfo)
+{
+    if (objUpdatingInfo.IsHeld() && objUpdatingInfo.IsHeldBy())
+    {
+        IMS_TRACE_I("HandleUnconfirmedRemoteHold : Set UnconfirmedRemoteHold", 0, 0, 0);
+        m_objContext.SetUnconfirmedRemoteHold(IMS_TRUE);
+    }
+    else if (m_objContext.IsOnUnconfirmedRemoteHold() && objUpdatingInfo.IsResumed())
+    {
+        IMS_TRACE_I("HandleUnconfirmedRemoteHold : Trying to recover", 0, 0, 0);
+        m_objContext.SetUnconfirmedRemoteHold(IMS_FALSE);
+
+        MediaInfo objMediaInfoToRecover = objUpdatingInfo.GetModifiedInfo();
+        objMediaInfoToRecover.eAudioDirection = DIRECTION_SEND_RECEIVE;
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [objMediaInfoToRecover](IMtcCallState* pState) mutable
+                {
+                    return pState->Resume(objMediaInfoToRecover);
+                });
+    }
+    else if (m_objContext.IsOnUnconfirmedRemoteHold() && objUpdatingInfo.IsResumedBy())
+    {
+        // No need to consider HeldBy, it won't happen while UnconfirmedRemoteHold is set
+        IMS_TRACE_I("HandleUnconfirmedRemoteHold : Reset UnconfirmedRemoteHold", 0, 0, 0);
+        m_objContext.SetUnconfirmedRemoteHold(IMS_FALSE);
     }
 }

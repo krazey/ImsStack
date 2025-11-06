@@ -1526,6 +1526,18 @@ TEST_F(MtcCallTest, SetHeldByMeSetsHeldByMe)
     EXPECT_EQ(IMS_FALSE, objCall.IsHeldByMe());
 }
 
+TEST_F(MtcCallTest, SetUnconfirmedRemoteHoldSetsUnconfirmedRemoteHold)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+
+    objCall.SetUnconfirmedRemoteHold(IMS_TRUE);
+    EXPECT_TRUE(objCall.IsOnUnconfirmedRemoteHold());
+
+    objCall.SetUnconfirmedRemoteHold(IMS_FALSE);
+    EXPECT_FALSE(objCall.IsOnUnconfirmedRemoteHold());
+}
+
 TEST_F(MtcCallTest, SessionAlertingCallsState)
 {
     MockISession objSession;
