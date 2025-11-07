@@ -194,7 +194,9 @@ public class SmsRLStateMachineTest {
 
         mHandler.post(()->mSmsRLStateMachine.mTR1TimerHandler.run());
         assertTrue(waitForEvent(sSemaphore, 1));
-        verify(mListener, Mockito.timeout(100).times(1)).notifyRLReportIndication(mToken,
+        // Verify that MtsController is notified about the timeout.
+        verify(mMtsController, Mockito.timeout(100)).notifyMoSmsTimedOut();
+        verify(mListener, Mockito.timeout(100)).notifyRLReportIndication(mToken,
                 mSmsRLStateMachine.mTpMr, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
         assertEquals(IDLE, mSmsRLStateMachine.getState());
@@ -418,6 +420,8 @@ public class SmsRLStateMachineTest {
     public void onTR1TimerExpiredTest_WaitForRPack() {
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         mSmsRLStateMachine.onTR1TimerExpired();
+        // Verify that MtsController is notified about the timeout.
+        verify(mMtsController).notifyMoSmsTimedOut();
         verify(mListener).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
@@ -546,6 +550,28 @@ public class SmsRLStateMachineTest {
 
         assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void onTR1TimerExpired_nullMtsController() {
+        // Create a new state machine with a null MtsController to test the null check
+        mSmsRLStateMachine = new TestSmsRLStateMachine(mToken, mMessageType,
+                null, mContext, mListener, mPsiSmsc, mDestinationAddress);
+
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+        // Set a mock message reference, which is passed to the listener
+        mSmsRLStateMachine.mTpMr = 17;
+
+        // Execute the timer expiry logic
+        mSmsRLStateMachine.onTR1TimerExpired();
+
+        // Verify that the listener is still notified and the state machine transitions to IDLE,
+        // and that no NullPointerException was thrown due to the null MtsController.
+        verify(mListener).notifyRLReportIndication(eq(mSmsRLStateMachine.mToken),
+                eq(mSmsRLStateMachine.mTpMr),
+                eq(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY),
+                eq(SmsManager.RESULT_ERROR_GENERIC_FAILURE), eq(0));
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
     }
 
     @Test
