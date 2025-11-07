@@ -3063,13 +3063,14 @@ TEST_F(AosHandleMtcTest, VopsStateIsChangedIfNewStateIsDifferentToOldStateAndNoA
     EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
 }
 
-TEST_F(AosHandleMtcTest, VolteHysTimerIsStartedIfVopsIsSupportedOnNetworkChangeToLte)
+TEST_F(AosHandleMtcTest, VolteHysTimerIsStartedIfVopsIsSupportedOnNetworkChangeToLteRoaming)
 {
     // GIVEN
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
     m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     m_pAosHandleMtc->SetVopsPlmn(AString("123456"));
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOPS);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosNetTracker, GetNetworkOperator()).WillByDefault(Return(AString("123456")));
@@ -3081,6 +3082,27 @@ TEST_F(AosHandleMtcTest, VolteHysTimerIsStartedIfVopsIsSupportedOnNetworkChangeT
 
     // THEN
     EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerRunning());
+}
+
+TEST_F(AosHandleMtcTest, VolteHysTimerIsNotStartedIfVopsIsSupportedOnNetworkChangeToLteHome)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    m_pAosHandleMtc->SetVopsPlmn(AString("123456"));
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOPS);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_OFF);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkOperator()).WillByDefault(Return(AString("123456")));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
 }
 
 TEST_F(AosHandleMtcTest, VopsBlockIsReleasedIfVopsIsSupportedOnNetworkChangeToLteAndNoVolteHysTime)
@@ -3336,7 +3358,7 @@ TEST_F(AosHandleMtcTest, NoBlockVopsIfKeepMmtelRegPolicyExists)
 
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test6)
 {
-    // Test6: call idle, no unavailalble policy, network=LTE
+    // Test6: call idle, no unavailalble policy, network=LTE roaming
     // Expectation: Start/Stop VolteHysTimer. Plmn block if the condition is met.
     //              BLOCK_VOPS blocked.
     //              No change m_nVopsState and m_nHoldingVopsState
@@ -3346,6 +3368,7 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test6)
             .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -3395,6 +3418,7 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_VolteHysTimerRunning_by_Ssac)
             .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -3508,6 +3532,7 @@ TEST_F(AosHandleMtcTest, ShouldStartVolteHysTimeWhenVopsChanged_Plmn1_Off_Plmn2_
 {
     // GIVEN
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -3544,6 +3569,7 @@ TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimeWhenVopsChanged_Plmn1_Off_Plmn1_O
 {
     // GIVEN
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -3582,6 +3608,7 @@ TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimeWhenVopsChanged_Plmn1_Off_Plmn1_O
 {
     // GIVEN
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -4544,6 +4571,7 @@ TEST_F(AosHandleMtcTest, NotStartVolteHysTimerIfSsacUnbarredOnVopsNotSupported)
     objSsacInfo.nBarringFactorForVoice = 100;
     m_pAosHandleMtc->SetHandleState(AosHandle::STATE_DISCONNECTED);
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
     m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
     m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
@@ -4569,6 +4597,7 @@ TEST_F(AosHandleMtcTest, NotStartVolteHysTimerIfSsacUnbarredOnNonLte)
     objSsacInfo.nBarringFactorForVoice = 100;
     m_pAosHandleMtc->SetHandleState(AosHandle::STATE_DISCONNECTED);
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_NR);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
     m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
 
@@ -4585,7 +4614,7 @@ TEST_F(AosHandleMtcTest, NotStartVolteHysTimerIfSsacUnbarredOnNonLte)
     EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
 }
 
-TEST_F(AosHandleMtcTest, StartVolteHysTimerIfSsacUnbarredOnLte)
+TEST_F(AosHandleMtcTest, NotStartVolteHysTimerIfSsacUnbarredOnLteHome)
 {
     // GIVEN
     SsacInfo objSsacInfo;
@@ -4594,6 +4623,31 @@ TEST_F(AosHandleMtcTest, StartVolteHysTimerIfSsacUnbarredOnLte)
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
     m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_OFF);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ImsRadio_OnSsacChanged(objSsacInfo);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsSsacBarred());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase(AosHandle::BLOCK_SSAC));
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
+}
+
+TEST_F(AosHandleMtcTest, StartVolteHysTimerIfSsacUnbarredOnLteRoaming)
+{
+    // GIVEN
+    SsacInfo objSsacInfo;
+    objSsacInfo.nBarringFactorForVoice = 100;
+    m_pAosHandleMtc->SetHandleState(AosHandle::STATE_DISCONNECTED);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetSsacBarred(IMS_TRUE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_SSAC);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     ON_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
             .WillByDefault(Return(IMS_TRUE));
@@ -4615,6 +4669,7 @@ TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_VolteHysTimerRunning_by_Vops)
             .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetRoamingState(IMS_ROAMING_STATE_ON);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())

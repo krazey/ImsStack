@@ -950,6 +950,12 @@ IMS_BOOL AosHandleMtc::IsVolteHysTimerStartingCondition(IN VolteHysTimerCheckRea
         return IMS_FALSE;
     }
 
+    if (!IsRoaming())
+    {
+        A_IMS_TRACE_D(APPPROFILE, "IsVolteHysTimerStartingCondition :: Not roaming", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
     if (eReason == VolteHysTimerCheckReason::VOPS_CHANGED)
     {
         if (m_bVopsIgnoredForVolteEnabled)
