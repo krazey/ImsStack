@@ -22,6 +22,7 @@
 #include "call/MockIMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -62,6 +63,8 @@ protected:
                             return std::make_unique<MockMtcTimerWrapper>();
                         }));
         ON_CALL(objContext, GetRadioChecker).WillByDefault(ReturnRef(objRadioChecker));
+        ON_CALL(objRadioChecker, Check(_, _, _, _, _, _))
+                .WillByDefault(Return(IMtcRadioChecker::CheckResult::Unblocked()));
 
         pCallManager = new MtcCallManager(objContext);
     }

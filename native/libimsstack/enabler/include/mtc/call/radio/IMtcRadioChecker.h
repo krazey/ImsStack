@@ -21,7 +21,6 @@
 #include "call/IMtcCall.h"
 
 class IMtcRadioCheckerListener;
-enum class CheckResult;
 
 /**
  * The {@code IMtcRadioChecker} interface defines a listener for checking the radio traffic.
@@ -29,6 +28,54 @@ enum class CheckResult;
 class IMtcRadioChecker
 {
 public:
+    struct CheckResult
+    {
+    public:
+        enum class Status
+        {
+            UNBLOCKED,
+            BLOCKED,
+            PENDING,
+        };
+
+        static CheckResult Unblocked() { return CheckResult(Status::UNBLOCKED); }
+
+        static CheckResult Pending() { return CheckResult(Status::PENDING); }
+
+        static CheckResult Blocked() { return CheckResult(Status::BLOCKED); }
+
+        static CheckResult Blocked(IN IMS_UINT32 eReason, IN IMS_UINT32 nWaitTimeMillis)
+        {
+            return CheckResult(Status::BLOCKED, eReason, nWaitTimeMillis);
+        }
+
+        IMS_BOOL operator==(IN const CheckResult& other) const
+        {
+            return eStatus == other.eStatus && eReason == other.eReason &&
+                    nWaitTimeMillis == other.nWaitTimeMillis;
+        }
+
+        Status eStatus;
+        // The variables below are only valid when the `OnConnectionFailed` is received.
+        IMS_UINT32 eReason;
+        IMS_UINT32 nWaitTimeMillis;
+
+    private:
+        explicit CheckResult(IN Status eStatus) :
+                eStatus(eStatus),
+                eReason(RADIO_REASON_NONE),
+                nWaitTimeMillis(0)
+        {
+        }
+
+        CheckResult(IN Status eStatus, IN IMS_UINT32 eReason, IN IMS_UINT32 nWaitTimeMillis) :
+                eStatus(eStatus),
+                eReason(eReason),
+                nWaitTimeMillis(nWaitTimeMillis)
+        {
+        }
+    };
+
     virtual ~IMtcRadioChecker() = default;
 
     /**
@@ -75,6 +122,10 @@ public:
      * @return The registration throttling time in milliseconds.
      */
     virtual IMS_UINT32 GetRegistrationThrottlingTimeMillis() const = 0;
+
+    // This is the internally used default value for `IImsRadio::ConnectionFailureReason`, because
+    // `ConnectionFailureReason` itself does not have a default value.
+    static const IMS_SINT32 RADIO_REASON_NONE = 0;
 };
 
 class IMtcRadioCheckerListener
@@ -96,13 +147,6 @@ public:
      */
     virtual void OnConnectionFailed(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) = 0;
-};
-
-enum class CheckResult
-{
-    UNBLOCKED,
-    BLOCKED,
-    PENDING,
 };
 
 #endif

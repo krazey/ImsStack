@@ -82,6 +82,11 @@ IdleState::IdleState(IN IMtcCallContext& objContext) :
 
 PUBLIC VIRTUAL IdleState::~IdleState() {}
 
+PUBLIC VIRTUAL void IdleState::OnEnter()
+{
+    PerformPreRadioCheckForMo();
+}
+
 PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AString& strTarget,
         IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices)
 {
@@ -176,7 +181,6 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
 PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
 {
     m_objContext.GetCallInfo().eInitialCallType = CallType::UNKNOWN;
-    m_objContext.GetCallInfo().ePeerType = PeerType::MT;
 
     IMtcSession* pSession = m_objContext.CreateSession(piSession);
     if (pSession == IMS_NULL)
@@ -363,7 +367,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSessio
 {
     IMS_TRACE_D("HandleIncomingUssi", 0, 0, 0);
 
-    m_objContext.GetCallInfo().ePeerType = PeerType::MT;
     m_objContext.GetCallInfo().bUssi = IMS_TRUE;
     m_objContext.CreateSession(piSession);
 
@@ -689,5 +692,18 @@ const CallReasonInfo IdleState::GetInternalErrorReason() const
     else
     {
         return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR);
+    }
+}
+
+PRIVATE
+void IdleState::PerformPreRadioCheckForMo()
+{
+    const CallInfo& objCallInfo = m_objContext.GetCallInfo();
+    if (objCallInfo.ePeerType == PeerType::MO)
+    {
+        m_objContext.GetRadioChecker().Check(objCallInfo.eInitialCallType,
+                objCallInfo.IsEmergency(), objCallInfo.ePeerType,
+                m_objContext.GetService().GetRatType(), objCallInfo.bUssi,
+                m_objContext.GetCallKey());
     }
 }

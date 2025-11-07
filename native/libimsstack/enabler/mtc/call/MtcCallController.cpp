@@ -85,6 +85,7 @@ PUBLIC
 void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;
+    objCallInfo.ePeerType = PeerType::MT;
     if (pService->IsEmergency())
     {
         objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;

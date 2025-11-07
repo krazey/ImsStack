@@ -36,6 +36,7 @@
 #include "call/extension/MockIMtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/message/IMtcMessageHandler.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "call/state/IdleState.h"
 #include "call/state/MtcCallState.h"
@@ -136,6 +137,8 @@ protected:
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objCallContext, GetRadioChecker).WillByDefault(ReturnRef(objMockIMtcRadioChecker));
+        ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _))
+                .WillByDefault(Return(IMtcRadioChecker::CheckResult::Blocked()));
         ON_CALL(objCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
@@ -186,6 +189,21 @@ protected:
         return objMtcExtensionSet;
     }
 };
+
+TEST_F(IdleStateTest, OnEnterInvokesPerformPreRadioCheckForMo)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    EXPECT_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _)).Times(1);
+
+    pIdleState->OnEnter();
+}
+
+TEST_F(IdleStateTest, OnEnterDoesNotInvokePreRadioCheckForMt)
+{
+    objCallInfo.ePeerType = PeerType::MT;
+    EXPECT_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _)).Times(0);
+    pIdleState->OnEnter();
+}
 
 TEST_F(IdleStateTest, StartSetsUpCallInfo)
 {
@@ -1158,6 +1176,7 @@ TEST_F(IdleStateTest, HandleIncomingReturnsIdleStateIfBlockCheckResultIsPending)
 
 TEST_F(IdleStateTest, HandleIncomingRejectsIfBlockCheckResultIsBlocked)
 {
+    objCallInfo.ePeerType = PeerType::MT;
     ON_CALL(objCallContext, CreateSession(&objSession)).WillByDefault(Return(&objMtcSession));
     MockIMessage* pMessage = new MockIMessage();
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
@@ -1597,6 +1616,7 @@ TEST_F(IdleStateTest, HandleIncomingUssiReturnsIdleStateIfBlockCheckResultIsPend
 
 TEST_F(IdleStateTest, HandleIncomingUssiRejectsIfBlockCheckResultIsBlocked)
 {
+    objCallInfo.ePeerType = PeerType::MT;
     ON_CALL(objCallContext, CreateSession(&objSession)).WillByDefault(Return(&objMtcSession));
     MockIMessage* pMessage = new MockIMessage();
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))

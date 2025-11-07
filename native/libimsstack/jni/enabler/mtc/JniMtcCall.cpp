@@ -281,6 +281,7 @@ void JniMtcCall::Open(IN IMtcCallController& objCallController, IN const android
     JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
 
     CallInfo objCallInfo;
+    objCallInfo.eInitialCallType = objJniCallInfo.eCallType;
     objCallInfo.eEmergencyType = objJniCallInfo.eEmergencyType;
     objCallInfo.bOffline = objJniCallInfo.bOffline;
     objCallInfo.bUssi = objJniCallInfo.bUssi;

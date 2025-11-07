@@ -29,6 +29,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "call/radio/MtcRadioChecker.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
@@ -99,15 +100,16 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnTerminatedBeforeCreatingSession(IN CallKe
     RemoveCallKeyAndStopTrafficCheckingIfNeeded(nCallKey);
 }
 
-PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_BOOL bEmergency,
-        IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey)
+PUBLIC VIRTUAL IMtcRadioChecker::CheckResult MtcRadioChecker::Check(IN CallType eCallType,
+        IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi,
+        IN CallKey nCallKey)
 {
     m_nRegistrationThrottlingTimeMillis = 0;
 
     if (bUssi)
     {
         IMS_TRACE_D("Check : unblocked - USSI MO DATA(Best Effort).", 0, 0, 0);
-        return CheckResult::UNBLOCKED;
+        return IMtcRadioChecker::CheckResult::Unblocked();
     }
 
     IMS_UINT32 eCallDirection =
@@ -118,23 +120,40 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
             !m_piImsRadio->IsImsTrafficAllowed(eTrafficType))
     {
         IMS_TRACE_D("Check : blocked - traffic hasn't been allowed", 0, 0, 0);
-        return CheckResult::BLOCKED;
+        return IMtcRadioChecker::CheckResult::Blocked();
     }
 
     MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
     if (!pMtcTrafficInfo)
     {
+        // Traffic info not found. Initiate new traffic type and direction for checking.
         pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection, eRatType);
         AddCallKey(*pMtcTrafficInfo, nCallKey);
         StartTrafficChecking(*pMtcTrafficInfo, eRatType);
 
-        return eCallDirection == IImsRadio::DIRECTION_MO ? CheckResult::PENDING
-                                                         : CheckResult::UNBLOCKED;
+        return eCallDirection == IImsRadio::DIRECTION_MO
+                ? IMtcRadioChecker::CheckResult::Pending()
+                : IMtcRadioChecker::CheckResult::Unblocked();
+    }
+
+    if (eCallDirection == IImsRadio::DIRECTION_MO &&
+            pMtcTrafficInfo->m_objCallKeys.Contains(nCallKey))
+    {
+        if (pMtcTrafficInfo->m_eRat == INetworkWatcher::RADIOTECH_TYPE_NR &&
+                eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE)
+        {
+            // In the Eps-Fb case, the RAT is updated and the call is processed.
+            // Other RAT changes are handled in `OnRatChanged`.
+            UpdateTrafficIfRatChanged(*pMtcTrafficInfo, eRatType);
+            pMtcTrafficInfo->m_objResult = IMtcRadioChecker::CheckResult::Unblocked();
+        }
+
+        return pMtcTrafficInfo->m_objResult;
     }
 
     AddCallKey(*pMtcTrafficInfo, nCallKey);
     UpdateTrafficIfRatChanged(*pMtcTrafficInfo, eRatType);
-    return CheckResult::UNBLOCKED;
+    return IMtcRadioChecker::CheckResult::Unblocked();
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(
@@ -158,11 +177,14 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficT
         return;
     }
 
-    const MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
     if (!pMtcTrafficInfo)
     {
         return;
     }
+
+    pMtcTrafficInfo->m_objResult =
+            IMtcRadioChecker::CheckResult::Blocked(nFailureReason, nWaitTimeMillis);
 
     for (IMS_UINT32 i = 0; i < m_objMtcRadioCheckerListeners.GetSize(); i++)
     {
@@ -176,11 +198,13 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
     IMS_TRACE_D("OnConnectionSetupPrepared TrafficType[%d] direction[%d]", eTrafficType,
             eCallDirection, 0);
 
-    const MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
     if (!pMtcTrafficInfo)
     {
         return;
     }
+
+    pMtcTrafficInfo->m_objResult = IMtcRadioChecker::CheckResult::Unblocked();
 
     for (IMS_UINT32 i = 0; i < m_objMtcRadioCheckerListeners.GetSize(); i++)
     {
@@ -396,7 +420,7 @@ PRIVATE void MtcRadioChecker::StartTrafficChecking(
     m_piImsRadio->StartImsTraffic(objTrafficInfo.m_eTrafficType, ConvertRatType(eRat),
             objTrafficInfo.m_eCallDirection, &objTrafficInfo);
 
-    IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d] CallKey[%d]",
+    IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d]",
             objTrafficInfo.m_eTrafficType, objTrafficInfo.m_eCallDirection, 0);
 }
 
@@ -433,7 +457,7 @@ PRIVATE IMS_BOOL MtcRadioChecker::IsInEpsfbSilentRedial(ImsList<CallKey>& objCal
     for (IMS_UINT32 nIndex = 0; nIndex < objCallKeys.GetSize(); nIndex++)
     {
         IMtcCall* pCall = m_objContext.GetCallManager().GetCallByCallKey(objCallKeys.GetAt(nIndex));
-        if(pCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
+        if (pCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
         {
             continue;
         }

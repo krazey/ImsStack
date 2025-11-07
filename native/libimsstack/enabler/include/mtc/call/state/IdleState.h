@@ -42,6 +42,7 @@ public:
     IdleState(IN const IdleState&) = delete;
     IdleState& operator=(IN const IdleState&) = delete;
 
+    void OnEnter() override;
     CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
@@ -80,6 +81,7 @@ private:
     void CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers);
     AString RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget);
     const CallReasonInfo GetInternalErrorReason() const;
+    void PerformPreRadioCheckForMo();
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;
