@@ -150,7 +150,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferReceivedReturnsTrue)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(),
             kPeerPayload);  // Should take peer's PT
@@ -177,7 +177,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "AMR-WB");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
@@ -187,6 +187,38 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBasicAmrOfferSentReturnsTrue)
     EXPECT_EQ(m_pPeerProfile->GetNegotiatedPayloadIndex(), 0);   // Peer index
     // Check that local PT was NOT updated (MO case)
     EXPECT_EQ(m_pLocalProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kLocalPayload);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerNoFmtpReturnsTrue)
+{
+    // Arrange
+    // Local profile has a complete EVS payload
+    m_pLocalProfile->AddPayload(CreateEvsPayload(98, 0x0F, 0xFFF));
+
+    // Peer profile has an EVS payload but its fmtp is null
+    AudioProfile::Payload* pPeerEvsPayload = new AudioProfile::Payload();
+    pPeerEvsPayload->GetRtpMap().SetPayloadType("EVS");
+    pPeerEvsPayload->GetRtpMap().SetSamplingRate(16000);
+    pPeerEvsPayload->GetRtpMap().SetPayloadNumber(98);
+    pPeerEvsPayload->SetFmtp(nullptr);  // No fmtp
+    m_pPeerProfile->AddPayload(pPeerEvsPayload);
+
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6018);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_FALSE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
+
+    // When peer fmtp is null, the local fmtp should be copied to the negotiated payload.
+    EXPECT_EQ(*pNegoPayload->GetFmtp(), *m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
 }
 
 TEST_F(AudioProfileNegotiatorTest, NegotiateAmrFmtpVisibility)
@@ -210,7 +242,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateAmrFmtpVisibility)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
@@ -253,7 +285,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateAmrFmtpPeerModeSetNotVisible)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
@@ -280,7 +312,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedReturnsTrue)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 101);  // Should take peer's PT
@@ -311,7 +343,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiatePcmOfferReceivedReturnsTrue)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "PCMU");
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
@@ -338,7 +370,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEventMatchingRateAppended)
     // Assert
     EXPECT_TRUE(bResult);
     // Expecting AMR-WB and matching telephone-event
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 2);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     EXPECT_EQ(
@@ -366,7 +398,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateTelephoneEvent8kAcceptedAppended)
     // Assert
     EXPECT_TRUE(bResult);
     // Expecting AMR-WB and the 8k telephone-event (as fallback)
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 2);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kPeerPayload);
     EXPECT_EQ(
@@ -391,8 +423,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingAudioPayloadReturnsFalse)
 
     // Assert
     EXPECT_FALSE(bResult);  // Should fail as no common audio codec found
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(),
-            m_pLocalProfile->GetPayloadList().GetSize());
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), m_pLocalProfile->GetPayloadListSize());
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
 }
@@ -412,8 +443,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEmptyPeerPayloadListCopiesLocal)
 
     // Assert
     EXPECT_TRUE(bResult);  // Negotiation succeeds by copying local
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(),
-            m_pLocalProfile->GetPayloadList().GetSize());
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), m_pLocalProfile->GetPayloadListSize());
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
     EXPECT_EQ(
             m_pNegotiatedProfile->GetPayloadAt(1)->GetRtpMap().GetPayloadType(), "telephone-event");
@@ -438,7 +468,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeRe
 
     // Assert
     EXPECT_TRUE(bResult);  // Expect success
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 101);
@@ -469,7 +499,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferReceivedCompareEvsBwBrModeLe
 
     // Assert
     EXPECT_TRUE(bResult);  // Expect success via legacy path
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 102);
@@ -494,8 +524,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(
-            m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Ensure payload was negotiated
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Ensure payload was negotiated
     // If peer offers SEND, we should negotiate to RECEIVE
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_RECEIVE);
     EXPECT_GT(m_pNegotiatedProfile->GetDataPort(), 0);
@@ -515,8 +544,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(
-            m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Ensure payload was negotiated
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Ensure payload was negotiated
     // If peer offers RECEIVE, we should negotiate to SEND
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND);
     EXPECT_GT(m_pNegotiatedProfile->GetDataPort(), 0);
@@ -537,7 +565,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateDirectionInactiveReturnsTrue)
     // Assert
     EXPECT_TRUE(bResult);
     // Payload might still be negotiated even if direction is inactive
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);  // Port should remain 0 for inactive
@@ -568,7 +596,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthRemoteOption)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRs(), 500);
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), 600);
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 34);
@@ -599,7 +627,7 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateBandwidthLocalOption)
 
     // Assert
     EXPECT_TRUE(bResult);
-    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     // Check that negotiated bandwidth matches the local's values due to config option
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRs(), 350);
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), 450);

@@ -60,14 +60,11 @@ private:
     std::shared_ptr<AudioProfile::AmrFmtp> NegotiateAmrFmtp(IN AudioProfile* pLocalProfile,
             IN AudioProfile::Payload* pPeerPayload, IN IMS_UINT32 nNegoModeSetList,
             IN IMS_UINT32 nNegoDefaultRtpModeSet, OUT IMS_SINT32& nLocalPayloadIndex);
-    AudioProfile::Payload* NegotiateEvs(IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
-            IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nBandwidthNegoList,
-            IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList);
-    std::shared_ptr<AudioProfile::EvsFmtp> NegotiateEvsFmtp(IN AudioProfile* pLocalProfile,
+    AudioProfile::Payload* NegotiateEvs(IN AudioProfile::Payload* pLocalPayload,
+            IN AudioProfile::Payload* pPeerPayload, IN AudioProfile* pNegotiatedProfile);
+    std::shared_ptr<AudioProfile::EvsFmtp> NegotiateEvsFmtp(IN AudioProfile::Payload* pLocalPayload,
             IN AudioProfile::Payload* pPeerPayload, IN IMS_UINT32 nBandwidthNegoList,
-            IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList,
-            OUT IMS_SINT32& nLocalPayloadIndex);
+            IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList);
     void NegotiateUniDirectionBrBw(OUT std::shared_ptr<AudioProfile::EvsFmtp> pEvsFmtp,
             IN IMS_UINT32 nBandwidthNegoList, IN IMS_UINT32 nBitrateNegoList);
     void NegotiateCmr(IN std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp,
@@ -96,9 +93,9 @@ private:
             IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT AudioProfile* pNegotiatedProfile);
     void NegotiateRtcpInterval(OUT AudioProfile* pNegotiatedProfile,
             IN IMS_SINT32 nRtcpIntervalOnHold, IN IMS_SINT32 nRtcpIntervalOnActive);
-    IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            OUT IMS_UINT32* pBandwidthNegoList, OUT IMS_UINT32* pBitrateNegoList,
-            OUT IMS_UINT32* pModeSetNegoList);
+    IMS_BOOL FindMatchingEvsPayload(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
+    IMS_BOOL FindMatchedEvsFmtp(
+            IN AudioProfile::Payload* pComparedPayload, IN AudioProfile::Payload* pPeerPayload);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
     IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
@@ -108,6 +105,13 @@ private:
     IMS_SINT32 CompareModeSet(IN std::shared_ptr<AudioProfile::AmrFmtp> pLocalFmtp,
             IN std::shared_ptr<AudioProfile::AmrFmtp> pPeerFmtp, IN IMS_BOOL bReturnMode,
             OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet);
+    IMS_BOOL CompareEvsBw(IN std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp,
+            IN std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp, OUT IMS_UINT32* nNegoBwList);
+    IMS_BOOL CompareEvsBr(IN std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp,
+            IN std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp, IN IMS_UINT32 nNegoBwList,
+            OUT IMS_UINT32* nNegoBrList);
+    IMS_BOOL CompareEvsMode(IN std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp,
+            IN std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp, OUT IMS_UINT32* nNegoModeList);
     IMS_BOOL CompareEvsBwBrMode(IN std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp,
             IN std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp, OUT IMS_UINT32* nNegoBwList,
             OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
