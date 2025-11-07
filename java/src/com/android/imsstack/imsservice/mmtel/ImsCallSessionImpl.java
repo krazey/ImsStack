@@ -83,6 +83,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class ImsCallSessionImpl extends ImsCallSessionImplBase {
+    enum FinalCallEndCallback {
+            START_FAILED,
+            TERMINATED
+    };
+
     private static final boolean DBG = ImsLog.isDebuggable();
     private static final boolean FEATURE_CHANGE_CONFERENCE_PARTICIPANT_STATE_ON_DROP = false;
     private static final String MEDIA_GTT_MODE = "media_gtt_mode";
@@ -140,7 +145,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     protected ImsCallSessionImpl mTransferRequestedSession = null;
     protected ImsCallSessionImpl mTransferTargetSession = null;
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
-    private ImsReasonInfo mCacheCallReasonInfo = null;
+    private ImsReasonInfo mCacheCallEndReason = null;
     private boolean mIsE2eeCallInfoNotified = false;
     private ImsCallExtManagerProxy mCallExtManagerProxy = new ImsCallExtManagerProxy() {
         @Override
@@ -396,7 +401,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             loge("start :: No native session - code=" + code + ", extraCode=" + extraCode);
 
-            notifyCallStartFailed(ImsCallUtils.createImsReasonInfo(
+            notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                     code, extraCode, "No native session"));
             return;
         }
@@ -405,7 +410,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         MtcApp mtcApp = callApp.getCallManager().getMtcApp();
         if (mtcApp.isOutgoingCallBarringActivated(ImsCallUtils.getCallTypeFromProfile(
                 profile.getCallType(), profile.getMediaProfile().isRttCall()), callee)) {
-            notifyCallStartFailed(ImsCallUtils.createImsReasonInfo(ImsReasonInfo.CODE_CALL_BARRED));
+            notifyCallEnd(ImsCallUtils.createImsReasonInfo(ImsReasonInfo.CODE_CALL_BARRED));
             return;
         }
 
@@ -468,7 +473,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // EXCEPTION_HANDLING: Call UI stuck
             loge("startConference :: No native session");
 
-            notifyCallStartFailed(ImsCallUtils.createImsReasonInfo(
+            notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                     ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE, "No native session"));
             return;
         }
@@ -578,10 +583,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // it was cancelled by the remote end before alerting the user.
             if (mImmediateCallEndReason != null) {
                 log("Call end reason :: " + mImmediateCallEndReason);
-                notifyCallStartFailed(mImmediateCallEndReason);
+                notifyCallEnd(mImmediateCallEndReason);
             } else if ((state == ImsCallSessionImplBase.State.TERMINATED)
-                    && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                waitOrNotifyCallTerminated(ImsCallUtils.createImsReasonInfo(
+                    && !mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
+                notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                         ImsReasonInfo.CODE_USER_TERMINATED,
                         ImsCallUtils.REASON_CALL_DISCONNECTED_BY_USER));
             }
@@ -698,17 +703,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         setTerminationReason(reason);
 
         if (state == ImsCallSessionImplBase.State.TERMINATED) {
-            if (!mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                final ImsReasonInfo reasonInfo = ImsCallUtils.createImsReasonInfo(
+            if (!mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
+                notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                         ImsReasonInfo.CODE_USER_TERMINATED,
-                        ImsCallUtils.REASON_CALL_DISCONNECTED_BY_USER);
-                if (mCallDetails.is(CallDetails.MO) && !mCallDetails.is(CallDetails.MO_STARTED)) {
-                    logi("Callback-Replacement(terminate) :: "
-                            + "onCallTerminated >> onCallStartFailed");
-                    notifyCallStartFailed(reasonInfo);
-                } else {
-                    waitOrNotifyCallTerminated(reasonInfo);
-                }
+                        ImsCallUtils.REASON_CALL_DISCONNECTED_BY_USER));
             }
             return;
         }
@@ -748,8 +746,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             notifyCallHoldOrResumeFailed(ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED, true);
 
             if ((state == ImsCallSessionImplBase.State.TERMINATED)
-                    && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                waitOrNotifyCallTerminated(ImsCallUtils.createImsReasonInfo(
+                    && !mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
+                notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                         ImsReasonInfo.CODE_USER_TERMINATED));
             }
 
@@ -812,8 +810,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             notifyCallHoldOrResumeFailed(ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED, false);
 
             if ((state == ImsCallSessionImplBase.State.TERMINATED)
-                    && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                waitOrNotifyCallTerminated(ImsCallUtils.createImsReasonInfo(
+                    && !mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
+                notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                         ImsReasonInfo.CODE_USER_TERMINATED));
             }
 
@@ -1254,7 +1252,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
             }
 
-            notifyCallStartFailed(ImsCallUtils.createImsReasonInfo(code));
+            notifyCallEnd(ImsCallUtils.createImsReasonInfo(code));
             return;
         }
 
@@ -1278,7 +1276,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (mImmediateCallEndReason != null) {
                 log("Call end reason :: " + mImmediateCallEndReason);
-                notifyCallStartFailed(mImmediateCallEndReason);
+                notifyCallEnd(mImmediateCallEndReason);
                 return;
             }
 
@@ -1322,7 +1320,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         setTerminationReason(ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED);
 
-        notifyCallTerminated(ImsCallUtils.createImsReasonInfo(
+        notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                 ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED, ImsCallUtils.REASON_IMS_NOT_REGISTERED));
     }
 
@@ -1391,8 +1389,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     @VisibleForTesting
-    public boolean isCacheCallReasonInfoNull() {
-        return mCacheCallReasonInfo == null;
+    public boolean isCacheCallEndReasonPresent() {
+        return mCacheCallEndReason != null;
     }
 
     protected boolean isCallFeatureSupported(int feature) {
@@ -1402,14 +1400,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             boolean isFeatureSupported = getFeatureSupportedStatus(feature);
             mCallFeatureCache.put(feature, isFeatureSupported);
             return isFeatureSupported;
-        }
-    }
-
-    private void waitOrNotifyCallTerminated(ImsReasonInfo reasonInfo) {
-        if (!mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
-            notifyCallTerminated(reasonInfo);
-        } else {
-            mCacheCallReasonInfo = reasonInfo;
         }
     }
 
@@ -1506,11 +1496,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             public void run() {
                 try {
                     if (session != null) {
-                        /* When {@link #close} the {@link #ImsCallSessionImpl} internally will clear
-                         * the {@link #WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END} so it will not
-                         * wait for {#link #onAudioSessionClosed}
-                         */
-                        mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
                         session.close();
                     }
                 } catch (Throwable t) {
@@ -1817,11 +1802,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             synchronized (mLock) {
                 callStartFailedNotification = ((mImmediateCallEndReason != null)
-                        && !mCallDetails.is(CallDetails.CALL_END_FINISHED));
+                        && !mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED));
             }
 
             if (callStartFailedNotification) {
-                notifyCallStartFailed(mImmediateCallEndReason);
+                notifyCallEnd(mImmediateCallEndReason);
                 return true;
             }
         }
@@ -1829,36 +1814,36 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         return false;
     }
 
+    private void notifyCallEnd(ImsReasonInfo reasonInfo) {
+        if (determineFinalCallEndCallback(reasonInfo) == FinalCallEndCallback.START_FAILED) {
+            notifyCallStartFailed(reasonInfo);
+            return;
+        }
+
+        notifyCallTerminated(reasonInfo);
+    }
+
+    private FinalCallEndCallback determineFinalCallEndCallback(final ImsReasonInfo reasonInfo) {
+        if (mCallDetails.is(CallDetails.MO)
+                && (ImsCallUtils.isCsSilentRedialRequired(reasonInfo)
+                || !mCallDetails.is(CallDetails.MO_PROGRESSING))) {
+            return FinalCallEndCallback.START_FAILED;
+        }
+
+        return FinalCallEndCallback.TERMINATED;
+    }
+
     private void notifyCallStartFailed(ImsReasonInfo reasonInfo) {
-        boolean callbackReplacementRequired = false;
-
-        if (mCallDetails.is(CallDetails.MO)) {
-            if (mCallDetails.is(CallDetails.MO_PROGRESSING)) {
-                callbackReplacementRequired = true;
-            }
-
-            if (ImsCallUtils.isCsSilentRedialRequired(reasonInfo)) {
-                /* Call StarFailed callback to re-dial the call via CS
-                 * {@link #invokeStartFailed} will called only in case of
-                 * {@link #CODE_LOCAL_CALL_CS_RETRY_REQUIRED}. For other cases will call
-                 * {@link #invokeTerminated}
-                 */
-                callbackReplacementRequired = false;
-            }
-        } else {
-            callbackReplacementRequired = true;
-        }
-
-        if (callbackReplacementRequired) {
-            notifyCallTerminated(reasonInfo);
+        if (mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
+            mCacheCallEndReason = reasonInfo;
             return;
         }
 
-        if (mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
+        if (mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
             return;
         }
 
-        mCallDetails.set(CallDetails.CALL_END_FINISHED);
+        mCallDetails.set(CallDetails.CALL_END_CALLBACK_NOTIFIED);
 
         if (isTerminationReasonPresent()) {
             reasonInfo = ImsCallUtils.createImsReasonInfo(getTerminationReason());
@@ -1873,14 +1858,18 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void notifyCallTerminated(ImsReasonInfo reasonInfo) {
-        if (mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
+        if (mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
+            mCacheCallEndReason = reasonInfo;
+            return;
+        }
+
+        if (mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
             return;
         }
 
         setTerminationReason(reasonInfo.getCode());
 
-        mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
-        mCallDetails.set(CallDetails.CALL_END_FINISHED);
+        mCallDetails.set(CallDetails.CALL_END_CALLBACK_NOTIFIED);
 
         // the Telephony doesn't require a termination notification for this reason.
         if (reasonInfo.getCode() == ImsReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING) {
@@ -2512,7 +2501,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         /**
          * Indicates that the call end event is passed to the framework or not.
          */
-        public static final int CALL_END_FINISHED = 0x80000000;
+        public static final int CALL_END_CALLBACK_NOTIFIED = 0x80000000;
 
         private int mDetails = NONE;
 
@@ -2548,7 +2537,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             sb.append(", closePending=");
             sb.append(is(CLOSE_PENDING) ? "Y" : "N");
             sb.append(", callEndFinished=");
-            sb.append(is(CALL_END_FINISHED) ? "Y" : "N");
+            sb.append(is(CALL_END_CALLBACK_NOTIFIED) ? "Y" : "N");
             sb.append(", 0x");
             sb.append(Integer.toHexString(mDetails));
             sb.append(" ]");
@@ -3381,6 +3370,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             updateLocalTtyMode();
 
             if (mCallDetails.is(CallDetails.MO)) {
+                mCallDetails.set(CallDetails.MO_PROGRESSING);
                 mCallDetails.set(CallDetails.MO_STARTED);
             }
 
@@ -3398,7 +3388,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            if (mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
+            if (mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
                 log("Ignore the duplicated start-failed event");
                 return;
             }
@@ -3425,7 +3415,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             setState(ImsCallSessionImplBase.State.TERMINATED);
 
-            notifyCallStartFailed(ImsCallUtils.createImsReasonInfo(callReasonInfo));
+            notifyCallEnd(ImsCallUtils.createImsReasonInfo(callReasonInfo));
             if (MtcCallUtils.isOutgoingCallsBarred(callReasonInfo)) {
                 mCallback.invokeSuppServiceReceived(ImsCallSessionImpl.this,
                         ImsSuppServiceUtils.MO.getOutgoingCallsBarred());
@@ -3478,17 +3468,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsReasonInfo reasonInfo = ImsCallUtils.createImsReasonInfo(callReasonInfo);
 
-            if (mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
+            if (mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
                 log("Ignore the duplicated terminated event");
-            } else if (mCallDetails.is(CallDetails.ON_MERGING)) {
-            /* When one of the conference participant is terminated {@link #onCallMergeFailed}
-             * is called that time we should not wait for {@link #onAudioSessionClosed} and
-             * immediately send {@link #invokeTerminated} so FW will {@link #close} the new
-             * conference session.
-             */
-                notifyCallTerminated(reasonInfo);
             } else {
-                waitOrNotifyCallTerminated(reasonInfo);
+                notifyCallEnd(reasonInfo);
             }
 
             // Notify all the users that the conference call is terminated.
@@ -4395,12 +4378,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             logi("onAudioSessionClosed");
             if (mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
-                if ((getState() == ImsCallSessionImplBase.State.TERMINATED)
-                        && !mCallDetails.is(CallDetails.CALL_END_FINISHED)
-                        && !isCacheCallReasonInfoNull()) {
-                    notifyCallTerminated(mCacheCallReasonInfo);
-                }
                 mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
+
+                if ((getState() == ImsCallSessionImplBase.State.TERMINATED)
+                        && !mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)
+                        && isCacheCallEndReasonPresent()) {
+                    notifyCallEnd(mCacheCallEndReason);
+                }
 
                 if (mCallDetails.is(CallDetails.CLOSE_PENDING)
                         && !mCallDetails.is(CallDetails.IMPLICIT_TERMINATED)) {
@@ -4628,7 +4612,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                             mCall.getCallConnectionId() + "", mCall.getConferenceUserId(),
                             null);
 
-                    notifyCallTerminated(ImsCallUtils.createImsReasonInfo(callReasonInfo));
+                    notifyCallEnd(ImsCallUtils.createImsReasonInfo(callReasonInfo));
                     closeMtcCall(mCall);
                 } else {
                     // After receiving the result of call merge,
@@ -5084,8 +5068,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     && (getState() == ImsCallSessionImplBase.State.TERMINATED)
                     && ((reason == ImsReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE)
                         || (reason == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE))
-                    && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                waitOrNotifyCallTerminated(ImsCallUtils.createImsReasonInfo(
+                    && !mCallDetails.is(CallDetails.CALL_END_CALLBACK_NOTIFIED)) {
+                notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                         ImsReasonInfo.CODE_USER_TERMINATED,
                         ImsCallUtils.REASON_CALL_DISCONNECTED_BY_MERGE_FAILED));
             }
@@ -5161,7 +5145,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (mCallDetails.is(CallDetails.SESSION_TERMINATED_ON_CONFERENCE)) {
                 mCallDetails.clear(CallDetails.SESSION_TERMINATED_ON_CONFERENCE);
-                waitOrNotifyCallTerminated(ImsCallUtils.createImsReasonInfo(
+                notifyCallEnd(ImsCallUtils.createImsReasonInfo(
                         ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
                         ImsCallUtils.REASON_CALL_DISCONNECTED_BY_MERGE_FAILED));
             } else {
