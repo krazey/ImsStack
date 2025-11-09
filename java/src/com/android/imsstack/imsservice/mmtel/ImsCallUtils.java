@@ -202,10 +202,10 @@ public class ImsCallUtils {
                 && (callType == ImsCallProfile.CALL_TYPE_VT)) {
             callType = ImsCallMediaUtils.getVideoCallType(mediaProfile);
         }
+        ImsCallMediaUtils.updateMediaProfileFromMediaInfoForAudioCodecAttributes(mediaProfile, mi);
 
         ImsCallProfile profile = new ImsCallProfile(serviceType, callType, new Bundle(),
                 mediaProfile);
-        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mi);
 
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE,
                 MtcCallInfo.isConference(ci));

@@ -128,8 +128,11 @@ public class ImsCallMediaUtils {
             videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
         }
 
-        return new ImsStreamMediaProfile(audioQuality, audioDirection,
+        ImsStreamMediaProfile mediaProfile = new ImsStreamMediaProfile(audioQuality, audioDirection,
                 videoQuality, videoDirection, rttMode);
+        updateMediaProfileFromMediaInfoForAudioCodecAttributes(mediaProfile, mi);
+
+        return mediaProfile;
     }
 
     public static VideoProfile createVideoProfileFromMediaInfo(final MediaInfo mi) {
@@ -483,7 +486,7 @@ public class ImsCallMediaUtils {
         profile.getMediaProfile().copyFrom(new ImsStreamMediaProfile(audioQuality, audioDirection,
                 videoQuality, videoDirection, rttMode));
 
-        updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mi);
+        updateMediaProfileFromMediaInfoForAudioCodecAttributes(profile.getMediaProfile(), mi);
         updateCallProfileFromMediaInfoForRtt(profile, mi);
     }
 
@@ -494,8 +497,8 @@ public class ImsCallMediaUtils {
      * @param profile The ImsCallProfile to update.
      * @param mi The MediaInfo object containing the new audio codec attributes.
      */
-    public static void updateCallProfileFromMediaInfoForAudioCodecAttributes(ImsCallProfile profile,
-            final MediaInfo mi) {
+    public static void updateMediaProfileFromMediaInfoForAudioCodecAttributes(
+            ImsStreamMediaProfile mediaProfile, final MediaInfo mi) {
         AudioCodecAttributes fromAttributes = mi.getAudioCodecAttributes();
 
         if (fromAttributes == null) {
@@ -510,7 +513,7 @@ public class ImsCallMediaUtils {
         android.telephony.ims.AudioCodecAttributes toAttributes =
                 new android.telephony.ims.AudioCodecAttributes(fromAttributes.mBitrateKbps,
                 bitrateRange, fromAttributes.mBandwidthKhz, bandwidthRange);
-        profile.getMediaProfile().setAudioCodecAttributes(toAttributes);
+        mediaProfile.setAudioCodecAttributes(toAttributes);
     }
 
     public static void updateCallProfileFromMediaInfoForRtt(ImsCallProfile profile,

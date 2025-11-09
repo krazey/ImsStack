@@ -706,12 +706,13 @@ public class ImsCallMediaUtilsTest {
     }
 
     @Test
-    public void testUpdateCallProfileFromMediaInfoForAudioCodecAttributes() {
+    public void testUpdateMediaProfileFromMediaInfoForAudioCodecAttributes() {
         ImsCallProfile profile = new ImsCallProfile();
         MediaInfo mediaInfo = new MediaInfo();
 
         // Test with null AudioCodecAttributes
-        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mediaInfo);
+        ImsCallMediaUtils.updateMediaProfileFromMediaInfoForAudioCodecAttributes(
+                profile.getMediaProfile(), mediaInfo);
         assertNull(profile.getMediaProfile().getAudioCodecAttributes());
 
         // Test with non-null AudioCodecAttributes
@@ -719,7 +720,8 @@ public class ImsCallMediaUtilsTest {
                 new AudioCodecAttributes(64f, 32f, 128f, 16f, 8f, 24f);
         mediaInfo.setAudioCodecAttributes(fromAttributes);
 
-        ImsCallMediaUtils.updateCallProfileFromMediaInfoForAudioCodecAttributes(profile, mediaInfo);
+        ImsCallMediaUtils.updateMediaProfileFromMediaInfoForAudioCodecAttributes(
+                profile.getMediaProfile(), mediaInfo);
 
         android.telephony.ims.AudioCodecAttributes toAttributes =
                 profile.getMediaProfile().getAudioCodecAttributes();
