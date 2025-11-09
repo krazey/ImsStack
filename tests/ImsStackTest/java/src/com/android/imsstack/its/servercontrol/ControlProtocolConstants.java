@@ -46,7 +46,41 @@ public class ControlProtocolConstants {
     // configurations
     public static final String MESSAGE_CONFIG = "message-config=";
     public static final String CONFIG_DELAY = "Delay";
-    public static final String CONFIG_FORKED_RESPONSE = "ForkedResponse";
+    public static final String CONFIG_AUDIO_DIR = "audiodirection";
+    public static final String CONFIG_VIDEO_DIR = "videodirection";
+    public static final String CONFIG_TEXT_DIR = "textdirection";
+    public static final String CONFIG_AUDIO_PORT0 = "useaudioport0";
+    public static final String CONFIG_VIDEO_PORT0 = "usevideoport0";
+    public static final String CONFIG_TEXT_PORT0 = "usetextport0";
+    public static final String CONFIG_AMR_SUPPORTED = "amrsupported";
+    public static final String CONFIG_AMR_WB_SUPPORTED = "amrwbsupported";
+    public static final String CONFIG_EVS_SUPPORTED = "evssupported";
+    public static final String CONFIG_TELEPHONE_SUPPORTED = "telephoneeventsupported";
+    public static final String CONFIG_H263_SUPPORTED = "h263supported";
+    public static final String CONFIG_H264_SUPPORTED = "h264supported";
+    public static final String CONFIG_AUDIO_QOS_STATUS = "qosstatusaudio";
+    public static final String CONFIG_VIDEO_QOS_STATUS = "qosstatusvideo";
+    public static final String CONFIG_TEXT_QOS_STATUS = "qosstatustext";
+    public static final String CONFIG_AUDIO_QOS_CONF = "useqosconfaudio";
+    public static final String CONFIG_VIDEO_QOS_CONF = "useqosconfvideo";
+    public static final String CONFIG_TEXT_QOS_CONF = "useqosconftext";
+    public static final String CONFIG_REQUIRE_TIMER = "addrequiretimer";
+    public static final String CONFIG_REQUIRE_PRECONDITION = "addrequireprecondition";
+    public static final String CONFIG_REQUIRE_100REL = "addrequire100rel";
+    public static final String CONFIG_INDIALOG = "indialog";
+    public static final String CONFIG_FORKED_RESPONSE = "forkedresponse";
+    public static final String CONFIG_FROM_DISPLAY_NAME = "usefromdisplayname";
+    public static final String CONFIG_PAID_DISPLAY_NAME = "usepaiddisplayname";
+    public static final String CONFIG_PRIVACY_ID = "useprivacyid";
+    public static final String CONFIG_ISFOCUS = "addisfocus";
+    public static final String CONFIG_CWI = "usecwi";
+    public static final String CONFIG_DTMF_ENABLED = "usedtmfenabled";
+    public static final String CONFIG_RETRY_AFTER = "useretryafter";
+    public static final String CONFIG_PEM_SENDRECV = "usepemsendrecv";
+    public static final String CONFIG_EARLY_SESSION = "useearlysession";
+    public static final String CONFIG_SUBS_STATE_ACTIVE = "usesubsstateactive";
+    public static final String CONFIG_AVCHANGE = "useavchange";
+    public static final String CONFIG_COMPACT_FORM = "usecompactform";
 
     // rule sets
     public static final String MESSAGE_RULESET = "message-ruleset=";
