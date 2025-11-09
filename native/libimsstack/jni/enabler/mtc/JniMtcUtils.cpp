@@ -21,6 +21,7 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
+#include "JniExternalCall.h"
 #include "JniMtcUtils.h"
 #include "MtcDef.h"
 #include "conferencecall/ConferenceDef.h"

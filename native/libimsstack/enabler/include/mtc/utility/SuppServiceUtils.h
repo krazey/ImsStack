@@ -17,10 +17,11 @@
 #ifndef SUPP_SERVICE_UTILS_H_
 #define SUPP_SERVICE_UTILS_H_
 
-#include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
+
+class AString;
 
 /**
  * This class contains utility functions for handle a list of SuppService.

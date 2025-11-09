@@ -17,15 +17,17 @@
 #ifndef JNI_MTC_UTILS_H_
 #define JNI_MTC_UTILS_H_
 
-#include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
-#include "JniExternalCall.h"
-#include "MtcDef.h"
 #include <binder/Parcel.h>
 
+class AString;
+class SuppService;
+struct AudioCodecAttributes;
 struct ConfUser;
+struct JniExternalCall;
+struct MediaInfo;
 
 class JniMtcUtils final
 {

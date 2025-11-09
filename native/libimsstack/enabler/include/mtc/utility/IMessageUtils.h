@@ -21,7 +21,6 @@
 #include "Ims3gpp.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include <optional>
 

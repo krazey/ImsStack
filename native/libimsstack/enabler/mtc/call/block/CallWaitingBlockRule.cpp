@@ -15,6 +15,7 @@
  */
 
 #include "IMtcService.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"

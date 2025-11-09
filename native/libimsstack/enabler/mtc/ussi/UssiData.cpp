@@ -18,6 +18,8 @@
 #include "DomDocumentBuilderFactory.h"
 #include "IDocument.h"
 #include "IElement.h"
+#include "INode.h"
+#include "INodeList.h"
 #include "IText.h"
 #include "ServiceTrace.h"
 #include "ussi/UssiConstants.h"

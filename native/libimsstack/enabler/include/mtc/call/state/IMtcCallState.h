@@ -21,6 +21,7 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
+#include "helper/ISrvccStateListener.h"
 
 class AString;
 class IMessage;

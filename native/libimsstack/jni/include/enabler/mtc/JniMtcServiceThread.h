@@ -20,9 +20,10 @@
 #include "BaseServiceThread.h"
 #include "IJniMtcServiceThread.h"
 #include "IMtcService.h"
-#include "ImsMap.h"
 #include "IuMtcService.h"
-#include "MtcDef.h"
+
+class SuppService;
+struct MediaInfo;
 
 class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
 {

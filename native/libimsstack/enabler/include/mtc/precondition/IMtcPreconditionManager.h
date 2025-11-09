@@ -18,7 +18,6 @@
 #define INTERFACE_MTC_PRECONDITION_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "precondition/QosDef.h"
 
 class ISession;
 class IMessage;

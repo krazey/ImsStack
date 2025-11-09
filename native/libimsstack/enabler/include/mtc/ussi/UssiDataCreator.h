@@ -17,8 +17,9 @@
 #ifndef USSI_DATA_CREATOR_H_
 #define USSI_DATA_CREATOR_H_
 
-#include "AStringBuffer.h"
-#include "ussi/UssiData.h"
+#include "ussi/UssiDef.h"
+
+class AStringBuffer;
 
 class UssiDataCreator
 {

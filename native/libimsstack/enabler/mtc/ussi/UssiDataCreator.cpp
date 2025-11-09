@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AStringBuffer.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"

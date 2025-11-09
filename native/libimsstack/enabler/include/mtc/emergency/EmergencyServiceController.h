@@ -18,6 +18,7 @@
 #define EMERGENCY_SERVICE_CONTROLLER_H_
 
 #include "IMtcCallStateListener.h"
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"

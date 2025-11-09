@@ -18,12 +18,12 @@
 #define USSI_CONTROLLER_H_
 
 #include "ImsTypeDef.h"
-#include "call/IMtcCallContext.h"
 #include "ussi/UssiData.h"
 #include "ussi/UssiEventNotifier.h"
 
 class IMessage;
 class IMessageUtils;
+class IMtcCallContext;
 class ISipClientConnection;
 class ISipMessage;
 class ISipServerConnection;

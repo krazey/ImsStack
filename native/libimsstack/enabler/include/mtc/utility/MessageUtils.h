@@ -18,11 +18,8 @@
 #define MESSAGE_UTILS_H_
 
 #include "AString.h"
-#include "IMtcService.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
-#include "utility/MessageUtil.h"
 #include <optional>
 #include <tuple>
 

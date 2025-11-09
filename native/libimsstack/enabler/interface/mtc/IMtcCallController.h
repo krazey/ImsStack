@@ -17,6 +17,7 @@
 #ifndef INTERFACE_MTC_CALL_CONTROLLER_H_
 #define INTERFACE_MTC_CALL_CONTROLLER_H_
 
+#include "IMtcService.h"
 #include "INativeEnabler.h"
 #include "ImsList.h"
 #include "call/IMtcCall.h"
@@ -24,7 +25,6 @@
 
 class AString;
 class IMtcCallContext;
-class IMtcService;
 class ISession;
 class ISilentRedialHelper;
 class SuppService;

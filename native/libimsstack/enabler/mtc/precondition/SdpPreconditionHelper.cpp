@@ -15,6 +15,7 @@
  */
 
 #include "IMessage.h"
+#include "ISession.h"
 #include "ISessionParameter.h"
 #include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
@@ -28,6 +29,7 @@
 #include "media/MtcMediaUtil.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
+#include "precondition/QosStatusTable.h"
 #include "precondition/QosStringUtils.h"
 #include "precondition/SdpPreconditionHelper.h"
 

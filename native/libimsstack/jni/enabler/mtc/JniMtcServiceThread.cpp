@@ -20,6 +20,7 @@
 #include "JniMtcCall.h"
 #include "JniMtcServiceThread.h"
 #include "JniMtcUtils.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include <binder/Parcel.h>
 

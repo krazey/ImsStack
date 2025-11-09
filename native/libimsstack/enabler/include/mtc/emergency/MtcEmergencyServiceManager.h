@@ -17,6 +17,7 @@
 #ifndef MTC_EMERGENCY_SERVICE_MANAGER_H_
 #define MTC_EMERGENCY_SERVICE_MANAGER_H_
 
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include <memory>

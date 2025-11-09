@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
