@@ -270,7 +270,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_OtherParam(SIP_CHAR* pszString)
     return DoPercentEncoding_TokenParam(pszString);
 }
 
-SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Param(SIP_CHAR* pszName, SIP_CHAR* pszValue)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Param(const SIP_CHAR* pszName, SIP_CHAR* pszValue)
 {
     if ((SipPf_Stricmp(pszName, SIP_USER_PRM) == 0) || (SipPf_Stricmp(pszName, SIP_METHOD) == 0) ||
             (SipPf_Stricmp(pszName, SIP_TRNSPORT_PRM) == 0) ||

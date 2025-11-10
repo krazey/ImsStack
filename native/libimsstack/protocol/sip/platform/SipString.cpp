@@ -36,7 +36,7 @@ void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...)
     return;
 }
 
-void SipPf_Sscanf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd)
+void SipPf_Sscanf(const SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd)
 {
     sscanf(pszBuffer, pszFormat, pszCharAdd);
     return;

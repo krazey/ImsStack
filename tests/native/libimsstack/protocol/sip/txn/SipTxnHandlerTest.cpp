@@ -277,7 +277,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
 
     ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
             .WillByDefault(Invoke(
-                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    [&](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
                     {
                         SipMessage* pTempSipMsg = new SipMessage();
                         pOutTxn = new SipTxn(
@@ -291,7 +291,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
 
     ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
             .WillByDefault(Invoke(
-                    [&](IN SipTxnKey* pTxnKey, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    [&](IN const SipTxnKey* pTxnKey, Unused, Unused, OUT SipTxn*& pOutTxn)
                     {
                         SipMessage* pTempSipMsg = new SipMessage();
                         pOutTxn = new SipTxn(
@@ -639,7 +639,7 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Response)
 
     ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
             .WillByDefault(Invoke(
-                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    [&](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
                     {
                         SipMessage* pTempSipMsg = new SipMessage();
                         pOutTxn = new SipTxn(
@@ -659,7 +659,7 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Response)
 
     ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
             .WillByDefault(Invoke(
-                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    [&](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
                     {
                         SipMessage* pTempSipMsg = new SipMessage();
                         pOutTxn = new SipTxn(
@@ -790,7 +790,7 @@ CSeq: 1 REGISTER\r\n\
 
     ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
             .WillByDefault(Invoke(
-                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    [&](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
                     {
                         SipMessage* pTempSipMsg = new SipMessage();
                         pOutTxn = new SipTxn(
@@ -987,7 +987,7 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
 
     ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
             .WillByDefault(Invoke(
-                    [&](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                    [&](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
                     {
                         SipMessage* pTempSipMsg = new SipMessage();
                         pOutTxn = new SipTxn(

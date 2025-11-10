@@ -22,8 +22,8 @@
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
 
-SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
-        IN SipTransportParameter* pTranspParam, IN const SIP_CHAR* pSipBuffer,
+SIP_BOOL SipTransportHandler::OnSendTransp(IN const SipMessage* pSipMsg,
+        IN const SipTransportParameter* pTranspParam, IN const SIP_CHAR* pSipBuffer,
         IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError)
 {
     (void)pnError;
@@ -258,7 +258,7 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
 }
 
 PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
-        SipMessage* pSipMsg, SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
+        SipMessage* pSipMsg, const SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
 {
     const SIP_CHAR STR_VIA_ENC_FORMAT[] = "\r\nVia:";
     const SIP_CHAR STR_VIA_COMPACT_ENC_FORMAT[] = "\r\nv:";

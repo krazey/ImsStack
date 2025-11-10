@@ -26,7 +26,7 @@ public:
     static SIP_CHAR* DoPercentEncoding_UserAndHeader(SIP_CHAR* pszString, const SIP_CHAR* pType);
     static SIP_CHAR* DoPercentEncoding_Password(SIP_CHAR* pszString);
     static SIP_CHAR* DoPercentEncoding_Host(SIP_CHAR* pszString);
-    static SIP_CHAR* DoPercentEncoding_Param(SIP_CHAR* pszName, SIP_CHAR* pszValue);
+    static SIP_CHAR* DoPercentEncoding_Param(const SIP_CHAR* pszName, SIP_CHAR* pszValue);
     static SIP_CHAR* DoPercentEncoding_TokenParam(SIP_CHAR* pszString);
 
     static SIP_CHAR* DoPercentEncoding_MddrParam(SIP_CHAR* pszString);

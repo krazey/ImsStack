@@ -395,7 +395,7 @@ SipHeaderBase* SipDateHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHead
     return new SipDateHeader();
 }
 
-SIP_INT32 SipDateHeader::GetWeekDayType(SIP_CHAR* pszWeekDay)
+SIP_INT32 SipDateHeader::GetWeekDayType(const SIP_CHAR* pszWeekDay)
 {
     switch (pszWeekDay[0])
     {
@@ -444,7 +444,7 @@ SIP_INT32 SipDateHeader::GetWeekDayType(SIP_CHAR* pszWeekDay)
     return SipDateHeader::UNKNOWN_DAY;
 }
 
-SIP_INT32 SipDateHeader::GetMonthType(SIP_CHAR* pszMonth)
+SIP_INT32 SipDateHeader::GetMonthType(const SIP_CHAR* pszMonth)
 {
     switch (pszMonth[0])
     {

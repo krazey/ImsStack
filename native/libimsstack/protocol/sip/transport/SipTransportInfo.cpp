@@ -16,7 +16,7 @@
 #include "transport/SipTransportInfo.h"
 
 SipTransportInfo::SipTransportInfo(
-        SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer) :
+        const SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer) :
         m_cNumTimeReqSent(SIP_ZERO),
         m_pActualDestParam(SIP_NULL),
         m_pTranspParam(SIP_NULL),

@@ -242,8 +242,8 @@ private:
 public:
     SipTxn();
 
-    SipTxn(SIP_INT32 eTxnType, SipTxnKey* pTxnKey, SipMessage* pSipMsg,
-            SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
+    SipTxn(SIP_INT32 eTxnType, const SipTxnKey* pTxnKey, const SipMessage* pSipMsg,
+            const SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
 
     SIP_BOOL InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnError);
     SIP_BOOL AbortTxn();

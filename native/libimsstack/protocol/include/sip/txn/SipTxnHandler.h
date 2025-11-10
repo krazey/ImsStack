@@ -46,7 +46,7 @@ private:
     PRIVATE SIP_BOOL ValidateRecvTxn(IN SipMessage* pSipMsg, OUT SIP_INT32* peTxnType);
 
     /* invoking client FSM to send request. returns new txn object*/
-    PRIVATE SIP_BOOL HandleClientTxnSend(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey,
+    PRIVATE SIP_BOOL HandleClientTxnSend(IN SIP_INT32 eTxnType, IN const SipTxnKey* pTxnKey,
             IN SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError);
 
     /* invokes server FSM to send response */

@@ -37,7 +37,7 @@ SipTxnKey::SipTxnKey() :
 {
 }
 
-SipTxnKey::SipTxnKey(SipTxnKey* pTxnKey, SIP_UINT16* pnError) :
+SipTxnKey::SipTxnKey(const SipTxnKey* pTxnKey, SIP_UINT16* pnError) :
         m_nRSeqNum(SIP_ZERO),
         m_eMsgType(SipMessage::TYPE_INVALID),
         m_pszViaBranchParam(SIP_NULL),
@@ -200,7 +200,7 @@ SipTxnKey::~SipTxnKey()
     Clear();
 }
 
-SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
+SIP_VOID SipTxnKey::Init(const SipTxnKey* pTxnKey, SIP_UINT16* pnError)
 {
     if (pTxnKey == SIP_NULL)
     {

@@ -16,7 +16,7 @@
 #include "platform/SipString.h"
 #include "transport/SipTransportParameter.h"
 
-SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam) :
+SipTransportParameter::SipTransportParameter(const SipTransportParameter* pTranspParam) :
         m_pHostAddress(SIP_NULL),
         m_nPort(SIP_ZERO),
         m_nTranspProtocol(SIP_INVALID),

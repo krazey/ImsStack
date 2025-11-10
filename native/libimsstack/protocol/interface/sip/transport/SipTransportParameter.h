@@ -47,7 +47,7 @@ public:
             m_nTranspIpType(SIP_INVALID)
     {
     }
-    explicit SipTransportParameter(SipTransportParameter* pTranspParam);
+    explicit SipTransportParameter(const SipTransportParameter* pTranspParam);
     SipTransportParameter(
             const SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol);
     virtual ~SipTransportParameter()

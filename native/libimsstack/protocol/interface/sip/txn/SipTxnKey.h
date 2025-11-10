@@ -61,10 +61,10 @@ public:
 
 public:
     SipTxnKey();
-    SipTxnKey(SipTxnKey* pTxnKey, SIP_UINT16* pnError);
+    SipTxnKey(const SipTxnKey* pTxnKey, SIP_UINT16* pnError);
     SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError);
 
-    SIP_VOID Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError);
+    SIP_VOID Init(const SipTxnKey* pTxnKey, SIP_UINT16* pnError);
 
     inline void AddRule(SIP_UINT32 nRule) { m_nRules |= nRule; }
     inline void RemoveRule(SIP_UINT32 nRule) { m_nRules &= (~nRule); }

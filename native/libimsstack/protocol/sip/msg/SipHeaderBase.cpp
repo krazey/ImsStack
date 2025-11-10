@@ -166,7 +166,7 @@ SipHeaderBase::~SipHeaderBase()
     }
 }
 
-SIP_VOID SipHeaderBase::InitParameters(SipParameters* pParameters)
+SIP_VOID SipHeaderBase::InitParameters(const SipParameters* pParameters)
 {
     if (this->m_pParameters != SIP_NULL)
     {

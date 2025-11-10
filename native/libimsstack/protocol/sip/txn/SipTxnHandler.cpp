@@ -618,8 +618,8 @@ PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppT
     return SIP_TRUE;
 }
 
-PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey,
-        IN_OUT SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError)
+PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType,
+        IN const SipTxnKey* pTxnKey, IN_OUT SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError)
 {
     SipTimerContext* pSipTimerContext = SIP_NULL;
 

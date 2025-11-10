@@ -24,7 +24,7 @@ SipTimeoutData::SipTimeoutData()
     m_pTxnKey = SIP_NULL;
 }
 
-SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnKey* pTxnKey)
+SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, const SipTxnKey* pTxnKey)
 {
     m_eTxnType = eTxnType;
     m_eTimerType = eTimerType;

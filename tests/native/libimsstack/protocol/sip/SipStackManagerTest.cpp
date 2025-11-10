@@ -67,7 +67,7 @@ protected:
 
         ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
                 .WillByDefault(Invoke(
-                        [](IN SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                        [](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
                         {
                             if (pTxn == SIP_NULL)
                             {

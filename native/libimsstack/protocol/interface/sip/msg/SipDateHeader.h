@@ -123,7 +123,7 @@ public:
 
 private:
     ~SipDateHeader() override;
-    static SIP_INT32 GetWeekDayType(SIP_CHAR* pszWeekDay);
-    static SIP_INT32 GetMonthType(SIP_CHAR* pszMonth);
+    static SIP_INT32 GetWeekDayType(const SIP_CHAR* pszWeekDay);
+    static SIP_INT32 GetMonthType(const SIP_CHAR* pszMonth);
 };
 #endif  //__SIP_DATE_HEADER_H__

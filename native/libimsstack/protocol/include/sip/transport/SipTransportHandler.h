@@ -27,7 +27,7 @@ public:
 
 private:
     SIP_BOOL UpdateViaSipMsg(
-            SipMessage* pSipMsg, SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto);
+            SipMessage* pSipMsg, const SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto);
 
     PRIVATE SIP_BOOL GetTxnKeyFromSipMsg(
             IN SipMessage* pSipMsg, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError);
@@ -36,9 +36,10 @@ private:
             OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError);
 
 public:
-    SIP_BOOL OnSendTransp(IN SipMessage* pSipMsg, IN SipTransportParameter* pTranspParam,
-            IN const SIP_CHAR* pSipBuffer, IN SIP_UINT32 nSipBufferLen,
-            OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError);
+    SIP_BOOL OnSendTransp(IN const SipMessage* pSipMsg,
+            IN const SipTransportParameter* pTranspParam, IN const SIP_CHAR* pSipBuffer,
+            IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo,
+            OUT SIP_UINT16* pnError);
 
     SIP_BOOL OnRecvTransp(IN SipMessage* pSipMsg, IN SipTransportParameter* pTranspParam,
             OUT SIP_INT32* peTxnStatus, OUT SIP_BOOL* pbTxnExist, OUT SipTxnKey** ppTxnKey,

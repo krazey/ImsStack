@@ -221,7 +221,7 @@ protected:
             const SIP_CHAR*& pszCommentStart, const SIP_CHAR*& pszCommentEnd);
 
 private:
-    SIP_VOID InitParameters(SipParameters* pParameters);
+    SIP_VOID InitParameters(const SipParameters* pParameters);
 };
 
 class SipNameAddrHeader : public SipHeaderBase

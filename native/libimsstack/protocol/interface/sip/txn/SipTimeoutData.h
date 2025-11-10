@@ -35,7 +35,7 @@ class SipTimeoutData
 
 public:
     SipTimeoutData();
-    SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnKey* pTxnKey);
+    SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, const SipTxnKey* pTxnKey);
     virtual ~SipTimeoutData();
 
     SipTxnKey* GetTxnKey() const;

@@ -40,8 +40,8 @@ SipTxn::SipTxn() :
 {
 }
 
-SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSipMsg,
-        IN SipTimerContext* pSipTxnTimerContext, OUT SIP_UINT16* pnError) :
+SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN const SipTxnKey* pTxnKey, IN const SipMessage* pSipMsg,
+        IN const SipTimerContext* pSipTxnTimerContext, OUT SIP_UINT16* pnError) :
         m_eTxnType(SipTxn::INVALID),
         m_pTxnKey(SIP_NULL),
         m_pSipMsg(SIP_NULL),
