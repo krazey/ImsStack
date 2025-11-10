@@ -22,6 +22,7 @@
 #include "CarrierConfig.h"
 #include "ConfigDef.h"
 #include "IImsAosInfo.h"
+#include "INetworkWatcher.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "ImsVector.h"
@@ -224,20 +225,34 @@ public:
 
     inline static AString GetContactHeaderAddressInInviteForEmergency(
             IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode,
-            IN IMS_BOOL bRoaming)
+            IN IMS_SINT32 eRoamingType)
     {
+        IMS_UINT32 nBaseIndex;
+        if (eRoamingType == INetworkWatcher::ROAMING_TYPE_NOT_ROAMING)
+        {
+            nBaseIndex = CONTACT_HEADER_ADDRESS_OFFSET_NON_ROAMING;
+        }
+        else if (eRoamingType == INetworkWatcher::ROAMING_TYPE_DOMESTIC)
+        {
+            nBaseIndex = CONTACT_HEADER_ADDRESS_OFFSET_DOMESTIC_ROAMING;
+        }
+        else
+        {
+            nBaseIndex = CONTACT_HEADER_ADDRESS_OFFSET_INTERNATIONAL_ROAMING;
+        }
+
         ImsVector<AString> lstConfig = objProxy.GetStringArray(
                 ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY);
         switch (eAosRegMode)
         {
             case IImsAosInfo::REG_MODE_NORMAL:
-                return lstConfig[bRoaming ? 4 : 0];
+                return lstConfig[nBaseIndex + REG_MODE_INDEX_NORMAL];
             case IImsAosInfo::REG_MODE_ADMIN:
-                return lstConfig[bRoaming ? 5 : 1];
+                return lstConfig[nBaseIndex + REG_MODE_INDEX_ADMIN];
             case IImsAosInfo::REG_MODE_INTERNAL:
-                return lstConfig[bRoaming ? 6 : 2];
+                return lstConfig[nBaseIndex + REG_MODE_INDEX_INTERNAL];
             case IImsAosInfo::REG_MODE_NOUICC:
-                return lstConfig[bRoaming ? 7 : 3];
+                return lstConfig[nBaseIndex + REG_MODE_INDEX_NOUICC];
             default:
                 return AString::ConstEmpty();
         }
@@ -251,13 +266,13 @@ public:
         switch (eAosRegMode)
         {
             case IImsAosInfo::REG_MODE_NORMAL:
-                return lstConfig[0];
+                return lstConfig[REG_MODE_INDEX_NORMAL];
             case IImsAosInfo::REG_MODE_ADMIN:
-                return lstConfig[1];
+                return lstConfig[REG_MODE_INDEX_ADMIN];
             case IImsAosInfo::REG_MODE_INTERNAL:
-                return lstConfig[2];
+                return lstConfig[REG_MODE_INDEX_INTERNAL];
             case IImsAosInfo::REG_MODE_NOUICC:
-                return lstConfig[3];
+                return lstConfig[REG_MODE_INDEX_NOUICC];
             default:
                 return AString::ConstEmpty();
         }
@@ -345,6 +360,14 @@ private:
         }
         return AString::ConstNull();
     }
+
+    static const IMS_UINT32 CONTACT_HEADER_ADDRESS_OFFSET_NON_ROAMING = 0;
+    static const IMS_UINT32 CONTACT_HEADER_ADDRESS_OFFSET_DOMESTIC_ROAMING = 4;
+    static const IMS_UINT32 CONTACT_HEADER_ADDRESS_OFFSET_INTERNATIONAL_ROAMING = 8;
+    static const IMS_UINT32 REG_MODE_INDEX_NORMAL = 0;
+    static const IMS_UINT32 REG_MODE_INDEX_ADMIN = 1;
+    static const IMS_UINT32 REG_MODE_INDEX_INTERNAL = 2;
+    static const IMS_UINT32 REG_MODE_INDEX_NOUICC = 3;
 };
 
 #endif
