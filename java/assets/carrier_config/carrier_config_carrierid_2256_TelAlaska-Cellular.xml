@@ -26,5 +26,4 @@
         <item value="send [x=640,y=480] recv [x=640,y=480]"/>
     </string-array>
     <boolean name="imsvt.video_avpf_enable_bool" value="false"/>
-    <int name="imsvt.video_avpf_feature_int" value="0"/>
 </carrier_config>

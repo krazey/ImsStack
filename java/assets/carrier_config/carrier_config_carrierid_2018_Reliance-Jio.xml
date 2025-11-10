@@ -119,7 +119,6 @@
     <boolean name="imsvt.video_drop_p_frame_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
-    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="7"/>
     <int-array name="imsvt.video_codec_bitrate_int_array" num="1">
         <item value="384"/>

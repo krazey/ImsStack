@@ -100,6 +100,7 @@
         <item value="1254"/>
         <item value="1254"/>
     </int-array>
+    <boolean name="imsvt.video_avpf_enable_bool" value="false"/>
     <int name="imsvt.video_cvo_value_int" value="-1"/>
     <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
         <item value="send [x=480,y=640] recv [x=480,y=640] "/>

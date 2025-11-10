@@ -45,7 +45,6 @@
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
-    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
      <string-array name="imsvt.video_codec_frame_size_string_array" num="2">
         <item value="119 240 320"/>

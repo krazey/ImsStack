@@ -80,6 +80,7 @@
         <item value="7020"/>
         <item value="7022"/>
     </int-array>
+    <boolean name="imsvt.video_avpf_enable_bool" value="false"/>
     <int name="imsvt.video_cvo_value_int" value="-1"/>
     <string-array name="imsvoice.audio_candidate_attribute_string_array" num="1">
         <item value="1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"/>

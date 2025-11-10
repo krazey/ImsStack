@@ -253,7 +253,6 @@
 
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
-    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="31"/>
     <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
         <item value="send [x=240,y=320] recv [x=240,y=320] "/>
