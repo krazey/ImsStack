@@ -423,7 +423,14 @@ send to network
            Delete Txn entry from DB and delete the instance*/
         objTxnHandler.DeleteTxn(pTxnKey);
 
-        pTxnKey->SipDelete();
+        if (pSipMsg->GetMethodType() == SipMessage::METHOD_ACK)
+        {
+            *ppTxnKey = pTxnKey;
+        }
+        else
+        {
+            pTxnKey->SipDelete();
+        }
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
     }
