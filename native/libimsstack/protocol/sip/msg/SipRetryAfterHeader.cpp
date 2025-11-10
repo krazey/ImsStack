@@ -106,8 +106,6 @@ SIP_BOOL SipRetryAfterHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
                 return SIP_FALSE;
             }
             pEndPt = pTempPre;
-            pTempPre = SIP_NULL;
-            pTempNext = SIP_NULL;
         }
     }
     else

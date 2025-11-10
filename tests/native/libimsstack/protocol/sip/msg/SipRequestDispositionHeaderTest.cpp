@@ -62,8 +62,6 @@ TEST_F(SipRequestDispositionHeaderTest, Decode)
     pHeader->SipDelete();
 
     /* Check all possible valid values, success */
-    const SIP_CHAR* pDirectiveStr;
-
     for (SIP_UINT16 nCnt = 0; nCnt < SipRequestDispositionHeader::GetDirectiveSize(); nCnt++)
     {
         pHeader = reinterpret_cast<SipRequestDispositionHeader*>(
@@ -71,7 +69,7 @@ TEST_F(SipRequestDispositionHeaderTest, Decode)
                         SipHeaderBase::REQUEST_DISPOSITION, nullptr));
         ASSERT_TRUE(pHeader != nullptr);
 
-        pDirectiveStr = SipRequestDispositionHeader::GetDirectiveString(nCnt);
+        const SIP_CHAR* pDirectiveStr = SipRequestDispositionHeader::GetDirectiveString(nCnt);
         EXPECT_EQ(SIP_TRUE, pHeader->Decode(pDirectiveStr, SipPf_Strlen(pDirectiveStr)));
         pHeader->SipDelete();
     }
