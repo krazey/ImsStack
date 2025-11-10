@@ -113,7 +113,7 @@
     // For tiss-presubmit test group
     "tiss-presubmit": [
         {
-            "name": "ImsStackTest",
+            "name": "ImsStackPresubmitTest",
             "options": [
                 {
                     "include-filter": "com.android.imsstack.its.tests.ImsTissTest"
