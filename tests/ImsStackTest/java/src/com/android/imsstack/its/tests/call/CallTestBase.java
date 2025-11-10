@@ -42,6 +42,8 @@ public class CallTestBase extends ImsStackTestBase {
     }
 
     protected void performRegistration() {
+        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
+
         startImsStack(SLOT0, mConfig);
         enableAllMmTelCapabilities();
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
