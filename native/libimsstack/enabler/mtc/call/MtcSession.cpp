@@ -717,14 +717,14 @@ void MtcSession::HandleByeTransactionIfNeeded()
         return;
     }
 
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (!pAosConnector)
     {
         return;
     }
 
     m_objContext.GetCallController().HandleByeTransaction(m_objContext.GetCallKey(),
-            [pAosConnector](ISession& objSession)
+            [pAosConnector](const ISession& objSession)
             {
                 const IMessage* piByeMessage =
                         objSession.GetPreviousRequest(IMessage::SESSION_TERMINATE);
