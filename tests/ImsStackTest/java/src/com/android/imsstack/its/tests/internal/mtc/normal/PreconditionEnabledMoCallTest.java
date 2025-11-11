@@ -18,7 +18,6 @@ package com.android.imsstack.its.tests.internal.mtc.normal;
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
 import android.net.QosSession;
-import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsReasonInfo;
 import android.testing.AndroidTestingRunner;
@@ -39,6 +38,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Objects;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class PreconditionEnabledMoCallTest extends CallTestBase {
@@ -50,9 +51,9 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
     public void setUp() throws Exception {
         setEnablerStoppable(false);
         setUpBase(SLOT0);
+        setUpCallTest();
 
-        mImsRegistration = mImsServiceConnector.getRegistration();
-        mMmTelFeature = mImsServiceConnector.getMmTelFeature();
+        mMmTelFeature = Objects.requireNonNull(mImsServiceConnector.getMmTelFeature());
         mCall = new TestCall(mMmTelFeature);
         createControlConnection(mCall);
         turnOnQosAndPrecondition();
@@ -60,10 +61,6 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
 
     @Before
     public void turnOnQosAndPrecondition() {
-        if (mConfig == null) {
-            mConfig = new PersistableBundle();
-        }
-
         mConfig.putBoolean(
                 CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL, true);
     }
@@ -71,6 +68,7 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
     @After
     public void tearDown() throws Exception {
         mServerControlConnection.disconnect();
+        tearDownCallTest();
         tearDownBase(SLOT0);
         mConnectivityManagerProxy.setQosSessionBearerType(0);
     }

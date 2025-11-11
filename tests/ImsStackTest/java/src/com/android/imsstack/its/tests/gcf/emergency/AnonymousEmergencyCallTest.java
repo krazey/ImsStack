@@ -36,6 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Objects;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class AnonymousEmergencyCallTest extends CallTestBase {
@@ -45,9 +47,9 @@ public class AnonymousEmergencyCallTest extends CallTestBase {
     public void setUp() throws Exception {
         setEnablerStoppable(false);
         setUpBase(SLOT0);
+        setUpCallTest();
 
-        mImsRegistration = mImsServiceConnector.getRegistration();
-        mMmTelFeature = mImsServiceConnector.getMmTelFeature();
+        mMmTelFeature = Objects.requireNonNull(mImsServiceConnector.getMmTelFeature());
         mCall = new TestCall(mMmTelFeature);
         createControlConnection(mCall);
     }
@@ -55,6 +57,7 @@ public class AnonymousEmergencyCallTest extends CallTestBase {
     @After
     public void tearDown() throws Exception {
         mServerControlConnection.disconnect();
+        tearDownCallTest();
         tearDownBase(SLOT0);
     }
 
