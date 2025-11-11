@@ -15,15 +15,14 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ImsStrLib.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
+#include "ImsStrLib.h"
 #include "config/CodecAudioConfig.h"
 #include "config/CodecEvsConfig.h"
+#include "config/ImsCodec.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -36,9 +35,11 @@ static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = CodecEvsConfig::DEFAULT_EVS_MOD
 static const IMS_SINT32 DEFAULT_BR_LIST = CodecEvsConfig::DEFAULT_BR_LIST;
 static const IMS_SINT32 DEFAULT_BW_LIST = CodecEvsConfig::DEFAULT_BW_LIST;
 static const IMS_SINT32 DEFAULT_CMR = CodecEvsConfig::DEFAULT_CMR;
-static const IMS_SINT32 CARRIERCONFIG_CMR_NOT_PRESENT = CodecEvsConfig::CARRIERCONFIG_CMR_NOT_PRESENT;
+static const IMS_SINT32 CARRIERCONFIG_CMR_NOT_PRESENT =
+        CodecEvsConfig::CARRIERCONFIG_CMR_NOT_PRESENT;
 static const IMS_SINT32 CARRIERCONFIG_CMR_DISABLED = CodecEvsConfig::CARRIERCONFIG_CMR_DISABLED;
-static const IMS_SINT32 CARRIERCONFIG_CMR_ALL_ENABLED = CodecEvsConfig::CARRIERCONFIG_CMR_ALL_ENABLED;
+static const IMS_SINT32 CARRIERCONFIG_CMR_ALL_ENABLED =
+        CodecEvsConfig::CARRIERCONFIG_CMR_ALL_ENABLED;
 static const IMS_SINT32 CARRIERCONFIG_CMR_ENABLED = CodecEvsConfig::CARRIERCONFIG_CMR_ENABLED;
 static const IMS_SINT32 CMR_DISABLED = CodecEvsConfig::CMR_DISABLED;
 static const IMS_SINT32 CMR_ENABLED = CodecEvsConfig::CMR_ENABLED;
@@ -342,7 +343,6 @@ TEST_F(CodecEvsConfigTest, BitrateConversion)
     EXPECT_EQ(m_pCodecEvsConfig->GetBr(), CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_24_4_KBPS);
 }
 
-
 TEST_F(CodecEvsConfigTest, Create_CmrNotPresent)
 {
     // Define specific test values
@@ -355,7 +355,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrNotPresent)
     ImsVector<IMS_SINT32> objBitrateListArray;  // {5.9kbps, 7.2kbps}
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_5_9_KBPS);  // 0
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_7_2_KBPS);  // 1
-    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;  // 1 (WB only)
+    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;                  // 1 (WB only)
     IMS_SINT32 nCmr = CARRIERCONFIG_CMR_NOT_PRESENT;
     IMS_SINT32 nChAwRecv = 2;
     IMS_BOOL bVisibleModeSet = IMS_TRUE;
@@ -473,7 +473,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrDisabled)
     ImsVector<IMS_SINT32> objBitrateListArray;  // {5.9kbps, 7.2kbps}
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_5_9_KBPS);  // 0
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_7_2_KBPS);  // 1
-    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;  // 1 (WB only)
+    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;                  // 1 (WB only)
     IMS_SINT32 nCmr = CARRIERCONFIG_CMR_DISABLED;
     IMS_SINT32 nChAwRecv = 2;
     IMS_BOOL bVisibleModeSet = IMS_TRUE;
@@ -591,7 +591,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrAllEnabled)
     ImsVector<IMS_SINT32> objBitrateListArray;  // {5.9kbps, 7.2kbps}
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_5_9_KBPS);  // 0
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_7_2_KBPS);  // 1
-    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;  // 1 (WB only)
+    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;                  // 1 (WB only)
     IMS_SINT32 nCmr = CARRIERCONFIG_CMR_ALL_ENABLED;
     IMS_SINT32 nChAwRecv = 2;
     IMS_BOOL bVisibleModeSet = IMS_TRUE;
@@ -709,7 +709,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrEnabled)
     ImsVector<IMS_SINT32> objBitrateListArray;  // {5.9kbps, 7.2kbps}
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_5_9_KBPS);  // 0
     objBitrateListArray.Push(CodecEvsConfig::EVS_PRIMARY_MODE_BITRATE_7_2_KBPS);  // 1
-    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;  // 1 (WB only)
+    IMS_SINT32 nBwList = CodecEvsConfig::EVS_ENCODED_BW_TYPE_WB;                  // 1 (WB only)
     IMS_SINT32 nCmr = CARRIERCONFIG_CMR_ENABLED;
     IMS_SINT32 nChAwRecv = 2;
     IMS_BOOL bVisibleModeSet = IMS_TRUE;

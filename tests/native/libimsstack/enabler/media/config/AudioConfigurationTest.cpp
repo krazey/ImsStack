@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ImsStrLib.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
+#include "ICarrierConfig.h"
 #include "config/AudioConfiguration.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -224,40 +222,40 @@ TEST_F(AudioConfigurationTest, GetJitterBufferSize)
 
 TEST_F(AudioConfigurationTest, IsRtcpXrEnabled)
 {
-    IMS_BOOL bAudioRtcpxrEnabled = IMS_TRUE;
-    IMS_BOOL bAudioRtcpxrStatisticsEnabled = IMS_FALSE;
-    IMS_BOOL bAudioRtcpxrVoipMetricsEnabled = IMS_TRUE;
-    IMS_BOOL bAudioRtcpxrPacketLossRleEnabled = IMS_FALSE;
-    IMS_BOOL bAudioRtcpxrPacketDuplicateRleEnabled = IMS_TRUE;
+    IMS_BOOL bAudioRtcpXrEnabled = IMS_TRUE;
+    IMS_BOOL bAudioRtcpXrStatisticsEnabled = IMS_FALSE;
+    IMS_BOOL bAudioRtcpXrVoipMetricsEnabled = IMS_TRUE;
+    IMS_BOOL bAudioRtcpXrPacketLossRleEnabled = IMS_FALSE;
+    IMS_BOOL bAudioRtcpXrPacketDuplicateRleEnabled = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR))
-            .WillByDefault(Return(bAudioRtcpxrEnabled));
+            .WillByDefault(Return(bAudioRtcpXrEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL,
                     DEFAULT_RTCPXR_STATISTICS))
-            .WillByDefault(Return(bAudioRtcpxrStatisticsEnabled));
+            .WillByDefault(Return(bAudioRtcpXrStatisticsEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
                     DEFAULT_RTCPXR_VOIP_METRICS))
-            .WillByDefault(Return(bAudioRtcpxrVoipMetricsEnabled));
+            .WillByDefault(Return(bAudioRtcpXrVoipMetricsEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_LOSS_RLE))
-            .WillByDefault(Return(bAudioRtcpxrPacketLossRleEnabled));
+            .WillByDefault(Return(bAudioRtcpXrPacketLossRleEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE))
-            .WillByDefault(Return(bAudioRtcpxrPacketDuplicateRleEnabled));
+            .WillByDefault(Return(bAudioRtcpXrPacketDuplicateRleEnabled));
 
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->IsRtcpXrEnabled(), bAudioRtcpxrEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrStatisticsEnabled(), bAudioRtcpxrStatisticsEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrVoipEnabled(), bAudioRtcpxrVoipMetricsEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrPlrEnabled(), bAudioRtcpxrPacketLossRleEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(), bAudioRtcpxrPacketDuplicateRleEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrEnabled(), bAudioRtcpXrEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrStatisticsEnabled(), bAudioRtcpXrStatisticsEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrVoipEnabled(), bAudioRtcpXrVoipMetricsEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrPlrEnabled(), bAudioRtcpXrPacketLossRleEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(), bAudioRtcpXrPacketDuplicateRleEnabled);
 }
 
 TEST_F(AudioConfigurationTest, GetDtmfDuration)

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 #define _MOCK_MEDIA_CONFIGURATION_H_
 
 #include <gmock/gmock.h>
+
 #include <config/MediaConfiguration.h>
 
 class MockMediaConfiguration : public MediaConfiguration
@@ -54,7 +55,7 @@ public:
     MOCK_METHOD(void, ToDebugString, (), (const, override));
     MOCK_METHOD(void, ToDebugStringCodecs, (IN const CodecConfig* pCodecConfig), (const, override));
     MOCK_METHOD(void, Clear, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetCodecType, (IN IMS_UINT32 nCodec), (const, override));
+    MOCK_METHOD(IMS_UINT32, ConvertCodecType, (IN IMS_UINT32 nCodec), (const, override));
     MOCK_METHOD(void, SetPorts, (IN ICarrierConfig * piCc, IN const IMS_CHAR* pszKey), (override));
     MOCK_METHOD(void, SetRtcpIntervals, (IN ICarrierConfig * piCc, IN const IMS_CHAR* pszKey),
             (override));

@@ -59,8 +59,8 @@ PRIVATE void MediaProfileGenerator::SetPayloads(
         return;
     }
 
-    ImsList<CodecConfig*> pCodecs;
-    pCodecs = pConfig->GetCodecConfigs();
+    ImsList<CodecConfig*> pCodecs = pConfig->GetCodecConfigs();
+    IMS_TRACE_D("SetPayloads() - numCodecs[%d]", pCodecs.GetSize(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < pCodecs.GetSize(); i++)
     {
@@ -68,7 +68,7 @@ PRIVATE void MediaProfileGenerator::SetPayloads(
 
         if (pCodecConfig == IMS_NULL)
         {
-            IMS_TRACE_D("CreateCodecPayloads() - pCodecConfig is NULL", 0, 0, 0);
+            IMS_TRACE_D("SetPayloads() - pCodecConfig is NULL", 0, 0, 0);
             break;
         }
 
@@ -76,8 +76,8 @@ PRIVATE void MediaProfileGenerator::SetPayloads(
 
         if (pCodecConfig->GetPayloadType() == -1)
         {
-            IMS_TRACE_D("CreateCodecPayloads() - invalid payload type, skip config[%d] - %d:%s", i,
-                    nCodec, ImsCodec::CodecToString(nCodec));
+            IMS_TRACE_D("SetPayloads() - invalid payload type, skip config[%d] - %d:%s", i, nCodec,
+                    ImsCodec::CodecToString(nCodec));
             continue;
         }
 

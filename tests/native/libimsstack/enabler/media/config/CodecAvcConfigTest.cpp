@@ -15,14 +15,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ImsStrLib.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
+#include "ImsStrLib.h"
 #include "config/CodecAvcConfig.h"
+#include "config/ImsCodec.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -38,7 +37,7 @@ static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SP
 #define DEFAULT_PROFILE_ID "42C00C"
 #define DEFAULT_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
-#define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
+#define DEFAULT_FRAME_SIZE   "NEED_TO_CHECK"
 #define DEFAULT_SPROP_PARAMS "Z0LAFtoHgUZA,aM4G8g=="
 
 using ::testing::Return;
@@ -48,7 +47,8 @@ MATCHER_P(IsSameKey, key, "")
     return IMS_StrCmp(arg, key) == 0;
 }
 
-class CodecAvcConfigTest : public ::testing::Test {
+class CodecAvcConfigTest : public ::testing::Test
+{
 public:
     CodecAvcConfig* m_pConfig;
     MockICarrierConfig* m_pMockICarrierConfig;

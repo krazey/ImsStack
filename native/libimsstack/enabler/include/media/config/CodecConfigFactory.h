@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +17,9 @@
 #ifndef CODEC_CONFIG_FACTORY_H_
 #define CODEC_CONFIG_FACTORY_H_
 
-#include "config/CodecAmrConfig.h"
-#include "config/CodecPcmConfig.h"
-#include "config/CodecTelephoneEventConfig.h"
-#include "config/CodecEvsConfig.h"
-#include "config/CodecAvcConfig.h"
-#include "config/CodecHevcConfig.h"
-#include "config/CodecT140Config.h"
+#include "ImsTypeDef.h"
 
+class ICarrierConfig;
 class CodecConfig;
 
 class CodecConfigFactory

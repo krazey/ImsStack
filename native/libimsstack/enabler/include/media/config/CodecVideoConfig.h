@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 #ifndef CODEC_VIDEO_CONFIG_H_
 #define CODEC_VIDEO_CONFIG_H_
 
+#include "AString.h"
 #include "config/CodecConfig.h"
 
 class CodecVideoConfig : public CodecConfig

@@ -19,7 +19,9 @@
 
 #include "ImsMap.h"
 #include "ImsList.h"
-#include "config/MediaSessionConfig.h"
+#include "MediaDef.h"
+
+class MediaSessionConfig;
 
 class MediaSessionConfigFactory
 {

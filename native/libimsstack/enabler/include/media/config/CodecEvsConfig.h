@@ -17,8 +17,9 @@
 #ifndef CODEC_EVS_CONFIG_H_
 #define CODEC_EVS_CONFIG_H_
 
-#include "AString.h"
 #include "config/CodecAudioConfig.h"
+
+class AString;
 
 class CodecEvsConfig : public CodecAudioConfig
 {

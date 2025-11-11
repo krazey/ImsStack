@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "config/MediaSessionConfigFactory.h"
+
+#include "ServiceTrace.h"
+#include "config/MediaSessionConfig.h"
 
 static MediaSessionConfigFactory* g_pMediaSessionConfigFactory = IMS_NULL;
 

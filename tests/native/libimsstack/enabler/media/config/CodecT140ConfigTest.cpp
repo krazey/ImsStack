@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,14 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
+#include "ICarrierConfig.h"
 #include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
 #include "config/CodecT140Config.h"
+#include "config/ImsCodec.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::Return;
 
@@ -32,7 +33,8 @@ static const IMS_SINT32 DEFAULT_RED_LEVEL_NONE = CodecT140Config::DEFAULT_RED_LE
 static const IMS_SINT32 DEFAULT_RED_LEVEL = CodecT140Config::DEFAULT_RED_LEVEL;
 static const IMS_SINT32 DEFAULT_TEXT_SAMPLING_RATE = CodecT140Config::DEFAULT_TEXT_SAMPLING_RATE;
 
-class CodecT140ConfigTest : public ::testing::Test {
+class CodecT140ConfigTest : public ::testing::Test
+{
 public:
     ICarrierConfig* m_piCc;
 

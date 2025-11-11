@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 
 #include "ICarrierConfig.h"
-#include "CarrierConfig.h"
 #include "ServiceConfig.h"
 #include "config/CodecTelephoneEventConfig.h"
+#include "config/ImsCodec.h"
 
 static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_CHAR* DEFAULT_EVENT = "0-15";

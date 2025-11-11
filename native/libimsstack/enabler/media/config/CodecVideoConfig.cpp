@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "config/CodecVideoConfig.h"
+
+#include "CarrierConfig.h"
+#include "ICarrierConfig.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

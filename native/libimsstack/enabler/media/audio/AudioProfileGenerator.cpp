@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+#include "audio/AudioProfileGenerator.h"
+
 #include "ServiceTrace.h"
 
-#include "audio/AudioProfileGenerator.h"
+#include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
 #include "config/CodecAmrConfig.h"
 #include "config/CodecEvsConfig.h"
 #include "config/CodecTelephoneEventConfig.h"
-#include "audio/AudioProfileUtil.h"
+#include "config/ImsCodec.h"
 
 static const IMS_SINT32 NOT_PRESENT = -1;
 
@@ -211,8 +213,8 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
     IMS_TRACE_D("CreateAmrPayload(): Codec[%s], Payload[%d], SamplingRate[%d]",
             ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetPayloadType(),
             pAmrConfig->GetSamplingRate());
-    IMS_TRACE_D("CreateAmrPayload(): amrDtx[%d], VisibleModeSet[%d]", pAmrConfig->GetDtx(),
-            pAmrConfig->GetVisibleModeSet(), 0);
+    IMS_TRACE_D("CreateAmrPayload(): OctetAligned[%d], Dtx[%d], VisibleModeSet[%d]",
+            pAmrConfig->GetOctetAlign(), pAmrConfig->GetDtx(), pAmrConfig->GetVisibleModeSet());
 
     return pAmrPayload;
 }
