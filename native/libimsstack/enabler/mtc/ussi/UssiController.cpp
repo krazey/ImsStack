@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AStringBuffer.h"
 #include "IMessage.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
@@ -24,6 +25,7 @@
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "ussi/UssiConstants.h"

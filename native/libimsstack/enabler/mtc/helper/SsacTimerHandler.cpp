@@ -16,6 +16,7 @@
 
 #include "IImsRadio.h"
 #include "IMtcContext.h"
+#include "IMtcService.h"
 #include "INetworkWatcher.h"
 #include "ServiceImsRadio.h"
 #include "ServiceSystemTime.h"

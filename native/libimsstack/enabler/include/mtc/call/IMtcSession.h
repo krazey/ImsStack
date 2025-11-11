@@ -18,6 +18,7 @@
 #define INTERFACE_MTC_SESSION_H_
 
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/message/IMtcMessageHandler.h"
 

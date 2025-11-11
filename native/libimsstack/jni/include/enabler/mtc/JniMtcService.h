@@ -18,7 +18,6 @@
 #define JNI_MTC_SERVICE_H_
 
 #include "BaseService.h"
-#include "IJniEnabler.h"
 #include "ImsTypeDef.h"
 
 class IMtcService;

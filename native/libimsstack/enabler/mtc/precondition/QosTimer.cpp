@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "ITimer.h"
+#include "ServiceTimer.h"
 #include "ServiceTrace.h"
+#include "precondition/IQosTimerListener.h"
 #include "precondition/QosStringUtils.h"
 #include "precondition/QosTimer.h"
 

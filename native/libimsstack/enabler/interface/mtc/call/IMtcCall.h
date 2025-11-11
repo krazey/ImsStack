@@ -17,12 +17,10 @@
 #ifndef INTERFACE_MTC_CALL_H_
 #define INTERFACE_MTC_CALL_H_
 
-#include "AString.h"
-#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
+class AString;
 class ISession;
 class SuppService;
 class IMtcCallContext;

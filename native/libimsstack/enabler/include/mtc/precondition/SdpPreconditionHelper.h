@@ -17,14 +17,14 @@
 #ifndef SDP_PRECONDITION_HELPER_H_
 #define SDP_PRECONDITION_HELPER_H_
 
-#include "ISession.h"
-#include "ISipMessage.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "media/IMediaDescriptor.h"
-#include "offeranswer/SdpSegmentedPrecondition.h"
-#include "precondition/SdpPreconditionHelper.h"
-#include "precondition/QosStatusTable.h"
+
+class IMediaDescriptor;
+class ISession;
+class ISipMessage;
+class QosStatusTable;
+class SdpSegmentedPrecondition;
 
 class SdpPreconditionHelper
 {

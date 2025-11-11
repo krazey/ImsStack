@@ -16,6 +16,8 @@
 
 #include "CallReasonInfo.h"
 #include "ImsList.h"
+#include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/NullCall.h"
 #include <gtest/gtest.h>
 

@@ -17,9 +17,9 @@
 #ifndef INTERFACE_MTC_PRECONDITION_LISTENER_H_
 #define INTERFACE_MTC_PRECONDITION_LISTENER_H_
 
-#include "ISession.h"
 #include "ImsTypeDef.h"
 
+class ISession;
 enum class QosLossPolicy;
 
 class IMtcPreconditionListener

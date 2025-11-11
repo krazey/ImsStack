@@ -17,11 +17,9 @@
 #ifndef JNI_MTC_CALL_THREAD_H_
 #define JNI_MTC_CALL_THREAD_H_
 
-#include "BaseService.h"
 #include "BaseServiceThread.h"
 #include "IJniMtcCallThread.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 

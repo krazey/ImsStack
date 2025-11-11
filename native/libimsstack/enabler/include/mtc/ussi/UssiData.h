@@ -18,9 +18,10 @@
 #define USSI_DATA_H_
 
 #include "AString.h"
-#include "INodeList.h"
 #include "ImsTypeDef.h"
 #include "ussi/UssiDef.h"
+
+class INode;
 
 class UssiData
 {

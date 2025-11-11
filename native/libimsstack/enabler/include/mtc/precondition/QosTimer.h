@@ -19,9 +19,10 @@
 
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "ServiceTimer.h"
-#include "precondition/IQosTimerListener.h"
 #include "precondition/QosDef.h"
+
+class IQosTimerListener;
+class ITimer;
 
 class QosTimer : public ITimerListener
 {

@@ -19,6 +19,7 @@
 #include "INetworkWatcher.h"
 #include "ISipClientConnection.h"
 #include "ISipConnection.h"
+#include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsAosReason.h"
 #include "IuMtcCall.h"

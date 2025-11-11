@@ -19,6 +19,7 @@
 
 #include "AString.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/message/IMtcMessageHandler.h"
 
 class IMessage;

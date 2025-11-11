@@ -43,6 +43,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMediaReportEventListener.h"
 #include "media/MtcMediaManager.h"
+#include "precondition/IMtcPreconditionListener.h"
 #include "precondition/MtcPreconditionManager.h"
 #include <functional>
 #include <memory>

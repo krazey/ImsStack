@@ -18,7 +18,6 @@
 #define CONFERENCE_DEF_H_
 
 #include "AString.h"
-#include "ServiceTrace.h"
 
 //
 enum

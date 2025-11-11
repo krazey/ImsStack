@@ -19,16 +19,18 @@
 
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCallContext.h"
-#include "media/IMediaDescriptor.h"
+#include "call/IMtcCall.h"
 #include "media/IMediaQosEventListener.h"
-#include "precondition/IMtcPreconditionListener.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "precondition/IQosTimerListener.h"
 #include "precondition/QosDef.h"
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosTimer.h"
 #include "precondition/SdpPreconditionHelper.h"
+
+class IMediaDescriptor;
+class IMtcCallContext;
+class IMtcPreconditionListener;
 
 class QosInfo
 {
