@@ -20,6 +20,7 @@
 #include "ImsAosParameter.h"
 #include "ImsVector.h"
 #include "MockIMessage.h"
+#include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
 #include "PlatformContext.h"
@@ -29,6 +30,7 @@
 #include "TextParser.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "call/MockISilentRedialHelper.h"
 #include "call/termination/EmergencyStartErrorHandler.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
@@ -54,6 +56,8 @@ public:
     MockIMessageUtils objMessageUtils;
     MockIMtcSession objMtcSession;
     MockISession objSession;
+    MockIMtcCallController objCallController;
+    MockISilentRedialHelper objRedialHelper;
     TestConfigService* m_pConfigService;
     ImsVector<AString> objActionSets;
     EmergencyStartErrorHandler* pHandler;
@@ -77,6 +81,8 @@ protected:
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objMessageUtils, GetCauseFromReasonHeader).WillByDefault(Return(-1));
+        ON_CALL(objCallContext, GetCallController).WillByDefault(ReturnRef(objCallController));
+        ON_CALL(objCallController, GetActiveRedialHelper()).WillByDefault(Return(nullptr));
         pHandler = new EmergencyStartErrorHandler(objCallContext, objSession);
     }
 
@@ -338,6 +344,61 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleDoesNotRedialsWithRetryAfterInSipEr
 
     EXPECT_FALSE(CheckHandleResult(
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfOnceInitiatesSingleRetry)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest,
+        HandleSilentReinviteToAlternatePcscfOnceReturnsCsRetryRequiredIfAosConnectorIsNull)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(nullptr));
+
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandlePcscfOnceRetryTerminationCheckIfRetryFails)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ON_CALL(objCallController, GetActiveRedialHelper()).WillByDefault(Return(&objRedialHelper));
+    ON_CALL(objRedialHelper, GetType())
+            .WillByDefault(Return(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(0);
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandlePcscfOnceRetryTerminationCheckIfNonOnceRetryInProgress)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE);
+    ON_CALL(objCallController, GetActiveRedialHelper()).WillByDefault(Return(&objRedialHelper));
+    ON_CALL(objRedialHelper, GetType())
+            .WillByDefault(Return(EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
 }
 
 }  // namespace android

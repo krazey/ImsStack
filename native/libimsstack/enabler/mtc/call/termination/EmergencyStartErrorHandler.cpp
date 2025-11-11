@@ -24,6 +24,7 @@
 #include "call/IMtcSession.h"
 #include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
 #include "call/termination/EmergencyStartErrorHandler.h"
+#include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationResolver.h"
 #include "helper/IMtcAosConnector.h"
@@ -50,6 +51,8 @@ const std::unordered_map<IMS_SINT32, EmergencyStartErrorHandler::ActionFunc>
             &EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByPermFailure},
     {ConfigEmergency::START_ERROR_ACTION_TERMINATE,
             &EmergencyStartErrorHandler::HandleTerminate},
+    {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE,
+            &EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce},
 };
 // clang-format on
 
@@ -97,6 +100,18 @@ EmergencyStartErrorHandler::MaybeGetOverriddenCallReasonInfo(
 PUBLIC
 CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
+    if (StartErrorHandler::ShouldTerminateWithoutActionConfig(m_objContext))
+    {
+        if (StartErrorHandler::IsTransactionTimeout(piMessage))
+        {
+            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+        }
+        else
+        {
+            return StartErrorHandler::GetDefaultCallReasonInfo(m_objContext, *piMessage);
+        }
+    }
+
     IMS_SINT32 nStatusCode = GetStatusCode(piMessage);
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(),
@@ -249,6 +264,22 @@ CallReasonInfo EmergencyStartErrorHandler::HandleTerminate(IN const IMessage* pi
     const IMS_SINT32 nReasonCode =
             GetDefaultReasonCode(m_objContext.GetConfigurationProxy(), nStatusCode);
     return CallReasonInfo(nReasonCode, GetExtraCode(nReasonCode, piMessage));
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
+        IN [[maybe_unused]] const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
+
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (!pAosConnector)
+    {
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    }
+
+    pAosConnector->RegisterWithNextPcscf(0);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
 }
 
 PRIVATE

@@ -104,7 +104,7 @@
         <item value="403:6"/> <!-- TERMINATE -->
         <item value="486:6"/> <!-- TERMINATE -->
         <item value="487:6"/> <!-- TERMINATE -->
-        <item value="503:6"/> <!-- TERMINATE -->
+        <item value="503:7"/> <!-- SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE -->
         <item value="603:6"/> <!-- TERMINATE -->
     </string-array>
     <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="12">
