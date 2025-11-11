@@ -48,6 +48,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -460,7 +462,7 @@ public class ImsMmTelService extends MmTelFeature
     protected class MmTelCallListener implements IMmTelCallListener {
         @Override
         public void onIncomingCallReceived(ImsCallSessionImplBase session) {
-            ImsCallSessionImpl incomingSession = (ImsCallSessionImpl)session;
+            ImsCallSessionImpl incomingSession = (ImsCallSessionImpl) session;
 
             if (incomingSession == null) {
                 throw new IllegalArgumentException("ImsCallSessionImplBase is null");
@@ -475,30 +477,24 @@ public class ImsMmTelService extends MmTelFeature
             callApp.takeCallSession(incomingSession);
 
             Bundle extras = new Bundle();
-
-            // EXTRA_USSD
-            String isUSSD = incomingSession.getProperty(ImsCallProfile.EXTRA_USSD);
-            if (isUSSD != null && isUSSD.equals("true")) {
+            if ("true".equals(session.getProperty(ImsCallProfile.EXTRA_USSD))) {
                 extras.putBoolean(MmTelFeature.EXTRA_IS_USSD, true);
             }
 
-            // If any exception is thrown by this method call,
-            // the incoming call is automatically rejected.
-            mImsContext.getDefaultHandler().post(
-                    () -> {
-                        try {
-                            notifyIncomingCall(incomingSession,
-                                    incomingSession.getCallId(), extras);
-                        } catch (RuntimeException e) {
-                            loge("onIncomingCallReceived Exception:" + e.toString());
-                        }
-                    }
-            );
+            // `notifyIncomingCall` should be notified using the `default handler` instead of the
+            // `call handler`. This is because, in the same flow, Telephony accesses
+            // the IMS stack call object, and since the `call thread` is used, a deadlock occurs.
+            // The result of `notifyIncomingCall` is processed via the `call thread`.
+            Executor defaultExecutor = mImsContext.getDefaultHandler()::post;
+            Executor callExecutor = incomingSession.getCallHandler()::post;
 
-            // Notify user alerting to native MTC logic if not USSD.
-            if (isUSSD == null || isUSSD.equals("false")) {
-                incomingSession.alertUser();
-            }
+            CompletableFuture.supplyAsync(
+                    () -> notifyIncomingCall(incomingSession, incomingSession.getCallId(), extras),
+                    defaultExecutor)
+                    .whenCompleteAsync((listener, exception) -> {
+                        incomingSession.onIncomingcallNotified(
+                                exception == null && listener != null);
+                    }, callExecutor);
         }
 
         @Override

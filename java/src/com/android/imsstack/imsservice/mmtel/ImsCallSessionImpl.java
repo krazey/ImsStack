@@ -1314,6 +1314,27 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         mCall.alertUser();
     }
 
+    /**
+     * Called when the framework has been notified of an incoming call.
+     *
+     * If the notification is not handled by the framework, the call will be rejected with
+     * {@link ImsReasonInfo#CODE_LOCAL_SERVICE_UNAVAILABLE}
+     *
+     * @param isHandled Indicates whether the framework has handled the incoming call notification.
+     *        If false, the telephony will not invoke {@code close()}. The ImsStack must internally
+     *        handle the call closing mechanism.
+     */
+    public void onIncomingcallNotified(boolean isHandled) {
+        log("onIncomingcallNotified isHandled: " +  isHandled);
+
+        if (isHandled) {
+            alertUser();
+        } else {
+            reject(ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
+            closeInternal(ImsCallSessionImpl.this);
+        }
+    }
+
     public int getCallConnectionId() {
         return mLocalCallProfile.getCallExtraInt(Call.EXTRA_CALL_CONNECTION_ID, 0);
     }
@@ -1403,6 +1424,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     @VisibleForTesting
     public CallDetails getCallDetails() {
         return mCallDetails;
+    }
+
+    protected Handler getCallHandler() {
+        return mCallContext.getCallHandler();
     }
 
     @VisibleForTesting
@@ -1892,7 +1917,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
-        Handler h = mCallContext.getCallHandler();
+        Handler h = getCallHandler();
 
         if (mStartFailedCallback != null) {
             // If it's already posted, then remove it first.
@@ -1958,8 +1983,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         if (delay <= 0) {
             mCallback.invokeTerminated(this, reasonInfo);
         } else {
-            Handler h = mCallContext.getCallHandler();
-            h.postDelayed(() -> {
+            getCallHandler().postDelayed(() -> {
                 mCallback.invokeTerminated(ImsCallSessionImpl.this, reasonInfo);
             }, delay);
         }
@@ -1977,8 +2001,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             session.close();
             mCallDetails.clear(CallDetails.CLOSE_PENDING);
         } else {
-            Handler h = mCallContext.getCallHandler();
-            h.postDelayed(() -> {
+            getCallHandler().postDelayed(() -> {
                 if (session.getMtcCall() != null) {
                     session.close();
                     mCallDetails.clear(CallDetails.CLOSE_PENDING);
@@ -2009,9 +2032,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         logi("Forwarded call :: number=" + ImsLog.hiddenString(cdivHistory)
                 + ", cause=" + cdivCause);
 
-        Handler h = mCallContext.getCallHandler();
-
-        h.postDelayed(new Runnable() {
+        getCallHandler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -3947,7 +3968,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     && mCallDetails.is(CallDetails.IMPLICIT_ON_HOLD)) {
                 // TODO(b/451717299): mTransferRequestedSession.mCallback.
                 // invokeCallSessionTransferFailed is required here?
-                mCallContext.getCallHandler().postDelayed(
+                getCallHandler().postDelayed(
                         () -> mCall.resume(MtcCallUtils.createUnholdMedia(
                             mCall.getCallInfo(), mCall.getMediaInfo(),
                             isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE))),
@@ -4243,7 +4264,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                     log("onCallUpdateReceived :: delay the video upgrade"
                             + "to sync video capability with the call framework");
-                    mCallContext.getCallHandler().postDelayed(
+                    getCallHandler().postDelayed(
                             () -> mVideoCallSession.receiveSessionModifyRequest(
                             ImsVideoCallSession.MODIFICATION_CALL_TYPE, mediaInfo), 100);
                 } else {
