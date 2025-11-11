@@ -88,20 +88,56 @@ function get_test_name() {
 }
 
 function its() {
-    command=$(get_its_test_name "$@")
+    if [ $# -eq 0 ]; then
+        get_its_test_name "$@"
+        return 1
+    fi
+
+    local command=$(get_its_test_name "$1")
+    shift
+    local extra_args="$@"
 
     clear
-    echo "> atest -c ImsStackTest:$command"
-    atest -c ImsStackTest:$command -- --log-level-display ERROR
+    echo "> atest -c ImsStackTest:$command $extra_args"
+    atest -c ImsStackTest:$command $extra_args -- --log-level-display ERROR
 }
 
 function get_its_test_name() {
     if [ $# -eq 0 ]; then
-        echo "Usage: its <TestPath.TestName> or its <TestPath.TestName#TestMethod>"
+        echo "Usage: its <TestPath.TestName> or its <TestPath.TestName#TestMethod> [--argument]"
         exit 1
     fi
 
-    TEST_NAME="com.android.imsstack.its.tests.$1"
+    local test_arg="$1"
+    local test_class_name
+    local test_method
+
+    if [[ "$test_arg" == *"#"* ]]; then
+        test_class_name="${test_arg%%#*}"
+        test_method="#${test_arg#*#}"
+    else
+        test_class_name="$test_arg"
+        test_method=""
+    fi
+
+    local search_dir=""
+    if [[ "$test_class_name" == *"."* ]]; then
+        search_dir="/$(echo "${test_class_name%.*}" | sed 's/\./\//g')"
+        test_class_name="${test_class_name##*.}"
+    fi
+
+    local script_dir=$(dirname "${BASH_SOURCE[0]}")
+    local search_path="${script_dir}/ImsStackTest/java${search_dir}"
+    local file_path=$(find "${search_path}" -name "${test_class_name}.java" | head -n 1)
+
+    if [ -z "$file_path" ]; then
+        echo "Test file not found for: ${test_arg}"
+        exit 1
+    fi
+
+    local full_class_name=$(echo "$file_path" | sed -e 's|.*java/src/||' -e 's|.java||' -e 's|/|.|g')
+
+    TEST_NAME="${full_class_name}${test_method}"
 
     echo "$TEST_NAME"
 }
