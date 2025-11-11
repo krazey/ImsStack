@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.aos.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -43,6 +44,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.util.SparseArray;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -81,6 +84,7 @@ import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.util.IndentingPrintWriter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -90,6 +94,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.StringWriter;
 import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
@@ -1572,6 +1577,60 @@ public class AosServiceTest extends ImsStackTest {
 
         verifyNoMoreInteractions(mMockAosRegistrationListener);
         verifyNoMoreInteractions(mMockAosInfoListener);
+    }
+
+    @Test
+    @SmallTest
+    public void dumpVerifiesPresenceOfKeyInfo() {
+        // GIVEN: Setup the service state and log content
+
+        final String dumpsysIndentPrefix = "  ";
+        StringWriter stringWriter = new StringWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(stringWriter, dumpsysIndentPrefix);
+
+        CapabilityPairs pairs = new CapabilityPairs(NetworkType.IWLAN, Capability.VIDEO);
+        mAosService.setCapabilityPairs(pairs);
+        mAosService.setConnectedOverCrossSim(true);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERING);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(FeatureTagMask.MMTEL);
+        parcel.writeInt(0);
+        parcel.setDataPosition(0);
+
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        assertNotNull("JNI Listener should not be null", jniImsListener);
+        jniImsListener.onMessage(parcel);
+
+        processAllMessages();
+
+        // WHEN: The dump() method is called
+        mAosService.dump(pw);
+        pw.flush();
+        String output = stringWriter.toString();
+
+
+        // THEN: The output string loosely contains all key information
+
+        // Check for section headers
+        assertTrue("Output should contain the 'Service:' header",
+                output.contains("Service:"));
+        assertTrue("Output should contain the 'Most recent logs:' header",
+                output.contains("Most recent logs:"));
+
+        // Check for key state values
+        assertTrue("Dump should contain the correct registration state",
+                output.contains("state=" + RegistrationState.REGISTERING));
+        assertTrue("Dump should contain the correct CrossSim status",
+                output.contains("CrossSim=true"));
+        assertTrue("Dump should contain the capability pairs string",
+                output.contains(pairs.toString()));
+
+        // Check that the log content was dumped
+        assertTrue("Dump should contain the log message from the JNI call",
+                output.contains("N2J_NOTIFY_REGISTERING: type=NORMAL"));
     }
 
     @Test

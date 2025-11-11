@@ -275,9 +275,14 @@ public class AosFactory {
      * @param pw A {@link PrintWriter} object used to write the formatted logs.
      */
     public void dump(int slotId, @NonNull IndentingPrintWriter pw) {
+        pw.println("Aos:");
+        pw.increaseIndent();
+
         AosService aosService = mAosServices.get(slotId);
         if (aosService != null) {
             aosService.dump(pw);
         }
+
+        pw.decreaseIndent();
     }
 }
