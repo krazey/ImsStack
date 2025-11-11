@@ -285,78 +285,29 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(IN IMS_UINTP nNegoId, IN MEDIA_
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL void MediaSession::RequestQosParam(
-        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType)
+PUBLIC
+IMS_BOOL MediaSession::IsQosAvailable(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
 {
-    IMS_TRACE_I("RequestQosParam() - NegoId[%" PFLS_x "], Type[%d]", nNegoId, eType, 0);
-
-    QosRequestParam* pParam = createQosParam(nNegoId, eType);
+    QosRequestParam* pParam = createQosParam(nNegoId, eMediaType);
 
     if (pParam == IMS_NULL)
     {
-        IMS_TRACE_E(0, "RequestQosParam() - invalid param", 0, 0, 0);
-        return;
+        IMS_TRACE_E(0, "IsQosAvailable() - failed to create QosRequestParam", 0, 0, 0);
+        return IMS_FALSE;
     }
 
     // check whether qos for the remote address already requested
     QosRequestParam* pQosParams = FindQosParam(pParam);
+    delete pParam;
 
-    if (pQosParams != IMS_NULL)
+    if (pQosParams != nullptr)
     {
-        IMS_TRACE_D("RequestQosParam() - Type[%d] found, port[%d]", eType, pQosParams->m_nPort, 0);
-        pQosParams->AddNegoId(nNegoId);
-
-        if (pQosParams->m_bResult)  // The qos already acquired
-        {
-            IMS_TRACE_D("RequestQosParam() - Qos already acquired", 0, 0, 0);
-            MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-            if (pMediaManager != nullptr)
-            {
-                ImsMediaMsgQosParam* pQosInfoParam = new ImsMediaMsgQosParam(
-                        pQosParams->m_eMediaType, pQosParams->m_objIpAddress, pQosParams->m_nPort);
-                pQosInfoParam->m_bResult = pQosParams->m_bResult;
-
-                pMediaManager->PostMessage(
-                        IJniMedia::NOTIFY_QOS_INFO, m_nCallKey, (IMS_UINTP)pQosInfoParam);
-            }
-            else
-            {
-                IMS_TRACE_D("RequestQosParam() - MediaManager is invalid", 0, 0, 0);
-            }
-        }
-        else  // request again
-        {
-            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS,
-                    new ImsMediaMsgQosParam(
-                            pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
-        }
-
-        delete pParam;
+        IMS_TRACE_I("IsQosAvailable() - NegoId[%" PFLS_x "], Type[%d], result[%d]", nNegoId,
+                eMediaType, pQosParams->m_bResult);
+        return pQosParams->m_bResult;
     }
-    else  // new request
-    {
-        pParam->AddNegoId(nNegoId);
-        MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS,
-                new ImsMediaMsgQosParam(
-                        pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
-        m_objListQosParams.Append(pParam);
-    }
-}
 
-PROTECTED VIRTUAL void MediaSession::ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType)
-{
-    IMS_TRACE_I("ReleaseQosParam() - Type[%d]", eType, 0, 0);
-
-    for (IMS_SINT32 nIndex = 0; nIndex < m_objListQosParams.GetSize(); nIndex++)
-    {
-        QosRequestParam* qosParam = m_objListQosParams.GetAt(nIndex);
-
-        if (eType == qosParam->m_eMediaType)
-        {
-            m_objListQosParams.RemoveAt(nIndex);
-            delete qosParam;
-        }
-    }
+    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL void MediaSession::FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession)
@@ -746,6 +697,80 @@ PROTECTED void MediaSession::ClearQosParam()
         if (param != IMS_NULL)
         {
             delete param;
+        }
+    }
+}
+
+PROTECTED VIRTUAL void MediaSession::RequestQosParam(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType)
+{
+    IMS_TRACE_I("RequestQosParam() - NegoId[%" PFLS_x "], Type[%d]", nNegoId, eType, 0);
+
+    QosRequestParam* pParam = createQosParam(nNegoId, eType);
+
+    if (pParam == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "RequestQosParam() - invalid param", 0, 0, 0);
+        return;
+    }
+
+    // check whether qos for the remote address already requested
+    QosRequestParam* pQosParams = FindQosParam(pParam);
+
+    if (pQosParams != IMS_NULL)
+    {
+        IMS_TRACE_D("RequestQosParam() - Type[%d] found, port[%d]", eType, pQosParams->m_nPort, 0);
+        pQosParams->AddNegoId(nNegoId);
+
+        if (pQosParams->m_bResult)  // The qos already acquired
+        {
+            IMS_TRACE_D("RequestQosParam() - Qos already acquired", 0, 0, 0);
+            MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+            if (pMediaManager != nullptr)
+            {
+                ImsMediaMsgQosParam* pQosInfoParam = new ImsMediaMsgQosParam(
+                        pQosParams->m_eMediaType, pQosParams->m_objIpAddress, pQosParams->m_nPort);
+                pQosInfoParam->m_bResult = pQosParams->m_bResult;
+
+                pMediaManager->PostMessage(
+                        IJniMedia::NOTIFY_QOS_INFO, m_nCallKey, (IMS_UINTP)pQosInfoParam);
+            }
+            else
+            {
+                IMS_TRACE_D("RequestQosParam() - MediaManager is invalid", 0, 0, 0);
+            }
+        }
+        else  // request again
+        {
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS,
+                    new ImsMediaMsgQosParam(
+                            pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
+        }
+
+        delete pParam;
+    }
+    else  // new request
+    {
+        pParam->AddNegoId(nNegoId);
+        MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS,
+                new ImsMediaMsgQosParam(
+                        pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
+        m_objListQosParams.Append(pParam);
+    }
+}
+
+PROTECTED VIRTUAL void MediaSession::ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType)
+{
+    IMS_TRACE_I("ReleaseQosParam() - Type[%d]", eType, 0, 0);
+
+    for (IMS_SINT32 nIndex = 0; nIndex < m_objListQosParams.GetSize(); nIndex++)
+    {
+        QosRequestParam* qosParam = m_objListQosParams.GetAt(nIndex);
+
+        if (eType == qosParam->m_eMediaType)
+        {
+            m_objListQosParams.RemoveAt(nIndex);
+            delete qosParam;
         }
     }
 }

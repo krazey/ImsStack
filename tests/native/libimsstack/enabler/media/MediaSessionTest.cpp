@@ -689,6 +689,37 @@ TEST_F(MediaSessionTest, testRequestQosWhenPendingResendsRequest)
     EXPECT_EQ(m_pSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
 }
 
+TEST_F(MediaSessionTest, testIsQosAvailable)
+{
+    IMS_UINTP nNegoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
+    ASSERT_NE(nNegoId, 0);
+
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO))
+            .WillRepeatedly(Return(REMOTE_PORT));
+    EXPECT_CALL(*m_pMockMediaNegoHandler, GetNegotiatedRemoteAddress(nNegoId, MEDIA_TYPE_AUDIO))
+            .WillRepeatedly(ReturnRef(m_objRemoteIpAddress));
+
+    // 1. Before requesting, QoS should not be available.
+    EXPECT_FALSE(m_pSession->IsQosAvailable(nNegoId, MEDIA_TYPE_AUDIO));
+
+    // 2. Request QoS.
+    EXPECT_EQ(m_pSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
+
+    // 3. After requesting but before notification, it should still be considered unavailable
+    //    as the result is not yet successful.
+    EXPECT_FALSE(m_pSession->IsQosAvailable(nNegoId, MEDIA_TYPE_AUDIO));
+
+    // 4. Simulate receiving the QoS success notification.
+    ImsMediaMsgQosParam objParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
+    objParam.m_bResult = IMS_TRUE;
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(&objParam)),
+            IMS_TRUE);
+
+    // 5. Now, QoS should be available.
+    EXPECT_TRUE(m_pSession->IsQosAvailable(nNegoId, MEDIA_TYPE_AUDIO));
+}
+
 // --- Event Tests ---
 
 TEST_F(MediaSessionTest, testNotifySrvccSuccess)

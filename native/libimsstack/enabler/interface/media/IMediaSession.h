@@ -134,6 +134,16 @@ public:
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
 
     /**
+     * @brief Check if QoS is available with the given nego id and media type.
+     *
+     * @param nNegoId The identification of the session.
+     * @param eMediaType The type of media.
+     * @return IMS_BOOL Returns IMS_TRUE if QoS is available, otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL IsQosAvailable(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
+
+    /**
      * @brief Cleans up media descriptors that are marked as deleted from the session.
      *
      * This is typically called after a session update is confirmed to remove media

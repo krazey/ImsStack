@@ -101,6 +101,8 @@ public:
     SdpNegotiationResult NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession) override;
     IMS_BOOL RequestQos(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) override;
+    IMS_BOOL IsQosAvailable(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
     void FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession) override;
     IMS_BOOL Run(IN IMS_UINTP nNegoID) override;
     IMS_BOOL Terminate() override;
@@ -131,9 +133,12 @@ public:
     void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
 
 protected:
+    // QoS methods
     QosRequestParam* FindQosParam(const QosRequestParam* param);
-    virtual QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
+    QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
     void ClearQosParam();
+    void RequestQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
+    void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType);
     // IMediaSessionListener
     IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param) override;
@@ -151,8 +156,6 @@ protected:
     IMS_BOOL OnChangeNetworkConnection(IN IMS_UINTP pParam);
     IMS_BOOL OnMediaMtuChanged();
     IMS_BOOL OnNotifyAnbrReceived(IN IMS_UINTP nParam);
-    void RequestQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
-    void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType);
 
 private:
     IMS_BOOL HandleNotifyMediaInactivity(IN IMS_UINTP nParam);
