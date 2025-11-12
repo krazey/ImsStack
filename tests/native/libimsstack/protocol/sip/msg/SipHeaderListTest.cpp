@@ -53,7 +53,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
             SipHeaderList::GetNewListObj(SipHeaderBase::ALLOW, nullptr));
     ASSERT_TRUE(pHeaderList != nullptr);
 
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("INVITE"));
@@ -65,7 +65,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
 
     EXPECT_EQ(1, pHeaderList->GetSize());
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("CANCEL"));
@@ -78,7 +78,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
 
     pHeader->SipDelete();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("REFER"));

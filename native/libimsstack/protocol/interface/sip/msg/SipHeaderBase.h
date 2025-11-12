@@ -212,7 +212,7 @@ public:
     virtual const SIP_CHAR* GetValue() const;
     static SIP_BOOL IsHeaderTypeValid(SIP_INT32 eHdrType);
     static SIP_BOOL IsMultiValueHeader(SIP_INT32 eHdrType);
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+    static SipHeaderBase* CreateGenericHeader(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 protected:
     ~SipHeaderBase() override;

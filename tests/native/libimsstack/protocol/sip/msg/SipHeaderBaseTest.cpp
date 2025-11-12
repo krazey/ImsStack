@@ -33,12 +33,12 @@ protected:
 
 TEST_F(SipHeaderBaseTest, CopyConstructor)
 {
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT, nullptr);
+    SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ACCEPT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     pHeader->SetValue("HeaderValue");
 
-    SipHeaderBase* pCopyHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT, pHeader);
+    SipHeaderBase* pCopyHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ACCEPT, pHeader);
 
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -81,7 +81,7 @@ TEST_F(SipHeaderBaseTest, IsValidHeader)
 
     for (SIP_INT32 i = 0; i < nCount; i++)
     {
-        SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(arTestData[i][0], nullptr);
+        SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(arTestData[i][0], nullptr);
         ASSERT_TRUE(pHeader != nullptr);
 
         EXPECT_EQ(arTestData[i][1], pHeader->IsValidHeader());
@@ -95,7 +95,7 @@ TEST_F(SipHeaderBaseTest, IsValidHeader)
 
 TEST_F(SipHeaderBaseTest, SetValue)
 {
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("INVITE"));
@@ -103,7 +103,7 @@ TEST_F(SipHeaderBaseTest, SetValue)
 
     pHeader->SipDelete();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pHeader->SetValue("INVITE"));
@@ -112,7 +112,7 @@ TEST_F(SipHeaderBaseTest, SetValue)
 
     pHeader->SipDelete();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::FEATURE_CAPS, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::FEATURE_CAPS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pHeader->SetValue("INVITE"));
@@ -121,7 +121,7 @@ TEST_F(SipHeaderBaseTest, SetValue)
 
     pHeader->SipDelete();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::REJECT_CONTACT, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::REJECT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pHeader->SetValue("INVITE"));
@@ -133,7 +133,7 @@ TEST_F(SipHeaderBaseTest, SetValue)
 
 TEST_F(SipHeaderBaseTest, Encode)
 {
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     const SIP_INT32 BUFFER_SIZE = 4096;
@@ -161,7 +161,7 @@ TEST_F(SipHeaderBaseTest, Encode)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Encode empty content-disposition not allowed */
@@ -193,7 +193,7 @@ TEST_F(SipHeaderBaseTest, Encode)
 
 TEST_F(SipHeaderBaseTest, Decode)
 {
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Decode empty header - allowed for ALLOW header */
@@ -204,7 +204,7 @@ TEST_F(SipHeaderBaseTest, Decode)
     EXPECT_STREQ("UPDATE", pHeader->GetValue());
     pHeader->SipDelete();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty header value not allowed in content-disposition */
@@ -216,7 +216,7 @@ TEST_F(SipHeaderBaseTest, Decode)
     pHeader->SipDelete();
 
     /* Decode content-disposition with value and parameters */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pHeader->Decode("render;handling=optional", 24));
     EXPECT_STREQ("render", pHeader->GetValue());
@@ -228,37 +228,37 @@ TEST_F(SipHeaderBaseTest, Decode)
     pHeader->SipDelete();
 
     /* Decode with only value and empty parameters */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("render;", 7));
     pHeader->SipDelete();
 
     /* Decode with only parameters and empty value */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pHeader->Decode(";handling=optional", 18));
     pHeader->SipDelete();
 
     /* Decode feature-caps with value not as '*', fail */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::FEATURE_CAPS, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::FEATURE_CAPS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode reject-contact with value not as '*', fail */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::REJECT_CONTACT, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::REJECT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value not as '*', fail */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value as'*', success */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pHeader->Decode("*;param-name=param-value", 24));
     EXPECT_STREQ("*", pHeader->GetValue());
@@ -272,7 +272,8 @@ TEST_F(SipHeaderBaseTest, Decode)
 
 TEST_F(SipHeaderBaseTest, DecodeParameter)
 {
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    SipHeaderBase* pHeader =
+            SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_TYPE, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Decode content-type with value and parameters */
@@ -292,7 +293,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     pHeader->SipDelete();
 
     /* Decode with only value and empty parameters */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_TYPE, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     pValue = "multipart/mixed";
@@ -312,14 +313,14 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     pHeader->SipDelete();
 
     /* Decode with only parameters and empty value */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_TYPE, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     pValue = ";boundary=b_4043f-000a3b";
     EXPECT_EQ(SIP_FALSE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value as'*' and multpile parameters */
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     pValue = "*;param1=value1;param2=value2,value3";

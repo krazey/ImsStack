@@ -63,13 +63,13 @@ TEST_F(SipMIMEHdrsTest, SetAndGetHeaders)
     pContentTypeHeader->SipDelete();
 
     SipHeaderBase* pContentDospositionHeader = reinterpret_cast<SipHeaderBase*>(
-            SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr));
+            SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_DISPOSITION, nullptr));
     ASSERT_TRUE(pContentDospositionHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMimeHeaders->SetMimeHdrs(pContentDospositionHeader));
     pContentDospositionHeader->SipDelete();
 
     SipHeaderBase* pContentEncodingHeader = reinterpret_cast<SipHeaderBase*>(
-            SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_ENCODING, nullptr));
+            SipHeaderBase::CreateGenericHeader(SipHeaderBase::CONTENT_ENCODING, nullptr));
     ASSERT_TRUE(pContentEncodingHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMimeHeaders->SetMimeHdrs(pContentEncodingHeader));
     pContentEncodingHeader->SipDelete();

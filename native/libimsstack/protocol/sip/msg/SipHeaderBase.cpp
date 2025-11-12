@@ -414,7 +414,7 @@ SIP_BOOL SipHeaderBase::IsMultiValueHeader(SIP_INT32 eHdrType)
                                        : SIP_TRUE;
 }
 
-SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
+SipHeaderBase* SipHeaderBase::CreateGenericHeader(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
