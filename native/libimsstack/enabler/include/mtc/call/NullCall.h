@@ -68,6 +68,11 @@ public:
     inline void CancelUpdate(IN const CallReasonInfo&) override {}
     inline void Terminate(IN const CallReasonInfo&) override {}
     inline void SendUssd(IN const AString&) override {}
+    inline const AString& GetLogTag() const override
+    {
+        static const AString sLogTag("Null_Call");
+        return sLogTag;
+    }
 
     inline CallKey GetKey() const override { return CALL_KEY_INVALID; }
     inline CallType GetCallType() const override { return CallType::UNKNOWN; }

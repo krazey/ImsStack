@@ -147,7 +147,7 @@ TEST_F(JniMtcCallTest, SendDataOpenInvokesOpenAndAttach)
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Open(_, _)).WillOnce(Return(nValidKey));
+    EXPECT_CALL(objMockController, Open(_, _, _)).WillOnce(Return(nValidKey));
     EXPECT_CALL(objMockController, Attach(nValidKey));
 
     pJniCall->SendData(objParcel);
@@ -159,7 +159,7 @@ TEST_F(JniMtcCallTest, SendDataOpenDoesNotInvokeAttachIfCallKeyIsInvalid)
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Open(_, _)).WillOnce(Return(nInvalidKey));
+    EXPECT_CALL(objMockController, Open(_, _, _)).WillOnce(Return(nInvalidKey));
     EXPECT_CALL(objMockController, Attach(_)).Times(0);
 
     pJniCall->SendData(objParcel);
@@ -181,7 +181,7 @@ TEST_F(JniMtcCallTest, SendDataStart)
     CallKey nValidKey = 1;
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
-    ON_CALL(objMockController, Open(_, _)).WillByDefault(Return(nValidKey));
+    ON_CALL(objMockController, Open(_, _, _)).WillByDefault(Return(nValidKey));
     pJniCall->SendData(objParcel);
 
     objParcel.setDataPosition(0);
@@ -199,7 +199,7 @@ TEST_F(JniMtcCallTest, SendDataStartDoesNotInvokeStartIfCallKeyIsInvalid)
     CallKey nInvalidKey = 0;
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
-    ON_CALL(objMockController, Open(_, _)).WillByDefault(Return(nInvalidKey));
+    ON_CALL(objMockController, Open(_, _, _)).WillByDefault(Return(nInvalidKey));
 
     pJniCall->SendData(objParcel);
 
@@ -428,7 +428,7 @@ TEST_F(JniMtcCallTest, SendDataOpenDoesNotInvokeOpenIfNativeEnablerIsNull)
 {
     JniEnablerConnector::GetInstance().SetNativeEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
 
-    EXPECT_CALL(objMockController, Open(_, _)).Times(0);
+    EXPECT_CALL(objMockController, Open(_, _, _)).Times(0);
     EXPECT_CALL(objMockController, Attach(_)).Times(0);
 
     pJniCall->SendData(objParcel);

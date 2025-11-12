@@ -124,7 +124,7 @@ public class MtcAppTest extends ImsStackTest {
         }
 
         @Override
-        public MtcCall createMtcCall(int callAttributes) {
+        public MtcCall createMtcCall(int callAttributes, String logTag) {
             return mMtcCall;
         }
 
@@ -385,7 +385,7 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testCreateMtcCall() {
-        assertNotNull(mTestMtcApp.createMtcCall(0));
+        assertNotNull(mTestMtcApp.createMtcCall(0, ""));
     }
 
     @Test

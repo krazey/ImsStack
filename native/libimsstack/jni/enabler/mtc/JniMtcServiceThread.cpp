@@ -68,14 +68,15 @@ void JniMtcServiceThread::OnEmergencyServiceChanged(IN IuMtcService::EmergencySe
 }
 
 PUBLIC
-void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
+void JniMtcServiceThread::OnPreIncomingCallReceived(
+        IN IMS_ULONG nCallKey, IN const AString& strLogTag)
 {
-    IMS_TRACE_D("OnPreIncomingCallReceived", 0, 0, 0);
+    IMS_TRACE_D("OnPreIncomingCallReceived logtag[%s]", strLogTag.GetStr(), 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::PRE_INCOMING_CALL);
     objParcel.writeInt64(nCallKey);
 
-    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
 
     SendData2Java(objParcel);
 }
@@ -84,7 +85,8 @@ PUBLIC
 void JniMtcServiceThread::OnRejectedIncomingCall(IN IMS_ULONG nCallKey,
         IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
         IN const ImsList<SuppService*>& objSuppServices, IN OipType eOipType,
-        IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason)
+        IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason,
+        IN const AString& strLogTag)
 {
     IMS_TRACE_D("OnRejectedIncomingCall", 0, 0, 0);
     Parcel objParcel;
@@ -101,7 +103,7 @@ void JniMtcServiceThread::OnRejectedIncomingCall(IN IMS_ULONG nCallKey,
 
     JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
 
-    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
 
     SendData2Java(objParcel);
 }

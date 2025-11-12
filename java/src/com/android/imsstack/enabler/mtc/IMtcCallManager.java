@@ -46,9 +46,11 @@ public interface IMtcCallManager {
     ICallStateTracker getCallStateTracker();
 
     /**
-     * gets an index that is not owned by other calls.
+     * Gets the next call index.
+     *
+     * The index cycles from 1 to {@code MtcCallManager#MAX_CALL_INDEX}.
      */
-    int getVacantCallIndex();
+    int getNextCallIndex();
 
     /**
      * Attachs {@code Call} for originating call.

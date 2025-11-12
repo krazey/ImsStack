@@ -17,6 +17,7 @@
 #ifndef MTC_CALL_H_
 #define MTC_CALL_H_
 
+#include "AString.h"
 #include "ISessionListener.h"
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
@@ -99,7 +100,7 @@ class MtcCall final :
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
-            IN std::unique_ptr<IMtcCallStateFactory> pStateFactory);
+            IN std::unique_ptr<IMtcCallStateFactory> pStateFactory, IN const AString& strLogTag);
     virtual ~MtcCall() override;
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
@@ -138,6 +139,7 @@ public:
     }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
+    inline const AString& GetLogTag() const override { return m_strLogTag; }
     inline IMS_BOOL IsEstablished() const override { return m_bEstablished; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
     inline IMS_BOOL IsOnUnconfirmedRemoteHold() const override { return m_bUnconfirmedRemoteHold; }
@@ -339,6 +341,7 @@ private:
     static IMutex* s_pKeyCreationLock;
 
     static CallKey CreateCallKey();
+    AString CreateLogTag(IN const AString& strLogTag) const;
     void OnInternalFailure();
     IMS_BOOL IsInUpdateAfterConnectedDelay() const;
 
@@ -346,6 +349,7 @@ private:
     IMtcService& m_objService;
 
     CallKey m_nKey;
+    AString m_strLogTag;
 
     IMS_BOOL m_bEstablished;
     IMS_BOOL m_bHeldByMe;

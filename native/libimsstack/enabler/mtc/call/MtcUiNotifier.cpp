@@ -65,7 +65,8 @@ void MtcUiNotifier::SendPreIncomingCallReceived()
         return;
     }
 
-    piServiceThread->OnPreIncomingCallReceived(m_objContext.GetCallKey());
+    piServiceThread->OnPreIncomingCallReceived(
+            m_objContext.GetCallKey(), m_objContext.GetCall().GetLogTag());
 }
 
 PUBLIC
@@ -104,7 +105,8 @@ void MtcUiNotifier::SendIncomingCallRejected(IN const CallReasonInfo& objReason)
             m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
-            m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason);
+            m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason,
+            m_objContext.GetCall().GetLogTag());
 }
 
 PUBLIC

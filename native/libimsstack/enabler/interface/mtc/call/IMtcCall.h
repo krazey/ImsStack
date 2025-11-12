@@ -252,6 +252,13 @@ public:
      */
     virtual void SendUssd(IN const AString& strUssd) = 0;
 
+    /**
+     * @brief Gets the log tag of the call.
+     *
+     * @return The log tag.
+     */
+    virtual const AString& GetLogTag() const = 0;
+
     // Returns a key to uniquely identify this call.
 
     /**

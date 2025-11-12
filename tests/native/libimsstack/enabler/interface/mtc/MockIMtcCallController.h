@@ -40,7 +40,9 @@ union Key;
 class MockIMtcCallController : public IMtcCallController
 {
 public:
-    MOCK_METHOD(CallKey, Open, (IN ServiceType eServiceType, IN CallInfo& objCallInfo), (override));
+    MOCK_METHOD(CallKey, Open,
+            (IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag),
+            (override));
     MOCK_METHOD(void, Attach, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, Detach, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, HandleIncoming,

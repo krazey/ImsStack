@@ -111,11 +111,11 @@ TEST_F(MtcCallControllerTest, OpenCreatesCall)
     CallKey nCallKey = 1;
     MockIMtcCall* pCall = CreateMockIMtcCall(nCallKey);
 
-    EXPECT_CALL(objCallManager, CreateCall(eServiceType, Eq(std::ref(objCallInfo))))
+    EXPECT_CALL(objCallManager, CreateCall(eServiceType, Eq(std::ref(objCallInfo)), _))
             .Times(1)
             .WillRepeatedly(Return(pCall));
 
-    pCallController->Open(eServiceType, objCallInfo);
+    pCallController->Open(eServiceType, objCallInfo, AString::ConstNull());
 
     delete pCall;
 }
@@ -125,11 +125,11 @@ TEST_F(MtcCallControllerTest, OpenReturnsCreatedCallKey)
     CallKey nCallKey = 1;
     MockIMtcCall* pCall = CreateMockIMtcCall(nCallKey);
 
-    ON_CALL(objCallManager, CreateCall(_, _)).WillByDefault(Return(pCall));
+    ON_CALL(objCallManager, CreateCall(_, _, _)).WillByDefault(Return(pCall));
 
     ServiceType eServiceType = ServiceType::NORMAL;
     CallInfo objCallInfo;
-    EXPECT_EQ(nCallKey, pCallController->Open(eServiceType, objCallInfo));
+    EXPECT_EQ(nCallKey, pCallController->Open(eServiceType, objCallInfo, AString::ConstNull()));
 
     delete pCall;
 }
@@ -169,7 +169,7 @@ TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
     ON_CALL(objService, GetServiceType).WillByDefault(Return(eServiceType));
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCallManager, CreateCall(_, _)).Times(1).WillRepeatedly(Return(&objCall));
+    EXPECT_CALL(objCallManager, CreateCall(_, _, _)).Times(1).WillRepeatedly(Return(&objCall));
 
     pCallController->HandleIncoming(&objService, IMS_NULL);
 }
@@ -182,7 +182,7 @@ TEST_F(MtcCallControllerTest, HandleIncomingCallsTargetCall)
     MockIMtcCall objCall;
     EXPECT_CALL(objCall, HandleIncoming(pSession)).Times(1);
 
-    ON_CALL(objCallManager, CreateCall(_, _)).WillByDefault(Return(&objCall));
+    ON_CALL(objCallManager, CreateCall(_, _, _)).WillByDefault(Return(&objCall));
 
     pCallController->HandleIncoming(&objService, pSession);
 }

@@ -278,8 +278,10 @@ void JniMtcCall::Open(IN IMtcCallController& objCallController, IN const android
 {
     IMS_TRACE_D("Open Key[%d]", m_nCallKey, 0, 0);
 
-    ServiceType eServiceType = JniMtcUtils::ReadServiceType(objParcel);
-    JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
+    const ServiceType eServiceType = JniMtcUtils::ReadServiceType(objParcel);
+    const JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
+    AString strLogTag;
+    JniMtcUtils::ConvertString(objParcel.readString16(), strLogTag);
 
     CallInfo objCallInfo;
     objCallInfo.eInitialCallType = objJniCallInfo.eCallType;
@@ -287,7 +289,8 @@ void JniMtcCall::Open(IN IMtcCallController& objCallController, IN const android
     objCallInfo.bOffline = objJniCallInfo.bOffline;
     objCallInfo.bUssi = objJniCallInfo.bUssi;
 
-    m_nCallKey = objCallController.Open(eServiceType, objCallInfo);
+    m_nCallKey = objCallController.Open(eServiceType, objCallInfo, strLogTag);
+
     if (m_nCallKey != IMtcCall::CALL_KEY_INVALID)
     {
         Attach(objCallController);
