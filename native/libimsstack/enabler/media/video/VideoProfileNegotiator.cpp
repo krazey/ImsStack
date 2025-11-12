@@ -113,12 +113,14 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
         // Setting framerate
         pNegotiatedProfile->SetFrameRate(nNegotiatedMaxFrameRate);
         NegotiateCvo(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+        pNegotiatedProfile->SetOmitAttributes(IMS_FALSE);
     }
     else
     {
         // reset using the peer profile
         ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile,
                 reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
+        pNegotiatedProfile->SetOmitAttributes(IMS_TRUE);
     }
 
     // RTCP interval

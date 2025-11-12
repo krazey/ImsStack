@@ -223,7 +223,8 @@ public:
             m_eDirection(direction),
             m_objCapaNego(CapaNego()),
             m_nNegotiatedPayloadIndex(-1),
-            m_lstPayload(ImsList<std::shared_ptr<BasePayload>>())
+            m_lstPayload(ImsList<std::shared_ptr<BasePayload>>()),
+            m_bOmitAttributes(IMS_FALSE)
     {
     }
 
@@ -238,7 +239,8 @@ public:
             m_nBandwidthRr(obj.m_nBandwidthRr),
             m_eDirection(obj.m_eDirection),
             m_objCapaNego(obj.m_objCapaNego),
-            m_nNegotiatedPayloadIndex(obj.m_nNegotiatedPayloadIndex)
+            m_nNegotiatedPayloadIndex(obj.m_nNegotiatedPayloadIndex),
+            m_bOmitAttributes(obj.m_bOmitAttributes)
     {
         CopyPayloads(obj.m_lstPayload);
     }
@@ -259,6 +261,7 @@ public:
             m_nBandwidthRr = obj.m_nBandwidthRr;
             m_eDirection = obj.m_eDirection;
             m_objCapaNego = obj.m_objCapaNego;
+            m_bOmitAttributes = obj.m_bOmitAttributes;
             m_nNegotiatedPayloadIndex = obj.m_nNegotiatedPayloadIndex;
 
             m_lstPayload.Clear();
@@ -271,6 +274,7 @@ public:
     {
         return (m_objIpAddress == obj.m_objIpAddress && m_nDataPort == obj.m_nDataPort &&
                 m_nControlPort == obj.m_nControlPort &&
+                m_bOmitAttributes == obj.m_bOmitAttributes &&
                 m_strTransportType == obj.m_strTransportType &&
                 m_nRtcpInterval == obj.m_nRtcpInterval && m_nBandwidthAs == obj.m_nBandwidthAs &&
                 m_nBandwidthRs == obj.m_nBandwidthRs && m_nBandwidthRr == obj.m_nBandwidthRr &&
@@ -299,12 +303,12 @@ public:
     bool ComparePayloadList(const ImsList<std::shared_ptr<BasePayload>>& objPayloadList) const
     {
         if (m_lstPayload.GetSize() != objPayloadList.GetSize())
-            return false;
+            return IMS_FALSE;
 
         for (IMS_UINT32 i = 0; i < m_lstPayload.GetSize(); ++i)
         {
             if (*(m_lstPayload.GetAt(i).get()) != *(objPayloadList.GetAt(i).get()))
-                return false;
+                return IMS_FALSE;
         }
 
         return true;
@@ -345,6 +349,8 @@ public:
     inline IMS_SINT32 GetPayloadListSize() const { return m_lstPayload.GetSize(); }
     inline ImsList<std::shared_ptr<BasePayload>>& GetPayloadList() { return m_lstPayload; }
     inline void AddPayload(std::shared_ptr<BasePayload> pPayload) { m_lstPayload.Append(pPayload); }
+    inline void SetOmitAttributes(IMS_BOOL bOmitAttributes) { m_bOmitAttributes = bOmitAttributes; }
+    inline IMS_BOOL IsOmitAttributes() const { return m_bOmitAttributes; }
 
 private:
     IpAddress m_objIpAddress;
@@ -359,6 +365,7 @@ private:
     CapaNego m_objCapaNego;
     IMS_SINT32 m_nNegotiatedPayloadIndex;
     ImsList<std::shared_ptr<BasePayload>> m_lstPayload;
+    IMS_BOOL m_bOmitAttributes;
 };
 
 #endif

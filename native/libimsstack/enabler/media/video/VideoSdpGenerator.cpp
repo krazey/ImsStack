@@ -48,7 +48,7 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 
     VideoProfile* pProfile = static_cast<VideoProfile*>(pBaseProfile);
 
-    if (pProfile->GetDataPort() != 0)
+    if (!pProfile->IsOmitAttributes())
     {
         GeneratePayload(pDescriptor, pProfile);
         GenerateDirection(pDescriptor, pProfile);
