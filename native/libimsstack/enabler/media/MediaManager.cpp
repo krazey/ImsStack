@@ -21,7 +21,6 @@
 #include "JniEnablerConnector.h"
 #include "MediaManager.h"
 #include "MediaMsgHandler.h"
-#include "MediaNego.h"
 #include "MediaResourceManager.h"
 #include "MediaSession.h"
 #include "ServiceTrace.h"
@@ -37,7 +36,7 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
         ImsActivityEx(strName),
         m_nSlotId(nSlotId),
         m_lstSessionNode(ImsList<MediaSessionNode*>()),
-        m_pResourceMngr(new MediaResourceManager(nSlotId))
+        m_pResourceMngr(std::make_shared<MediaResourceManager>())
 {
     IMS_TRACE_D("+MediaManager() thread[%s], nSlotId[%d]", strName.GetStr(), nSlotId, 0);
 
@@ -53,9 +52,6 @@ PROTECTED VIRTUAL MediaManager::~MediaManager()
     {
         m_objMapMediaManager.RemoveAt(nIndex);
     }
-
-    delete m_pResourceMngr;
-    m_pResourceMngr = IMS_NULL;
 
     ClearMediaSessionNode();
 
@@ -131,21 +127,6 @@ PUBLIC VIRTUAL IMediaSession* MediaManager::CreateSession(IN MEDIA_NETWORK_TYPE 
     MediaMsgHandler* pHandler = new MediaMsgHandler(m_nSlotId, nCallKey);
     MediaSessionNode* pSessionNode = new MediaSessionNode(nCallKey, pSession, pHandler);
     m_lstSessionNode.Append(pSessionNode);
-
-    // update pdn
-    if (m_pResourceMngr == IMS_NULL ||
-            !m_pResourceMngr->UpdatePdn(eServiceType == MEDIA_SERVICE_EMERGENCY
-                            ? MediaResourceManager::PDN_EMERGENCY
-                            : MediaResourceManager::PDN_IMS,
-                    pIService->GetIpAddress()))
-    {
-        IMS_TRACE_E(0, "CreateSession() - fail to update pdn", 0, 0, 0);
-    }
-
-    auto* resourceManager = this->GetResourceManager();
-    IMS_UINT32 nAccessNetwork =
-            (resourceManager != nullptr) ? resourceManager->GetNetworkType() : 0;
-    pSession->SetCurrentAccessNetwork(nAccessNetwork);
     IMS_TRACE_D("CreateSession() - ListSize[%d]", m_lstSessionNode.GetSize(), 0, 0);
 
     return pSession;
@@ -190,7 +171,7 @@ MediaSession* MediaManager::GetSession(IN IMS_SINTP nCallKey)
 PUBLIC
 MediaResourceManager* MediaManager::GetResourceManager()
 {
-    return m_pResourceMngr;
+    return m_pResourceMngr.get();
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(

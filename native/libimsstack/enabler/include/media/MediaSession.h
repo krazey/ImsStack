@@ -21,16 +21,21 @@
 
 #include "IMediaSession.h"
 #include "IMediaSessionListener.h"
+#include "IMediaNetworkConnectionListener.h"
 
 class IService;
+class AudioSession;
+class AudioController;
 class MediaNego;
 class MediaNegoHandler;
-class AudioController;
-class VideoController;
+class MediaNetworkConnectionWatcher;
 class TextController;
-class AudioSession;
+class VideoController;
 
-class MediaSession : public IMediaSessionListener, public IMediaSession
+class MediaSession :
+        public IMediaSessionListener,
+        public IMediaSession,
+        public IMediaNetworkConnectionListener
 {
 public:
     /**
@@ -75,13 +80,6 @@ public:
      * @brief Set the VideoController object
      */
     void SetVideoController(std::shared_ptr<VideoController> pVideoController);
-
-    /**
-     * @brief Set the current access network.
-     *
-     * @param nAccessNetwork The current access network type.
-     */
-    void SetCurrentAccessNetwork(IN IMS_UINT32 nAccessNetwork);
 
     /**
      * @brief Set the TextController object
@@ -129,6 +127,10 @@ public:
     void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType) override;
     IMS_BOOL IsPreviewMode(IMS_UINTP nNegoId) override;
 
+    /* IMediaNetworkConnectionListener Interface Impl */
+    void OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType) override;
+    void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
+
 protected:
     QosRequestParam* FindQosParam(const QosRequestParam* param);
     virtual QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
@@ -149,7 +151,6 @@ protected:
     void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eType);
     IMS_BOOL OnChangeNetworkConnection(IN IMS_UINTP pParam);
     IMS_BOOL OnMediaMtuChanged();
-    IMS_SINT32 GetMtu();
     IMS_BOOL OnNotifyAnbrReceived(IN IMS_UINTP nParam);
     void RequestQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
     void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType);
@@ -163,6 +164,8 @@ private:
     void UpdateMediaSessions(IN IMS_UINTP nNegoId, IN std::shared_ptr<MediaNego> pMediaNego,
             MEDIA_CONTENT_TYPE eType);
     void CloseMediaSessions(MEDIA_CONTENT_TYPE eType);
+    /** Get the rtp fragment size from mtu */
+    IMS_SINT32 GetRtpFragmentSize();
 
 protected:
     IMS_UINT32 m_nSlotId;
@@ -179,6 +182,7 @@ protected:
     std::mutex m_objMutex;
     MEDIA_CONTENT_TYPE m_eCurMediaType;
     IMS_BOOL m_bIsConference;
+    std::shared_ptr<MediaNetworkConnectionWatcher> m_pNetworkConnectionWatcher;
 };
 
 #endif

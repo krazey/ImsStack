@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,45 +14,20 @@
  * limitations under the License.
  */
 
+#include "MediaResourceManager.h"
+
 #include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
-#include "ServiceNetworkPolicy.h"
-
-#include "IJniMedia.h"
-#include "MediaManager.h"
-#include "MediaNetworkConnectionWatcher.h"
-#include "MediaResourceManager.h"
 #include "config/MediaConfiguration.h"
-
-#define MEDIA_RESOURCEMNGR_IP_ADDR_LEN 46
-
-#define MTU_MOBILE                     1500
-#define MTU_EPDG                       1280
-#define SIZE_OF_IP_SEC                 60
-#define SIZE_OF_IPV6                   60
-#define SIZE_OF_IPV4                   40
-#define SIZE_OF_RTP                    20 + 8  // rtp + header extension (cvo)
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC MediaResourceManager::MediaResourceManager(IN IMS_SINT32 nSlotId) :
-        m_nSlotId(nSlotId),
-        m_nPdnType(-1),
-        m_bIsIpv6(IMS_FALSE),
-        m_nNetworkType(MediaNetworkConnectionWatcher::UNKNOWN),
-        m_nMtu(0),
-        m_lstUsedRtpPort(ImsList<IMS_UINT32>()),
-        m_pNetworkConnectionWatcher(IMS_NULL)
+PUBLIC MediaResourceManager::MediaResourceManager() :
+        m_lstUsedRtpPort(ImsList<IMS_UINT32>())
 {
 }
 
-PUBLIC MediaResourceManager::~MediaResourceManager()
-{
-    if (m_pNetworkConnectionWatcher != IMS_NULL)
-    {
-        delete m_pNetworkConnectionWatcher;
-    }
-}
+PUBLIC MediaResourceManager::~MediaResourceManager() {}
 
 PUBLIC IMS_UINT32 MediaResourceManager::AcquireRtpPort(IN MediaConfiguration* pConfig)
 {
@@ -175,97 +150,4 @@ PUBLIC IMS_BOOL MediaResourceManager::ReleaseRtpPort(IN IMS_UINT32 nPort)
     }
 
     return IMS_FALSE;
-}
-
-PUBLIC IMS_BOOL MediaResourceManager::UpdatePdn(
-        IN IMS_SINT32 nPdnType, IN const IpAddress& objIpAddress)
-{
-    if (m_nPdnType == nPdnType)
-    {
-        return IMS_TRUE;
-    }
-
-    m_nPdnType = nPdnType;
-    m_bIsIpv6 = objIpAddress.IsIPv6Address();
-
-    if (m_pNetworkConnectionWatcher != IMS_NULL)
-    {
-        delete m_pNetworkConnectionWatcher;
-    }
-
-    IMS_TRACE_D("UpdatePdn() - PdnType[%d], bIpv6[%d]", m_nPdnType, m_bIsIpv6, 0);
-
-    m_pNetworkConnectionWatcher = new MediaNetworkConnectionWatcher(objIpAddress);
-    m_pNetworkConnectionWatcher->SetListener(this);
-    m_nNetworkType = m_pNetworkConnectionWatcher->GetNetworkType();
-    m_nMtu = m_pNetworkConnectionWatcher->GetMtu();
-    IMS_TRACE_D("UpdatePdn() - Network[%d], Mtu[%d]", m_nNetworkType, m_nMtu, 0);
-
-    return IMS_TRUE;
-}
-
-PUBLIC IMS_SINT32 MediaResourceManager::GetNetworkType()
-{
-    return m_nNetworkType;
-}
-
-PUBLIC IMS_SINT32 MediaResourceManager::GetMtu()
-{
-    return m_nMtu;
-}
-
-PUBLIC IMS_SINT32 MediaResourceManager::GetRtpFragmentSize()
-{
-    IMS_SINT32 nMtu = GetMtu();
-    if (nMtu == 0)
-    {
-        if (m_pNetworkConnectionWatcher != IMS_NULL)
-        {
-            nMtu = m_pNetworkConnectionWatcher->GetMtu();
-        }
-
-        if (nMtu == 0)
-        {
-            nMtu = (GetNetworkType() == MediaNetworkConnectionWatcher::IWLAN) ? MTU_EPDG
-                                                                              : MTU_MOBILE;
-        }
-    }
-
-    nMtu -= SIZE_OF_IP_SEC;
-    nMtu -= (m_bIsIpv6) ? SIZE_OF_IPV6 : SIZE_OF_IPV4;
-    nMtu -= SIZE_OF_RTP;
-
-    IMS_TRACE_D("GetRtpFragmentSize() - mtu[%d], m_bIsIpv6[%d], network type[%d]", nMtu, m_bIsIpv6,
-            GetNetworkType());
-
-    return nMtu;
-}
-
-PUBLIC void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType)
-{
-    IMS_TRACE_D("OnNetworkConnectionChanged() - NetworkType[%d]", nRatType, 0, 0);
-    m_nNetworkType = nRatType;
-
-    ImsMediaMsgParam* pMediaMsgParam = new ImsMediaMsgParam(MEDIA_TYPE_AUDIOVIDEOTEXT, nRatType);
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-    if (pMediaManager != IMS_NULL)
-    {
-        pMediaManager->SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, 0,
-                reinterpret_cast<IMS_UINTP>(pMediaMsgParam));
-    }
-}
-
-PUBLIC void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
-{
-    IMS_TRACE_D("OnMediaMtuChanged() - Mtu[%d]", nMtu, 0, 0);
-    m_nMtu = nMtu;
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-    if (pMediaManager != IMS_NULL)
-    {
-        pMediaManager->SendMessage(IJniMedia::CHANGE_MTU, 0, 0);
-    }
 }

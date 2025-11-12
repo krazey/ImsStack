@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "MediaManager.h"
-#include "MockICoreService.h"
-#include "MediaResourceManager.h"
 #include "MediaSession.h"
+
+#include "MockICoreService.h"
 #include "MockIMediaSession.h"
 #include "MockMediaMsgHandler.h"
 
@@ -307,12 +306,6 @@ TEST_F(MediaManagerTest, testDestroySession)
     EXPECT_EQ(m_pMediaManager->GetSession(CALL_KEY_3), nullptr);
 }
 
-TEST_F(MediaManagerTest, testGetResourceManager)
-{
-    EXPECT_NE(m_pMediaManager->GetResourceManager(), nullptr);
-    EXPECT_EQ(m_pMediaManager->GetResourceManager()->GetMtu(), 0);
-}
-
 TEST_F(MediaManagerTest, testSendMessage_CommonResponse)
 {
     MockIMediaSession* pMockIMediaSession =
@@ -464,13 +457,7 @@ TEST_F(MediaManagerTest, testSendMessage_Etc)
     EXPECT_TRUE(m_pMediaManager->SendMessage(
             IJniMedia::SEND_DTMF, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam1)));
 
-    IMS_UINT32 nRatType = 3;
-    ON_CALL(*pMockIMediaSession, SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, nRatType))
-            .WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(m_pMediaManager->SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType));
-
     delete pParam1;
-
     m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
 

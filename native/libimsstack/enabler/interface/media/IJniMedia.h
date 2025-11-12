@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@
 #include <AudioConfig.h>
 #include <VideoConfig.h>
 #include <MediaQualityThreshold.h>
+
 #include "ImsMessageDef.h"
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
@@ -76,8 +77,6 @@ public:
             IJNIMEDIA_CASE_ENUM(SET_PAUSE_IMAGE_CMD);
             IJNIMEDIA_CASE_ENUM(CHANGE_ORIENTATION_CMD);
             IJNIMEDIA_CASE_ENUM(NOTIFY_VIDEO_BITRATE);
-            IJNIMEDIA_CASE_ENUM(CHANGE_NETWORK_CONNECTION);
-            IJNIMEDIA_CASE_ENUM(CHANGE_MTU);
         }
         return "Unrecognized Msg";
     }
@@ -203,9 +202,6 @@ public:
 
     static const IMS_SINT32 MEDIA_MESSAGE_INTERNAL_IND_IDX_START = IJNIMEDIA_IND + 120;
     static const IMS_SINT32 MEDIA_MESSAGE_INTERNAL_IND_IDX_END = IJNIMEDIA_IND + 129;
-
-    static const IMS_SINT32 CHANGE_NETWORK_CONNECTION = MEDIA_MESSAGE_INTERNAL_IND_IDX_START + 0;
-    static const IMS_SINT32 CHANGE_MTU = MEDIA_MESSAGE_INTERNAL_IND_IDX_START + 1;
 
     static const IMS_SINT32 MEDIA_MESSAGE_IND_IDX_END = MEDIA_MESSAGE_INTERNAL_IND_IDX_END;
 };

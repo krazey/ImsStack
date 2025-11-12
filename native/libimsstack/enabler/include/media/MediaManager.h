@@ -94,6 +94,19 @@ public:
     virtual IMS_BOOL SendMessage(
             IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
 
+    /**
+     * @brief Creates a new media session for a call.
+     *
+     * This method instantiates a new MediaSession, a corresponding MediaMsgHandler,
+     * and encapsulates them within a MediaSessionNode, which is then stored in the
+     * MediaManager's list of active sessions.
+     *
+     * @param eNetwork The network type for the session.
+     * @param eServiceType The service type (e.g., default, emergency).
+     * @param pService A pointer to the service interface for accessing network information.
+     * @param nCallKey A unique key to identify the call session.
+     * @return IMediaSession* A pointer to the newly created IMediaSession, or IMS_NULL on failure.
+     */
     virtual IMediaSession* CreateSession(IN MEDIA_NETWORK_TYPE eNetwork,
             IN MEDIA_SERVICE_TYPE eServiceType, IN IService* pService, IN IMS_SINTP nCallKey);
 
@@ -132,7 +145,7 @@ public:
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
 
     /**
-     * @brief Handle the disaptch messages
+     * @brief Handle the dispatch messages
      *
      * @param nMsg enum of message ID. It is defined in IJniMedia.h
      * @param wParam The key to identify the call session, nCallKey
@@ -162,7 +175,7 @@ protected:
     virtual MediaSessionNode* FindSessionNode(IN IMS_SINTP nCallKey);
 
     /**
-     * @brief Sends message to repective session
+     * @brief Sends message to respective session
      *
      * @param nMsg enum of message
      * @param nCallKey session identification
@@ -176,7 +189,7 @@ protected:
     static ImsMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
     IMS_SINT32 m_nSlotId;
     ImsList<MediaSessionNode*> m_lstSessionNode;
-    MediaResourceManager* m_pResourceMngr;
+    std::shared_ptr<MediaResourceManager> m_pResourceMngr;
 };
 
 #endif
