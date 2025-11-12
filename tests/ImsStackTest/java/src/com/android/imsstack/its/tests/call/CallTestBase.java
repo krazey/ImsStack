@@ -46,13 +46,13 @@ public class CallTestBase extends ImsStackTestBase {
 
         startImsStack(SLOT0, mConfig);
         enableAllMmTelCapabilities();
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
         mConnectivityManagerProxy.notifyNetworkAvailable(APN_IMS);
 
         mImsRegistration.waitForRegistered();
 
-        // Just sleep to have a delay between registration and call.
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        // Add delay between registration and call.
+        SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
     }
 
     // TODO: Move into CallTestUtilities / CallTestConfigManager.
