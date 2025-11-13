@@ -271,7 +271,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
 
     SetTcallTimerConfig(ConfigVoice::
                     MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
@@ -318,7 +318,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
 
     SetTcallTimerConfig(ConfigVoice::
                     MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
@@ -349,7 +349,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
@@ -662,7 +662,7 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
     // SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION case
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT))
             .WillByDefault(Return(ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }

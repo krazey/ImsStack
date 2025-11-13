@@ -265,7 +265,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-                ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
+                ControlAos(ImsAosControl::REGISTER_REINITIATE);
             }
             break;
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
@@ -461,7 +461,7 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& obj
         case ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
             if (m_objContext.IsCsfbAvailable())
             {
-                ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+                ControlAos(ImsAosControl::REGISTER_REINITIATE);
                 return CallReasonInfo(
                         CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
             }
@@ -619,7 +619,7 @@ CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
 
     if (m_objContext.IsCsfbAvailable())
     {
-        ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+        ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
