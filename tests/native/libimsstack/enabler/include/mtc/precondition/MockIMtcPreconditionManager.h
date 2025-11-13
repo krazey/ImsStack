@@ -53,6 +53,10 @@ public:
     MOCK_METHOD(void, OnCallEstablished, (IN ISession* piSession), (override));
     MOCK_METHOD(void, OnCallModified, (IN ISession* piSession), (override));
     MOCK_METHOD(void, OnRatChanged, (IN IMS_SINT32 eRatType), (override));
+    MOCK_METHOD(void, UpdateQosIfAvailable,
+            (IN ISession * piSession, IN IMS_UINTP nNegoId,
+                    IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession),
+            (override));
 };
 
 #endif

@@ -35,6 +35,7 @@
 #include "media/MockIMediaReportEventListener.h"
 #include "media/MockMediaProfileManager.h"
 #include "media/MtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -99,6 +100,7 @@ public:
     MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMessageUtils objMessageUtils;
     MockMtcMediaProfileManager* pMediaProfileManager;
+    MockIMtcPreconditionManager objPreconditionManager;
 
 protected:
     virtual void SetUp() override
@@ -108,6 +110,8 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objContext, GetPreconditionManager())
+                .WillByDefault(ReturnRef(objPreconditionManager));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
 
         pMediaManager = CreateMtcMediaManager();
@@ -393,7 +397,7 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyQosNotifiesListener)
     MockIMediaQosEventListener objQosListener;
     {
         // qos listener is null
-        EXPECT_CALL(objQosListener, OnQosStatusChanged(_, _, _)).Times(0);
+        EXPECT_CALL(objQosListener, OnQosStatusChanged(_, _, _, _)).Times(0);
         pMediaManager->MediaSession_NotifyQos(NEGO_ID, bAnyResult, eAnyMediaType);
     }
 
@@ -404,12 +408,12 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyQosNotifiesListener)
                 .Times(2)
                 .WillRepeatedly(Return(&objISession));
         EXPECT_CALL(objQosListener,
-                OnQosStatusChanged(&objISession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO))
+                OnQosStatusChanged(&objISession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO, IMS_TRUE))
                 .Times(1);
         pMediaManager->MediaSession_NotifyQos(NEGO_ID, IMS_TRUE, eAnyMediaType);
 
-        EXPECT_CALL(
-                objQosListener, OnQosStatusChanged(&objISession, QosStatus::LOST, MEDIATYPE_AUDIO))
+        EXPECT_CALL(objQosListener,
+                OnQosStatusChanged(&objISession, QosStatus::LOST, MEDIATYPE_AUDIO, IMS_TRUE))
                 .Times(1);
         pMediaManager->MediaSession_NotifyQos(NEGO_ID, IMS_FALSE, eAnyMediaType);
     }

@@ -34,7 +34,7 @@ public:
      * @param eStatus
      * @param eMediaType
      */
-    virtual void OnQosStatusChanged(
-            IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) = 0;
+    virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
+            IN IMS_UINT32 eMediaType, IN IMS_BOOL bNeedToNotify = IMS_TRUE) = 0;
 };
 #endif

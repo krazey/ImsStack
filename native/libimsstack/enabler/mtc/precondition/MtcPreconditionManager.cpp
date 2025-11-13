@@ -505,12 +505,40 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
     }
 }
 
-PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
-        IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL void MtcPreconditionManager::UpdateQosIfAvailable(IN ISession* piSession,
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eNegotiatedMediaType,
+        IN IMediaSession* piMediaSession)
 {
-    IMS_TRACE_D("OnQosStatusChanged media type[%s][%s]",
+    if (!piSession || !piMediaSession || nNegoId == UNDEFINED_NEGO_ID)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("UpdateQosIfAvailable : negotiated media type[%s]",
+            MtcMediaStringUtils::ConvertContentType(eNegotiatedMediaType), 0, 0);
+
+    const std::vector<MEDIA_CONTENT_TYPE> eMediaTypes = {
+            MEDIA_TYPE_AUDIO, MEDIA_TYPE_VIDEO, MEDIA_TYPE_TEXT};
+    for (const auto& eMediaType : eMediaTypes)
+    {
+        if (eNegotiatedMediaType & eMediaType)
+        {
+            if ((GetQosStatus(piSession, eMediaType) != QosStatus::AVAILABLE) &&
+                    piMediaSession->IsQosAvailable(nNegoId, eMediaType))
+            {
+                OnQosStatusChanged(piSession, QosStatus::AVAILABLE,
+                        MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType), IMS_FALSE);
+            }
+        }
+    }
+}
+
+PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(IN ISession* piSession,
+        IN QosStatus eStatus, IN IMS_UINT32 eMediaType, IN IMS_BOOL bNeedToNotify)
+{
+    IMS_TRACE_D("OnQosStatusChanged media type[%s][%s], need to notify[%s]",
             MtcMediaStringUtils::ConvertContentType(eMediaType),
-            QosStringUtils::ConvertQosStatus(eStatus), 0);
+            QosStringUtils::ConvertQosStatus(eStatus), _TRACE_B_(bNeedToNotify));
 
     QosStatus eCurrStatus = GetQosStatus(piSession, eMediaType);
     if (!IsNeedToUpdateQosStatus(eCurrStatus, eStatus))
@@ -534,8 +562,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
     pStatusTable->UpdateLocalCurrentStatus(MtcMediaUtil::GetSdpMediaType(eMediaType),
             IsLocalResourceReservedByMediaType(piSession, eMediaType));
 
-    if ((eCurrStatus == QosStatus::IDLE && eStatus == QosStatus::AVAILABLE) &&
-            (!GetQosTimer(piSession)->IsQosTimerActivated(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE)))
+    if (bNeedToNotify && (eCurrStatus == QosStatus::IDLE && eStatus == QosStatus::AVAILABLE) &&
+            !GetQosTimer(piSession)->IsQosTimerActivated(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE))
     {
         NotifyQosStatusToListener(piSession, IMS_TRUE, eMediaType);
     }

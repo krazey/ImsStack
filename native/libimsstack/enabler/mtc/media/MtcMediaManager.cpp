@@ -140,7 +140,7 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId
     {
         m_pQosListener->OnQosStatusChanged(m_pProfileManager->GetSessionWithNegoId(nNegoId),
                 (bSuccess) ? QosStatus::AVAILABLE : QosStatus::LOST,
-                MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType));
+                MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType), IMS_TRUE);
     }
 }
 
@@ -373,6 +373,8 @@ PUBLIC VIRTUAL SdpNegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* p
     if (GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
     {
         m_piMediaSession->RequestQos(nNegoId, objResult.eNegotiatedType);
+        m_objContext.GetPreconditionManager().UpdateQosIfAvailable(
+                piSession, nNegoId, objResult.eNegotiatedType, m_piMediaSession);
     }
 
     return objResult;
