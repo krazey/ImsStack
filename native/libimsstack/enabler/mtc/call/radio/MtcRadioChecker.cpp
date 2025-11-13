@@ -104,8 +104,6 @@ PUBLIC VIRTUAL IMtcRadioChecker::CheckResult MtcRadioChecker::Check(IN CallType 
         IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi,
         IN CallKey nCallKey)
 {
-    m_nRegistrationThrottlingTimeMillis = 0;
-
     if (bUssi)
     {
         IMS_TRACE_D("Check : unblocked - USSI MO DATA(Best Effort).", 0, 0, 0);
@@ -126,6 +124,8 @@ PUBLIC VIRTUAL IMtcRadioChecker::CheckResult MtcRadioChecker::Check(IN CallType 
     MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
     if (!pMtcTrafficInfo)
     {
+        m_nRegistrationThrottlingTimeMillis = 0;
+
         // Traffic info not found. Initiate new traffic type and direction for checking.
         pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection, eRatType);
         AddCallKey(*pMtcTrafficInfo, nCallKey);
@@ -151,8 +151,8 @@ PUBLIC VIRTUAL IMtcRadioChecker::CheckResult MtcRadioChecker::Check(IN CallType 
         return pMtcTrafficInfo->m_objResult;
     }
 
+    m_nRegistrationThrottlingTimeMillis = 0;
     AddCallKey(*pMtcTrafficInfo, nCallKey);
-    UpdateTrafficIfRatChanged(*pMtcTrafficInfo, eRatType);
     return IMtcRadioChecker::CheckResult::Unblocked();
 }
 
