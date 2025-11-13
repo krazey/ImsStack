@@ -184,7 +184,7 @@ protected:
     IMtcPreconditionListener* m_pListener;
     IMtcCallContext& m_objContext;
     SdpPreconditionHelper* m_pSdpPreconditionHelper;
-    IMS_BOOL bLocalResourceConfirmedInitially;
+    IMS_BOOL m_bLocalResourceConfirmedInitially;
     IMS_BOOL m_bOnWlan;
     IMS_SINT32 m_ePreviousRatType;
     IMS_SINT32 m_eCurrentRatType;

@@ -701,7 +701,7 @@ TEST_F(MtcPreconditionManagerTest, IsLocalResourceConfirmationRequiredReturnsTru
 TEST_F(MtcPreconditionManagerTest,
         IsLocalResourceConfirmationRequiredReturnsFalseIfInitialInviteSendrecv)
 {
-    // FormPreconditionSdp sets bLocalResourceConfirmedInitially.
+    // FormPreconditionSdp sets m_bLocalResourceConfirmedInitially.
     SetUpMockQosInfo();
     pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
