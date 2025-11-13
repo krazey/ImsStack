@@ -636,5 +636,6 @@ TEST_F(TextNegoTest, testGetters)
     EXPECT_EQ(m_pTextNego->GetNegotiatedLocalProfile(), nullptr);
     EXPECT_EQ(m_pTextNego->GetNegotiatedNegoProfile(), nullptr);
     EXPECT_EQ(m_pTextNego->GetNegotiatedPeerProfile(), nullptr);
+    EXPECT_EQ(m_pTextNego->GetNegotiatedRtpPort(), -1);
     EXPECT_EQ(m_pTextNego->GetRemotePort(), MEDIA_PORT_INVALID);
 }
