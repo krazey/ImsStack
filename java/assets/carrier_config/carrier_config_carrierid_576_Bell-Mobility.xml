@@ -47,17 +47,17 @@
         <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
-        <item value="403:0"/> <!-- CSFB  -->
+        <item value="403:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
         <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
-        <item value="408:0"/> <!-- CSFB -->
+        <item value="408:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
         <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
-        <item value="480:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
+        <item value="480:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
         <item value="486:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
-        <item value="488:2,0"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, CSFB -->
-        <item value="500:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
-        <item value="503:10,0"/> <!-- BLOCK_CALL_BY_TIMER, CSFB -->
+        <item value="488:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
+        <item value="500:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
+        <item value="503:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
         <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
-        <item value="600:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
+        <item value="600:3,11,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TRIGGER_EPSFB, CSFB -->
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
