@@ -882,7 +882,10 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     }
     else
     {
-        m_bLocalResourceConfirmedInitially = bLocalReserved;
+        if (!m_objContext.GetMediaManager().IsForkedSession(piSession))
+        {
+            m_bLocalResourceConfirmedInitially = bLocalReserved;
+        }
     }
 
     pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType, bLocalReserved);

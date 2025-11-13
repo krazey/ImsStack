@@ -318,6 +318,14 @@ public:
      * @return IMS_TRUE if the SDP negotiation is done in preview mode, otherwise IMS_FALSE.
      */
     virtual IMS_BOOL IsPreviewMode(IN ISession* piSession) const = 0;
+
+    /**
+     * @brief Checks if the given session is a forked session.
+     *
+     * @param piSession The ISession instance to check.
+     * @return IMS_TRUE if the session is a forked session, otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL IsForkedSession(IN const ISession* piSession) const = 0;
 };
 
 #endif

@@ -73,6 +73,7 @@ public:
     virtual PemType GetPemType(IN const ISession* piSession) const;
     virtual IMS_BOOL IsActive(IN const ISession* piSession) const;
     virtual IMS_BOOL IsConfirmed(IN const ISession* piSession) const;
+    virtual IMS_BOOL IsForked(IN const ISession* piSession) const;
 
     virtual void SetPemType(IN const ISession* piSession, IN PemType ePemType);
     virtual void SetActive(IN const ISession* piSession, IN IMS_BOOL bActive);

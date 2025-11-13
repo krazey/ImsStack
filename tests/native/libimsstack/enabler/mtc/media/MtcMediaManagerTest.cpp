@@ -1344,6 +1344,15 @@ TEST_F(MtcMediaManagerTest,
     EXPECT_EQ(MEDIATYPE_AUDIO, pMediaManager->GetSupportedMediaTypesFromSdp(&objISession));
 }
 
+TEST_F(MtcMediaManagerTest, IsForkedSessionReturnsValueFromProfileManager)
+{
+    ON_CALL(*pMediaProfileManager, IsForked(&objISession)).WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(pMediaManager->IsForkedSession(&objISession));
+
+    ON_CALL(*pMediaProfileManager, IsForked(&objISession)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(pMediaManager->IsForkedSession(&objISession));
+}
+
 TEST_F(MtcMediaManagerTest, FinalizeSdpInvokesMediaSessionFinalizeSdp)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));

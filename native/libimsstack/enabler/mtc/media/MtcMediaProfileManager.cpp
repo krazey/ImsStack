@@ -186,6 +186,19 @@ IMS_BOOL MtcMediaProfileManager::IsConfirmed(IN const ISession* piSession) const
 }
 
 PUBLIC
+IMS_BOOL MtcMediaProfileManager::IsForked(IN const ISession* piSession) const
+{
+    const MediaProfile* pProfile = GetMediaProfile(piSession);
+
+    if (!pProfile)
+    {
+        return IMS_FALSE;
+    }
+
+    return pProfile->bForked;
+}
+
+PUBLIC
 void MtcMediaProfileManager::SetPemType(IN const ISession* piSession, IN PemType ePemType)
 {
     MediaProfile* pProfile = GetMediaProfile(piSession);

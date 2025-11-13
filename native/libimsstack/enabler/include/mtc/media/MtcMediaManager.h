@@ -146,6 +146,7 @@ public:
     IMS_BOOL IsOnHold(IN const ISession& objISession) override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
     IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
+    IMS_BOOL IsForkedSession(IN const ISession* piSession) const override;
 
 private:
     void UpdateLocalTone(

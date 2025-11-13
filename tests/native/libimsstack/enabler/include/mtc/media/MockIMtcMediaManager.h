@@ -84,7 +84,8 @@ public:
     MOCK_METHOD(void, SetSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(IMS_BOOL, IsOnHold, (IN const ISession& objISession), (override));
     MOCK_METHOD(IMS_UINT32, GetSupportedMediaTypesFromSdp, (IN ISession * piSession), (override));
-    MOCK_METHOD(IMS_BOOL, IsPreviewMode, (IN ISession * piSession), (const override));
+    MOCK_METHOD(IMS_BOOL, IsPreviewMode, (IN ISession * piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsForkedSession, (IN const ISession* piSession), (const, override));
 };
 
 #endif

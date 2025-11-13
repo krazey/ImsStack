@@ -727,6 +727,38 @@ TEST_F(MtcPreconditionManagerTest,
 }
 
 TEST_F(MtcPreconditionManagerTest,
+        IsLocalResourceConfirmationRequiredReturnsTrueIfForkedSessionAlreadyAcquiredQos)
+{
+    // FormPreconditionSdp not set m_bLocalResourceConfirmedInitially.
+    SetUpMockQosInfo();
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ImsList<IMedia*> lstMedias;
+    MockIMedia objAudioMedia;
+    lstMedias.Append(&objAudioMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+    ON_CALL(objAudioMedia, GetUpdateState()).WillByDefault(Return(IMedia::UPDATE_UNCHANGED));
+    ON_CALL(objAudioMedia, GetMediaDescriptor()).WillByDefault(Return(&objMediaDescriptor));
+    ON_CALL(objAudioMedia, GetState()).WillByDefault(Return(IMedia::STATE_ACTIVE));
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetPort(10000);
+    ON_CALL(objMediaDescriptor, GetMediaDescriptionExAsLocal()).WillByDefault(Return(&objSdpMedia));
+    ImsList<QosStatusRecord*> lstQosRecords;
+    ON_CALL(objStatusTable, GetRecords(_)).WillByDefault(Return(lstQosRecords));
+    ON_CALL(*pSdpPreconditionHelper, GetMediaType(_, _)).WillByDefault(Return(MEDIATYPE_AUDIO));
+    ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMediaManager, IsForkedSession(&objISession)).WillByDefault(Return(IMS_TRUE));
+    pPreconditionManager->FormPreconditionSdp(&objISession, IMS_FALSE);
+
+    EXPECT_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_TRUE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
         IsAvailableToSendLocalResourceConfirmationReturnsFalseIfLocalResourceIsNotReserved)
 {
     SetUpMockQosInfo();

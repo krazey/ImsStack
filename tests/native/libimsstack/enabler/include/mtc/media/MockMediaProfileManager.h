@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(PemType, GetPemType, (IN const ISession* piSession), (const, override));
     MOCK_METHOD(IMS_BOOL, IsActive, (IN const ISession* piSession), (const, override));
     MOCK_METHOD(IMS_BOOL, IsConfirmed, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsForked, (IN const ISession* piSession), (const, override));
     MOCK_METHOD(void, SetPemType, (IN const ISession* piSession, IN PemType ePemType), (override));
     MOCK_METHOD(void, SetActive, (IN const ISession* piSession, IN IMS_BOOL bActive), (override));
     MOCK_METHOD(

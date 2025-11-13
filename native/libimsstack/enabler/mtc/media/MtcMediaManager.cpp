@@ -692,6 +692,11 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsPreviewMode(IN ISession* piSession) c
     return m_piMediaSession->IsPreviewMode(GetMediaNegoId(piSession));
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsForkedSession(IN const ISession* piSession) const
+{
+    return m_pProfileManager->IsForked(piSession);
+}
+
 PRIVATE void MtcMediaManager::DestroySessionMedia(IN const ISession& objISession)
 {
     IMS_SLONG nIndex = m_objSessionMedias.GetIndexOfKey(&objISession);
