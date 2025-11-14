@@ -396,7 +396,18 @@ public class SscServiceImplTest {
         mLooper.processAllMessages();
         assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 
-        // 2nd handling HTTP_PRECONDITION_FAILURE for PUT. Considering it as a final failure.
+        // Handle HTTP_PRECONDITION_FAILURE for PUT. Triggering the entire Doc. query again.
+        processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFB);
+        mLooper.processAllMessages();
+        assertFalse(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        // 3rd entire Doc. query because of 2nd 412.
+        processEntireXmlDocQueryAsSuccess();
+        mLooper.processAllMessages();
+        assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        // 3rd handling HTTP_PRECONDITION_FAILURE for PUT. Considering it as a final failure.
         processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFB);
         mLooper.processAllMessages();
