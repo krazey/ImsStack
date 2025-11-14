@@ -21,6 +21,25 @@
     android:versionCode="10000"
     android:versionName="1.00.00">
 
+    <!--Legacy broadcast messages for updating IMS configs-->
+    <protected-broadcast android:name="com.android.imsstack.TEST_CARRIER_CONFIG_APPLY"/>
+    <protected-broadcast android:name="com.android.imsstack.TEST_CARRIER_CONFIG_PUT"/>
+
+    <!--Receiving event from Android AlarmManager-->
+    <protected-broadcast android:name="com.android.imsstack.action.ALARM_NATIVE_TIMER"/>
+    <protected-broadcast android:name="com.android.imsstack.action.ALARM_TIMER"/>
+
+    <!--Reading and updating IMS configs-->
+    <protected-broadcast android:name="com.android.imsstack.action.CLEAR_CONFIG"/>
+    <protected-broadcast android:name="com.android.imsstack.action.GET_CONFIG"/>
+    <protected-broadcast android:name="com.android.imsstack.action.SET_CONFIG"/>
+
+    <!--Controlling test mode-->
+    <protected-broadcast android:name="com.android.imsstack.action.INTENT_AOS_TEST"/>
+    <protected-broadcast android:name="com.android.imsstack.action.INTENT_MTC_TEST"/>
+    <protected-broadcast android:name="com.android.imsstack.action.INTENT_QOS_TEST"/>
+    <protected-broadcast android:name="com.android.imsstack.action.INTENT_SRVCC_TEST"/>
+
     <!-- ims permission -->
     <permission android:name="com.android.imsstack.permission.IMS"
         android:protectionLevel="signatureOrSystem" />
