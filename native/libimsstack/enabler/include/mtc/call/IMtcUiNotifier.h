@@ -197,6 +197,13 @@ public:
     virtual void SendRatChanged(IN IMS_SINT32 eRatType) = 0;
 
     virtual void OnCallSessionReleased() = 0;
+
+    /**
+     * @brief Retrieves the reason for blocking.
+     *
+     * @return CallReasonInfo& The reason for blocking.
+     */
+    virtual const CallReasonInfo& GetBlockingReason() const = 0;
 };
 
 #endif

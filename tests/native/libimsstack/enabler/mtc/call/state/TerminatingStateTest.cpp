@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "INetworkWatcher.h"
 #include "ISession.h"
+#include "MockIMessage.h"
 #include "MockISession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -50,6 +52,8 @@ public:
             objSession(),
             objCallInfo(),
             objMtcRadioChecker(),
+            objMessage(),
+            objReason(CODE_UNSPECIFIED),
             objTerminatingState(objCallContext)
     {
     }
@@ -64,6 +68,8 @@ public:
     MockISession objSession;
     CallInfo objCallInfo;
     MockIMtcRadioChecker objMtcRadioChecker;
+    MockIMessage objMessage;
+    CallReasonInfo objReason;
 
     TerminatingState objTerminatingState;
 
@@ -80,6 +86,10 @@ protected:
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATING));
+        ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_START))
+                .WillByDefault(Return(&objMessage));
+        objReason.nCode = CODE_UNSPECIFIED;
+        ON_CALL(objUiNotifier, GetBlockingReason).WillByDefault(ReturnRef(objReason));
 
         ON_CALL(objCallContext, GetCallKey).WillByDefault(Return(ANY_CALL_KEY));
         ON_CALL(objCallContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
@@ -106,24 +116,70 @@ TEST_F(TerminatingStateTest, OnEnterInvokesNotifyCallSessionReleasedIfSessionIsA
 }
 
 TEST_F(TerminatingStateTest,
-        OnEnterInvokesUiNotifierOnCallSessionReleasedIfSessionIsAlreadyTerminatedAndEmergency)
+        OnEnterInvokesUiNotifierOnCallSessionReleasedIfSessionStateIsTerminatedAndEmergency)
 {
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
 
+    EXPECT_CALL(objTimerWrapper, Start(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
 
     objTerminatingState.OnEnter();
+    Mock::VerifyAndClearExpectations(&objUiNotifier);
 }
 
-TEST_F(TerminatingStateTest, OnEnterStartTimerIfEmergency)
+TEST_F(TerminatingStateTest, OnEnterDoesNotStartTimerIfSessionIsNotCreatedAndEmergency)
 {
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(IMS_NULL));
 
-    EXPECT_CALL(objTimerWrapper, Start(_, _));
+    EXPECT_CALL(objTimerWrapper, Start(_, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
 
     objTerminatingState.OnEnter();
+    Mock::VerifyAndClearExpectations(&objUiNotifier);
+}
+
+TEST_F(TerminatingStateTest,
+        OnEnterDoesNotStartTimerIfTerminatedNotByUserWithNoResponseReceivedAndEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
+
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_START))
+            .WillByDefault(Return(IMS_NULL));
+
+    EXPECT_CALL(objTimerWrapper, Start(_, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
+
+    objTerminatingState.OnEnter();
+    Mock::VerifyAndClearExpectations(&objUiNotifier);
+}
+
+TEST_F(TerminatingStateTest, OnEnterStartsTimerIfTerminatedByUserWithNoResponseReceivedAndEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_START))
+            .WillByDefault(Return(IMS_NULL));
+    objReason.nCode = CODE_USER_TERMINATED;
+
+    EXPECT_CALL(objTimerWrapper, Start(_, _));
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased).Times(0);
+
+    objTerminatingState.OnEnter();
+    Mock::VerifyAndClearExpectations(&objUiNotifier);
+}
+
+TEST_F(TerminatingStateTest, OnEnterStartsTimerIfReceivedResponseAndEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+
+    EXPECT_CALL(objTimerWrapper, Start(_, _));
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased).Times(0);
+
+    objTerminatingState.OnEnter();
+    Mock::VerifyAndClearExpectations(&objUiNotifier);
 }
 
 TEST_F(TerminatingStateTest, NotifyCallSessionReleasedIsInvokedOnlyOnce)

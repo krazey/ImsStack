@@ -199,7 +199,7 @@ TEST_F(MtcUiNotifierTest, SendStartFailed)
     pNotifier->SendStartFailed(*pReason);
 }
 
-TEST_F(MtcUiNotifierTest, SendStartFailedBlocksNotificationIfEmergencyCall)
+TEST_F(MtcUiNotifierTest, SendStartFailedBlocksNotificationAndStoreBlockingReasonIfEmergencyCall)
 {
     CallInfo objInfo;
     objInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
@@ -208,6 +208,8 @@ TEST_F(MtcUiNotifierTest, SendStartFailedBlocksNotificationIfEmergencyCall)
     EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
 
     pNotifier->SendStartFailed(*pReason);
+
+    EXPECT_EQ(pNotifier->GetBlockingReason(), *pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendInitiating)
@@ -357,7 +359,7 @@ TEST_F(MtcUiNotifierTest, SendTerminated)
     pNotifier->SendTerminated(*pReason);
 }
 
-TEST_F(MtcUiNotifierTest, SendTerminatedBlocksNotificationIfEmergencyCall)
+TEST_F(MtcUiNotifierTest, SendTerminatedBlocksNotificationAndStoreBlockingReasonIfEmergencyCall)
 {
     CallInfo objInfo;
     objInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
@@ -365,6 +367,8 @@ TEST_F(MtcUiNotifierTest, SendTerminatedBlocksNotificationIfEmergencyCall)
 
     EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
     pNotifier->SendTerminated(*pReason);
+
+    EXPECT_EQ(pNotifier->GetBlockingReason(), *pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendIncomingResume)
@@ -500,7 +504,7 @@ TEST_F(MtcUiNotifierTest, OnCallSessionReleasedInvokesBlockingStartFailed)
     EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
     pNotifier->SendStartFailed(*pReason);
 
-    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnStartFailed(*pReason)).Times(1);
     pNotifier->OnCallSessionReleased();
 
     EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
@@ -516,7 +520,7 @@ TEST_F(MtcUiNotifierTest, OnCallSessionReleasedInvokesBlockingTerminated)
     EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
     pNotifier->SendTerminated(*pReason);
 
-    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnTerminated(*pReason)).Times(1);
     pNotifier->OnCallSessionReleased();
 
     EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);

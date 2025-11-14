@@ -37,6 +37,7 @@ public:
 private:
     void HandleCallSessionReleased();
     void NotifyCallSessionReleased();
+    IMS_BOOL ShouldWaitEmergencyCallSessionReleased() const;
 
     IMS_BOOL m_bSessionReleasedNotified;
 };

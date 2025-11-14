@@ -54,6 +54,7 @@ public:
     MOCK_METHOD(void, SendCallPushCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendRatChanged, (IN IMS_SINT32), (override));
     MOCK_METHOD(void, OnCallSessionReleased, (), (override));
+    MOCK_METHOD(const CallReasonInfo&, GetBlockingReason, (), (const override));
 };
 
 #endif

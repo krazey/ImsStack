@@ -44,6 +44,7 @@ PUBLIC
 MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_objBlockedNotification(IMS_NULL),
+        m_objBlockingReason(CODE_NONE),
         m_objLastDispatchedMediaInfo(),
         m_objLastDispatchedJniCallInfo(),
         m_objLastDispatchedSuppServices()
@@ -132,14 +133,15 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 
     if (m_objContext.GetCallInfo().IsEmergency())
     {
-        m_objBlockedNotification = [this, objReason]()
+        m_objBlockingReason = objReason;
+        m_objBlockedNotification = [this]()
         {
             IJniMtcCallThread* piThread = GetCallThread();
             if (piThread == IMS_NULL)
             {
                 return;
             }
-            piThread->OnStartFailed(objReason);
+            piThread->OnStartFailed(m_objBlockingReason);
         };
         IMS_TRACE_I("SendStartFailed blocked", 0, 0, 0);
         return;
@@ -305,14 +307,15 @@ void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 
     if (m_objContext.GetCallInfo().IsEmergency())
     {
-        m_objBlockedNotification = [this, objReason]()
+        m_objBlockingReason = objReason;
+        m_objBlockedNotification = [this]()
         {
             IJniMtcCallThread* piThread = GetCallThread();
             if (piThread == IMS_NULL)
             {
                 return;
             }
-            piThread->OnTerminated(objReason);
+            piThread->OnTerminated(m_objBlockingReason);
         };
         IMS_TRACE_I("SendTerminated blocked", 0, 0, 0);
         return;
@@ -486,6 +489,11 @@ PUBLIC VIRTUAL void MtcUiNotifier::OnCallSessionReleased()
         m_objBlockedNotification();
         m_objBlockedNotification = nullptr;
     }
+}
+
+PUBLIC VIRTUAL const CallReasonInfo& MtcUiNotifier::GetBlockingReason() const
+{
+    return m_objBlockingReason;
 }
 
 PRIVATE

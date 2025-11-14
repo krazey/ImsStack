@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "CarrierConfig.h"
+#include "IMessage.h"
 #include "INetworkWatcher.h"
 #include "ISession.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/MtcUiNotifier.h"
 #include "call/radio/IMtcRadioChecker.h"
@@ -56,13 +59,19 @@ PUBLIC VIRTUAL void TerminatingState::OnEnter()
     {
         HandleCallSessionReleased();
     }
-
-    if (m_objContext.GetCallInfo().IsEmergency())
+    else if (m_objContext.GetCallInfo().IsEmergency())
     {
-        IMS_TRACE_I("Wait emergency call session released.", 0, 0, 0);
-        m_objContext.GetTimer().Start(TIMER_E911_WAIT_SESSION_RELEASED,
-                m_objContext.GetConfigurationProxy().GetInt(
-                        ConfigIms::KEY_SIP_TIMER_T1_MILLIS_INT));
+        if (ShouldWaitEmergencyCallSessionReleased())
+        {
+            IMS_TRACE_I("Wait emergency call session released.", 0, 0, 0);
+            m_objContext.GetTimer().Start(TIMER_E911_WAIT_SESSION_RELEASED,
+                    m_objContext.GetConfigurationProxy().GetInt(
+                            ConfigIms::KEY_SIP_TIMER_T1_MILLIS_INT));
+        }
+        else
+        {
+            HandleCallSessionReleased();
+        }
     }
 
     if (!piSession)
@@ -127,4 +136,28 @@ void TerminatingState::NotifyCallSessionReleased()
     IMS_TRACE_D("NotifyCallSessionReleased", 0, 0, 0);
     m_objContext.GetCallStateProxy().NotifyCallSessionReleased(m_objContext.GetCallKey(),
             m_objContext.GetCallInfo().IsEmergency(), m_objContext.IsEstablished());
+}
+
+PRIVATE
+IMS_BOOL TerminatingState::ShouldWaitEmergencyCallSessionReleased() const
+{
+    IMtcSession* pSession = m_objContext.GetSession();
+    if (pSession == IMS_NULL)
+    {
+        IMS_TRACE_D("Terminating when Session is not started", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetUiNotifier().GetBlockingReason().nCode == CODE_USER_TERMINATED)
+    {
+        return IMS_TRUE;
+    }
+
+    if (!pSession->GetISession().GetPreviousResponse(IMessage::SESSION_START))
+    {
+        IMS_TRACE_D("Terminating when no response received and not ended by user", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }
