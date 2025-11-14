@@ -41,6 +41,20 @@ public class SingleLatch {
     private final String mTag;
     private CountDownLatch mLatch;
 
+    /**
+     * Holds the current thread for the given timeout value.
+     * This method uses an independent {@link CountDownLatch} for the delay.
+     *
+     * @param millis The timeout value to be held.
+     */
+    public static void delay(long millis) {
+        try {
+            new CountDownLatch(1).await(millis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Log.d(SingleLatch.class, "delay interrupted: " + e.toString());
+        }
+    }
+
     public SingleLatch(String tag) {
         mTag = tag;
         init();

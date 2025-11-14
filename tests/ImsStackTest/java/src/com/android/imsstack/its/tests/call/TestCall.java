@@ -192,7 +192,7 @@ public class TestCall extends ServerFailureHandler {
 
         @Override
         public void nothing() {
-            mLatch.sleep(mWaitingTimeInMillis);
+            SingleLatch.delay(mWaitingTimeInMillis);
         }
 
         @Override
