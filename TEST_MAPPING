@@ -116,7 +116,10 @@
             "name": "ImsStackPresubmitTest",
             "options": [
                 {
-                    "include-filter": "com.android.imsstack.its.tests.ImsTissTest"
+                    "include-filter": "com.android.imsstack.its.tests"
+                },
+                {
+                    "include-annotation": "android.platform.test.annotations.Presubmit"
                 }
             ]
         }
