@@ -33,11 +33,14 @@ public class ControlProtocolConstants {
     public static final String HEADER_ADD = "+";
     public static final String HEADER_REMOVE = "-";
 
-    // SDP/Body handling
+    // Body handling
     public static final String MESSAGE_SDP = "message-sdp=";
     public static final String MESSAGE_XML = "message-xml=";
     public static final String SDP_COPY = "copy";
     public static final String SDP_COPY_WITHOUT_PRECONDITION = "copyRemoteSdpWithoutPrecondition";
+    public static final String BODY_ADDITION = "message-addbody=";
+    public static final String BODY_TYPE_SDP = "sdp";
+    public static final String BODY_TYPE_XML = "xml";
 
     // Target message ID
     public static final String MESSAGE_ID = "message-id=";

@@ -25,6 +25,7 @@ public class ServerMessage extends SipMessage {
     private final String mTarget;
     private final String mBodySdp;
     private final String mBodyXml;
+    private final String mNewBody;
     private final Map<String, String> mHeaders;
 
     private ServerMessage(Builder builder) {
@@ -32,6 +33,7 @@ public class ServerMessage extends SipMessage {
         mTarget = builder.mTarget;
         mBodySdp = builder.mBodySdp;
         mBodyXml = builder.mBodyXml;
+        mNewBody = builder.mNewBody;
         mHeaders = builder.mHeaders;
     }
 
@@ -67,6 +69,11 @@ public class ServerMessage extends SipMessage {
             appendSetting(message, ControlProtocolConstants.MESSAGE_XML, mBodyXml);
         }
 
+        // Append New Body if present
+        if (mNewBody != null) {
+            appendSetting(message, ControlProtocolConstants.BODY_ADDITION, mNewBody);
+        }
+
         // Append configs
         if (!mConfig.getConfigs().isEmpty()) {
             mConfig.getConfigs().forEach((key, value) ->
@@ -82,6 +89,7 @@ public class ServerMessage extends SipMessage {
         private String mTarget;
         private String mBodySdp;
         private String mBodyXml;
+        private String mNewBody;
         private Map<String, String> mHeaders = new HashMap<>();
         private MessageConfig mConfig = new MessageConfig();
 
@@ -136,6 +144,29 @@ public class ServerMessage extends SipMessage {
          */
         public Builder setXml(String xmlFile) {
             mBodyXml = xmlFile;
+            return this;
+        }
+
+        /**
+         * Inject a body content with type and name.
+         * This body is only valid for the current lifecycle of the server
+         * and is not persistently stored.
+         * The injected body can be used immediately upon injection
+         * and can be accessed by its name in subsequent messages.
+         *
+         * @param type The type of the body part.
+         *             {@link ControlProtocolConstants#BODY_TYPE_SDP},
+         *             {@link ControlProtocolConstants#BODY_TYPE_XML}
+         * @param name The name of the body part.
+         *             To include the body to the message, the name of this body part must also be
+         *             provided via {@link #setSdp} or {@link #setXml}
+         * @param content The content of the body part.
+         * @return Builder instance for method chaining.
+         */
+        public Builder addBodyContent(String type, String name, String content) {
+            final String newlinePlaceholder = "\\n";
+            mNewBody = type + "##" + name + "##"
+                    + content.replace(ControlProtocolConstants.CRLF, newlinePlaceholder);
             return this;
         }
 
