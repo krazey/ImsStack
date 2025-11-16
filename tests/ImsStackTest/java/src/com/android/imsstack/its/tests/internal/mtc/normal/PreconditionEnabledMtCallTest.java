@@ -37,6 +37,7 @@ import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
 import com.android.imsstack.its.servercontrol.ServerMessage;
 import com.android.imsstack.its.tests.call.CallTestBase;
 import com.android.imsstack.its.tests.call.TestCall;
+import com.android.imsstack.its.util.bodyhelper.VoiceCallSdpTemplate;
 
 import org.junit.After;
 import org.junit.Before;
@@ -324,7 +325,10 @@ public class PreconditionEnabledMtCallTest extends CallTestBase {
             String remoteInitialStatus) {
         generator.addMessage(new ServerMessage.Builder()
                 .setMethodOrCode("INVITE-REGISTER")
-                .setSdp("audio_with_precondition")
+                .addBodyContent(ControlProtocolConstants.BODY_TYPE_SDP,
+                        "audio_evs_with_precondition",
+                        VoiceCallSdpTemplate.SDP_AUDIO_EVS_WITH_PRECONDITION)
+                .setSdp("audio_evs_with_precondition")
                 .addConfig(ControlProtocolConstants.CONFIG_DELAY, String.valueOf(timeToCallStartMs))
                 .addConfig(ControlProtocolConstants.CONFIG_REQUIRE_100REL, "true")
                 .addConfig(ControlProtocolConstants.CONFIG_REQUIRE_PRECONDITION, "false")
@@ -421,7 +425,10 @@ public class PreconditionEnabledMtCallTest extends CallTestBase {
             int timeToWaitAcceptMs, int timeToWaitByeMs) {
         generator.addMessage(new ServerMessage.Builder()
                 .setMethodOrCode("INVITE-REGISTER")
-                .setSdp("audio_without_precondition")
+                .addBodyContent(ControlProtocolConstants.BODY_TYPE_SDP,
+                        "audio_evs_without_precondition",
+                        VoiceCallSdpTemplate.SDP_AUDIO_EVS)
+                .setSdp("audio_evs_without_precondition")
                 .addConfig(ControlProtocolConstants.CONFIG_DELAY, String.valueOf(timeToCallStartMs))
                 .addConfig(ControlProtocolConstants.CONFIG_REQUIRE_100REL, "true")
                 .addConfig(ControlProtocolConstants.CONFIG_REQUIRE_PRECONDITION, "false")
