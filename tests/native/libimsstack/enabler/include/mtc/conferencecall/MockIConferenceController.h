@@ -17,12 +17,16 @@
 #ifndef MOCK_I_CONFERENCE_CONTROLLER_H_
 #define MOCK_I_CONFERENCE_CONTROLLER_H_
 
-#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "conferencecall/IConferenceController.h"
 #include <gmock/gmock.h>
 
 class ConferenceParticipantList;
+class SuppService;
+struct ConfUser;
+template <typename T>
+class ImsList;
 
 class MockIConferenceController : public IConferenceController
 {

@@ -17,12 +17,9 @@
 #ifndef MOCK_I_MTC_CALL_STATE_H_
 #define MOCK_I_MTC_CALL_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
-#include "helper/IMtcAosStateListener.h"
 #include <gmock/gmock.h>
 
 class AString;
@@ -31,10 +28,14 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
+enum class CallType;
+enum class MtcAosState;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <typename T>
+class ImsList;
 
 class MockIMtcCallState : public IMtcCallState
 {

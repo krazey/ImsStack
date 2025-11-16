@@ -17,7 +17,7 @@
 #ifndef MOCK_CONFERENCE_EVENT_NOTIFIER_H_
 #define MOCK_CONFERENCE_EVENT_NOTIFIER_H_
 
-#include "CallReasonInfo.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include <gmock/gmock.h>
@@ -26,6 +26,7 @@ class IMtcCallContext;
 class IMtcCallManager;
 class CallConnectionIdManager;
 class ConferenceParticipantList;
+struct CallReasonInfo;
 
 class MockConferenceEventNotifier : public ConferenceEventNotifier
 {

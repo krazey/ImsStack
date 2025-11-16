@@ -17,6 +17,7 @@
 #ifndef MOCK_CONFERENCE_SUBSCRIPTION_H_
 #define MOCK_CONFERENCE_SUBSCRIPTION_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceSubscription.h"
 #include <gmock/gmock.h>

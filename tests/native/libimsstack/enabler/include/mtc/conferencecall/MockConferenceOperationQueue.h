@@ -17,15 +17,14 @@
 #ifndef MOCK_CONFERENCE_OPERATION_QUEUE_H_
 #define MOCK_CONFERENCE_OPERATION_QUEUE_H_
 
-#include "ITimer.h"
-#include "ImsList.h"
-#include "ImsMap.h"
-#include "IuMtcCall.h"
-#include "MtcDef.h"
-#include "conferencecall/ConferenceDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "conferencecall/IConferenceOperationQueueListener.h"
 #include <gmock/gmock.h>
+
+class ITimer;
+struct ConfUser;
+template <typename T>
+class ImsList;
 
 class MockConferenceOperationQueue : public ConferenceOperationQueue
 {

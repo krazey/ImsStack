@@ -18,7 +18,7 @@
 #define MOCK_CONFERENCE_INFO_H_
 
 #include "AString.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceInfo.h"
 #include <gmock/gmock.h>
 
