@@ -16,6 +16,7 @@
 package com.android.imsstack.its.tests.registration;
 
 import android.location.LocationManager;
+import android.os.PersistableBundle;
 import android.telephony.ServiceState;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
@@ -90,7 +91,29 @@ public class RegistrationHelper {
     public void triggerRegistration(@NonNull ImsStackTestBase testBase) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
 
-        triggerRegistration(testBase, null);
+        triggerRegistration(testBase, new RegistrationInfo.Builder().build());
+    }
+
+    /**
+     * Triggers IMS registration based on the provided {@link ImsStackTestBase} instance and
+     * a specific carrier configuration {@link PersistableBundle}.
+     * This is a convenience method that internally builds a {@link RegistrationInfo} object
+     * with the provided configuration using {@link RegistrationInfo.Builder} and delegates
+     * the execution to {@link #triggerRegistration(ImsStackTestBase, RegistrationInfo)}.
+     *
+     * @param testBase The {@link ImsStackTestBase} instance to perform registration.
+     *                 Must not be {@code null}.
+     * @param config The {@link PersistableBundle} containing specific carrier configuration
+     *               to be applied during registration. Must not be {@code null}.
+     * @throws NullPointerException if {@code testBase} or {@code config} is {@code null}.
+     * @see #triggerRegistration(ImsStackTestBase, RegistrationInfo)
+     */
+    public void triggerRegistration(@NonNull ImsStackTestBase testBase,
+            @NonNull PersistableBundle config) {
+        Objects.requireNonNull(testBase, "testBase must not be null.");
+        Objects.requireNonNull(config, "config must not be null.");
+
+        triggerRegistration(testBase, new RegistrationInfo.Builder().addConfig(config).build());
     }
 
     /**
@@ -104,16 +127,13 @@ public class RegistrationHelper {
      * @param testBase The {@link ImsStackTestBase} instance to perform registration.
      *                 Must not be null.
      * @param info The {@link RegistrationInfo} object containing IMS registration information.
-     *             If null, a default registration information will be used.
+     *             Must not be null.
      * @throws NullPointerException if {@code testBase} is null.
      */
     public void triggerRegistration(@NonNull ImsStackTestBase testBase,
-            @Nullable RegistrationInfo info) {
+            @NonNull RegistrationInfo info) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
-
-        if (info == null) {
-            info = new RegistrationInfo.Builder().build();
-        }
+        Objects.requireNonNull(info, "info must not be null.");
 
         startImsStackWithRegistrationInfo(testBase, info);
 
