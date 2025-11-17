@@ -134,7 +134,8 @@ class AosConnectorTest : public ::testing::Test
 {
 public:
     inline AosConnectorTest() :
-            m_pAosConnector(IMS_NULL)
+            m_pAosConnector(IMS_NULL),
+            m_piAosCallTracker(IMS_NULL)
     {
         m_objTimerService.SetTimer(&m_objMockITimer);
         PlatformContext::GetInstance()->SetService(
