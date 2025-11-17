@@ -665,6 +665,7 @@ TEST_F(MtcPreconditionManagerTest,
         IsLocalResourceConfirmationRequiredReturnsFalseIfPreconditionIsNotSupported)
 {
     SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_FALSE));
     EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
 }
@@ -673,6 +674,7 @@ TEST_F(MtcPreconditionManagerTest,
         IsLocalResourceConfirmationRequiredReturnsFalseIfLocalResourceIsAlreadyConfirmed)
 {
     SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
@@ -681,21 +683,95 @@ TEST_F(MtcPreconditionManagerTest,
     EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
 }
 
-TEST_F(MtcPreconditionManagerTest, IsLocalResourceConfirmationRequiredReturnsTrue)
+TEST_F(MtcPreconditionManagerTest,
+        IsLocalResourceConfirmationRequiredReturnsFalseIfLocalResourceIsNotAvailable)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsLocalResourceConfirmationRequiredReturnsFalseIfAllMediaIsConfirmed)
 {
     SetUpMockQosInfo();
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    SetUpNothingOnDefaultBearerSupported();
+
+    EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsLocalResourceConfirmationRequiredReturnsTrueIfOnlyAudioIsConfirmed)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+
     ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_VIDEO))
             .WillByDefault(Return(IMS_FALSE));
 
     pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
-    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
     SetUpNothingOnDefaultBearerSupported();
 
     EXPECT_TRUE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsLocalResourceConfirmationRequiredReturnsFalseIfNotConfirmedMediaNotUsePrecondition)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_VIDEO))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    SetUpNothingOnDefaultBearerSupported();
+
+    EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -705,6 +781,9 @@ TEST_F(MtcPreconditionManagerTest,
     SetUpMockQosInfo();
     pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+
     ImsList<IMedia*> lstMedias;
     MockIMedia objAudioMedia;
     lstMedias.Append(&objAudioMedia);
@@ -733,6 +812,9 @@ TEST_F(MtcPreconditionManagerTest,
     SetUpMockQosInfo();
     pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIA_TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+
     ImsList<IMedia*> lstMedias;
     MockIMedia objAudioMedia;
     lstMedias.Append(&objAudioMedia);

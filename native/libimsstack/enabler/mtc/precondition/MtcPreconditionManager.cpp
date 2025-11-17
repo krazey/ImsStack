@@ -240,9 +240,20 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
     IMS_BOOL bResult = std::any_of(objMediaTypeList.begin(), objMediaTypeList.end(),
             [this, piSession, pStatusTable](IMS_UINT32 eMediaType)
             {
-                return !pStatusTable->IsLocalResourceConfirmed(
-                               MtcMediaUtil::GetSdpMediaType(eMediaType)) &&
-                        IsLocalResourceReservedByMediaType(piSession, eMediaType);
+                if (!m_pSdpPreconditionHelper->IsPreconditionIncludedInSdp(piSession, eMediaType))
+                {
+                    IMS_TRACE_D("No precondition is used for [%s]",
+                            MtcMediaStringUtils::ConvertContentType(eMediaType), 0, 0);
+                    return IMS_FALSE;
+                }
+                if (pStatusTable->IsLocalResourceConfirmed(
+                            MtcMediaUtil::GetSdpMediaType(eMediaType)))
+                {
+                    IMS_TRACE_D("[%s] is Already confirmed",
+                            MtcMediaStringUtils::ConvertContentType(eMediaType), 0, 0);
+                    return IMS_FALSE;
+                }
+                return IsLocalResourceReservedByMediaType(piSession, eMediaType);
             });
 
     IMS_TRACE_D("IsLocalResourceConfirmationRequired (%s)", _TRACE_B_(bResult), 0, 0);
