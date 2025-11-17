@@ -18,7 +18,7 @@
 #define MOCK_CONFERENCE_PARTICIPANT_LIST_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include <gmock/gmock.h>
 

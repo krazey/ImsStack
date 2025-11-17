@@ -17,7 +17,6 @@
 #ifndef MOCK_I_MTC_UI_NOTIFIER_H_
 #define MOCK_I_MTC_UI_NOTIFIER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcUiNotifier.h"
 #include <gmock/gmock.h>

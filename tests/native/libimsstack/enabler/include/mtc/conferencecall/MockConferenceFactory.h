@@ -17,7 +17,7 @@
 #ifndef MOCK_CONFERENCE_FACTORY_H_
 #define MOCK_CONFERENCE_FACTORY_H_
 
-#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceFactory.h"
 #include <gmock/gmock.h>
@@ -33,6 +33,8 @@ class IConferenceReference;
 class IConferenceReferenceListener;
 class IConferenceSubscriptionListener;
 class IMtcContext;
+template <typename T>
+class ImsList;
 
 class MockConferenceFactory : public ConferenceFactory
 {

@@ -17,9 +17,10 @@
 #ifndef MOCK_I_CONFERENCE_REFERENCE_LISTENER_H_
 #define MOCK_I_CONFERENCE_REFERENCE_LISTENER_H_
 
-#include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include <gmock/gmock.h>
+
+class IConferenceReference;
 
 class MockIConferenceReferenceListener : public IConferenceReferenceListener
 {

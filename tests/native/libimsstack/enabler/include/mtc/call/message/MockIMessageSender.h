@@ -18,11 +18,11 @@
 #define MOCK_I_MESSAGE_SENDER_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
 #include "call/message/IMessageSender.h"
 #include <gmock/gmock.h>
 
+enum class CallType;
+enum class UpdateType;
 struct CallReasonInfo;
 
 class MockIMessageSender : public IMessageSender

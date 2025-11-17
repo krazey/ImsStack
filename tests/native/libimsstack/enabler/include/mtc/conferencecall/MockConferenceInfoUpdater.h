@@ -17,11 +17,11 @@
 #ifndef MOCK_CONFERENCE_INFO_UPDATER_H_
 #define MOCK_CONFERENCE_INFO_UPDATER_H_
 
-#include "AString.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include <gmock/gmock.h>
 
+class AString;
 class ConferenceFactory;
 class ConferenceParticipantList;
 

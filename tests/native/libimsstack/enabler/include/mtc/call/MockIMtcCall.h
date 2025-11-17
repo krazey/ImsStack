@@ -17,14 +17,11 @@
 #ifndef MOCK_I_MTC_CALL_H_
 #define MOCK_I_MTC_CALL_H_
 
-#include "AString.h"
-#include "IMtcService.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include <gmock/gmock.h>
 
+class AString;
 class IMtcCallContext;
 class ISession;
 class SuppService;
@@ -32,6 +29,8 @@ enum class UpdateType;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <typename T>
+class ImsList;
 
 class MockIMtcCall : public IMtcCall
 {
