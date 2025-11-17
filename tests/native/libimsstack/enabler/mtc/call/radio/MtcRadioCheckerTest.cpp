@@ -658,11 +658,21 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedStoresRegistrationThrottlingTime)
 
 TEST_F(MtcRadioCheckerTest, CheckResetsRegistrationThrottlingTime)
 {
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_RACH_FAILURE,
             IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START, 1000);
     m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
             INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1);
+
+    EXPECT_EQ(0, m_pMtcRadioChecker->GetRegistrationThrottlingTimeMillis());
+
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
+            IImsRadio::REASON_RACH_FAILURE,
+            IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START, 1000);
+    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+            INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2);
 
     EXPECT_EQ(0, m_pMtcRadioChecker->GetRegistrationThrottlingTimeMillis());
 }
