@@ -556,10 +556,10 @@ TEST_F(MtcCallControllerTest, GetRedialHelperWithDifferentTypeCreatesSilentRedia
 {
     const CallReasonInfo objReason1(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
     const CallReasonInfo objReason2(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
-    ISilentRedialHelper& objRedialHelper1 =
+    const ISilentRedialHelper& objRedialHelper1 =
             pCallController->GetRedialHelper(objContext, objReason1);
     IMS_UINT32 nType1 = objRedialHelper1.GetType();
-    ISilentRedialHelper& objRedialHelper2 =
+    const ISilentRedialHelper& objRedialHelper2 =
             pCallController->GetRedialHelper(objContext, objReason2);
     EXPECT_NE(nType1, objRedialHelper2.GetType());
 }
@@ -567,10 +567,12 @@ TEST_F(MtcCallControllerTest, GetRedialHelperWithDifferentTypeCreatesSilentRedia
 TEST_F(MtcCallControllerTest, ReleaseRedialHelperDeletesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper1 = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper1 =
+            pCallController->GetRedialHelper(objContext, objReason);
     IMS_UINT32 nType1 = objRedialHelper1.GetType();
     pCallController->ReleaseRedialHelper();
-    ISilentRedialHelper& objRedialHelper2 = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper2 =
+            pCallController->GetRedialHelper(objContext, objReason);
     // nothing to check : cannot check address
     EXPECT_EQ(nType1, objRedialHelper2.GetType());
 }
@@ -582,7 +584,8 @@ TEST_F(MtcCallControllerTest, GetActiveRedialHelper)
     EXPECT_EQ(pNullRedialHelper, nullptr);
 
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper =
+            pCallController->GetRedialHelper(objContext, objReason);
     const ISilentRedialHelper* pActiveRedialHelper = pCallController->GetActiveRedialHelper();
     EXPECT_EQ(&objRedialHelper, pActiveRedialHelper);
 }
