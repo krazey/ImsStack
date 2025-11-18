@@ -36,6 +36,7 @@ import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
 import java.util.EnumMap;
+import java.util.concurrent.Executors;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
@@ -564,6 +565,11 @@ public class TestCall extends ServerFailureHandler {
             Log.d(this, "callSessionTerminated - reason: " + reason);
             onCallEventReceived(CallEvent.Type.SESSION_TERMINATED,
                     new CallEvent.EventRecord(reason));
+
+            // Simulates the telephony behavior to release the call
+            Executors.newSingleThreadExecutor().execute(() -> {
+                mCallSession.close();
+            });
         }
 
         @Override
