@@ -42,7 +42,10 @@ public class CallTestBase extends ImsStackTestBase {
     }
 
     protected void performRegistration() {
+        // The Test Server doesn't support IPSec.
         mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
+        // Enforce TCP for test robustness.
+        mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT, 1);
 
         startImsStack(SLOT0, mConfig);
         enableAllMmTelCapabilities();
