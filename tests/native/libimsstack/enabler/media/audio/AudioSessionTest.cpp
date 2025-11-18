@@ -152,7 +152,7 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
     }
 
-    // Case 3: PEM type is RECVONLY -> should be SEND_ONLY
+    // Case 3: PEM type is RECVONLY -> should be RECEIVE_ONLY
     {
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::RECVONLY);
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
@@ -161,13 +161,13 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
     }
 
-    // Case 4: PEM type is INACTIVE -> should be INACTIVE
+    // Case 4: PEM type is INACTIVE -> should be RECEIVE_ONLY
     {
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::INACTIVE);
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
-        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
+        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
     }
 
     // Case 5: PEM type is NONE, and RecvOnlyEarlySession is enabled -> should be RECEIVE_ONLY

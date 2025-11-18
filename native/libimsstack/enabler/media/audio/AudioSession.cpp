@@ -942,20 +942,18 @@ AudioConfiguration* AudioSession::GetConfiguration()
 }
 
 PRIVATE
-IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 mediaDirection)
+IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 nMediaDirection)
 {
-    IMS_SINT32 nEarlyAudioDirection = mediaDirection;
+    IMS_SINT32 nEarlyAudioDirection = nMediaDirection;
 
     switch (m_ePemType)
     {
+        case MEDIA_PEM_TYPE::SENDONLY:
         case MEDIA_PEM_TYPE::INACTIVE:
-            nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+            nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
             break;
         case MEDIA_PEM_TYPE::SENDRECV:
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-            break;
-        case MEDIA_PEM_TYPE::SENDONLY:
-            nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
             break;
         case MEDIA_PEM_TYPE::RECVONLY:
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
@@ -972,9 +970,8 @@ IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 mediaDirection)
         break;
     }
 
-    IMS_TRACE_D("UpdateEarlyMediaDirection() - P-Early-media direction[%d], media direction[%d], "
-                "changed media direction[%d]",
-            m_ePemType, mediaDirection, nEarlyAudioDirection);
+    IMS_TRACE_D("UpdateEarlyMediaDirection() - PEM direction[%d], direction[%d]->[%d]", m_ePemType,
+            nMediaDirection, nEarlyAudioDirection);
 
     return nEarlyAudioDirection;
 }
