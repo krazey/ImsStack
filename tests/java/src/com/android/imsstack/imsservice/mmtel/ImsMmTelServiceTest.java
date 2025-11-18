@@ -35,13 +35,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsExternalCallState;
 import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.SrvccCall;
+import android.telephony.ims.aidl.IImsCallSessionListener;
+import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature.MmTelCapabilities;
@@ -51,6 +53,7 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
+import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
@@ -89,6 +92,8 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Mock private IUtInterface mMockUtInterface;
     @Mock private ImsCallApp mMockImsCallApp;
     @Mock private SettingsProxy mGlobalSettings;
+    @Mock private IImsCallSessionListener mMockCallSessionListener;
+    @Mock private IImsMmTelListener mMockMmtelListener;
 
     private TestAppContext mTestAppContext;
     private ImsServiceManager mServiceManager;
@@ -390,27 +395,63 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void testOnIncomingCallReceived() {
+    public void testOnIncomingCallReceivedInvokesInternalException() throws Exception {
         assertThrows(IllegalArgumentException.class,
                 () -> mMmTelFeature.makeIncomingCall(null));
 
         final ImsCallSessionImpl callSession = Mockito.mock(ImsCallSessionImpl.class);
-        mMockImsCallApp =  null;
+        mMockImsCallApp = null;
         assertThrows(IllegalArgumentException.class,
                 () -> mMmTelFeature.makeIncomingCall(callSession));
+    }
 
-        String callId = "1";
-        mMockImsCallApp = Mockito.mock(ImsCallApp.class);
-        when(mMockImsContext.getDefaultHandler()).thenReturn(new Handler(Looper.getMainLooper()));
-        when(callSession.getProperty(eq(ImsCallProfile.EXTRA_USSD))).thenReturn(null, "true");
-        when(callSession.getCallId()).thenReturn(callId);
+    @Test
+    public void testOnIncomingCallReceivedNotifyIncomingCallThrowsException() throws Exception {
+        final ImsCallSessionImpl callSession = setupIncomingCallTest();
+
+        // no IImsMmTelListener in the MmtleFeature
         mMmTelFeature.makeIncomingCall(callSession);
+
         verify(mMockImsCallApp, times(1)).takeCallSession(callSession);
-        verify(callSession, times(1)).alertUser();
+        processAllMessages();
+
+        verify(callSession, times(1)).onIncomingcallNotified(false);
+    }
+
+    @Test
+    public void testOnIncomingCallReceivedNotifyIncomingCallReturnsNull() throws Exception {
+        final ImsCallSessionImpl callSession = setupIncomingCallTest();
+
+        // IImsMmTelListener returns null;
+        mMmTelFeature.getBinder().setListener(mMockMmtelListener);
+        when(mMockMmtelListener.onIncomingCall(any(), any(), any())).thenReturn(null);
 
         mMmTelFeature.makeIncomingCall(callSession);
-        verify(mMockImsCallApp, times(2)).takeCallSession(callSession);
-        verify(callSession, times(1)).alertUser();
+
+        verify(mMockImsCallApp, times(1)).takeCallSession(callSession);
+
+        processAllMessages();
+
+        verify(callSession, times(1)).onIncomingcallNotified(false);
+    }
+
+    @Test
+    public void testOnIncomingCallReceivedNotifyIncomingCallRetrunsValidListener()
+            throws Exception {
+        final ImsCallSessionImpl callSession = setupIncomingCallTest();
+
+        // IImsMmTelListener returns a valid Listener;
+        mMmTelFeature.getBinder().setListener(mMockMmtelListener);
+        when(mMockMmtelListener.onIncomingCall(any(), any(), any())).thenReturn(
+                mMockCallSessionListener);
+
+        mMmTelFeature.makeIncomingCall(callSession);
+
+        verify(mMockImsCallApp, times(1)).takeCallSession(callSession);
+
+        processAllMessages();
+
+        verify(callSession, times(1)).onIncomingcallNotified(true);
     }
 
     @Test
@@ -509,6 +550,28 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         }
 
         return imsMmTelFeature;
+    }
+
+    private ImsCallSessionImpl setupIncomingCallTest() throws Exception {
+        // Create TestableLoopers for default and call handlers
+        HandlerThread defaultHandlerThread = new HandlerThread("defaultHandlerThread");
+        defaultHandlerThread.start();
+        TestableLooper defaultLooper = new TestableLooper(defaultHandlerThread.getLooper());
+        monitorTestableLooper(defaultLooper);
+
+        HandlerThread callHandlerThread = new HandlerThread("callHandlerThread");
+        callHandlerThread.start();
+        TestableLooper callLooper = new TestableLooper(callHandlerThread.getLooper());
+        monitorTestableLooper(callLooper);
+
+        final ImsCallSessionImpl callSession = Mockito.mock(ImsCallSessionImpl.class);
+        String callId = "1";
+        mMockImsCallApp = Mockito.mock(ImsCallApp.class);
+        when(mMockImsContext.getDefaultHandler()).thenReturn(
+                new Handler(defaultLooper.getLooper()));
+        when(callSession.getCallHandler()).thenReturn(new Handler(callLooper.getLooper()));
+        when(callSession.getCallId()).thenReturn(callId);
+        return callSession;
     }
 
     private class TestImsMmTelService extends ImsMmTelService {

@@ -867,21 +867,21 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testAlertUserNormalCall() {
+    public void testOnIncomingcallNotifiedAlertUserNormalCall() {
         // For a normal call, it should just alert the user via MtcCall.
-        mImsCallSession.alertUser();
+        mImsCallSession.onIncomingcallNotified(true);
         verify(mMockMtcCall, times(1)).alertUser();
         verify(mMockImsCallSessionCallback, never()).invokeStartFailed(any(), any());
     }
 
     @Test
-    public void testAlertUserAutoRejectedCallNoListener() {
+    public void testOnIncomingcallNotifiedAlertUserAutoRejectedCallNoListener() {
         // For an auto-rejected call without a listener, it should cache the reason.
         when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
         when(mMockImsCallSessionCallback.hasListener()).thenReturn(false);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
-        mImsCallSession.alertUser();
+        mImsCallSession.onIncomingcallNotified(true);
         assertNotEquals(ImsCallSessionImplBase.State.TERMINATING, mImsCallSession.getState());
         assertNotEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
         assertNotEquals(ImsCallSessionImplBase.State.INVALID, mImsCallSession.getState());
@@ -895,12 +895,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testAlertUserAutoRejectedCallSetListenerLater() {
+    public void testOnIncomingcallNotifiedAlertUserAutoRejectedCallSetListenerLater() {
         // For an auto-rejected call, when the listener is set later, it should notify.
         when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
         when(mMockImsCallSessionCallback.hasListener()).thenReturn(false);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
-        mImsCallSession.alertUser(); // Caches the reason
+        mImsCallSession.onIncomingcallNotified(true); // Caches the reason
 
         // Setting the listener should trigger the delayed notification.
         mImsCallSession.setListener(mMockImsCallSessionListener);
@@ -911,19 +911,29 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testAlertUserAutoRejectedCallWithListener() {
+    public void testOnIncomingcallNotifiedAlertUserAutoRejectedCallWithListener() {
         // For an auto-rejected call with a listener already set, it should notify immediately.
         when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
         when(mMockImsCallSessionCallback.hasListener()).thenReturn(true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
-        mImsCallSession.alertUser();
+        mImsCallSession.onIncomingcallNotified(true);
         processAllMessages();
 
         // Should not cache the reason, but notify directly.
         assertNull(mImsCallSession.mImmediateCallEndReason);
         verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
                 eq(mImsCallSession), any(ImsReasonInfo.class));
+    }
+
+    @Test
+    public void testOnIncomingcallNotifiedReject() {
+        mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
+
+        mImsCallSession.onIncomingcallNotified(false);
+        processAllMessages();
+
+        verify(mMockMtcCall, times(1)).reject(anyInt());
     }
 
     private void verifyWaitOrNotifyCallTerminated() {
