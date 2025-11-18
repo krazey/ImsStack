@@ -560,7 +560,6 @@ public:
     MockIAosRegistrationListener m_objMockIAosRegistrationListener;
     MockIAosRetryRepository m_objMockIAosRetryRepository;
     MockIAosTransaction m_objMockIAosTransaction;
-    // cppcheck-suppress unusedStructMember
     MockIRegSubscription m_objMockIRegSubscription;
     MockIThread m_objMockThread;
     MockITimer m_objMockITimer;
@@ -1717,7 +1716,7 @@ TEST_F(AosRegistrationTest, RemoveSipPlaniHeaderWhenClearSipRtConfigAfterSetPlan
 TEST_F(AosRegistrationTest, RemoveRegContactAddressWhenClearSipRtConfigAfterSetRegContactAddress)
 {
     ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(SLOT_ID);
-    SipRtConfigHelper* pConfigHelper = static_cast<SipRtConfigHelper*>(piConfHelper);
+    const SipRtConfigHelper* pConfigHelper = static_cast<SipRtConfigHelper*>(piConfHelper);
     SipRtConfig::RegContactAddress objContactAddress;
     objContactAddress.strCallId = "TestCallId";
     piConfHelper->SetConfig(SipRtConfig::CONFIG_I_REG_CONTACT_ADDRESS, &objContactAddress);
