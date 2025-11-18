@@ -278,7 +278,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
 
     SetTcallTimerConfig(ConfigVoice::
                     MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
@@ -325,7 +325,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
 
     SetTcallTimerConfig(ConfigVoice::
                     MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
@@ -356,7 +356,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
@@ -415,6 +415,19 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutDoesNotInvokeEpsfbIfEpsFbI
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END);
 
     EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutDoesNotReturnsCsfbIfCsfbIsNotAvailable)
+{
+    SetTransactionTimeout();
+    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_FALSE));
+    SetTcallTimerConfig(ConfigVoice::
+                    MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
@@ -669,7 +682,7 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
     // SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION case
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT))
             .WillByDefault(Return(ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
@@ -683,6 +696,19 @@ TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhrase)
     ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(reasonPhrase));
 
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, -1, reasonPhrase));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403ResponseWithConfigRecoverRegistrationWhenCsfbIsNotAvailable)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY);
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT))
+            .WillByDefault(Return(ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
 }
 
 TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonHeaderText)
