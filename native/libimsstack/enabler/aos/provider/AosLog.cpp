@@ -144,9 +144,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
         case ImsAosControl::REGISTER_REINITIATE:
             return "REGISTER_REINITIATE";
 
-        case ImsAosControl::REGISTER_REINITIATE_BY_CSFB:
-            return "REGISTER_REINITIATE_BY_CSFB";
-
         case ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF:
             return "E_REGISTER_FAKE_WITH_NEXT_PCSCF";
 
