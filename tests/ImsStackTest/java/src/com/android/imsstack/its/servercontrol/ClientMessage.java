@@ -147,6 +147,22 @@ public class ClientMessage extends SipMessage {
         }
 
         /**
+         * Applies a block of configurations to the builder only if the specified condition is
+         * true.
+         *
+         * @param condition The boolean condition to evaluate.
+         * @param setter A {@link java.util.function.Consumer} that accepts the builder and applies
+         *              configurations.
+         * @return Builder instance for method chaining.
+         */
+        public Builder ifTrue(boolean condition, java.util.function.Consumer<Builder> setter) {
+            if (condition) {
+                setter.accept(this);
+            }
+            return this;
+        }
+
+        /**
          * Builds the {@link ClientMessage} instance.
          *
          * @return Constructed {@link ClientMessage}.
