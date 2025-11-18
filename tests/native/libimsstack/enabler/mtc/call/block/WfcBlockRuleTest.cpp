@@ -15,6 +15,7 @@
  */
 
 #include "IMtcImsEventReceiver.h"
+#include "INetworkWatcher.h"
 #include "ImsEventDef.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
@@ -93,13 +94,14 @@ protected:
     }
 };
 
-// Conceptually WfcBlockRule doesn't care about cellular registration cases
 TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfNotRegisteredOnWifi)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_ON));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
@@ -107,16 +109,20 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfNotRegisteredOnWifi)
     objSsacInfo.nBarringFactorForVoice = 0;
 
     AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfWfcAvailable)
+TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfWfcOn)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_ON));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_INVALID));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
@@ -124,16 +130,20 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfWfcAvailable)
     objSsacInfo.nBarringFactorForVoice = 0;
 
     AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfVoiceCallsAreAvailableOnCellular)
+TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfCallsAreAvailableOnNr)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_NR));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
@@ -141,35 +151,42 @@ TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfVoiceCallsAreAvailableOnCellular
     objSsacInfo.nBarringFactorForVoice = 100;
 
     AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedForVideoCalls)
+TEST_F(WfcBlockRuleTest, CheckReturnsUnblockedIfCallsAreAvailableOnLte)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
-            .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
+            .WillByDefault(Return(IMS_VOICE_OVER_PS_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
-            .WillByDefault(Return(IMS_TRUE));
-    objSsacInfo.nBarringFactorForVoice = 0;
+            .WillByDefault(Return(IMS_FALSE));
+    objSsacInfo.nBarringFactorForVoice = 100;
 
-    lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
-    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
-
+    AssertResultForCallType(CallType::VOIP, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::RTT, Result(Result::Status::UNBLOCKED));
     AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::UNKNOWN, Result(Result::Status::UNBLOCKED));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVideoCallsIfAlreadyHasVideoCall)
+TEST_F(WfcBlockRuleTest,
+        CheckReturnsBlockedForAnyCallsIfAlreadyHasVideoCallAndCallsAreNotAvailableOnCellular)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_INVALID));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
@@ -179,20 +196,62 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVideoCallsIfAlreadyHasVideoCall)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VT));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
+    AssertResultForCallType(CallType::VOIP,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
     AssertResultForCallType(CallType::VT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::RTT,
             Result(Result::Status::BLOCKED,
                     CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
     AssertResultForCallType(CallType::VIDEO_RTT,
             Result(Result::Status::BLOCKED,
                     CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::UNKNOWN,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableByVops)
+TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVoiceCallsIfNoCellularCoverage)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_INVALID));
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
+            .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
+    ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
+            .WillByDefault(Return(IMS_FALSE));
+    objSsacInfo.nBarringFactorForVoice = 100;
+
+    lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
+
+    AssertResultForCallType(CallType::VOIP,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::RTT,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+    AssertResultForCallType(CallType::UNKNOWN,
+            Result(Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
+}
+
+TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVoiceCallsIfVoiceCallsAreUnavailableByVops)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
+            .WillByDefault(Return(IMS_WFC_OFF));
+
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
@@ -208,14 +267,19 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableByVops)
     AssertResultForCallType(CallType::UNKNOWN,
             Result(Result::Status::BLOCKED,
                     CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacP00)
+TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVoiceCallsIfVoiceCallsAreUnavailableBySsacP00)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_SUPPORTED));
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
@@ -231,14 +295,19 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacP00)
     AssertResultForCallType(CallType::UNKNOWN,
             Result(Result::Status::BLOCKED,
                     CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
 }
 
-TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacTimer)
+TEST_F(WfcBlockRuleTest, CheckReturnsBlockedForVoiceCallsIfVoiceCallsAreUnavailableBySsacTimer)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
 
+    ON_CALL(objService, GetMobileRatType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_SUPPORTED));
     objSsacInfo.nBarringFactorForVoice = 60;
@@ -254,4 +323,7 @@ TEST_F(WfcBlockRuleTest, CheckReturnsBlockedIfVoiceCallsAreUnavailableBySsacTime
     AssertResultForCallType(CallType::UNKNOWN,
             Result(Result::Status::BLOCKED,
                     CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF)));
+
+    AssertResultForCallType(CallType::VT, Result(Result::Status::UNBLOCKED));
+    AssertResultForCallType(CallType::VIDEO_RTT, Result(Result::Status::UNBLOCKED));
 }
