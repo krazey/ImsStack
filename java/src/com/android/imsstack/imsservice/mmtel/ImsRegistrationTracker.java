@@ -352,6 +352,16 @@ public class ImsRegistrationTracker {
         return mRegTracker;
     }
 
+    @VisibleForTesting
+    protected void updateFeatures(int featureTagBits) {
+        mRegTracker.updateFeatures(featureTagBits);
+    }
+
+    @VisibleForTesting
+    protected void updateNetworkType(NetworkType networkType) {
+        mRegTracker.updateNetworkType(networkType);
+    }
+
     protected CapabilityPairs createCapabilityPairsFromCapabilities() {
         CapabilityPairs capabilityPairs = createSmsCapabilityPairs();
 
@@ -923,12 +933,25 @@ public class ImsRegistrationTracker {
                 return;
             }
 
+            if (isRegistered()) {
+                notifyDeregistered();
+            }
+
             if (getIAosRegistration(mContext.getSlotId()) != null) {
                 mAosReg.removeListener(this);
             }
             mAosReg = null;
 
             cleanup();
+        }
+
+        private void notifyDeregistered() {
+            logi("notifyDeregistered: slotId=" + mContext.getSlotId());
+            mRegImpl.notifyDeregistered(RegistrationType.NORMAL,
+                    convertToTelephonyNetworkType(getNetworkType()),
+                            ReasonCode.UNSPECIFIED, null, 0);
+            updateNetworkType(NetworkType.NONE);
+            updateFeatures(FeatureTagMask.NONE);
         }
 
         private boolean isUsatRegEventDownloadRequired(

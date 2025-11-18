@@ -20,6 +20,7 @@ import static com.android.imsstack.base.TestAppContext.SLOT0;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -1141,6 +1142,24 @@ public class ImsRegistrationTrackerTest {
         listener.onImsServiceStopped(SLOT0);
         verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockIDcNetWatcher, times(2)).removeListener(any(IDcNetWatcher.Listener.class));
+    }
+
+    @Test
+    public void testOnImsServiceStopped_onRegistered() {
+        ImsStackRegistry.ImsServiceListener listener = mRegTracker.getImsServiceListener();
+        assertNotNull(listener);
+
+        mRegTracker.updateFeatures(IAosRegistrationListener.FeatureTagMask.MMTEL);
+        mRegTracker.updateNetworkType(IAosRegistrationListener.NetworkType.LTE);
+        assertTrue(mRegTracker.isRegistered());
+        assertEquals(IAosRegistrationListener.NetworkType.LTE,
+                mRegTracker.getRegisteredNetworkType());
+
+        listener.onImsServiceStopped(SLOT0);
+
+        assertFalse(mRegTracker.isRegistered());
+        assertEquals(IAosRegistrationListener.NetworkType.NONE,
+                mRegTracker.getRegisteredNetworkType());
     }
 
     @Test
