@@ -1813,7 +1813,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
         return IMS_FALSE;
     }
 
-    StartRegBinding();
+    if (!StartRegBinding())
+    {
+        A_IMS_TRACE_D(REGID, "All handle detached", 0, 0, 0);
+        return IMS_FALSE;
+    }
 
     m_piRegParameter = m_piRegistration->GetParameter();
 
@@ -1920,8 +1924,23 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartRegBinding()
 {
     // attach services (add and create binding)
     ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
-    AString strLog;
+    IMS_BOOL bFeatureTagRequired = IMS_FALSE;
+    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
+    {
+        IAosHandle* piHandle = objHandles.GetValueAt(i);
+        if (piHandle->GetRequestType() == IAosHandle::ATTACH && piHandle->IsRegFeatureTagRequired())
+        {
+            bFeatureTagRequired = IMS_TRUE;
+            break;
+        }
+    }
 
+    if (!bFeatureTagRequired)
+    {
+        return IMS_FALSE;
+    }
+
+    AString strLog;
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
     {
         IAosHandle* piHandle = objHandles.GetValueAt(i);

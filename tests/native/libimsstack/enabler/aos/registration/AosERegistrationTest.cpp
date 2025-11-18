@@ -399,6 +399,7 @@ protected:
                 .WillByDefault(ReturnRef(m_objBindedFeatureTagList));
         ON_CALL(m_objMockIAosHandle, GetServiceType())
                 .WillByDefault(Return(static_cast<IMS_UINT32>(ImsAosService::MTS)));
+        ON_CALL(m_objMockIAosHandle, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_TRUE));
 
         // IAosPcscf
         ON_CALL(m_objMockIAosPcscf, GetCurrentIndex()).WillByDefault(Return(0));

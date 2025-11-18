@@ -109,6 +109,7 @@ using ::testing::SetArgReferee;
     using Base::ClearRetryCount;                                    \
     using Base::ClearRetryTimers;                                   \
     using Base::ClearTimers;                                        \
+    using Base::CreateRegistration;                                 \
     using Base::CreateSubscription;                                 \
     using Base::DestroyRegistration;                                \
     using Base::DestroySubscription;                                \
@@ -185,6 +186,7 @@ using ::testing::SetArgReferee;
     using Base::SetTrafficForDeregister;                            \
     using Base::SetTrafficListener;                                 \
     using Base::SetTrafficPriorityBlocked;                          \
+    using Base::StartRegBinding;                                    \
     using Base::StartSubscription;                                  \
     using Base::StartTimer;                                         \
     using Base::StopSubscription;                                   \
@@ -700,6 +702,7 @@ protected:
         ON_CALL(m_objMockIAosHandle, GetServiceType())
                 .WillByDefault(Return(static_cast<IMS_UINT32>(ImsAosService::MTS)));
         ON_CALL(m_objMockIAosHandle, IsRegBinded()).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosHandle, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_TRUE));
 
         // IAosPcscf
         ON_CALL(m_objMockIAosPcscf, GetCurrentIndex()).WillByDefault(Return(0));
@@ -7262,6 +7265,58 @@ TEST_F(AosRegistrationTest, DestroySubscriptionReturnsTrueIfSucceedToDestroy)
     IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
 
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnFalseWhenCreateRegistrationWithNoFeatureTagService)
+{
+    ON_CALL(m_objMockIAosHandle, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_FALSE(m_pAosRegistration->CreateRegistration());
+}
+
+TEST_F(AosRegistrationTest, ReturnFalseWhenStartRegBindingWithNoFeatureTagService)
+{
+    MockIAosHandle objMockIAosHandle2;
+    AString strAppId = AString("ims.app.test2");
+    AString strServiceId = AString("ims.service.test2");
+    m_objHandles.Add(m_strServiceId, &objMockIAosHandle2);
+    ON_CALL(m_objMockIAosAppContext, GetHandle(m_strServiceId))
+            .WillByDefault(Return(&m_objMockIAosHandle));
+    ON_CALL(m_objMockIAosAppContext, GetHandle(strServiceId))
+            .WillByDefault(Return(&objMockIAosHandle2));
+    ON_CALL(objMockIAosHandle2, GetAppId()).WillByDefault(ReturnRef(strAppId));
+    ON_CALL(objMockIAosHandle2, GetServiceId()).WillByDefault(ReturnRef(strServiceId));
+    ON_CALL(objMockIAosHandle2, GetRequestType()).WillByDefault(Return(IAosHandle::ATTACH));
+    ON_CALL(m_objMockIAosHandle, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockIAosHandle2, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_FALSE(m_pAosRegistration->StartRegBinding());
+}
+
+TEST_F(AosRegistrationTest, ReturnTrueWhenStartRegBindingWithAnyFeatureTagService)
+{
+    MockIAosHandle objMockIAosHandle2;
+    AString strAppId = AString("ims.app.test2");
+    AString strServiceId = AString("ims.service.test2");
+    m_objHandles.Add(m_strServiceId, &objMockIAosHandle2);
+    ON_CALL(m_objMockIAosAppContext, GetHandle(m_strServiceId))
+            .WillByDefault(Return(&m_objMockIAosHandle));
+    ON_CALL(m_objMockIAosAppContext, GetHandle(strServiceId))
+            .WillByDefault(Return(&objMockIAosHandle2));
+    ON_CALL(objMockIAosHandle2, GetAppId()).WillByDefault(ReturnRef(strAppId));
+    ON_CALL(objMockIAosHandle2, GetServiceId()).WillByDefault(ReturnRef(strServiceId));
+    ON_CALL(objMockIAosHandle2, GetRequestType()).WillByDefault(Return(IAosHandle::ATTACH));
+    ON_CALL(objMockIAosHandle2, GetFeatureTagList())
+            .WillByDefault(ReturnRef(m_objEmptyFeatureTagList));
+    ON_CALL(objMockIAosHandle2, GetBindedFeatureTagList())
+            .WillByDefault(ReturnRef(m_objEmptyFeatureTagList));
+    ON_CALL(objMockIAosHandle2, GetServiceType())
+            .WillByDefault(Return(static_cast<IMS_UINT32>(ImsAosService::MTS)));
+    ON_CALL(objMockIAosHandle2, IsRegBinded()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosHandle, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockIAosHandle2, IsRegFeatureTagRequired()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pAosRegistration->StartRegBinding());
 }
 
 TEST_F(AosRegistrationTest, StartSubscriptionReturnsFalseIfFeatureIsNotOn)
