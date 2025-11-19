@@ -83,7 +83,6 @@ protected:
     void OnTotalCallStateChanged(IN State eState) override;
     void OnCallSessionReleased(
             IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
-    // TODO : Need to override IsSynchronousCallRequired to receive call state synchronously.
 
     // Log
     static const IMS_CHAR* TypeToString(IN IMS_UINT32 nType);
