@@ -19,7 +19,7 @@
 #include "FeatureCaps.h"
 #include "IMtcService.h"
 #include "ImsList.h"
-#include "MediaNego.h"
+#include "MediaDef.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
@@ -424,7 +424,7 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupportedSdpHeadersWithIpMis
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
-    CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MediaNego::ERROR_IP_MISMATCH);
+    CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MEDIA_NEGO_ERROR_IP_MISMATCH);
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
 
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
@@ -437,7 +437,7 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupportedSdpHeadersWithInval
     AString strPhrase;
 
     CallReasonInfo objReasonInfo(
-            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MediaNego::ERROR_INVALID_DESCRIPTOR);
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
 
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
@@ -449,7 +449,7 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithMediaNotAcceptableWithNoCodecM
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
-    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_NO_CODEC_MATCHED);
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
 
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);

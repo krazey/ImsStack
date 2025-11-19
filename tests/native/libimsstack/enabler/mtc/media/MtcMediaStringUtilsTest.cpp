@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MediaDef.h"
 #include "media/MtcMediaStringUtils.h"
 
 #include <gtest/gtest.h>
@@ -150,26 +151,23 @@ TEST_F(MtcMediaStringUtilsTest, ConvertErrorType)
 
 TEST_F(MtcMediaStringUtilsTest, ConvertNegoType)
 {
-    MediaNego::MediaNegoResult eNegoType = MediaNego::MediaNegoResult::NO_ERROR;
+    MediaNegoResult eNegoType = MEDIA_NEGO_NO_ERROR;
     EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "no error");
 
-    eNegoType = MediaNego::MediaNegoResult::ERROR_INVALID_DESCRIPTOR;
+    eNegoType = MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR;
     EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "invalid descriptor");
 
-    eNegoType = MediaNego::MediaNegoResult::ERROR_NO_CODEC_MATCHED;
+    eNegoType = MEDIA_NEGO_ERROR_NO_CODEC_MATCHED;
     EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "no codec matched");
 
-    eNegoType = MediaNego::MediaNegoResult::ERROR_IP_MISMATCH;
+    eNegoType = MEDIA_NEGO_ERROR_IP_MISMATCH;
     EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "ip mismatch");
 
-    eNegoType = MediaNego::MediaNegoResult::ERROR_NO_AUDIO;
-    EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "no audio");
+    eNegoType = static_cast<MediaNegoResult>(MEDIA_NEGO_NO_ERROR - 1);
+    EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "OUT_OF_RANGE");
 
-    eNegoType = MediaNego::MediaNegoResult::ERROR_NO_VIDEO;
-    EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "no video");
-
-    eNegoType = MediaNego::MediaNegoResult::ERROR_NO_TEXT;
-    EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "no text");
+    eNegoType = static_cast<MediaNegoResult>(MEDIA_NEGO_ERROR_IP_MISMATCH + 1);
+    EXPECT_STREQ(MtcMediaStringUtils::ConvertNegoType(eNegoType), "OUT_OF_RANGE");
 }
 
 TEST_F(MtcMediaStringUtilsTest, ConvertPemType)

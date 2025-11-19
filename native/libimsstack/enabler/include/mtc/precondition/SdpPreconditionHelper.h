@@ -24,6 +24,7 @@ class IMediaDescriptor;
 class ISession;
 class ISipMessage;
 class QosStatusTable;
+class SdpMedia;
 class SdpSegmentedPrecondition;
 
 class SdpPreconditionHelper

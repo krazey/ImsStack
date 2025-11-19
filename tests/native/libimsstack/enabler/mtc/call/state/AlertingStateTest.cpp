@@ -16,6 +16,7 @@
 
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "MediaDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -505,7 +506,7 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfOfferAnswerFails)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objPreconditionManager, OnSdpReceived(&objISession)).WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::ACK;
@@ -523,15 +524,15 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfNoCodecMatched)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
-            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED)));
     ON_CALL(objPreconditionManager, OnSdpReceived(&objISession)).WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::ACK;
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(
-                    CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED)));
+            SendStartFailed(
+                    CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED)));
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
 }
 
@@ -543,15 +544,15 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfInvalidSdpDescriptor)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
-            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR)));
     ON_CALL(objPreconditionManager, OnSdpReceived(&objISession)).WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::ACK;
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS,
-                    NegotiationResult::ERROR_INVALID_DESCRIPTOR)));
+            SendStartFailed(CallReasonInfo(
+                    CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR)));
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
 }
 
@@ -680,7 +681,7 @@ TEST_F(AlertingStateTest, SessionPrackReceivedInvokesRejectIncomingIfOfferAnswer
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objPreconditionManager, OnSdpReceived(&objISession)).WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::PRACK;

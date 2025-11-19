@@ -26,6 +26,7 @@
 #include "Ims3gpp.h"
 #include "ImsAosReason.h"
 #include "ImsVector.h"
+#include "MediaDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
@@ -194,13 +195,13 @@ protected:
     }
 
     void SetNegotiateSdpFailure(
-            IN MockIMessage& objMessage, IN const NegotiationResult& eNegoResult)
+            IN MockIMessage& objMessage, IN const SdpNegotiationResult& objNegoResult)
     {
         ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMediaManager, GetNegotiationState(&objSession))
                 .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
         ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objAckMethod));
-        ON_CALL(objMediaManager, NegotiateSdp(&objSession)).WillByDefault(Return(eNegoResult));
+        ON_CALL(objMediaManager, NegotiateSdp(&objSession)).WillByDefault(Return(objNegoResult));
     }
 
     void SetUpStartErrorHandler(IN MockIMessage* pMessage, IN IMS_SINT32 eStatusCode,
@@ -907,15 +908,15 @@ TEST_F(OutgoingStateTest, SessionStartedTerminatesCallIfNoCodecMatched)
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
     ON_CALL(objMessageUtils, GetHeader(_, _, _)).WillByDefault(Return(AString("id")));
     ON_CALL(objMessageUtils, IsHeaderPresent(_, _, _)).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(
-            objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
-    EXPECT_CALL(
-            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStarted(&objSession));
 }
@@ -925,15 +926,17 @@ TEST_F(OutgoingStateTest, SessionStartedTerminatesCallIfInvalidDescriptor)
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
     ON_CALL(objMessageUtils, GetHeader(_, _, _)).WillByDefault(Return(AString("id")));
     ON_CALL(objMessageUtils, IsHeaderPresent(_, _, _)).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMtcSession,
-            Terminate(_, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            Terminate(
+                    _, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            SendStartFailed(
+                    CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStarted(&objSession));
 }
@@ -1365,13 +1368,13 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedTerminatesCallIfNoCodecMatched
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
             .WillByDefault(Return(&objMessage));
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
-    EXPECT_CALL(
-            objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
-    EXPECT_CALL(
-            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
@@ -1381,13 +1384,15 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedTerminatesCallIfInvalidDescrip
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
             .WillByDefault(Return(&objMessage));
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
-    EXPECT_CALL(objMtcSession,
-            Terminate(_, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            SendStartFailed(
+                    CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(
+                    _, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
@@ -1752,13 +1757,13 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsTerminatingIfNoCodecMatche
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
-    EXPECT_CALL(
-            objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
-    EXPECT_CALL(
-            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
@@ -1767,13 +1772,15 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsTerminatingIfInvalidDescri
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
-    EXPECT_CALL(objMtcSession,
-            Terminate(_, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            SendStartFailed(
+                    CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(
+                    _, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
@@ -2140,13 +2147,15 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedTerminatesCallIfNoCo
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
 
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED)));
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
-    EXPECT_CALL(
-            objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
-    EXPECT_CALL(
-            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
     EXPECT_EQ(CallStateName::TERMINATING,
             pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0));
 }
@@ -2162,13 +2171,15 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedTerminatesCallIfInva
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
 
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
     EXPECT_CALL(objMtcSession,
-            Terminate(_, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            Terminate(
+                    _, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            SendStartFailed(
+                    CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
     EXPECT_EQ(CallStateName::TERMINATING,
             pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0));
 }
@@ -2337,14 +2348,14 @@ TEST_F(OutgoingStateTest, SessionRprReceivedTerminatesCallIfNoCodecMatched)
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
 
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE));
-    EXPECT_CALL(
-            objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
-    EXPECT_CALL(
-            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult)));
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }
 
@@ -2359,14 +2370,16 @@ TEST_F(OutgoingStateTest, SessionRprReceivedTerminatesCallIfInvalidDescriptor)
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
 
-    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    SetNegotiateSdpFailure(objMessage, objNegoResult);
 
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE));
     EXPECT_CALL(objMtcSession,
-            Terminate(_, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            Terminate(
+                    _, CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult)));
+            SendStartFailed(
+                    CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, objNegoResult.eResult)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }
 
@@ -2782,7 +2795,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroNormalCall)
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
@@ -2811,7 +2824,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroEmergencyCallNonR
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
@@ -2841,7 +2854,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedHandleAudioPortZeroEmergencyCallRtt)
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
@@ -2865,7 +2878,7 @@ TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroEmergencyCallRtt)
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
@@ -2889,7 +2902,7 @@ TEST_F(OutgoingStateTest, SessionStartedHandleAudioPortZeroUssiCall)
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
     ON_CALL(objMediaManager, GetRemoteRtpPort(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(0));
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_TRUE));

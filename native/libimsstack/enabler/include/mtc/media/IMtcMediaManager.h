@@ -18,8 +18,8 @@
 #define INTERFACE_MTC_MEDIA_MANAGER_H_
 
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
 #include "helper/ISrvccStateListener.h"
-#include "media/MediaNego.h"
 
 class IMediaQosEventListener;
 class IMediaReportEventListener;
@@ -29,7 +29,6 @@ enum class CallType;
 enum class PemType;
 struct MediaInfo;
 
-using NegotiationResult = MediaNego::MediaNegoResult;
 using NegotiationState = NEGO_STATE;
 
 class IMtcMediaManager
@@ -146,9 +145,9 @@ public:
     /**
      * @brief This method calls the media interface API to negotiate SDP.
      * @param piSession ISession instance is used for managing the media profile.
-     * @return It returns the result of the negotiation as NegotiationResult.
+     * @return It returns the result of the negotiation as SdpNegotiationResult.
      */
-    virtual NegotiationResult NegotiateSdp(IN ISession* piSession) = 0;
+    virtual SdpNegotiationResult NegotiateSdp(IN ISession* piSession) = 0;
 
     /**
      * @brief Restore the media when the call fails to convert, hold, and resume.

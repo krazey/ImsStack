@@ -546,7 +546,8 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpAndNegotiationStateIsNotNegotiated)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
 
-    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession))
+            .WillOnce(Return(SdpNegotiationResult()));
 
     ON_CALL(objMediaSession, GetNegoState(NEGO_ID))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
@@ -562,15 +563,13 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpAndNegotiationStateIsNegotiated)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
 
-    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession))
+            .WillOnce(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR, MEDIA_TYPE_AUDIO)));
 
     ON_CALL(objMediaSession, GetNegoState(NEGO_ID))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
-    MEDIA_CONTENT_TYPE eContentType = MEDIA_TYPE_AUDIO;
-    ON_CALL(objMediaSession, GetNegotiatedMediaType(NEGO_ID)).WillByDefault(Return(eContentType));
-
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, eContentType)).Times(1);
+    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIO)).Times(1);
 
     pMediaManager->NegotiateSdp(&objISession);
 }
@@ -579,13 +578,11 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsVideo)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
 
-    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession))
+            .WillOnce(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR, MEDIA_TYPE_AUDIOVIDEO)));
 
     ON_CALL(objMediaSession, GetNegoState(NEGO_ID))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
-
-    MEDIA_CONTENT_TYPE eContentType = MEDIA_TYPE_AUDIOVIDEO;
-    ON_CALL(objMediaSession, GetNegotiatedMediaType(NEGO_ID)).WillByDefault(Return(eContentType));
 
     EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIOVIDEO)).Times(1);
 
@@ -596,13 +593,11 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsText)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
 
-    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMediaSession, NegotiateSdp(NEGO_ID, &objISession))
+            .WillOnce(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR, MEDIA_TYPE_AUDIOTEXT)));
 
     ON_CALL(objMediaSession, GetNegoState(NEGO_ID))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
-
-    MEDIA_CONTENT_TYPE eContentType = MEDIA_TYPE_AUDIOTEXT;
-    ON_CALL(objMediaSession, GetNegotiatedMediaType(NEGO_ID)).WillByDefault(Return(eContentType));
 
     EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIOTEXT)).Times(1);
 
@@ -611,11 +606,10 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsText)
 
 TEST_F(MtcMediaManagerTest, NegotiateSdpReturnsError)
 {
-    const NegotiationResult eResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
-    ON_CALL(objMediaSession, NegotiateSdp(_, _, _, _, _, _))
-            .WillByDefault(DoAll(SetArgReferee<5>(eResult), Return(IMS_TRUE)));
+    const SdpNegotiationResult objResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
+    ON_CALL(objMediaSession, NegotiateSdp(_, _)).WillByDefault(Return(objResult));
 
-    EXPECT_EQ(pMediaManager->NegotiateSdp(&objISession), eResult);
+    EXPECT_EQ(pMediaManager->NegotiateSdp(&objISession).eResult, objResult.eResult);
 }
 
 TEST_F(MtcMediaManagerTest, UpdatePemTypeDoesNothingIfNoPemAndConfigDoesNotRequire)
@@ -1535,8 +1529,9 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpPopulatesAudioCodecAttributes)
             .WillByDefault(DoAll(SetArgReferee<1>(nBandwidthStartKhz),
                     SetArgReferee<2>(nBandwidthEndKhz), Return()));
 
-    ON_CALL(objMediaSession, NegotiateSdp(nNegoId, &objISession, _, _, _, _))
-            .WillByDefault(DoAll(SetArgReferee<5>(MediaNego::NO_ERROR), Return(IMS_TRUE)));
+    const SdpNegotiationResult objResult(MEDIA_NEGO_NO_ERROR);
+    ON_CALL(objMediaSession, NegotiateSdp(nNegoId, &objISession)).WillByDefault(Return(objResult));
+
     ON_CALL(objMediaSession, GetNegoState(nNegoId))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 

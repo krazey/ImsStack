@@ -17,6 +17,7 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ImsList.h"
+#include "MediaDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
@@ -51,7 +52,6 @@
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcLocationRefresher.h"
 #include "helper/MtcSupplementaryService.h"
-#include "media/MediaDef.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "ussi/MockUssiController.h"
@@ -1380,10 +1380,10 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfNoCodecMatched)
     SipMethod objMethod(SipMethod::ACK);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED)));
 
     const CallReasonInfo objReasonInfo(
-            CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED);
+            CODE_MEDIA_NOT_ACCEPTABLE, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
@@ -1404,10 +1404,10 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfInvalidDescriptor)
     SipMethod objMethod(SipMethod::ACK);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR)));
 
     const CallReasonInfo objReasonInfo(
-            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, NegotiationResult::ERROR_INVALID_DESCRIPTOR);
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
@@ -1525,7 +1525,7 @@ TEST_F(IdleStateTest, OnAttachedUpdatesCallTypeToNegotiatedType)
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objSession))
             .WillByDefault(Return(CallType::VT));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::NO_ERROR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
 
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("no100rel")));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -1712,10 +1712,10 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfNoCodecMatched)
     SipMethod objMethod(SipMethod::ACK);
     ON_CALL(*pMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED)));
 
     const CallReasonInfo objReasonInfo(
-            CODE_MEDIA_NOT_ACCEPTABLE, NegotiationResult::ERROR_NO_CODEC_MATCHED);
+            CODE_MEDIA_NOT_ACCEPTABLE, MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
@@ -1745,10 +1745,10 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfInvalidDescriptor)
     SipMethod objMethod(SipMethod::ACK);
     ON_CALL(*pMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMediaManager, NegotiateSdp(&objSession))
-            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR)));
 
     const CallReasonInfo objReasonInfo(
-            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, NegotiationResult::ERROR_INVALID_DESCRIPTOR);
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 

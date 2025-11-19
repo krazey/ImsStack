@@ -19,6 +19,7 @@
 #include "ISession.h"
 #include "ISipClientConnection.h"
 #include "ISipServerConnection.h"
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -566,10 +567,10 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
     IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
     IMtcSession* pMtcSession = m_objContext.GetSession();
     ISession& objSession = pMtcSession->GetISession();
-    NegotiationResult eNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
-    if (eNegoResult != NegotiationResult::NO_ERROR)
+    SdpNegotiationResult objNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
+    if (objNegoResult.eResult != MEDIA_NEGO_NO_ERROR)
     {
-        return GetReasonByNegotiationResult(eNegoResult);
+        return GetReasonByNegotiationResult(objNegoResult.eResult);
     }
     m_objContext.GetSession()->SetCallType(
             m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession));

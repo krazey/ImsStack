@@ -20,7 +20,6 @@
 #include "IJniMedia.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
-#include "MediaNego.h"
 #include "MtcDef.h"
 #include <unordered_map>
 
@@ -85,22 +84,17 @@ public:
         return it != objErrorTypeStrings.end() ? it->second : "OUT_OF_RANGE";
     }
 
-    inline static const IMS_CHAR* ConvertNegoType(IN MediaNego::MediaNegoResult eNegoResult)
+    inline static const IMS_CHAR* ConvertNegoType(IN MediaNegoResult eNegoResult)
     {
-        static const std::unordered_map<MediaNego::MediaNegoResult, const IMS_CHAR*>
-                objNegoResultStrings = {
-                        {MediaNego::MediaNegoResult::NO_ERROR,                 "no error"        },
-                        {MediaNego::MediaNegoResult::ERROR_INVALID_DESCRIPTOR,
-                         "invalid descriptor"                                                    },
-                        {MediaNego::MediaNegoResult::ERROR_NO_CODEC_MATCHED,   "no codec matched"},
-                        {MediaNego::MediaNegoResult::ERROR_IP_MISMATCH,        "ip mismatch"     },
-                        {MediaNego::MediaNegoResult::ERROR_NO_AUDIO,           "no audio"        },
-                        {MediaNego::MediaNegoResult::ERROR_NO_VIDEO,           "no video"        },
-                        {MediaNego::MediaNegoResult::ERROR_NO_TEXT,            "no text"         },
+        static const std::unordered_map<MediaNegoResult, const IMS_CHAR*> objNegoResultStrings = {
+                {MEDIA_NEGO_NO_ERROR,                 "no error"          },
+                {MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR, "invalid descriptor"},
+                {MEDIA_NEGO_ERROR_NO_CODEC_MATCHED,   "no codec matched"  },
+                {MEDIA_NEGO_ERROR_IP_MISMATCH,        "ip mismatch"       },
         };
 
         auto it = objNegoResultStrings.find(eNegoResult);
-        return it->second;
+        return it != objNegoResultStrings.end() ? it->second : "OUT_OF_RANGE";
     }
 
     inline static const IMS_CHAR* ConvertPemType(IN PemType ePemType)

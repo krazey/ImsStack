@@ -24,6 +24,7 @@
 #include "ImsAosReason.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
+#include "MediaDef.h"
 #include "MtcDef.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
@@ -719,11 +720,11 @@ const CallReasonInfo MtcCallState::HandleReceivedSdp(
         return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
     }
 
-    NegotiationResult negoResult = m_objContext.GetMediaManager().NegotiateSdp(piSession);
-    if (negoResult != NegotiationResult::NO_ERROR)
+    SdpNegotiationResult objNegoResult = m_objContext.GetMediaManager().NegotiateSdp(piSession);
+    if (objNegoResult.eResult != MEDIA_NEGO_NO_ERROR)
     {
         IMS_TRACE_D("HandleReceivedSdp - Nego SDP Failed", 0, 0, 0);
-        return GetReasonByNegotiationResult(negoResult);
+        return GetReasonByNegotiationResult(objNegoResult.eResult);
     }
     m_objContext.GetSession()->SetCallType(
             m_objContext.GetMediaManager().GetNegotiatedCallType(piSession));
@@ -1086,17 +1087,14 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessag
 }
 
 PROTECTED
-const CallReasonInfo MtcCallState::GetReasonByNegotiationResult(IN NegotiationResult eNegoResult)
+const CallReasonInfo MtcCallState::GetReasonByNegotiationResult(IN MediaNegoResult eNegoResult)
 {
     switch (eNegoResult)
     {
-        case NegotiationResult::NO_ERROR:
+        case MEDIA_NEGO_NO_ERROR:
             return CallReasonInfo(CODE_NONE);
-        case NegotiationResult::ERROR_INVALID_DESCRIPTOR:
-        case NegotiationResult::ERROR_IP_MISMATCH:
-        case NegotiationResult::ERROR_NO_AUDIO:
-        case NegotiationResult::ERROR_NO_VIDEO:
-        case NegotiationResult::ERROR_NO_TEXT:
+        case MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR:
+        case MEDIA_NEGO_ERROR_IP_MISMATCH:
             return CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult);
         default:
             return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult);

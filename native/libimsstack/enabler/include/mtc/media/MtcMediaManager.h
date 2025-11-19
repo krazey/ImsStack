@@ -31,6 +31,7 @@ class IMessage;
 class IMtcCallContext;
 class MediaManager;
 class MtcMediaProfileManager;
+struct SdpNegotiationResult;
 
 class SessionMedia
 {
@@ -112,7 +113,7 @@ public:
     /* Handling SDP */
     IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType,
             IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE) override;
-    NegotiationResult NegotiateSdp(IN ISession* piSession) override;
+    SdpNegotiationResult NegotiateSdp(IN ISession* piSession) override;
     void RestoreSdp(IN ISession* piSession) override;
     void FinalizeSdp(IN ISession* piSession) override;
 
