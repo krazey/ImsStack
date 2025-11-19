@@ -15,8 +15,10 @@
  */
 package com.android.imsstack.its.servercontrol;
 
-import java.util.HashMap;
-import java.util.Map;
+import android.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a SIP message sent by the server, supporting headers, configs and body content.
@@ -26,7 +28,7 @@ public class ServerMessage extends SipMessage {
     private final String mBodySdp;
     private final String mBodyXml;
     private final String mNewBody;
-    private final Map<String, String> mHeaders;
+    private final List<Pair<String, String>> mHeaders;
 
     private ServerMessage(Builder builder) {
         super(builder.mMethodOrCode, builder.mConfig);
@@ -53,8 +55,9 @@ public class ServerMessage extends SipMessage {
 
         // Append headers
         if (!mHeaders.isEmpty()) {
-            mHeaders.forEach((name, value) -> {
-                String formattedValue = value == null ? name : name + ": " + value;
+            mHeaders.forEach(header -> {
+                String formattedValue = header.second == null ? header.first : header.first + ": "
+                        + header.second;
                 appendSetting(message, ControlProtocolConstants.MESSAGE_HEADER, formattedValue);
             });
         }
@@ -90,7 +93,7 @@ public class ServerMessage extends SipMessage {
         private String mBodySdp;
         private String mBodyXml;
         private String mNewBody;
-        private Map<String, String> mHeaders = new HashMap<>();
+        private List<Pair<String, String>> mHeaders = new ArrayList<>();
         private MessageConfig mConfig = new MessageConfig();
 
         /**
@@ -171,14 +174,15 @@ public class ServerMessage extends SipMessage {
         }
 
         /**
-         * Sets a header (overwrites if the header already exists).
+         * Sets a header
+         * The test server will overwrite the existing header.
          *
          * @param name Header name.
          * @param value Header value.
          * @return Builder instance for method chaining.
          */
         public Builder setHeader(String name, String value) {
-            mHeaders.put(name, value);
+            mHeaders.add(new Pair<>(name, value));
             return this;
         }
 
@@ -190,7 +194,7 @@ public class ServerMessage extends SipMessage {
          * @return Builder instance for method chaining.
          */
         public Builder addHeader(String name, String value) {
-            mHeaders.put(ControlProtocolConstants.HEADER_ADD + name, value);
+            mHeaders.add(new Pair<>(ControlProtocolConstants.HEADER_ADD + name, value));
             return this;
         }
 
@@ -201,7 +205,7 @@ public class ServerMessage extends SipMessage {
          * @return Builder instance for method chaining.
          */
         public Builder removeHeader(String name) {
-            mHeaders.put(ControlProtocolConstants.HEADER_REMOVE + name, null);
+            mHeaders.add(new Pair<>(ControlProtocolConstants.HEADER_REMOVE + name, null));
             return this;
         }
 
@@ -214,6 +218,22 @@ public class ServerMessage extends SipMessage {
          */
         public Builder addConfig(String key, String value) {
             mConfig.addConfig(key, value);
+            return this;
+        }
+
+        /**
+         * Applies a block of configurations to the builder only if the specified condition is
+         * true.
+         *
+         * @param condition The boolean condition to evaluate.
+         * @param setter A {@link java.util.function.Consumer} that accepts the builder and applies
+         *              configurations.
+         * @return Builder instance for method chaining.
+         */
+        public Builder ifTrue(boolean condition, java.util.function.Consumer<Builder> setter) {
+            if (condition) {
+                setter.accept(this);
+            }
             return this;
         }
 
