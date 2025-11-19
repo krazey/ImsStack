@@ -1217,6 +1217,89 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfSettingKeepPdnUntilEMod
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
 }
 
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedIfEAttach)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndIfEAttach())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsDisabledAndEAttach)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndIfEAttach())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsDisabledAndNotEAttach)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndIfEAttach())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsEnabledButNotEAttach)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndIfEAttach())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    EXPECT_FALSE(bResult);
+}
+
 TEST_F(AosEApplicationTest,
         ReleaseEPdnWhenECallTerminatedInFakeModeBySubscriberIncompletedAndAttachedToPlmnRequiresEPdnRelease)
 {

@@ -160,9 +160,17 @@ PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
 {
     if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && IsKeepEPdnWhenNoPcscf())
     {
-        A_IMS_TRACE_I(APPID, "Need to keep emergency pdn until data is disconnected.", 0, 0, 0);
+        A_IMS_TRACE_I(APPID, "Keep EPDN: Wait until data disconnected", 0, 0, 0);
         SetKeepEPdnWhenNoPcscf(IMS_FALSE);
         return IMS_FALSE;
+    }
+
+    IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
+    if (GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndIfEAttach() &&
+            piNetTracker->IsEmergencyAttach())
+    {
+        A_IMS_TRACE_D(APPID, "Release EPDN: Emergency Attach", 0, 0, 0);
+        return IMS_TRUE;
     }
 
     // FAKE MODE
@@ -170,6 +178,7 @@ PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
     {
         if (GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndInFakeMode())
         {
+            A_IMS_TRACE_D(APPID, "Release EPDN: Fake Mode", 0, 0, 0);
             return IMS_TRUE;
         }
 
@@ -180,32 +189,45 @@ PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
         {
             const ImsVector<AString> plmns =
                     GET_N_CONFIG(m_nSlotId)->GetPlmnsReleaseEPdnUponECallEndInFakeMode();
-            IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
             if (piNetTracker != IMS_NULL && plmns.Contains(piNetTracker->GetMobileNetworkPlmn()))
             {
-                A_IMS_TRACE_D(APPID, "Need to release emergency pdn.", 0, 0, 0);
+                A_IMS_TRACE_D(APPID, "Release EPDN: Fake Mode (Blocked & PLMN Matched)", 0, 0, 0);
                 return IMS_TRUE;
             }
         }
     }
 
     // IPCAN
-    IMS_UINT32 nIpcan = GET_N_CONFIG(m_nSlotId)->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd();
+    const IMS_UINT32 nIpcan =
+            GET_N_CONFIG(m_nSlotId)->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd();
+    IMS_BOOL bShouldRelease = IMS_FALSE;
 
     switch (nIpcan)
     {
         case CarrierConfig::ImsEmergency::IPCAN_CELLULAR:
-            return !m_bEpdgEnabled;
+            bShouldRelease = !m_bEpdgEnabled;
+            break;
 
         case CarrierConfig::ImsEmergency::IPCAN_WLAN:
-            return m_bEpdgEnabled;
+            bShouldRelease = m_bEpdgEnabled;
+            break;
 
         case CarrierConfig::ImsEmergency::IPCAN_ALL:
-            return IMS_TRUE;
+            bShouldRelease = IMS_TRUE;
+            break;
 
         default:
-            return IMS_FALSE;
+            bShouldRelease = IMS_FALSE;
+            break;
     }
+
+    if (bShouldRelease)
+    {
+        A_IMS_TRACE_D(APPID, "Release EPDN: IPCAN Check (IPCAN:%d, EpdgEnabled:%d)", nIpcan,
+                m_bEpdgEnabled, 0);
+    }
+
+    return bShouldRelease;
 }
 
 PROTECTED IMS_BOOL AosEApplication::MaybeRedialOverCrossStack()
