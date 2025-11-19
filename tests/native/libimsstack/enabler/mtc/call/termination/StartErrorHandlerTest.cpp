@@ -418,7 +418,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutDoesNotInvokeEpsfbIfEpsFbI
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
-TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutDoesNotReturnsCsfbIfCsfbIsNotAvailable)
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutDoesNotReturnCsfbIfCsfbIsNotAvailable)
 {
     SetTransactionTimeout();
     ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));

@@ -120,7 +120,7 @@ TEST_F(MtcAosConnectorTest, ControlInvokesImsAosApi)
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_START)).Times(1);
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_REFRESH)).Times(1);
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_STOP)).Times(1);
-    EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
 
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::PCSCF_NEXT)).Times(0);
@@ -129,7 +129,7 @@ TEST_F(MtcAosConnectorTest, ControlInvokesImsAosApi)
     pConnector->Control(ImsAosControl::REGISTER_START);
     pConnector->Control(ImsAosControl::REGISTER_REFRESH);
     pConnector->Control(ImsAosControl::REGISTER_STOP);
-    pConnector->Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+    pConnector->Control(ImsAosControl::REGISTER_REINITIATE);
 }
 
 // IImsAosInfo
