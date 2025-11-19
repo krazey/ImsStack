@@ -21,7 +21,6 @@ java_defaults {
     name: "ims_stack_test_defaults",
     certificate: "platform",
     platform_apis: true,
-    manifest: "AndroidManifest.xml",
 
     srcs: [
         "src/**/*.java",
@@ -69,11 +68,13 @@ java_library {
 android_test {
     name: "ImsStackTest",
     defaults: ["ims_stack_test_defaults"],
+    manifest: "AndroidManifest.xml",
     test_config: "AndroidTest.xml",
 }
 
 android_test {
     name: "ImsStackPresubmitTest",
     defaults: ["ims_stack_test_defaults"],
+    manifest: "AndroidManifestPresubmitTest.xml",
     test_config: "AndroidPresubmitTest.xml",
 }
