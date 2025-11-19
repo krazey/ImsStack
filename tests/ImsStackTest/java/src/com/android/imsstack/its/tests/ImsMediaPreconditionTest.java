@@ -63,7 +63,7 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
     @Test
     public void testTriggerSetTestMode() throws Exception {
         logi(this, "start testTriggerSetTestMode");
-        mTestMode = 1;
+        mTestMode = 4;
 
         ImsMediaCallback callback = new ImsMediaCallback();
         ImsMediaManager imsMediaManager = new ImsMediaManager(AppContext.getInstance(),
@@ -133,6 +133,7 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
 
         @Override
         public void onDisconnected() {
+            mImsMediaManager.setTestMode(0);
             logi(this, "ImsMediaPrecondition - disconnected");
         }
     }
