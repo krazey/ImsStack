@@ -88,7 +88,6 @@ public class MtCallTest extends CallTestBase {
         // 7. Verify that a 200 OK response is sent without an SDP.
         // 8. Verify the call remains active for 3 seconds, after which a BYE is sent.
         int timeToCallStartMs = 1000;
-        int qosFromStartCallDelayMs = 2000;
         int timeToWaitAcceptMs = 2000;
         int timeToTerminateMs = 3000;
         setupScenario(generator, timeToCallStartMs, timeToWaitAcceptMs, timeToTerminateMs,
@@ -127,7 +126,6 @@ public class MtCallTest extends CallTestBase {
         // 6. Verify that a 200 OK response is sent without an SDP.
         // 7. Verify the call remains active for 3 seconds, after which a BYE is sent.
         int timeToCallStartMs = 1000;
-        int qosFromStartCallDelayMs = 2000;
         int timeToWaitAcceptMs = 2000;
         int timeToTerminateMs = 3000;
         setupScenario(generator, timeToCallStartMs, timeToWaitAcceptMs, timeToTerminateMs,
@@ -169,7 +167,6 @@ public class MtCallTest extends CallTestBase {
         // 7. Verify that a 200 OK response is sent without an SDP.
         // 8. Verify the call remains active for 3 seconds, after which a BYE is sent.
         int timeToCallStartMs = 1000;
-        int qosFromStartCallDelayMs = 2000;
         int timeToWaitAcceptMs = 2000;
         int timeToTerminateMs = 3000;
         setupScenario(generator, timeToCallStartMs, timeToWaitAcceptMs, timeToTerminateMs,
@@ -209,7 +206,6 @@ public class MtCallTest extends CallTestBase {
         // 7. Verify that a 200 OK response is sent without an SDP.
         // 8. Verify the call remains active for 3 seconds, after which a BYE is sent.
         int timeToCallStartMs = 1000;
-        int qosFromStartCallDelayMs = 2000;
         int timeToWaitAcceptMs = 2000;
         int timeToTerminateMs = 3000;
         setupScenario(generator, timeToCallStartMs, timeToWaitAcceptMs, timeToTerminateMs,
