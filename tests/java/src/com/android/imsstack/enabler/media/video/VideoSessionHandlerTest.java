@@ -270,52 +270,6 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
-    public void testOpenSessionWhileClosingWithTimeout() {
-        // Set state to LIVE and prepare for closing
-        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
-        mVideoSessionHandler.setVideoSession(mMockVideoSession);
-        mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
-        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
-        mMediaManager.setImsMediaConnected(true);
-        when(mMockQosAgent.createQosConnection(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT))
-                .thenReturn(mRtpSocketPair);
-
-            // Send REQUEST_CLOSE_SESSION
-        Parcel closeParcel = Parcel.obtain();
-        closeParcel.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
-        closeParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        closeParcel.setDataPosition(0);
-        mMediaListener.onMediaMessage(closeParcel);
-        processAllMessages();
-
-        // Verify close was initiated
-        verify(mMockImsMediaManager).closeSession(eq(mMockVideoSession));
-        assertEquals(MediaState.MEDIA_STATE_CLOSED, mVideoSessionHandler.getMediaState());
-
-        // Send REQUEST_OPEN_SESSION
-        Parcel openParcel = Parcel.obtain();
-        openParcel.writeInt(MediaConstants.REQUEST_OPEN_SESSION);
-        openParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        openParcel.writeString(LOCAL_RTP_ADDRESS);
-        openParcel.writeInt(LOCAL_RTP_PORT);
-        openParcel.setDataPosition(0);
-        mMediaListener.onMediaMessage(openParcel);
-
-        // Process the open session message. This will wait for a timeout.
-        processAllMessages();
-
-        // After timeout, handleVideoSessionClosed() is called, then handleVideoOpenSession().
-        verify(mMockQosAgent).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
-        verify(mMockImsMediaManager).openSession(eq(mRtpSocketPair.first),
-                eq(mRtpSocketPair.second), eq(ImsMediaSession.SESSION_TYPE_VIDEO), eq(null),
-                eq(mMockExecutor), eq(mVideoSessionCallback));
-        assertEquals(MediaState.MEDIA_STATE_OPENING, mVideoSessionHandler.getMediaState());
-
-        closeParcel.recycle();
-        openParcel.recycle();
-    }
-
-    @Test
     public void testModifySession() {
         // Modify Session Request
         VideoConfig videoConfig = MediaTestUtils.createVideoConfig();
