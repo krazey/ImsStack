@@ -102,6 +102,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsContactUriValidationChecked, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRetryWithIpVerFallback, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReleaseEPdnOfUnavailableNetwork, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsReleaseEPdnUponECallEndIfEAttach, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReleaseEPdnUponECallEndInFakeMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsCallEndOnRegHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsECallEndOnRegHeld, (), (const, override));

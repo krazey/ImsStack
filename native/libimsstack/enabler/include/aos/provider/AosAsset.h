@@ -53,6 +53,7 @@ public:
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
             bReleaseEPdnOfUnavailableNetwork(IMS_TRUE),
+            bReleaseEPdnUponECallEndIfEAttach(IMS_FALSE),
             bReleaseEPdnUponECallEndInFakeMode(IMS_TRUE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequiredCdmalessFeatureTag(IMS_FALSE),
@@ -168,6 +169,7 @@ public:
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;
     IMS_BOOL bReleaseEPdnOfUnavailableNetwork;
+    IMS_BOOL bReleaseEPdnUponECallEndIfEAttach;
     IMS_BOOL bReleaseEPdnUponECallEndInFakeMode;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequiredCdmalessFeatureTag;

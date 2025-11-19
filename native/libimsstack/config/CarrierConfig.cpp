@@ -507,6 +507,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
                 KEY_IMS_EMERGENCY_PREFIX "emergency_provisional_to_final_response_timer_millis_int";
 
 // Aos
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IF_EATTACH_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "release_epdn_upon_ecall_end_if_eattach_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "release_epdn_upon_ecall_end_in_fake_mode_bool";
 const IMS_CHAR
