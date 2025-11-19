@@ -140,7 +140,8 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_bIsActivated(IMS_TRUE),
         m_bEpdgEnabled(IMS_FALSE),
         m_bDataRoaming(IMS_FALSE),
-        m_bPdnDeactivationRequired(IMS_FALSE)
+        m_bPdnDeactivationRequired(IMS_FALSE),
+        m_bClearIpsecBlockOnPdnDisconnect(IMS_FALSE)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, strAppId.GetStr());
 
@@ -2261,6 +2262,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_NoNextPcscfOnScscfRestor
 
 PROTECTED VIRTUAL void AosApplication::ProcessDisconnectingState(IN IMS_UINT32 nReason /* = 0 */)
 {
+    if (nReason == AosReason::AIRPLANE_MODE)
+    {
+        m_bClearIpsecBlockOnPdnDisconnect = IMS_TRUE;
+    }
+
     if (m_piRegistration->IsRegistered())
     {
         SetOffReason(nReason);
@@ -2503,6 +2509,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 
     if (bNotifyPlmnBlock)
     {
+        m_bClearIpsecBlockOnPdnDisconnect = IMS_TRUE;
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
         m_pConnector->Stop(GET_N_CONFIG(m_nSlotId)->GetReleasePdnDelaySecAfterTempPlmnBlock());
     }
@@ -3355,6 +3362,16 @@ PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReas
     // newly connected
     ClearWifiRegBlock();
 
+    if (m_bClearIpsecBlockOnPdnDisconnect)
+    {
+        A_IMS_TRACE_I(APPID, "Connector_Deactivated :: Clearing IPsec block", 0, 0, 0);
+        if (m_piRegistration != IMS_NULL)
+        {
+            m_piRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_IPSEC_BLOCK);
+        }
+        m_bClearIpsecBlockOnPdnDisconnect = IMS_FALSE;
+    }
+
     if (IsNotReady())
     {
         return;
@@ -3616,6 +3633,11 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
         ProcessRatBlockTimerExpired();
         return;
     }
+}
+
+PROTECTED VIRTUAL void AosApplication::ServicePhone_PlmnChanged(IN const AString& /* strPlmn */)
+{
+    m_bClearIpsecBlockOnPdnDisconnect = IMS_TRUE;
 }
 
 PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(

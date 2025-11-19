@@ -314,6 +314,7 @@ protected:
     // AosServicePhoneListener
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
     void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bConnected) override;
+    void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
 
 public:
     static const IMS_UINT32 RECONFIG_GUARD_TIME_MILLIS = 1000;
@@ -468,6 +469,7 @@ protected:
     IMS_BOOL m_bEpdgEnabled;
     IMS_BOOL m_bDataRoaming;
     IMS_BOOL m_bPdnDeactivationRequired;
+    IMS_BOOL m_bClearIpsecBlockOnPdnDisconnect;
 
     AString m_strTag;
 };

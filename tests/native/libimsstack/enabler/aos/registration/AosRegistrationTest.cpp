@@ -330,6 +330,8 @@ public:
     inline IMS_BOOL GetEps5GsOnly() { return m_bEps5GsOnly; }
     inline void SetIpsecBlockReason(IMS_UINT32 nReason) { m_nIpsecBlockReason = nReason; }
     inline IMS_UINT32 GetIpsecBlockReason() { return m_nIpsecBlockReason; }
+    inline void SetAuthIpsecCount(IN IMS_UINT32 nCount) { m_nAuthIpsecCount = nCount; }
+    inline IMS_UINT32 GetAuthIpsecCount() { return m_nAuthIpsecCount; }
     inline void SetImsRegState(IMS_UINT32 nState) { m_nImsRegState = nState; }
     inline IMS_UINT32 GetImsRegState() { return m_nImsRegState; }
     inline void SetImsReasonCode(AosReasonCode eCode) { m_eImsReasonCode = eCode; }
@@ -7861,4 +7863,15 @@ TEST_F(AosRegistrationTest, ReportDataDisconnectedForPdnDisconnection)
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ClearIpsecBlockReasonAndAuthIpsecCountWhenRequestToClearIpsecBlock)
+{
+    m_pAosRegistration->SetIpsecBlockReason(AosRegistration::IPSEC_BLOCK_ERROR);
+    m_pAosRegistration->SetAuthIpsecCount(1);
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_IPSEC_BLOCK);
+
+    EXPECT_EQ(m_pAosRegistration->GetIpsecBlockReason(), AosRegistration::IPSEC_BLOCK_NONE);
+    EXPECT_EQ(m_pAosRegistration->GetAuthIpsecCount(), 0);
 }
