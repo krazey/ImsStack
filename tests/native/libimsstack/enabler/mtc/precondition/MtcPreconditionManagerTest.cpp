@@ -2296,7 +2296,6 @@ TEST_F(MtcPreconditionManagerTest,
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AUDIO_DEDICATED_BEARER))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
     ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::LOST));
@@ -2362,7 +2361,7 @@ TEST_F(MtcPreconditionManagerTest, NotifiesQosReserveFailedToListenerOnGuardAfte
 }
 
 TEST_F(MtcPreconditionManagerTest,
-        NotifiesQosReserveFailedOnQosStatusChangedLostInEstablishingState)
+        DoNothingOnQosStatusChangedLostInEstablishingStateAndQosLossPolicyIsMaintain)
 {
     SetUpMockQosInfo();
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
@@ -2373,22 +2372,6 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
             .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL));
 
-    EXPECT_CALL(objListener, QosReserveFailed(&objISession, _)).Times(1);
+    EXPECT_CALL(objListener, QosReserveFailed(&objISession, _)).Times(0);
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::GUARD_AFTER_LOST);
-}
-
-TEST_F(MtcPreconditionManagerTest,
-        NotifiesQosReserveFailedOnWaitAudioAvailableTimerExpiredInEstablishingState)
-{
-    SetUpMockQosInfo();
-    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
-    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
-    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
-    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
-    SetUpNothingOnDefaultBearerSupported();
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
-            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL));
-
-    EXPECT_CALL(objListener, QosReserveFailed(&objISession, _)).Times(1);
-    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
 }

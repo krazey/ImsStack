@@ -1427,10 +1427,7 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
     {
         if (!IsLocalResourceReservedByMediaType(piSession, eMediaType))
         {
-            QosLossPolicy ePartialAction =
-                    (!IsConfirmedDialog(piSession) && eMediaType == MEDIATYPE_AUDIO)
-                    ? QosLossPolicy::RELEASE
-                    : GetQosLossPolicy(eMediaType);
+            QosLossPolicy ePartialAction = GetQosLossPolicy(eMediaType);
             if (eAction < ePartialAction)
             {
                 eAction = ePartialAction;
