@@ -524,10 +524,15 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
-    const IMS_BOOL bNeedToConfirm = m_objContext.GetConfigurationProxy().GetBoolean(
-                                      ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL) &&
-            IsNeedToSendLocalResourceConfirmation(piSession);
-    if (!bNeedToConfirm)
+
+    // In case of the QoS is acquired as Availabl before receiving 183 for the
+    // initial session of tha call, it takes time to receive notification to ImsStack through
+    // telephony, so including SDP to PRACK in the original session is excluded.
+    const IMS_BOOL bSendPrackWithoutCheckingQos =
+            !m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL) ||
+            !m_objContext.GetMediaManager().IsForkedSession(piSession);
+    if (bSendPrackWithoutCheckingQos)
     {
         // Assume that there is no case to send ANSWER in PRACK.
         // Therefore, when QoS Confirmation is unnecessary, MTC sends the PRACK first and then
@@ -603,12 +608,17 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
     else
     {
-        if (bNeedToConfirm)
+        if (!bSendPrackWithoutCheckingQos)
         {
-            objMediaManager.AdjustDirectionForLocalResourceConfirmation(
-                    *piSession, pSession->GetCallType());
+            IMS_BOOL bNeedToSendLocalResourceConfirmation =
+                    IsNeedToSendLocalResourceConfirmation(piSession);
+            if (bNeedToSendLocalResourceConfirmation)
+            {
+                objMediaManager.AdjustDirectionForLocalResourceConfirmation(
+                        *piSession, pSession->GetCallType());
+            }
 
-            if (pSession->SendPrack(IMS_TRUE) == IMS_FAILURE)
+            if (pSession->SendPrack(bNeedToSendLocalResourceConfirmation) == IMS_FAILURE)
             {
                 CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
                 HandleCancel(piSession, objReason);

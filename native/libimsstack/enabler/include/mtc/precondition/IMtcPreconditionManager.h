@@ -18,6 +18,8 @@
 #define INTERFACE_MTC_PRECONDITION_MANAGER_H_
 
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
+#include "media/IMediaSession.h"
 
 class ISession;
 class IMessage;
@@ -170,6 +172,9 @@ public:
      * @param eRatType The changed RAT type
      */
     virtual void OnRatChanged(IN IMS_SINT32 eRatType) = 0;
+
+    virtual void UpdateQosIfAvailable(IN ISession* piSession, IN IMS_UINTP nNegoId,
+            IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession) = 0;
 };
 
 #endif

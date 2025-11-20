@@ -19,6 +19,7 @@
 
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
 #include "call/IMtcCall.h"
 #include "media/IMediaQosEventListener.h"
 #include "precondition/IMtcPreconditionManager.h"
@@ -29,6 +30,7 @@
 #include "precondition/SdpPreconditionHelper.h"
 
 class IMediaDescriptor;
+class IMediaSession;
 class IMtcCallContext;
 class IMtcPreconditionListener;
 
@@ -118,10 +120,12 @@ public:
     virtual void OnCallEstablished(IN ISession* piSession) override;
     virtual void OnCallModified(IN ISession* piSession) override;
     virtual void OnRatChanged(IN IMS_SINT32 eRatType) override;
+    virtual void UpdateQosIfAvailable(IN ISession* piSession, IN IMS_UINTP nNegoId,
+            IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession) override;
 
 public:
-    virtual void OnQosStatusChanged(
-            IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) override;
+    virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
+            IN IMS_UINT32 eMediaType, IN IMS_BOOL bNeedToNotify = IMS_TRUE) override;
     virtual void OnTimerExpired(IN QosTimer* pTimer, IN QosTimerType eType) override;
 
 protected:
