@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.telecom.Connection;
 import android.telecom.VideoProfile;
-import android.telecom.VideoProfile.VideoState;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
@@ -787,8 +786,8 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         }
     }
 
-    private @VideoState int getVideoState() {
-        @VideoState int videoState =
+    private /* @VideoState */ int getVideoState() {
+        /* @VideoState */ int videoState =
                 isCameraOn() ? VideoProfile.STATE_BIDIRECTIONAL : VideoProfile.STATE_RX_ENABLED;
 
         return videoState;
