@@ -55,9 +55,6 @@ IMS_SINT32 MtsAosUtils::ConvertToAosControl(IN IMS_SINT32 nPolicy)
         case MtsRegRecoveryPolicy::REGISTER_REINITIATE:
             return ImsAosControl::REGISTER_REINITIATE;
 
-        case MtsRegRecoveryPolicy::REGISTER_REINITIATE_BY_CSFB:
-            return ImsAosControl::REGISTER_REINITIATE_BY_CSFB;
-
         case MtsRegRecoveryPolicy::E_REGISTER_FAKE_WITH_NEXT_PCSCF:
             return ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF;
 

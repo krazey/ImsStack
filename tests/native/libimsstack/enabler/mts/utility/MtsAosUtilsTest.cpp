@@ -50,8 +50,6 @@ TEST_F(MtsAosUtilsTest, ConvertToAosControl)
             ImsAosControl::REGISTER_STOP);
     EXPECT_EQ(pMtsAosUtils->ConvertToAosControl(MtsRegRecoveryPolicy::REGISTER_REINITIATE),
             ImsAosControl::REGISTER_REINITIATE);
-    EXPECT_EQ(pMtsAosUtils->ConvertToAosControl(MtsRegRecoveryPolicy::REGISTER_REINITIATE_BY_CSFB),
-            ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
     EXPECT_EQ(pMtsAosUtils->ConvertToAosControl(
                       MtsRegRecoveryPolicy::E_REGISTER_FAKE_WITH_NEXT_PCSCF),
             ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF);
