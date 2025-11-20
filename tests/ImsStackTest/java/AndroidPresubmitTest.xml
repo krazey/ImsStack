@@ -39,6 +39,7 @@
         <option name="package" value="com.android.imsstack.its" />
         <option name="include-annotation" value="android.platform.test.annotations.Presubmit" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+        <option name="instrumentation-arg" key="use_scm" value="true" />
         <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>
