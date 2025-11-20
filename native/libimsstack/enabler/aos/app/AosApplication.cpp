@@ -197,14 +197,12 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             PostMessage(MSG_REG_UPDATE, 0, 1);
             break;
 
-        case ImsAosControl::REGISTER_STOP:  // FALL-THROUGH
+        case ImsAosControl::REGISTER_STOP:
             ProcessDisconnectingState();
             PostMessage(MSG_REG_STOP, 0, 0);
             break;
 
-        case ImsAosControl::REGISTER_REINITIATE:  // FALL-THROUGH
-        case ImsAosControl::REGISTER_REINITIATE_BY_CSFB:
-            // TODO : check csfb operation for REGISTER_REINITIATE_BY_CSFB
+        case ImsAosControl::REGISTER_REINITIATE:
             PostMessage(MSG_REG_RECOVER, 0, 0);
             break;
 

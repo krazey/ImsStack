@@ -47,14 +47,6 @@ public:
          *        terminated.
          */
         REGISTER_REINITIATE,
-        /**
-         * The registration is destroyed, and an initial registration is attempted based on the
-         * CS call state and RAT.
-         *
-         * [NOTE] If there are any IMS calls, the registration will be performed after they are
-         *        terminated.
-         */
-        REGISTER_REINITIATE_BY_CSFB,
         /// The emergency registration is skipped, and the next PCSCF is used.
         E_REGISTER_FAKE_WITH_NEXT_PCSCF,
         /**

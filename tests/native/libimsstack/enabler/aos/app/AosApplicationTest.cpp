@@ -1309,9 +1309,6 @@ TEST_F(AosApplicationTest, RequestCmd)
     // ImsAosControl::REGISTER_REINITIATE
     EXPECT_TRUE(m_pAosApplication->RequestCmd(ImsAosControl::REGISTER_REINITIATE));
 
-    // ImsAosControl::REGISTER_REINITIATE_BY_CSFB
-    EXPECT_TRUE(m_pAosApplication->RequestCmd(ImsAosControl::REGISTER_REINITIATE_BY_CSFB));
-
     // ImsAosControl::PCSCF_NEXT
     EXPECT_TRUE(m_pAosApplication->RequestCmd(ImsAosControl::PCSCF_NEXT));
 
