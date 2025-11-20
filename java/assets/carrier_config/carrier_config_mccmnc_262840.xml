@@ -18,6 +18,9 @@
     <!-- Aos -->
     <int name="ims.isim_index_for_impu_int" value="0"/>
 
+    <!-- Ssc -->
+    <int name="imsss.ut_cfnr_timer_update_method_int" value="0"/>
+
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
@@ -40,14 +43,13 @@
     <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="2"/>
     <boolean name="imsvt.video_bw_nego_option_bool" value="false"/>
+    <boolean name="imsvt.video_inactive_hold_bool" value="true"/>
     <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
     <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
     <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
         <item value="5"/>
         <item value="5"/>
     </int-array>
-    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
     <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="5"/>
         <item value="5"/>
