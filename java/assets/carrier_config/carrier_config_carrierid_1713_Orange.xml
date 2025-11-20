@@ -37,6 +37,10 @@
     </int-array>
 
     <!-- Mtc Assets -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
+
+    <!-- Mtc Assets -->
     <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
     <int-array name="imsvoice.location_based_number_list_int_array" num="5">
          <item value="112"/>

@@ -39,6 +39,10 @@
     </int-array>
     <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
 
+    <!-- Mtc Assets -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
+
     <!-- Mts -->
     <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="9"/>
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>

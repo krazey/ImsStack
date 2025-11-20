@@ -264,6 +264,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             : ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT;
 
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(pszKey);
+    IMS_TRACE_D("HandleTransactionTimeout : policy[%d]", nPolicy, 0, 0);
     IMS_SINT32 nReason = CODE_NETWORK_RESP_TIMEOUT;
     IMS_SINT32 nExtraCode = EXTRA_CODE_METHOD_INVITE;
     switch (nPolicy)

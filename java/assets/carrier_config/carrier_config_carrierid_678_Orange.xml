@@ -38,6 +38,9 @@
         <item value="-504"/>
     </int-array>
 
+    <!-- Mtc Assets -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 
     <!-- Mts -->
