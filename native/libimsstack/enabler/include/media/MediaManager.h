@@ -32,24 +32,31 @@ class MediaResourceManager;
 class MediaManager : public ImsActivityEx, public IJniMediaManager
 {
 public:
+    /**
+     * @brief A node to hold and manage the lifecycle of a media session and its handler.
+     */
     class MediaSessionNode
     {
     public:
-        IMS_SINTP nCallKey;
-        MediaSession* pMediaSession;
-        MediaMsgHandler* pMessageHandler;
+        IMS_SINTP nCallKey = 0;
+        std::shared_ptr<MediaSession> pMediaSession;
+        std::shared_ptr<MediaMsgHandler> pMessageHandler;
 
     public:
-        MediaSessionNode() :
-                nCallKey(0),
-                pMediaSession(IMS_NULL),
-                pMessageHandler(IMS_NULL) {};
+        MediaSessionNode() = default;
 
-        MediaSessionNode(
-                IN IMS_SINTP callKey, IN MediaSession* pSession, IN MediaMsgHandler* pHandler) :
+        /**
+         * @brief Constructs a MediaSessionNode, taking ownership of the session and handler.
+         *
+         * @param callKey The unique identifier for the call session.
+         * @param pSession A shared_ptr to the MediaSession object.
+         * @param pHandler A shared_ptr to the MediaMsgHandler object.
+         */
+        MediaSessionNode(IN IMS_SINTP callKey, IN std::shared_ptr<MediaSession> pSession,
+                IN std::shared_ptr<MediaMsgHandler> pHandler) :
                 nCallKey(callKey),
-                pMediaSession(pSession),
-                pMessageHandler(pHandler) {};
+                pMediaSession(std::move(pSession)),
+                pMessageHandler(std::move(pHandler)) {};
     };
 
 public:
@@ -73,9 +80,10 @@ public:
      * @brief Gets the message handler for a specific call session.
      *
      * @param nCallKey The key to identify the call session.
-     * @return MediaMsgHandler* A pointer to the message handler, or IMS_NULL if not found.
+     * @return std::shared_ptr<MediaMsgHandler> A pointer to the message handler, or IMS_NULL if not
+     * found.
      */
-    MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
+    virtual std::shared_ptr<MediaMsgHandler> GetHandler(IN IMS_SINTP nCallKey);
 
     /**
      * @brief Notifies that the JNI enabler has been set.
@@ -111,9 +119,9 @@ public:
             IN MEDIA_SERVICE_TYPE eServiceType, IN IService* pService, IN IMS_SINTP nCallKey);
 
     /**
-     * @brief Destroys the MediaSession instance
+     * @brief Destroys a media session identified by its interface pointer.
      *
-     * @param pSession The instance to destroy
+     * @param piSession A pointer to the IMediaSession interface of the session to destroy.
      */
     virtual void DestroySession(IN const IMediaSession* piSession);
 
@@ -124,12 +132,12 @@ public:
      * @return MediaSession* The instance matched with the key, IMS_NULL if there is not matched
      * session
      */
-    MediaSession* GetSession(IN IMS_SINTP nCallKey);
+    virtual MediaSession* GetSession(IN IMS_SINTP nCallKey);
 
     /**
      * @brief Gets the MediaResourceManager instance
      *
-     * @return MediaResourceManager*
+     * @return MediaResourceManager* A pointer to the resource manager.
      */
     MediaResourceManager* GetResourceManager();
 
@@ -145,11 +153,11 @@ public:
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
 
     /**
-     * @brief Handle the dispatch messages
+     * @brief Handles internal messages posted to the MediaManager's activity thread.
      *
-     * @param nMsg enum of message ID. It is defined in IJniMedia.h
-     * @param wParam The key to identify the call session, nCallKey
-     * @param param additional message parameters
+     * @param nMsg The message identifier.
+     * @param wParam The first message parameter (typically the call key).
+     * @param lParam The second message parameter (typically a pointer to message data).
      */
     virtual void HandleMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP wParam, IN IMS_SINTP lParam);
 
@@ -163,23 +171,28 @@ protected:
     virtual ~MediaManager() override;
     MediaManager(IN const MediaManager& obj);
     MediaManager& operator=(IN const MediaManager& obj);
+
     void ClearMediaSessionNode();
-    void DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS_UINT32 nIndex);
+    void DeleteMediaSessionNode(
+            IN const std::shared_ptr<MediaSessionNode> pSessionNode, IMS_UINT32 nIndex);
+
+    virtual std::shared_ptr<MediaMsgHandler> CreateMessageHandler(IN IMS_SINTP nCallKey);
 
     /**
-     * @brief Finds MediaSessionNode with the parameter
+     * @brief Finds a MediaSessionNode by its call key.
      *
-     * @param nCallKey session node identification
-     * @return MediaSessionNode*
+     * @param nCallKey The key identifying the call session.
+     * @return std::shared_ptr<MediaSessionNode> A pointer to the found node, or IMS_NULL if not
+     * found.
      */
-    virtual MediaSessionNode* FindSessionNode(IN IMS_SINTP nCallKey);
+    virtual std::shared_ptr<MediaSessionNode> FindSessionNode(IN IMS_SINTP nCallKey);
 
     /**
-     * @brief Sends message to respective session
+     * @brief Sends a message to a specific session identified by its call key.
      *
-     * @param nMsg enum of message
-     * @param nCallKey session identification
-     * @param pParam message parameter
+     * @param nMsg The message identifier.
+     * @param nCallKey The key identifying the target session.
+     * @param pParam Additional message parameters.
      * @return IMS_BOOL IMS_TRUE when the message is deliverd successfully, IMS_FALSE when it fails
      */
     virtual IMS_BOOL SendMessageToSessions(
@@ -188,7 +201,7 @@ protected:
 protected:
     static ImsMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
     IMS_SINT32 m_nSlotId;
-    ImsList<MediaSessionNode*> m_lstSessionNode;
+    ImsList<std::shared_ptr<MediaSessionNode>> m_lstSessionNode;
     std::shared_ptr<MediaResourceManager> m_pResourceMngr;
 };
 

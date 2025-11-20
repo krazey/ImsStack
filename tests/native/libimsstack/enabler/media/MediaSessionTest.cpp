@@ -542,9 +542,9 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackUnmatch)
             m_objMockClientListener, MediaSession_NotifyQos(nNegoId, IMS_TRUE, MEDIA_TYPE_AUDIO))
             .Times(0);
 
-    EXPECT_EQ(
-            m_pSession->SendMessage(IJniMedia::REQUEST_QOS, reinterpret_cast<IMS_UINTP>(&objParam)),
-            IMS_TRUE);
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(&objParam)),
+            IMS_FALSE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(nNegoId), IMS_TRUE);
 }

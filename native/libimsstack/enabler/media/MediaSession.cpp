@@ -833,12 +833,6 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
     IMS_TRACE_I(
             "OnMessage() - CallKey[%d], nMsg[%d, %s]", m_nCallKey, nMsg, IJniMedia::PrintMsg(nMsg));
 
-    if (m_pClientListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "OnMessage() - null listener", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
     IMS_BOOL bRet = IMS_TRUE;
 
     switch (nMsg)
@@ -876,7 +870,7 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
             bRet = OnNotifyAnbrReceived(pParam);
             break;
         default:
-            break;
+            return IMS_FALSE;
     }
 
     return bRet;
@@ -902,6 +896,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 {
     if (m_pClientListener == IMS_NULL)
     {
+        IMS_TRACE_E(0, "OnNotify() - null listener", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -944,7 +939,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             break;
         case IJniMedia::NOTIFY_MEDIA_DETACH:
             m_pClientListener->MediaSession_Notify(REPORT_MEDIA_DETACH);
-            break;
+            return IMS_TRUE;
         case IJniMedia::NOTIFY_QOS_INFO:
         {
             const ImsMediaMsgQosParam* pParam = reinterpret_cast<ImsMediaMsgQosParam*>(nParam);
@@ -970,9 +965,9 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                         m_pClientListener->MediaSession_NotifyQos(
                                 negoId, bResult, pMatchedParam->m_eMediaType);
                     }
-                }
 
-                return IMS_TRUE;
+                    return IMS_TRUE;
+                }
             }
         }
         break;
