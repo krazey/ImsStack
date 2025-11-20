@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "config/CodecEvsConfig.h"
+
+#include "ICarrierConfig.h"
+#include "CarrierConfig.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -165,17 +168,17 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
         switch (m_nCmr)
         {
             case CARRIERCONFIG_CMR_DISABLED:
-            m_nCmr = CMR_DISABLED;
-            break;
+                m_nCmr = CMR_DISABLED;
+                break;
             case CARRIERCONFIG_CMR_ENABLED:
-            m_nCmr = CMR_ENABLED;
-            break;
+                m_nCmr = CMR_ENABLED;
+                break;
             case CARRIERCONFIG_CMR_ALL_ENABLED:
-            m_nCmr = DEFAULT_CMR;
-            break;
+                m_nCmr = DEFAULT_CMR;
+                break;
             case CARRIERCONFIG_CMR_NOT_PRESENT:
-            m_nCmr = NOT_DEFINED;
-            break;
+                m_nCmr = NOT_DEFINED;
+                break;
         }
         if (m_nCmr != NOT_DEFINED)
         {

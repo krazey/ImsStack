@@ -23,176 +23,206 @@
 
 class CodecConfig;
 
-/*!
- * @class   MediaConfiguration
- * @brief   MediaConfiguration class for android
- * @details Get audio/video common configurations from DB
+/**
+ * @class MediaConfiguration
+ * @brief Base class for holding media configuration settings.
+ * @details This class manages common configurations for media sessions, such as ports, bandwidth,
+ * and codec settings, which are typically derived from carrier-specific configurations.
  */
 class MediaConfiguration
 {
 public:
     /**
-     * @brief Construct a new media configuration
+     * @brief Constructs a new MediaConfiguration object.
      *
-     * @param eSessionType Set media ssession_type (ex: audio, video etc)
+     * @param eSessionType The type of media session (e.g., audio, video).
      */
     explicit MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
+
     /**
-     * @brief Destroy the media configuration
-     *
+     * @brief Destroys the MediaConfiguration object.
      */
     virtual ~MediaConfiguration();
     /**
-     * @brief Create codec using the configuration
+     * @brief Initializes the configuration by reading carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+
     /**
-     * @brief Update codec using the configuration
+     * @brief Updates the configuration with new carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
     virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
+
     /**
-     * @brief Get the codec config
+     * @brief Gets the configuration for a specific codec.
      *
-     * @param nCodec codec type
-     * @return CodecConfig* Return the current codec config
+     * @param nCodec The identifier of the codec.
+     * @return A pointer to the CodecConfig object, or IMS_NULL if not found.
      */
     virtual CodecConfig* GetCodecConfig(IN IMS_UINT32 nCodec) const;
+
     /**
-     * @brief Get the codec configs
+     * @brief Gets the list of all configured codecs.
      *
-     * @return const ImsList<CodecConfig*>& Return the codec config
+     * @return A constant reference to the list of CodecConfig pointers.
      */
     virtual const ImsList<CodecConfig*>& GetCodecConfigs() const;
 
     /**
-     * @brief Get media session type
+     * @brief Gets the media session type.
      *
-     * @return MEDIA_CONTENT_TYPE Return media session type
+     * @return The media content type for this configuration.
      */
     virtual MEDIA_CONTENT_TYPE GetSessionType() const;
+
     /**
-     * @brief Get the start index of the rtp port range
+     * @brief Gets the start of the RTP port range.
      *
-     * @return IMS_SINT32 Return port index
+     * @return The starting RTP port number.
      */
     virtual IMS_SINT32 GetPortRtp() const;
+
     /**
-     * @brief Get the end index of the rtp port range
+     * @brief Gets the end of the RTP port range.
      *
-     * @return IMS_SINT32 Return the end index
+     * @return The ending RTP port number.
      */
     virtual IMS_SINT32 GetPortRtpEnd() const;
+
     /**
-     * @brief Get the rtcp port number (rtp port number + 1)
+     * @brief Gets the RTCP port number.
      *
-     * @return IMS_SINT32 Return the rtcp port number
+     * @return The RTCP port number, typically the RTP port + 1.
      */
     virtual IMS_SINT32 GetPortRtcp() const;
+
     /**
-     * @brief Get the rtcp interval in active state
+     * @brief Gets the RTCP reporting interval for an active call.
      *
-     * @return IMS_SINT32 Return the rtcp interval. The timer for this interval runs in seconds.
+     * @return The RTCP interval in seconds.
      */
     virtual IMS_SINT32 GetRtcpIntervalOnActive() const;
+
     /**
-     * @brief Get the rtcp interval in hold state
+     * @brief Gets the RTCP reporting interval when the call is on hold.
      *
-     * @return IMS_SINT32 Return the rtcp interval. The timer for this interval runs in seconds.
+     * @return The RTCP interval in seconds.
      */
     virtual IMS_SINT32 GetRtcpIntervalOnHold() const;
+
     /**
-     * @brief Get the as bandwidth kbps
+     * @brief Gets the Application Specific (AS) maximum bandwidth.
      *
-     * @return IMS_SINT32 Return as value
+     * @return The AS bandwidth in kilobits per second (kbps).
      */
     virtual IMS_SINT32 GetAsBandwidthKbps() const;
+
     /**
-     * @brief Get the rs bandwidth bps value
+     * @brief Gets the RTCP bandwidth for active data senders (RS).
      *
-     * @return IMS_SINT32 Return rs value
+     * @return The RS bandwidth in bits per second (bps).
      */
     virtual IMS_SINT32 GetRsBandwidthBps() const;
+
     /**
-     * @brief Get the Rr Bandwidth bps value
+     * @brief Gets the RTCP bandwidth for receivers (RR).
      *
-     * @return IMS_SINT32 Return rr value
+     * @return The RR bandwidth in bits per second (bps).
      */
     virtual IMS_SINT32 GetRrBandwidthBps() const;
+
     /**
-     * @brief Get the rtp inactivity timer in milli seconds unit
+     * @brief Gets the RTP inactivity timer duration.
      *
-     * @return IMS_SINT32 Return the rtp inactivitity timer
+     * @return The timer duration in milliseconds.
      */
     virtual IMS_SINT32 GetRtpInactivityTimerMillis() const;
+
     /**
-     * @brief Get the rtcp inactivity timer in milli seconds unit
+     * @brief Gets the RTCP inactivity timer duration.
      *
-     * @return IMS_SINT32 Return the rtcp inactivitity timer
+     * @return The timer duration in milliseconds.
      */
     virtual IMS_SINT32 GetRtcpInactivityTimerMillis() const;
+
     /**
-     * @brief Get the receive only direction feature is enabled in early session.
+     * @brief Checks if the 'recvonly' media direction is enabled for early media sessions.
      *
-     * @return IMS_BOOL Return whether the recvonly direction feature is enabled in early session.
+     * @return IMS_TRUE if enabled, otherwise IMS_FALSE.
      */
     virtual IMS_BOOL IsRecvOnlyEarlySessionEnabled() const;
 
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
+
     virtual IMS_UINT32 MakeEachCodecs(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
             IN IMS_UINT32 nCodecIndex, IN ImsVector<IMS_SINT32> objPayloadTypeArray);
+
     virtual IMS_UINT32 MakeCodec(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
             IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum);
+
     virtual void ToDebugString() const;
     virtual void ToDebugStringCodecs(IN const CodecConfig* pCodecConfig) const;
+
     virtual void Clear();
-    virtual IMS_UINT32 GetCodecType(IN IMS_UINT32 nCodec) const;
+    /**
+     * @brief Converts a codec type to its corresponding media type.
+     *
+     * @param nCodec The codec identifier.
+     * @return IMS_UINT32 Returns the media type (e.g., AUDIO_MAX, VIDEO_MAX, TEXT_MAX).
+     */
+    virtual IMS_UINT32 ConvertCodecType(IN IMS_UINT32 nCodec) const;
+
     virtual void SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
+
     virtual void SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
 
 public:
     /** Bandwidth type */
     enum
     {
-        /** Application Specific Maximum Bandwidth */
+        /** Application-Specific Maximum Bandwidth (RFC 3556). */
         BW_AS = 1,
-        /** RTCP bandwidth allocated to active data senders */
+        /** RTCP bandwidth for receivers (RFC 3556). */
         BW_RR = 2,
-        /** RTCP bandwidth allocated to other participants in the RTP session */
+        /** RTCP bandwidth for active data senders (RFC 3556). */
         BW_RS = 3
     };
 
-    /*
-        Bandwidth_option_value
-        BW_OPTION_LOCAL_VALUE : Use Local Profile's AS/RS/RR Value
-        BW_OPTION_REMOTE_VALUE : Use Remote Profile's AS/RS/RR Value (If sdp negotiationsucceeds,
-                the value of remote profile is used as negotiated profile.)
-    */
-    enum
-    {
-        BW_OPTION_LOCAL_VALUE = 0,
-        BW_OPTION_REMOTE_VALUE = 1
-    };
-
-    /** check SDPOfferCapNegForAVPF option
-     *  acap (Attribute Capability Attribute)
-     *  tcap (Transport Protocol Capability Attribute)
+    /**
+     * @brief Defines whether to use local or remote bandwidth values for negotiation.
      */
     enum
     {
-        /** No capability attribute */
+        /** Use the local device's configured AS, RS, and RR bandwidth values. */
+        BW_OPTION_LOCAL_VALUE = 0,
+        /**
+         * Use the remote party's AS, RS, and RR values. If SDP negotiation succeeds, the remote
+         * values are used for the negotiated profile.
+         */
+        BW_OPTION_REMOTE_VALUE = 1
+    };
+
+    /**
+     * @brief Defines capability negotiation options for AVPF (Audio-Visual Profile with Feedback)
+     * in an SDP offer.
+     *
+     * This controls the inclusion of 'acap' (Attribute Capability) and 'tcap'
+     * (Transport Protocol Capability) attributes.
+     */
+    enum
+    {
+        /** No capability attributes are included in the SDP offer. */
         CAPNEG_OFFER_NONE = 0,
-        /** No acap, tcap only */
+        /** Only 'tcap' is included in the SDP offer. */
         CAPNEG_OFFER_WITHOUT_ACAP = 1,
-        /** Acap and tcap */
+        /** Both 'acap' and 'tcap' are included in the SDP offer. */
         CAPNEG_OFFER_WITH_ACAP = 2
     };
 

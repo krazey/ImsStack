@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ImsVector.h"
-#include "config/ImsCodec.h"
 #include "config/VideoConfiguration.h"
+
+#include "ImsVector.h"
+#include "ServiceTrace.h"
+#include "config/ImsCodec.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+#include "config/TextConfiguration.h"
+
 #include "ServiceTrace.h"
 #include "config/ImsCodec.h"
-#include "config/TextConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

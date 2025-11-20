@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+#include "config/MediaConfiguration.h"
+
 #include "ServiceTrace.h"
 #include "config/ImsCodec.h"
 #include "config/CodecConfig.h"
 #include "config/CodecConfigFactory.h"
-#include "config/MediaConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -87,7 +88,7 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfi
         IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,
         IN ImsVector<IMS_SINT32> objPayloadTypeArray)
 {
-    if (!GetCodecType(nCodec))
+    if (!ConvertCodecType(nCodec))
     {
         IMS_TRACE_E(0, "MakeEachCodecs - fail, No codec name", 0, 0, 0);
         return nCodecIndex;
@@ -109,7 +110,7 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfi
 PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* piCc,
         IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum)
 {
-    IMS_UINT32 nCodecType = GetCodecType(nCodec);
+    IMS_UINT32 nCodecType = ConvertCodecType(nCodec);
     CodecConfig* pCodecConfig = IMS_NULL;
 
     if (nCodecType == ImsCodec::AUDIO_MAX)
@@ -161,67 +162,9 @@ PROTECTED VIRTUAL void MediaConfiguration::ToDebugString() const
 PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(
         IN const CodecConfig* pCodecConfig) const
 {
-    if (pCodecConfig == IMS_NULL)
+    if (pCodecConfig != IMS_NULL)
     {
-        return;
-    }
-
-    switch (pCodecConfig->GetCodec())
-    {
-        case ImsCodec::AUDIO_AMR:
-        case ImsCodec::AUDIO_AMR_WB:
-        {
-            const CodecAmrConfig* pAmrConfig =
-                    reinterpret_cast<const CodecAmrConfig*>(pCodecConfig);
-            pAmrConfig->ToDebugString();
-        }
-        break;
-        case ImsCodec::AUDIO_PCMA:
-        case ImsCodec::AUDIO_PCMU:
-        {
-            const CodecPcmConfig* pPcmConfig =
-                    reinterpret_cast<const CodecPcmConfig*>(pCodecConfig);
-            pPcmConfig->ToDebugString();
-        }
-        break;
-        case ImsCodec::AUDIO_TELEPHONE_EVENT:
-        case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
-        {
-            const CodecTelephoneEventConfig* pTelephoneEventConfig =
-                    reinterpret_cast<const CodecTelephoneEventConfig*>(pCodecConfig);
-            pTelephoneEventConfig->ToDebugString();
-        }
-        break;
-        case ImsCodec::AUDIO_EVS:
-        {
-            const CodecEvsConfig* pEvsConfig =
-                    reinterpret_cast<const CodecEvsConfig*>(pCodecConfig);
-            pEvsConfig->ToDebugString();
-        }
-        break;
-        case ImsCodec::VIDEO_AVC:
-        {
-            const CodecAvcConfig* pAvcConfig =
-                    reinterpret_cast<const CodecAvcConfig*>(pCodecConfig);
-            pAvcConfig->ToDebugString();
-        }
-        break;
-        case ImsCodec::VIDEO_HEVC:
-        {
-            const CodecHevcConfig* pHevcConfig =
-                    reinterpret_cast<const CodecHevcConfig*>(pCodecConfig);
-            pHevcConfig->ToDebugString();
-        }
-        break;
-        case ImsCodec::TEXT_T140:
-        {
-            const CodecT140Config* pT140Config =
-                    reinterpret_cast<const CodecT140Config*>(pCodecConfig);
-            pT140Config->ToDebugString();
-        }
-        break;
-        default:
-            break;
+        pCodecConfig->ToDebugString();
     }
 }
 
@@ -241,7 +184,7 @@ PROTECTED VIRTUAL void MediaConfiguration::Clear()
 }
 
 PROTECTED
-IMS_UINT32 MediaConfiguration::GetCodecType(IN IMS_UINT32 nCodec) const
+IMS_UINT32 MediaConfiguration::ConvertCodecType(IN IMS_UINT32 nCodec) const
 {
     switch (nCodec)
     {

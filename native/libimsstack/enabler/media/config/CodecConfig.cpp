@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceUtil.h"
-#include "MediaDef.h"
 #include "config/CodecConfig.h"
+
 #include "ICarrierConfig.h"
+#include "ServiceTrace.h"
 #include "config/ImsCodec.h"
 #include "config/MediaSessionConfig.h"
-#include "config/AudioConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -39,9 +36,8 @@ PUBLIC VIRTUAL CodecConfig::~CodecConfig()
     IMS_TRACE_I("~CodecConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* /*piCc*/)
 {
-    (void)piCc;
     return IMS_TRUE;
 }
 

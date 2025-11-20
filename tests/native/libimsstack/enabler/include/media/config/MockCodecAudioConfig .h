@@ -19,10 +19,7 @@
 
 #include <gmock/gmock.h>
 
-#include "ICarrierConfig.h"
-#include "MockICarrierConfig.h"
-#include "config/MediaCarrierConfigBundle.h"
-#include "config/CodecAmrConfig.h"
+#include "config/CodecAudioConfig.h"
 
 class MockCodecAudioConfig : public CodecAudioConfig
 {

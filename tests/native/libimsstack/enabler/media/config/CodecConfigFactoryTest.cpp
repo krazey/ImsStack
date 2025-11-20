@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
 
+#include "CarrierConfig.h"
+#include "ImsStrLib.h"
 #include "config/CodecConfigFactory.h"
+#include "config/ImsCodec.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::Return;
 using ::testing::TypedEq;

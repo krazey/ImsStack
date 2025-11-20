@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "config/CodecHevcConfig.h"
+
+#include "CarrierConfig.h"
+#include "ICarrierConfig.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

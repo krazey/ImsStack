@@ -15,17 +15,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ImsStrLib.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
-#include <config/MockMediaConfiguration.h>
-#include "config/MediaCarrierConfigBundle.h"
-#include "config/CodecAudioConfig.h"
 #include "config/CodecAmrConfig.h"
+#include "config/CodecAudioConfig.h"
+#include "config/ImsCodec.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::_;
 using ::testing::Return;

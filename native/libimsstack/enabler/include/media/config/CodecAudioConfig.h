@@ -17,6 +17,7 @@
 #ifndef CODEC_AUDIO_CONFIG_H_
 #define CODEC_AUDIO_CONFIG_H_
 
+#include "ImsVector.h"
 #include "config/CodecConfig.h"
 
 class CodecAudioConfig : public CodecConfig

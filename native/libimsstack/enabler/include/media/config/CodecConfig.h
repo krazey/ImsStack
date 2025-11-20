@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@
 #ifndef CODEC_CONFIG_H_
 #define CODEC_CONFIG_H_
 
-#include "CarrierConfig.h"
-#include "ICarrierConfig.h"
-#include "config/ImsCodec.h"
+#include "ImsTypeDef.h"
+
+class ICarrierConfig;
 
 class CodecConfig
 {

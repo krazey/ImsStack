@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+#include "config/CodecConfigFactory.h"
+
 #include "ServiceTrace.h"
 #include "config/ImsCodec.h"
-#include "config/CodecConfigFactory.h"
+#include "config/CodecAmrConfig.h"
+#include "config/CodecAvcConfig.h"
+#include "config/CodecEvsConfig.h"
+#include "config/CodecHevcConfig.h"
+#include "config/CodecPcmConfig.h"
+#include "config/CodecTelephoneEventConfig.h"
+#include "config/CodecT140Config.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -38,7 +46,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         case ImsCodec::AUDIO_AMR:
         case ImsCodec::AUDIO_AMR_WB:
         {
-            CodecAmrConfig* pAmrConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
+            auto pAmrConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
 
             if (pAmrConfig == IMS_NULL || !pAmrConfig->Create(piCc))
             {
@@ -54,7 +62,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         case ImsCodec::AUDIO_PCMA:
         case ImsCodec::AUDIO_PCMU:
         {
-            CodecPcmConfig* pPcmConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
+            auto pPcmConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
 
             if (pPcmConfig == IMS_NULL || !pPcmConfig->Create(piCc))
             {
@@ -70,8 +78,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         case ImsCodec::AUDIO_TELEPHONE_EVENT:
         case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
         {
-            CodecTelephoneEventConfig* pTelephoneEventConfig =
-                    new CodecTelephoneEventConfig(nCodec, nPayloadTypeNum);
+            auto pTelephoneEventConfig = new CodecTelephoneEventConfig(nCodec, nPayloadTypeNum);
 
             if (pTelephoneEventConfig == IMS_NULL || !pTelephoneEventConfig->Create(piCc))
             {
@@ -87,7 +94,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         break;
         case ImsCodec::AUDIO_EVS:
         {
-            CodecEvsConfig* pEvsConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
+            auto pEvsConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
 
             if (pEvsConfig == IMS_NULL || !pEvsConfig->Create(piCc))
             {

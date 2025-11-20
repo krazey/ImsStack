@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,11 @@
 
 #include "MediaDef.h"
 #include "MediaSessionConfigFactory.h"
+#include "config/MediaSessionConfig.h"
+
+class AudioConfiguration;
+class VideoConfiguration;
+class TextConfiguration;
 
 class MediaConfigUtil
 {

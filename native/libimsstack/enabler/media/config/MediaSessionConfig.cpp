@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+#include "config/MediaSessionConfig.h"
+
+#include "ICarrierConfig.h"
 #include "ServiceTrace.h"
 #include "ServiceConfig.h"
-#include "config/MediaSessionConfig.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "ICarrierConfig.h"
 #include "config/AudioConfiguration.h"
+#include "config/MediaSessionConfigFactory.h"
 #include "config/VideoConfiguration.h"
 #include "config/TextConfiguration.h"
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "config/CodecAvcConfig.h"
+
+#include "CarrierConfig.h"
+#include "ICarrierConfig.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
 #define DEFAULT_AVC_PROFILE_ID "42C00C"
 #define DEFAULT_AVC_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
-#define DEFAULT_AVC_FRAME_SIZE "NEED_TO_CHECK"
+#define DEFAULT_AVC_FRAME_SIZE   "NEED_TO_CHECK"
 #define DEFAULT_AVC_SPROP_PARAMS "Z0LAFtoHgUZA,aM4G8g=="
 
 PUBLIC

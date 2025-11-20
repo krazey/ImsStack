@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ImsVector.h"
-#include "config/ImsCodec.h"
 #include "config/AudioConfiguration.h"
+
+#include "ImsVector.h"
+#include "ServiceTrace.h"
+#include "config/ImsCodec.h"
 #include "config/MediaSessionConfig.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -37,11 +38,11 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nJitterBufferMaxSize(DEFAULT_JITTER_MAX),
         m_nJitterBufferAdjustTime(DEFAULT_JITTER_ADJUST),
         m_nJitterBufferStepSize(DEFAULT_JITTER_STEP),
-        m_bAudioRtcpxrEnabled(DEFAULT_RTCPXR),
-        m_bAudioRtcpxrStatisticsEnabled(DEFAULT_RTCPXR_STATISTICS),
-        m_bAudioRtcpxrVoipMetricsEnabled(DEFAULT_RTCPXR_VOIP_METRICS),
-        m_bAudioRtcpxrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
-        m_bAudioRtcpxrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
+        m_bAudioRtcpXrEnabled(DEFAULT_RTCPXR),
+        m_bAudioRtcpXrStatisticsEnabled(DEFAULT_RTCPXR_STATISTICS),
+        m_bAudioRtcpXrVoipMetricsEnabled(DEFAULT_RTCPXR_VOIP_METRICS),
+        m_bAudioRtcpXrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
+        m_bAudioRtcpXrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
         m_objAudioCandidateAttribute(ImsVector<AString>()),
         m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
@@ -131,17 +132,17 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
 
     // rtcp-xr
-    m_bAudioRtcpxrEnabled =
+    m_bAudioRtcpXrEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR);
-    m_bAudioRtcpxrStatisticsEnabled = piCc->GetBoolean(
+    m_bAudioRtcpXrStatisticsEnabled = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL, DEFAULT_RTCPXR_STATISTICS);
-    m_bAudioRtcpxrVoipMetricsEnabled =
+    m_bAudioRtcpXrVoipMetricsEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
                     DEFAULT_RTCPXR_VOIP_METRICS);
-    m_bAudioRtcpxrPacketLossRleEnabled =
+    m_bAudioRtcpXrPacketLossRleEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_LOSS_RLE);
-    m_bAudioRtcpxrPacketDuplicateRleEnabled =
+    m_bAudioRtcpXrPacketDuplicateRleEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
 
@@ -252,12 +253,12 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             m_nAudioMaxRed);
     IMS_TRACE_D("BandwidthNegoOption[%d], Dscp[%d], DtmfDuration[%d]", m_bAudioBwNegoOptionEnabled,
             m_nAudioRtpDscp, m_nDtmfDuration);
-    IMS_TRACE_D("SupportEvs[%d], RtcpxrEnabled[%d], RtcpxrStatisticsEnabled[%d]", m_bEvsSupported,
-            m_bAudioRtcpxrEnabled, m_bAudioRtcpxrStatisticsEnabled);
-    IMS_TRACE_D("RtcpxrVoipMetricsEnabled[%d], RtcpxrPacketLossRleEnabled[%d], \
-            RtcpxrPacketDuplicateRleEnabled[%d]",
-            m_bAudioRtcpxrVoipMetricsEnabled, m_bAudioRtcpxrPacketLossRleEnabled,
-            m_bAudioRtcpxrPacketDuplicateRleEnabled);
+    IMS_TRACE_D("SupportEvs[%d], RtcpXrEnabled[%d], RtcpXrStatisticsEnabled[%d]", m_bEvsSupported,
+            m_bAudioRtcpXrEnabled, m_bAudioRtcpXrStatisticsEnabled);
+    IMS_TRACE_D("RtcpXrVoipMetricsEnabled[%d], RtcpXrPacketLossRleEnabled[%d], \
+            RtcpXrPacketDuplicateRleEnabled[%d]",
+            m_bAudioRtcpXrVoipMetricsEnabled, m_bAudioRtcpXrPacketLossRleEnabled,
+            m_bAudioRtcpXrPacketDuplicateRleEnabled);
     IMS_TRACE_D("RecvOnlyEarlySessionEnabled[%d]", m_bRecvOnlyEarlySessionEnabled, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
@@ -336,70 +337,42 @@ IMS_SINT32 AudioConfiguration::GetJitterBufferStepSize() const
     return m_nJitterBufferStepSize;
 }
 
-/**
- * @brief   GetRtcpXr
- * @details Get RTCP-XR enable
- */
 PUBLIC
 IMS_BOOL AudioConfiguration::IsRtcpXrEnabled() const
 {
-    return m_bAudioRtcpxrEnabled;
+    return m_bAudioRtcpXrEnabled;
 }
 
-/**
- * @brief   GetRtcpXrStatistics
- * @details Get RTCP-XR statistic metrics enable
- */
 PUBLIC
 IMS_BOOL AudioConfiguration::IsRtcpXrStatisticsEnabled() const
 {
-    return m_bAudioRtcpxrStatisticsEnabled;
+    return m_bAudioRtcpXrStatisticsEnabled;
 }
 
-/**
- * @brief   GetRtcpXrVoip
- * @details Get RTCP-XR Voip metrics enable
- */
 PUBLIC
 IMS_BOOL AudioConfiguration::IsRtcpXrVoipEnabled() const
 {
-    return m_bAudioRtcpxrVoipMetricsEnabled;
+    return m_bAudioRtcpXrVoipMetricsEnabled;
 }
 
-/**
- * @brief   GetRtcpXrPlr
- * @details Get RTCP-XR packet loss rle enable
- */
 PUBLIC
 IMS_BOOL AudioConfiguration::IsRtcpXrPlrEnabled() const
 {
-    return m_bAudioRtcpxrPacketLossRleEnabled;
+    return m_bAudioRtcpXrPacketLossRleEnabled;
 }
 
-/**
- * @brief   GetRtcpXrPdr
- * @details Get RTCP-XR packet duplicate rle enable
- */
 PUBLIC
 IMS_BOOL AudioConfiguration::IsRtcpXrPdrEnabled() const
 {
-    return m_bAudioRtcpxrPacketDuplicateRleEnabled;
+    return m_bAudioRtcpXrPacketDuplicateRleEnabled;
 }
 
-/**
- * @brief   GetDtmfDuration
- * @details Get the dtmf duration value for playing
- */
 PUBLIC
 IMS_SINT32 AudioConfiguration::GetDtmfDuration() const
 {
     return m_nDtmfDuration;
 }
 
-/**
- * @brief   GetAudioCandidateAttribute
- * @details Get the audioCandidateAttribute
- */
 PUBLIC
 const ImsVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 {
