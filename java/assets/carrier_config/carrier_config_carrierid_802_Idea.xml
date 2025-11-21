@@ -18,6 +18,7 @@
     <!-- Ims General -->
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <!-- Aos -->
+    <boolean name="ims.keep_existing_pcscf_on_pcscf_change_during_the_call_bool" value="true"/>
     <!-- USIM -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
