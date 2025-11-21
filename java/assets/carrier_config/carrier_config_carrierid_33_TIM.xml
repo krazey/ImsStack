@@ -26,4 +26,7 @@
         <item value="501"/>
     </int-array>
     <int name="imsvoice.audio_maxred_int" value="220"/>
+
+    <!-- Ssc -->
+    <string name="imsss.xcap_auid_prefix_string">/mtasxdms</string>
 </carrier_config>
