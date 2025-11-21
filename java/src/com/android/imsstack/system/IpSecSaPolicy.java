@@ -73,8 +73,11 @@ public class IpSecSaPolicy implements Parcelable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("[ ");
-        sb.append("spi=");
+        sb.append("spi=0x");
+        sb.append(Integer.toHexString(mSpi));
+        sb.append("(");
         sb.append(mSpi);
+        sb.append(")");
         sb.append(", direction=");
         sb.append(mDirection == 0 ? "IN" : "OUT");
         sb.append(", mode=");
