@@ -120,6 +120,9 @@
                 },
                 {
                     "include-annotation": "android.platform.test.annotations.Presubmit"
+                },
+                {
+                    "instrumentation-arg": "use_scm:=true"
                 }
             ]
         }

@@ -73,9 +73,12 @@ import com.android.imsstack.its.base.TestConstants;
 import com.android.imsstack.its.core.agents.WifiAgent;
 import com.android.imsstack.its.imsservice.ImsServiceConnector;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
+import com.android.imsstack.its.scm.ScmConnector;
 import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.jni.NativeCommands;
 import com.android.imsstack.util.Log;
+
+import org.junit.Rule;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -91,6 +94,9 @@ public class ImsStackTestBase {
     protected interface TestValueInitializer {
         void init(int slotId, int simApplicationState);
     }
+
+    @Rule
+    public final ScmConnector mScmConnector = new ScmConnector();
 
     protected static final int APN_EMERGENCY = NetworkCapabilities.NET_CAPABILITY_EIMS;
     protected static final int APN_IMS = NetworkCapabilities.NET_CAPABILITY_IMS;
