@@ -199,6 +199,12 @@ public class ImsCallApp extends ImsApp {
             // FIXME: P-GII
             mRegTracker.refreshCallRegistrationState();
 
+            // Initialize Ut before initializing ImsCallContext since ImsCallContext adds a listener
+            // to Ut for terminal-based supplementary services.
+            if (mUt != null) {
+                mUt.init();
+            }
+
             mCallContext.init();
             mCallManager.init();
 
@@ -208,10 +214,6 @@ public class ImsCallApp extends ImsApp {
 
             if (mSms != null) {
                 mSms.init();
-            }
-
-            if (mUt != null) {
-                mUt.init();
             }
 
             mFeatureManager.updateFeaturesOnServiceUpDown(true);
