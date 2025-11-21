@@ -142,6 +142,7 @@ PUBLIC VIRTUAL void MediaManager::DestroySession(IN const IMediaSession* piSessi
 
         if (pSessionNode->pMediaSession.get() == piSession)
         {
+            pSessionNode->pMediaSession->Terminate();
             DeleteMediaSessionNode(pSessionNode, i);
             return;
         }
@@ -268,6 +269,16 @@ PROTECTED
 void MediaManager::ClearMediaSessionNode()
 {
     IMS_TRACE_D("ClearMediaSessionNode(): list size[%d]", m_lstSessionNode.GetSize(), 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
+    {
+        auto pSessionNode = m_lstSessionNode.GetAt(i);
+        if (pSessionNode != IMS_NULL && pSessionNode->pMediaSession != IMS_NULL)
+        {
+            pSessionNode->pMediaSession->Terminate();
+        }
+    }
+
     m_lstSessionNode.Clear();
 }
 
