@@ -685,6 +685,14 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    // SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING case
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhrase)
@@ -696,6 +704,22 @@ TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhrase)
     ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(reasonPhrase));
 
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, -1, reasonPhrase));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403ResponseForWarningHeaderWhenCsfbIsNotAvailable)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY);
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING));
+    ON_CALL(objMessageUtils, IsHeaderPresent(pMessage, ISipHeader::WARNING, AString::ConstNull()))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
 }
 
 TEST_F(StartErrorHandlerTest, Handle403ResponseWithConfigRecoverRegistrationWhenCsfbIsNotAvailable)

@@ -242,7 +242,7 @@
         <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
         <item value="2"/> <!-- CSFB_BLOCK_CONDITION_IN_WIFI -->
     </int-array>
-    <int name="imsvoice.policy_for_403_response_for_invite_int" value="4"/>
+    <int name="imsvoice.policy_for_403_response_for_invite_int" value="5"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="1"/>
     <boolean name="imsvoice.wait_qos_for_incoming_invite_without_precondition_bool" value="false"/>
     <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="true"/>
