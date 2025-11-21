@@ -112,7 +112,7 @@ public:
     static void ParseHostNPort(
             IN const AString& strHostNPort, OUT AString& strHost, OUT IMS_SINT32& nPort);
     // To display an SIP Protocol Message
-    static void PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSend,
+    static void PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId, IN IMS_BOOL bSend,
             IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
             IN IMS_SINT32 nLength);
 
