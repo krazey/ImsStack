@@ -1633,6 +1633,55 @@ TEST_F(AosRegistrationTest, IgnoreSetTrafficForInvalidRegType)
     EXPECT_FALSE(bResult);
 }
 
+TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetTrafficWithStartIfEpdgEnabled)
+{
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(
+            m_objMockIAosTransaction, StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_WLAN))
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pAosRegistration->SetTraffic(IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetTrafficWithStartIfEpdgDisabled)
+{
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(
+            m_objMockIAosTransaction, StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE))
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pAosRegistration->SetTraffic(IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, InvokeStopTrafficWhenSetTrafficWithStop)
+{
+    EXPECT_CALL(m_objMockIAosTransaction, StopTraffic(IAosTransaction::TYPE_REG));
+
+    m_pAosRegistration->SetTraffic(IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetTrafficWithStartForEmergencyType)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockIAosTransaction, StartEmergencyTraffic(_));
+
+    m_pAosRegistration->SetTraffic(IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, InvokeStopTrafficWhenSetTrafficWithStopForEmergencyType)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic());
+
+    m_pAosRegistration->SetTraffic(IMS_FALSE);
+}
+
 TEST_F(AosRegistrationTest,
         StopDeregTimerAndTrafficIfTimerIsRunningAndOldDeregisteringStateWhenSetState)
 {
@@ -1648,9 +1697,25 @@ TEST_F(AosRegistrationTest,
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
 }
 
-TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetForDeregisterWithStart)
+TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetForDeregisterWithStartIfEpdgEnabled)
 {
-    EXPECT_CALL(m_objMockIAosTransaction, StartTraffic(IAosTransaction::TYPE_DEREG, _))
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosTransaction,
+            StartTraffic(IAosTransaction::TYPE_DEREG, NW_REPORT_RADIO_WLAN))
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pAosRegistration->SetTrafficForDeregister(IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetForDeregisterWithStartIfEpdgDisabled)
+{
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosTransaction,
+            StartTraffic(IAosTransaction::TYPE_DEREG, NW_REPORT_RADIO_LTE))
             .WillOnce(Return(IMS_TRUE));
 
     m_pAosRegistration->SetTrafficForDeregister(IMS_TRUE);

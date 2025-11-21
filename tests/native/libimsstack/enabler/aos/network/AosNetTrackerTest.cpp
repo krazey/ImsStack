@@ -380,8 +380,16 @@ TEST_F(AosNetTrackerTest, RemoveTimerListener)
     EXPECT_EQ(m_pAosNetTracker->GetTimerListeners().GetSize(), 0);
 }
 
-TEST_F(AosNetTrackerTest, GetMobileChangingNetworkType)
+TEST_F(AosNetTrackerTest, NotReturnMobileChangingNetworkTypeWhenRatGuardDisabled)
 {
+    m_pAosNetTracker->SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NR, IMS_FALSE);
+    m_pAosNetTracker->SetChangingRat(NW_REPORT_RADIO_LTE);
+    EXPECT_EQ(m_pAosNetTracker->GetMobileChangingNetworkType(), NW_REPORT_RADIO_NR);
+}
+
+TEST_F(AosNetTrackerTest, ReturnMobileChangingNetworkTypeWhenRatGuardEnabled)
+{
+    m_pAosNetTracker->SetFeature(AosNetTracker::FEATURE_RAT_GUARD);
     EXPECT_EQ(m_pAosNetTracker->GetMobileChangingNetworkType(), NW_REPORT_RADIO_NOSRV);
     m_pAosNetTracker->SetChangingRat(NW_REPORT_RADIO_LTE);
     EXPECT_EQ(m_pAosNetTracker->GetMobileChangingNetworkType(), NW_REPORT_RADIO_LTE);

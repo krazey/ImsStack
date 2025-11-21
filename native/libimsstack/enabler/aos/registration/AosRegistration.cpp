@@ -20,6 +20,7 @@
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
+#include "INetworkWatcher.h"
 #include "IImsPrivateProperty.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
@@ -748,15 +749,16 @@ IMS_BOOL AosRegistration::SetTraffic(IN IMS_BOOL bStarted)
     {
         if (bStarted)
         {
+            IMS_UINT32 nRadioType = (m_piContext->GetConnection()->IsEpdgEnabled())
+                    ? NW_REPORT_RADIO_WLAN
+                    : m_piContext->GetNetTracker()->GetMobileChangingNetworkType();
             if (m_eRegType == AosRegistrationType::NORMAL)
             {
-                return piTransaction->StartTraffic(
-                        IAosTransaction::TYPE_REG, m_piContext->GetNetTracker()->GetNetworkType());
+                return piTransaction->StartTraffic(IAosTransaction::TYPE_REG, nRadioType);
             }
             else
             {
-                piTransaction->StartEmergencyTraffic(
-                        m_piContext->GetNetTracker()->GetNetworkType());
+                piTransaction->StartEmergencyTraffic(nRadioType);
             }
         }
         else
@@ -784,8 +786,10 @@ IMS_BOOL AosRegistration::SetTrafficForDeregister(IN IMS_BOOL bStarted)
     {
         if (bStarted)
         {
-            return piTransaction->StartTraffic(
-                    IAosTransaction::TYPE_DEREG, m_piContext->GetNetTracker()->GetNetworkType());
+            IMS_UINT32 nRadioType = (m_piContext->GetConnection()->IsEpdgEnabled())
+                    ? NW_REPORT_RADIO_WLAN
+                    : m_piContext->GetNetTracker()->GetMobileChangingNetworkType();
+            return piTransaction->StartTraffic(IAosTransaction::TYPE_DEREG, nRadioType);
         }
         else
         {

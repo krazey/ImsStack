@@ -286,7 +286,7 @@ PUBLIC VIRTUAL void AosNetTracker::RemoveTimerListener(IN IAosNetTrackerTimerLis
 
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileChangingNetworkType()
 {
-    return m_nChangingRat;
+    return (m_pUtil->IsFeatureOn(FEATURE_RAT_GUARD, m_nFeature)) ? m_nChangingRat : m_nNetRadioType;
 }
 
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileNetworkType()
