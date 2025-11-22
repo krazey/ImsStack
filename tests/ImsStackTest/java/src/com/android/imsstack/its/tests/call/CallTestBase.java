@@ -15,26 +15,45 @@
  */
 package com.android.imsstack.its.tests.call;
 
-import static com.android.imsstack.its.base.TestConstants.SLOT0;
-
+import android.annotation.NonNull;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
-import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.servercontrol.ControlConnection;
 import com.android.imsstack.its.servercontrol.ServerFailureHandler;
 import com.android.imsstack.its.tests.ImsStackTestBase;
+import com.android.imsstack.its.tests.registration.RegistrationHelper;
+import com.android.imsstack.its.tests.registration.RegistrationInfo;
 import com.android.imsstack.its.util.SingleLatch;
 
 public class CallTestBase extends ImsStackTestBase {
     protected final SingleLatch mEventLatch = new SingleLatch(CallTestBase.class.getSimpleName());
 
-    protected ControlConnection mServerControlConnection = null;
-    protected ImsRegistrationWrapper mImsRegistration = null;
-    protected ImsMmTelFeatureWrapper mMmTelFeature = null;
+    @NonNull protected ControlConnection mServerControlConnection = null;
+    @NonNull protected RegistrationHelper mRegistrationHelper = null;
+    @NonNull protected ImsMmTelFeatureWrapper mMmTelFeature = null;
 
-    protected PersistableBundle mConfig = null;
+    @NonNull protected PersistableBundle mConfig = null;
+
+    /**
+     * Sets up the test environment before each test.
+     *
+     * @throws Exception if an error occurs during setup.
+     */
+    public void setUpCallTest() throws Exception {
+        mConfig = new PersistableBundle();
+        setDefaultConfig();
+        mRegistrationHelper = new RegistrationHelper();
+    }
+
+    /**
+     * Tears down the test environment after each test.
+     *
+     * @throws Exception if an error occurs during teardown.
+     */
+    public void tearDownCallTest() throws Exception {
+    }
 
     protected void createControlConnection(ServerFailureHandler serverFailureHandler) {
         mServerControlConnection =
@@ -42,17 +61,8 @@ public class CallTestBase extends ImsStackTestBase {
     }
 
     protected void performRegistration() {
-        // The Test Server doesn't support IPSec.
-        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
-        // Enforce TCP for test robustness.
-        mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT, 1);
-
-        startImsStack(SLOT0, mConfig);
-        enableAllMmTelCapabilities();
-        SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
-        mConnectivityManagerProxy.notifyNetworkAvailable(APN_IMS);
-
-        mImsRegistration.waitForRegistered();
+        mRegistrationHelper.performRegistration(this,
+                new RegistrationInfo.Builder().addConfig(mConfig).build());
 
         // Add delay between registration and call.
         SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
@@ -60,9 +70,6 @@ public class CallTestBase extends ImsStackTestBase {
 
     // TODO: Move into CallTestUtilities / CallTestConfigManager.
     protected void turnOffQosAndPrecondition() {
-        if (mConfig == null) {
-            mConfig = new PersistableBundle();
-        }
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 false);
         mConfig.putBoolean(CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
@@ -74,5 +81,10 @@ public class CallTestBase extends ImsStackTestBase {
                 false);
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
                 true);
+    }
+
+    private void setDefaultConfig() {
+        // Enforce TCP for test robustness.
+        mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT, 1);
     }
 }
