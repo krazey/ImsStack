@@ -37,6 +37,7 @@ public:
     IMS_BOOL SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
     IMS_BOOL ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
     void ClearAllBlockReasons() override;
+    void GetBlockReasonsString(OUT AString& strOutLog) override;
     IMS_BOOL PrintBlockReasons() override;
 
     void GetBlockReasons(

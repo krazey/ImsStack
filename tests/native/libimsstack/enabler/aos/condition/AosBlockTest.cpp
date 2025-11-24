@@ -433,6 +433,48 @@ TEST_F(AosBlockTest, SucceedsClearAllBlockReasons)
     EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_WHOLE));
 }
 
+TEST_F(AosBlockTest, SucceedsGetBlockReasonsStringFullFormat)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_PERMANENT_DATA_FAILED);
+    m_pAosBlock->SetBlockReason(BLOCK_USIM_AUTHENTICATION_FAILED);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+
+    AString strResult;
+
+    // WHEN
+    m_pAosBlock->GetBlockReasonsString(strResult);
+
+    // THEN
+    // Check Common blocks size and content
+    EXPECT_TRUE(strResult.Contains("Common(2):"));
+    EXPECT_TRUE(strResult.Contains("PERMANENT_DATA_FAILED"));
+
+    // Check Cellular blocks size and content
+    EXPECT_TRUE(strResult.Contains("Cellular(2):"));
+    EXPECT_TRUE(strResult.Contains("CELLULAR_NO_NETWORK"));
+
+    // Check WiFi blocks size and content
+    EXPECT_TRUE(strResult.Contains("WiFi(1):"));
+    EXPECT_TRUE(strResult.Contains("WIFI_BAD_CONNECTION"));
+}
+
+TEST_F(AosBlockTest, SucceedsGetBlockReasonsStringEmpty)
+{
+    // GIVEN
+    m_pAosBlock->ClearAllBlockReasons();
+    const IMS_CHAR* pszExpected = "Common(0): Cellular(0): WiFi(0):";
+
+    AString strResult;
+
+    // WHEN
+    m_pAosBlock->GetBlockReasonsString(strResult);
+
+    EXPECT_TRUE(strResult.Contains(pszExpected));
+}
+
 TEST_F(AosBlockTest, SucceedsPrintBlockReasonsForCommonBlocks)
 {
     // GIVEN

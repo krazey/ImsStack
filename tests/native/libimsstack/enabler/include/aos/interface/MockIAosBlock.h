@@ -32,6 +32,12 @@ public:
                         {
                             GetBlockReasonsInternal(&objReasons, eType);
                         });
+        ON_CALL(*this, GetBlockReasonsString)
+                .WillByDefault(
+                        [this](OUT AString& strOutLog)
+                        {
+                            GetBlockReasonsStringInternal(&strOutLog);
+                        });
     }
 
     MOCK_METHOD(void, SetListener, (IN IAosBlockListener* piListener), (override));
@@ -43,6 +49,7 @@ public:
     MOCK_METHOD(IMS_BOOL, ResetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
             (override));
     MOCK_METHOD(void, ClearAllBlockReasons, (), (override));
+    MOCK_METHOD(void, GetBlockReasonsString, (OUT AString & strOutLog), (override));
     MOCK_METHOD(IMS_BOOL, PrintBlockReasons, (), (override));
     MOCK_METHOD(void, GetBlockReasons,
             (OUT ImsList<IMS_UINT32> & objReasons, IN SERVICE_TYPE eType), (override));
@@ -53,6 +60,7 @@ public:
     // Add mock method that can set OUT parameter
     MOCK_METHOD(void, GetBlockReasonsInternal,
             (OUT ImsList<IMS_UINT32> * objReasons, IN SERVICE_TYPE eType));
+    MOCK_METHOD(void, GetBlockReasonsStringInternal, (OUT AString * strOutLog));
 };
 
 #endif // MOCK_I_AOS_BLOCK_H_

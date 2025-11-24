@@ -176,9 +176,21 @@ public:
     virtual void ClearAllBlockReasons() = 0;
 
     /**
-     * @brief
+     * @brief Retrieves a formatted string listing all currently active block reasons.
      *
-     * @param
+     * This method iterates through all block categories (Common, Cellular, and WiFi)
+     * and appends the string representation of every enabled block reason to the output.
+     * This is primarily used by the diagnostic reporter to capture the current blocking state.
+     *
+     * @param strOutLog [OUT] The string buffer to populate with the formatted block info.
+     * Format Example: "Common(1):[AOS_INCOMPLETED] Cellular(0): WiFi(0):"
+     */
+    virtual void GetBlockReasonsString(OUT AString& strOutLog) = 0;
+
+    /**
+     * @brief Prints the currently active block reasons to the native trace log.
+     *
+     * @return IMS_TRUE if successful.
      */
     virtual IMS_BOOL PrintBlockReasons() = 0;
 

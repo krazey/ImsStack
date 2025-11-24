@@ -203,7 +203,7 @@ PUBLIC VIRTUAL void AosBlock::ClearAllBlockReasons()
     Notify(BLOCK_MAX, IMS_FALSE);
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
+PUBLIC VIRTUAL void AosBlock::GetBlockReasonsString(OUT AString& strOutLog)
 {
     AString strLogCom;
     for (IMS_UINT32 i = BLOCK_START; i <= BLOCK_END; i++)
@@ -238,12 +238,17 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
-    AString strLog;
-    strLog.Sprintf("PrintBlockReasons :: Common(%d):%s Cellular(%d):%s WiFi(%d):%s",
-            m_objBlock.GetSize(), strLogCom.GetStr(), m_objBlockCellular.GetSize(),
-            strLogCell.GetStr(), m_objBlockWifi.GetSize(), strLogWifi.GetStr());
+    strOutLog.Sprintf("Common(%d):%s Cellular(%d):%s WiFi(%d):%s", m_objBlock.GetSize(),
+            strLogCom.GetStr(), m_objBlockCellular.GetSize(), strLogCell.GetStr(),
+            m_objBlockWifi.GetSize(), strLogWifi.GetStr());
+}
 
-    A_IMS_TRACE_I(APPPROFILE, "%s", strLog.GetStr(), 0, 0);
+PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
+{
+    AString strLog;
+    GetBlockReasonsString(strLog);
+    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: %s", strLog.GetStr(), 0, 0);
+
     return IMS_TRUE;
 }
 
