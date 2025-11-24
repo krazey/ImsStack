@@ -94,8 +94,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private RegistrationState mRegState = RegistrationState.DEREGISTERED;
     private NativeStateListener mNativeStateListener;
     private IPhoneStateNotifier mNotifier;
-    private static final int MAX_LOG_LINES = 300;
-    private final LocalLog mLocalLog = new LocalLog(MAX_LOG_LINES);
+    private static final int MAX_LOG_LINES_DEFAULT = 100;
+    private static final int MAX_LOG_LINES_SMALL = 50;
+    private final LocalLog mLocalLog = new LocalLog(MAX_LOG_LINES_DEFAULT);
+    private final LocalLog mNormalTraceLog = new LocalLog(MAX_LOG_LINES_DEFAULT);
+    private final LocalLog mEmergencyTraceLog = new LocalLog(MAX_LOG_LINES_SMALL);
 
     /** package-private members */
     Handler mHandler;
@@ -387,8 +390,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     @Override
     public void notifyServiceSetting(ServiceSetting state, int serviceBits) {
-        mLocalLog.log("J2N_NOTIFY_SERVICE_SETTING: state=" + state
-                + " serviceBits=" + serviceBits);
+        mLocalLog.log("J2N_NOTIFY_SERVICE_SETTING: state=" + state + " serviceBits=" + serviceBits);
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.J2N_NOTIFY_SERVICE_SETTING);
         parcel.writeInt(state.getValue());
@@ -993,8 +995,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 + featureTags);
 
         if (regType == RegistrationType.EMERGENCY || regType == RegistrationType.FAKE) {
-            mHandler.post(() -> onRegisteredForEmergency(regType, networkType, featureTagBits,
-                    featureTags));
+            mHandler.post(() -> onRegisteredForEmergency(
+                    regType, networkType, featureTagBits, featureTags));
         } else {
             mHandler.post(() -> onRegistered(networkType, featureTagBits, featureTags));
         }
@@ -1007,8 +1009,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 + featureTags);
 
         if (regType == RegistrationType.EMERGENCY || regType == RegistrationType.FAKE) {
-            mHandler.post(() -> onRegisteringForEmergency(regType, networkType, featureTagBits,
-                    featureTags));
+            mHandler.post(() -> onRegisteringForEmergency(
+                    regType, networkType, featureTagBits, featureTags));
         } else {
             mHandler.post(() -> onRegistering(networkType, featureTagBits, featureTags));
         }
@@ -1020,8 +1022,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 + networkType + "), reason(" + reason + "), dataFailCause(" + dataFailCause + ")");
 
         if (regType == RegistrationType.EMERGENCY || regType == RegistrationType.FAKE) {
-            mHandler.post(
-                    () -> onDeregisteredForEmergency(regType, networkType, reason, dataFailCause));
+            mHandler.post(() -> onDeregisteredForEmergency(
+                    regType, networkType, reason, dataFailCause));
         } else {
             mHandler.post(() -> onDeregistered(networkType, reason, dataFailCause));
         }
@@ -1075,6 +1077,24 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 + networkType + "), featureTagBits (" + featureTagBits + ")");
 
         mHandler.post(() -> onImsFeatureChanged(regType, networkType, featureTagBits));
+    }
+
+    /**
+     * Records the provided log entry to the correct dedicated LocalLog buffer based on
+     * the registration type.
+     * This function manages the final destination (Normal or Emergency log buffer)
+     * after filtering out low-priority messages (e.g., FAKE, RCS).
+     *
+     * @param regType The integer registration type (e.g., RegistrationType.NORMAL).
+     * @param trace The complete, pre-formatted log string.
+     */
+    private void recordTrace(int regType, String trace) {
+        final int type = RegistrationType.of(regType);
+        switch (type) {
+            case RegistrationType.NORMAL -> mNormalTraceLog.log(trace);
+            case RegistrationType.EMERGENCY -> mEmergencyTraceLog.log(trace);
+            default -> { /* Do nothing */ }
+        }
     }
 
     private void requestPhoneNumberRetry(int command) {
@@ -1258,7 +1278,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 }
                 case IIAosService.N2J_NOTIFY_DEREGISTERING -> {
                     int regType = parcel.readInt();
-
                     mLocalLog.log("N2J_NOTIFY_DEREGISTERING: type="
                             + RegistrationType.toString(regType));
                     updateDeregistering(regType);
@@ -1331,6 +1350,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                             + " bits=" + FeatureTagMask.toString(featureTagBits));
                     updateImsFeatureChanged(regType, networkType, featureTagBits);
                 }
+                case IIAosService.N2J_NOTIFY_TRACE -> {
+                    int regType = parcel.readInt();
+                    String trace = parcel.readString();
+                    recordTrace(regType, trace);
+                }
                 case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY -> {
                     int command = parcel.readInt();
                     mLocalLog.log("N2J_REQUEST_PHONE_NUMBER_RETRY: command=" + command);
@@ -1355,15 +1379,34 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     public void dump(@NonNull IndentingPrintWriter pw) {
         pw.println("Service:");
         pw.increaseIndent();
+
+        // -- Snapshot of java --
         pw.println("state=" + mRegState + ", network=" + mRegisteredNetworkType
                 + " CrossSim=" + mIsConnectedOverCrossSim);
         pw.println("FeatureTagBits=" + FeatureTagMask.toString(mFeatureTagBits)
                 + " FeatureTags=" + mFeatureTags);
         pw.println("CapabilityPairs=" + mCapabilityPairs);
+
         pw.println("Most recent logs:");
         pw.increaseIndent();
         mLocalLog.dump(pw);
         pw.decreaseIndent();
+
+        // -- Snapshot of Native --
+        pw.println("Most recent Trace logs:");
+
+        // NORMAL Registration Logs
+        pw.println("NORMAL:");
+        pw.increaseIndent();
+        mNormalTraceLog.dump(pw);
+        pw.decreaseIndent();
+
+        // EMERGENCY Registration Logs
+        pw.println("EMERGENCY:");
+        pw.increaseIndent();
+        mEmergencyTraceLog.dump(pw);
+        pw.decreaseIndent();
+
         pw.decreaseIndent();
     }
 }
