@@ -58,6 +58,25 @@ public class IAosRegistrationListenerTest {
     // --- RegistrationType Tests ---
 
     @Test
+    public void registrationType_of_shouldReturnCorrectValueForKnownTypes() {
+        assertEquals(RegistrationType.NORMAL, RegistrationType.of(RegistrationType.NORMAL));
+        assertEquals(RegistrationType.EMERGENCY, RegistrationType.of(RegistrationType.EMERGENCY));
+        assertEquals(RegistrationType.FAKE, RegistrationType.of(RegistrationType.FAKE));
+    }
+
+    @Test
+    public void registrationType_of_shouldReturnNormalForInvalidOrUnknownValues() {
+        assertEquals("Unknown value should default to NORMAL",
+                RegistrationType.NORMAL, RegistrationType.of(999));
+
+        assertEquals("Negative value should default to NORMAL",
+                RegistrationType.NORMAL, RegistrationType.of(-1));
+
+        assertEquals("Untracked value (3) should default to NORMAL",
+                RegistrationType.NORMAL, RegistrationType.of(3));
+    }
+
+    @Test
     public void registrationType_toString_shouldReturnCorrectNames() {
         assertEquals("NORMAL", RegistrationType.toString(RegistrationType.NORMAL));
         assertEquals("EMERGENCY", RegistrationType.toString(RegistrationType.EMERGENCY));

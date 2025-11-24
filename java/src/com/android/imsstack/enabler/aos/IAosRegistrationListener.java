@@ -204,6 +204,19 @@ public interface IAosRegistrationListener {
         public @interface RegistrationTypeDef {}
 
         /**
+         * Converts the integer value to its corresponding RegistrationType constant.
+         *
+         * @param regType The integer registration type value.
+         * @return The matching RegistrationType constant.
+         */
+        public static @RegistrationTypeDef int of(int regType) {
+            return switch (regType) {
+                case NORMAL, EMERGENCY, FAKE -> regType;
+                default -> NORMAL;
+            };
+        }
+
+        /**
          * This method returns a String for the given registration type.
          *
          * @param regType The registration Type.
