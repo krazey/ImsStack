@@ -26,13 +26,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC VideoSdpParser::VideoSdpParser() :
         MediaSdpParser(MEDIA_TYPE_VIDEO)
 {
-    IMS_TRACE_I("+VideoSdpParser()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL VideoSdpParser::~VideoSdpParser()
-{
-    IMS_TRACE_I("~VideoSdpParser()", 0, 0, 0);
-}
+PUBLIC VIRTUAL VideoSdpParser::~VideoSdpParser() {}
 
 PUBLIC
 IMS_BOOL VideoSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,

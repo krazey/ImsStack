@@ -36,8 +36,6 @@ AudioController::AudioController() :
 PUBLIC
 AudioController::~AudioController()
 {
-    IMS_TRACE_I("~AudioController(): state[%d]", m_eMediaState, 0, 0);
-
     if (m_pAudioConfig != IMS_NULL)
     {
         delete m_pAudioConfig;

@@ -23,13 +23,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC TextProfileNegotiator::TextProfileNegotiator() :
         MediaProfileNegotiator(MEDIA_TYPE_TEXT)
 {
-    IMS_TRACE_I("+TextProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL TextProfileNegotiator::~TextProfileNegotiator()
-{
-    IMS_TRACE_I("~TextProfileNegotiator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL TextProfileNegotiator::~TextProfileNegotiator() {}
 
 PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
         IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,

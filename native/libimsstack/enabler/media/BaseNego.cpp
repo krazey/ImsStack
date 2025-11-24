@@ -39,7 +39,6 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         m_pSdpGenerator(IMS_NULL),
         m_pProfileGenerator(IMS_NULL)
 {
-    IMS_TRACE_I("+BaseNego() - type[%d], slot[%d]", m_eType, nSlotId, 0);
 }
 
 BaseNego::BaseNego(IN const BaseNego& obj) :
@@ -183,14 +182,14 @@ PUBLIC VIRTUAL void BaseNego::CleanupIncompleteOaModels()
 
 PUBLIC const IpAddress& BaseNego::GetNegotiatedRemoteAddress()
 {
-    auto pProfile = GetNegotiatedPeerProfile();
+    const auto pProfile = GetNegotiatedPeerProfile();
 
     return (pProfile != IMS_NULL) ? pProfile->GetIpAddress() : IpAddress::NONE;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 BaseNego::GetRemotePort()
 {
-    auto pProfile = GetNegotiatedPeerProfile();
+    const auto pProfile = GetNegotiatedPeerProfile();
 
     return (pProfile != IMS_NULL) ? pProfile->GetDataPort() : MEDIA_PORT_INVALID;
 }

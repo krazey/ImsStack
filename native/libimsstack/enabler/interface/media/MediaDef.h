@@ -217,7 +217,7 @@ struct SdpNegotiationResult
     /** The negotiated direction for the text stream. */
     MEDIA_DIRECTION eTextDirection = MEDIA_DIRECTION_INVALID;
 
-    SdpNegotiationResult(MediaNegoResult result = MEDIA_NEGO_NO_ERROR,
+    explicit SdpNegotiationResult(MediaNegoResult result = MEDIA_NEGO_NO_ERROR,
             MEDIA_CONTENT_TYPE negotiatedType = MEDIA_TYPE_INVALID,
             MEDIA_DIRECTION audioDirection = MEDIA_DIRECTION_INVALID,
             MEDIA_DIRECTION videoDirection = MEDIA_DIRECTION_INVALID,

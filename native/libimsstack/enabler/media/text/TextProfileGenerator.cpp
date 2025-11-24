@@ -26,13 +26,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC TextProfileGenerator::TextProfileGenerator() :
         MediaProfileGenerator(MEDIA_TYPE_TEXT)
 {
-    IMS_TRACE_I("+TextProfileGenerator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL TextProfileGenerator::~TextProfileGenerator()
-{
-    IMS_TRACE_I("~TextProfileGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL TextProfileGenerator::~TextProfileGenerator() {}
 
 PROTECTED
 void TextProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,

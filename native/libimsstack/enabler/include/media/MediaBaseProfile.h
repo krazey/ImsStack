@@ -203,7 +203,8 @@ public:
             m_nBandwidthRr(0),
             m_eDirection(MEDIA_DIRECTION_INVALID),
             m_objCapaNego(CapaNego()),
-            m_nNegotiatedPayloadIndex(-1)
+            m_nNegotiatedPayloadIndex(-1),
+            m_bOmitAttributes(IMS_FALSE)
     {
     }
 

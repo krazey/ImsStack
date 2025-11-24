@@ -27,13 +27,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC AudioSdpGenerator::AudioSdpGenerator() :
         MediaSdpGenerator(MEDIA_TYPE_AUDIO)
 {
-    IMS_TRACE_I("+AudioSdpGenerator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioSdpGenerator::~AudioSdpGenerator()
-{
-    IMS_TRACE_I("~AudioSdpGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL AudioSdpGenerator::~AudioSdpGenerator() {}
 
 PUBLIC
 IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,

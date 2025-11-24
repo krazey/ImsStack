@@ -28,13 +28,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC VideoProfileGenerator::VideoProfileGenerator() :
         MediaProfileGenerator(MEDIA_TYPE_VIDEO)
 {
-    IMS_TRACE_I("+VideoProfileGenerator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL VideoProfileGenerator::~VideoProfileGenerator()
-{
-    IMS_TRACE_I("~VideoProfileGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL VideoProfileGenerator::~VideoProfileGenerator() {}
 
 PROTECTED
 void VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,

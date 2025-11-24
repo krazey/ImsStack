@@ -42,16 +42,12 @@ AudioSession::AudioSession(IN IMS_SINT32 nSlotId) :
         m_piNetworkToneWaitTimer(IMS_NULL),
         m_ePemType(MEDIA_PEM_TYPE::NONE)
 {
-    IMS_TRACE_I("+AudioSession() - state[%d]", m_nState, 0, 0);
-
     m_pRtpConfig = new AudioConfig();
 }
 
 PUBLIC
 VIRTUAL AudioSession::~AudioSession()
 {
-    IMS_TRACE_I("~AudioSession() - state[%d]", m_nState, 0, 0);
-
     StopTimer();
     if (m_pRtpConfig)
     {

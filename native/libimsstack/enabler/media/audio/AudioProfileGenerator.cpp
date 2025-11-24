@@ -32,13 +32,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC AudioProfileGenerator::AudioProfileGenerator() :
         MediaProfileGenerator(MEDIA_TYPE_AUDIO)
 {
-    IMS_TRACE_I("+AudioProfileGenerator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioProfileGenerator::~AudioProfileGenerator()
-{
-    IMS_TRACE_I("~AudioProfileGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL AudioProfileGenerator::~AudioProfileGenerator() {}
 
 PROTECTED
 void AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,

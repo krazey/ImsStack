@@ -26,13 +26,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC VideoSdpGenerator::VideoSdpGenerator() :
         MediaSdpGenerator(MEDIA_TYPE_VIDEO)
 {
-    IMS_TRACE_I("+VideoSdpGenerator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL VideoSdpGenerator::~VideoSdpGenerator()
-{
-    IMS_TRACE_I("~VideoSdpGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL VideoSdpGenerator::~VideoSdpGenerator() {}
 
 PUBLIC
 IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,

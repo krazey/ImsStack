@@ -37,15 +37,11 @@ PUBLIC VideoSession::VideoSession(IN IMS_SINT32 nSlotId) :
         m_bDisplaySurfaceSet(IMS_FALSE),
         m_ePemType(MEDIA_PEM_TYPE::NONE)
 {
-    IMS_TRACE_I("+VideoSession() - state[%d]", m_nState, 0, 0);
-
     m_pRtpConfig = new VideoConfig();
 }
 
 PUBLIC VIRTUAL VideoSession::~VideoSession()
 {
-    IMS_TRACE_I("~VideoSession() - state[%d]", GetState(), 0, 0);
-
     if (m_pRtpConfig)
     {
         delete m_pRtpConfig;
