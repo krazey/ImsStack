@@ -153,7 +153,7 @@ private:
         }
 
         // DEBUG message
-        void DisplayMessage(IN IMS_SINT32 nSlotId);
+        void DisplayMessage(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId);
     };
 
     ImsList<SipSocket*> m_objSockets;

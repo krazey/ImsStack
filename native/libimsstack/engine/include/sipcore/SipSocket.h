@@ -71,6 +71,10 @@ public:
     /** Same as ISocket::SetOption(...) */
     void SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue);
 
+    inline IMS_SINT32 GetSocketId() const
+    {
+        return (m_piSocket != IMS_NULL) ? m_piSocket->GetSocketId() : -1;
+    }
     inline IMS_SINT32 GetState() const { return m_nState; }
     inline IMS_SINT32 GetType() const { return m_objSockAddr.GetType(); }
     inline IMS_BOOL IsSocketForcinlyClosed() const { return m_bForcinglyClosed; }

@@ -582,14 +582,16 @@ PUBLIC GLOBAL void SipTransport::ParseHostNPort(
     SipStack::ParseHostNPort(strHostNPort, strHost, nPort);
 }
 
-PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSend,
-        IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
+PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId,
+        IN IMS_BOOL bSend, IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
         IN IMS_SINT32 nLength)
 {
-    // SEND or RECV:Message Length:Transport Type:IP address:Port
+    // SEND or RECV:Message Length:Transport Type:IP address:Port [Additional information]
     // For example,
-    //    SEND:    <<<==SEND:512:UDP:10.168.114.153:5060==
-    //    RECV:    ==RECV:512:TCP:10.168.114.153:5060==>>>
+    //    Socket FD: 101
+    //    Slot ID: 0
+    //    SEND:    <<<==SEND:512:UDP:10.168.114.153:5060_101_s0==
+    //    RECV:    ==RECV:512:TCP:10.168.114.153:5060_101_s0==>>>
     const IMS_CHAR* pszFormat;
     const IMS_CHAR* pszTransport;
     AString strLog;
@@ -598,11 +600,11 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
 
     if (bSend)
     {
-        pszFormat = "<<<==SEND:%d:%s:%s:%d_s%d==";
+        pszFormat = "<<<==SEND:%d:%s:%s:%d_%d_s%d==";
     }
     else
     {
-        pszFormat = "==RECV:%d:%s:%s:%d_s%d==>>>";
+        pszFormat = "==RECV:%d:%s:%s:%d_%d_s%d==>>>";
     }
 
     if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP)
@@ -627,12 +629,12 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
     {
         strLog.Sprintf(pszFormat, nLength, pszTransport,
                 objFarEnd.GetIpAddress().IsIPv6Address() ? "::" : "0.0.0.0", objFarEnd.GetPort(),
-                nSlotId);
+                nSocketId, nSlotId);
     }
     else
     {
         strLog.Sprintf(pszFormat, nLength, pszTransport, SipDebug::GetIp(objFarEnd.GetIpAddress()),
-                objFarEnd.GetPort(), nSlotId);
+                objFarEnd.GetPort(), nSocketId, nSlotId);
     }
 
     // Summary of message -- ends
@@ -1006,8 +1008,8 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
     // don't send the packet via Socket.
     if (SipRtConfigUtils::IsFeatureSipTxPacketBlockedEnabled(GetSlotId()))
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, reinterpret_cast<const IMS_CHAR*>(pBuffer),
-                nBuffLen);
+        PrintMessage(GetSlotId(), m_pSocket->GetSocketId(), IMS_TRUE, m_objFarEnd,
+                reinterpret_cast<const IMS_CHAR*>(pBuffer), nBuffLen);
         return IMS_TRUE;
     }
 
@@ -1016,8 +1018,8 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
 
     // DEBUGGING message ...
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, reinterpret_cast<const IMS_CHAR*>(pBuffer),
-                nBuffLen);
+        PrintMessage(GetSlotId(), m_pSocket->GetSocketId(), IMS_TRUE, m_objFarEnd,
+                reinterpret_cast<const IMS_CHAR*>(pBuffer), nBuffLen);
     }
 
     if (nSentBytes == ISocket::RESULT_ERROR)

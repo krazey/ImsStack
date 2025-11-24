@@ -783,7 +783,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DatagramSocket_DataReceived(IN SipSocke
     pBuffer->m_objNearEnd.SetIpAddress(objSockIp);
 
     // DEBUG ...
-    pBuffer->DisplayMessage(GetSlotId());
+    pBuffer->DisplayMessage(GetSlotId(), pSocket->GetSocketId());
 
     if (!m_objBuffers.Append(pBuffer))
     {
@@ -852,7 +852,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_DataReceived(
         pBuffer->m_objNearEnd.SetIpAddress(objTmpIp);
 
         // DEBUG ...
-        pBuffer->DisplayMessage(GetSlotId());
+        pBuffer->DisplayMessage(GetSlotId(), pSocket->GetSocketId());
 
         if (!m_objBuffers.Append(pBuffer))
         {
@@ -1129,8 +1129,9 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
 }
 
 PRIVATE
-void SipTransportHelper::TransportBuffer::DisplayMessage(IN IMS_SINT32 nSlotId)
+void SipTransportHelper::TransportBuffer::DisplayMessage(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId)
 {
-    SipTransport::PrintMessage(nSlotId, IMS_FALSE, m_objFarEnd,
+    SipTransport::PrintMessage(nSlotId, nSocketId, IMS_FALSE, m_objFarEnd,
             reinterpret_cast<const IMS_CHAR*>(m_objData.GetData()), m_objData.GetLength());
 }
