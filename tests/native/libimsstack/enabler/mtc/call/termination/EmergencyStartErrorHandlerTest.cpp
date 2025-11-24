@@ -57,6 +57,7 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objSession;
     MockIMtcCallController objCallController;
+    // cppcheck-suppress unusedStructMember
     MockISilentRedialHelper objRedialHelper;
     TestConfigService* m_pConfigService;
     ImsVector<AString> objActionSets;

@@ -102,6 +102,7 @@ public:
     MockIMtcCallManager objCallManager;
     MockEpsFallbackTrigger objEpsFbTrigger;
     ImsVector<AString> objActionSets;
+    // cppcheck-suppress unusedStructMember
     MockISilentRedialHelper objRedialHelper;
     MockIMtcCallController objCallController;
 
