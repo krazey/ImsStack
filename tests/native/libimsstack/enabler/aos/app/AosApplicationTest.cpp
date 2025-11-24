@@ -182,6 +182,7 @@ enum
     using Base::AddRatBlock;                                    \
     using Base::ClearRatBlocks;                                 \
     using Base::PerformRatBlockActions;                         \
+    using Base::GetStatusInfo;                                  \
     using Base::IsEmergency;                                    \
     using Base::IsStateMessage;                                 \
     using Base::IsNotReady;                                     \
@@ -1190,6 +1191,37 @@ TEST_F(AosApplicationTest, GetAndSet)
 
     // TEST_F : IsRegReconfigAvailable
     EXPECT_TRUE(m_pAosApplication->IsRegReconfigAvailable());
+}
+
+TEST_F(AosApplicationTest, ReturnsCorrectCompositionWhenGetStatusInfo)
+{
+    // GIVEN
+    const IMS_UINT32 nTestAppState = IAosApplication::STATE_CONNECTED;
+    const IMS_UINT32 nTestOffReason = AosReason::POWER_OFF;
+    const IMS_SINT32 nTestDataFail = 12345;
+
+    m_pAosApplication->SetAppState(nTestAppState);
+    m_pAosApplication->SetOffReason(nTestOffReason);
+    m_pAosApplication->SetDataFailureReason(nTestDataFail);
+
+    const IMS_UINT32 nInputRegResult = IAosRegistration::RESULT_FAILURE;
+    const IMS_UINT32 nInputRegReason = IAosRegistration::REASON_FAILURE_INTERNAL;
+    const IMS_UINT32 nInputConnState = CONNECTION_ACTIVATED;
+    const IMS_UINT32 nInputConnReason = AosConnector::REASON_PERMANENTLY_FAILED;
+
+    // WHEN
+    AosStatusInfo objAosStatusInfo = m_pAosApplication->GetStatusInfo(
+            nInputRegResult, nInputRegReason, nInputConnState, nInputConnReason);
+
+    // THEN
+    EXPECT_EQ(objAosStatusInfo.m_nAppState, nTestAppState);
+    EXPECT_EQ(objAosStatusInfo.m_nOffReason, nTestOffReason);
+    EXPECT_EQ(objAosStatusInfo.m_nDataFailureReason, nTestDataFail);
+
+    EXPECT_EQ(objAosStatusInfo.m_nRegResult, nInputRegResult);
+    EXPECT_EQ(objAosStatusInfo.m_nRegReason, nInputRegReason);
+    EXPECT_EQ(objAosStatusInfo.m_nConnState, nInputConnState);
+    EXPECT_EQ(objAosStatusInfo.m_nConnReason, nInputConnReason);
 }
 
 TEST_F(AosApplicationTest, GetSetClearDataFailureReason)

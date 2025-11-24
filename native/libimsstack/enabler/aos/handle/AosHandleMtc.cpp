@@ -33,6 +33,7 @@
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
+#include "interface/IAosTracer.h"
 
 #include "provider/AosProvider.h"
 #include "provider/AosString.h"

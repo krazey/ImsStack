@@ -186,6 +186,8 @@ protected:
     void ProcessWifiSettingEvent(IN IMS_BOOL bIsOn);
     void ProcessLocationInfo(IN LocationInfo eState);
     void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
+    void ProcessTraceBlockEvent(IN const IMS_CHAR* pszPrefix, IN const IMS_CHAR* pszReason,
+            IN const IMS_CHAR* pszStatus) const;
     void ProcessAllowedNetworkTypesEvent(IN IMS_ULONG nNetworkTypesBitMask);
 
     void ClearRegistrationAndDataFailureBlocks();

@@ -31,6 +31,7 @@
 #include "interface/IAosRegistration.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosRegStateManager.h"
+#include "interface/IAosTracer.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "handle/AosFeatureTag.h"
@@ -48,6 +49,11 @@
 __IMS_TRACE_TAG_AOS__;
 
 #define APPID m_strTag.GetStr()
+#define TRACE_APP_STATUS TRACE_AOS_STATUS(m_piContext, GetStatusInfo(0, 0, 0, 0))
+#define TRACE_APP_STATUS_EX(REG_RESULT, REG_REASON, CONN_STATE, CONN_REASON) \
+    TRACE_AOS_STATUS(                                                        \
+            m_piContext, GetStatusInfo((REG_RESULT), (REG_REASON), (CONN_STATE), (CONN_REASON)))
+#define TRACE_APP_I(PREFIX, NAME) TRACE_AOS_I(m_piContext, AosDomain::APP, (PREFIX), (NAME))
 
 BEGIN_STATE_MAP(AosApplication)
 STATE_ENTRY(STATE_NOTREADY)
@@ -163,8 +169,10 @@ PUBLIC VIRTUAL void AosApplication::Reconfig()
 PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
         IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason /* = 0 */)
 {
-    A_IMS_TRACE_I(APPID, "RequestCmd :: Cmd (%s)",
-            AosProvider::GetLog()->AppRequestToString(nCmdType), 0, 0);
+    const IMS_CHAR* strCmd = AosProvider::GetLog()->AppRequestToString(nCmdType);
+
+    A_IMS_TRACE_I(APPID, "RequestCmd :: Cmd (%s), Reason (%d)", strCmd, nReason, 0);
+    TRACE_APP_I("RequestCmd=", strCmd);
 
     IMS_BOOL bResult = IMS_TRUE;
     switch (nCmdType)
@@ -494,6 +502,13 @@ void AosApplication::PerformRatBlockActions(IN IMS_BOOL bStart)
         ClearRatBlocks();
         m_pCondition->ResetBlock(BLOCK_CELLULAR_RAT_BLOCK);
     }
+}
+
+PROTECTED AosStatusInfo AosApplication::GetStatusInfo(IN IMS_UINT32 nRegResult,
+        IN IMS_UINT32 nRegReason, IN IMS_UINT32 nConnState, IN IMS_UINT32 nConnReason) const
+{
+    return AosStatusInfo::CollectStatus(GetState(), nRegResult, nRegReason, nConnState, nConnReason,
+            m_nOffReason, m_nDataFailureReason);
 }
 
 PROTECTED
@@ -850,8 +865,9 @@ PROTECTED VIRTUAL void AosApplication::SetAppType(IN AosRegistrationType eRegTyp
 
 PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
 {
+    IMS_UINT32 nOldState = GetState();
     A_IMS_TRACE_I(APPID, "SetAppState :: old (%s) , curr (%s)",
-            AosProvider::GetLog()->AppStateToString(GetState()),
+            AosProvider::GetLog()->AppStateToString(nOldState),
             AosProvider::GetLog()->AppStateToString(nState), 0);
 
     SetState(nState);
@@ -859,6 +875,11 @@ PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
     if (m_piRegistration)
     {
         m_piRegistration->SetAppReady((IsUpdateAvailable()) ? IMS_TRUE : IMS_FALSE);
+    }
+
+    if (nOldState != nState)
+    {
+        TRACE_APP_STATUS;
     }
 }
 
@@ -1614,6 +1635,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objM
 {
     IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
+    TRACE_APP_STATUS_EX(0, 0, nType, nReason);
 
     switch (nType)
     {
@@ -1662,6 +1684,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateConnecting_Connection(IN IMSMSG&
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     A_IMS_TRACE_I(APPID, "StateConnecting_Connection :: nType(%d), nReason(%d)", nType, nReason, 0);
+    TRACE_APP_STATUS_EX(0, 0, nType, nReason);
 
     switch (nType)
     {
@@ -1687,6 +1710,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateConnecting_Registration(IN IMSMS
 
     A_IMS_TRACE_I(
             APPID, "StateConnecting_Registration :: nResult(%d), nReason(%d)", nResult, nReason, 0);
+    TRACE_APP_STATUS_EX(nResult, nReason, 0, 0);
 
     switch (nResult)
     {
@@ -1720,6 +1744,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateConnected_Connection(IN IMSMSG& 
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     A_IMS_TRACE_I(APPID, "StateConnected_Connection :: nType(%d), nReason(%d)", nType, nReason, 0);
+    TRACE_APP_STATUS_EX(0, 0, nType, nReason);
 
     switch (nType)
     {
@@ -1745,6 +1770,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateConnected_Registration(IN IMSMSG
 
     A_IMS_TRACE_I(
             APPID, "StateConnected_Registration :: nResult(%d), nReason(%d)", nResult, nReason, 0);
+    TRACE_APP_STATUS_EX(nResult, nReason, 0, 0);
 
     switch (nResult)
     {
@@ -1774,6 +1800,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateUpdating_Connection(IN IMSMSG& o
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     A_IMS_TRACE_I(APPID, "StateUpdating_Connection :: nType(%d), nReason(%d)", nType, nReason, 0);
+    TRACE_APP_STATUS_EX(0, 0, nType, nReason);
 
     switch (nType)
     {
@@ -1799,6 +1826,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateUpdating_Registration(IN IMSMSG&
 
     A_IMS_TRACE_I(
             APPID, "StateUpdating_Registration :: nResult(%d), nReason(%d)", nResult, nReason, 0);
+    TRACE_APP_STATUS_EX(nResult, nReason, 0, 0);
 
     switch (nResult)
     {
@@ -1838,6 +1866,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateDisconnecting_Connection(IN IMSM
 
     A_IMS_TRACE_I(
             APPID, "StateDisconnecting_Connection :: nType(%d), nReason(%d)", nType, nReason, 0);
+    TRACE_APP_STATUS_EX(0, 0, nType, nReason);
 
     switch (nType)
     {
@@ -1859,6 +1888,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateDisconnecting_Connection(IN IMSM
 PROTECTED VIRTUAL IMS_BOOL AosApplication::StateDisconnecting_Registration(IN IMSMSG& objMsg)
 {
     IMS_UINT32 nResult = LONG_TO_INT(objMsg.nWparam);
+    TRACE_APP_STATUS_EX(nResult, 0, 0, 0);
 
     if (nResult == IAosRegistration::RESULT_TRYING)
     {

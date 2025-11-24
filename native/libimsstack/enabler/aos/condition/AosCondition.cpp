@@ -30,6 +30,7 @@
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosSubscriber.h"
+#include "interface/IAosTracer.h"
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
 #include "condition/AosBlock.h"
@@ -40,6 +41,8 @@
 __IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE m_strTag.GetStr()
+#define TRACE_COND_C_I(PREFIX, NAME, VAL) \
+    TRACE_AOS_C_I(m_piAppContext, AosDomain::COND, (PREFIX), (NAME), (VAL))
 
 PUBLIC
 AosCondition::AosCondition(IN IAosAppContext* piAppContext) :
@@ -454,18 +457,27 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
 
 PROTECTED VIRTUAL void AosCondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
 {
-    A_IMS_TRACE_I(APPPROFILE, "Block_Changed :: Reason(%s)(%d) - %s",
-            AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "NOT_BLOCK");
+    const IMS_CHAR* pszReason = AosBlock::BlockReasonToString(nType);
+    const IMS_CHAR* pszStatus = (nParam > 0) ? "BLOCK" : "NOT_BLOCK";
+
+    A_IMS_TRACE_I(APPPROFILE, "Block_Changed :: Reason(%s)(%d) - %s", pszReason, nType, pszStatus);
 
     SendConditionEvent(AosServiceAvailable::EVENT_BLOCK, nType, nParam);
+
+    ProcessTraceBlockEvent("BlockChanged=", pszReason, pszStatus);
 }
 
 PROTECTED VIRTUAL void AosCondition::Block_SilentChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
 {
-    A_IMS_TRACE_I(APPPROFILE, "Block_SilentChanged :: Reason(%s)(%d) - %s",
-            AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "NOT_BLOCK");
+    const IMS_CHAR* pszReason = AosBlock::BlockReasonToString(nType);
+    const IMS_CHAR* pszStatus = (nParam > 0) ? "BLOCK" : "NOT_BLOCK";
+
+    A_IMS_TRACE_I(
+            APPPROFILE, "Block_SilentChanged :: Reason(%s)(%d) - %s", pszReason, nType, pszStatus);
 
     SendConditionEvent(AosServiceAvailable::EVENT_BLOCK_SILENT, nType, nParam);
+
+    ProcessTraceBlockEvent("BlockSilentChanged=", pszReason, pszStatus);
 }
 
 PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed(IN IMS_BOOL bNotify /*= IMS_TRUE*/)
@@ -863,6 +875,19 @@ void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStat
 
     m_bIsCombinedAttached =
             (nState == IMS_LTE_INFO_COMBINED_ATTACHED && nStateEx == IMS_LTE_INFO_EXTRA_NONE);
+}
+
+PROTECTED
+void AosCondition::ProcessTraceBlockEvent(IN const IMS_CHAR* pszPrefix,
+        IN const IMS_CHAR* pszReason, IN const IMS_CHAR* pszStatus) const
+{
+    AString strReason;
+    strReason.Sprintf("[%s: %s]", pszReason, pszStatus);
+
+    AString strBlockList;
+    m_piBlock->GetBlockReasonsString(strBlockList);
+
+    TRACE_COND_C_I(pszPrefix, strReason.GetStr(), strBlockList.GetStr());
 }
 
 PROTECTED

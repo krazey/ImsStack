@@ -32,6 +32,8 @@
 
 #include "handle/AosFeatureTag.h"
 
+#define TRACE_HDL_I(NAME, VAL) TRACE_AOS_I(m_piAppContext, AosDomain::HDL, (NAME), (VAL))
+
 class IAosAppContext;
 
 class AosHandle :
@@ -286,6 +288,7 @@ protected:
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg);
     static const IMS_CHAR* RadioTypeToString(IN IMS_UINT32 nType);
+    static AString BlocksToString(IN IMS_UINT32 nBlocks);
     const IMS_CHAR* ServiceTypeToString();
 
     enum

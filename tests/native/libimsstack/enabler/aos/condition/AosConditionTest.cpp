@@ -68,6 +68,7 @@ const AString PROFILE_ID = AString("test");
     using Base::Block_Changed;                           \
     using Base::ServiceAvailable_RequestCommand;         \
     using Base::NConfiguration_NotifyConfigChanged;      \
+    using Base::ProcessTraceBlockEvent;                  \
     using Base::ServicePhone_AosStart;                   \
     using Base::ServicePhone_LocationInfoChanged;        \
     using Base::ServicePhone_PhoneNumberStateChanged;    \
@@ -1509,6 +1510,20 @@ TEST_F(AosConditionTest, RemoveHold_UninterestingEvent)
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_NONE, IMS_FALSE);
+}
+
+TEST_F(AosConditionTest, InvokeGetBlockReasonsStringWhenProcessTraceBlockEvent)
+{
+    // GIVEN
+    const IMS_CHAR* strInputReason = "TEST_REASON";
+    const IMS_CHAR* strInputStatus = "BLOCK";
+
+    EXPECT_CALL(m_objMockIAosBlock, GetBlockReasonsString(_));
+
+    // WHEN
+    m_pAosCondition->ProcessTraceBlockEvent("BlockChanged=", strInputReason, strInputStatus);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosConditionTest, RequestCommand_ListenerIsNull)

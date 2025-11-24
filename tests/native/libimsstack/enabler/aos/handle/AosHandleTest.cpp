@@ -59,6 +59,7 @@ using ::testing::ReturnRef;
 #define DECLARE_USING(Base)                        \
     using Base::AddBlock;                          \
     using Base::BackupAllBlocks;                   \
+    using Base::BlocksToString;                    \
     using Base::CheckSuspended;                    \
     using Base::CleanUp;                           \
     using Base::ClearSuspendedReason;              \
@@ -4930,6 +4931,43 @@ TEST_F(AosHandleTest, RadioTypeToString_Test)
     EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_WCDMA), "3G");
     EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_HSPA), "3G");
     EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_CDMA), "__INVALID__");
+}
+
+TEST_F(AosHandleTest, BlocksToString_Test)
+{
+    // Test with BLOCK_NONE
+    EXPECT_STREQ(m_pAosHandle->BlocksToString(AosHandle::BLOCK_NONE).GetStr(), "[NONE]");
+
+    // Test with a single block
+    EXPECT_STREQ(m_pAosHandle->BlocksToString(AosHandle::BLOCK_VOLTE_CAPABILITY).GetStr(),
+            "[VOLTE_CAPABILITY]");
+    EXPECT_STREQ(m_pAosHandle->BlocksToString(AosHandle::BLOCK_3G).GetStr(), "[3G]");
+
+    // Test with multiple blocks
+    IMS_UINT32 nMultiBlocks = AosHandle::BLOCK_VOLTE_CAPABILITY |
+            AosHandle::BLOCK_VILTE_CAPABILITY | AosHandle::BLOCK_NETWORK;
+    EXPECT_STREQ(m_pAosHandle->BlocksToString(nMultiBlocks).GetStr(),
+            "[VOLTE_CAPABILITY | VILTE_CAPABILITY | NETWORK]");
+
+    // Test with another combination of multiple blocks
+    IMS_UINT32 nAnotherMultiBlocks = AosHandle::BLOCK_SSAC | AosHandle::BLOCK_LIMITED_SMS;
+    EXPECT_STREQ(
+            m_pAosHandle->BlocksToString(nAnotherMultiBlocks).GetStr(), "[SSAC | LIMITED_SMS]");
+
+    // Test with all blocks
+    IMS_UINT32 nAllBlocks = AosHandle::BLOCK_VOLTE_CAPABILITY | AosHandle::BLOCK_VILTE_CAPABILITY |
+            AosHandle::BLOCK_VOWIFI_CAPABILITY | AosHandle::BLOCK_VIWIFI_CAPABILITY |
+            AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY | AosHandle::BLOCK_SMS_CAPABILITY |
+            AosHandle::BLOCK_TEXT_CAPABILITY | AosHandle::BLOCK_VOPS | AosHandle::BLOCK_SSAC |
+            AosHandle::BLOCK_NETWORK | AosHandle::BLOCK_3G | AosHandle::BLOCK_LIMITED_MMTEL |
+            AosHandle::BLOCK_LIMITED_VIDEO | AosHandle::BLOCK_LIMITED_TEXT |
+            AosHandle::BLOCK_LIMITED_SMS;
+
+    const IMS_CHAR* pszExpectedAllString =
+            "[VOLTE_CAPABILITY | VILTE_CAPABILITY | VOWIFI_CAPABILITY | VIWIFI_CAPABILITY | "
+            "CALL_COMPOSER_CAPABILITY | SMS_CAPABILITY | TEXT_CAPABILITY | VOPS | SSAC | "
+            "NETWORK | 3G | LIMITED_MMTEL | LIMITED_VIDEO | LIMITED_TEXT | LIMITED_SMS]";
+    EXPECT_STREQ(m_pAosHandle->BlocksToString(nAllBlocks).GetStr(), pszExpectedAllString);
 }
 
 TEST_F(AosHandleTest, ServiceTypeToString_Test)

@@ -36,6 +36,7 @@
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegStateManager.h"
+#include "interface/IAosTracer.h"
 
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
@@ -1053,6 +1054,7 @@ IMS_BOOL AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE
 
         ProcessBlockChanged();
 
+        TRACE_HDL_I("Blocks=", BlocksToString(m_nBlocks).GetStr());
         return IMS_TRUE;
     }
     else
@@ -2029,6 +2031,61 @@ PROTECTED GLOBAL const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nTyp
         default:
             return "__INVALID__";
     }
+}
+
+PROTECTED
+AString AosHandle::BlocksToString(IN IMS_UINT32 nBlocks)
+{
+    if (nBlocks == BLOCK_NONE)
+    {
+        return "[NONE]";
+    }
+
+    ImsVector<AString> objBlocks;
+
+    if (nBlocks & BLOCK_VOLTE_CAPABILITY)
+        objBlocks.Add("VOLTE_CAPABILITY");
+    if (nBlocks & BLOCK_VILTE_CAPABILITY)
+        objBlocks.Add("VILTE_CAPABILITY");
+    if (nBlocks & BLOCK_VOWIFI_CAPABILITY)
+        objBlocks.Add("VOWIFI_CAPABILITY");
+    if (nBlocks & BLOCK_VIWIFI_CAPABILITY)
+        objBlocks.Add("VIWIFI_CAPABILITY");
+    if (nBlocks & BLOCK_CALL_COMPOSER_CAPABILITY)
+        objBlocks.Add("CALL_COMPOSER_CAPABILITY");
+    if (nBlocks & BLOCK_SMS_CAPABILITY)
+        objBlocks.Add("SMS_CAPABILITY");
+    if (nBlocks & BLOCK_TEXT_CAPABILITY)
+        objBlocks.Add("TEXT_CAPABILITY");
+    if (nBlocks & BLOCK_VOPS)
+        objBlocks.Add("VOPS");
+    if (nBlocks & BLOCK_SSAC)
+        objBlocks.Add("SSAC");
+    if (nBlocks & BLOCK_NETWORK)
+        objBlocks.Add("NETWORK");
+    if (nBlocks & BLOCK_3G)
+        objBlocks.Add("3G");
+    if (nBlocks & BLOCK_LIMITED_MMTEL)
+        objBlocks.Add("LIMITED_MMTEL");
+    if (nBlocks & BLOCK_LIMITED_VIDEO)
+        objBlocks.Add("LIMITED_VIDEO");
+    if (nBlocks & BLOCK_LIMITED_TEXT)
+        objBlocks.Add("LIMITED_TEXT");
+    if (nBlocks & BLOCK_LIMITED_SMS)
+        objBlocks.Add("LIMITED_SMS");
+
+    AString strResult = "[";
+    for (IMS_UINT32 i = 0; i < objBlocks.GetSize(); i++)
+    {
+        if (i > 0)
+        {
+            strResult.Append(" | ");
+        }
+        strResult.Append(objBlocks.GetAt(i));
+    }
+    strResult.Append("]");
+
+    return strResult;
 }
 
 PROTECTED

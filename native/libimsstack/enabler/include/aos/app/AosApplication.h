@@ -33,6 +33,7 @@
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosRegistrationListener.h"
 #include "interface/IAosServicePhoneListener.h"
+#include "provider/AosTracer.h"
 #include "provider/AosStaticProfile.h"
 
 class IAosAppContext;
@@ -111,6 +112,8 @@ protected:
     void AddRatBlock();
     void ClearRatBlocks();
     void PerformRatBlockActions(IN IMS_BOOL bStart);
+    AosStatusInfo GetStatusInfo(IN IMS_UINT32 nRegResult, IN IMS_UINT32 nRegReason,
+            IN IMS_UINT32 nConnType, IN IMS_UINT32 nConnReason) const;
 
     IMS_BOOL IsEmergency() const;
     IMS_BOOL IsStateMessage(IN IMS_UINT32 nMsg) const;
