@@ -866,16 +866,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED));
     }
 
-    /*
-     * The following test functions are intended to test functions that are not currently in use or
-     * don't have actual implementations.
-     */
-    @Test
-    public void testGetMocnPlmnInfo() {
-        assertEquals(0, mDcNetWatcher.getMocnPlmnInfo());
-        // TODO : no actual implementations so far
-    }
-
     @Test
     public void testIsEmergencyOnly() throws Exception {
         replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",

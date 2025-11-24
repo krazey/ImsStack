@@ -779,12 +779,6 @@ AStringArray System::GetLastAccessNetworkInfo(IN IMS_SINT32 nNetworkType, IN IMS
 }
 
 PUBLIC
-IMS_SINT32 System::GetMocnPlmnInfo(IN IMS_SINT32 nSlotId)
-{
-    return GetInt(SystemConstants::GET_MOCN_PLMN_INFO, 0, nSlotId);
-}
-
-PUBLIC
 IMS_SINT32 System::GetMtu(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     return GetInt2(SystemConstants::GET_MTU, nApnType, 0, nSlotId);

@@ -429,13 +429,6 @@ public interface SystemCallInterface {
     int getDataRoamingType();
 
     /**
-     * Returns the PLMN information of MOCN.
-     *
-     * @return A PLMN info. of MOCN.
-     */
-    int getMocnPlmnInfo();
-
-    /**
      * Checks whether the current network is attached as roaming.
      *
      * @return {@code true} if the network is in roaming, {@code false} otherwise.

@@ -72,7 +72,6 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_SERVICE_STATE, "GET_SERVICE_STATE"),
             Map.entry(SystemConstants.IS_EMERGENCY_ONLY, "IS_EMERGENCY_ONLY"),
             Map.entry(SystemConstants.IS_MOBILE_DATA_ENABLED, "IS_MOBILE_DATA_ENABLED"),
-            Map.entry(SystemConstants.GET_MOCN_PLMN_INFO, "GET_MOCN_PLMN_INFO"),
             Map.entry(SystemConstants.GET_VOICE_SERVICE_STATE, "GET_VOICE_SERVICE_STATE"),
             Map.entry(SystemConstants.GET_VOICE_ROAMING_TYPE, "GET_VOICE_ROAMING_TYPE"),
             Map.entry(SystemConstants.GET_DATA_ROAMING_TYPE, "GET_DATA_ROAMING_TYPE"),
@@ -1113,7 +1112,6 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_SERVICE_STATE: // fall through
                 case SystemConstants.IS_EMERGENCY_ONLY: // fall through
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:// fall through
-                case SystemConstants.GET_MOCN_PLMN_INFO: // fall through
                 case SystemConstants.GET_VOICE_SERVICE_STATE: // fall through
                 case SystemConstants.GET_VOICE_ROAMING_TYPE: // fall through
                 case SystemConstants.GET_DATA_ROAMING_TYPE: // fall through
@@ -1329,9 +1327,6 @@ public class SystemInterface implements JniSystemListener {
                     break;
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:
                     out.writeInt(mSystemCall.isMobileDataEnabled() ? 1 : 0);
-                    break;
-                case SystemConstants.GET_MOCN_PLMN_INFO:
-                    out.writeInt(mSystemCall.getMocnPlmnInfo());
                     break;
                 case SystemConstants.GET_VOICE_SERVICE_STATE:
                     out.writeInt(mSystemCall.getVoiceServiceState());

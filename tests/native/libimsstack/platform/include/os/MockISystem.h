@@ -132,7 +132,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyOnly, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyAttachSupported, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_BOOL, IsMobileDataEnabled, (IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetMocnPlmnInfo, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, GetMtu, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, BindSocket,
             (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId), (override));

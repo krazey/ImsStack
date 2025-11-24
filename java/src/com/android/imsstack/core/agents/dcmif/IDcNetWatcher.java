@@ -64,11 +64,6 @@ public interface IDcNetWatcher extends IDc {
     int getVoiceServiceState();
 
     /**
-     * Returns MOCN(multi-operator core network) PLMN information.
-     */
-    int getMocnPlmnInfo();
-
-    /**
      * Returns network registration reject cause stored in DcNetWatcher object
      */
     int getNetworkRegistrationRejectCause();
