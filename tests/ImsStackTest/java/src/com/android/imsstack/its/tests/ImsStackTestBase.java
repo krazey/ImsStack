@@ -79,6 +79,7 @@ import com.android.imsstack.jni.NativeCommands;
 import com.android.imsstack.util.Log;
 
 import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -95,6 +96,8 @@ public class ImsStackTestBase {
         void init(int slotId, int simApplicationState);
     }
 
+    @Rule
+    public final TestName name = new TestName();
     @Rule
     public final ScmConnector mScmConnector = new ScmConnector();
 
@@ -300,6 +303,7 @@ public class ImsStackTestBase {
      * @param slotId The slot id.
      */
     public void setUpBase(int slotId) {
+        Log.i(this, name.getMethodName());
         setUpNetwork(slotId);
         setUpImsService(slotId);
     }

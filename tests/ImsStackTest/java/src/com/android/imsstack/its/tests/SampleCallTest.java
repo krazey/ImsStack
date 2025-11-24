@@ -68,7 +68,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMoCallSetup() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMoCallSetup");
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
@@ -86,7 +85,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMoCallNormalClearingByUser() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMoCallNormalClearingByUser");
 
         Scenario scenario = new Scenario.Builder()
                 .addClientMessage("REGISTER")
@@ -120,7 +118,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMoCallNormalClearingByRemote() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMoCallNormalClearingByRemote");
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
@@ -148,7 +145,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMoCallRejectedBy603() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMoCallRejectedBy603");
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
@@ -164,7 +160,6 @@ public class SampleCallTest extends CallTestBase {
 
     @Test
     public void testMtCallSetup() throws Exception {
-        logi(this, "testMtCallSetup");
         turnOffQosAndPrecondition();
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
@@ -186,7 +181,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMtCallReject() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMtCallReject");
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
@@ -216,7 +210,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMoCallForking() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMoCallForking");
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
@@ -249,7 +242,6 @@ public class SampleCallTest extends CallTestBase {
     @Test
     public void testMoCallAudioOnlyWithoutPrecondition() throws Exception {
         turnOffQosAndPrecondition();
-        logi(this, "testMoCallAudioOnlyWithoutPrecondition");
 
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
