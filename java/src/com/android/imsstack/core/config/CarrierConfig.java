@@ -28,7 +28,6 @@ import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.TelephonyManagerProxy;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -1563,16 +1562,6 @@ public class CarrierConfig {
         }
     }
 
-    // PAYLOAD_DESCRIPTION_BUNDLE is excluded from this list because it has a nested bundle.
-    private static final List<String> IMS_BUNDLE_KEYS = List.of(
-            Ims.KEY_EXTRA_REG_ERR_BUNDLE,
-            Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
-            Ims.KEY_REG_RETRY_INTERVAL_BUNDLE,
-            Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
-            Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-            Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-            ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE);
-
     private final PersistableBundle mConfig = new PersistableBundle();
 
     public CarrierConfig() {}
@@ -1798,36 +1787,6 @@ public class CarrierConfig {
         }
 
         return "UnknownKeyType";
-    }
-
-    /**
-     * Overrides the bundle item - merge two configurations ({@code defaultConfig}: low priority,
-     * {@code overrideConfig}: high priority) and puts the updated value to the
-     * {@code overrideConfig} argument.
-     *
-     * @param defaultConfig A configuration with lower priority
-     * @param overrideConfig A configuration with higher priority
-     */
-    public static void overrideNestedBundles(PersistableBundle defaultConfig,
-            PersistableBundle overrideConfig) {
-        for (int i = 0; i < IMS_BUNDLE_KEYS.size(); ++i) {
-            final String key = IMS_BUNDLE_KEYS.get(i);
-            PersistableBundle newBundle = new PersistableBundle();
-            PersistableBundle defaultBundle = defaultConfig.getPersistableBundle(key);
-            PersistableBundle overrideBundle = overrideConfig.getPersistableBundle(key);
-
-            if (defaultBundle != null) {
-                newBundle.putAll(defaultBundle);
-            }
-
-            if (overrideBundle != null) {
-                newBundle.putAll(overrideBundle);
-            }
-
-            if (!newBundle.isEmpty()) {
-                overrideConfig.putPersistableBundle(key, newBundle);
-            }
-        }
     }
 
     private void adjustSpecialKeys(int slotId) {

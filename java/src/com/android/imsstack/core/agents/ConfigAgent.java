@@ -283,22 +283,16 @@ public class ConfigAgent implements ConfigInterface {
                         .setCarrierId(cid)
                         .build();
                 PersistableBundle parentConfig = readCarrierConfig(subId, parentCid);
-                CarrierConfig.overrideNestedBundles(mCarrierInternalConfig, parentConfig);
                 mCarrierInternalConfig.putAll(parentConfig);
             }
         }
 
-        CarrierConfig.overrideNestedBundles(mCarrierInternalConfig, tempConfig);
         mCarrierInternalConfig.putAll(tempConfig);
-        tempConfig = mCarrierInternalConfig.deepCopy();
-        CarrierConfig.overrideNestedBundles(config, tempConfig);
-        config.putAll(tempConfig);
 
         // Overrides the specific carrier configuration values if present.
         tempConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
         mCarrierInternalConfig.putAll(tempConfig);
-        CarrierConfig.overrideNestedBundles(config, tempConfig);
-        config.putAll(tempConfig);
+        config.putAll(mCarrierInternalConfig);
 
         // Sets the public carrier configuration from CarrierConfigManager.
         tempConfig = getCarrierConfig(subId);
@@ -308,15 +302,13 @@ public class ConfigAgent implements ConfigInterface {
         mCarrierInternalOverrideConfig.clear();
         tempConfig = getCarrierInternalConfig(subId);
         mCarrierInternalOverrideConfig.putAll(tempConfig);
-        config.putAll(tempConfig);
+        config.putAll(mCarrierInternalOverrideConfig);
 
         // Sets the internal public carrier configuration.
         mCarrierPublicConfig.clear();
         if (config.getBoolean(CarrierConfig.KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL, true)) {
             ImsLog.d(this, mSlotId, "Overriding public configs...");
-            tempConfig = mDefaultPublicConfig.deepCopy();
-            CarrierConfig.overrideNestedBundles(config, tempConfig);
-            config.putAll(tempConfig);
+            config.putAll(mDefaultPublicConfig);
 
             if (parentCarrierIds != null && parentCarrierIds.length > 0) {
                 for (int cid : parentCarrierIds) {
@@ -324,17 +316,13 @@ public class ConfigAgent implements ConfigInterface {
                             .setCarrierId(cid)
                             .build();
                     PersistableBundle parentConfig = readCarrierConfig(subId, parentCid, false);
-                    CarrierConfig.overrideNestedBundles(mCarrierPublicConfig, parentConfig);
                     mCarrierPublicConfig.putAll(parentConfig);
                 }
             }
 
             tempConfig = readCarrierConfig(subId, id, false);
-            CarrierConfig.overrideNestedBundles(mCarrierPublicConfig, tempConfig);
             mCarrierPublicConfig.putAll(tempConfig);
-            tempConfig = mCarrierPublicConfig.deepCopy();
-            CarrierConfig.overrideNestedBundles(config, tempConfig);
-            config.putAll(tempConfig);
+            config.putAll(mCarrierPublicConfig);
         }
 
         mIntentReceiver.setOriginalCarrierConfig(config);
@@ -387,7 +375,6 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         ImsLog.i(this, mSlotId, "Override internal settings for the hidden key");
-        CarrierConfig.overrideNestedBundles(config, configsInHiddenKey);
         config.putAll(configsInHiddenKey);
     }
 
@@ -408,9 +395,7 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         if (!testConfig.isEmpty()) {
-            PersistableBundle newTestConfig = testConfig.deepCopy();
-            CarrierConfig.overrideNestedBundles(config, newTestConfig);
-            config.putAll(newTestConfig);
+            config.putAll(testConfig);
 
             for (String key : testConfig.keySet()) {
                 ImsLog.d(this, mSlotId, key + "=" + CarrierConfig.getValue(testConfig, key));
