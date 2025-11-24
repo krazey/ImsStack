@@ -61,8 +61,6 @@ PUBLIC GLOBAL AString SipUtils::GenerateCallId(IN const AString& strHost)
 PUBLIC GLOBAL AString SipUtils::GenerateSessionId(
         IN IMS_SINT32 nSlotId, IN const AString& strCallId)
 {
-    // FIXME: add a runtime feature check routine in here (FEATURE)
-
     AString strSecretKey;
     IMS_UINT32 nRandom = IMS_SYS_GetRandom0();
 

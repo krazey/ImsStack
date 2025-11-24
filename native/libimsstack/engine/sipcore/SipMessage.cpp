@@ -830,8 +830,6 @@ IMS_BOOL SipMessage::FormMessage()
 PUBLIC
 IMS_BOOL SipMessage::FormMessageOnChallenge()
 {
-    // FIXME: need to improve the logic
-
     while (SipStack::GetHeaderCount(m_pSipMsg, ISipHeader::UNKNOWN) > 0)
     {
         SipStack::RemoveHeader(ISipHeader::UNKNOWN, m_pSipMsg);
@@ -857,7 +855,6 @@ IMS_BOOL SipMessage::FormMessageOnChallenge()
     // Set message body parts
     if (!m_objBodyParts.IsEmpty())
     {
-        // FIXME: need to improve the logic
         // Message body is formed in the re-submitted request
         if (SipStack::GetMessageBodyCount(m_pSipMsg) == 0)
         {

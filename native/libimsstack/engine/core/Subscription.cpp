@@ -376,9 +376,6 @@ PUBLIC
 void Subscription::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
     m_bImplicitRoutingRequired = bFlag;
-
-    // FIXME: If the routing address needs to be provisioned by the application,
-    // please add a second argument for it.
 }
 
 PUBLIC

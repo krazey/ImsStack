@@ -178,7 +178,6 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
             {
                 if (SipStack::IsLastErrorNoExist())
                 {
-                    // FIXME: should we get SIP profile?
                     nPort = SipConfigProxy::GetPort(nSlotId);
                 }
             }
@@ -187,7 +186,6 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
                 // NO_EXIST (for port only)
                 if ((nPort == Sip::PORT_UNSPECIFIED) && SipStack::IsLastErrorNoExist())
                 {
-                    // FIXME: should we get SIP profile?
                     nPort = SipConfigProxy::GetPort(nSlotId);
                     IMS_TRACE_D("ConnectionNotifier :: port(%d) from config.", nPort, 0, 0);
                 }

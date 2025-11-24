@@ -157,7 +157,6 @@ GLOBAL void Initialize()
 
         IMS_TRACE_D("SIP Timers :: %s", strSipTimers.GetStr(), 0, 0);
 
-        // TODO - Verify and modify implementation for dualsim hot swap scenarios.
         // SetCompactForm Encoding
         SIP_BOOL bCompact = (SIP_BOOL)SipConfigProxy::IsCompactFormConfigured(nSlotId, NULL);
         pSipConfig->SetShortFormEncoding(bCompact);
@@ -2513,7 +2512,7 @@ GLOBAL AString GetParameter(
     }
     else
     {
-        // FIXME: Tel URL
+        // Tel URL
         return AString::ConstNull();
     }
 

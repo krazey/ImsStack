@@ -290,8 +290,6 @@ PUBLIC GLOBAL const ISipConfigV* SipConfigProxy::GetSipConfigV(IN IMS_SINT32 nSl
 }
 
 // SIP_FEATURES {
-// FIXME: If the SIP features in SipProfile is zero, how to handle it?
-// Do we need to check the default configuration??
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsAuthenticationAlgorithmRequired(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {

@@ -351,7 +351,6 @@ public:
         MECHANISM_IPSEC_IKE,
         MECHANISM_IPSEC_MAN,
         MECHANISM_IPSEC_3GPP
-        // FIXME: security mechanism for media plane - sdes-srtp; mediasec="sdes-srtp"
     };
 
     /// To check if those parameters are present or not

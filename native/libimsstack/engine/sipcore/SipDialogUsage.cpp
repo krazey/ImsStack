@@ -204,7 +204,7 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
             case SipStatusCode::SC_485:  // FALL-THROUGH
             case SipStatusCode::SC_502:  // FALL-THROUGH
             case SipStatusCode::SC_604:
-                // FIXME: Should 502 be excluded if the dialog usage is for subscription? (RFC 6665)
+                // Should 502 be excluded if the dialog usage is for subscription? (RFC 6665)
                 if (SipFeatures::IsMultipleDialogUsagesRequiredForNonSharedDialog(
                             objMsgInfo.GetSlotId()) ||
                         ((pDialogState != IMS_NULL) && pDialogState->HasMultipleDialogUsages()))
