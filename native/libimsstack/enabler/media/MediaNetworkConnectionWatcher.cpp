@@ -47,8 +47,6 @@ PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
 
 PUBLIC VIRTUAL MediaNetworkConnectionWatcher::~MediaNetworkConnectionWatcher()
 {
-    IMS_TRACE_D("~MediaNetworkConnectionWatcher()", 0, 0, 0);
-
     if (m_pNetConnection != IMS_NULL)
     {
         m_pNetConnection->RemoveReferenceListener(this);

@@ -33,13 +33,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC AudioProfileNegotiator::AudioProfileNegotiator() :
         MediaProfileNegotiator(MEDIA_TYPE_AUDIO)
 {
-    IMS_TRACE_I("+AudioProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioProfileNegotiator::~AudioProfileNegotiator()
-{
-    IMS_TRACE_I("~AudioProfileNegotiator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL AudioProfileNegotiator::~AudioProfileNegotiator() {}
 
 PUBLIC
 IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,

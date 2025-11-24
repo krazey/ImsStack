@@ -23,13 +23,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC TextSdpGenerator::TextSdpGenerator() :
         MediaSdpGenerator(MEDIA_TYPE_TEXT)
 {
-    IMS_TRACE_I("+TextSdpGenerator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL TextSdpGenerator::~TextSdpGenerator()
-{
-    IMS_TRACE_I("~TextSdpGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL TextSdpGenerator::~TextSdpGenerator() {}
 
 PUBLIC
 IMS_BOOL TextSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,

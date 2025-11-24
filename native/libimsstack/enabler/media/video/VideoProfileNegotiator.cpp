@@ -60,13 +60,9 @@ void NegotiateVideoFmtp(
 PUBLIC VideoProfileNegotiator::VideoProfileNegotiator() :
         MediaProfileNegotiator(MEDIA_TYPE_VIDEO)
 {
-    IMS_TRACE_I("+VideoProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL VideoProfileNegotiator::~VideoProfileNegotiator()
-{
-    IMS_TRACE_I("~VideoProfileNegotiator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL VideoProfileNegotiator::~VideoProfileNegotiator() {}
 
 PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,

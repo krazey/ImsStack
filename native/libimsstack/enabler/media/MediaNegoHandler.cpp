@@ -37,14 +37,10 @@ MediaNegoHandler::MediaNegoHandler(IMS_UINT32 nSlotId,
         m_pMediaNegoFactory(
                 pFactory != IMS_NULL ? pFactory : std::make_shared<ConcreteMediaNegoFactory>())
 {
-    IMS_TRACE_I("+MediaNegoHandler(): SlotId[%u]", m_nSlotId, 0, 0);
 }
 
 PUBLIC
-MediaNegoHandler::~MediaNegoHandler()
-{
-    IMS_TRACE_I("~MediaNegoHandler(): SlotId[%u]", m_nSlotId, 0, 0);
-}
+MediaNegoHandler::~MediaNegoHandler() {}
 
 PUBLIC
 IMS_UINTP MediaNegoHandler::CreateMediaNego(IMS_UINTP nNegoId)

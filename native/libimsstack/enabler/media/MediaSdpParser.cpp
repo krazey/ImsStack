@@ -22,14 +22,10 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC MediaSdpParser::MediaSdpParser(IN const MEDIA_CONTENT_TYPE eType)
 {
-    IMS_TRACE_I("+MediaSdpParser() media type[%d]", eType, 0, 0);
     m_eType = eType;
 }
 
-PUBLIC VIRTUAL MediaSdpParser::~MediaSdpParser()
-{
-    IMS_TRACE_I("~MediaSdpParser() media type[%d]", m_eType, 0, 0);
-}
+PUBLIC VIRTUAL MediaSdpParser::~MediaSdpParser() {}
 
 PROTECTED
 void MediaSdpParser::Parse(IN const ISessionDescriptor* pSessionDescriptor,

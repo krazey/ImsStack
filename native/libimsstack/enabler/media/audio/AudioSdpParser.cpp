@@ -24,13 +24,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC AudioSdpParser::AudioSdpParser() :
         MediaSdpParser(MEDIA_TYPE_AUDIO)
 {
-    IMS_TRACE_I("+AudioSdpParser()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioSdpParser::~AudioSdpParser()
-{
-    IMS_TRACE_I("~AudioSdpParser()", 0, 0, 0);
-}
+PUBLIC VIRTUAL AudioSdpParser::~AudioSdpParser() {}
 
 PUBLIC
 IMS_BOOL AudioSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
@@ -235,7 +231,7 @@ IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         }
     }
 
-    if(bIsEvs)
+    if (bIsEvs)
     {
         SetEvsFullBr(std::static_pointer_cast<AudioProfile::EvsFmtp>(pFmtp));
         SetEvsFullBw(std::static_pointer_cast<AudioProfile::EvsFmtp>(pFmtp));
@@ -965,14 +961,13 @@ void AudioSdpParser::SetEvsFullBr(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFm
         return;
     }
 
-    if (pFmtp->GetBrList() == 0 &&(pFmtp->GetBrRecv() == 0 && pFmtp->GetBrSend() == 0))
+    if (pFmtp->GetBrList() == 0 && (pFmtp->GetBrRecv() == 0 && pFmtp->GetBrSend() == 0))
     {
-        pFmtp->SetBrList(0x0FFF);  //5.9-128 case
+        pFmtp->SetBrList(0x0FFF);  // 5.9-128 case
     }
 
     IMS_TRACE_D("SetEvsFullBr(): brList[%d], visible[%d]", pFmtp->GetBrList(),
             pFmtp->IsBrListVisible(), 0);
-
 }
 
 PROTECTED
@@ -986,12 +981,11 @@ void AudioSdpParser::SetEvsFullBw(OUT std::shared_ptr<AudioProfile::EvsFmtp> pFm
 
     if (pFmtp->GetBwList() == 0 && (pFmtp->GetBwRecv() == 0 && pFmtp->GetBwSend() == 0))
     {
-        pFmtp->SetBwList(0x0F);  //NB-FB case
+        pFmtp->SetBwList(0x0F);  // NB-FB case
     }
 
     IMS_TRACE_D("SetEvsFullBw(): bwList[%d], visible[%d]", pFmtp->GetBwList(),
             pFmtp->IsBwListVisible(), 0);
-
 }
 
 PROTECTED

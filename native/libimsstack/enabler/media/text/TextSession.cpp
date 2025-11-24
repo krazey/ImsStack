@@ -31,15 +31,11 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC TextSession::TextSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId)
 {
-    IMS_TRACE_I("+TextSession()", 0, 0, 0);
-
     m_pRtpConfig = new TextConfig();
 }
 
 PUBLIC VIRTUAL TextSession::~TextSession()
 {
-    IMS_TRACE_I("~TextSession() - state[%d]", GetState(), 0, 0);
-
     if (m_pRtpConfig)
     {
         delete m_pRtpConfig;

@@ -26,10 +26,7 @@ PUBLIC MediaSdpGenerator::MediaSdpGenerator(IN const MEDIA_CONTENT_TYPE eType) :
 {
 }
 
-PUBLIC VIRTUAL MediaSdpGenerator::~MediaSdpGenerator()
-{
-    IMS_TRACE_I("~MediaSdpGenerator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL MediaSdpGenerator::~MediaSdpGenerator() {}
 
 PROTECTED
 void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDescriptor,

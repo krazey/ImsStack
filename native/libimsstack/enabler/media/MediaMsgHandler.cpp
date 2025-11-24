@@ -28,14 +28,10 @@ MediaMsgHandler::MediaMsgHandler(IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey) :
         m_strListenerThread(AString::ConstNull()),
         m_nCallKey(nCallKey)
 {
-    IMS_TRACE_I("+MediaMsgHandler()", 0, 0, 0);
 }
 
 PUBLIC
-MediaMsgHandler::~MediaMsgHandler()
-{
-    IMS_TRACE_I("~MediaMsgHandler()", 0, 0, 0);
-}
+MediaMsgHandler::~MediaMsgHandler() {}
 
 PUBLIC
 void MediaMsgHandler::SetListener(IN CONST AString& strName)

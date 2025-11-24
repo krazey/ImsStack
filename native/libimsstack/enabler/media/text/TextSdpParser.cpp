@@ -23,13 +23,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC TextSdpParser::TextSdpParser() :
         MediaSdpParser(MEDIA_TYPE_TEXT)
 {
-    IMS_TRACE_I("+TextSdpParser()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL TextSdpParser::~TextSdpParser()
-{
-    IMS_TRACE_I("~TextSdpParser()", 0, 0, 0);
-}
+PUBLIC VIRTUAL TextSdpParser::~TextSdpParser() {}
 
 PUBLIC IMS_BOOL TextSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile)
