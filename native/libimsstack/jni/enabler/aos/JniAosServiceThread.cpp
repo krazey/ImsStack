@@ -208,6 +208,19 @@ IMS_BOOL JniAosServiceThread::NotifyImsFeatureChanged(
 }
 
 PUBLIC
+IMS_BOOL JniAosServiceThread::NotifyTrace(IN IMS_SINT32 nRegType, IN const AString& strLog)
+{
+    IMS_TRACE_D("NotifyTrace", 0, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IIAosService::N2J_NOTIFY_TRACE);
+    objParcel.writeInt32(nRegType);
+    objParcel.writeString16(String16(strLog.GetStr()));
+
+    return SendData2Java(objParcel);
+}
+
+PUBLIC
 IMS_BOOL JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
 {
     IMS_TRACE_D("RequestPhoneNumberRetry", 0, 0, 0);

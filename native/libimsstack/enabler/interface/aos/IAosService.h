@@ -29,6 +29,7 @@ class IAosServiceSettingListener;
 class IAosEmergencyListener;
 
 enum class AosReasonCode;
+enum class AosRegistrationType;
 enum class AosNetworkType;
 enum class AosCapability : IMS_UINT32;
 enum class AosIsimState;
@@ -232,6 +233,22 @@ public:
      */
     virtual IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
             IN IMS_UINT32 nFeatureTagBits) = 0;
+
+    /**
+     * @brief Notifies the application layer of a structured diagnostic trace,
+     *        covering both system vital status snapshots and specific transactional events.
+     *        This method serves as the unified interface for both TraceStatus and TraceEvent.
+     *        AosService(Native) -> AosService(Java)
+     *
+     * @param eType The type of registration this trace belongs to (e.g., NORMAL, EMERGENCY).
+     *        This parameter is used by the Java layer for log routing and filtering.
+     * @param strLog The formatted diagnostic log string.
+     *        This contains the full payload, which can be either:
+     *        1. A comprehensive vital status snapshot (from AosTracer::TraceStatus).
+     *        2. A specific transactional event message (from AosTracer::TraceEvent).
+     * @return IMS_TRUE if the notification was successfully sent to Java, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL NotifyTrace(IN AosRegistrationType eType, IN const AString& strLog) = 0;
 
     /**
      * Request the application to phone number retry.

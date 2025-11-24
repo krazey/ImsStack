@@ -89,6 +89,7 @@ public:
     static const IMS_SINT32 N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED = EVENT_N2J + 7;
     static const IMS_SINT32 N2J_NOTIFY_REG_EVENT_STATE = EVENT_N2J + 8;
     static const IMS_SINT32 N2J_NOTIFY_IMS_FEATURE_CHANGED = EVENT_N2J + 9;
+    static const IMS_SINT32 N2J_NOTIFY_TRACE = EVENT_N2J + 10;
 
     /// AosService(Native) -> IAosInfoListener(Java)
     static const IMS_SINT32 N2J_NOTIFY_AOS_ISIM_STATE = EVENT_N2J_INFO + 1;

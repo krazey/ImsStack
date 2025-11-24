@@ -83,6 +83,7 @@ public interface IIAosService {
     int N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED = EVENT_N2J + 7;
     int N2J_NOTIFY_REG_EVENT_STATE = EVENT_N2J + 8;
     int N2J_NOTIFY_IMS_FEATURE_CHANGED = EVENT_N2J + 9;
+    int N2J_NOTIFY_TRACE = EVENT_N2J + 10;
 
     /// AosService(Native) -> IAosInfoListener(Java) or Send it directly without a listener
     int N2J_NOTIFY_AOS_ISIM_STATE = EVENT_N2J_INFO + 1;

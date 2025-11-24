@@ -157,6 +157,19 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyImsFeatureChanged
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyTrace)
+{
+    // GIVEN
+    IMS_SINT32 nRegType = 1;
+    AString strTestLog("IMS stack trace message: Registration attempt failed.");
+
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyTrace(nRegType, strTestLog);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
+}
+
 TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenRequestPhoneNumberRetry)
 {
     // GIVEN
