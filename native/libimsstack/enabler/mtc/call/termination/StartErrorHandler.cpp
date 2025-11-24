@@ -502,6 +502,18 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& obj
                         CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
             }
             break;
+
+        case ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING:
+            if (m_objContext.GetMessageUtils().IsHeaderPresent(&objMessage, ISipHeader::WARNING))
+            {
+                ControlAos(ImsAosControl::REGISTER_REINITIATE);
+            }
+            if (m_objContext.IsCsfbAvailable())
+            {
+                return CallReasonInfo(
+                        CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+            }
+            break;
     }
 
     return CallReasonInfo(CODE_NONE);
