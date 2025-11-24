@@ -188,6 +188,25 @@ TEST(AosLogTest, AppTimerToString)
             "__INVALID__");
 }
 
+TEST(AosLogTest, AppConnectionStateToString)
+{
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AppConnectionStateToString(ApplicationLog::CONNECTION_ACTIVATED),
+            "ACTIVATED");
+
+    EXPECT_STREQ(AosProvider::GetLog()->AppConnectionStateToString(
+                         ApplicationLog::CONNECTION_DEACTIVATED),
+            "DEACTIVATED");
+
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AppConnectionStateToString(ApplicationLog::CONNECTION_UPDATED),
+            "UPDATED");
+
+    EXPECT_STREQ(AosProvider::GetLog()->AppConnectionStateToString(
+                         ApplicationLog::CONNECTION_UPDATED + 99),
+            "__INVALID__");
+}
+
 TEST(AosLogTest, RegMessageToString)
 {
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_START),
@@ -338,6 +357,105 @@ TEST(AosLogTest, RegTimerToString)
     EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(
                          RegistrationLog::TIMER_WAIT_EMERGENCY_NETWORK + 99),
             "__INVALID__");
+}
+
+TEST(AosLogTest, RegResultToString)
+{
+    EXPECT_STREQ(AosProvider::GetLog()->RegResultToString(RegistrationLog::RESULT_NONE), "NONE");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegResultToString(RegistrationLog::RESULT_SUCCESS), "SUCCESS");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegResultToString(RegistrationLog::RESULT_TRYING), "TRYING");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegResultToString(RegistrationLog::RESULT_FAILURE), "FAILURE");
+    EXPECT_STREQ(AosProvider::GetLog()->RegResultToString(RegistrationLog::RESULT_FAILURE + 99),
+            "__INVALID__");
+}
+
+TEST(AosLogTest, ConnectorReasonToString)
+{
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_NONE),
+            "REASON_NONE");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_DISCONNECTED),
+            "REASON_DISCONNECTED");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_FAILED),
+            "REASON_FAILED");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(
+                         ConnectorLog::REASON_PCSCF_DISCOVERY_FAILED),
+            "REASON_PCSCF_DISCOVERY_FAILED");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_PERMANENTLY_FAILED),
+            "REASON_PERMANENTLY_FAILED");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(
+                         ConnectorLog::REASON_LIMITED_SERVICE_PCO),
+            "REASON_LIMITED_SERVICE_PCO");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_IP_CHANGED),
+            "REASON_IP_CHANGED");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_PCSCF_CHANGED),
+            "REASON_PCSCF_CHANGED");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_IPCAN_CAT_CHANGED),
+            "REASON_IPCAN_CAT_CHANGED");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_OTHERS),
+            "REASON_OTHERS");
+    EXPECT_STREQ(AosProvider::GetLog()->ConnectorReasonToString(ConnectorLog::REASON_OTHERS + 99),
+            "__INVALID__");
+}
+
+TEST(AosLogTest, AosReasonToString)
+{
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::NONE), "NONE");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::POWER_OFF), "POWER_OFF");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AosReasonToString(AosReason::AIRPLANE_MODE), "AIRPLANE_MODE");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::IMS_DISABLED), "IMS_DISABLED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::TTYMODEON), "TTY_MODE_ON");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::WIFI_OFF), "WIFI_OFF");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AosReasonToString(AosReason::SERVICE_POLICY), "SERVICE_POLICY");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::VOPS_NOT_SUPPORTED),
+            "VOPS_NOT_SUPPORTED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::SSAC_BARRED), "SSAC_BARRED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::IP_CHANGED), "IP_CHANGED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::DATA_DISCONNECTED),
+            "DATA_DISCONNECTED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::DATA_CONNECTION_MAINTAIN),
+            "DATA_CONNECTION_MAINTAIN");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::DATA_PERMANENTLY_FAILED),
+            "DATA_PERMANENTLY_FAILED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::NETWORK_ATTACH_REJECTED),
+            "NETWORK_ATTACH_REJECTED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::REG_FAILURE), "REG_FAILURE");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AosReasonToString(AosReason::REG_TERMINATED), "REG_TERMINATED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::REG_TERMINATING),
+            "REG_TERMINATING");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::INITIAL_REG_REQUESTED),
+            "INITIAL_REG_REQUESTED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(AosReason::REG_ALL_PCSCF_FAILED),
+            "REG_ALL_PCSCF_FAILED");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AosReasonToString(AosReason::NOT_SPECIFIED), "NOT_SPECIFIED");
+    EXPECT_STREQ(AosProvider::GetLog()->AosReasonToString(99999), "UNKNOWN");
+}
+
+TEST(AosLogTest, AosRegistrationTypeToString)
+{
+    EXPECT_STREQ(AosProvider::GetLog()->AosRegistrationTypeToString(AosRegistrationType::NORMAL),
+            "NORMAL");
+
+    EXPECT_STREQ(AosProvider::GetLog()->AosRegistrationTypeToString(AosRegistrationType::EMERGENCY),
+            "EMERGENCY");
+
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AosRegistrationTypeToString(AosRegistrationType::FAKE), "FAKE");
+
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AosRegistrationTypeToString(AosRegistrationType::RCS), "RCS");
+
+    EXPECT_STREQ(AosProvider::GetLog()->AosRegistrationTypeToString(
+                         static_cast<AosRegistrationType>(999)),
+            "UNKNOWN");
 }
 
 TEST(AosLogTest, EventToString)

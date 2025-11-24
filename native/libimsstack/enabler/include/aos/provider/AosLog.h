@@ -17,6 +17,7 @@
 #define AOS_LOG_H_
 
 #include "interface/AosInternalMsgDef.h"
+#include "provider/AosStaticProfile.h"
 
 class ApplicationLog
 {
@@ -99,6 +100,14 @@ public:
         TIMER_IMS_ESTABLISHMENT,
         TIMER_RAT_BLOCK
     };
+
+    // INTMSG CONNECTION wParam
+    enum
+    {
+        CONNECTION_ACTIVATED = 10,
+        CONNECTION_DEACTIVATED,
+        CONNECTION_UPDATED
+    };
 };
 
 class RegistrationLog
@@ -170,6 +179,70 @@ public:
         TIMER_INTERNAL_ERROR,
         TIMER_WAIT_EMERGENCY_NETWORK
     };
+
+    enum
+    {
+        RESULT_NONE = 0,
+
+        RESULT_SUCCESS,
+        RESULT_TRYING,
+        RESULT_FAILURE
+    };
+
+    enum
+    {
+        REASON_NONE = 0,
+
+        /// RESULT_SUCCESS
+
+        /// RESULT_TRYING
+        REASON_TRYING_START,
+        REASON_TRYING_UPDATE,
+        REASON_TRYING_STOP,
+
+        /// RESULT_FAILURE
+        REASON_FAILURE_GENERAL,
+        REASON_FAILURE_SPECIAL,
+
+        REASON_FAILURE_FORBIDDEN,
+        REASON_FAILURE_FORBIDDEN_IN_WIFI,
+        REASON_FAILURE_AUTHENTICATION,
+        REASON_FAILURE_USIM_AUTHENTICATION,
+        REASON_FAILURE_TERMINATED,
+        REASON_FAILURE_INTERNAL,
+        REASON_FAILURE_BANNDED,
+        REASON_FAILURE_INVALID_REGINFO,
+        REASON_FAILURE_PDN_RECONNECT,
+        REASON_FAILURE_PDN_RECONNECT_WITH_AWT,
+        REASON_FAILURE_NEXT_PCSCF_REQUIRED,
+        REASON_FAILURE_NO_PCSCF_AVAILABLE,
+        REASON_FAILURE_REG_TERMINATING,
+        REASON_FAILURE_PCO_LIMITED_SERVICE,
+        REASON_FAILURE_PLMN_BLOCK_WITH_TIMEOUT
+    };
+};
+
+class ConnectorLog
+{
+public:
+    enum
+    {
+        REASON_NONE = 0,
+
+        // Connection_Deactivated
+        REASON_DISCONNECTED,
+        REASON_FAILED,
+        REASON_PCSCF_DISCOVERY_FAILED,
+        REASON_PERMANENTLY_FAILED,
+        REASON_LIMITED_SERVICE_PCO,
+
+        // Connection_Updated
+        REASON_IP_CHANGED,
+        REASON_PCSCF_CHANGED,
+        REASON_IPCAN_CAT_CHANGED,
+
+        REASON_OTHERS
+    };
 };
 
 class AosLog
@@ -184,6 +257,7 @@ public:
     static const IMS_CHAR* AppRequestToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* AppStateToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* AppTimerToString(IN IMS_UINT32 nType);
+    static const IMS_CHAR* AppConnectionStateToString(IN IMS_UINT32 nState);
 
     // Registration Log
     static const IMS_CHAR* RegMessageToString(IN IMS_UINT32 nType);
@@ -192,6 +266,17 @@ public:
     static const IMS_CHAR* RegReasonToString(IN IMS_SINT32 nType);
     static const IMS_CHAR* RegStateToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* RegTimerToString(IN IMS_UINT32 nType);
+    static const IMS_CHAR* RegResultToString(IN IMS_UINT32 nType);
+    static const IMS_CHAR* RegReasonForResultToString(IN IMS_UINT32 nType);
+
+    // AosConnector Log
+    static const IMS_CHAR* ConnectorReasonToString(IN IMS_UINT32 eType);
+
+    // AosReason
+    static const IMS_CHAR* AosReasonToString(IN IMS_UINT32 nReason);
+
+    // AosStaticProfile
+    static const IMS_CHAR* AosRegistrationTypeToString(IN AosRegistrationType eType);
 
     // Event Log
     static const IMS_CHAR* EventToString(IN IMS_SINT32 nEvent);
