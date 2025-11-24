@@ -194,11 +194,11 @@ public class IpSecSaParameter implements Parcelable {
 
     private static String toHexString(byte[] data) {
         StringBuilder sb = new StringBuilder();
+        sb.append("0x");
 
         for (int i = 0; i < data.length; i++) {
-            sb.append(String.format("%02x ", data[i] & 0xff));
+            sb.append(String.format("%02x", data[i] & 0xff));
         }
-
         return sb.toString();
     }
 }
