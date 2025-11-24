@@ -15,13 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
     <int-array name="ims.parent_carrier_ids_int_array" num="1">
-        <item value="718"/>
-    </int-array>
-
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="1"/>
+        <item value="2"/>
     </int-array>
 </carrier_config>

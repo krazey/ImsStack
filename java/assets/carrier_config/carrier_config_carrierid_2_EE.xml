@@ -15,9 +15,18 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Please always keep this config on the first line. -->
-    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
-    <int-array name="ims.parent_carrier_ids_int_array" num="1">
-        <item value="5"/>
+    <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+
+    <!-- Mtc Assets -->
+    <int name="ims.geolocation_policy_for_location_based_call_int" value="13"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
+    <int name="imsss.ut_transaction_timer_sec_int" value="30"/>
 </carrier_config>

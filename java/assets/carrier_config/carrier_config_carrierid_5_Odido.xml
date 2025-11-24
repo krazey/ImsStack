@@ -15,9 +15,11 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Please always keep this config on the first line. -->
-    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
-    <int-array name="ims.parent_carrier_ids_int_array" num="1">
-        <item value="5"/>
+    <!-- Aos -->
+    <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="1">
+        <item value="3"/>
     </int-array>
+
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>
