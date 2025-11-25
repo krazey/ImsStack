@@ -15,7 +15,6 @@
  */
 #include "ServiceMemory.h"
 
-#include "SipAckPackage.h"
 #include "SipClientConnectionImpl.h"
 #include "SipConfigProxy.h"
 #include "SipConnectionNotifierImpl.h"
@@ -235,9 +234,6 @@ IMS_BOOL SipManager::StartUp()
 
     // Initialize the SIP stack & transaction layer
     SipStackState::GetInstance()->StartUp();
-
-    // For ACK retransmission for 2xx response to INVITE
-    SipAckPackage::Init();
 
     SipDebug::InitLogging();
 

@@ -305,11 +305,6 @@ PRIVATE VIRTUAL ISipGenericChallenge* SipClientConnectionImpl::GetAuthentication
     return m_pScc->GetAuthenticationChallenge(nIndex);
 }
 
-PRIVATE VIRTUAL ISipAckPackage* SipClientConnectionImpl::GrabAck()
-{
-    return m_pScc->GrabAck();
-}
-
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitResubmissionRequest()
 {
     return m_pScc->InitResubmissionRequest();
