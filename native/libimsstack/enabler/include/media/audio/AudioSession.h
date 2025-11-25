@@ -221,6 +221,14 @@ public:
      */
     void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
 
+    /**
+     * @brief request REQUEST_RTP_RECEPTION_STATS for AV sync during the video call
+     *
+     * @param nReportingIntervalMs The reporting interval for AV sync
+     * @return IMS_BOOL returns IMS_TRUE when the requestRtpReceptionStats request is triggered
+     */
+    IMS_BOOL RequestRtpReceptionStats(IN IMS_SINT32 nReportingIntervalMs);
+
 private:
     IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT32 nCodecType);
     void NetworkToneTimerExpired();

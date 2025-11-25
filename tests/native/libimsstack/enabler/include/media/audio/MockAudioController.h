@@ -76,6 +76,8 @@ public:
     MOCK_METHOD(
             void, SetMediaPemType, (IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType), (override));
     MOCK_METHOD(MEDIA_DIRECTION, GetMediaDirection, (), (override));
+    MOCK_METHOD(IMS_BOOL, RequestRtpReceptionStats,
+            (IN IMS_UINTP nNegoId, IN IMS_UINT32 nReportingIntervalMs), (override));
 };
 
 #endif

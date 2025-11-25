@@ -220,6 +220,18 @@ IMS_BOOL VideoController::ApplyQualityThreshold(IN IMS_BOOL bIsConference)
 }
 
 PUBLIC
+IMS_BOOL VideoController::RequestRtpReceptionStats(IN IMS_UINT32 nReportingIntervalMs)
+{
+    if (m_pSession == IMS_NULL || m_pSession->GetState() == VideoSession::STATE_NONE)
+    {
+        IMS_TRACE_E(0, "RequestRtpReceptionStats(): invalid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return m_pSession->RequestRtpReceptionStats(nReportingIntervalMs);
+}
+
+PUBLIC
 IMS_BOOL VideoController::IsSessionOpened()
 {
     if (m_pSession != IMS_NULL && m_pSession->GetState() != VideoSession::STATE_NONE)

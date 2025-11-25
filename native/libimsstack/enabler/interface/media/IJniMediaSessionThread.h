@@ -26,6 +26,7 @@ class ImsMediaMsgOpenConfigParam;
 class ImsMediaMsgParamBase;
 class ImsMediaMsgQosParam;
 class ImsMediaMsgSetMediaQualityParam;
+class ImsMediaMsgRtpReceptionStatsParam;
 
 class IJniMediaSessionThread : public IJniEnablerThread
 {
@@ -121,6 +122,14 @@ public:
      * @brief Called to inform the display surface is ready
      */
     virtual void OnSetDisplaySurface();
+
+    /**
+     * @brief Called to request rtp reception stats for the av sync
+     *
+     * @param pParam The parameter set for requestRtpReceptionStats
+     * @return IMS_BOOL Returns false when the parameter is invalid
+     */
+    virtual IMS_BOOL OnRequestRtpReceptionStats(IN ImsMediaMsgRtpReceptionStatsParam* pParam);
 };
 
 #endif

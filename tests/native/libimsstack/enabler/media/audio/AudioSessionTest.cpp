@@ -330,3 +330,24 @@ TEST_F(AudioSessionTest, testSetMediaQuality)
 
     EXPECT_TRUE(m_pSession->SetMediaQuality(IMS_TRUE));
 }
+
+TEST_F(AudioSessionTest, RequestRtpReceptionStats)
+{
+    // Arrange
+    const int32_t intervalMs = 3000;
+
+    // Expect a message to be sent to the media manager
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_RTP_RECEPTION_STATS,
+                    testing::Truly(
+                            [](ImsMediaMsgParamBase* p)
+                            {
+                                auto* param = static_cast<ImsMediaMsgRtpReceptionStatsParam*>(p);
+                                return param && param->m_nIntervalMs == intervalMs;
+                            })))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    // Act & Assert
+    EXPECT_TRUE(m_pSession->RequestRtpReceptionStats(intervalMs));
+}

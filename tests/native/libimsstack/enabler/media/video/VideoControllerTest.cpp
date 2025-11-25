@@ -307,3 +307,16 @@ TEST_F(VideoControllerTest, testIsSessionOpened)
     // Session is closed (state is STATE_NONE)
     EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
 }
+
+TEST_F(VideoControllerTest, RequestRtpReceptionStats)
+{
+    // Arrange
+    const IMS_UINT32 intervalMs = 3000;
+    // Ensure a session exists and is opened
+    m_pController->CreateSession(&m_objListener, m_pConfig);
+    m_pController->UpdateLocalAddress(m_pVideoNego);
+    m_pController->OpenSession();
+
+    // Act & Assert
+    EXPECT_TRUE(m_pController->RequestRtpReceptionStats(intervalMs));
+}

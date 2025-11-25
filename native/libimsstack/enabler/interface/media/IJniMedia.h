@@ -53,6 +53,7 @@ public:
             IJNIMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
             IJNIMEDIA_CASE_ENUM(REQUEST_QOS);
             IJNIMEDIA_CASE_ENUM(REQUEST_UPDATE_ANBR_ENABLED_CONFIG);
+            IJNIMEDIA_CASE_ENUM(REQUEST_RTP_RECEPTION_STATS);
             IJNIMEDIA_CASE_ENUM(REQUEST_SET_PREVIEW_SURFACE);
             IJNIMEDIA_CASE_ENUM(REQUEST_SET_DISPLAY_SURFACE);
             IJNIMEDIA_CASE_ENUM(REQUEST_VIDEO_DATA_USAGE);
@@ -125,6 +126,8 @@ public:
     static const IMS_SINT32 REQUEST_QOS = IJNIMEDIA + 10;
     /** send notify ANBR command */
     static const IMS_SINT32 REQUEST_UPDATE_ANBR_ENABLED_CONFIG = IJNIMEDIA + 12;
+    /** send request Rtp Reception Stats for AV Sync */
+    static const IMS_SINT32 REQUEST_RTP_RECEPTION_STATS = IJNIMEDIA + 13;
     static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_END = IJNIMEDIA + 49;
 
     // Requests to ImsMedia VideoSession
@@ -485,6 +488,19 @@ public:
 public:
     IMS_SINT32 nWidth;
     IMS_SINT32 nHeight;
+};
+
+class ImsMediaMsgRtpReceptionStatsParam : public ImsMediaMsgParamBase
+{
+public:
+    explicit ImsMediaMsgRtpReceptionStatsParam(MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) :
+            ImsMediaMsgParamBase(eType),
+            m_nIntervalMs(0) {};
+
+    virtual ~ImsMediaMsgRtpReceptionStatsParam() override {}
+
+public:
+    IMS_SINT32 m_nIntervalMs;
 };
 
 #endif

@@ -860,6 +860,27 @@ void AudioSession::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
     m_ePemType = ePemType;
 }
 
+PUBLIC
+IMS_BOOL AudioSession::RequestRtpReceptionStats(IN IMS_SINT32 nReportingIntervalMs)
+{
+    IMS_TRACE_I("RequestRtpReceptionStats() - state[%d]", m_nState, 0, 0);
+    IMS_BOOL bResult = IMS_FALSE;
+
+    if (m_piMediaSessionListener != IMS_NULL)
+    {
+        ImsMediaMsgRtpReceptionStatsParam* pParam =
+                new ImsMediaMsgRtpReceptionStatsParam(MEDIA_TYPE_AUDIO);
+        pParam->m_nIntervalMs = nReportingIntervalMs;
+
+        IMS_TRACE_D("RequestRtpReceptionStats type[%d]", pParam->m_eMediaType, 0, 0);
+
+        bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
+                IJniMedia::REQUEST_RTP_RECEPTION_STATS, pParam);
+    }
+
+    return bResult;
+}
+
 PRIVATE
 IMS_SINT32 AudioSession::GetRtpInactivityTimer(IN IMS_BOOL bActiveSession)
 {

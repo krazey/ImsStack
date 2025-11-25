@@ -219,6 +219,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::HandleRequestMsg(
 
     if (pNode == IMS_NULL || pNode->pMessageHandler == IMS_NULL)
     {
+        IMS_TRACE_I(
+                "HandleRequestMsg(): Can't find session node or message handler for CallKey[%d]",
+                nCallKey, 0, 0);
         return IMS_FALSE;
     }
 

@@ -121,6 +121,8 @@ protected:
                 .WillByDefault(ReturnRef(m_objRemoteIpAddress));  // Default remote address
 
         // Stub Get*Nego methods on the main MediaNego mock to return the sub-nego mock instances
+        ON_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(NEGO_ID))
+                .WillByDefault(Return(MEDIA_TYPE_AUDIOVIDEO));
         ON_CALL(*m_pMediaNego, GetAudioNego()).WillByDefault(Return(m_pMockAudioNegoInstance));
         ON_CALL(*m_pMediaNego, GetVideoNego()).WillByDefault(Return(m_pMockVideoNegoInstance));
         ON_CALL(*m_pMediaNego, GetTextNego()).WillByDefault(Return(IMS_NULL));
@@ -1250,6 +1252,38 @@ TEST_F(MediaSessionTest, testSendMessageResponseNullParam)
             IJniMedia::RESPONSE_OPEN_SESSION, reinterpret_cast<IMS_UINTP>(IMS_NULL)));
     // Note: SendMessage itself returns true even if the param is null,
     // because OnResponse handles the null check internally.
+}
+
+TEST_F(MediaSessionTest, testRequestRtpReceptionStats)
+{
+    // Arrange
+    const IMS_UINT32 intervalMs = 3000;
+    ON_CALL(*m_pMockAudioController, IsSessionOpened()).WillByDefault(Return(true));
+    ON_CALL(*m_pMockVideoController, IsSessionOpened()).WillByDefault(Return(true));
+
+    // Expect controllers to be updated and stats requested
+    EXPECT_CALL(*m_pMockAudioController, UpdateSession(NEGO_ID, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(*m_pMockVideoController, UpdateRtpConfig(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(*m_pMockVideoController, UpdateAccessNetwork(_)).Times(1);
+    EXPECT_CALL(*m_pMockVideoController, UpdateSession()).WillOnce(Return(true));
+    EXPECT_CALL(*m_pMockVideoController, ApplyQualityThreshold(_)).Times(1);
+    EXPECT_CALL(*m_pMockAudioController, RequestRtpReceptionStats(NEGO_ID, intervalMs))
+            .Times(1)
+            .WillOnce(Return(true));
+    EXPECT_CALL(*m_pMockVideoController, RequestRtpReceptionStats(intervalMs))
+            .Times(1)
+            .WillOnce(Return(true));
+
+    // Act: Simulate running the session, which triggers the stats request
+    m_pSession->Run(NEGO_ID);
+
+    // Expect stats reporting to be stopped when the video session is closed
+    EXPECT_CALL(*m_pMockAudioController, RequestRtpReceptionStats(NEGO_ID, 0))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    ON_CALL(*m_pMockMediaNegoHandler, FormSdp(_, _, _, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
+    m_pSession->FormSdp(NEGO_ID, m_pIsession.get(), MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND_RECEIVE,
+            MEDIA_DIRECTION_INACTIVE, MEDIA_DIRECTION_INACTIVE, false);
 }
 
 // --- SetOptions Tests ---

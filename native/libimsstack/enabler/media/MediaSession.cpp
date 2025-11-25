@@ -40,6 +40,7 @@ __IMS_TRACE_TAG_MEDIA__;
 #define SIZE_OF_IPV6   60
 #define SIZE_OF_IPV4   40
 #define SIZE_OF_RTP    20 + 8  // rtp + header extension (cvo)
+#define AVSYNC_REPORT_INTERVAL_MS 3000
 
 using namespace android::telephony::imsmedia;
 
@@ -82,7 +83,7 @@ PUBLIC VIRTUAL MediaSession::~MediaSession()
         m_pMediaNegoHandler->ClearAllMediaNego();
     }
 
-    CloseMediaSessions(MEDIA_TYPE_AUDIOVIDEOTEXT);
+    CloseMediaSessions(MEDIA_TYPE_AUDIOVIDEOTEXT, UNDEFINED_NEGO_ID);
     ClearQosParam();
 }
 
@@ -193,7 +194,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession
     }
     else
     {
-        CloseMediaSessions(MEDIA_TYPE_VIDEO);
+        CloseMediaSessions(MEDIA_TYPE_VIDEO, nNegoId);
     }
 
     if (GetNegoState(nNegoId) == STATE_NEGOTIATED)
@@ -245,12 +246,12 @@ PUBLIC VIRTUAL SdpNegotiationResult MediaSession::NegotiateSdp(
 
     if (!(objResult.eNegotiatedType & MEDIA_TYPE_VIDEO))
     {
-        CloseMediaSessions(MEDIA_TYPE_VIDEO);
+        CloseMediaSessions(MEDIA_TYPE_VIDEO, nNegoId);
     }
 
     if (!(objResult.eNegotiatedType & MEDIA_TYPE_TEXT))
     {
-        CloseMediaSessions(MEDIA_TYPE_TEXT);
+        CloseMediaSessions(MEDIA_TYPE_TEXT, UNDEFINED_NEGO_ID);
     }
 
     if (GetNegoState(nNegoId) == STATE_NEGOTIATED)
@@ -367,7 +368,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
     IMS_TRACE_I("Terminate() - CallKey[%d]", m_nCallKey, 0, 0);
     std::lock_guard<std::mutex> guard(m_objMutex);
 
-    CloseMediaSessions(MEDIA_TYPE_AUDIOVIDEOTEXT);
+    CloseMediaSessions(MEDIA_TYPE_AUDIOVIDEOTEXT, UNDEFINED_NEGO_ID);
 
     if (m_pMediaNegoHandler != IMS_NULL)
     {
@@ -536,6 +537,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             {
                 m_bIsConference = IMS_TRUE;
                 m_pVideoController->ApplyQualityThreshold(m_bIsConference);
+                m_pVideoController->RequestRtpReceptionStats(AVSYNC_REPORT_INTERVAL_MS);
             }
             break;
         case SET_DIRECTION:
@@ -1288,6 +1290,14 @@ void MediaSession::UpdateMediaSessions(
         {
             m_pVideoController->ApplyQualityThreshold(m_bIsConference);
         }
+
+        // To start the requestRtpReceptionStats api for AV sync to the audioSessionHandler
+        if (m_pAudioController != IMS_NULL)
+        {
+            IMS_TRACE_D("UpdateMediaSessions() - start RequestRtpReceptionStats", 0, 0, 0);
+            m_pAudioController->RequestRtpReceptionStats(nNegoId, AVSYNC_REPORT_INTERVAL_MS);
+            m_pVideoController->RequestRtpReceptionStats(AVSYNC_REPORT_INTERVAL_MS);
+        }
     }
 
     // Update Text Session
@@ -1305,7 +1315,7 @@ void MediaSession::UpdateMediaSessions(
 }
 
 PRIVATE
-void MediaSession::CloseMediaSessions(MEDIA_CONTENT_TYPE eType)
+void MediaSession::CloseMediaSessions(MEDIA_CONTENT_TYPE eType, IN IMS_UINTP nNegoId)
 {
     if (eType & MEDIA_TYPE_AUDIO && m_pAudioController != IMS_NULL &&
             m_pAudioController->IsSessionOpened())
@@ -1319,6 +1329,12 @@ void MediaSession::CloseMediaSessions(MEDIA_CONTENT_TYPE eType)
     if (eType & MEDIA_TYPE_VIDEO && m_pVideoController != IMS_NULL &&
             m_pVideoController->IsSessionOpened())
     {
+        if (m_pAudioController != IMS_NULL && nNegoId != UNDEFINED_NEGO_ID)
+        {
+            IMS_TRACE_D("CloseMediaSessions() - stop reporting av sync", 0, 0, 0);
+            m_pAudioController->RequestRtpReceptionStats(nNegoId, 0);
+        }
+
         if (!m_pVideoController->CloseSession())
         {
             IMS_TRACE_E(0, "CloseMediaSessions() - failed to close video", 0, 0, 0);

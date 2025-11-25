@@ -172,7 +172,8 @@ private:
             MEDIA_CONTENT_TYPE eType);
     void UpdateMediaSessions(IN IMS_UINTP nNegoId, IN std::shared_ptr<MediaNego> pMediaNego,
             MEDIA_CONTENT_TYPE eType);
-    void CloseMediaSessions(MEDIA_CONTENT_TYPE eType);
+    void CloseMediaSessions(MEDIA_CONTENT_TYPE eType, IN IMS_UINTP nNegoId);
+    void StopRtpReceptionStats(IN IMS_UINTP nNegoId);
     /** Get the rtp fragment size from mtu */
     IMS_SINT32 GetRtpFragmentSize();
 
