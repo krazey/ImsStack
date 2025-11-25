@@ -88,8 +88,6 @@ PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::ConnectReferMethod(IN IServiceMethod* 
         pMethod = pSessionImpl->GetSession();
     }
 
-    // FIXME: If any other method needs to be handled, then add the code below...
-
     return m_pReference->ConnectReferMethod(pMethod);
 }
 

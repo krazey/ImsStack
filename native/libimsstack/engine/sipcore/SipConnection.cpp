@@ -91,7 +91,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::AddHeader(
     }
     else
     {
-        // TODO:: IMS_SINT32 nHCount = pMessage->GetHeaderCount(nHType, strHNameFF);
         /*
          *    " abc , cde, fgh " --> abc/cde/fgh
          */
@@ -109,8 +108,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::AddHeader(
         for (IMS_SINT32 i = objTokens.GetCount() - 1; i >= 0; --i)
         {
             m_pMessage->PrependHeader(nHType, objTokens.GetElementAt(i), strName);
-
-            // TODO:: If failed, remove the appended headers from the message (using nHCount)
         }
     }
 
@@ -209,7 +206,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::SetHeader(
     }
     else
     {
-        // TODO:: IMS_SINT32 nHCount = pMessage->GetHeaderCount(nHType, strHNameFF);
         /*
          *    " abc , cde, fgh " --> abc/cde/fgh
          */
@@ -236,7 +232,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::SetHeader(
         for (IMS_SINT32 i = objTokens.GetCount() - 2; i >= 0; --i)
         {
             m_pMessage->PrependHeader(nHType, objTokens.GetElementAt(i), strName);
-            // TODO:: If failed, remove the appended headers from the message (using nHCount)
         }
     }
 

@@ -1080,8 +1080,6 @@ PRIVATE VIRTUAL void Registration::RemoveActiveBindingsForcingly()
 
     if (GetSubState() != SUB_STATE_IDLE)
     {
-        // FIXME: need to control the details
-
         SetSubState(SUB_STATE_IDLE);
 
         if (m_piOngoingScc != IMS_NULL)
@@ -1919,7 +1917,6 @@ void Registration::CheckUaLocation(IN const ISipMessage* piSipMsg)
         piHeader->Destroy();
 
         // NAT_REQ_UE_PUBLIC_IP
-        // FIXME: Is it required to check "sent-by"?
         if (m_bIsBehindNat && m_pRegParam->IsSecurityAssociationPresent())
         {
             // Don't clear the flag.
@@ -1943,7 +1940,6 @@ void Registration::CheckUaLocation(IN const ISipMessage* piSipMsg)
         piHeader->Destroy();
 
         // NAT_REQ_UE_PUBLIC_IP
-        // FIXME: Is it required to check "sent-by"?
         if (m_bIsBehindNat && m_pRegParam->IsSecurityAssociationPresent())
         {
             // Don't clear the flag.
@@ -3506,8 +3502,7 @@ void Registration::UpdateCSeqNumber(IN const ISipMessage* piSipMsg)
 
     if (nPosOfSp == AString::NPOS)
     {
-        // TODO:: select the proper value to increase sequence number when an error occurs
-        // If CSeq header is invalid, the number will be increased as much as 5
+        // If CSeq header is invalid, the number will be increased as much as 5.
         (void)m_pRegFlow->IncreaseNGetCSeqValue(5);
         return;
     }

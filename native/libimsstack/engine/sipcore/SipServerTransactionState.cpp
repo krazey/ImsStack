@@ -179,8 +179,6 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV6);
     }
 
-    /* Prepare User data */
-    /* BSP_TODO: make sure stack store the pTxnContextData otherwise there is memory leak */
     SipMethod objMethod = SipStack::GetMethod(pSipMsg);
 
     SipTxnContext* pTxnContext = SipStack::CreateTxnContext();
@@ -198,10 +196,6 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
     ISipUserData objUserData(static_cast<SIP_VOID*>(pTxnContext));
-
-    /* BSP_TODO::
-    To send internal 100 Trying on received of new INVITE, user data is required otherwise
-    Send2Nw APIs will Fail */
     IMS_SINT32 eTxnStatus = SipTxn::STATUS_INVALID;
     ::SipTxnKey* pTxnKey = IMS_NULL;
     IMS_UINT16 nError = 0;

@@ -530,7 +530,6 @@ IMS_SINT32 CallerCapability::AddFeature(IN const AString& strTag)
     }
     else
     {
-        // TODO:: if failed, what to do ???
         if (Attach(strTag, AString::ConstNull()))
         {
             return FEATURE_CHANGED;
@@ -554,7 +553,6 @@ IMS_SINT32 CallerCapability::AddFeature(IN const AString& strTag, IN const AStri
     }
     else
     {
-        // TODO:: if failed, what to do ???
         if (Attach(strTag, strValue))
         {
             return FEATURE_CHANGED;

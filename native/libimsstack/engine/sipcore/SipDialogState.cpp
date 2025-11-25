@@ -1618,7 +1618,6 @@ void SipDialogState::UpdateState(
 {
     IMS_SINT32 nNextState = SipDState::STATE_MAX;
 
-    // 3 TODO
     (void)nTrigger;
 
     switch (nAction)

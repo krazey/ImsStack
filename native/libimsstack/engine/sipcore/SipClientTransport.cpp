@@ -411,7 +411,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
             if (pReqUri != IMS_NULL)
             {
-                // FIXME: consider "sips" URI scheme
+                // Consider "sips" URI scheme if needed.
                 if (IsSameHostAndPort(pAddrSpec, pReqUri))
                 {
                     bImplicitRoutingTransportRequired = IMS_TRUE;

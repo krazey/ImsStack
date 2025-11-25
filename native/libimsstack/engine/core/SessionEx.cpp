@@ -909,7 +909,6 @@ PROTECTED VIRTUAL void SessionEx::NotifySipError(
         }
         else
         {
-            // FIXME: select a proper status code
             RejectEx(SipStatusCode::SC_580);
         }
         return;
