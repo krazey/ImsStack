@@ -81,7 +81,6 @@ private:
     }
     IMS_RESULT SetRequestUri(IN const AString& strUri) override;
     ISipGenericChallenge* GetAuthenticationChallenge(IN IMS_SINT32 nIndex = 0) const override;
-    ISipAckPackage* GrabAck() override;
     IMS_RESULT InitResubmissionRequest() override;
     void RemoveAllChallenges() override;
     void RemoveAllCredentials() override;

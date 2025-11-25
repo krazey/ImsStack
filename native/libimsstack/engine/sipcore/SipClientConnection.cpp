@@ -17,7 +17,6 @@
 #include "ServiceTimer.h"
 
 #include "IOnSipClientConnectionListener.h"
-#include "SipAckPackage.h"
 #include "SipAuHelper.h"
 #include "SipClientConnection.h"
 #include "SipClientTransmissionProxy.h"
@@ -821,60 +820,6 @@ ISipGenericChallenge* SipClientConnection::GetAuthenticationChallenge(
     }
 
     return m_pAuHelper->GetChallenge(nIndex);
-}
-
-PUBLIC
-ISipAckPackage* SipClientConnection::GrabAck()
-{
-    if (m_pDialog == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    SipAckPackage* pAckPackage = SipAckPackage::CreateAckPackage(m_pDialog->GetCallId());
-
-    if (pAckPackage != IMS_NULL)
-    {
-        IMS_BOOL bSipConfigRequired = IMS_TRUE;
-        IMS_SINT32 nAliveInterval = 2000 * 64;
-        const SipTimerValues* pTimerValues = GetTransactionTimerValues();
-
-        if (pTimerValues != IMS_NULL)
-        {
-            IMS_SINT32 nTimerValue = pTimerValues->GetValue(SipTimerValues::TIMER_H);
-
-            if (nTimerValue > 0)
-            {
-                bSipConfigRequired = IMS_FALSE;
-                nAliveInterval = nTimerValue;
-            }
-            else
-            {
-                nTimerValue = pTimerValues->GetValue(SipTimerValues::TIMER_T1);
-
-                if (nTimerValue > 0)
-                {
-                    bSipConfigRequired = IMS_FALSE;
-                    nAliveInterval = nTimerValue * 64;
-                }
-            }
-        }
-
-        if (bSipConfigRequired)
-        {
-            IMS_SINT32 nTimerValueT1 =
-                    SipConfigProxy::GetTimerValueT1(GetSlotId(), m_pCtState->GetSipProfile());
-
-            if (nTimerValueT1 > 0)
-            {
-                nAliveInterval = nTimerValueT1 * 64;
-            }
-        }
-
-        pAckPackage->AddAck(m_pCtState.Get(), nAliveInterval);
-    }
-
-    return pAckPackage;
 }
 
 PUBLIC

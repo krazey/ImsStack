@@ -21,7 +21,6 @@
 #include "Sip.h"
 
 class Credential;
-class ISipAckPackage;
 class ISipClientConnectionListener;
 class ISipConnectionNotifier;
 class ISipGenericChallenge;
@@ -193,15 +192,6 @@ public:
      * @return Pointer to ISipGenericChallenge.
      */
     virtual ISipGenericChallenge* GetAuthenticationChallenge(IN IMS_SINT32 nIndex = 0) const = 0;
-
-    /**
-     * @brief Returns the helper package for SIP ACK retransmission.
-     *
-     * The application SHOULD destroy the returned object if it does not use anymore.
-     *
-     * @return Pointer to ISipAckPackage.
-     */
-    virtual ISipAckPackage* GrabAck() = 0;
 
     /**
      * @brief Initializes the resubmitting request message when the connection had received

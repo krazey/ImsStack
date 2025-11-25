@@ -26,7 +26,6 @@
 #include "SipConnection.h"
 
 class IOnSipClientConnectionListener;
-class ISipAckPackage;
 class ISipGenericChallenge;
 class SipAuHelper;
 class SipClientTransmissionProxy;
@@ -81,7 +80,6 @@ public:
     }
     IMS_RESULT SetRequestUri(IN const AString& strUri);
     ISipGenericChallenge* GetAuthenticationChallenge(IN IMS_SINT32 nIndex = 0) const;
-    ISipAckPackage* GrabAck();
     IMS_RESULT InitResubmissionRequest();
     void RemoveAllChallenges();
     void RemoveAllCredentials();

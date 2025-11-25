@@ -24,7 +24,6 @@
 #include "Sip.h"
 
 class Credential;
-class ISipAckPackage;
 class ISipClientConnectionListener;
 class ISipConnectionNotifier;
 class ISipGenericChallenge;
@@ -46,7 +45,6 @@ public:
     MOCK_METHOD(IMS_RESULT, SetRequestUri, (IN const AString& strUri), (override));
     MOCK_METHOD(ISipGenericChallenge*, GetAuthenticationChallenge, (IN IMS_SINT32 nIndex),
             (const, override));
-    MOCK_METHOD(ISipAckPackage*, GrabAck, (), (override));
     MOCK_METHOD(IMS_RESULT, InitResubmissionRequest, (), (override));
     MOCK_METHOD(void, RemoveAllChallenges, (), (override));
     MOCK_METHOD(void, RemoveAllCredentials, (), (override));
