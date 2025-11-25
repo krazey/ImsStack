@@ -3705,6 +3705,8 @@ TEST_F(AosApplicationTest, ShouldRequestScscfRestorationToRegistration)
     m_pAosApplication->SetOffReason(AosReason::NONE);
     ImsMessage objMessage(MSG_SCSCF_RESTORATION, 0, 30);
 
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_INCREASE_FAILURE_COUNT_FOR_PDN_REACTIVATED, _));
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, 30));
 
     // WHEN

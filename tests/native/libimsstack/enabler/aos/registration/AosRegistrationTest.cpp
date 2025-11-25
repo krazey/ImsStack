@@ -1202,15 +1202,43 @@ TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidForGivenTimeWhenRequestForScsc
     // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidWhenRequestForScscfRestorationWithoutTime)
+TEST_F(AosRegistrationTest,
+        SetCurrentPcscfInvalidWhenScscfRestorationWithoutTimeAndIsNotPdnReactivationPolicy)
 {
     // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_NOT_SPECIFIED));
+
     EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0));
 
     // WHEN
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest,
+        SetCurrentPcscfInvalidWhenScscfRestorationAndPdnReactivationPolicyAndEps5GsOnly)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED));
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0));
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+}
+
+TEST_F(AosRegistrationTest,
+        DoNotSetCurrentPcscfInvalidWhenScscfRestorationAndPdnReactivationPolicyAndIsNotEps5Gsonly)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED));
+    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(0);
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
 }
 
 TEST_F(AosRegistrationTest, DestroyRegistrationWhenRequestForScscfRestroration)

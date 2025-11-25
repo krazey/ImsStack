@@ -3396,7 +3396,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
     }
     else
     {
-        piPcscf->SetCurrentPcscfInvalid();
+        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() !=
+                        CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED ||
+                m_bEps5GsOnly)
+        {
+            piPcscf->SetCurrentPcscfInvalid();
+        }
     }
 
     if (piPcscf->HasNextPcscf())

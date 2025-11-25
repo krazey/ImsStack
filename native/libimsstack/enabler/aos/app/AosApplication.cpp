@@ -1448,14 +1448,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
      * It will conduct a new registration regardless of RegRecoverHold scheme.
      */
 
-    IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
     IMS_UINT32 nUnavailableTimeForCurrentPcscf = LONG_TO_INT(objMsg.nLparam);
-    A_IMS_TRACE_I(APPID,
-            "ProcessScscfRestoration :: reason (%d), nUnavailableTimeForCurrentPcscf (%d)", nReason,
-            nUnavailableTimeForCurrentPcscf, 0);
+    A_IMS_TRACE_I(APPID, "ProcessScscfRestoration :: nUnavailableTimeForCurrentPcscf (%d)",
+            nUnavailableTimeForCurrentPcscf, 0, 0);
 
     SetOffReason(AosReason::INITIAL_REG_REQUESTED);
 
+    m_piRegistration->RequestCmd(IAosRegistration::CMD_INCREASE_FAILURE_COUNT_FOR_PDN_REACTIVATED);
     m_piRegistration->RequestCmd(
             IAosRegistration::CMD_SCSCF_RESTORATION, nUnavailableTimeForCurrentPcscf);
 }
