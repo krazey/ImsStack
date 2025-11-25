@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
@@ -67,6 +68,24 @@ public class DebugScreen extends Activity {
     public void onPause() {
         super.onPause();
         handlePause();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (isSystemKeyToConsume(keyCode)) {
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (isSystemKeyToConsume(keyCode)) {
+            return true;
+        }
+
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override
@@ -201,5 +220,12 @@ public class DebugScreen extends Activity {
 
     private void showToast(String text) {
         Toast.makeText(DebugScreen.this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    private static boolean isSystemKeyToConsume(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_CALL ||
+                keyCode == KeyEvent.KEYCODE_ENDCALL ||
+                keyCode == KeyEvent.KEYCODE_HEADSETHOOK ||
+                keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
     }
 }
