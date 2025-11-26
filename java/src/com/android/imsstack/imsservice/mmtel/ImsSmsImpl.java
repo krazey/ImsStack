@@ -82,12 +82,14 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
      * clears the objects created by this class.
      */
     public void clear() {
-        mReady = false;
-        if (mSmsTL != null) {
-            log("clear");
-            mSmsTL.setListener(null);
-            mSmsTL.clear();
-            mSmsTL = null;
+        synchronized (mLock) {
+            mReady = false;
+            if (mSmsTL != null) {
+                log("clear");
+                mSmsTL.setListener(null);
+                mSmsTL.clear();
+                mSmsTL = null;
+            }
         }
     }
 
@@ -119,10 +121,23 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         log("sendSms: token = " + token + " format = " + format + " smsc = " + smsc
                                 + " isRetry = " + isRetry);
         int smsFormat = SmsUtils.FORMAT_INT_INVALID;
-        int result;
-        if (!mReady) {
-            throw new RuntimeException("Sms Not Ready!");
+
+        SmsTransferLayer smsTL;
+        synchronized (mLock) {
+            if (!mReady || mSmsTL == null) {
+                loge("sendSms failed: mReady=" + mReady + ", mSmsTL is null: " + (mSmsTL == null));
+                // Gracefully report error to Framework so it can retry
+                onSendSmsResultError(
+                        token,
+                        messageRef,
+                        SEND_STATUS_ERROR_RETRY,
+                        SmsManager.RESULT_ERROR_GENERIC_FAILURE,
+                        RESULT_NO_NETWORK_ERROR);
+                return;
+            }
+            smsTL = mSmsTL;
         }
+
         try {
             if (format.equals(SmsMessage.FORMAT_3GPP)) {
                 smsFormat = SmsUtils.FORMAT_INT_3GPP;
@@ -161,7 +176,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                         RESULT_NO_NETWORK_ERROR);
                 return;
             }
-            result = mSmsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu, isRetry);
+            int result = smsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu, isRetry);
             if (result == SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS) {
                 loge("Can not send sms - Invalid smsc");
                 onSendSmsResultError(

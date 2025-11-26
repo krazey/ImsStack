@@ -95,13 +95,22 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     }
 
     @Test
-    public void test_sendSms_Exception() throws RemoteException {
+    public void test_SendSms_NotReady() throws RemoteException {
+        // Set mReady to false and mSmsTL to null
         mImsSmsImpl.clear();
-        Throwable exception = assertThrows(RuntimeException.class, () -> {
-            mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
-        }
-        );
-        assertEquals("Sms Not Ready!", exception.getMessage());
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR_RETRY,
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
+    }
+
+    @Test
+    public void test_sendSms_NullPdu() throws RemoteException {
+        // Set mReady to true and mSmsTL to null.
+        mImsSmsImpl.clear();
+        mImsSmsImpl.onReady();
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, null);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR_RETRY,
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
     }
 
     @Test
