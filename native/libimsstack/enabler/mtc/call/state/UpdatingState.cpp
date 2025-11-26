@@ -20,7 +20,6 @@
 #include "ISession.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
-#include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -137,16 +136,12 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo& objReason)
 {
     IMtcSession* pMtcSession = m_objContext.GetSession();
-    // TODO: need to check ISession state?
     if (m_objContext.GetMediaManager().GetNegotiationState(&pMtcSession->GetISession()) !=
             NegotiationState::STATE_NEGOTIATED)
     {
         // TODO: Use this reject code in MessageFormatter#GetRejectStatusCode.
-        IMS_SINT32 nRejectCode =
-                ConfigService::GetConfigService()
-                        ->GetCarrierConfig(m_objContext.GetSlotId())
-                        ->GetInt(ConfigVoice::
-                                        KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
+        IMS_SINT32 nRejectCode = m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
         if (nRejectCode == SipStatusCode::SC_200)
         {
             return AcceptUpdate(pMtcSession->GetPreviousCallType(),
