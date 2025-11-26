@@ -105,9 +105,7 @@ public class IncomingMtcCall implements Parcelable {
 
         suppInfo = new SuppInfo(source);
 
-        logTag = source.readString();
-
-        ImsLog.d("[" + logTag + "]callKey : " + callKey
+        ImsLog.d("callKey : " + callKey
                 + " OIPType : " + OIPType
                 + " calleePartyNum : " + calleePartyNum
                 + " callerPartyNum : " + callerPartyNum

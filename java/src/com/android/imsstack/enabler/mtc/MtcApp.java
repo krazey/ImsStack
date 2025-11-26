@@ -517,6 +517,7 @@ public class MtcApp implements Closeable {
                 MtcCall call;
                 if (mIncomingCallKey == nativeCallKey) {
                     // PRE_INCOMING_CALL and AUTO_REJECTED_CALL for a same incoming call.
+                    parcel.readString();
                     call = getPendingCall(mPreIncomingNativeCallId);
                 } else {
                     // only AUTO_REJECTED_CALL for a differencet incoming call.
