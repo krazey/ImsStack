@@ -60,8 +60,6 @@ public:
             IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork) const override;
     IMS_BOOL IsEmergencyOnly() override;
     IMS_BOOL IsEmergencyAttachSupported() override;
-    // 2nd PLMN info for MOCN
-    IMS_SINT32 GetMocnPlmnInfo() override;
     IMS_SINT32 GetNetworkRegistrationRejectCause() override;
     AString GetAccessNetworkPlmn() const override;
 

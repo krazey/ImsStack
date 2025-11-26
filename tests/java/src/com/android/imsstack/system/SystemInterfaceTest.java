@@ -1909,24 +1909,6 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallGetMocnPlmnInfo() {
-        setUpSystemInterface();
-        setUpSystem();
-        Parcel data = Parcel.obtain();
-        try {
-            data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.GET_MOCN_PLMN_INFO);
-            data.setDataPosition(0);
-            mSystemInterface.onMessage(data, null);
-        } finally {
-            data.recycle();
-        }
-
-        verify(mSystemCall).getMocnPlmnInfo();
-    }
-
-    @Test
-    @SmallTest
     public void testSystemCallGetVoiceServiceState() {
         setUpSystemInterface();
         setUpSystem();

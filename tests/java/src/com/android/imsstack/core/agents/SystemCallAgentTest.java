@@ -801,20 +801,6 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testGetMocnPlmnInfo() {
-        mSystemCallAgent.getMocnPlmnInfo();
-
-        verify(mDcNetWatcher).getMocnPlmnInfo();
-
-        replaceDcNetWatcher(null);
-        int result = mSystemCallAgent.getMocnPlmnInfo();
-
-        assertEquals(0, result);
-        verifyNoMoreInteractions(mDcNetWatcher);
-    }
-
-    @Test
-    @SmallTest
     public void testIsNetworkRoaming() {
         mSystemCallAgent.isNetworkRoaming();
 

@@ -698,17 +698,6 @@ public final class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
-     * Returns the PLMN information of MOCN.
-     *
-     * @return A PLMN info. of MOCN.
-     */
-    @Override
-    public int getMocnPlmnInfo() {
-        IDcNetWatcher netWatcher = getDcNetWatcher();
-        return (netWatcher != null) ? netWatcher.getMocnPlmnInfo() : 0;
-    }
-
-    /**
      * Checks whether the current network is attached as roaming.
      *
      * @return {@code true} if the network is in roaming, {@code false} otherwise.

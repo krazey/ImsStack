@@ -1062,14 +1062,6 @@ TEST_F(SystemTest, GetLastAccessNetworkInfo)
     EXPECT_EQ(m_pSystem->GetLastAccessNetworkInfo(nNetworkType, 0).GetFirstElement(), strOut);
 }
 
-TEST_F(SystemTest, GetMocnPlmnInfo)
-{
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetMocnPlmnInfo(0), 0);
-}
-
 TEST_F(SystemTest, GetMtu)
 {
     m_pSystem->SetCallback(IMS_NULL);

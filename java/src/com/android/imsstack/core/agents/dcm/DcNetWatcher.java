@@ -255,12 +255,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     @Override
-    public int getMocnPlmnInfo() {
-        // TODO : update MOCN PLMN info
-        return 0;
-    }
-
-    @Override
     public String getNetworkOperator() {
         return mNetworkOperator;
     }

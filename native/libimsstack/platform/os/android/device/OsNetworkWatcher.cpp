@@ -570,11 +570,6 @@ IMS_SINT32 OsNetworkWatcher::GetVoiceServiceStateType() const
     return PlatformContext::GetInstance()->GetSystem()->GetVoiceServiceState(GetSlotId());
 }
 
-PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetMocnPlmnInfo()
-{
-    return PlatformContext::GetInstance()->GetSystem()->GetMocnPlmnInfo(GetSlotId());
-}
-
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkRegistrationRejectCause()
 {
     return PlatformContext::GetInstance()->GetSystem()->GetNetworkRegistrationRejectCause(
