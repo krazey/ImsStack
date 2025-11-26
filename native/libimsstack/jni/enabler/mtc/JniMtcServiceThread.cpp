@@ -92,6 +92,7 @@ void JniMtcServiceThread::OnRejectedIncomingCall(IN IMS_ULONG nCallKey,
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::AUTO_REJECTED_CALL);
     objParcel.writeInt64(nCallKey);
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
 
     JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(objMediaInfo, objParcel);
@@ -102,8 +103,6 @@ void JniMtcServiceThread::OnRejectedIncomingCall(IN IMS_ULONG nCallKey,
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
 
     JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
-
-    objParcel.writeString16(android::String16(strLogTag.GetStr()));
 
     SendData2Java(objParcel);
 }

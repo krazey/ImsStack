@@ -305,8 +305,6 @@ void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
     /* Supp Info */
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
 
-    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
-
     objParcel.writeInt32(eRatType);
 
     SendData2Java(objParcel);
