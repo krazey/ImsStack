@@ -324,6 +324,68 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 }
 
+TEST_F(SipTransportHandlerTest, OnReceiveInvalidMessage)
+{
+    /* INVITE Request */
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    FillTransportParameters(pMsg);
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
+
+    SIP_UINT16 nError = 0;
+    SIP_INT32 nTxnStatus = 0;
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    SipTxnKey* pNewTxnKey = SIP_NULL;
+
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnRecvTransp(
+                    pMessage, pTranspParam, &nTxnStatus, &bTxnExist, &pNewTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_NEW_REQ_RECVD, nTxnStatus);
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                        {
+                            pOutTxn = pTxn;
+                            return SIP_TRUE;
+                        }
+                        return SIP_FALSE;
+                    }));
+
+    nTxnStatus = 0;
+    bTxnExist = SIP_FALSE;
+    pNewTxnKey = SIP_NULL;
+
+    ClearTransportParameters();
+
+    pMsg = "SIP/2.0 480 Temporarily Unavailable \r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    FillTransportParameters(pMsg);
+
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnRecvTransp(
+                    pMessage, pTranspParam, &nTxnStatus, &bTxnExist, &pNewTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_STRAY_RESP, nTxnStatus);
+}
+
 TEST_F(SipTransportHandlerTest, OnRecvTanspError)
 {
     SIP_UINT16 nError = 0;

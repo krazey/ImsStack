@@ -310,6 +310,14 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         return SIP_NOT_MATCH;
     }
 
+    if (pGeneratedKey->m_eTxnType != m_eTxnType)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
+                "txn-comparison: not-match >> transaction type (s:%d, g:%d)", m_eTxnType,
+                pGeneratedKey->m_eTxnType);
+        return SIP_NOT_MATCH;
+    }
+
     if (pGeneratedKey->HasRule(RULE_COMPARE_VIA_BRANCH) == SIP_TRUE)
     {
         if (SipPf_Stricmp(m_pszViaBranchParam, pGeneratedKey->m_pszViaBranchParam) != SIP_EQUALS)
