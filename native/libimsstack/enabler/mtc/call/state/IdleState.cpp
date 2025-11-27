@@ -284,33 +284,39 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
 
 PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 {
-    ISession* piSession = GetISession();
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+    IMtcSession& objSession = *m_objContext.GetSession();
+    ISession& objISession = objSession.GetISession();
+    IMessage* piMessage = objISession.GetPreviousRequest(IMessage::SESSION_START);
 
     InitMediaSession(MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
             AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
-    m_objContext.GetPreconditionManager().CreateQos(piSession);
+    m_objContext.GetPreconditionManager().CreateQos(&objISession);
 
-    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    CallReasonInfo objReason = HandleReceivedSdp(&objISession, piMessage);
     if (objReason.nCode != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(objReason);
     }
 
-    if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
+    if (m_objContext.GetMessageUtils().HasSdp(piMessage))
+    {
+        objSession.SetCapableCallType(
+                m_objContext.GetMediaManager().GetNegotiatedCallType(&objISession));
+        MediaInfo objCapableMediaInfo = m_objContext.GetMediaManager().GetMediaInfo(objISession);
+        MtcMediaUtil::RefineMediaInfoByCallType(objSession.GetCallType(), objCapableMediaInfo);
+        m_objContext.GetMediaManager().SetMediaInfo(objISession, objCapableMediaInfo);
+    }
+    else
     {
         m_objContext.GetMediaManager().AdjustDirectionForAutoOffer(
-                *piSession, m_objContext.GetSession()->GetCallType());
+                objISession, objSession.GetCallType());
     }
-    m_objContext.GetSession()->SetCapableCallType(
-            m_objContext.GetMediaManager().GetNegotiatedCallType(piSession));
 
-    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
+    m_objContext.GetPreconditionManager().OnMessageReceived(&objISession, piMessage);
 
-    if (m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-                MtcExtensionSet::OPTION_TAG_RPR))
+    if (objSession.GetExtensionSet().IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR))
     {
-        if (m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE, IMS_TRUE) == IMS_FAILURE)
+        if (objSession.SendProvisionalResponse(IMS_FALSE, IMS_TRUE) == IMS_FAILURE)
         {
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         }
@@ -321,7 +327,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
         return OnReadyToAlert();
     }
 
-    StartEpsFallbackWatchdogIfNeeded(*piSession->GetPreviousResponse(IMessage::SESSION_START));
+    StartEpsFallbackWatchdogIfNeeded(*objISession.GetPreviousResponse(IMessage::SESSION_START));
     return CallStateName::INCOMING;
 }
 
