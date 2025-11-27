@@ -60,14 +60,6 @@ import java.util.List;
  */
 public class ImsCallUtils {
     /**
-     * Flags to indicate the conversion of the reason code & extra code
-     */
-    public static final int FLAG_REASON_INFO_NONE = 0x00;
-    public static final int FLAG_REASON_INFO_CODE = 0x01;
-    public static final int FLAG_REASON_INFO_EXTRA_CODE = 0x02;
-    public static final int FLAG_REASON_INFO_ALL = 0xFF;
-
-    /**
      * Variable types.
      */
     public static final int VAR_TYPE_INT = 0;
@@ -268,7 +260,7 @@ public class ImsCallUtils {
 
 
         profile.setCallExtra(ImsCallProfile.EXTRA_CALL_DISCONNECT_CAUSE,
-                Integer.toString(getReasonFromMTC(incomingCall.rejectedReason)));
+                Integer.toString(getCodeFromCallReasonInfo(incomingCall.rejectedReason)));
 
         updateCallProfileForEmergency(profile, incomingCall.callInfo);
         updateCallProfileFromCallInfo(context, profile, incomingCall.callInfo);
@@ -342,33 +334,44 @@ public class ImsCallUtils {
     * Helper for creating the object of {@code ImsReasonInfo}
     *
     * @param callReasonInfo the target to be converted
-    * @param flags indicates which member of the {@code CallReasonInfo} to be converted
     */
-    public static ImsReasonInfo createReasonInfo(final CallReasonInfo callReasonInfo, int flags) {
-        return createReasonInfo(callReasonInfo.mCode, callReasonInfo.mExtraCode,
-                callReasonInfo.mExtraMessage, flags);
+    public static ImsReasonInfo createImsReasonInfo(final CallReasonInfo callReasonInfo) {
+        return new ImsReasonInfo(getCodeFromCallReasonInfo(callReasonInfo.mCode),
+                getExtraCodeFromCallReasonInfo(callReasonInfo.mCode, callReasonInfo.mExtraCode),
+                callReasonInfo.mExtraMessage);
     }
 
-    public static ImsReasonInfo createReasonInfo(
-            int code, int extraCode, String message, int flags) {
-        return createReasonInfo(code, extraCode, message, flags, 0);
+    /**
+     * Helper for creating an object of {@code ImsReasonInfo} with only a reason code.
+     *
+     * @param code The reason code.
+     * @return a new {@link ImsReasonInfo} object.
+     */
+    public static ImsReasonInfo createImsReasonInfo(int code) {
+        return createImsReasonInfo(code, "");
     }
 
-    public static ImsReasonInfo createReasonInfo(
-            int code, int extraCode, String message, int flags, int preferredCode) {
-        // FIXME: convert reason to the proper code of ImsReasonInfo
-        int convertedCode = (preferredCode <= 0) ? code : preferredCode;
-        int convertedExtraCode = extraCode;
+    /**
+     * Helper for creating an object of {@code ImsReasonInfo} with an unspecified extra code.
+     *
+     * @param code The reason code.
+     * @param extraMessage The extra message.
+     * @return a new {@link ImsReasonInfo} object.
+     */
+    public static ImsReasonInfo createImsReasonInfo(int code, String extraMessage) {
+        return createImsReasonInfo(code, ImsReasonInfo.CODE_UNSPECIFIED, extraMessage);
+    }
 
-        if ((preferredCode <= 0) && ((flags & FLAG_REASON_INFO_CODE) != 0)) {
-            convertedCode = getReasonFromMTC(code);
-        }
-
-        if ((flags & FLAG_REASON_INFO_EXTRA_CODE) != 0) {
-            convertedExtraCode = getExtraCodeFromMtc(code, extraCode);
-        }
-
-        return new ImsReasonInfo(convertedCode, convertedExtraCode, message);
+    /**
+     * Helper for creating an object of {@code ImsReasonInfo}.
+     *
+     * @param code The reason code.
+     * @param extraCode The extra code.
+     * @param extraMessage The extra message.
+     * @return a new {@link ImsReasonInfo} object.
+     */
+    public static ImsReasonInfo createImsReasonInfo(int code, int extraCode, String extraMessage) {
+        return new ImsReasonInfo(code, extraCode, extraMessage);
     }
 
     public static SuppInfo createSuppInfoFromCallProfile(
@@ -633,14 +636,21 @@ public class ImsCallUtils {
         }
     }
 
-    public static int getExtraCodeFromMtc(int reason, int extraCode) {
-        if (MtcCallUtils.isCallTerminatedByCSRetry(reason)) {
+    /**
+     * Converts the native information to an {@link ImsReasonInfo} extra code.
+     *
+     * @param code The native call termination reason.
+     * @param extraCode The native extra code.
+     * @return The corresponding {@link ImsReasonInfo} extra code.
+     */
+    public static int getExtraCodeFromCallReasonInfo(int code, int extraCode) {
+        if (MtcCallUtils.isCallTerminatedByCSRetry(code)) {
             if (extraCode == CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL) {
                 return ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             } else {
                 return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
             }
-        } else if (MtcCallUtils.isCallTerminatedByECallRetry(reason)) {
+        } else if (MtcCallUtils.isCallTerminatedByECallRetry(code)) {
             return (extraCode >= 300) ? extraCode : getEmergencyServiceCode(extraCode);
         } else if (extraCode > 0) {
         // TODO : need to modify this after emergency domain selection policy is decided.
@@ -654,9 +664,16 @@ public class ImsCallUtils {
         }
     }
 
-    public static int getReasonFromMTC(int reason) {
-        Integer code = sMtcReasonToImsReason.get(reason);
-        return (code != null) ? code.intValue() : ImsReasonInfo.CODE_UNSPECIFIED;
+    /**
+     * Converts the native call termination reason to an {@link ImsReasonInfo} code.
+     *
+     * @param code The native call termination reason.
+     * @return The corresponding {@link ImsReasonInfo} code, or
+     *         {@link ImsReasonInfo#CODE_UNSPECIFIED} if no mapping is found.
+     */
+    public static int getCodeFromCallReasonInfo(int code) {
+        Integer imsCode = sMtcReasonToImsReason.get(code);
+        return (imsCode != null) ? imsCode.intValue() : ImsReasonInfo.CODE_UNSPECIFIED;
     }
 
     /**
@@ -839,22 +856,6 @@ public class ImsCallUtils {
         }
 
         return ImsCallMediaUtils.isVideoProfileChanged(profile.getMediaProfile(), mi);
-    }
-
-    /**
-    * converts the {@code mCode} of {@code CallReasonInfo} with specific case.
-    *
-    * @param profile used for this operation
-    * @param callReasonInfo the target to be converted
-    */
-    public static void refineCallReasonInfoForCode(ICallContext context,
-            ImsCallProfile profile, CallReasonInfo callReasonInfo) {
-        if ((callReasonInfo.mCode == CallReasonInfo.CODE_SIP_NOT_SUPPORTED)
-                && (callReasonInfo.mExtraCode == 415)
-                && ImsCallUtils.isVideoCall(profile.getCallType())
-                && "LGU".equals(ImsPrivateProperties.getSimOperator(context.getSlotId()))) {
-            callReasonInfo.mCode = CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED;
-        }
     }
 
     public static void removeCallExtra(ImsCallProfile profile, String key) {

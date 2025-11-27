@@ -229,10 +229,9 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testCreateReasonInfo() {
+    public void testCreateImsReasonInfo() {
         CallReasonInfo info = new CallReasonInfo();
-        ImsReasonInfo reasonInfoExtra = ImsCallUtils.createReasonInfo(info,
-                ImsCallUtils.FLAG_REASON_INFO_EXTRA_CODE);
+        ImsReasonInfo reasonInfoExtra = ImsCallUtils.createImsReasonInfo(info);
         assertNotNull(reasonInfoExtra);
     }
 
@@ -537,24 +536,24 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testGetExtraCodeFromMtc() {
+    public void testgetExtraCodeFromCallReasonInfo() {
         int reason = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
         int extraCode = -1;
-        int result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        int result = ImsCallUtils.getExtraCodeFromCallReasonInfo(reason, extraCode);
         int resultCode = ImsReasonInfo.CODE_UNSPECIFIED;
         assertEquals(resultCode, result);
 
         reason = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
-        result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        result = ImsCallUtils.getExtraCodeFromCallReasonInfo(reason, extraCode);
         assertEquals(resultCode, result);
 
         reason = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
         extraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-        result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        result = ImsCallUtils.getExtraCodeFromCallReasonInfo(reason, extraCode);
         assertEquals(CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL, result);
 
         reason = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-        result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        result = ImsCallUtils.getExtraCodeFromCallReasonInfo(reason, extraCode);
         assertEquals(ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL, result);
     }
 
@@ -858,8 +857,8 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testGetReasonFromMTC() {
-        int ret = ImsCallUtils.getReasonFromMTC(
+    public void testgetCodeFromCallReasonInfo() {
+        int ret = ImsCallUtils.getCodeFromCallReasonInfo(
                 CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
         Assert.assertEquals(ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE, ret);
     }

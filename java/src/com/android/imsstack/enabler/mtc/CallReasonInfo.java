@@ -136,9 +136,9 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_OEM_CAUSE_3 = 61443;
 
     // CODE_LOCAL_CALL_CS_RETRY_REQUIRED
-    public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 0;
-    public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 1;
-    public static final int EXTRA_CODE_CALL_RETRY_EMERGENCY = 2;
+    public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 1;
+    public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2;
+    public static final int EXTRA_CODE_CALL_RETRY_EMERGENCY = 4;
 
     // CODE_USER_TERMINATED
     public static final int EXTRA_USER_TERMINATED_ECT = 0;
