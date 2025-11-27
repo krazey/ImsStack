@@ -90,7 +90,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+        RegistrationInfo regInfo = mInfoBuilder.build();
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
@@ -206,7 +207,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+        RegistrationInfo regInfo = mInfoBuilder.build();
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().registered(
@@ -237,14 +240,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
                 info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -271,14 +273,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
                 info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -305,6 +306,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
@@ -312,8 +314,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -340,6 +340,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
@@ -347,8 +348,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -378,6 +377,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
@@ -386,7 +386,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
 
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -413,6 +412,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
@@ -420,8 +420,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -451,6 +449,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registering();
 
         mRegistration.expect().deregistered(
@@ -458,8 +457,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -472,21 +469,20 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder.build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
 
         mRegistration.expect(3000).nothing();
 
         notifyPreciseDataConnectionState(getLtePreciseDataConnectionState(
-                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo);
+                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo.getSlotId());
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
+                TelephonyManager.DATA_CONNECTED), regInfo.getSlotId());
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -504,7 +500,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+        RegistrationInfo regInfo = mInfoBuilder.build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
@@ -537,7 +535,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+        RegistrationInfo regInfo = mInfoBuilder.build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
@@ -633,7 +633,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+        RegistrationInfo regInfo = mInfoBuilder.build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
@@ -723,7 +725,9 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+        RegistrationInfo regInfo = mInfoBuilder.build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
@@ -806,6 +810,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -836,6 +841,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -872,6 +878,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VIDEO,
@@ -905,6 +912,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -929,6 +937,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -960,6 +969,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -970,8 +980,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -995,6 +1003,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1005,8 +1014,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1031,6 +1038,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1042,8 +1050,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1068,9 +1074,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        notifyPreciseDataConnectionState(getNrPreciseDataConnectionState(
+                TelephonyManager.DATA_CONNECTED), regInfo.getSlotId());
 
         mRegistration.expect().registering();
 
@@ -1079,8 +1089,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1108,6 +1116,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1119,8 +1128,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1145,6 +1152,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1156,8 +1164,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1185,6 +1191,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1196,8 +1203,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_NR);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1209,6 +1214,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1219,15 +1225,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistration.expect(3000).nothing();
 
         notifyPreciseDataConnectionState(getNrPreciseDataConnectionState(
-                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo);
+                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo.getSlotId());
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
+                TelephonyManager.DATA_CONNECTED), regInfo.getSlotId());
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1247,6 +1251,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1284,6 +1289,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1336,6 +1342,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1379,6 +1386,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1431,6 +1439,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1474,6 +1483,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         RegistrationInfo regInfo = mInfoBuilder
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1526,6 +1536,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_NR)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
@@ -1562,17 +1573,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
-
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1598,6 +1605,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -1608,13 +1616,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
-
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1640,6 +1643,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VIDEO,
@@ -1650,13 +1654,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
-
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1681,6 +1680,7 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .setEnableCapability(CAPABILITY_TYPE_VOICE,
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .setDisableCapability(CAPABILITY_TYPE_VIDEO,
@@ -1691,13 +1691,8 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
-
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1713,19 +1708,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1752,12 +1743,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -1765,8 +1754,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1793,12 +1780,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -1806,8 +1791,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1834,12 +1817,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -1848,8 +1829,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1876,12 +1855,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -1890,8 +1867,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1921,12 +1896,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -1935,8 +1908,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -1963,12 +1934,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -1977,8 +1946,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -2008,12 +1975,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registering();
 
@@ -2022,8 +1987,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 action -> action
                         == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Test
@@ -2038,12 +2001,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
@@ -2051,10 +2012,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistration.expect(3000).nothing();
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo);
+                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo.getSlotId());
 
         notifyPreciseDataConnectionState(getLtePreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
+                TelephonyManager.DATA_CONNECTED), regInfo.getSlotId());
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
@@ -2072,12 +2033,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildNrIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
@@ -2085,10 +2044,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mRegistration.expect(3000).nothing();
 
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo);
+                TelephonyManager.DATA_HANDOVER_IN_PROGRESS), regInfo.getSlotId());
 
         notifyPreciseDataConnectionState(getNrPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
+                TelephonyManager.DATA_CONNECTED), regInfo.getSlotId());
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
@@ -2106,17 +2065,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
-
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Ignore("TISS support is required.")
@@ -2151,20 +2106,16 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
                         && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Ignore("TISS support is required.")
@@ -2210,12 +2161,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
@@ -2225,8 +2174,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Ignore("TISS support is required.")
@@ -2261,20 +2208,16 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
                         && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Ignore("TISS support is required.")
@@ -2320,12 +2263,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
@@ -2335,8 +2276,6 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Ignore("TISS support is required.")
@@ -2371,20 +2310,16 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
                         && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
                 action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 
     @Ignore("TISS support is required.")
@@ -2430,12 +2365,10 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         RegistrationInfo regInfo = mInfoBuilder
                 .addConfig(mConfig)
                 .setServiceState(buildLteIwlanServiceState())
+                .setExpectedRegTech(REGISTRATION_TECH_IWLAN)
                 .build();
 
         mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED), regInfo);
 
         mRegistration.expect(20000).deregistered(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
@@ -2445,7 +2378,5 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
-
-        simulateSimStateChange(regInfo, TelephonyManager.SIM_STATE_ABSENT);
     }
 }
