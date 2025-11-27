@@ -33,6 +33,7 @@
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/MtcBlockChecker.h"
+#include "call/block/ServiceBlockRule.h"
 #include "call/block/SrvccBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/EstablishedState.h"
@@ -178,6 +179,37 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
     return CallStateName::UPDATING;
 }
 
+PRIVATE VIRTUAL CallStateName EstablishedState::RejectUpdate(IN const CallReasonInfo& objReason)
+{
+    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    IMtcSession& objSession = *m_objContext.GetSession();
+
+    // Restore the CallType that was changed by MtcSession#HandleRequest.
+    objSession.SetCallType(objSession.GetPreviousCallType());
+
+    if (objMediaManager.GetNegotiationState(&objSession.GetISession()) == STATE_OFFER_RECEIVED &&
+            m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT) ==
+                    SipStatusCode::SC_200)
+    {
+        SdpNegotiationResult objNegoResult =
+                objMediaManager.NegotiateSdp(&objSession.GetISession());
+        if (objNegoResult.eResult != MEDIA_NEGO_NO_ERROR)
+        {
+            objSession.Reject(GetReasonByNegotiationResult(objNegoResult.eResult));
+        }
+        objSession.AcceptUpdate();
+    }
+    else
+    {
+        objSession.Reject(objReason);
+    }
+
+    objMediaManager.FinalizeSdp(&objSession.GetISession());
+
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName EstablishedState::Terminate(IN const CallReasonInfo& objReason)
 {
     // SetTerminateCodeForInvitedSessionToConf
@@ -241,11 +273,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     if (objResultReason.nCode != CODE_NONE)
     {
-        // Restore the CallType that was changed by MtcSession#HandleRequest.
-        pSession->SetCallType(pSession->GetPreviousCallType());
-        pSession->Reject(objResultReason);
-        m_objContext.GetMediaManager().FinalizeSdp(piSession);
-        eStateName = CallStateName::ESTABLISHED;
+        eStateName = RejectUpdate(objResultReason);
     }
 
     if (eStateName == CallStateName::ESTABLISHED)
@@ -706,6 +734,8 @@ ImsList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
     lstRules.Append(new CallTypeBlockRule(
             m_objContext, m_objContext.GetUpdatingInfo().GetTargetCallType()));
     lstRules.Append(new SrvccBlockRule(m_objContext.GetService().GetSrvccState()));
+    lstRules.Append(
+            new ServiceBlockRule(m_objContext, m_objContext.GetUpdatingInfo().GetTargetCallType()));
     return lstRules;
 }
 

@@ -43,7 +43,24 @@ private:
     IMtcCallContext& m_objContext;
     CallType m_eCallType;
 
-    CallReasonInfo GetBlockReason() const;
+    /**
+     * @brief Checks capabilities for initiating a call.
+     *
+     * This does not check for specific media capabilities. If the service is available, it
+     * returns {@code UNBLOCKED}, assuming any media mismatch will be handled during negotiation.
+     */
+    Result CheckForInitiatingCall() const;
+
+    /**
+     * @brief Checks capabilities for call type change.
+     *
+     * It returns {@code BLOCKED} if the capability is not enough for {@code m_eCallType}.
+     * No need to check for downgrade (from any call type to VOIP).
+     */
+    Result CheckForEstablishedCall() const;
+    CallReasonInfo GetBlockReasonForInitiatingCall() const;
+
+    IMS_BOOL HasCapabilitiesForCallType(IN const CallType eCallType) const;
 };
 
 #endif
