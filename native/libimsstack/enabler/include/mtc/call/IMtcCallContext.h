@@ -143,7 +143,7 @@ public:
      *
      * @return
      */
-    virtual IMtcService& GetService() = 0;
+    virtual IMtcService& GetService() const = 0;
 
     /**
      * @brief Gets
