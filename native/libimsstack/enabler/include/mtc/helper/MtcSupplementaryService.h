@@ -37,18 +37,21 @@ public:
     MtcSupplementaryService(const MtcSupplementaryService&) = delete;
     MtcSupplementaryService& operator=(const MtcSupplementaryService&) = delete;
 
-    void UpdateOutgoingServices(IN const ImsList<SuppService*>& objSuppServices);
-    void UpdateTip(IN IMessage* piMessage);
+    void UpdateServices(IN const ImsList<SuppService*>& objSuppServices);
+    void UpdateServices(IN IMessage* piMessage);
 
-    IMS_BOOL UpdateIncomingServices(IN IMessage* piMessage);
-    IMS_BOOL UpdateCallerId(IN IMessage* piMessage);
-    IMS_BOOL UpdateCnap(IN IMessage* piMessage);
-    IMS_BOOL UpdateCdivCause(IN const IMessage* piMessage);
-    IMS_BOOL UpdateCdivHistory(IN const IMessage* piMessage);
-    IMS_BOOL UpdateCw(IN const IMessage* piMessage);
-    IMS_BOOL UpdateCallingNumberVerification(IN IMessage* piMessage);
-    IMS_BOOL UpdateCallComposerElements(IN const IMessage* piMessage);
-    IMS_BOOL UpdateSessionId(IN const IMessage* piMessage);
+    void UpdateTip(IN IMessage* piMessage);
+    void UpdateSessionId(IN const IMessage* piMessage);
+
+    // The visibility of these internal methods is currently public to allow for unit testing.
+    void UpdateCallerId(IN IMessage* piMessage);
+    void UpdateCnap(IN IMessage* piMessage);
+    void UpdateCdivCause(IN const IMessage* piMessage);
+    void UpdateCdivHistory(IN const IMessage* piMessage);
+    void UpdateCw(IN const IMessage* piMessage);
+    void UpdateCallingNumberVerification(IN IMessage* piMessage);
+    void UpdateCallComposerElements(IN const IMessage* piMessage);
+
     inline void Add(IN SuppType eSuppType, IN const AString& strValue)
     {
         SuppServiceUtils::Add(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType), strValue);
@@ -65,7 +68,6 @@ public:
     {
         SuppServiceUtils::Delete(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
     }
-    inline void DeleteServices() { SuppServiceUtils::DeleteServices(m_objSuppServices); }
     inline const SuppService* Get(IN SuppType eSuppType) const
     {
         return SuppServiceUtils::Get(m_objSuppServices, static_cast<IMS_SINT32>(eSuppType));
@@ -76,21 +78,22 @@ public:
             IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
 
 private:
-    ISipHeader* GetHistoryInfoHeader(IN const IMessage* piMessage);
+    ISipHeader* GetHistoryInfoHeader(IN const IMessage* piMessage) const;
+    AString GetCnvParameterValue(IN IMessage* piMessage) const;
+    OipType GetOipTypeByHeader(
+            IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack) const;
+    AString GetCnapByHeader(
+            IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack) const;
+
     static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
     static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
     static IMS_SINT32 GetCallingNumberVerificationResult(
             IN const AString& strVerstatParameter, IN const AString& strDisplayName);
-    AString GetCnvParameterValue(IN IMessage* piMessage) const;
-    OipType GetOipTypeByHeader(
-            IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack);
-    void GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOOL bFromHeader, OUT AString& strCnap,
-            IN IMS_BOOL bDoFallBack);
 
-private:
     IMtcCallContext& m_objContext;
     MtcConfigurationProxy& m_objConfigurationProxy;
     ImsList<SuppService*> m_objSuppServices;
 };
+
 #endif

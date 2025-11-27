@@ -250,7 +250,7 @@ TEST_F(MtcUiNotifierTest, SendProgressingSkipOnProgressingWhenParametersAreSame)
 
     SuppServiceUtils::Add(objSuppServices,
             static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ROAMING_VOICE), IMS_TRUE);
-    pSupplementaryService->UpdateOutgoingServices(objSuppServices);
+    pSupplementaryService->UpdateServices(objSuppServices);
 
     EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(1);
     pNotifier->SendProgressing();
@@ -260,7 +260,7 @@ TEST_F(MtcUiNotifierTest, SendProgressingSkipOnProgressingWhenParametersAreSame)
     ImsList<SuppService*> objSuppServices2;
     SuppServiceUtils::Add(objSuppServices2,
             static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO), 0);
-    pSupplementaryService->UpdateOutgoingServices(objSuppServices2);
+    pSupplementaryService->UpdateServices(objSuppServices2);
 
     EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(1);
     pNotifier->SendProgressing();
