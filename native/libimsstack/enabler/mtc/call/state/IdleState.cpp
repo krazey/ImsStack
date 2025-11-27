@@ -91,7 +91,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
         IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("Start [%s]", strTarget.GetStr(), 0, 0);
-    m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
+    m_objContext.GetSupplementaryService().UpdateServices(objSuppServices);
     MediaInfo objMediaInfoToStart;
     if (IsCallPull())
     {
@@ -135,7 +135,7 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo& objMediaInfo,
         IN const ImsList<SuppService*>& objSuppServices, IN const ImsList<ConfUser*>& lstUsers)
 {
-    m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
+    m_objContext.GetSupplementaryService().UpdateServices(objSuppServices);
     m_objContext.GetCallInfo().eInitialCallType = eCallType;
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
@@ -191,7 +191,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
     pSession->HandleRequest(RequestType::START, *piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
-    m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
+    m_objContext.GetSupplementaryService().UpdateServices(piMessage);
 
     AString strNotSupportedExtension;
     if (!pSession->GetExtensionSet().IsSupportRequiredExtensions(
@@ -405,7 +405,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 
     // TODO: need to check
     m_objContext.GetSession()->HandleRequest(RequestType::START, *piMessage);
-    m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
+    m_objContext.GetSupplementaryService().UpdateServices(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
 
     AString strNotSupportedExtension;

@@ -88,7 +88,7 @@ protected:
     }
 };
 
-TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
+TEST_F(MtcSupplementaryServiceTest, UpdateServices)
 {
     SuppService* pTestSupp1 = new SuppService();
     pTestSupp1->nType = static_cast<IMS_SINT32>(SuppType::CNAP);
@@ -106,7 +106,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
     objInSuppService.Append(pTestSupp2);
     objInSuppService.Append(pTestSupp3);
 
-    pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService);
+    pMtcSupplementaryService->UpdateServices(objInSuppService);
 
     const ImsList<SuppService*>& objOutSuppService = pMtcSupplementaryService->GetServices();
 
@@ -116,7 +116,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
     pTestSupp4->bValue = IMS_FALSE;
     ImsList<SuppService*> objInSuppService2;
     objInSuppService2.Append(pTestSupp4);
-    pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService2);
+    pMtcSupplementaryService->UpdateServices(objInSuppService2);
 
     const SuppService* pService = pMtcSupplementaryService->Get(SuppType::CW);
     EXPECT_FALSE(pService->bValue);
