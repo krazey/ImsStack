@@ -243,6 +243,8 @@ public final class RegistrationInfo {
         public Builder() {
             mConfig = new PersistableBundle();
             mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
+            mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT,
+                    CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
         }
 
         /**
