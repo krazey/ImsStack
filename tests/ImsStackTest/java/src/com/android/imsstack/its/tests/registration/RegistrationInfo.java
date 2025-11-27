@@ -21,6 +21,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,6 +47,7 @@ public final class RegistrationInfo {
     private final CapabilityChangeRequest mCapabilityRequest;
     private final int mNetworkCapability;
     private final ServiceState mServiceState;
+    private final int mExpectedRegTech;
 
     /**
      * Defines the available modes for SIM card support.
@@ -83,11 +85,13 @@ public final class RegistrationInfo {
      * @param capabilityRequest The request to change capabilities. {@link CapabilityChangeRequest}
      * @param networkCapability The network capability for the IMS registration.
      * @param serviceState      The service state. {@link ServiceState}
+     * @param expectedRegTech   The expected registration technology, such as
+     *                          {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}.
      */
     public RegistrationInfo(int slotId, PersistableBundle config, int simCarrierId,
             SimSupportMode simSupportMode, int simApplicationState,
             CapabilityChangeRequest capabilityRequest, int networkCapability,
-            ServiceState serviceState) {
+            ServiceState serviceState, int expectedRegTech) {
         mSlotId = slotId;
         mConfig = config;
         mSimCarrierId = simCarrierId;
@@ -96,6 +100,7 @@ public final class RegistrationInfo {
         mCapabilityRequest = capabilityRequest;
         mNetworkCapability = networkCapability;
         mServiceState = serviceState;
+        mExpectedRegTech = expectedRegTech;
     }
 
     /**
@@ -189,6 +194,18 @@ public final class RegistrationInfo {
     }
 
     /**
+     * Returns the expected registration technology.
+     *
+     * @return The expected registration technology. Possible values are:
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE},
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_NR},
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
+     */
+    public int getExpectedRegTech() {
+        return mExpectedRegTech;
+    }
+
+    /**
      * Indicates whether the service state has been changed.
      *
      * @return {@code true} if the service state has been changed, {@code false} otherwise.
@@ -217,6 +234,8 @@ public final class RegistrationInfo {
         sb.append(mNetworkCapability);
         sb.append(", ServiceState=");
         sb.append((mServiceState != null) ? mServiceState.toString() : "null");
+        sb.append(", RegistrationTech=");
+        sb.append(mExpectedRegTech);
         sb.append(" ]");
 
         return sb.toString();
@@ -233,6 +252,7 @@ public final class RegistrationInfo {
         private int mSimApplicationState = TelephonyManager.SIM_STATE_LOADED;
         private int mNetworkCapability = NetworkCapabilities.NET_CAPABILITY_IMS;
         private ServiceState mServiceState;
+        private int mExpectedRegTech = ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
 
         private final CapabilityPairs mEnablePairs = new CapabilityPairs();
         private final CapabilityPairs mDisablePairs = new CapabilityPairs();
@@ -418,6 +438,21 @@ public final class RegistrationInfo {
         }
 
         /**
+         * Sets the expected registration technology for the registration information.
+         *
+         * @param expectedRegTech The expected registration technology. Possible values are:
+         *        {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE},
+         *        {@link ImsRegistrationImplBase#REGISTRATION_TECH_NR},
+         *        {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
+         * @return This {@code Builder} object to allow for chaining of method calls.
+         */
+        @NonNull
+        public Builder setExpectedRegTech(int expectedRegTech) {
+            mExpectedRegTech = expectedRegTech;
+            return this;
+        }
+
+        /**
          * Builds the registration information using the current state of this builder.
          *
          * @return A new {@code RegistrationInfo} object with the specified configuration.
@@ -425,7 +460,7 @@ public final class RegistrationInfo {
         public RegistrationInfo build() {
             return new RegistrationInfo(mSlotId, mConfig, mSimCarrierId, mSimSupportMode,
                     mSimApplicationState, createCapabilityRequest(), mNetworkCapability,
-                    mServiceState);
+                    mServiceState, mExpectedRegTech);
         }
 
 

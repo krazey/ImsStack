@@ -15,13 +15,17 @@
  */
 package com.android.imsstack.its.tests.registration;
 
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_NR;
+
 import android.location.LocationManager;
 import android.os.PersistableBundle;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.imsstack.its.base.CarrierConfigManagerProxyImpl;
 import com.android.imsstack.its.base.ConnectivityManagerProxyImpl;
@@ -46,6 +50,8 @@ public class RegistrationHelper {
 
     /**
      * Performs IMS registration based on the provided {@link ImsStackTestBase} instance.
+     * This method calls the overloaded method using a default {@link RegistrationInfo} object
+     * created with {@code new RegistrationInfo.Builder().build()}.
      *
      * @param testBase The {@link ImsStackTestBase} instance to perform registration.
      *                 Must not be null.
@@ -54,7 +60,7 @@ public class RegistrationHelper {
      */
     public boolean performRegistration(@NonNull ImsStackTestBase testBase) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
-        return performRegistration(testBase, null);
+        return performRegistration(testBase, new RegistrationInfo.Builder().build());
     }
 
     /**
@@ -65,13 +71,14 @@ public class RegistrationHelper {
      * @param testBase The {@link ImsStackTestBase} instance to perform registration.
      *                 Must not be {@code null}.
      * @param info The {@link RegistrationInfo} object containing IMS registration information.
-     *             If {@code null}, a default registration information will be used.
+     *             Must not be {@code null}.
      * @return {@code true} if registration is successful, {@code false} otherwise.
      * @throws NullPointerException if {@code testBase} is {@code null}.
      */
     public boolean performRegistration(@NonNull ImsStackTestBase testBase,
-            @Nullable RegistrationInfo info) {
+            @NonNull RegistrationInfo info) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
+        Objects.requireNonNull(info, "info must not be null.");
 
         triggerRegistration(testBase, info);
 
@@ -145,6 +152,41 @@ public class RegistrationHelper {
 
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
         getConnectivityManagerProxy().notifyNetworkAvailable(info.getNetworkCapability());
+
+        notifyDataConnected(testBase, info);
+    }
+
+    /**
+     * Notifies the system of a successful precise data connection state change (DATA_CONNECTED)
+     * for the expected IMS registration technology specified in the {@link RegistrationInfo}.
+     * If the expected registration technology is not explicitly supported (NR, or IWLAN),
+     * it defaults to notifying for LTE technology.
+     *
+     * @param testBase The {@link ImsStackTestBase} instance to perform registration.
+     *                 Must not be null.
+     * @param info The {@link RegistrationInfo} containing the expected registration technology.
+     *             Must not be null.
+     * @see TelephonyManager#DATA_CONNECTED
+     * @see ImsRegistrationImplBase#REGISTRATION_TECH_LTE
+     * @see ImsRegistrationImplBase#REGISTRATION_TECH_NR
+     * @see ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN
+     */
+    public void notifyDataConnected(@NonNull ImsStackTestBase testBase,
+            @NonNull RegistrationInfo info) {
+        Objects.requireNonNull(testBase, "testBase must not be null.");
+        Objects.requireNonNull(info, "info must not be null.");
+
+        final int expectedTech = info.getExpectedRegTech();
+        if (expectedTech == REGISTRATION_TECH_NR) {
+            testBase.notifyPreciseDataConnectionState(testBase.getNrPreciseDataConnectionState(
+                    TelephonyManager.DATA_CONNECTED), info.getSlotId());
+        } else if (expectedTech == REGISTRATION_TECH_IWLAN) {
+            testBase.notifyPreciseDataConnectionState(testBase.getIwlanPreciseDataConnectionState(
+                    TelephonyManager.DATA_CONNECTED), info.getSlotId());
+        } else {
+            testBase.notifyPreciseDataConnectionState(testBase.getLtePreciseDataConnectionState(
+                    TelephonyManager.DATA_CONNECTED), info.getSlotId());
+        }
     }
 
     /**
@@ -178,8 +220,6 @@ public class RegistrationHelper {
             testBase.updateCarrierConfig(slotId, subId);
         }
         testBase.startEnabler(slotId);
-
-        mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
 
         getCarrierConfigManagerProxy().notifyCarrierConfigChanged(
                 slotId, subId, telephony.getSimCarrierId(), telephony.getSimSpecificCarrierId());
