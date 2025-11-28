@@ -16,8 +16,6 @@
 #ifndef SDP_PRECONDITION_H_
 #define SDP_PRECONDITION_H_
 
-#include "AString.h"
-
 class SdpPrecondition
 {
 public:

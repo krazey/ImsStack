@@ -16,6 +16,8 @@
 #ifndef SDP_CONNECTION_H_
 #define SDP_CONNECTION_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpConnection : public SdpLine

@@ -16,7 +16,13 @@
 #ifndef SDP_PARAMETER_H_
 #define SDP_PARAMETER_H_
 
-#include "SdpDescription.h"
+#include "Sdp.h"
+#include "SdpAttribute.h"
+#include "SdpBandwidth.h"
+
+class SdpDescription;
+class SdpEncryptionKey;
+class SdpInformation;
 
 class SdpParameter
 {

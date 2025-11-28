@@ -16,14 +16,15 @@
 #ifndef SDP_SESSION_DESCRIPTION_H_
 #define SDP_SESSION_DESCRIPTION_H_
 
-#include "IpAddress.h"
-
 #include "SdpDescription.h"
 #include "SdpOrigin.h"
 #include "SdpSessionName.h"
 #include "SdpTimeDescription.h"
 #include "SdpVersion.h"
 
+class IpAddress;
+
+class SdpConnection;
 class SdpTimezone;
 class SdpUri;
 

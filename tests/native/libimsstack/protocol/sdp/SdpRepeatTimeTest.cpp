@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "SdpRepeatTime.h"
 
 namespace android

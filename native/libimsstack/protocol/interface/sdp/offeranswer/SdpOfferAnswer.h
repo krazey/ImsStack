@@ -16,8 +16,6 @@
 #ifndef SDP_OFFER_ANSWER_H_
 #define SDP_OFFER_ANSWER_H_
 
-#include "ImsTypeDef.h"
-
 class SdpOfferAnswer
 {
 public:

@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "Sdp.h"
 #include "SdpEncryptionKey.h"
 

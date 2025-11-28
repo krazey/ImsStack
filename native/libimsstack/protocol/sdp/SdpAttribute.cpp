@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
+#include "TextParser.h"
 
 #include "Sdp.h"
 #include "SdpAttribute.h"

@@ -16,6 +16,8 @@
 #ifndef SDP_BANDWIDTH_H_
 #define SDP_BANDWIDTH_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpBandwidth : public SdpLine

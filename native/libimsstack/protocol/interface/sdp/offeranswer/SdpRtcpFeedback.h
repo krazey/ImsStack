@@ -16,6 +16,8 @@
 #ifndef SDP_RTCP_FEEDBACK_H_
 #define SDP_RTCP_FEEDBACK_H_
 
+#include "AString.h"
+
 #include "offeranswer/SdpMediaFormatParameter.h"
 
 class SdpRtcpFeedback : public SdpMediaFormatParameter

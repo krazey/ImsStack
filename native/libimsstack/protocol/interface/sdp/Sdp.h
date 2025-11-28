@@ -16,8 +16,10 @@
 #ifndef SDP_H_
 #define SDP_H_
 
-#include "AStringArray.h"
-#include "TextParser.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class AStringArray;
 
 class Sdp
 {

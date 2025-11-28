@@ -16,6 +16,8 @@
 #ifndef SDP_ATTRIBUTE_H_
 #define SDP_ATTRIBUTE_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpAttribute : public SdpLine

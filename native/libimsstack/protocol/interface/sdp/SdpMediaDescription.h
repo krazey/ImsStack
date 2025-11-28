@@ -16,6 +16,7 @@
 #ifndef SDP_MEDIA_DESCRIPTION_H_
 #define SDP_MEDIA_DESCRIPTION_H_
 
+#include "SdpConnection.h"
 #include "SdpDescription.h"
 #include "SdpMedia.h"
 

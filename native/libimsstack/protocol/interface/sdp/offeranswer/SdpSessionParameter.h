@@ -16,8 +16,16 @@
 #ifndef SDP_SESSION_PARAMETER_H_
 #define SDP_SESSION_PARAMETER_H_
 
-#include "SdpSessionDescription.h"
+#include "SdpOrigin.h"
+#include "SdpSessionName.h"
+#include "SdpTimeDescription.h"
+#include "SdpVersion.h"
 #include "offeranswer/SdpParameter.h"
+
+class SdpConnection;
+class SdpSessionDescription;
+class SdpTimezone;
+class SdpUri;
 
 class SdpSessionParameter : public SdpParameter
 {

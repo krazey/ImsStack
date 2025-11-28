@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
-#include "ServiceMemory.h"
+#include "TextParser.h"
 
 #include "Sdp.h"
 #include "offeranswer/SdpAvCodec.h"

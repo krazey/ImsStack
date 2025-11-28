@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringArray.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
 #include "Sdp.h"
+#include "SdpTime.h"
 #include "SdpTimeDescription.h"
 
 __IMS_TRACE_TAG_SDP__;

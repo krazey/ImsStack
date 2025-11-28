@@ -19,6 +19,9 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "SdpEncryptionKey.h"
+#include "SdpInformation.h"
+#include "SdpMediaDescription.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpE2EPrecondition.h"
 #include "offeranswer/SdpFramesize.h"

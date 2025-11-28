@@ -17,7 +17,11 @@
 #include "ServiceMemory.h"
 
 #include "Sdp.h"
-#include "offeranswer/SdpSessionParameter.h"
+#include "SdpConnection.h"
+#include "SdpDescription.h"
+#include "SdpEncryptionKey.h"
+#include "SdpInformation.h"
+#include "offeranswer/SdpParameter.h"
 
 // 4 Check this attribute fields
 #define __IMS_SETUP_CONNECTION__

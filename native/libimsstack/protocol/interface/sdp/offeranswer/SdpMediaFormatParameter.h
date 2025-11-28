@@ -16,7 +16,7 @@
 #ifndef SDP_MEDIA_FORMAT_PARAMETER_H_
 #define SDP_MEDIA_FORMAT_PARAMETER_H_
 
-#include "AString.h"
+class AString;
 
 class SdpMediaFormatParameter
 {

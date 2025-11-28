@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 namespace android

@@ -17,10 +17,12 @@
 #define SDP_MEDIA_PARAMETER_H_
 
 #include "SdpConnection.h"
-#include "SdpMediaDescription.h"
-#include "offeranswer/SdpMediaFormat.h"
+#include "SdpMedia.h"
 #include "offeranswer/SdpParameter.h"
 #include "offeranswer/SdpPrecondition.h"
+
+class SdpMediaDescription;
+class SdpMediaFormat;
 
 #define __IMS_SDP_PRECONDITION__
 

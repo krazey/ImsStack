@@ -16,6 +16,8 @@
 #ifndef SDP_INFORMATION_H_
 #define SDP_INFORMATION_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpInformation : public SdpLine

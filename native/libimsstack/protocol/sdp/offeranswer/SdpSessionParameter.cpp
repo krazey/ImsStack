@@ -17,9 +17,12 @@
 #include "IpAddress.h"
 #include "ServiceMemory.h"
 
-#include "SdpUri.h"
-#include "SdpTimeDescription.h"
+#include "SdpConnection.h"
+#include "SdpEncryptionKey.h"
+#include "SdpInformation.h"
+#include "SdpSessionDescription.h"
 #include "SdpTimezone.h"
+#include "SdpUri.h"
 #include "offeranswer/SdpOfferAnswer.h"
 #include "offeranswer/SdpSessionParameter.h"
 

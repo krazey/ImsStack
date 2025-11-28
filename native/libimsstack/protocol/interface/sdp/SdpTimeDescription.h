@@ -16,10 +16,11 @@
 #ifndef SDP_TIME_DESCRIPTION_H_
 #define SDP_TIME_DESCRIPTION_H_
 
-#include "AStringArray.h"
-
 #include "SdpRepeatTime.h"
-#include "SdpTime.h"
+
+class AStringArray;
+
+class SdpTime;
 
 class SdpTimeDescription
 {
