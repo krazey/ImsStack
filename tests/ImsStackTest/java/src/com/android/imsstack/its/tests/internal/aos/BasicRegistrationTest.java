@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.tests.registration.tests;
+package com.android.imsstack.its.tests.internal.aos;
 
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
@@ -39,6 +39,7 @@ import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
 import com.android.imsstack.its.servercontrol.ServerMessage;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
+import com.android.imsstack.its.tests.registration.tests.RegistrationTestBase;
 import com.android.imsstack.its.tests.registration.util.MessageBuildUtils;
 import com.android.imsstack.its.tests.registration.util.TestRegistration;
 import com.android.imsstack.its.util.SingleLatch;
@@ -51,7 +52,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class PrimaryRegistrationTest extends RegistrationTestBase {
+public class BasicRegistrationTest extends RegistrationTestBase {
 
     @Before
     public void setUp() throws Exception {
@@ -73,8 +74,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
     }
 
+     // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+     //    MMTEL, audio, video, and SMSIP features.
+     // 2. The server then completes the registration and subscription flow.
+     // 3. Trigger IMS registration on the device with default configurations.
+     // 4. Verify that the device successfully registers on LTE.
     @Test
-    public void testCarrierDefaultLte_Register_defaultConfig() throws Exception {
+    public void register_onLte_withDefaultConfig_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -91,14 +97,21 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
         RegistrationInfo regInfo = mInfoBuilder.build();
+
         mRegistrationHelper.triggerRegistration(this, regInfo);
 
         mRegistration.expect().registered(
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL and audio, but not video or SMSIP.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to support only the voice capability and disable SMS over IMS.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on LTE.
     @Test
-    public void testCarrierDefaultLte_Register_CapabilityVoice() throws Exception {
+    public void register_onLte_withVoiceOnly_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -132,8 +145,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, and video, but not SMSIP.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to support voice and video capabilities and disable SMS over IMS.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on LTE.
     @Test
-    public void testCarrierDefaultLte_Register_CapabilityVoiceVideo() throws Exception {
+    public void register_onLte_withVoiceVideo_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -167,8 +186,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, and SMSIP, but not video.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to support voice and SMS capabilities, but disable video.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on LTE.
     @Test
-    public void testCarrierDefaultLte_Register_CapabilityVoiceSms() throws Exception {
+    public void register_onLte_withVoiceSms_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -199,8 +224,12 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the first REGISTER request with a 423 Interval Too Brief.
+    // 2. The server then expects a new REGISTER request and completes the normal registration flow.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device retries registration and successfully registers on LTE.
     @Test
-    public void testCarrierDefaultLte_Register_Response423() throws Exception {
+    public void register_onLte_with423Response_retriesAndSucceeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -216,8 +245,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
+    // 2. Configure the device to treat a 403 response as a critical error that
+    //    triggers a PLMN block.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN.
     @Test
-    public void testCarrierDefaultLte_Register_Response403_TriggerPlmnBlock()
+    public void register_onLte_with403AsCriticalError_triggersPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -249,8 +284,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 404 Not Found.
+    // 2. Configure the device via CarrierConfig to define the 404 response as a 'critical'
+    //    error type, which results in blocking the current PLMN.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN.
     @Test
-    public void testCarrierDefaultLte_Register_Response404_TriggerPlmnBlock()
+    public void register_onLte_with404AsCriticalError_triggersPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -282,8 +323,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
+    // 2. Configure the device via CarrierConfig to define the 5xx response as a 'repeated'
+    //    error type, which results in blocking the PLMN with a specific protocol timer.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultLte_Register_Response500_TriggerPlmnBlockWithTimeOut()
+    public void register_onLte_with500AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -316,8 +363,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
+    // 2. Configure the device via CarrierConfig to define the 503 response as a 'repeated'
+    //    error type, which results in blocking the PLMN with a specific protocol timer.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultLte_Register_Response503_TriggerPlmnBlockWithTimeOut()
+    public void register_onLte_with503AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -350,8 +403,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable
+    //    and a Retry-After header.
+    // 2. Configure the device via CarrierConfig to define the 503 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultLte_Register_Response503RetryAfter_TriggerPlmnBlockWithTimeOut()
+    public void register_onLte_with503RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -388,8 +448,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
 
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out.
+    // 2. Configure the device via CarrierConfig to define the 504 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultLte_Register_Response504_TriggerPlmnBlockWithTimeOut()
+    public void register_onLte_with504AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -422,8 +488,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out
+    //    and a Retry-After header.
+    // 2. Configure the device via CarrierConfig to define the 504 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultLte_Register_Response504RetryAfter_TriggerPlmnBlockWithTimeOut()
+    public void register_onLte_with504RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -459,8 +532,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to complete a normal registration and subscription flow, and then
+    //    expect a re-REGISTER.
+    // 2. Trigger IMS registration on LTE.
+    // 3. Verify that the device registers successfully on LTE.
+    // 4. Simulate a data connection handover from LTE to IWLAN.
+    // 5. Verify that the device successfully re-registers on IWLAN.
     @Test
-    public void testCarrierDefaultLte_Register_HandoverToWlan() throws Exception {
+    public void handover_fromLte_toWlan_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(">REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE"
                 + "| >REGISTER | <200-REGISTER");
@@ -485,8 +564,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
+    // 2. Verify the received SUBSCRIBE request contains a P-Access-Network-Info header
+    //    with '3GPP-E-UTRAN'.
+    // 3. Trigger IMS registration on LTE.
+    // 4. Verify that the device successfully registers on LTE.
     @Test
-    public void testCarrierDefaultLte_Subscribe_defaultConfig() throws Exception {
+    public void subscribe_onLte_withDefaultConfig_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<200-REGISTER");
@@ -508,9 +592,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. The device completes registration and subscription.
+    // 2. The server sends a NOTIFY message with event="unregistered" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyUnregistered() throws Exception {
+    public void deregister_onLte_byNotifyUnregistered_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
@@ -549,9 +637,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. The device completes registration and subscription.
+    // 2. The server sends a NOTIFY message with event="unregistered".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "unregistered" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyUnregistered_TriggerRegister()
+    public void deregister_onLte_byNotifyUnregistered_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -606,9 +699,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. The device completes registration and subscription.
+    // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyRejected() throws Exception {
+    public void deregister_onLte_byNotifyRejected_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
@@ -644,9 +741,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. The device completes registration and subscription.
+    // 2. The server sends a NOTIFY message with event="rejected".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "rejected" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyRejected_TriggerRegister()
+    public void deregister_onLte_byNotifyRejected_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -698,9 +800,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. The device completes registration and subscription.
+    // 2. The server sends a NOTIFY message with event="deactivated" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyDeactivated() throws Exception {
+    public void deregister_onLte_byNotifyDeactivated_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
@@ -736,9 +842,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_LTE);
     }
 
+    // 1. The device completes registration and subscription.
+    // 2. The server sends a NOTIFY message with event="deactivated".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "deactivated" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultLte_Deregister_ByNotifyDeactivated_TriggerRegister()
+    public void deregister_onLte_byNotifyDeactivated_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -791,8 +902,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, video, and SMSIP features.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to be on an NR network.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on NR.
     @Test
-    public void testCarrierDefaultNr_Register_defaultConfig() throws Exception {
+    public void register_onNr_withDefaultConfig_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -819,8 +936,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL and audio, but not video or SMSIP.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to support only the voice capability in an NR network.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on NR.
     @Test
-    public void testCarrierDefaultNr_Register_CapabilityVoice() throws Exception {
+    public void register_onNr_withVoiceOnly_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -856,8 +979,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, and video, but not SMSIP.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to support voice and video capabilities in an NR network.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on NR.
     @Test
-    public void testCarrierDefaultNr_Register_CapabilityVoiceVideo() throws Exception {
+    public void register_onNr_withVoiceVideo_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -893,8 +1022,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, and SMSIP, but not video.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to support voice and SMS capabilities in an NR network.
+    // 4. Trigger IMS registration.
+    // 5. Verify that the device successfully registers on NR.
     @Test
-    public void testCarrierDefaultNr_Register_CapabilityVoiceSms() throws Exception {
+    public void register_onNr_withVoiceSms_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -927,8 +1062,12 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the first REGISTER request with a 423 Interval Too Brief.
+    // 2. The server then expects a new REGISTER request and completes the normal registration flow.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device retries registration and successfully registers on NR.
     @Test
-    public void testCarrierDefaultNr_Register_Response423() throws Exception {
+    public void register_onNr_with423Response_retriesAndSucceeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -948,8 +1087,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
+    // 2. Configure the device via CarrierConfig to define the 403 response as a 'critical'
+    //    error type, which results in blocking the current PLMN.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN.
     @Test
-    public void testCarrierDefaultNr_Register_Response403_TriggerPlmnBlock() throws Exception {
+    public void register_onNr_with403AsCriticalError_triggersPlmnBlock() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<403-REGISTER");
@@ -982,8 +1127,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 404 Not Found.
+    // 2. Configure the device via CarrierConfig to define the 404 response as a 'critical'
+    //    error type, which results in blocking the current PLMN.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN.
     @Test
-    public void testCarrierDefaultNr_Register_Response404_TriggerPlmnBlock() throws Exception {
+    public void register_onNr_with404AsCriticalError_triggersPlmnBlock() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<404-REGISTER");
@@ -1016,8 +1167,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
+    // 2. Configure the device via CarrierConfig to define the 5xx response as a 'repeated'
+    //    error type, which results in blocking the PLMN with a specific protocol timer.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultNr_Register_Response500_TriggerPlmnBlockWithTimeOut()
+    public void register_onNr_with500AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1052,8 +1209,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
+    // 2. Configure the device via CarrierConfig to define the 503 response as a 'repeated'
+    //    error type, which results in blocking the PLMN with a specific protocol timer.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultNr_Register_Response503_TriggerPlmnBlockWithTimeOut()
+    public void register_onNr_with503AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1091,8 +1254,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable
+    //    and a Retry-After header.
+    // 2. Configure the device via CarrierConfig to define the 503 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultNr_Register_Response503RetryAfter_TriggerPlmnBlockWithTimeOut()
+    public void register_onNr_with503RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1130,8 +1300,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out.
+    // 2. Configure the device via CarrierConfig to define the 504 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultNr_Register_Response504_TriggerPlmnBlockWithTimeOut()
+    public void register_onNr_with504AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1166,8 +1342,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out
+    //    and a Retry-After header.
+    // 2. Configure the device via CarrierConfig to define the 504 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device in an NR network.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultNr_Register_Response504RetryAfter_TriggerPlmnBlockWithTimeOut()
+    public void register_onNr_with504RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1205,8 +1388,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to complete a normal registration and subscription flow, and then
+    //    expect a re-REGISTER.
+    // 2. Trigger IMS registration on NR.
+    // 3. Verify that the device registers successfully on NR.
+    // 4. Simulate a data connection handover from NR to IWLAN.
+    // 5. Verify that the device successfully re-registers on IWLAN.
     @Test
-    public void testCarrierDefaultNr_Register_HandoverToWlan() throws Exception {
+    public void handover_fromNr_toWlan_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(">REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE"
                 + "| >REGISTER | <200-REGISTER");
@@ -1234,8 +1423,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
+    // 2. Verify the received SUBSCRIBE request contains a P-Access-Network-Info header
+    //    with '3GPP-NR'.
+    // 3. Trigger IMS registration on NR.
+    // 4. Verify that the device successfully registers on NR.
     @Test
-    public void testCarrierDefaultNr_Subscribe_defaultConfig() throws Exception {
+    public void subscribe_onNr_withDefaultConfig_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<200-REGISTER");
@@ -1260,9 +1454,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. The device completes registration and subscription on NR.
+    // 2. The server sends a NOTIFY message with event="unregistered" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultNr_Deregister_ByNotifyUnregistered() throws Exception {
+    public void deregister_onNr_byNotifyUnregistered_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
@@ -1301,9 +1499,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. The device completes registration and subscription on NR.
+    // 2. The server sends a NOTIFY message with event="unregistered".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "unregistered" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again on NR.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultNr_Deregister_ByNotifyUnregistered_TriggerRegister()
+    public void deregister_onNr_byNotifyUnregistered_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -1357,9 +1560,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. The device completes registration and subscription on NR.
+    // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultNr_Deregister_ByNotifyRejected() throws Exception {
+    public void deregister_onNr_byNotifyRejected_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
@@ -1398,9 +1605,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. The device completes registration and subscription on NR.
+    // 2. The server sends a NOTIFY message with event="rejected".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "rejected" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again on NR.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultNr_Deregister_ByNotifyRejected_TriggerRegister()
+    public void deregister_onNr_byNotifyRejected_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -1454,9 +1666,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. The device completes registration and subscription on NR.
+    // 2. The server sends a NOTIFY message with event="deactivated" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultNr_Deregister_ByNotifyDeactivated() throws Exception {
+    public void deregister_onNr_byNotifyDeactivated_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
@@ -1495,9 +1711,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_NR);
     }
 
+    // 1. The device completes registration and subscription on NR.
+    // 2. The server sends a NOTIFY message with event="deactivated".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "deactivated" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again on NR.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultNr_Deregister_ByNotifyDeactivated_TriggerRegister()
+    public void deregister_onNr_byNotifyDeactivated_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -1551,8 +1772,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, video, and SMSIP features.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device to allow IMS registration over WLAN.
+    // 4. Trigger IMS registration on the device in a WLAN network.
+    // 5. Verify that the device successfully registers on IWLAN.
     @Test
-    public void testCarrierDefaultWlan_Register_defaultConfig() throws Exception {
+    public void register_onWlan_withDefaultConfig_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -1582,8 +1809,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL and audio, but not video or SMSIP.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device for Wi-Fi calling, supporting only the voice capability.
+    // 4. Trigger IMS registration on IWLAN.
+    // 5. Verify that the device successfully registers on IWLAN.
     @Test
-    public void testCarrierDefaultWlan_Register_CapabilityVoice() throws Exception {
+    public void register_onWlan_withVoiceOnly_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -1620,8 +1853,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, and video, but not SMSIP.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device for Wi-Fi calling, supporting voice and video capabilities.
+    // 4. Trigger IMS registration on IWLAN.
+    // 5. Verify that the device successfully registers on IWLAN.
     @Test
-    public void testCarrierDefaultWlan_Register_CapabilityVoiceVideo() throws Exception {
+    public void register_onWlan_withVoiceVideo_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -1658,8 +1897,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
+    //    MMTEL, audio, and SMSIP, but not video.
+    // 2. The server then completes the registration and subscription flow.
+    // 3. Configure the device for Wi-Fi calling, supporting voice and SMS capabilities.
+    // 4. Trigger IMS registration on IWLAN.
+    // 5. Verify that the device successfully registers on IWLAN.
     @Test
-    public void testCarrierDefaultWlan_Register_CapabilityVoiceSms() throws Exception {
+    public void register_onWlan_withVoiceSms_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister()
                 .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
@@ -1695,8 +1940,12 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the first REGISTER request with a 423 Interval Too Brief.
+    // 2. The server then expects a new REGISTER request and completes the normal registration flow.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device retries registration and successfully registers on IWLAN.
     @Test
-    public void testCarrierDefaultWlan_Register_Response423() throws Exception {
+    public void register_onWlan_with423Response_retriesAndSucceeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages(
@@ -1719,8 +1968,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
+    // 2. Configure the device via CarrierConfig to define the 403 response as a 'critical'
+    //    error type, which results in blocking the current PLMN.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN.
     @Test
-    public void testCarrierDefaultWlan_Register_Response403_TriggerPlmnBlock()
+    public void register_onWlan_with403AsCriticalError_triggersPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1756,8 +2011,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 404 Not Found.
+    // 2. Configure the device via CarrierConfig to define the 404 response as a 'critical'
+    //    error type, which results in blocking the current PLMN.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN.
     @Test
-    public void testCarrierDefaultWlan_Register_Response404_TriggerPlmnBlock()
+    public void register_onWlan_with404AsCriticalError_triggersPlmnBlock()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1793,8 +2054,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
+    // 2. Configure the device via CarrierConfig to define the 5xx response as a 'repeated'
+    //    error type, which results in blocking the PLMN with a specific protocol timer.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultWlan_Register_Response500_TriggerPlmnBlockWithTimeOut()
+    public void register_onWlan_with500AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1831,8 +2098,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
+    // 2. Configure the device via CarrierConfig to define the 503 response as a 'repeated'
+    //    error type, which results in blocking the PLMN with a specific protocol timer.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultWlan_Register_Response503_TriggerPlmnBlockWithTimeOut()
+    public void register_onWlan_with503AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1869,8 +2142,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable
+    //    and a Retry-After header.
+    // 2. Configure the device via CarrierConfig to define the 503 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultWlan_Register_Response503RetryAfter_TriggerPlmnBlockWithTimeOut()
+    public void register_onWlan_with503RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1910,8 +2190,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out.
+    // 2. Configure the device via CarrierConfig to define the 504 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultWlan_Register_Response504_TriggerPlmnBlockWithTimeOut()
+    public void register_onWlan_with504AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1948,8 +2234,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out
+    //    and a Retry-After header.
+    // 2. Configure the device via CarrierConfig to define the 504 response as a 'repeated'
+    //    error type.
+    // 3. Trigger IMS registration on the device over IWLAN.
+    // 4. Verify that the device enters a deregistered state with the suggested action to
+    //    block the PLMN with a timeout.
     @Test
-    public void testCarrierDefaultWlan_Register_Response504RetryAfter_TriggerPlmnBlockWithTimeOut()
+    public void register_onWlan_with504RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
@@ -1989,8 +2282,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. Set up the server to complete a normal registration and subscription flow, and then
+    //    expect a re-REGISTER.
+    // 2. Trigger IMS registration on IWLAN.
+    // 3. Verify that the device registers successfully on IWLAN.
+    // 4. Simulate a data connection handover from IWLAN to LTE.
+    // 5. Verify that the device successfully re-registers on LTE.
     @Test
-    public void testCarrierDefaultWlan_Register_HandoverToLte() throws Exception {
+    public void handover_fromWlan_toLte_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(">REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE"
                 + "| >REGISTER | <200-REGISTER");
@@ -2021,8 +2320,14 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
     }
 
+    // 1. Set up the server to complete a normal registration and subscription flow, and then
+    //    expect a re-REGISTER.
+    // 2. Trigger IMS registration on IWLAN.
+    // 3. Verify that the device registers successfully on IWLAN.
+    // 4. Simulate a data connection handover from IWLAN to NR.
+    // 5. Verify that the device successfully re-registers on NR.
     @Test
-    public void testCarrierDefaultWlan_Register_HandoverToNr() throws Exception {
+    public void handover_fromWlan_toNr_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(">REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE"
                 + "| >REGISTER | <200-REGISTER");
@@ -2053,8 +2358,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_NR);
     }
 
+    // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
+    // 2. Configure the device for Wi-Fi Calling.
+    // 3. Trigger IMS registration on IWLAN.
+    // 4. Verify the device registers successfully.
+    // 5. Verify the device sends a SUBSCRIBE request.
     @Test
-    public void testCarrierDefaultWlan_Subscribe_defaultConfig() throws Exception {
+    public void subscribe_onWlan_withDefaultConfig_succeeds() throws Exception {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | >SUBSCRIBE");
@@ -2074,9 +2384,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. The device completes registration and subscription on IWLAN.
+    // 2. The server sends a NOTIFY message with event="unregistered" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultWlan_Deregister_ByNotifyUnregistered() throws Exception {
+    public void deregister_onWlan_byNotifyUnregistered_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
@@ -2118,9 +2432,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. The device completes registration and subscription on IWLAN.
+    // 2. The server sends a NOTIFY message with event="unregistered".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "unregistered" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again
+    //    on IWLAN.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultWlan_Deregister_ByNotifyUnregistered_TriggerRegister()
+    public void deregister_onWlan_byNotifyUnregistered_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -2176,9 +2496,13 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. The device completes registration and subscription on IWLAN.
+    // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
+    // 3. The device sends a 200 OK for the NOTIFY.
+    // 4. Verify that the device is deregistered locally due to network-initiated detach.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultWlan_Deregister_ByNotifyRejected() throws Exception {
+    public void deregister_onWlan_byNotifyRejected_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
@@ -2220,9 +2544,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. The device completes registration and subscription on IWLAN.
+    // 2. The server sends a NOTIFY message with event="rejected".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "rejected" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again
+    //    on IWLAN.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultWlan_Deregister_ByNotifyRejected_TriggerRegister()
+    public void deregister_onWlan_byNotifyRejected_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
@@ -2278,9 +2608,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. The device completes registration and subscription on IWLAN.
+    // 2. The server sends a NOTIFY message with event="rejected".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "rejected" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again
+    //    on IWLAN.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultWlan_Deregister_ByNotifyDeactivated() throws Exception {
+    public void deregister_onWlan_byNotifyDeactivated_succeeds() throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
         File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
@@ -2322,9 +2658,15 @@ public class PrimaryRegistrationTest extends RegistrationTestBase {
                 networkType -> networkType == REGISTRATION_TECH_IWLAN);
     }
 
+    // 1. The device completes registration and subscription on IWLAN.
+    // 2. The server sends a NOTIFY message with event="deactivated".
+    // 3. Configure the device to re-register upon receiving a NOTIFY with "deactivated" event.
+    // 4. Verify that the device is deregistered locally.
+    // 5. Verify that the device triggers a new registration and successfully registers again
+    //    on IWLAN.
     @Ignore("TISS support is required.")
     @Test
-    public void testCarrierDefaultWlan_Deregister_ByNotifyDeactivated_TriggerRegister()
+    public void deregister_onWlan_byNotifyDeactivated_triggersRegistration()
             throws Exception {
         // TODO: The following XML files must be included in TISS:
         /*
