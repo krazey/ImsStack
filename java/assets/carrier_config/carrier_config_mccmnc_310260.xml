@@ -15,6 +15,13 @@
  * limitations under the License.
 -->
 <carrier_config_list>
+    <carrier_config gid1="6514">
+        <!-- Please always keep this config on the first line. -->
+        <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="2077"/>
+        </int-array>
+    </carrier_config>
     <carrier_config gid1="6523">
         <!-- Please always keep this config on the first line. -->
         <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
@@ -41,6 +48,13 @@
         <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
         <int-array name="ims.parent_carrier_ids_int_array" num="1">
             <item value="1"/>
+        </int-array>
+    </carrier_config>
+    <carrier_config gid1="6907">
+        <!-- Please always keep this config on the first line. -->
+        <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="2629"/>
         </int-array>
     </carrier_config>
     <carrier_config gid1="6911">
