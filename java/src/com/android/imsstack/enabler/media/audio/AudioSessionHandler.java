@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,8 +36,11 @@ import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.RtpReceptionStats;
 import android.util.Pair;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.QosAgent;
 import com.android.imsstack.core.agents.QosAgent.ImsQosCallback;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
@@ -107,6 +110,7 @@ public class AudioSessionHandler extends MediaState {
     private MediaConfig mMediaConfig;
     private int mCodecType;
     private boolean mAnbrEnabled;
+    private DtmfToneGenerator mDtmfToneGenerator;
 
     public AudioSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
@@ -119,6 +123,7 @@ public class AudioSessionHandler extends MediaState {
         mMediaConfig = new MediaConfig();
         createQosAgent(mContext.getSlotId());
         mAnbrEnabled = false;
+        mDtmfToneGenerator = new DtmfToneGenerator(mContext);
         ImsLog.d("AudioSessionHandler created");
     }
 
@@ -126,7 +131,7 @@ public class AudioSessionHandler extends MediaState {
     public AudioSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull AudioSessionCallbackHandler audioCallbackHandler,
             @NonNull ImsAudioSession audioSession, MediaConfig mediaConfig, Looper looper,
-            @Nullable QosAgent audioQosAgent) {
+            DtmfToneGenerator dtmfToneGenerator, @Nullable QosAgent audioQosAgent) {
         super(ImsMediaSession.SESSION_TYPE_AUDIO);
         mContext = context;
         mMediaManager = mediaManager;
@@ -138,6 +143,8 @@ public class AudioSessionHandler extends MediaState {
         mAudioMessageHandler = new AudioMessageHandler(looper);
         createQosAgent(mContext.getSlotId());
         mAnbrEnabled = false;
+        mDtmfToneGenerator = (dtmfToneGenerator != null) ? dtmfToneGenerator
+                : new DtmfToneGenerator(mContext);
         ImsLog.d("AudioSessionHandler created");
     }
 
@@ -1016,6 +1023,7 @@ public class AudioSessionHandler extends MediaState {
         mAudioSession = null;
         mAudioSessionId = 0;
         mAudioMessageHandler.removeCallbacksAndMessages(null);
+        mDtmfToneGenerator.release();
         if (mAudioSessionCallbackHandler != null) {
             mAudioSessionCallbackHandler.closeSessionResponse();
         }
@@ -1168,7 +1176,17 @@ public class AudioSessionHandler extends MediaState {
 
     private void handleNotifyIncomingDtmfReceived(final int dtmfDigit, final int durationMs) {
         if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.onNotifyIncomingDtmfReceived(dtmfDigit, durationMs);
+            int tone = convertDigitToTone(dtmfDigit);
+
+            if (tone != -1) {
+                if (isIncomingDtmfTonePlaySupported()) {
+                    mDtmfToneGenerator.play(tone, durationMs);
+                }
+
+                mAudioSessionCallbackHandler.onNotifyIncomingDtmfReceived(dtmfDigit, durationMs);
+            } else {
+                ImsLog.e("handleNotifyIncomingDtmfReceived: Invalid DTMF digit: " + dtmfDigit);
+            }
         }
     }
 
@@ -1211,5 +1229,45 @@ public class AudioSessionHandler extends MediaState {
             }
         }
         return null;
+    }
+
+    private boolean isIncomingDtmfTonePlaySupported() {
+        ImsLog.d("isIncomingDtmfTonePlaySupported");
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mContext.getSlotId());
+        boolean bIncomingDtmfTonePlaySupported = false;
+
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+            if (cc != null) {
+                bIncomingDtmfTonePlaySupported = cc.getBoolean(
+                        CarrierConfig.ImsVoice.KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL, false);
+            }
+        }
+
+        return bIncomingDtmfTonePlaySupported;
+    }
+
+    private int convertDigitToTone(final int dtmfDigit) {
+        int tone = -1;
+
+        if (Character.isDigit(dtmfDigit)) {
+            tone = Character.digit(dtmfDigit, 10);
+        } else if (dtmfDigit == '*') {
+            tone = 10; // ToneGenerator.TONE_DTMF_STAR
+        } else if (dtmfDigit == '#') {
+            tone = 11; // ToneGenerator.TONE_DTMF_POUND
+        }
+
+        ImsLog.d("convertDigitToTone: dtmfDigit=" + dtmfDigit + " tone= " + tone);
+        return tone;
+    }
+
+    /**
+     * Create DtmfToneGenerator instance
+     */
+    @VisibleForTesting
+    public DtmfToneGenerator createDtmfToneGenerator() {
+        return new DtmfToneGenerator(mContext);
     }
 }

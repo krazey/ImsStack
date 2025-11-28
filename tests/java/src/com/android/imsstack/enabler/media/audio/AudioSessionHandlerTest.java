@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,13 +52,17 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.QosAgent.ImsQosCallback;
+import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -73,6 +77,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     private static final int LOCAL_RTP_PORT = 50010;
     private static final String REMOTE_RTP_ADDRESS = "fg01:abab:cdef:6fee::1";
     private static final int REMOTE_RTP_PORT = 1236;
+    private static final int SLOT0 = 0;
     private static final int SESSION_ID = 439;
 
     // Dtmf settings
@@ -85,6 +90,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     @Mock AudioConfig mMockAudioConfig;
     @Mock AnbrMode mMockAnbrMode;
     @Mock EvsParams mMockEvsParams;
+    @Mock DtmfToneGenerator mMockDtmfToneGenerator;
 
     private AudioSessionHandler mAudioSessionHandler;
     private AudioSessionCallback mAudioSessionCallback;
@@ -96,7 +102,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         // create the instance to test
         mAudioSessionHandler = new AudioSessionHandler(mMockBaseContext, mMediaManager,
                 mMockAudioSessionCallbackHandler, mMockAudioSession, mMockMediaConfig,
-                Looper.myLooper(), mMockQosAgent);
+                Looper.myLooper(), mMockDtmfToneGenerator, mMockQosAgent);
         mMediaSession.setAudioSessionHandler(mAudioSessionHandler);
         mAudioSessionCallback = mAudioSessionHandler.getAudioSessionCallback();
     }
@@ -104,6 +110,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     @After
     public void tearDown() throws Exception {
         mAudioSessionHandler = null;
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         super.tearDown();
     }
 
@@ -201,6 +208,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         when(mMockAudioSession.getSessionId()).thenReturn(SESSION_ID);
         mAudioSessionCallback.onOpenSessionSuccess(mMockAudioSession);
         processAllMessages();
+
         verify(mMockAudioSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_SUCCESS));
         assertEquals(mAudioSessionHandler.getAudioSessionId(),SESSION_ID);
@@ -747,8 +755,51 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     public void testOnNotifyIncomingDtmfReceived() {
         mAudioSessionCallback.onDtmfReceived(DTMF_DIGIT, DTMF_DURATION);
         processAllMessages();
+        // Verification: The callback to the framework is still made
         verify(mMockAudioSessionCallbackHandler).onNotifyIncomingDtmfReceived(
                 eq((int) DTMF_DIGIT), eq(DTMF_DURATION));
+    }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived_PlaybackSupported() {
+        ConfigInterface mockConfigInterface = Mockito.mock(ConfigInterface.class);
+        CarrierConfig mockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mockConfigInterface,
+                SLOT0);
+
+        when(mockConfigInterface.getCarrierConfig()).thenReturn(mockCarrierConfig);
+        when(mockCarrierConfig.getBoolean(
+                CarrierConfig.ImsVoice.KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL,
+                false)).thenReturn(true);
+
+        AudioSessionHandler spyAudioSessionHandler = spy(mAudioSessionHandler);
+        doReturn(mMockDtmfToneGenerator).when(spyAudioSessionHandler).createDtmfToneGenerator();
+        mMediaSession.setAudioSessionHandler(spyAudioSessionHandler);
+
+        mAudioSessionCallback.onDtmfReceived(DTMF_DIGIT, DTMF_DURATION);
+        processAllMessages();
+    }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived_PlaybackNotSupported() {
+        ConfigInterface mockConfigInterface = Mockito.mock(ConfigInterface.class);
+        CarrierConfig mockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mockConfigInterface,
+                SLOT0);
+
+        when(mockConfigInterface.getCarrierConfig()).thenReturn(mockCarrierConfig);
+        when(mockCarrierConfig.getBoolean(
+                        CarrierConfig.ImsVoice.KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL, false))
+                .thenReturn(false);
+
+        mAudioSessionCallback.onDtmfReceived(DTMF_DIGIT, DTMF_DURATION);
+        processAllMessages();
+
+        // Verification: The callback to the framework is still made
+        verify(mMockAudioSessionCallbackHandler).onNotifyIncomingDtmfReceived(
+                eq((int) DTMF_DIGIT), eq(DTMF_DURATION));
+
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
     }
 
     @Test
@@ -921,7 +972,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         // create the instance to test
         mAudioSessionHandler = new AudioSessionHandler(mMockBaseContext, mMediaManager,
                 null, mMockAudioSession, mMockMediaConfig, Looper.myLooper(),
-                mMockQosAgent);
+                mMockDtmfToneGenerator, mMockQosAgent);
         mMediaSession.setAudioSessionHandler(mAudioSessionHandler);
         mAudioSessionCallback = mAudioSessionHandler.getAudioSessionCallback();
         AudioConfig audioConfig = MediaTestUtils.createAudioConfig();
@@ -1036,7 +1087,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         // create the instance to test
         mAudioSessionHandler = new AudioSessionHandler(mMockBaseContext, mMediaManager,
                 null, mMockAudioSession, mMockMediaConfig, Looper.myLooper(),
-                mMockQosAgent);
+                mMockDtmfToneGenerator, mMockQosAgent);
         ImsQosCallback callback = mAudioSessionHandler.getAudioImsQosCallback();
         callback.onNotifyQosConnectionAvailable(null);
         callback.onNotifyQosConnectionLost(null);

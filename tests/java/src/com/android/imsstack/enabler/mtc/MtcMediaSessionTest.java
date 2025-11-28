@@ -34,7 +34,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
@@ -76,6 +75,7 @@ public class MtcMediaSessionTest {
     private static final int MEDIA_TYPE_VIDEO = IUMtcMedia.SESSION_TYPE_VIDEO;
     private static final int MEDIA_DIRECTION_UL = 1;
     private static final int RAT_EUTRAN = AccessNetworkType.EUTRAN;
+    private static final char DTMF_DIGIT = '9';
     private MtcMediaSession mMtcMediaSession;
 
     @Mock private IBaseContext mMockBaseContext;
@@ -95,10 +95,10 @@ public class MtcMediaSessionTest {
 
     @Before
     public void setUp() throws Exception {
-        AppContext.deinit();
-        // TODO : Need to improve towards not using Appcontext
-
+        // Re-initialize mocks for each test to ensure isolation.
         MockitoAnnotations.initMocks(this);
+
+        AppContext.deinit();
 
         AppContext.init(mContext);
 
@@ -161,12 +161,12 @@ public class MtcMediaSessionTest {
 
     @After
     public void tearDown() throws Exception {
-        if (mMtcMediaSession != null) {
-            mMtcMediaSession.dispose();
-            mMtcMediaSession = null;
-        }
         MtcJniProxy.setInstanceForTesting(null);
         AppContext.deinit();
+        if (mMtcMediaSession != null) {
+            mMtcMediaSession.dispose();
+        }
+        mMtcMediaSession = null;
     }
 
     @Test
@@ -252,10 +252,10 @@ public class MtcMediaSessionTest {
 
     @Test
     public void testOnNotifyIncomingDtmfReceived() throws Exception {
-        mMtcMediaSession.onNotifyIncomingDtmfReceived(ToneGenerator.TONE_DTMF_1, 300);
+        mMtcMediaSession.onNotifyIncomingDtmfReceived(DTMF_DIGIT, 300);
 
         verify(mMockAudioListener, times(1)).onNotifyIncomingDtmfReceived(
-                eq(ToneGenerator.TONE_DTMF_1));
+                eq((int) DTMF_DIGIT));
     }
 
     @Test
