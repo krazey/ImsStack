@@ -24,10 +24,8 @@
 #include "MockIMtcService.h"
 #include "MockISession.h"
 #include "MtcDef.h"
-#include "PlatformContext.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
-#include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
@@ -77,7 +75,6 @@ public:
     MockMtcTimerWrapper objTimer;
     TestMtcPendingOperationHolder objPendingOperationHolder;
     MockIMessageUtils objMessageUtils;
-    TestConfigService objConfigService;
     MediaInfo objMediaInfo;
     SipMethod* pSipMethod;
     ImsVector<AString> objActionSets;
@@ -86,10 +83,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        objConfigService.SetCarrierConfig(&(objConfigService.GetMockCarrierConfig()));
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_CONFIG, &objConfigService);
-
         pConfigurationProxy = new MockMtcConfigurationProxy();
         pMtcSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
@@ -132,8 +125,6 @@ protected:
         delete pConfigurationProxy;
         delete pMtcSupplementaryService;
         delete pSipMethod;
-
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
     }
 
     void SetUpOnSdpReceivedFailed()
@@ -307,8 +298,8 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionRejectIfRejectCodeIsNot20
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
 
@@ -322,8 +313,8 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
             .WillByDefault(Return(200));
 
     ON_CALL(objMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
@@ -1055,8 +1046,8 @@ TEST_F(UpdatingStateTest,
     SetUpOnSdpReceivedFailed();
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objMessage));
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
 
@@ -1074,8 +1065,8 @@ TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateReceivedRejectsIfResponseFailed
 {
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objMessage));
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
 
@@ -1268,8 +1259,8 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfInvalidDescriptor)
 
 TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfResponseFailed)
 {
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200)).WillOnce(Return(IMS_FAILURE));
