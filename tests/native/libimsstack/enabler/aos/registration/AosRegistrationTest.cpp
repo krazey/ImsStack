@@ -2092,12 +2092,10 @@ TEST_F(AosRegistrationTest, UpdateFeatureTagOptionsSucceedWhenAddFeatureTagForMt
 {
     m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
 
-    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, _))
-            .Times(3)
-            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(_, _)).WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities());
 
-    IMS_UINT32 nRegFeatures = ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    IMS_UINT32 nRegFeatures = ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
     m_pAosRegistration->AddFeatureTagForMtc(nRegFeatures, IMS_FALSE);
 
     m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
@@ -2158,81 +2156,17 @@ TEST_F(AosRegistrationTest, AddHeaderParameterWhenAddFeatureTagForMtc)
     m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
 }
 
-TEST_F(AosRegistrationTest, AudioFeatureTagShouldBeRemovedIfMmtelFeatureUnavailable)
+TEST_F(AosRegistrationTest, UpdateFeatureTagOptionsWhenRemoveFeatureTagForMtc)
 {
-    // GIVEN
     m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
-
-    IMS_UINT32 nOldFeature = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
+    IMS_UINT32 nOldFeature = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
             ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT;
     ON_CALL(m_objMockISipConfigV, GetFeatureTagOptions()).WillByDefault(Return(nOldFeature));
 
-    IMS_UINT32 nNewFeatureTags = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT;
-    AString strSipFeatures;
-    strSipFeatures.Sprintf("0x%08x", nNewFeatureTags);
+    IMS_UINT32 nRegFeatures = ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    IMS_BOOL bResult = m_pAosRegistration->RemoveFeatureTagForMtc(nRegFeatures);
 
-    EXPECT_CALL(
-            m_objMockIConfigurable, Update(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, strSipFeatures))
-            .WillOnce(Return(IMS_TRUE));
-
-    // WHEN & THEN: The GIVEN expectations should be met.
-    EXPECT_TRUE(m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::MMTEL));
-
-    // Clean Up
-    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
-}
-
-TEST_F(AosRegistrationTest, VideoFeatureTagShouldBeRemovedIfVideoFeatureUnavailable)
-{
-    // GIVEN
-    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
-
-    IMS_UINT32 nOldFeature = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT;
-    ON_CALL(m_objMockISipConfigV, GetFeatureTagOptions()).WillByDefault(Return(nOldFeature));
-
-    IMS_UINT32 nNewFeatureTags = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT;
-    AString strSipFeatures;
-    strSipFeatures.Sprintf("0x%08x", nNewFeatureTags);
-
-    EXPECT_CALL(
-            m_objMockIConfigurable, Update(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, strSipFeatures))
-            .WillOnce(Return(IMS_TRUE));
-
-    // WHEN & THEN: The GIVEN expectations should be met.
-    EXPECT_TRUE(m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::VIDEO));
-
-    // Clean Up
-    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
-}
-
-TEST_F(AosRegistrationTest, TextFeatureTagShouldBeRemovedIfTextFeatureUnavailable)
-{
-    // GIVEN
-    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
-
-    IMS_UINT32 nOldFeature = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT;
-    ON_CALL(m_objMockISipConfigV, GetFeatureTagOptions()).WillByDefault(Return(nOldFeature));
-
-    IMS_UINT32 nNewFeatureTags = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO |
-            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO;
-    AString strSipFeatures;
-    strSipFeatures.Sprintf("0x%08x", nNewFeatureTags);
-
-    EXPECT_CALL(
-            m_objMockIConfigurable, Update(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, strSipFeatures))
-            .WillOnce(Return(IMS_TRUE));
-
-    // WHEN & THEN: The GIVEN expectations should be met.
-    EXPECT_TRUE(m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::TEXT));
-
-    // Clean Up
+    EXPECT_TRUE(bResult);
     m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
 }
 

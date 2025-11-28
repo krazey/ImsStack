@@ -2334,12 +2334,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddFeatureTagForMtc(
 
     IMS_BOOL bFeatureTagUpdated = IMS_FALSE;
 
-    if (m_pUtil->UpdateFeatureTagOptions(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO,
-                (nRegFeatures & ImsAosFeature::MMTEL) > 0, m_nSlotId))
-    {
-        bFeatureTagUpdated = IMS_TRUE;
-    }
-
     if (m_pUtil->UpdateFeatureTagOptions(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO,
                 (nRegFeatures & ImsAosFeature::VIDEO) > 0, m_nSlotId))
     {
@@ -2408,15 +2402,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32
 {
     IMS_BOOL bFeatureTagUpdated = IMS_FALSE;
 
-    if ((nRegFeatures & ImsAosFeature::MMTEL) > 0)
-    {
-        if (m_pUtil->UpdateFeatureTagOptions(
-                    ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO, IMS_FALSE, m_nSlotId))
-        {
-            bFeatureTagUpdated = IMS_TRUE;
-        }
-    }
-
     if ((nRegFeatures & ImsAosFeature::VIDEO) > 0)
     {
         if (m_pUtil->UpdateFeatureTagOptions(
@@ -2425,7 +2410,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32
             bFeatureTagUpdated = IMS_TRUE;
         }
     }
-
     if ((nRegFeatures & ImsAosFeature::TEXT) > 0)
     {
         if (m_pUtil->UpdateFeatureTagOptions(
@@ -2434,19 +2418,16 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32
             bFeatureTagUpdated = IMS_TRUE;
         }
     }
-
     if ((nRegFeatures & ImsAosFeature::NW_INIT_USSI) > 0)
     {
         m_piRegContact->RemoveExtraCapability(
                 AosString::STR_NW_INIT_USSI_FEATURE, AString::ConstNull());
     }
-
     if ((nRegFeatures & ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY) > 0)
     {
         m_piRegContact->RemoveExtraCapability(
                 FeatureTags::CALL_COMPOSER_VIA_TELEPHONY, AString::ConstNull());
     }
-
     if ((nRegFeatures & ImsAosFeature::VERSTAT) > 0)
     {
         m_piRegContact->RemoveHeaderParameter(AosString::STR_VERSTAT_FEATURE);
