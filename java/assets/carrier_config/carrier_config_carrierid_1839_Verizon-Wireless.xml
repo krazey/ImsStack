@@ -182,6 +182,7 @@
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="5"/>
     <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="2"/>
+    <int name="imsvoice.policy_for_prack_delivery_failure_int" value="2"/>
     <int name="imsvoice.call_max_count_int" value="2"/>
     <int name="imsvt.convert_remote_response_timer_millis_int" value="60000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="55000"/>
