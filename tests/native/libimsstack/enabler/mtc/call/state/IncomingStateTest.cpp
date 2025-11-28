@@ -748,4 +748,127 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
                     MtcAosState::CONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesSendIncomingCallReceived)
+{
+    // preset to invoke OnReadyToAlert()
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    SetParamsForIncomingCallReceived();
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE)).Times(0);
+    EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedSendsProvisionalResponse)
+{
+    // preset to invoke OnReadyToAlert()
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived).Times(0);
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_EQ(CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedRejectsIfSendingProvisionalResponseFails)
+{
+    // preset to invoke OnReadyToAlert()
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .WillOnce(Return(IMS_FAILURE));
+
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
+    EXPECT_CALL(objMtcSession, Reject(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
+    EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedSendsIncomingCallReceivedIfRprNotSupported)
+{
+    // preset to invoke OnReadyToAlert()
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    SetParamsForIncomingCallReceived();
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE)).Times(0);
+    EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedSendsProvisionalResponseWhenPrackIsSupported)
+{
+    // preset to invoke OnReadyToAlert()
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_EQ(CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedNotSendProvisionalResponseWhenPrackIsNotSupported)
+{
+    // preset to invoke OnReadyToAlert()
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE)).Times(0);
+    EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
 }  // namespace android

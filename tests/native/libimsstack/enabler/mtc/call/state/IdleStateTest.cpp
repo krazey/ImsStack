@@ -1580,6 +1580,7 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceived)
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE)).Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
 }

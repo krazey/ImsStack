@@ -73,8 +73,9 @@ PUBLIC VIRTUAL void AlertingState::OnExit()
 
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
-    if (!m_objContext.GetMessageUtils().IsResponseExist(
-                &m_objContext.GetSession()->GetISession(), SipStatusCode::SC_180))
+    // If IsPrackRequiredForAlert() returns true, a 180 provisional response has already been sent
+    // by MtcCallState::OnReadyToAlert(), so don't need to send it again.
+    if (!IsPrackRequiredForAlert())
     {
         if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IsRprRequired()) ==
                 IMS_FAILURE)

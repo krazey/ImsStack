@@ -522,14 +522,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnConnectionFailed(IN
 PROTECTED
 CallStateName MtcCallState::OnReadyToAlert()
 {
-    if (!m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
-    {
-        m_objContext.GetUiNotifier().SendIncomingCallReceived();
-        return CallStateName::ALERTING;
-    }
-
-    if (!IsRprRequired())
+    if (!IsPrackRequiredForAlert())
     {
         m_objContext.GetUiNotifier().SendIncomingCallReceived();
         return CallStateName::ALERTING;
@@ -1130,4 +1123,12 @@ IMS_BOOL MtcCallState::IsRprRequired() const
     }
 
     return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsPrackRequiredForAlert() const
+{
+    return m_objContext.GetConfigurationProxy().GetBoolean(
+                   ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL) &&
+            IsRprRequired();
 }
