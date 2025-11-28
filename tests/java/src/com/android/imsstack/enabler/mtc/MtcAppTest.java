@@ -576,7 +576,7 @@ public class MtcAppTest extends ImsStackTest {
     public void testAutoRejectedCallMessageWhenPreIncomingCallExistsBeforeForSameCall() {
         mTestMtcApp.setNativeObj(1);
         long nativeCallID = 1;
-
+        String logTag = "testTag";
         doReturn(nativeCallID).when(mMtcCall).getNativeCallId();
         doReturn(mExecutor).when(mBaseContext).getExecutor();
         doReturn(mMtcCall).when(mCM).getPendingCall(nativeCallID);
@@ -585,12 +585,14 @@ public class MtcAppTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.PRE_INCOMING_CALL);
         parcel.writeLong(nativeCallKey);
+        parcel.writeString(logTag);
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
         parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.AUTO_REJECTED_CALL);
         parcel.writeLong(nativeCallKey);
+        parcel.writeString(logTag);
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
