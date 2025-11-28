@@ -330,21 +330,17 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
     const MediaInfo& objMediaInfo = GetMediaInfo(*piSession);
-    IMS_BOOL bResult = m_piMediaSession->FormSdp(nNegoId, piSession, eContents,
-            static_cast<MEDIA_DIRECTION>(objMediaInfo.eAudioDirection),
-            static_cast<MEDIA_DIRECTION>(objMediaInfo.eVideoDirection),
-            static_cast<MEDIA_DIRECTION>(objMediaInfo.eTextDirection), bAnswerForOfferlessReInvite);
-
-    if (!bResult)
+    if (!m_piMediaSession->FormSdp(nNegoId, piSession, eContents,
+                static_cast<MEDIA_DIRECTION>(objMediaInfo.eAudioDirection),
+                static_cast<MEDIA_DIRECTION>(objMediaInfo.eVideoDirection),
+                static_cast<MEDIA_DIRECTION>(objMediaInfo.eTextDirection),
+                bAnswerForOfferlessReInvite))
     {
         RestoreMediaInfo(*piSession);
-    }
-    else if (GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
-    {
-        m_piMediaSession->RequestQos(nNegoId, eContents);
+        return IMS_FAILURE;
     }
 
-    return (bResult) ? IMS_SUCCESS : IMS_FAILURE;
+    return IMS_SUCCESS;
 }
 
 PUBLIC VIRTUAL SdpNegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
@@ -372,7 +368,6 @@ PUBLIC VIRTUAL SdpNegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* p
 
     if (GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
     {
-        m_piMediaSession->RequestQos(nNegoId, objResult.eNegotiatedType);
         m_objContext.GetPreconditionManager().UpdateQosIfAvailable(
                 piSession, nNegoId, objResult.eNegotiatedType, m_piMediaSession);
     }
