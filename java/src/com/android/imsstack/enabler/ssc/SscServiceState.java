@@ -147,6 +147,11 @@ public class SscServiceState {
     protected void deInit() {
         ImsLog.d(mSlotId, "");
 
+        if (mHandler.hasMessagesOrCallbacks()) {
+            ImsLog.w(mSlotId, "removeMessages");
+            mHandler.removeCallbacksAndMessages(null);
+        }
+
         resetAllUtStatus();
 
         IDcNetWatcher dnw = getDcNetWatcher();
