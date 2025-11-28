@@ -1065,12 +1065,7 @@ PRIVATE VIRTUAL void AosNetTracker::AosConnection_StateChanged(IN IMS_UINT32 nSt
     if (IsDataConnected() != bCurrConnected)
     {
         SetDataConnected(bCurrConnected);
-
-        // check the epdg connection
-        if (bCurrConnected)
-        {
-            SetEpdgEnabled(m_piConnection->IsEpdgEnabled());
-        }
+        SetEpdgEnabled(m_piConnection->IsEpdgEnabled());
 
         Notify();
     }
