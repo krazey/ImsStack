@@ -32,6 +32,8 @@ import android.net.InetAddresses;
 import android.net.NetworkCapabilities;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.Annotation;
 import android.telephony.BarringInfo;
 import android.telephony.DisconnectCause;
 import android.telephony.PreciseCallState;
@@ -40,6 +42,7 @@ import android.telephony.PreciseDisconnectCause;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
 import androidx.annotation.NonNull;
@@ -49,6 +52,7 @@ import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -87,6 +91,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A test base class to provide common functionalities for each test.
@@ -128,6 +133,18 @@ public class ImsStackTestBase {
     private final SingleLatch mEventLatch = new SingleLatch("ImsStackTestBase");
     private TestValueInitializer mTestValueInitializer = this::initTestValues;
     private boolean mEnablerStoppable = true;
+
+    /**
+     * A constant, immutable {@link ApnSetting} configured for IMS (IPv6) over cellular.
+     * This test fixture ensures all tests use a consistent, valid IMS APN profile.
+     */
+    private static final ApnSetting TEST_IMS_APN = new ApnSetting.Builder()
+            .setApnTypeBitmask(ApnSetting.TYPE_IMS)
+            .setApnName("ims")
+            .setEntryName("test_ims")
+            .setProtocol(ApnSetting.PROTOCOL_IPV6)
+            .setRoamingProtocol(ApnSetting.PROTOCOL_IPV6)
+            .build();
 
     public ImsStackTestBase() {
         mBroadcastReceiverProxy = SystemProxyResolver.getBroadcastReceiverProxy();
@@ -629,6 +646,112 @@ public class ImsStackTestBase {
         // If the subclass wants to use this for each test,
         // it can set the value initializer with {@link #setTestValueInitializer()}
         // in a specific test.
+    }
+
+    /**
+     * Notifies the {@link TelephonyManagerProxy} of a precise data connection state change.
+     * The notification will be associated with the provided slot ID.
+     *
+     * @param pdcs The precise data connection state to notify. Must not be null.
+     * @param slotId The ID of the slot to associate the notification with.
+     */
+    public void notifyPreciseDataConnectionState(
+            @NonNull PreciseDataConnectionState pdcs, int slotId) {
+        Objects.requireNonNull(pdcs, "pdcs must not be null.");
+
+        TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(getSubId(slotId));
+        telephony.notifyPreciseDataConnectionStateChanged(pdcs);
+    }
+
+    /**
+     * Factory method to build a {@link PreciseDataConnectionState} object for IWLAN
+     * using the common {@code #TEST_IMS_APN} and the specified data state.
+     *
+     * @param state The desired data state (e.g., {@link TelephonyManager#DATA_CONNECTED}
+     * or {@link TelephonyManager#DATA_DISCONNECTED}).
+     * @return A new {@link PreciseDataConnectionState} object configured for IWLAN.
+     */
+    public final PreciseDataConnectionState getIwlanPreciseDataConnectionState(
+            @Annotation.DataState int state) {
+        return getPreciseDataConnectionState(state, TelephonyManager.NETWORK_TYPE_IWLAN,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+    }
+
+    /**
+     * Factory method to build a {@link PreciseDataConnectionState} object for NR
+     * using the common {@code #TEST_IMS_APN} and the specified data state.
+     *
+     * @param state The desired data state (e.g., {@link TelephonyManager#DATA_CONNECTED}
+     * or {@link TelephonyManager#DATA_DISCONNECTED}).
+     * @return A new {@link PreciseDataConnectionState} object configured for NR.
+     */
+    public final PreciseDataConnectionState getNrPreciseDataConnectionState(
+            @Annotation.DataState int state) {
+        return getPreciseDataConnectionState(state, TelephonyManager.NETWORK_TYPE_NR,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+    }
+
+    /**
+     * Factory method to build a {@link PreciseDataConnectionState} object for LTE
+     * using the common {@code #TEST_IMS_APN} and the specified data state.
+     *
+     * @param state The desired data state (e.g., {@link TelephonyManager#DATA_CONNECTED}
+     * or {@link TelephonyManager#DATA_DISCONNECTED}).
+     * @return A new {@link PreciseDataConnectionState} object configured for LTE.
+     */
+    public final PreciseDataConnectionState getLtePreciseDataConnectionState(
+            @Annotation.DataState int state) {
+        return getPreciseDataConnectionState(state, TelephonyManager.NETWORK_TYPE_LTE,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+    }
+
+    private PreciseDataConnectionState getPreciseDataConnectionState(
+            @Annotation.DataState int state, int networkType, int transportType) {
+        return new PreciseDataConnectionState.Builder()
+                .setNetworkType(networkType)
+                .setTransportType(transportType)
+                .setApnSetting(TEST_IMS_APN)
+                .setState(state)
+                .build();
+    }
+
+    /**
+     * Factory method to build a {@link ServiceState} object configured for NR.
+     * Includes both PS and potentially CS registration info for NR.
+     *
+     * @return A new {@link ServiceState} object configured for NR.
+     */
+    protected final ServiceState buildNrServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNrCs()
+                .addNetworkRegistrationInfoForNr()
+                .build();
+    }
+
+    /**
+     * Factory method to build a {@link ServiceState} object configured for simultaneous
+     * LTE PS and IWLAN network registration.
+     *
+     * @return A new {@link ServiceState} object configured for LTE PS + IWLAN.
+     */
+    protected final ServiceState buildLteIwlanServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLtePs()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
+    }
+
+    /**
+     * Factory method to build a {@link ServiceState} object configured for simultaneous
+     * NR and IWLAN network registration.
+     *
+     * @return A new {@link ServiceState} object configured for NR + IWLAN.
+     */
+    protected final ServiceState buildNrIwlanServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForNr()
+                .addNetworkRegistrationInfoForIwlan()
+                .build();
     }
 
     protected static void logd(Object o, String s) {
