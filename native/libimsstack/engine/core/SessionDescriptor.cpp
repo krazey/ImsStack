@@ -16,6 +16,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "SdpBandwidth.h"
+#include "SdpInformation.h"
 #include "offeranswer/SdpSessionParameter.h"
 
 #include "ISessionState.h"

@@ -16,6 +16,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "SdpConnection.h"
+#include "SdpInformation.h"
 #include "SessionDescriptionReader.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

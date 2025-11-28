@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "SdpConnection.h"
 #include "SdpParser.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"

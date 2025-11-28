@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "SdpAttribute.h"
+#include "SdpMediaDescription.h"
 #include "offeranswer/SdpOfferAnswer.h"
 
 #include "SessionParameter.h"
