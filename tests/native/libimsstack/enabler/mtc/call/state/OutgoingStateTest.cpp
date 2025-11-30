@@ -66,6 +66,7 @@
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
+#include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 #include <initializer_list>
@@ -2195,6 +2196,9 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::SESSION_ID, _))
             .WillByDefault(Return(SESSION_ID));
+    ON_CALL(objMessageUtils,
+            GetHeaderValue(&objMessage, ISipHeader::ALERT_INFO, AString::ConstNull()))
+            .WillByDefault(Return(MessageUtil::STR_ALERT_URN_CALL_WAITING));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
@@ -2205,6 +2209,7 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
             pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0));
 
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::CW));
 }
 
 TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesNegotiateSdpForPreviewMode)
@@ -2481,7 +2486,9 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendProgressing)
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::SESSION_ID, _))
             .WillByDefault(Return(SESSION_ID));
-
+    ON_CALL(objMessageUtils,
+            GetHeaderValue(&objMessage, ISipHeader::ALERT_INFO, AString::ConstNull()))
+            .WillByDefault(Return(MessageUtil::STR_ALERT_URN_CALL_WAITING));
     ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
@@ -2491,6 +2498,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendProgressing)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
+    EXPECT_FALSE(pSupplementaryService->Get(SuppType::CW));
 }
 
 TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAnswer)
@@ -2506,6 +2514,9 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAns
     ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_183));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils,
+            GetHeaderValue(&objMessage, ISipHeader::ALERT_INFO, AString::ConstNull()))
+            .WillByDefault(Return(MessageUtil::STR_ALERT_URN_CALL_WAITING));
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(2000));
@@ -2514,6 +2525,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAns
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::CW));
 }
 
 TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor181WithSdpAnswer)

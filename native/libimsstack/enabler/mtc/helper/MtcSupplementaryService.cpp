@@ -227,13 +227,13 @@ void MtcSupplementaryService::UpdateCdivHistory(IN const IMessage* piMessage)
 PUBLIC
 void MtcSupplementaryService::UpdateCw(IN const IMessage* piMessage)
 {
-    if (m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::ALERT_INFO) ==
-            IMS_FALSE)
+    if (m_objContext.GetMessageUtils()
+                    .GetHeaderValue(piMessage, ISipHeader::ALERT_INFO)
+                    .Equals(MessageUtil::STR_ALERT_URN_CALL_WAITING))
     {
-        return;
+        IMS_TRACE_I("UpdateCw", 0, 0, 0);
+        Add(SuppType::CW, IMS_TRUE);
     }
-
-    Add(SuppType::CW, IMS_TRUE);
 }
 
 PUBLIC
