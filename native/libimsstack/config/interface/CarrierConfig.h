@@ -447,7 +447,8 @@ public:
             ERROR_POLICY_NOT_SPECIFIED = 0,
             ERROR_POLICY_PCSCF_FAILED = 1,
             ERROR_POLICY_SUBSCRIBER_FAILED = 2,
-            ERROR_POLICY_PDN_REACTIVATED = 3
+            ERROR_POLICY_PDN_REACTIVATED = 3,
+            ERROR_POLICY_SUBSCRIBER_FAILED_NO_IMSI_FALLBACK = 4
         };
 
         // error code mapping for registration

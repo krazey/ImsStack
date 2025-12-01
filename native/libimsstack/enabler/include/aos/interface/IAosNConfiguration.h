@@ -1855,17 +1855,29 @@ public:
      *        - ERROR_POLICY_SUBSCRIBER_FAILED
      *        Indicate the list of error codes that result in initial registration
      *        with another PCSCF after wait-time.
+     *        (wait time - KEY_WAIT_TIME_SEC_INT)
      *        If initial registration fails with all PCSCFs and another IMPU is available,
      *        registration is retried with changed IMPU.
      *        After it fails with both IMPUs based on MSISDN and IMSI,
      *        registration is handled as critcal error with PLMN block
-     *        (wait time - KEY_WAIT_TIME_SEC_INT)
+     *        if {ims.extra_reg_err_final_type_int} is configured to
+     *        CarrierConfig::Ims::ERROR_TYPE_CRITICAL.
+     *        Then IMS is disabled.
      *        - ERROR_POLICY_PDN_REACTIVATED
      *        Indicate the error causes that result in new PCSCF discovery
      *        when the calculated retry number reaches.
      *        - Possible wildcard values except for error codes are,
      *        CarrierConfig::Ims::REG_ERROR_CODE_TIMER_F, etc
      *        Negative value elements are used for exclusion purposes.
+     *        - ERROR_POLICY_SUBSCRIBER_FAILED_NO_IMSI_FALLBACK
+     *        Indicate the list of error codes that result in initial registration
+     *        with another PCSCF after wait-time.
+     *        (wait time - KEY_WAIT_TIME_SEC_INT)
+     *        After it fails with the 1st IMPU,
+     *        registration is handled as critcal error with PLMN block
+     *        if {ims.extra_reg_err_final_type_int} is configured to
+     *        CarrierConfig::Ims::ERROR_TYPE_CRITICAL.
+     *        Then IMS is disabled.
      *
      * @return vector error code list
      * @see {@code ims.extra_reg_err_code_int_array}

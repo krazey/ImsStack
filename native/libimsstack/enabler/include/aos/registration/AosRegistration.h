@@ -435,7 +435,7 @@ protected:
 private:
     void ControlPrivateHeader();
     IMS_UINT32 GetSpecificErrWaitTime();
-    void ProcessImsiBasedSubscriber();
+    void ProcessRetryForSubscriberFailure();
     void SetContactAddressConfiguration(IN IMS_BOOL bAdd);
     void SetPcniHeader();
     void SetPlaniHeader();

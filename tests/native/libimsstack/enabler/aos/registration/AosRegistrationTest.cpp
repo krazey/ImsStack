@@ -3794,6 +3794,30 @@ TEST_F(AosRegistrationTest, TriggerImsiBasedSubscriberUsingNextPuidWhenSubscribe
     EXPECT_TRUE(bResult);
 }
 
+TEST_F(AosRegistrationTest,
+        ShouldReportFailureForbiddenIfNoAvailablePcscfAndNoImsiFallbackWhenSubscriberFailed)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objRegErrCode;
+    objRegErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillByDefault(ReturnRef(objRegErrCode));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(
+                    Return(CarrierConfig::Ims::ERROR_POLICY_SUBSCRIBER_FAILED_NO_IMSI_FALLBACK));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).Times(0);
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403));
+
+    // THEN: The GIVEN expectation should be met.
+}
+
 TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenIpsecFallback)
 {
     m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
@@ -5144,12 +5168,24 @@ TEST_F(AosRegistrationTest, TriggerForbiddenFailHandlingWhenUpdateFailedWithPerm
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_403);
 }
 
+TEST_F(AosRegistrationTest, RegRequiredWithSamePcscfWhenUpdateFailedIfTheGivenErrorCodeExistsInList)
+{
+    ImsVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
+    objReregRetryErrCodeForInitRegWithSamePcscf.Add(SipStatusCode::SC_400);
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
+            .WillByDefault(ReturnRef(objReregRetryErrCodeForInitRegWithSamePcscf));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_400);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRegRequiredWithSamePcscf"), 1);
+}
+
 TEST_F(AosRegistrationTest, RegRequiredWithSamePcscfWhenUpdateFailedIfRetryWithSamePcscfConfigured)
 {
-    ImsVector<IMS_SINT32> ReregRetryErrCodeForInitRegWithSamePcscf;
-    ReregRetryErrCodeForInitRegWithSamePcscf.Add(CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP);
+    ImsVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
+    objReregRetryErrCodeForInitRegWithSamePcscf.Add(CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP);
     ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
-            .WillByDefault(ReturnRef(ReregRetryErrCodeForInitRegWithSamePcscf));
+            .WillByDefault(ReturnRef(objReregRetryErrCodeForInitRegWithSamePcscf));
 
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_302);
 
