@@ -470,6 +470,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
+    m_objContext.GetSupplementaryService().UpdateCdiv(piMessage);
 
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -570,6 +571,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
+    m_objContext.GetSupplementaryService().UpdateCdiv(piMessage);
 
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_START, nIndex);

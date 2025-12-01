@@ -88,8 +88,7 @@ void MtcSupplementaryService::UpdateServices(IN IMessage* piMessage)
 
     UpdateCallerId(piMessage);
     UpdateCnap(piMessage);
-    UpdateCdivCause(piMessage);
-    UpdateCdivHistory(piMessage);
+    UpdateCdiv(piMessage);
     UpdateCw(piMessage);
     UpdateCallingNumberVerification(piMessage);
     UpdateCallComposerElements(piMessage);
@@ -185,7 +184,7 @@ void MtcSupplementaryService::UpdateCnap(IN IMessage* piMessage)
 }
 
 PUBLIC
-void MtcSupplementaryService::UpdateCdivCause(IN const IMessage* piMessage)
+void MtcSupplementaryService::UpdateCdiv(IN const IMessage* piMessage)
 {
     ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
 
@@ -194,29 +193,14 @@ void MtcSupplementaryService::UpdateCdivCause(IN const IMessage* piMessage)
         return;
     }
 
-    IMS_SINT32 nCause;
-
-    if (GetCdivCause(piHeader->GetSipAddress(), nCause))
+    IMS_SINT32 nCause = GetCdivCause(piHeader->GetSipAddress());
+    if (nCause >= 0)
     {
         Add(SuppType::CDIV_CAUSE, ConvertCdivCause(nCause));
     }
 
-    piHeader->Destroy();
-}
-
-PUBLIC
-void MtcSupplementaryService::UpdateCdivHistory(IN const IMessage* piMessage)
-{
-    ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
-
-    if (piHeader == IMS_NULL)
-    {
-        return;
-    }
-
-    AString strTarget;
-
-    if (GetCdivTarget(piHeader->GetSipAddress(), strTarget))
+    AString strTarget = GetCdivTarget(piHeader->GetSipAddress());
+    if (strTarget.GetLength() > 0)
     {
         Add(SuppType::CDIV_HISTORY, strTarget);
     }
@@ -400,12 +384,11 @@ AString MtcSupplementaryService::GetCnapByHeader(
     return strCnap;
 }
 
-PRIVATE GLOBAL IMS_BOOL MtcSupplementaryService::GetCdivCause(
-        IN const SipAddress* pAddress, OUT IMS_SINT32& nCause)
+PRIVATE GLOBAL IMS_SINT32 MtcSupplementaryService::GetCdivCause(IN const SipAddress* pAddress)
 {
     if (pAddress == IMS_NULL)
     {
-        return IMS_FALSE;
+        return -1;
     }
 
     const SipParameter* pSIPParameter = pAddress->GetParameter("cause");
@@ -417,38 +400,31 @@ PRIVATE GLOBAL IMS_BOOL MtcSupplementaryService::GetCdivCause(
         {
             IMS_TRACE_D("GetCDIVCause : Cause=%s", strCause.GetStr(), 0, 0);
 
-            nCause = strCause.ToInt32();
-            return IMS_TRUE;
+            return strCause.ToInt32();
         }
     }
 
-    return IMS_FALSE;
+    return -1;
 }
 
-PRIVATE GLOBAL IMS_BOOL MtcSupplementaryService::GetCdivTarget(
-        IN const SipAddress* pAddress, OUT AString& strTarget)
+PRIVATE GLOBAL AString MtcSupplementaryService::GetCdivTarget(IN const SipAddress* pAddress)
 {
     if (pAddress == IMS_NULL)
     {
-        return IMS_FALSE;
+        return AString::ConstNull();
     }
 
     if (pAddress->IsSchemeSip() || pAddress->IsSchemeSips())
     {
-        strTarget = pAddress->GetUser();
+        return pAddress->GetUser();
     }
     else if (pAddress->IsSchemeTel())
     {
-        strTarget = pAddress->GetHost();
-    }
-    else
-    {
-        IMS_TRACE_I("GetCdivTarget : Getting the target failed", 0, 0, 0);
-        return IMS_FALSE;
+        return pAddress->GetHost();
     }
 
-    IMS_TRACE_D("GetCdivTarget : Target=%s", strTarget.GetStr(), 0, 0);
-    return IMS_TRUE;
+    IMS_TRACE_I("GetCdivTarget : Getting the target failed", 0, 0, 0);
+    return AString::ConstNull();
 }
 
 PRIVATE GLOBAL IMS_SINT32 MtcSupplementaryService::ConvertCdivCause(IN IMS_SINT32 nCause)

@@ -443,14 +443,14 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
 
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::BUSY));
 
     objHeaders.Append(AString("<sip:last_diverting_target;cause=302>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::UNCONDITION));
@@ -458,7 +458,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     objHeaders.Append(AString("<sip:last_diverting_target;cause=404>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::NOT_LOGGED_IN));
@@ -466,7 +466,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     objHeaders.Append(AString("<sip:last_diverting_target;cause=408>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::NO_REPLY));
@@ -474,7 +474,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     objHeaders.Append(AString("<sip:last_diverting_target;cause=480>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::DEFLECTION));
@@ -482,7 +482,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     objHeaders.Append(AString("<sip:last_diverting_target;cause=487>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::DEFLECTION_ALERTING));
@@ -490,14 +490,14 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     objHeaders.Append(AString("<sip:last_diverting_target;cause=503>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::NOT_REACHABLE));
 
     objHeaders.Append(AString("<sip:last_diverting_target;cause=999>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::NONE));
 }
@@ -512,20 +512,20 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivHistory)
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
 
-    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue, AString("office"));
 
     objHeaders.Append(AString("<sips:bob@ims.com;transport=tcp>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue, AString("bob"));
 
     objHeaders.Append(AString("<tel:+358-9-123-45678>;index=1.1.1;mp=1.1"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue,
             AString("+358-9-123-45678"));
@@ -533,7 +533,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivHistory)
     objHeaders.Append(AString("358-9-123-45678"));
     ON_CALL(objMessageUtils, GetHeaders(&objMockIMessage, ISipHeader::HISTORY_INFO, _))
             .WillByDefault(Return(objHeaders));
-    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+    pMtcSupplementaryService->UpdateCdiv(static_cast<IMessage*>(&objMockIMessage));
 
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue,
             AString("+358-9-123-45678"));

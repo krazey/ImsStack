@@ -46,8 +46,7 @@ public:
     // The visibility of these internal methods is currently public to allow for unit testing.
     void UpdateCallerId(IN IMessage* piMessage);
     void UpdateCnap(IN IMessage* piMessage);
-    void UpdateCdivCause(IN const IMessage* piMessage);
-    void UpdateCdivHistory(IN const IMessage* piMessage);
+    void UpdateCdiv(IN const IMessage* piMessage);
     void UpdateCw(IN const IMessage* piMessage);
     void UpdateCallingNumberVerification(IN IMessage* piMessage);
     void UpdateCallComposerElements(IN const IMessage* piMessage);
@@ -85,8 +84,8 @@ private:
     AString GetCnapByHeader(
             IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack) const;
 
-    static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
-    static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
+    static IMS_SINT32 GetCdivCause(IN const SipAddress* pAddress);
+    static AString GetCdivTarget(IN const SipAddress* pAddress);
     static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
     static IMS_SINT32 GetCallingNumberVerificationResult(
             IN const AString& strVerstatParameter, IN const AString& strDisplayName);

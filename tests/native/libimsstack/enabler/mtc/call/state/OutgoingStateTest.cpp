@@ -2058,6 +2058,7 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStarts18xWaitTimerIf
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, _));
 
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+    EXPECT_FALSE(pSupplementaryService->Get(SuppType::CDIV_HISTORY));
 }
 
 TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSenderIfSupported)
@@ -2200,6 +2201,10 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
             GetHeaderValue(&objMessage, ISipHeader::ALERT_INFO, AString::ConstNull()))
             .WillByDefault(Return(MessageUtil::STR_ALERT_URN_CALL_WAITING));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString("<sip:bob@example.com>;index=1"));
+    ON_CALL(objMessageUtils, GetHeaders(&objMessage, ISipHeader::HISTORY_INFO, _))
+            .WillByDefault(Return(objHeaders));
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
@@ -2210,6 +2215,7 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
 
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::CW));
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::CDIV_HISTORY));
 }
 
 TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesNegotiateSdpForPreviewMode)
@@ -2517,6 +2523,10 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAns
     ON_CALL(objMessageUtils,
             GetHeaderValue(&objMessage, ISipHeader::ALERT_INFO, AString::ConstNull()))
             .WillByDefault(Return(MessageUtil::STR_ALERT_URN_CALL_WAITING));
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString("<sip:bob@example.com>;index=1"));
+    ON_CALL(objMessageUtils, GetHeaders(&objMessage, ISipHeader::HISTORY_INFO, _))
+            .WillByDefault(Return(objHeaders));
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(2000));
@@ -2526,6 +2536,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAns
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::CW));
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::CDIV_HISTORY));
 }
 
 TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor181WithSdpAnswer)
