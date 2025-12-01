@@ -37,6 +37,7 @@ using ::testing::ReturnRef;
 #define DECLARE_USING(Base)                     \
     using Base::Init;                           \
     using Base::InitObject;                     \
+    using Base::IsEpdgEnabled;                  \
     using Base::UpdateNetworkStatus;            \
     using Base::Notify;                         \
     using Base::NotifyTimerChanged;             \
@@ -843,12 +844,28 @@ TEST_F(AosNetTrackerTest, HandleInvalidTimer)
     m_pAosNetTracker->Timer_TimerExpired(IMS_NULL);
 }
 
-TEST_F(AosNetTrackerTest, AosConnection_StateChanged)
+TEST_F(AosNetTrackerTest, AosConnection_StateChangedToActive)
 {
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillOnce(Return(IMS_FALSE));
 
     m_pAosNetTracker->AosConnection_StateChanged(IAosConnection::STATE_ACTIVE);
+
+    EXPECT_TRUE(m_pAosNetTracker->IsEpdgEnabled());
+}
+
+TEST_F(AosNetTrackerTest, AosConnection_StateChangedToIdle)
+{
+    m_pAosNetTracker->SetEpdgEnabled(IMS_TRUE);
+    m_pAosNetTracker->SetDataConnected(IMS_TRUE);
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
+
+    m_pAosNetTracker->AosConnection_StateChanged(IAosConnection::STATE_IDLE);
+
+    EXPECT_FALSE(m_pAosNetTracker->IsEpdgEnabled());
 }
 
 TEST_F(AosNetTrackerTest, AosConnection_IpcanCatChanged)
