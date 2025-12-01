@@ -218,6 +218,70 @@ protected:
         m_objAmrWbPayloadType.Clear();
         m_objAmrNbPayloadType.Clear();
     }
+
+    /**
+     * @brief Helper method to simulate a successful negotiation and set up a negotiated profile.
+     *
+     * This method mocks the negotiation process to populate the internal OA model list of the
+     * AudioNego object with a negotiated profile containing a specific audio codec.
+     *
+     * @param codec The name of the codec to set up (e.g., "AMR-WB", "EVS").
+     * @param bwList The bandwidth list to use for an EVS codec.
+     */
+    void SetUpNegotiatedProfile(const AString& codec, IMS_UINT32 bwList = 0)
+    {
+        MockISessionDescriptor objSessionDescriptor;
+        MockIMediaDescriptor objMediaDescriptor;
+        MEDIA_DIRECTION eDirection;
+
+        MockMediaProfileFactory objMediaProfileFactory;
+        MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
+
+        auto pNegoProfile = std::make_shared<AudioProfile>();
+        AudioProfile::Payload* pPayload = new AudioProfile::Payload();
+
+        if (codec.EqualsIgnoreCase("EVS"))
+        {
+            pPayload->SetRtpMap(112, "EVS", 16000, 1);
+            auto pEvsFmtp = std::make_shared<AudioProfile::EvsFmtp>();
+            pEvsFmtp->SetBwList(bwList);
+            pPayload->SetFmtp(pEvsFmtp);
+        }
+        else if (codec.EqualsIgnoreCase("AMR-WB"))
+        {
+            pPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
+            pPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
+        }
+        else if (codec.EqualsIgnoreCase("AMR"))
+        {
+            pPayload->SetRtpMap(97, "AMR", 8000, 1);
+            pPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
+        }
+        else if (codec.EqualsIgnoreCase("PCMU"))
+        {
+            pPayload->SetRtpMap(0, "PCMU", 8000, 1);
+        }
+
+        pNegoProfile->AddPayload(pPayload);
+        pNegoProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+        // Mock the negotiation process to populate the negotiated profile
+        auto pLocalProfile = std::make_shared<AudioProfile>();
+        auto pPeerProfile = std::make_shared<AudioProfile>();
+
+        EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
+                .WillOnce(Return(pLocalProfile))
+                .WillOnce(Return(pPeerProfile))
+                .WillOnce(Return(pNegoProfile));
+
+        ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
+        m_pAudioNego->NegotiateSdp(
+                STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+
+        MockMediaProfileFactory::SetInstance(IMS_NULL);
+    }
 };
 
 TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupported)
@@ -564,4 +628,109 @@ TEST_F(AudioNegoTest, testGetters)
     EXPECT_EQ(m_pAudioNego->GetNegotiatedNegoProfile(), nullptr);
     EXPECT_EQ(m_pAudioNego->GetNegotiatedPeerProfile(), nullptr);
     EXPECT_EQ(m_pAudioNego->GetRemotePort(), MEDIA_PORT_INVALID);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthKhzNoPayload)
+{
+    // Verifies behavior when no payload has been negotiated.
+    // Expects 0.0f as there is no codec information.
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedCodecBandwidthKhz(), 0.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthKhzAmrWb)
+{
+    // Verifies correct bandwidth for a negotiated AMR-WB codec.
+    SetUpNegotiatedProfile("AMR-WB");
+    // AMR-WB has a fixed bandwidth of 8.0 kHz.
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedCodecBandwidthKhz(), 8.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthKhzAmr)
+{
+    // Verifies correct bandwidth for a negotiated AMR (narrowband) codec.
+    SetUpNegotiatedProfile("AMR");
+    // AMR-NB has a fixed bandwidth of 4.0 kHz.
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedCodecBandwidthKhz(), 4.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthKhzEvs)
+{
+    // Verifies correct bandwidth for a negotiated EVS codec.
+    // The function should return the highest supported bandwidth.
+    SetUpNegotiatedProfile("EVS", EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB);
+    // SWB (16.0 kHz) is the highest bandwidth in the list.
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedCodecBandwidthKhz(), 16.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthKhzUnknownCodec)
+{
+    // Verifies behavior with a codec not specifically handled by the function.
+    SetUpNegotiatedProfile("PCMU");
+    // Expects 0.0f for unhandled codecs.
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedCodecBandwidthKhz(), 0.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthRangeNoPayload)
+{
+    // Verifies behavior when no payload has been negotiated.
+    IMS_FLOAT start = -1.0f, end = -1.0f;
+    m_pAudioNego->GetNegotiatedCodecBandwidthRange(start, end);
+    // Expects 0.0f for both start and end.
+    EXPECT_EQ(start, 0.0f);
+    EXPECT_EQ(end, 0.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthRangeAmrWb)
+{
+    // Verifies correct bandwidth range for a negotiated AMR-WB codec.
+    SetUpNegotiatedProfile("AMR-WB");
+    IMS_FLOAT start, end;
+    m_pAudioNego->GetNegotiatedCodecBandwidthRange(start, end);
+    // AMR-WB has a fixed bandwidth, so start and end should be the same.
+    EXPECT_EQ(start, 8.0f);
+    EXPECT_EQ(end, 8.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthRangeAmr)
+{
+    // Verifies correct bandwidth range for a negotiated AMR (narrowband) codec.
+    SetUpNegotiatedProfile("AMR");
+    IMS_FLOAT start, end;
+    m_pAudioNego->GetNegotiatedCodecBandwidthRange(start, end);
+    // AMR-NB has a fixed bandwidth, so start and end should be the same.
+    EXPECT_EQ(start, 4.0f);
+    EXPECT_EQ(end, 4.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthRangeEvs)
+{
+    // Verifies correct bandwidth range for a negotiated EVS codec.
+    SetUpNegotiatedProfile("EVS", EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB);
+    IMS_FLOAT start, end;
+    m_pAudioNego->GetNegotiatedCodecBandwidthRange(start, end);
+    // The range should be from the lowest (NB) to the highest (SWB) supported bandwidth.
+    EXPECT_EQ(start, 4.0f);
+    EXPECT_EQ(end, 16.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthRangeEvsWbStart)
+{
+    // Verifies correct bandwidth range for EVS starting from WB.
+    SetUpNegotiatedProfile("EVS", EVS_BW_WB | EVS_BW_SWB | EVS_BW_FB);
+    IMS_FLOAT start, end;
+    m_pAudioNego->GetNegotiatedCodecBandwidthRange(start, end);
+    // The range should be from the lowest (WB) to the highest (FB) supported bandwidth.
+    EXPECT_EQ(start, 8.0f);
+    EXPECT_EQ(end, 20.0f);
+}
+
+TEST_F(AudioNegoTest, GetNegotiatedCodecBandwidthRangeUnknownCodec)
+{
+    // Verifies behavior with a codec not specifically handled by the function.
+    SetUpNegotiatedProfile("PCMU");
+    IMS_FLOAT start = -1.0f, end = -1.0f;
+    m_pAudioNego->GetNegotiatedCodecBandwidthRange(start, end);
+    // Expects 0.0f for both start and end for unhandled codecs.
+    EXPECT_EQ(start, 0.0f);
+    EXPECT_EQ(end, 0.0f);
 }
