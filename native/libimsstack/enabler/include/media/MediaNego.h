@@ -22,14 +22,15 @@
 #include "audio/AudioDef.h"
 #include "text/TextDef.h"
 #include "video/VideoDef.h"
-#include "media/IMedia.h"
 
 class AudioNego;
+class IMedia;
+class IMediaDescriptor;
+class ISession;
+class MediaEnvironment;
+class SdpMedia;
 class TextNego;
 class VideoNego;
-class MediaEnvironment;
-class ISession;
-class IMediaDescriptor;
 
 class MediaNego : public ImsSlot
 {

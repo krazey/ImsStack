@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,33 +17,41 @@
 #ifndef MEDIA_PROFILE_UTIL_H_
 #define MEDIA_PROFILE_UTIL_H_
 
-#include "AString.h"
 #include "MediaDef.h"
 
+class AString;
 class MediaBaseProfile;
 class MediaConfiguration;
 
 /**
- * Thi class is an utility class for MediaProfile
+ * @brief Provides static utility functions for handling `MediaBaseProfile` objects.
+ *
+ * This class offers helper methods for common operations related to media profiles,
+ * such as determining media types from codecs and configuring RTCP parameters.
  */
 class MediaProfileUtil
 {
 public:
     /**
-     * @brief Get media type (audio/text/video) from the payload type.
+     * @brief Gets the media type (e.g., audio, video, text) from a codec payload type string.
      *
-     * @param payloadType media codec payload type
-     * @return MEDIA_CONTENT_TYPE The media type (audio/text/video)
+     * @param payloadType The name of the codec payload (e.g., "AMR-WB", "H264").
+     * @return MEDIA_CONTENT_TYPE The corresponding media type, or `MEDIA_TYPE_INVALID` if not
+     * found.
      */
     static MEDIA_CONTENT_TYPE GetMediaType(IN const AString payloadType);
 
     /**
-     * @brief Set RTCP RS/RR from the media configuration
+     * @brief Sets the RTCP sender (RS) and receiver (RR) bandwidth modifiers on a media profile.
      *
-     * @param pProfile target profile that RS/RR to be set
-     * @param pConfig media configuration
-     * @param bDirHold direction flag if the media direction is not sendrecv, this flag is IMS_TRUE,
-     * otherwise IMS_FALSE
+     * This method adjusts the RS/RR values based on the media configuration and whether the
+     * session is on hold. If on hold, it may apply default values if specific hold-related
+     * configurations are not set.
+     *
+     * @param pProfile The `MediaBaseProfile` to modify.
+     * @param pConfig The `MediaConfiguration` containing the bandwidth settings.
+     * @param bDirHold `IMS_TRUE` if the media direction is something other than send-receive (e.g.,
+     * on hold), `IMS_FALSE` otherwise.
      */
     static void SetRtcpRsRr(OUT MediaBaseProfile* pProfile, IN const MediaConfiguration* pConfig,
             IN IMS_BOOL bDirHold);

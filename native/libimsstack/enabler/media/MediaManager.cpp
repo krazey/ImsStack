@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+#include "MediaManager.h"
+
 #include "EnablerUtils.h"
 #include "IJniMedia.h"
 #include "IMediaSession.h"
 #include "IService.h"
 #include "JniEnablerConnector.h"
-#include "MediaManager.h"
 #include "MediaMsgHandler.h"
 #include "MediaResourceManager.h"
 #include "MediaSession.h"

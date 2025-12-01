@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "MediaMsgHandler.h"
-#include "JniEnablerConnector.h"
-#include "IJniMediaSessionThread.h"
+
 #include "IJniEnabler.h"
+#include "IJniMedia.h"
+#include "IJniMediaSessionThread.h"
+#include "JniEnablerConnector.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

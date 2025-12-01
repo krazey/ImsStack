@@ -18,7 +18,8 @@
 #define INTERFACE_MEDIA_SESSION_LISTENER_H_
 
 #include "MediaDef.h"
-#include "IJniMedia.h"
+
+class ImsMediaMsgParamBase;
 
 class IMediaSessionListener
 {
@@ -26,7 +27,7 @@ public:
     /**
      * @brief Destructor of IMediaSessionListener
      */
-    virtual ~IMediaSessionListener(){};
+    virtual ~IMediaSessionListener() {};
 
     /**
      * @brief Send request message to java

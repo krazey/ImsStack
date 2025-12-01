@@ -18,6 +18,7 @@
 #define CONCRETE_MEDIA_NEGO_FACTORY_H_
 
 #include "IMediaNegoFactory.h"
+#include "MediaNego.h"
 
 class ConcreteMediaNegoFactory : public IMediaNegoFactory
 {

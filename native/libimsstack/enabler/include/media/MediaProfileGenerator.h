@@ -17,12 +17,10 @@
 #ifndef MEDIA_PROFILE_GENERATOR_H_
 #define MEDIA_PROFILE_GENERATOR_H_
 
-#include <memory>
-
-#include "IService.h"
 #include "MediaDef.h"
 
 class CodecConfig;
+class IService;
 class MediaConfiguration;
 class MediaBaseProfile;
 

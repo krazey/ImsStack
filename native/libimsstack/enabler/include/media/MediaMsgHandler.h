@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,25 @@
 #ifndef MEDIA_MSG_HANDLER_H_
 #define MEDIA_MSG_HANDLER_H_
 
-#include "IJniMedia.h"
+#include "AString.h"
+#include "ImsTypeDef.h"
 
+class ImsMediaMsgParamBase;
+
+/**
+ * @brief Handles sending messages from the native media session to the Java layer.
+ *
+ * This class acts as a bridge to communicate events and requests from the native C++
+ * side to the corresponding Java `ImsMediaSession` instance via JNI. Each
+ * `MediaMsgHandler` is associated with a specific call session.
+ */
 class MediaMsgHandler
 {
 public:
+    /**
+     * @param nSlotId The UICC slot ID.
+     * @param nCallKey A unique key to identify the call session.
+     */
     MediaMsgHandler(IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey);
     virtual ~MediaMsgHandler();
 
@@ -33,12 +47,12 @@ public:
     virtual void SetListener(IN const AString& strName);
 
     /**
-     * @brief Send jni request message to media service
+     * @brief Sends a JNI request message to the Java media service.
      *
-     * @param eEvent The message event enum
-     * @param pParam The event parameters to send
-     * @return IMS_BOOL Returns IMS_TRUE when the message deliverd without error, IMS_FALSE when it
-     * is failed to send
+     * @param eEvent The message event enum, as defined in `IJniMedia.h`.
+     * @param pParam The parameters for the event.
+     * @return IMS_BOOL Returns `IMS_TRUE` if the message was delivered successfully,
+     * `IMS_FALSE` otherwise.
      */
     virtual IMS_BOOL SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
 

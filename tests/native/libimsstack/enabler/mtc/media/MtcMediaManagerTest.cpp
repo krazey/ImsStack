@@ -16,6 +16,7 @@
 
 #include "CallReasonInfo.h"
 #include "MediaManager.h"
+#include "IJniMedia.h"
 #include "ISipHeader.h"
 #include "MediaDef.h"
 #include "MockICoreService.h"

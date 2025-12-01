@@ -17,14 +17,14 @@
 #ifndef MEDIA_NEGO_HANDLER_H_
 #define MEDIA_NEGO_HANDLER_H_
 
-#include "ISession.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
-#include "MediaNego.h"
 
 class IMediaNegoFactory;
+class ISession;
 class MediaEnvironment;
+class MediaNego;
 
 /**
  * @brief Handles the creation, management, and SDP negotiation logic associated with MediaNego

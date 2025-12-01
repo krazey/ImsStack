@@ -15,10 +15,12 @@
  */
 
 #include "MediaNegoHandler.h"
+
 #include "IMediaNegoFactory.h"
 #include "ImsTypeDef.h"
 #include "ConcreteMediaNegoFactory.h"
 #include "MediaEnvironment.h"
+#include "MediaNego.h"
 #include "ServiceTrace.h"
 #include "audio/AudioNego.h"
 #include "text/TextNego.h"

@@ -15,6 +15,8 @@
  */
 
 #include "MediaProfileGenerator.h"
+
+#include "IService.h"
 #include "MediaBaseProfile.h"
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"

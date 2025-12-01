@@ -20,15 +20,15 @@
 #include <memory>
 
 #include "ImsSlot.h"
-#include "ISession.h"
-#include "MediaBaseProfile.h"
 #include "MediaDef.h"
-#include "media/IMediaDescriptor.h"
+#include "MediaBaseProfile.h"
 
-class MediaEnvironment;
+class IMediaDescriptor;
+class ISessionDescriptor;
 class MediaConfiguration;
-class MediaSdpGenerator;
+class MediaEnvironment;
 class MediaProfileGenerator;
+class MediaSdpGenerator;
 
 class BaseNego : public ImsSlot
 {

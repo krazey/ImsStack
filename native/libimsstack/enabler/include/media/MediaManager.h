@@ -17,17 +17,17 @@
 #ifndef MEDIA_MANAGER_H_
 #define MEDIA_MANAGER_H_
 
-#include "IJniMedia.h"
 #include "IJniMediaManager.h"
 #include "ImsActivityEx.h"
 #include "ImsMap.h"
 #include "MediaDef.h"
 
 class IMediaSession;
-class MediaMsgHandler;
-class MediaSession;
 class IService;
+class ImsMediaMsgParamBase;
+class MediaMsgHandler;
 class MediaResourceManager;
+class MediaSession;
 
 class MediaManager : public ImsActivityEx, public IJniMediaManager
 {

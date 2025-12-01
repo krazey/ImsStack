@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 
+#include "IJniMedia.h"
 #include "MediaManager.h"
 #include "MediaSession.h"
 

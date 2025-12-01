@@ -19,8 +19,7 @@
 
 #include <gmock/gmock.h>
 
-#include "MediaDef.h"
-#include "ImsTypeDef.h"
+#include "IJniMedia.h"
 #include "IMediaSessionListener.h"
 
 class FakeIMediaSessionListener : public IMediaSessionListener

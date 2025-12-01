@@ -15,6 +15,7 @@
  */
 
 #include "MediaNego.h"
+
 #include "ICoreService.h"
 #include "ISdpReader.h"
 #include "ISession.h"
@@ -24,11 +25,12 @@
 #include "MediaEnvironment.h"
 #include "ServiceTrace.h"
 #include "audio/AudioNego.h"
-#include "text/TextNego.h"
-#include "video/VideoNego.h"
 #include "config/MediaConfigUtil.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
+#include "media/IMedia.h"
+#include "text/TextNego.h"
+#include "video/VideoNego.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
