@@ -471,8 +471,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
 
-    // TODO: move to SessionAlerting
-    if (nStatusCode == SipStatusCode::SC_199)
+    if (nStatusCode == SipStatusCode::SC_180)
+    {
+        m_objContext.GetSupplementaryService().UpdateCw(piMessage);
+    }
+    else if (nStatusCode == SipStatusCode::SC_199)
     {
         return GetStateName();
     }
@@ -570,8 +573,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_START, nIndex);
-    // TODO: move to SessionAlerting
-    if (nStatusCode == SipStatusCode::SC_199)
+
+    if (nStatusCode == SipStatusCode::SC_180)
+    {
+        m_objContext.GetSupplementaryService().UpdateCw(piMessage);
+    }
+    else if (nStatusCode == SipStatusCode::SC_199)
     {
         return GetStateName();
     }
