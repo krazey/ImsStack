@@ -83,7 +83,8 @@ PUBLIC VIRTUAL ConferenceEventNotifier* ConferenceFactory::CreateEventNotifier(
 
 PUBLIC VIRTUAL ConferenceInfoUpdater* ConferenceFactory::CreateInfoUpdater()
 {
-    return new ConferenceInfoUpdater(*this, m_objContext.GetConfigurationProxy());
+    return new ConferenceInfoUpdater(
+            *this, m_objContext.GetConfigurationProxy(), m_objContext.GetMessageUtils());
 }
 
 PUBLIC VIRTUAL ConferenceInfo* ConferenceFactory::CreateInfo()

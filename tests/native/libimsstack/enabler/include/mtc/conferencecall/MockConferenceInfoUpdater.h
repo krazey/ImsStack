@@ -24,13 +24,14 @@
 class AString;
 class ConferenceFactory;
 class ConferenceParticipantList;
+class IMessageUtils;
 
 class MockConferenceInfoUpdater : public ConferenceInfoUpdater
 {
 public:
-    explicit MockConferenceInfoUpdater(
-            IN ConferenceFactory& objFactory, IN MtcConfigurationProxy& objConfigProxy) :
-            ConferenceInfoUpdater(objFactory, objConfigProxy)
+    MockConferenceInfoUpdater(IN ConferenceFactory& objFactory,
+            IN MtcConfigurationProxy& objConfigProxy, IN IMessageUtils& objMessageUtils) :
+            ConferenceInfoUpdater(objFactory, objConfigProxy, objMessageUtils)
     {
     }
     ~MockConferenceInfoUpdater() override {}

@@ -34,7 +34,6 @@
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceReference.h"
-#include "conferencecall/ConferenceUtils.h"
 #include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "conferencecall/UriFormatter.h"

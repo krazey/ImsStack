@@ -48,7 +48,7 @@ private:
     static AString GetPort(IN IMtcCallContext& objContext);
     static const AString& GetPublicUserId(IN const IMtcCallContext& objContext);
     static AString GetWifiCallingAddressId(IN const IMtcCallContext& objContext);
-    static AString GetMsisdn(IN const IMtcCallContext& objContext);
+    static AString GetMsisdn(IN IMtcCallContext& objContext);
     static AString GetHomeDomain(IN const IMtcCallContext& objContext);
     static AString GetUniqueId();
     static AString GetMcc(IN const IMtcCallContext& objContext);

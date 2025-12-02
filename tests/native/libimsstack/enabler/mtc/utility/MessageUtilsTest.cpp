@@ -424,6 +424,25 @@ TEST_F(MessageUtilsTest, GetUserPart)
     EXPECT_STREQ(strUserPart.GetStr(), "");
 }
 
+TEST_F(MessageUtilsTest, GetUserPartWithUri)
+{
+    AString strUri = "<sip:anyname1;userparam@ims.google.com>;anyheaderparam";
+    AString strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "anyname1");
+
+    strUri = "<tel:12345;anyuriparam>;anyparam";
+    strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "12345");
+
+    strUri = "invalid";
+    strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "");
+
+    strUri = "";
+    strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "");
+}
+
 TEST_F(MessageUtilsTest, GetUserIds)
 {
     ImsList<AString> objUserIds;

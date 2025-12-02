@@ -26,6 +26,7 @@
 #include "call/message/TemplateFormatter.h"
 #include "device/OsLocationInfo.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -48,6 +49,7 @@ public:
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
     MockISubscriberConfig objSubscriberConfig;
+    MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -56,6 +58,7 @@ protected:
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetAosConnector(_)).WillByDefault(Return(&objAosConnector));
         ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);

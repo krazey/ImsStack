@@ -67,6 +67,7 @@ public:
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
+    AString GetUserPart(IN const AString& strUri) override;
     ImsList<AString> GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,

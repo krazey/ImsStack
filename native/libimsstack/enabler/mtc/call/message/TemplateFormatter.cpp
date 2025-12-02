@@ -24,9 +24,9 @@
 #include "ServiceSystemTime.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/TemplateFormatter.h"
-#include "conferencecall/ConferenceUtils.h"
 #include "device/OsLocationInfo.h"
 #include "helper/IMtcAosConnector.h"
+#include "utility/IMessageUtils.h"
 #include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -230,7 +230,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetWifiCallingAddressId(
     return strAid;
 }
 
-PRIVATE GLOBAL AString TemplateFormatter::GetMsisdn(IN const IMtcCallContext& objContext)
+PRIVATE GLOBAL AString TemplateFormatter::GetMsisdn(IN IMtcCallContext& objContext)
 {
     AString strMsisdn;
     PhoneInfoService::GetPhoneInfoService()
@@ -245,8 +245,7 @@ PRIVATE GLOBAL AString TemplateFormatter::GetMsisdn(IN const IMtcCallContext& ob
     const IMtcAosConnector* pAosConnector = objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
-        // TODO: b/465097860, Move GetUserPart from ConferenceUtils to MessageUtils
-        ConferenceUtils::GetUserPart(pAosConnector->GetAssociatedUri(), strMsisdn);
+        strMsisdn = objContext.GetMessageUtils().GetUserPart(pAosConnector->GetAssociatedUri());
     }
 
     return strMsisdn;

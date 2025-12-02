@@ -22,6 +22,7 @@
 #include "conferencecall/MockConferenceInfo.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::Return;
@@ -64,6 +65,7 @@ public:
 
     ConferenceParticipantList objParticipantList;
     ConferenceInfoUpdater* pUpdater;
+    MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -83,7 +85,7 @@ protected:
         objParticipantList.SetLocalUri(LOCAL_URI);
 
         pFactory = new MockConferenceFactory(objContext);
-        pUpdater = new ConferenceInfoUpdater(*pFactory, *pConfigurationProxy);
+        pUpdater = new ConferenceInfoUpdater(*pFactory, *pConfigurationProxy, objMessageUtils);
     }
 
     virtual void TearDown() override

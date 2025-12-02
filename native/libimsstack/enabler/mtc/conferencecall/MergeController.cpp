@@ -22,7 +22,6 @@
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "conferencecall/ConferenceUtils.h"
 #include "conferencecall/MergeController.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
