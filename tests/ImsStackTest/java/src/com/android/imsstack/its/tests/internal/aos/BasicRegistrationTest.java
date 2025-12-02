@@ -46,7 +46,6 @@ import com.android.imsstack.its.util.SingleLatch;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -596,30 +595,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="unregistered" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onLte_byNotifyUnregistered_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="unregistered">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_unregistered")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyUnregistered().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -642,31 +622,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 3. Configure the device to re-register upon receiving a NOTIFY with "unregistered" event.
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onLte_byNotifyUnregistered_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="unregistered">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_unregistered")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyUnregistered().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -703,30 +664,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onLte_byNotifyRejected_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="rejected">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_rejected")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyRejected().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -746,31 +688,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 3. Configure the device to re-register upon receiving a NOTIFY with "rejected" event.
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onLte_byNotifyRejected_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="rejected">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_rejected")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyRejected().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -804,30 +727,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="deactivated" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onLte_byNotifyDeactivated_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="deactivated">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_deactivated")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyDeactivated().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -847,31 +751,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 3. Configure the device to re-register upon receiving a NOTIFY with "deactivated" event.
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onLte_byNotifyDeactivated_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="deactivated">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_deactivated")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyDeactivated().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
 
@@ -1458,30 +1343,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="unregistered" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onNr_byNotifyUnregistered_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="unregistered">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_unregistered")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyUnregistered().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -1504,31 +1370,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 3. Configure the device to re-register upon receiving a NOTIFY with "unregistered" event.
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again on NR.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onNr_byNotifyUnregistered_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="unregistered">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_unregistered")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyUnregistered().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -1564,30 +1411,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onNr_byNotifyRejected_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="rejected">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_rejected")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyRejected().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -1610,31 +1438,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 3. Configure the device to re-register upon receiving a NOTIFY with "rejected" event.
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again on NR.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onNr_byNotifyRejected_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="rejected">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_rejected")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyRejected().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -1670,30 +1479,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="deactivated" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onNr_byNotifyDeactivated_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="deactivated">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_deactivated")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyDeactivated().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -1716,31 +1506,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 3. Configure the device to re-register upon receiving a NOTIFY with "deactivated" event.
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again on NR.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onNr_byNotifyDeactivated_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="deactivated">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_deactivated")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyDeactivated().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -2388,30 +2159,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="unregistered" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onWlan_byNotifyUnregistered_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="unregistered">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_unregistered")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyUnregistered().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -2438,31 +2190,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again
     //    on IWLAN.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onWlan_byNotifyUnregistered_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_unregistered.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="unregistered">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Unregistered by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_unregistered")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyUnregistered().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -2500,30 +2233,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
     // 3. The device sends a 200 OK for the NOTIFY.
     // 4. Verify that the device is deregistered locally due to network-initiated detach.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onWlan_byNotifyRejected_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="rejected">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_rejected")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyRejected().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -2550,31 +2264,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again
     //    on IWLAN.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onWlan_byNotifyRejected_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_rejected.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="rejected">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Rejected by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_rejected")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyRejected().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
@@ -2614,30 +2309,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again
     //    on IWLAN.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onWlan_byNotifyDeactivated_succeeds() throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="deactivated">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_deactivated")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyDeactivated().build());
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
@@ -2664,31 +2340,12 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     // 4. Verify that the device is deregistered locally.
     // 5. Verify that the device triggers a new registration and successfully registers again
     //    on IWLAN.
-    @Ignore("TISS support is required.")
     @Test
     public void deregister_onWlan_byNotifyDeactivated_triggersRegistration()
             throws Exception {
-        // TODO: The following XML files must be included in TISS:
-        /*
-        File name : tiss/preferencefiles/xml/reg_notify_deactivated.txt
-        <?xml version="1.0" encoding="UTF-8"?>
-        <reginfo xmlns="urn:ietf:params:xml:ns:reginfo" version="1" state="full">
-          <registration aor="sip:001011123456789@ims.mnc001.mcc001.3gppnetwork.org" id="a1"
-              state="terminated">
-            <contact id="1" state="terminated" event="deactivated">
-              <uri>sip:ue_instance@192.168.200.44:5060</uri>
-              <unknown-param name="reason">Registration Deactivated by Network</unknown-param>
-            </contact>
-          </registration>
-        </reginfo>
-        */
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
-        generator.addMessage(new ServerMessage.Builder()
-                .setMethodOrCode("NOTIFY-SUBSCRIBE")
-                .setXml("reg_notify_deactivated")
-                .build());
+        generator.addMessage(MessageBuildUtils.getRegNotifyDeactivated().build());
         generator.addMessages(">200-NOTIFY");
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
