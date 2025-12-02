@@ -925,6 +925,14 @@ PRIVATE
 void OsNetworkConnection::GetAccessNetworkInfoForWiFi(OUT AccessNetworkInfo& objAccessNetInfo)
 {
     AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
+    // Fall back to a default MAC address because, in most cases, a valid one is not set
+    // due to privacy concerns.
+    // - specific case: Cross SIM dialing (no Wi-Fi, other SIM's data connection)
+    if (strMacAddress.GetLength() == 0)
+    {
+        IMS_TRACE_D("Fall back to a default MAC address", 0, 0, 0);
+        strMacAddress = WLAN_NULL_MAC;
+    }
     ImsList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)

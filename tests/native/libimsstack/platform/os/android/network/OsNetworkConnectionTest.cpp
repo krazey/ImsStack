@@ -502,7 +502,8 @@ TEST_F(OsNetworkConnectionTest, GetAccessNetworkInfo)
             .Times(AnyNumber())
             .WillOnce(Return(AString("8c:3b:ad:8c:31:d0:8c:40")))
             .WillOnce(Return(AString(":::::")))
-            .WillOnce(Return(AString("8c:3b:ad:8c:31:d0")));
+            .WillOnce(Return(AString("8c:3b:ad:8c:31:d0")))
+            .WillOnce(Return(AString::ConstNull()));
 
     pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
 
@@ -522,6 +523,13 @@ TEST_F(OsNetworkConnectionTest, GetAccessNetworkInfo)
     EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
     EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
             "\x8C\x3B\xAD\x8C\x31\xD0");
+
+    pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
+
+    EXPECT_EQ(objWifiAccessNetInfo.nType, AccessNetworkInfo::TYPE_IEEE_802_11);
+    EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
+    EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
+            "\x00\x00\x00\x00\x00\x00");
 }
 
 TEST_F(OsNetworkConnectionTest, GetLastAccessNetworkInfo)

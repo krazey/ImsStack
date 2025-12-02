@@ -132,6 +132,8 @@ struct CI_3GPP2
 #define ANI_WLAN_MAC_MAX_LEN  12  // hexadecimal digits excluding null character
 #define ANI_WLAN_SSID_MAX_LEN 32  // string token excluding null character
 
+static const constexpr IMS_CHAR* WLAN_NULL_MAC = "00:00:00:00:00:00";
+
 struct I_WLAN_NODE_ID
 {
     // IEEE-802.11 / IEEE-802.11a / IEEE-802.11b / IEEE-802.11g / IEEE-802.11n
