@@ -879,7 +879,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Message body present without content type",
                 SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
+        return SIP_TRUE;
     }
 
     /*Now Check for MIME or Single Body*/
@@ -1310,7 +1310,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Message body present without content type",
                 SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
+        return SIP_TRUE;
     }
 
     /*Now Check for MIME or Single Body*/
