@@ -81,6 +81,8 @@ private:
 
     static IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
             IN IMS_BOOL bAllowPrefix = IMS_TRUE);
+    static IMS_BOOL IsSameUriParameter(
+            IN const AString& strUserEntityA, IN const AString& strUserEntityB);
     static IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity);
     static IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB);
     static IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus);

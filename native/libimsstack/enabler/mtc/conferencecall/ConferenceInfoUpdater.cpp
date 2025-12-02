@@ -596,6 +596,14 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
         }
 
         IMS_BOOL bSameUri = IsSameUri(strParticipantUserEntity, strUserEntity, IMS_FALSE);
+        if (bSameUri &&
+                !IsSameUriParameter(
+                        m_pParticipantList->GetAt(i)->GetUserEntity(), pUser->GetEntity()))
+        {
+            IMS_TRACE_I("FindParticipantByUserEntity : different URI parameter", 0, 0, 0);
+            continue;
+        }
+
         if (IsAnonymousUri(strUserEntity) && !bSameUri)
         {
             // if anonymous uri "user-entity", they must be absolutely same. no prefix is allowed.
@@ -805,6 +813,14 @@ PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsSameUri(IN const AString& strUr
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsSameUriParameter(
+        IN const AString& strUserEntityA, IN const AString& strUserEntityB)
+{
+    // Checks only "user=phone" URI parameter.
+    const AString USER_PHONE(";user=phone");
+    return strUserEntityA.Contains(USER_PHONE) == strUserEntityB.Contains(USER_PHONE);
 }
 
 PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsAnonymousUri(IN const AString& strUserEntity)
