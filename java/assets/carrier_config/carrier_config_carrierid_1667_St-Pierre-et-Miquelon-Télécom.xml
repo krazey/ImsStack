@@ -18,24 +18,11 @@
 <carrier_config>
     <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
     <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="ims.pdn_reconnect_on_all_pcscfs_unavailable_bool" value="true"/>
+    <boolean name="ims.update_ongoing_reg_retry_timer_on_ims_est_timer_expiry_bool" value="false"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="3">
-        <item value="0"/>
-        <item value="5"/>
-        <item value="-504"/>
-    </int-array>
-    <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="3">
-        <item value="0"/>
-        <item value="5"/>
-        <item value="-504"/>
-    </int-array>
-    <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="3">
-        <item value="0"/>
-        <item value="5"/>
-        <item value="-504"/>
-    </int-array>
+    <int name="ims.reg_retry_timer_f_policy_int" value="2"/>
 
     <!-- Mtc -->
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="190000"/>
