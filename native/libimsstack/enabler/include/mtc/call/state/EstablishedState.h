@@ -39,6 +39,7 @@ public:
     CallStateName Hold(IN MediaInfo& objMediaInfo) override;
     CallStateName Resume(IN MediaInfo& objMediaInfo) override;
     CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;

@@ -45,8 +45,9 @@ protected:
     }
 };
 
-TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfMmtelFeatureAvailable)
+TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfMmtelFeatureAvailableBeforeEstablished)
 {
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
             .WillByDefault(Return(IMS_TRUE));
 
@@ -55,8 +56,10 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfMmtelFeatureAvailable)
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
-TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfbAvailableMoCall)
+TEST_F(ServiceBlockRuleTest,
+        CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfbAvailableMoCallBeforeEstablished)
 {
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
             .WillByDefault(Return(IMS_FALSE));
     objCallInfo.ePeerType = PeerType::MO;
@@ -71,8 +74,10 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfb
             objResult.objReason);
 }
 
-TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfbUnavailableMoCall)
+TEST_F(ServiceBlockRuleTest,
+        CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfbUnavailableMoCallBeforeEstablished)
 {
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
             .WillByDefault(Return(IMS_FALSE));
     objCallInfo.ePeerType = PeerType::MO;
@@ -85,8 +90,9 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfb
     EXPECT_EQ(CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE), objResult.objReason);
 }
 
-TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForMtCall)
+TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForMtCallBeforeEstablished)
 {
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
             .WillByDefault(Return(IMS_FALSE));
     objCallInfo.ePeerType = PeerType::MT;
@@ -100,8 +106,10 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForMtCa
             objResult.objReason);
 }
 
-TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfOnlyVideoFeatureAvailableForVideoCall)
+TEST_F(ServiceBlockRuleTest,
+        CheckReturnsUnblockedIfOnlyVideoFeatureAvailableForVideoCallBeforeEstablished)
 {
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::VIDEO))
@@ -109,5 +117,44 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfOnlyVideoFeatureAvailableFor
 
     Result objResult = ServiceBlockRule(objContext, CallType::VT).Check(objListener);
 
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedForUnconnectedFeaturesAfterEstablishedExceptVoip)
+{
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::VIDEO))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::TEXT))
+            .WillByDefault(Return(IMS_FALSE));
+
+    Result objResult = ServiceBlockRule(objContext, CallType::VOIP).Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    objResult = ServiceBlockRule(objContext, CallType::VT).Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION), objResult.objReason);
+    objResult = ServiceBlockRule(objContext, CallType::RTT).Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION), objResult.objReason);
+    objResult = ServiceBlockRule(objContext, CallType::VIDEO_RTT).Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION), objResult.objReason);
+}
+
+TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedForConnectedFeaturesAfterEstablished)
+{
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::TEXT))
+            .WillByDefault(Return(IMS_TRUE));
+
+    Result objResult = ServiceBlockRule(objContext, CallType::VOIP).Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    objResult = ServiceBlockRule(objContext, CallType::VT).Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    objResult = ServiceBlockRule(objContext, CallType::RTT).Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+    objResult = ServiceBlockRule(objContext, CallType::VIDEO_RTT).Check(objListener);
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }

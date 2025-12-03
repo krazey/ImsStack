@@ -847,7 +847,10 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     EXPECT_EQ(GetRejectStatusCode(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE), SipStatusCode::SC_603);
     EXPECT_EQ(GetRejectStatusCode(CODE_NETWORK_RESP_TIMEOUT), SipStatusCode::SC_500);
     EXPECT_EQ(GetRejectStatusCode(CODE_BLACKLISTED_CALL_ID), SipStatusCode::SC_603);
-    EXPECT_EQ(GetRejectStatusCode(CODE_USER_REJECTED_SESSION_MODIFICATION), SipStatusCode::SC_603);
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
+            .WillByDefault(Return(nTestStatusCode));
+    EXPECT_EQ(GetRejectStatusCode(CODE_USER_REJECTED_SESSION_MODIFICATION), nTestStatusCode);
     EXPECT_EQ(GetRejectStatusCode(CODE_ACCESS_CLASS_BLOCKED), SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_CALL_TYPE_NOT_ALLOWED), SipStatusCode::SC_488);
 }

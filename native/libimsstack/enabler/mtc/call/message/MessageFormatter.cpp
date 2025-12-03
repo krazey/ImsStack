@@ -802,8 +802,11 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_500;
             break;
         case CODE_BLACKLISTED_CALL_ID:
-        case CODE_USER_REJECTED_SESSION_MODIFICATION:
             eStatusCode = SipStatusCode::SC_603;
+            break;
+        case CODE_USER_REJECTED_SESSION_MODIFICATION:
+            eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
             break;
         case CODE_ACCESS_CLASS_BLOCKED:
         case CODE_REJECT_CALL_TYPE_NOT_ALLOWED:

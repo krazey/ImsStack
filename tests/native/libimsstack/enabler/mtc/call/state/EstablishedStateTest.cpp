@@ -667,8 +667,12 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsNotInvokedIfPreconditionIs
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
-TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
+TEST_F(EstablishedStateTest, SessionUpdateReceivedAcceptsByPreviousCallTypeIfConfiguredCodeIs200)
 {
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
+            .WillByDefault(Return(SipStatusCode::SC_200));
+    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VT));
     ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
             .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
@@ -676,10 +680,34 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(Return(IMtcBlockChecker::Result(
                     IMtcBlockChecker::Result::Status::BLOCKED, objAnyReason)));
+    ON_CALL(objMockMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(STATE_OFFER_RECEIVED));
 
-    CallType eAnyCallType = CallType::VIDEO_RTT;
-    EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
-    EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VT));
+    EXPECT_CALL(objMockMtcSession, AcceptUpdate);
+    EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
+            .WillByDefault(Return(SipStatusCode::SC_603));
+    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    CallReasonInfo objAnyReason(CODE_UNSPECIFIED);
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(Return(IMtcBlockChecker::Result(
+                    IMtcBlockChecker::Result::Status::BLOCKED, objAnyReason)));
+    ON_CALL(objMockMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(STATE_OFFER_RECEIVED));
+
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VT));
     EXPECT_CALL(objMockMtcSession, Reject(objAnyReason));
     EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
 
@@ -689,18 +717,21 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
 
 TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailed)
 {
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
+            .WillByDefault(Return(SipStatusCode::SC_603));
+    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VT));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objMockMediaManager, GetNegotiationState(_)).WillByDefault(Return(STATE_IDLE));
 
     const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_NO_CODEC_MATCHED);
     CallReasonInfo objMediaNegoFailReason(CODE_MEDIA_NOT_ACCEPTABLE, objNegoResult.eResult);
     ON_CALL(objMockMediaManager, NegotiateSdp(&objMockISession))
             .WillByDefault(Return(objNegoResult));
-    CallType eAnyCallType = CallType::VIDEO_RTT;
-    EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
-    EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VT));
     EXPECT_CALL(objMockMtcSession, Reject(objMediaNegoFailReason));
     EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
 
@@ -710,19 +741,22 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailed)
 
 TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailedWithInvalidDescriptor)
 {
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
+            .WillByDefault(Return(SipStatusCode::SC_603));
+    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VT));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objMockMediaManager, GetNegotiationState(_)).WillByDefault(Return(STATE_IDLE));
 
     const SdpNegotiationResult objNegoResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     MediaNegoResult eNegoFailReason = MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR;
     CallReasonInfo objMediaNegoFailReason(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoFailReason);
     ON_CALL(objMockMediaManager, NegotiateSdp(&objMockISession))
             .WillByDefault(Return(objNegoResult));
-    CallType eAnyCallType = CallType::VIDEO_RTT;
-    EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
-    EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VT));
     EXPECT_CALL(objMockMtcSession, Reject(objMediaNegoFailReason));
     EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
 
