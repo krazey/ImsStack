@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import android.telephony.CarrierConfigManager.ImsVt;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.VideoConfig;
 
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -31,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
 
 public class VideoConfigSpropGenerator {
     static final int MAX_VIDEO_PAYLOAD_TYPES = 3;
@@ -95,31 +97,32 @@ public class VideoConfigSpropGenerator {
         @Override
         public void onCarrierConfigChanged(int slotId, int subId) {
             ImsLog.d(slotId, "onCarrierConfigChanged subId:" + subId);
-            new MediaCallback(slotId).generateSprop();
+            // Connect to ImsMedia Service via ImsMediaManager.
+            MediaCallback callback = new MediaCallback(slotId);
+            ImsMediaManager imsMediaManager = new ImsMediaManager(AppContext.getInstance(),
+                    Executors.newSingleThreadExecutor(), callback);
+            callback.setMediaManager(imsMediaManager);
         }
     }
 
-    static class MediaCallback implements IMediaConnectionObserver {
-        private MediaManagerHelper mMediaManagerHelper;
+    static class MediaCallback implements ImsMediaManager.OnConnectedCallback {
+        private ImsMediaManager mImsMediaManager;
         private final int mSlotId;
 
         MediaCallback(int slotId) {
             mSlotId = slotId;
         }
 
-        public void generateSprop() {
-            mMediaManagerHelper = new MediaManagerHelper(this);
-            if (MediaManagerHelper.isImsMediaConnected()) {
-                onMediaConnected();
-            }
+        public void setMediaManager(ImsMediaManager imsMediaManager) {
+            mImsMediaManager = imsMediaManager;
         }
 
         @Override
-        public void onMediaConnected() {
+        public void onConnected() {
             ImsLog.i(mSlotId, "Service connected.");
 
-            if (mMediaManagerHelper == null) {
-                ImsLog.e(mSlotId, "MediaManagerHelper is null");
+            if (mImsMediaManager == null) {
+                ImsLog.e(mSlotId, "ImsMediaManager is null");
                 return;
             }
 
@@ -139,7 +142,7 @@ public class VideoConfigSpropGenerator {
             }
 
             // 2. Call ImsMedia service to generate SPROP for all VideoConfig
-            mMediaManagerHelper.generateVideoSprop(videoConfigs,
+            mImsMediaManager.generateVideoSprop(videoConfigs,
                     new ImsMediaManager.ImsMediaManagerCallback() {
                         @Override
                         public void onVideoSpropResponse(String[] spropList) {
@@ -167,16 +170,14 @@ public class VideoConfigSpropGenerator {
                             // 4. Notify carrier config change
                             configInterface.notifyCarrierConfigChangedForNative();
 
-                            if (mMediaManagerHelper != null) {
-                                mMediaManagerHelper.close();
-                                mMediaManagerHelper = null;
-                            }
+                            mImsMediaManager.release();
+                            mImsMediaManager = null;
                         }
                     });
         }
 
         @Override
-        public void onMediaDisconnected() {
+        public void onDisconnected() {
             ImsLog.d(mSlotId, "Service disconnected.");
         }
 
@@ -215,7 +216,7 @@ public class VideoConfigSpropGenerator {
                             + hevcPayloadDescriptions);
 
                     for (int payloadTypeIdx = 0; (payloadTypeIdx < hevcPayloadTypes.length)
-                            && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES); payloadTypeIdx++) {
+                                && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES); payloadTypeIdx++) {
 
                         int payloadType = hevcPayloadTypes[payloadTypeIdx];
                         PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
