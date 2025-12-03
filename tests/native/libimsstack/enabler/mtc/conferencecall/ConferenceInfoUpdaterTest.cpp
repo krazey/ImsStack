@@ -281,10 +281,9 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatching)
     IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
     IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
 
-    AString strAnyEntity1WithPhone = USER_ENTITY1 + ";user=phone";
-    AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    const ConfUser* pUser1 =
-            AddParticipant(strAnyEntity1WithPhone, strAnyEntity1WithPhone, eStatusBefore1);
+    AString strAnyEntity1 = USER_ENTITY1;
+    AddUserToInfo(strAnyEntity1, eStatusAfter1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
     AString strAnyEntity2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntity2, eStatusAfter2);
@@ -296,6 +295,30 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatching)
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
     EXPECT_EQ(pUser1->eStatus, eStatusAfter1);
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatchingByDifferentUserPhoneParameter)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    AString strAnyEntity1WithPhone = USER_ENTITY1 + ";user=phone";
+    AddUserToInfo(strAnyEntity1WithPhone, eStatusAfter1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, strAnyEntity1WithPhone, eStatusBefore1);
+
+    AString strAnyEntity2WithoutPhone = USER_ENTITY2;
+    AddUserToInfo(strAnyEntity2WithoutPhone, eStatusAfter2);
+    const ConfUser* pUser2 = AddParticipant(
+            USER_ENTITY2 + ";user=phone", USER_ENTITY2 + ";user=phone", eStatusBefore2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusBefore1);
+    EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatchingWithAnonymousUri)

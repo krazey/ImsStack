@@ -55,11 +55,11 @@ PUBLIC
 IMS_UINT32 ConferenceInfoUpdater::Update(
         IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage)
 {
-    IMS_TRACE_I("Update", 0, 0, 0);
+    IMS_TRACE_D("Update", 0, 0, 0);
 
     if (ParseConferenceInfo(strEventPackage) == IMS_FAILURE)
     {
-        IMS_TRACE_I("Update : Malformed XML", 0, 0, 0);
+        IMS_TRACE_E(0, "Malformed XML", 0, 0, 0);
         Clear();
         return RESULT_MALFORMED_XML;
     }
@@ -72,14 +72,11 @@ IMS_UINT32 ConferenceInfoUpdater::Update(
         return RESULT_INFO_DELETED;
     }
 
-    // TODO:
-    // this participantList pointer must be set to NULL end of this function
-    // to avoid referencing invalid object.
     m_pParticipantList = pParticipantList;
 
     if (CheckValidVersion() == IMS_FAILURE)
     {
-        IMS_TRACE_I("Update : Invalid Version", 0, 0, 0);
+        IMS_TRACE_E(0, "Invalid Version", 0, 0, 0);
 
         Clear();
         return RESULT_INVALID_VERSION;
@@ -94,8 +91,8 @@ IMS_UINT32 ConferenceInfoUpdater::Update(
     return eUserUpdateResult == IMS_SUCCESS ? RESULT_UPDATED : RESULT_NOTHING_UPDATED;
 }
 
-PUBLIC
-const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy ePolicy)
+PUBLIC GLOBAL const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(
+        IN MatchingPolicy ePolicy)
 {
     switch (ePolicy)
     {
@@ -110,8 +107,7 @@ const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy e
     }
 }
 
-PUBLIC
-const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStatus)
+PUBLIC GLOBAL const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStatus)
 {
     switch (nStatus)
     {
@@ -141,7 +137,18 @@ const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStat
     }
 }
 
-PROTECTED
+PRIVATE
+void ConferenceInfoUpdater::Clear()
+{
+    delete m_pConferenceInfo;
+    m_pConferenceInfo = IMS_NULL;
+
+    m_nInfoState = ConferenceInfo::STATE_INVALID;
+    m_objNotMatchedUsers.Clear();
+    m_bHostInfoInUsers = IMS_FALSE;
+}
+
+PRIVATE
 IMS_RESULT ConferenceInfoUpdater::ParseConferenceInfo(IN const AString& strEventPackage)
 {
     m_pConferenceInfo = m_objFactory.CreateInfo();
@@ -150,7 +157,7 @@ IMS_RESULT ConferenceInfoUpdater::ParseConferenceInfo(IN const AString& strEvent
     return bResult ? IMS_SUCCESS : IMS_FAILURE;
 }
 
-PROTECTED
+PRIVATE
 IMS_RESULT ConferenceInfoUpdater::CheckValidVersion() const
 {
     if (ConferenceConfigurationHelper::IsPackageVersionCheckRequired(m_objConfigProxy) == IMS_FALSE)
@@ -159,15 +166,12 @@ IMS_RESULT ConferenceInfoUpdater::CheckValidVersion() const
     }
 
     IMS_SINT32 nPreviousXmlVersion = m_pParticipantList->GetXmlVersion();
-    IMS_TRACE_I("CheckValidVersion : previous version=[%d]", nPreviousXmlVersion, 0, 0);
-
     if (nPreviousXmlVersion < 0)
     {
         return IMS_SUCCESS;
     }
 
     IMS_SINT32 nVersion = m_pConferenceInfo->GetVersion();
-
     if (m_nInfoState == ConferenceInfo::STATE_PARTIAL)
     {
         if (nPreviousXmlVersion + 1 == nVersion)
@@ -186,7 +190,7 @@ IMS_RESULT ConferenceInfoUpdater::CheckValidVersion() const
     return IMS_FAILURE;
 }
 
-PROTECTED
+PRIVATE
 IMS_RESULT ConferenceInfoUpdater::UpdateDescription()
 {
     m_pParticipantList->SetXmlVersion((IMS_SINT32)m_pConferenceInfo->GetVersion());
@@ -196,11 +200,9 @@ IMS_RESULT ConferenceInfoUpdater::UpdateDescription()
     return IMS_SUCCESS;
 }
 
-PROTECTED
+PRIVATE
 IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 {
-    IMS_TRACE_I("UpdateParticipantList", 0, 0, 0);
-
     if (IsInitialNotifyWithoutUsers())
     {
         IMS_TRACE_I("UpdateParticipantList : initial NOTIFY without users", 0, 0, 0);
@@ -232,7 +234,7 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
     return IMS_SUCCESS;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
 {
     IMS_TRACE_I("FindAndUpdate : policy[%s] - START", ConvertPolicyToString(ePolicy), 0, 0);
@@ -310,7 +312,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
     return bCompleted;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL ConferenceInfoUpdater::UpdateParticipant(
         IN const ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex)
 {
@@ -348,12 +350,15 @@ IMS_BOOL ConferenceInfoUpdater::UpdateParticipant(
         pParticipant->SetDisconnectedExplicitly(IMS_TRUE);
     }
 
-    ModifyParticipantInfoByConfig(pConfUser);
+    if (pConfUser->eStatus == STATUS_DISCONNECTING)
+    {
+        pConfUser->eStatus = STATUS_DISCONNECTED;
+    }
 
     return IMS_TRUE;
 }
 
-PROTECTED
+PRIVATE
 void ConferenceInfoUpdater::SetParticipantsMatchingStarted()
 {
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
@@ -364,7 +369,7 @@ void ConferenceInfoUpdater::SetParticipantsMatchingStarted()
     }
 }
 
-PROTECTED
+PRIVATE
 void ConferenceInfoUpdater::SetDeletedParticipantToDisconnected()
 {
     // set status to disconnected if the participant in not in the user list in full state info.
@@ -385,7 +390,7 @@ void ConferenceInfoUpdater::SetDeletedParticipantToDisconnected()
     }
 }
 
-PROTECTED
+PRIVATE
 IMS_SINT32 ConferenceInfoUpdater::FindParticipant(
         IN const ConferenceInfo::User* pUser, IN IMS_UINT32 nIndexInXml)
 {
@@ -405,7 +410,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipant(
     }
 }
 
-PROTECTED
+PRIVATE
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrder(
         IN IMS_UINT32 nIndexInXml, IN const ConferenceInfo::User* pUser)
 {
@@ -451,7 +456,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrder(
     return -1;
 }
 
-PROTECTED
+PRIVATE
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrderLegId(IN const ConferenceInfo::User* pUser)
 {
     const AString& strUserEntity = pUser->GetEntity();
@@ -472,7 +477,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrderLegId(IN const Conferenc
     return -1;
 }
 
-PROTECTED
+PRIVATE
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const ConferenceInfo::User* pUser)
 {
     IMS_UINT32 nMaxMatchingCount = 0;
@@ -560,7 +565,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const Conferenc
     return nLocalParticipantIndex;
 }
 
-PROTECTED
+PRIVATE
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const ConferenceInfo::User* pUser)
 {
     IMS_SINT32 nLocalParticipantIndex = -1;
@@ -591,6 +596,13 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
         }
 
         IMS_BOOL bSameUri = IsSameUri(strParticipantUserEntity, strUserEntity, IMS_FALSE);
+        if (bSameUri &&
+                !IsSameUriParameter(
+                        m_pParticipantList->GetAt(i)->GetUserEntity(), pUser->GetEntity()))
+        {
+            IMS_TRACE_I("FindParticipantByUserEntity : different URI parameter", 0, 0, 0);
+            continue;
+        }
 
         if (IsAnonymousUri(strUserEntity) && !bSameUri)
         {
@@ -616,140 +628,89 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
     return nLocalParticipantIndex;
 }
 
-PROTECTED
-IMS_UINT32 ConferenceInfoUpdater::GetMatchingScore(
-        IN const AString& strUriA, IN const AString& strUriB)
+PRIVATE
+ImsList<ConferenceInfo::User*> ConferenceInfoUpdater::GetSameUserEntities(
+        IN const ConferenceInfo::User* pUser) const
 {
-    if (IsAnonymousUri(strUriA) && IsAnonymousUri(strUriB))
+    const AString& strUserEntity = pUser->GetEntity();
+
+    const ImsList<ConferenceInfo::User*> objUsers = m_pConferenceInfo->GetUsers();
+    ImsList<ConferenceInfo::User*> objSameEntityUsers;
+
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
-        return 1;
-    }
-
-    return 0;
-}
-
-PROTECTED
-IMS_UINT32 ConferenceInfoUpdater::GetMatchingCount(
-        IN const AString& strUriA, IN const AString& strUriB)
-{
-    AString strA;
-    if (ConferenceUtils::GetUserPart(strUriA, strA).GetLength() == 0)
-    {
-        strA = strUriA;
-    }
-
-    AString strB;
-    if (ConferenceUtils::GetUserPart(strUriB, strB).GetLength() == 0)
-    {
-        strB = strUriB;
-    }
-
-    IMS_UINT32 nParticipantEntityLength = strA.GetLength();
-    IMS_UINT32 nXmlEntityLength = strB.GetLength();
-    IMS_UINT32 nMaxCount = nParticipantEntityLength > nXmlEntityLength ? nXmlEntityLength
-                                                                       : nParticipantEntityLength;
-    IMS_UINT32 nMatchingCount = 0;
-
-    for (IMS_UINT32 i = 1; i <= nMaxCount; i++)
-    {
-        if (strA[nParticipantEntityLength - i] == strB[nXmlEntityLength - i])
+        const ConferenceInfo::User* pTempUser = objUsers.GetAt(i);
+        if (pUser == pTempUser)
         {
-            nMatchingCount = i;
             continue;
         }
-        else
+
+        if (strUserEntity.Equals(objUsers.GetAt(i)->GetEntity()))
         {
-            break;
+            objSameEntityUsers.Append(objUsers.GetAt(i));
         }
     }
 
-    return nMatchingCount;
+    return objSameEntityUsers;
 }
 
-PROTECTED
-void ConferenceInfoUpdater::Clear()
+PRIVATE
+void ConferenceInfoUpdater::AddNotMatchedUserList(IN ConferenceInfo::User* pUser)
 {
-    delete m_pConferenceInfo;
-    m_pConferenceInfo = IMS_NULL;
-
-    m_nInfoState = ConferenceInfo::STATE_INVALID;
-    m_objNotMatchedUsers.Clear();
-    m_bHostInfoInUsers = IMS_FALSE;
-}
-
-PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
-        IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/)
-{
-    IMS_SINT32 nLengthA = strUriA.GetLength();
-    IMS_SINT32 nLengthB = strUriB.GetLength();
-
-    IMS_UINT32 nLongerLength = nLengthA > nLengthB ? nLengthA : nLengthB;
-    IMS_UINT32 nMargin = bAllowPrefix ? 3 : 0;
-    if (GetMatchingCount(strUriA, strUriB) + nMargin >= nLongerLength)
+    for (IMS_UINT32 i = 0; i < m_objNotMatchedUsers.GetSize(); i++)
     {
-        // +821040044404 vs 01040044404
-        // 10 + 3 >= 13(or 12)
-        return IMS_TRUE;
+        if (m_objNotMatchedUsers.GetAt(i) == pUser)
+        {
+            IMS_TRACE_D("AddNotMatchedUserList : It's already added", 0, 0, 0);
+            return;
+        }
     }
 
-    return IMS_FALSE;
+    IMS_TRACE_D("AddNotMatchedUserList : Added [%s]", pUser->GetEntity().GetStr(), 0, 0);
+    m_objNotMatchedUsers.Append(pUser);
 }
 
-PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsLocalUri(IN const AString& strUserEntity) const
+PRIVATE
+void ConferenceInfoUpdater::RemoveFromNotMatchedUserList(IN const ConferenceInfo::User* pUser)
 {
-    // 'local' represents near device.
-    AString strUserPart;
-    if (ConferenceUtils::GetUserPart(strUserEntity, strUserPart).GetLength() == 0)
+    for (IMS_UINT32 i = 0; i < m_objNotMatchedUsers.GetSize(); i++)
     {
-        IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
+        if (m_objNotMatchedUsers.GetAt(i) == pUser)
+        {
+            m_objNotMatchedUsers.RemoveAt(i);
+            IMS_TRACE_D("RemoveFromNotMatchedUserList : Removed [%s]", pUser->GetEntity().GetStr(),
+                    0, 0);
+            return;
+        }
+    }
+}
+
+PRIVATE
+IMS_BOOL ConferenceInfoUpdater::IsInitialNotifyWithoutUsers() const
+{
+    if (m_pParticipantList->GetXmlVersion() > 0)
+    {
         return IMS_FALSE;
     }
 
-    AString strLocalUserPart;
-    if (ConferenceUtils::GetUserPart(m_pParticipantList->GetLocalUri(), strLocalUserPart)
-                    .GetLength() == 0)
-    {
-        IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    IMS_BOOL bSame = IsSameUri(strUserPart, strLocalUserPart);
-    IMS_TRACE_D("IsLocalUri : uri[%s] isLocal[%s]", strUserPart.GetStr(), _TRACE_B_(bSame), 0);
-
-    return bSame;
-}
-
-PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsAnonymousUri(IN const AString& strUserEntity)
-{
-    if (strUserEntity.MakeLower().Contains(ConferenceConst::ANONYMOUS))
+    IMS_UINT32 nSize = m_pConferenceInfo->GetUsers().GetSize();
+    if (nSize == 0)
     {
         return IMS_TRUE;
+    }
+
+    if (nSize == 1)
+    {
+        if (IsLocalUri(m_pConferenceInfo->GetUsers().GetAt(0)->GetEntity()))
+        {
+            return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
 }
 
-PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsSamePrivacyUri(
-        IN const AString& strUriA, IN const AString& strUriB)
-{
-    if (IsAnonymousUri(strUriA) && IsAnonymousUri(strUriB))
-    {
-        return IMS_TRUE;
-    }
-
-    if (!IsAnonymousUri(strUriA) && !IsAnonymousUri(strUriB))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
+PRIVATE
 IMS_BOOL ConferenceInfoUpdater::IsInvalidStatusUpdate(
         IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const
 {
@@ -811,90 +772,84 @@ IMS_BOOL ConferenceInfoUpdater::IsInvalidStatusUpdate(
     return IMS_FALSE;
 }
 
-PROTECTED
-ImsList<ConferenceInfo::User*> ConferenceInfoUpdater::GetSameUserEntities(
-        IN const ConferenceInfo::User* pUser) const
+PRIVATE
+IMS_BOOL ConferenceInfoUpdater::IsLocalUri(IN const AString& strUserEntity) const
 {
-    const AString& strUserEntity = pUser->GetEntity();
-
-    const ImsList<ConferenceInfo::User*> objUsers = m_pConferenceInfo->GetUsers();
-    ImsList<ConferenceInfo::User*> objSameEntityUsers;
-
-    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    // 'local' represents near device.
+    AString strUserPart;
+    if (ConferenceUtils::GetUserPart(strUserEntity, strUserPart).GetLength() == 0)
     {
-        const ConferenceInfo::User* pTempUser = objUsers.GetAt(i);
-        if (pUser == pTempUser)
-        {
-            continue;
-        }
-
-        if (strUserEntity.Equals(objUsers.GetAt(i)->GetEntity()))
-        {
-            objSameEntityUsers.Append(objUsers.GetAt(i));
-        }
-    }
-
-    return objSameEntityUsers;
-}
-
-PROTECTED
-void ConferenceInfoUpdater::AddNotMatchedUserList(IN ConferenceInfo::User* pUser)
-{
-    for (IMS_UINT32 i = 0; i < m_objNotMatchedUsers.GetSize(); i++)
-    {
-        if (m_objNotMatchedUsers.GetAt(i) == pUser)
-        {
-            IMS_TRACE_D("AddNotMatchedUserList : It's already added", 0, 0, 0);
-            return;
-        }
-    }
-
-    IMS_TRACE_D("AddNotMatchedUserList : Added [%s]", pUser->GetEntity().GetStr(), 0, 0);
-    m_objNotMatchedUsers.Append(pUser);
-}
-
-PROTECTED
-void ConferenceInfoUpdater::RemoveFromNotMatchedUserList(IN const ConferenceInfo::User* pUser)
-{
-    for (IMS_UINT32 i = 0; i < m_objNotMatchedUsers.GetSize(); i++)
-    {
-        if (m_objNotMatchedUsers.GetAt(i) == pUser)
-        {
-            m_objNotMatchedUsers.RemoveAt(i);
-            IMS_TRACE_D("RemoveFromNotMatchedUserList : Removed [%s]", pUser->GetEntity().GetStr(),
-                    0, 0);
-            return;
-        }
-    }
-}
-
-PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsInitialNotifyWithoutUsers() const
-{
-    if (m_pParticipantList->GetXmlVersion() > 0)
-    {
+        IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_UINT32 nSize = m_pConferenceInfo->GetUsers().GetSize();
-    if (nSize == 0)
+    AString strLocalUserPart;
+    if (ConferenceUtils::GetUserPart(m_pParticipantList->GetLocalUri(), strLocalUserPart)
+                    .GetLength() == 0)
     {
-        return IMS_TRUE;
+        IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
+        return IMS_FALSE;
     }
 
-    if (nSize == 1)
+    IMS_BOOL bSame = IsSameUri(strUserPart, strLocalUserPart);
+    IMS_TRACE_D("IsLocalUri : uri[%s] isLocal[%s]", strUserPart.GetStr(), _TRACE_B_(bSame), 0);
+
+    return bSame;
+}
+
+PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsSameUri(IN const AString& strUriA,
+        IN const AString& strUriB, IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/)
+{
+    IMS_SINT32 nLengthA = strUriA.GetLength();
+    IMS_SINT32 nLengthB = strUriB.GetLength();
+
+    IMS_UINT32 nLongerLength = nLengthA > nLengthB ? nLengthA : nLengthB;
+    IMS_UINT32 nMargin = bAllowPrefix ? 3 : 0;
+    if (GetMatchingCount(strUriA, strUriB) + nMargin >= nLongerLength)
     {
-        if (IsLocalUri(m_pConferenceInfo->GetUsers().GetAt(0)->GetEntity()))
-        {
-            return IMS_TRUE;
-        }
+        // +821040044404 vs 01040044404
+        // 10 + 3 >= 13(or 12)
+        return IMS_TRUE;
     }
 
     return IMS_FALSE;
 }
 
-PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
+PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsSameUriParameter(
+        IN const AString& strUserEntityA, IN const AString& strUserEntityB)
+{
+    // Checks only "user=phone" URI parameter.
+    const AString USER_PHONE(";user=phone");
+    return strUserEntityA.Contains(USER_PHONE) == strUserEntityB.Contains(USER_PHONE);
+}
+
+PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsAnonymousUri(IN const AString& strUserEntity)
+{
+    if (strUserEntity.MakeLower().Contains(ConferenceConst::ANONYMOUS))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsSamePrivacyUri(
+        IN const AString& strUriA, IN const AString& strUriB)
+{
+    if (IsAnonymousUri(strUriA) && IsAnonymousUri(strUriB))
+    {
+        return IMS_TRUE;
+    }
+
+    if (!IsAnonymousUri(strUriA) && !IsAnonymousUri(strUriB))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
 {
     switch (nStatus)
     {
@@ -913,11 +868,50 @@ IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
     }
 }
 
-PRIVATE
-void ConferenceInfoUpdater::ModifyParticipantInfoByConfig(IN ConfUser* pConfUser)
+PRIVATE GLOBAL IMS_UINT32 ConferenceInfoUpdater::GetMatchingScore(
+        IN const AString& strUriA, IN const AString& strUriB)
 {
-    if (pConfUser->eStatus == STATUS_DISCONNECTING)
+    if (IsAnonymousUri(strUriA) && IsAnonymousUri(strUriB))
     {
-        pConfUser->eStatus = STATUS_DISCONNECTED;
+        return 1;
     }
+
+    return 0;
+}
+
+PRIVATE GLOBAL IMS_UINT32 ConferenceInfoUpdater::GetMatchingCount(
+        IN const AString& strUriA, IN const AString& strUriB)
+{
+    AString strA;
+    if (ConferenceUtils::GetUserPart(strUriA, strA).GetLength() == 0)
+    {
+        strA = strUriA;
+    }
+
+    AString strB;
+    if (ConferenceUtils::GetUserPart(strUriB, strB).GetLength() == 0)
+    {
+        strB = strUriB;
+    }
+
+    IMS_UINT32 nParticipantEntityLength = strA.GetLength();
+    IMS_UINT32 nXmlEntityLength = strB.GetLength();
+    IMS_UINT32 nMaxCount = nParticipantEntityLength > nXmlEntityLength ? nXmlEntityLength
+                                                                       : nParticipantEntityLength;
+    IMS_UINT32 nMatchingCount = 0;
+
+    for (IMS_UINT32 i = 1; i <= nMaxCount; i++)
+    {
+        if (strA[nParticipantEntityLength - i] == strB[nXmlEntityLength - i])
+        {
+            nMatchingCount = i;
+            continue;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return nMatchingCount;
 }
