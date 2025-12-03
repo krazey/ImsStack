@@ -1424,6 +1424,85 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class), eq(true));
     }
 
+
+    @Test
+    public void testOnCallUpdateFailed() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+        MtcCall mockAnotherMtcCall = Mockito.mock(MtcCall.class);
+
+        // Different Call Object
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(
+                mockAnotherMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback, never()).invokeUpdateFailed(any(), any());
+        verify(mMockImsCallSessionCallback, never()).invokeHoldFailed(any(), any());
+        verify(mMockImsCallSessionCallback, never()).invokeResumeFailed(any(), any());
+
+        // Video call hold fails
+        mImsCallProfile.mCallType = ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE;
+        mImsCallSession = createImsCallSession("2", true);
+        mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
+        mCallDetails.set(ImsCallSessionImpl.CallDetails.ON_HOLDING);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeHoldFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+
+        // Video call resume fails
+        mImsCallSession = createImsCallSession("3", true);
+        mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
+        mCallDetails.set(ImsCallSessionImpl.CallDetails.ON_UNHOLDING);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeResumeFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+
+        // RTT Turning On Failed
+        mImsCallSession = createImsCallSession("4", true);
+        mCallDetails.set(ImsCallSessionImpl.CallDetails.RTT_TURNING_ON);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeRttModifyResponseReceived(
+                any(ImsCallSessionImplBase.class),
+                eq(RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL));
+        assertFalse(mCallDetails.is(ImsCallSessionImpl.CallDetails.RTT_TURNING_ON));
+
+        // RTT Turning Off Failed
+        mImsCallSession = createImsCallSession("5", true);
+        mCallDetails.set(ImsCallSessionImpl.CallDetails.RTT_TURNING_OFF);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback, times(2)).invokeRttModifyResponseReceived(
+                any(ImsCallSessionImplBase.class),
+                eq(RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL));
+        assertFalse(mCallDetails.is(ImsCallSessionImpl.CallDetails.RTT_TURNING_OFF));
+
+        // Video Session Modification in Progress
+        mImsCallSession = createImsCallSession("6", true);
+        mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
+        when(mVideoCallSession.isSessionModificationInProgress()).thenReturn(true);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mVideoCallSession).receiveSessionModifyResponse(anyInt(), any());
+        assertEquals(ImsCallSessionImplBase.State.ESTABLISHED, mImsCallSession.getState());
+
+        // Video Session Modification Finalizing
+        mImsCallSession = createImsCallSession("7", true);
+        when(mVideoCallSession.isSessionModificationInProgress()).thenReturn(false);
+        when(mVideoCallSession.isSessionModificationFinalizing()).thenReturn(true);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mVideoCallSession).finalizeSessionModification();
+
+        // Call Controlled by IMS
+        mImsCallSession = createImsCallSession("8", true);
+        when(mVideoCallSession.isSessionModificationFinalizing()).thenReturn(false);
+        mImsCallSession.getLocalCallProfile().setCallExtraBoolean("call_controlled_by_ims", true);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+
+        assertFalse(mImsCallSession.getLocalCallProfile().getCallExtraBoolean(
+                "call_controlled_by_ims", false));
+
+        // Generic Update Failed
+        mImsCallSession = createImsCallSession("9", true);
+        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback, times(3)).invokeUpdateFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+    }
+
     @Test
     public void testOnCallUpdateReceivedForDowngradeToAudioFromRtt() {
         mImsCallProfile = new ImsCallProfile(

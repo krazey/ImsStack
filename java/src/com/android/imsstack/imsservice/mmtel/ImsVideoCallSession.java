@@ -48,7 +48,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     // It's used to handle an incoming call type switching request
     private ImsStreamMediaProfile mProposalMediaProfile;
     // Old video profile which is used before the device requests the session modification
-    private VideoProfile mProfileBeforeRequest;
     private VideoProfile mProposalProfile;
     private int mModificationType = MODIFICATION_NONE;
     private int mUpdateState = UPDATE_STATE_IDLE;
@@ -544,16 +543,10 @@ public final class ImsVideoCallSession implements IVideoCallSession {
                 status = Connection.VideoProvider.SESSION_MODIFY_REQUEST_TIMED_OUT;
             } else if (reasonInfoCode == ImsReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT) {
                 status = Connection.VideoProvider.SESSION_MODIFY_REQUEST_INVALID;
-            } else if (reasonInfoCode == ImsReasonInfo.CODE_SIP_USER_REJECTED) {
+            } else if (reasonInfoCode == ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION) {
                 status = Connection.VideoProvider.SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE;
             }
         }
-
-        /** FIXME: Is it correct to set the old profile when the session modification is failed?
-        if ((mProfileBeforeRequest != null)
-                && (status != Connection.VideoProvider.SESSION_MODIFY_REQUEST_SUCCESS)) {
-            // responseProfile = mProfileBeforeRequest;
-        } */
 
         logi("SessionModification-Response(RECV) :: errorCode="
                 + reasonInfoCode + ", status=" + status
@@ -583,7 +576,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     public boolean isClearedSessionModificationInfo() {
-        if ((mProfileBeforeRequest == null) && (mProposalProfile == null)
+        if ((mProposalProfile == null)
                 && (mProposalMediaProfile == null) && (mModificationType == MODIFICATION_NONE)) {
             return true;
         }
@@ -600,8 +593,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     private void clearSessionModificationInfo() {
-        mProfileBeforeRequest = null;
-
         setProposalProfile(null);
         setSessionModificationType(MODIFICATION_NONE);
         setProposedStreamMediaProfile(null);

@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.telecom.Connection;
 import android.telecom.VideoProfile;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;
@@ -360,27 +361,32 @@ public class ImsVideoCallSessionTest {
                 MediaInfo.VIDEO_QUALITY_QCIF, MediaInfo.DIRECTION_SEND_RECEIVE,
                 MediaInfo.DIRECTION_SEND_RECEIVE, MediaInfo.DIRECTION_INACTIVE,
                 MediaInfo.GTTMODE_FULL);
-        mVideoSession.receiveSessionModifyResponse(ImsReasonInfo.CODE_SIP_USER_REJECTED, mediaInfo);
-        verify(mVideoCallProvider).receiveSessionModifyResponse(anyInt(), eq(null),
+        mVideoSession.receiveSessionModifyResponse(
+                ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION, mediaInfo);
+        verify(mVideoCallProvider).receiveSessionModifyResponse(
+                eq(Connection.VideoProvider.SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE), eq(null),
                 any(VideoProfile.class));
         clearInvocations(mVideoCallProvider);
 
         mVideoSession.receiveSessionModifyResponse(ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE,
                 mediaInfo);
-        verify(mVideoCallProvider).receiveSessionModifyResponse(anyInt(), eq(null),
+        verify(mVideoCallProvider).receiveSessionModifyResponse(
+                eq(Connection.VideoProvider.SESSION_MODIFY_REQUEST_TIMED_OUT), eq(null),
                 any(VideoProfile.class));
         clearInvocations(mVideoCallProvider);
 
         mVideoSession.receiveSessionModifyResponse(ImsReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT,
                 mediaInfo);
-        verify(mVideoCallProvider).receiveSessionModifyResponse(anyInt(), eq(null),
+        verify(mVideoCallProvider).receiveSessionModifyResponse(
+                eq(Connection.VideoProvider.SESSION_MODIFY_REQUEST_INVALID), eq(null),
                 any(VideoProfile.class));
         clearInvocations(mVideoCallProvider);
 
         // To test default case with invalid value
         mVideoSession.setStateAndType(-1, IVideoCallSession.MODIFICATION_CALL_TYPE);
         mVideoSession.receiveSessionModifyResponse(ImsReasonInfo.CODE_UNSPECIFIED, mediaInfo);
-        verify(mVideoCallProvider).receiveSessionModifyResponse(anyInt(), eq(null),
+        verify(mVideoCallProvider).receiveSessionModifyResponse(
+                eq(Connection.VideoProvider.SESSION_MODIFY_REQUEST_FAIL), eq(null),
                 any(VideoProfile.class));
         clearInvocations(mVideoCallProvider);
 

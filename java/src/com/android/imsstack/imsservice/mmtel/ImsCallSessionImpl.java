@@ -3997,9 +3997,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if ((oldState == ImsCallSessionImplBase.State.RENEGOTIATING)
                     && mVideoCallSession.isSessionModificationInProgress()) {
                 mVideoCallSession.receiveSessionModifyResponse(
-                        (callReasonInfo.mExtraCode == 603) ? ImsReasonInfo.CODE_SIP_USER_REJECTED :
-                            ImsCallUtils.getCodeFromCallReasonInfo(callReasonInfo.mCode),
-                        null);
+                        ImsCallUtils.getCodeFromCallReasonInfo(callReasonInfo.mCode), null);
                 clearProposedCallProfile();
                 return;
             } else if (mVideoCallSession.isSessionModificationFinalizing()) {
