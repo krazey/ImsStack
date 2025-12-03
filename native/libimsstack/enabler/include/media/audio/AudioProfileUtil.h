@@ -18,7 +18,8 @@
 #define AUDIO_PROFILE_UTIL_H_
 
 #include "audio/AudioProfile.h"
-#include "config/AudioConfiguration.h"
+
+class AudioConfiguration;
 
 /**
  * @brief A utility class for handling audio profiles, particularly for AMR and EVS codecs.

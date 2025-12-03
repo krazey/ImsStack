@@ -25,6 +25,7 @@
 #include "MediaEnvironment.h"
 #include "ServiceTrace.h"
 #include "audio/AudioNego.h"
+#include "config/AudioConfiguration.h"
 #include "config/MediaConfigUtil.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"

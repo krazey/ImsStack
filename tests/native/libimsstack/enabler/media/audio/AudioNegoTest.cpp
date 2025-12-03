@@ -16,9 +16,12 @@
 
 #include <gtest/gtest.h>
 
-#include "audio/AudioNego.h"
+#include "CarrierConfig.h"
 #include "ImsStrLib.h"
 #include "MediaEnvironment.h"
+#include "audio/AudioNego.h"
+#include "config/AudioConfiguration.h"
+
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"
@@ -50,16 +53,16 @@ class AudioNegoTest : public ::testing::Test
 public:
     std::unique_ptr<AudioNego> m_pAudioNego;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;
-    AudioConfiguration* m_pConfig;
-    MockICarrierConfig* m_pMockICarrierConfig;
-    MockICarrierConfig* m_pAudioBundle;
-    MockICarrierConfig* m_pEvsBundle;
-    MockICarrierConfig* m_pAmrWbBundle;
-    MockICarrierConfig* m_pAmrNbBundle;
-    MockICarrierConfig* m_pEvsSubBundle;
-    MockICarrierConfig* m_pAmrWbSubBundle;
-    MockICarrierConfig* m_pAmrNbSubBundle;
-    MockICoreService* m_pICoreService;
+    std::unique_ptr<AudioConfiguration> m_pConfig;
+    std::unique_ptr<MockICarrierConfig> m_pMockICarrierConfig;
+    std::unique_ptr<MockICarrierConfig> m_pAudioBundle;
+    std::unique_ptr<MockICarrierConfig> m_pEvsBundle;
+    std::unique_ptr<MockICarrierConfig> m_pAmrWbBundle;
+    std::unique_ptr<MockICarrierConfig> m_pAmrNbBundle;
+    std::unique_ptr<MockICarrierConfig> m_pEvsSubBundle;
+    std::unique_ptr<MockICarrierConfig> m_pAmrWbSubBundle;
+    std::unique_ptr<MockICarrierConfig> m_pAmrNbSubBundle;
+    std::unique_ptr<MockICoreService> m_pICoreService;
     IpAddress m_objIpAddr;
     ImsVector<IMS_SINT32> m_objEvsPayloadType;
     ImsVector<IMS_SINT32> m_objAmrWbPayloadType;
@@ -87,7 +90,7 @@ protected:
         CreateNegoProfile();
     }
 
-    void CreateAudioConfig() { m_pConfig->Create(m_pMockICarrierConfig); }
+    void CreateAudioConfig() { m_pConfig->Create(m_pMockICarrierConfig.get()); }
 
     void CreateNegoProfile()
     {
@@ -111,32 +114,32 @@ protected:
 
         ON_CALL(*m_pMockProfileGenerator, Generate(_, _, _, _))
                 .WillByDefault(Return(m_pBaseProfile));
-        m_pAudioNego->CreateProfiles(m_pEnvironment, m_pConfig);
+        m_pAudioNego->CreateProfiles(m_pEnvironment, m_pConfig.get());
     }
 
     void CreateEnvironment()
     {
         m_pEnvironment = std::make_shared<MediaEnvironment>();
-        m_pICoreService = new MockICoreService();
+        m_pICoreService = std::make_unique<MockICoreService>();
 
         m_objIpAddr = IpAddress(LOCAL_IP);
-        ON_CALL(*m_pICoreService, GetIpAddress()).WillByDefault(ReturnRef(m_objIpAddr));
+        ON_CALL(*m_pICoreService.get(), GetIpAddress()).WillByDefault(ReturnRef(m_objIpAddr));
 
         m_pEnvironment->eNetworkType = MEDIA_NETWORK_LTE;
         m_pEnvironment->eServiceType = MEDIA_SERVICE_DEFAULT;
-        m_pEnvironment->pIService = m_pICoreService;
+        m_pEnvironment->pIService = m_pICoreService.get();
     }
 
     void PrepareAudioConfig()
     {
-        m_pMockICarrierConfig = new MockICarrierConfig();
-        m_pAudioBundle = new MockICarrierConfig();
+        m_pMockICarrierConfig = std::make_unique<MockICarrierConfig>();
+        m_pAudioBundle = std::make_unique<MockICarrierConfig>();
 
-        m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+        m_pConfig = std::make_unique<AudioConfiguration>(MEDIA_TYPE_AUDIO);
 
-        ON_CALL(*m_pMockICarrierConfig,
+        ON_CALL(*m_pMockICarrierConfig.get(),
                 GetBundle(CarrierConfig::ImsVoice::KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
-                .WillByDefault(Return(m_pAudioBundle));
+                .WillByDefault(Return(m_pAudioBundle.get()));
     }
 
     void PrepareEvsConfig()
@@ -147,77 +150,61 @@ protected:
                 .WillByDefault(Return(IMS_TRUE));
 
         m_objEvsPayloadType.Add(EVS_PAYLOAD);
-        ON_CALL(*m_pAudioBundle,
+        ON_CALL(*m_pAudioBundle.get(),
                 GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objEvsPayloadType));
 
-        m_pEvsBundle = new MockICarrierConfig();
-        ON_CALL(*m_pMockICarrierConfig,
+        m_pEvsBundle = std::make_unique<MockICarrierConfig>();
+        ON_CALL(*m_pMockICarrierConfig.get(),
                 GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
-                .WillByDefault(Return(m_pEvsBundle));
+                .WillByDefault(Return(m_pEvsBundle.get()));
 
         m_strEvsPayloadTypeNumber.SetNumber(EVS_PAYLOAD);
-        m_pEvsSubBundle = new MockICarrierConfig();
+        m_pEvsSubBundle = std::make_unique<MockICarrierConfig>();
 
-        ON_CALL(*m_pEvsBundle, GetBundle(IsSameKey(m_strEvsPayloadTypeNumber.GetStr())))
-                .WillByDefault(Return(m_pEvsSubBundle));
+        ON_CALL(*m_pEvsBundle.get(), GetBundle(IsSameKey(m_strEvsPayloadTypeNumber.GetStr())))
+                .WillByDefault(Return(m_pEvsSubBundle.get()));
     }
 
     void PrepareAmrWbConfig()
     {
         m_objAmrWbPayloadType.Add(AMR_WB_PAYLOAD);
-        ON_CALL(*m_pAudioBundle,
+        ON_CALL(*m_pAudioBundle.get(),
                 GetIntArray(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objAmrWbPayloadType));
 
-        m_pAmrWbBundle = new MockICarrierConfig();
-        ON_CALL(*m_pMockICarrierConfig,
+        m_pAmrWbBundle = std::make_unique<MockICarrierConfig>();
+        ON_CALL(*m_pMockICarrierConfig.get(),
                 GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
-                .WillByDefault(Return(m_pAmrWbBundle));
+                .WillByDefault(Return(m_pAmrWbBundle.get()));
 
         m_strAmrWbPayloadTypeNumber.SetNumber(AMR_WB_PAYLOAD);
-        m_pAmrWbSubBundle = new MockICarrierConfig();
+        m_pAmrWbSubBundle = std::make_unique<MockICarrierConfig>();
 
-        ON_CALL(*m_pAmrWbBundle, GetBundle(IsSameKey(m_strAmrWbPayloadTypeNumber.GetStr())))
-                .WillByDefault(Return(m_pAmrWbSubBundle));
+        ON_CALL(*m_pAmrWbBundle.get(), GetBundle(IsSameKey(m_strAmrWbPayloadTypeNumber.GetStr())))
+                .WillByDefault(Return(m_pAmrWbSubBundle.get()));
     }
 
     void PrepareAmrNbConfig()
     {
         m_objAmrNbPayloadType.Add(AMR_NB_PAYLOAD);
-        ON_CALL(*m_pAudioBundle,
+        ON_CALL(*m_pAudioBundle.get(),
                 GetIntArray(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objAmrNbPayloadType));
 
-        m_pAmrNbBundle = new MockICarrierConfig();
-        ON_CALL(*m_pMockICarrierConfig,
+        m_pAmrNbBundle = std::make_unique<MockICarrierConfig>();
+        ON_CALL(*m_pMockICarrierConfig.get(),
                 GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
-                .WillByDefault(Return(m_pAmrNbBundle));
+                .WillByDefault(Return(m_pAmrNbBundle.get()));
 
         m_strAmrNbPayloadTypeNumber.SetNumber(AMR_NB_PAYLOAD);
-        m_pAmrNbSubBundle = new MockICarrierConfig();
+        m_pAmrNbSubBundle = std::make_unique<MockICarrierConfig>();
 
-        ON_CALL(*m_pAmrNbBundle, GetBundle(IsSameKey(m_strAmrNbPayloadTypeNumber.GetStr())))
-                .WillByDefault(Return(m_pAmrNbSubBundle));
+        ON_CALL(*m_pAmrNbBundle.get(), GetBundle(IsSameKey(m_strAmrNbPayloadTypeNumber.GetStr())))
+                .WillByDefault(Return(m_pAmrNbSubBundle.get()));
     }
 
-    virtual void TearDown() override
-    {
-        delete m_pICoreService;
-        delete m_pMockICarrierConfig;
-        delete m_pAudioBundle;
-        delete m_pConfig;
-        delete m_pEvsBundle;
-        delete m_pEvsSubBundle;
-        delete m_pAmrWbBundle;
-        delete m_pAmrWbSubBundle;
-        delete m_pAmrNbBundle;
-        delete m_pAmrNbSubBundle;
-
-        m_objEvsPayloadType.Clear();
-        m_objAmrWbPayloadType.Clear();
-        m_objAmrNbPayloadType.Clear();
-    }
+    virtual void TearDown() override {}
 
     /**
      * @brief Helper method to simulate a successful negotiation and set up a negotiated profile.
@@ -275,7 +262,8 @@ protected:
                 .WillOnce(Return(pNegoProfile));
 
         ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
-        ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _))
+                .WillByDefault(Return(IMS_TRUE));
 
         m_pAudioNego->NegotiateSdp(
                 STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);

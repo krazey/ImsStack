@@ -19,8 +19,8 @@
 
 #include "MediaProfileNegotiator.h"
 #include "audio/AudioProfile.h"
-#include "config/AudioConfiguration.h"
 
+class AudioConfiguration;
 class MediaConfiguration;
 
 /**

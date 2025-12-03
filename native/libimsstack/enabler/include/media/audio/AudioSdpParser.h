@@ -19,8 +19,8 @@
 
 #include "MediaSdpParser.h"
 #include "audio/AudioProfile.h"
-#include "offeranswer/SdpAvCodec.h"
 
+class SdpAvCodec;
 /**
  * This class is to generate a peer audio profile by parsing SDP media attributes from the
  * MediaDescriptor and the SessionDescriptor

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "audio/AudioController.h"
+
+#include "ServiceTrace.h"
+#include "audio/AudioNego.h"
 #include "audio/AudioProfile.h"
+#include "audio/AudioSession.h"
+#include "config/AudioConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
