@@ -1511,7 +1511,7 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRequirePrackAnd
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
 }
 
-TEST_F(IdleStateTest, OnAttachedUpdatesCallTypeToNegotiatedType)
+TEST_F(IdleStateTest, OnAttachedUpdatesCallTypeAndMediaInfoToNegotiatedTypeIfSdpExists)
 {
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
             .WillByDefault(Return(IMS_FALSE));
@@ -1532,6 +1532,34 @@ TEST_F(IdleStateTest, OnAttachedUpdatesCallTypeToNegotiatedType)
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, SetCapableCallType(CallType::VT));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(_, _)).Times(2);  // InitMediaSession & refined
+    EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
+}
+
+TEST_F(IdleStateTest, OnAttachedDoesNotUpdateCallTypeToNegotiatedTypeIfNoSdp)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_IDLE));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objSession))
+            .WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(SdpNegotiationResult(MEDIA_NEGO_NO_ERROR)));
+    MediaInfo objMediaInfo;
+    ON_CALL(objMediaManager, GetMediaInfo(_)).WillByDefault(ReturnRef(objMediaInfo));
+    ON_CALL(objMtcSession, IsVideoCapable).WillByDefault(Return(IMS_TRUE));
+
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("no100rel")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objMtcSession, SetCapableCallType(_)).Times(0);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(_, _)).Times(1);  // InitMediaSession, no refined
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
 }
 
