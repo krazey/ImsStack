@@ -167,7 +167,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testGetCallId() {
         assertEquals("1", mImsCallSession.getCallId());
-        mImsCallSession = createImsCallSession("");
+        mImsCallSession = createImsCallSession("", true);
         assertNotNull(mImsCallSession.getCallId());
     }
 
@@ -203,7 +203,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 .thenReturn(ImsCallProfile.OIR_PRESENTATION_RESTRICTED);
         when(mMockMtcCall.getCallExtra(Call.EXTRA_USSD, null)).thenReturn("123");
 
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         assertEquals(mImsCallSession.getProperty(Call.EXTRA_CONFERENCE), "true");
         assertEquals(mImsCallSession.getProperty(Call.EXTRA_OIR), "1");
         assertEquals(mImsCallSession.getProperty(Call.EXTRA_USSD), "123");
@@ -240,14 +240,15 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession = new TestImsCallSessionImpl(mMockCallContext, mMockCallTracker, null,
                 mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
         mImsCallSession.start(null, mImsCallProfile);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback).invokeStartFailed(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
 
         // verify setRttInfo
         mImsCallProfile = new ImsCallProfile();
         mImsCallProfile.getMediaProfile().setRttMode(1);
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, false);
         mImsCallSession.start(null, mImsCallProfile);
         assertTrue(mCallDetails.is(mCallDetails.TELEPHONY_LISTENING));
@@ -256,7 +257,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         // verify setGttInfo
         mImsCallProfile.getMediaProfile().setRttMode(0);
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, true);
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
         mImsCallSession.start(null, mImsCallProfile);
@@ -277,7 +278,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mImsCallSession.start("1234", mImsCallProfile);
 
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback).invokeStartFailed(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
         verify(mMockMtcCall, times(0)).isEmergencyCall();
@@ -351,9 +352,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession = new TestImsCallSessionImpl(mMockCallContext, mMockCallTracker, null,
                 mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
         mImsCallSession.startConference(participants, mImsCallProfile);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
 
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.startConference(participants, mImsCallProfile);
         assertTrue(mCallDetails.is(mCallDetails.TELEPHONY_LISTENING));
         verify(mMockMtcCall).startConference(anyInt(), any(UsersInfo.class), any(MediaInfo.class),
@@ -377,14 +378,14 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), imsStreamMediaProfile);
 
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
         mImsCallSession.accept(ImsCallProfile.CALL_TYPE_VOICE, imsStreamMediaProfile);
         verify(mMockMtcCall, times(1)).accept(anyInt(), any(MediaInfo.class));
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
 
         //verify default media
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         imsStreamMediaProfile = null;
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
         mImsCallSession.accept(ImsCallProfile.CALL_TYPE_VOICE, imsStreamMediaProfile);
@@ -400,13 +401,17 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.TERMINATING);
 
         mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
+        mCallDetails.set(mCallDetails.MO_PROGRESSING);
         mImsCallSession.reject(ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback).invokeTerminated(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
-        assertTrue(mImsCallSession.isCacheCallReasonInfoNull());
+        assertFalse(mImsCallSession.isCacheCallEndReasonPresent());
 
-        verifyWaitOrNotifyCallTerminated();
+        mCallDetails.set(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
+        mCallDetails.clear(mCallDetails.CALL_END_CALLBACK_NOTIFIED);
+        mImsCallSession.reject(ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
+        assertTrue(mImsCallSession.isCacheCallEndReasonPresent());
 
         mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
         mImsCallSession.reject(ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
@@ -435,7 +440,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockMtcCall).transfer(transferTarget);
 
         //When call not on hold
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         when(mMockMtcCall.isOnHold()).thenReturn(false);
         when(mMockMtcCall.getCallInfo()).thenReturn(mMockCallInfo);
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
@@ -447,7 +452,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testConsultativeTransfer() {
         //When Call on hold
-        ImsCallSessionImpl imsCallSession = createImsCallSession("2");
+        ImsCallSessionImpl imsCallSession = createImsCallSession("2", true);
         when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
         when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
         when(mMockImsCallManager.getActiveSession()).thenReturn(imsCallSession);
@@ -456,8 +461,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockMtcCall).transfer(null);
 
         //When call is not on hold
-        mImsCallSession = createImsCallSession("3");
-        imsCallSession = createImsCallSession("4");
+        mImsCallSession = createImsCallSession("3", true);
+        imsCallSession = createImsCallSession("4", true);
         when(mMockImsCallManager.getActiveSession()).thenReturn(imsCallSession);
         when(mMockMtcCall.isOnHold()).thenReturn(false);
         when(mMockMtcCall.getCallInfo()).thenReturn(mMockCallInfo);
@@ -471,18 +476,18 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     public void testTerminate() {
         mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
         mImsCallSession.terminate(501);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
 
         //verify Ringing state terminate
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
-        mCallDetails.set(mCallDetails.MO_STARTED);
+        mCallDetails.set(mCallDetails.MO_PROGRESSING);
         mImsCallSession.terminate(501);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback).invokeTerminated(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
 
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         mImsCallSession.terminate(501);
         verify(mMockMtcCall).terminate(anyInt());
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.TERMINATING);
@@ -496,23 +501,21 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
                 ImsStreamMediaProfile.DIRECTION_INVALID, ImsStreamMediaProfile.RTT_MODE_DISABLED);
         mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
+        mCallDetails.set(mCallDetails.MO_PROGRESSING);
+        mCallDetails.set(mCallDetails.MO_STARTED);
         mImsCallSession.hold(imsStreamMediaProfile);
         verify(mMockImsCallSessionCallback, times(1)).invokeHoldFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
-
-        mImsCallSession.hold(imsStreamMediaProfile);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
-        verify(mMockImsCallSessionCallback, times(2)).invokeHoldFailed(
-                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback).invokeTerminated(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
 
         mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
         mImsCallSession.hold(imsStreamMediaProfile);
-        verify(mMockImsCallSessionCallback, times(3)).invokeHoldFailed(
+        verify(mMockImsCallSessionCallback, times(2)).invokeHoldFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_AUDIO_HOLD_WITH_INACTIVE, true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
         mImsCallSession.hold(imsStreamMediaProfile);
@@ -522,7 +525,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, new Bundle(), imsStreamMediaProfile);
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_VIDEO_HOLD_WITH_INACTIVE, true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
         mImsCallSession.hold(imsStreamMediaProfile);
@@ -539,20 +542,18 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
                 ImsStreamMediaProfile.DIRECTION_INVALID, ImsStreamMediaProfile.RTT_MODE_DISABLED);
         mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
+        mCallDetails.set(mCallDetails.MO_PROGRESSING);
+        mCallDetails.set(mCallDetails.MO_STARTED);
         mImsCallSession.resume(imsStreamMediaProfile);
         verify(mMockImsCallSessionCallback, times(1)).invokeResumeFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback, times(1)).invokeTerminated(
-                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
-
-        mImsCallSession.resume(imsStreamMediaProfile);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
-        verify(mMockImsCallSessionCallback, times(2)).invokeResumeFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                  ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, new Bundle(), imsStreamMediaProfile);
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         when(mMockMtcCall.isOnHeld()).thenReturn(true);
         mImsCallSession.resume(imsStreamMediaProfile);
         assertTrue(mCallDetails.is(mCallDetails.ON_UNHOLDING));
@@ -568,7 +569,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertTrue(mMediaInfoCaptor.getValue().videoDir
                 == ImsStreamMediaProfile.DIRECTION_INACTIVE);
 
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         when(mMockMtcCall.isOnHeld()).thenReturn(false);
         when(mVideoCallSession.isCameraOn()).thenReturn(false);
         imsStreamMediaProfile.mVideoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
@@ -607,7 +608,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback).invokeMergeFailed(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
 
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.merge();
         processAllMessages();
         verify(mMockImsCallSessionCallback).invokeMergeFailed(any(ImsCallSessionImplBase.class),
@@ -731,14 +732,14 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, times(1)).setListener(eq(null));
 
         mImsCallProfile.updateMediaProfile(toProfile);
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
         mImsCallSession.sendRttModifyRequest(toProfile);
         verify(mMockImsCallSessionCallback, times(1)).invokeRttModifyResponseReceived(any(
                 ImsCallSessionImplBase.class), eq(RttModifyStatus.SESSION_MODIFY_REQUEST_SUCCESS));
 
         mImsCallProfile = new ImsCallProfile();
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
         mImsCallSession.sendRttModifyRequest(toProfile);
         assertTrue(mCallDetails.is(mCallDetails.RTT_TURNING_ON));
@@ -772,7 +773,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), imsStreamMediaProfile);
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.sendRttMessage("Hello");
         verify(mMockMtcCall).sendRttMessage(eq("Hello"));
     }
@@ -852,11 +853,14 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testOnIncomingcallNotifieNotifyCallStartFailed() {
+    public void testOnIncomingcallNotifieNotifyCallTerminated() {
+        mImsCallSession = createImsCallSession(mCallId, false);
         mImsCallSession.mImmediateCallEndReason = Mockito.mock(ImsReasonInfo.class);
 
         mImsCallSession.onIncomingcallNotified(true);
-        verify(mMockImsCallSessionCallback).invokeStartFailed(
+        verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
+        verify(mMockImsCallSessionCallback).invokeTerminated(
                 eq(mImsCallSession), any(ImsReasonInfo.class));
         verify(mMockMtcCall, never()).alertUser();
     }
@@ -871,6 +875,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
     @Test
     public void testOnIncomingcallNotifiedAlertUserAutoRejectedCall() {
+        mImsCallSession = createImsCallSession(mCallId, false);
         when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
@@ -879,26 +884,22 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertNotEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
         assertNotEquals(ImsCallSessionImplBase.State.INVALID, mImsCallSession.getState());
 
-        verify(mMockImsCallSessionCallback).invokeStartFailed(
+        verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
+        verify(mMockImsCallSessionCallback).invokeTerminated(
                 eq(mImsCallSession), any(ImsReasonInfo.class));
         verify(mMockMtcCall, never()).alertUser();
     }
 
     @Test
     public void testOnIncomingcallNotifiedReject() {
+        mImsCallSession = createImsCallSession(mCallId, false);
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
         mImsCallSession.onIncomingcallNotified(false);
 
         verify(mMockMtcCall, times(1)).reject(anyInt());
         verify(mMockMtcCall, never()).alertUser();
-    }
-
-    private void verifyWaitOrNotifyCallTerminated() {
-        mCallDetails.set(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
-        mCallDetails.clear(mCallDetails.CALL_END_FINISHED);
-        mImsCallSession.reject(ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
-        assertFalse(mImsCallSession.isCacheCallReasonInfoNull());
     }
 
     @Test
@@ -928,7 +929,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 mMockMediaInfo, suppInfo);
         assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.ESTABLISHING);
 
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.getCallListenerProxy().onCallProgressing(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
         ImsCallProfile remoteProfile = mImsCallSession.getRemoteCallProfile();
@@ -949,7 +950,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         suppServiceSessionId.type = SuppInfo.SUPP_TYPE_SESSION_ID;
         suppServiceSessionId.strValue = SESSION_ID;
         suppInfo.updateService(SuppInfo.SUPP_TYPE_SESSION_ID, suppServiceSessionId);
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         ImsCallExtManagerProxy mockProxy = Mockito.mock(ImsCallExtManagerProxy.class);
         mImsCallSession.setImsCallExtManagerProxy(mockProxy);
         when(mMockMtcCall.getRemoteNumber()).thenReturn("123");
@@ -972,7 +973,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         when(mMockMtcCall.getCallExtra(Call.EXTRA_CDIV_HISTORY, null)).thenReturn("12345");
         when(mMockMtcCall.getCallExtraInt(Call.EXTRA_CDIV_CAUSE, 0)).thenReturn(0);
 
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.getCallListenerProxy().onCallProgressing(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
 
@@ -987,7 +988,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         // 1. cdivHistory is null
         when(mMockMtcCall.getCallExtra(Call.EXTRA_CDIV_HISTORY, null)).thenReturn(null);
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.getCallListenerProxy().onCallProgressing(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
         processAllFutureMessages();
@@ -1026,7 +1027,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         suppServiceSessionId.type = SuppInfo.SUPP_TYPE_SESSION_ID;
         suppServiceSessionId.strValue = SESSION_ID;
         suppInfo.updateService(SuppInfo.SUPP_TYPE_SESSION_ID, suppServiceSessionId);
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         ImsCallExtManagerProxy mockProxy = Mockito.mock(ImsCallExtManagerProxy.class);
         mImsCallSession.setImsCallExtManagerProxy(mockProxy);
         when(mMockMtcCall.getRemoteNumber()).thenReturn("123");
@@ -1048,7 +1049,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         //verify onTtyModeReceived() onwards
         mMockMediaInfo.gttMode = MediaInfo.GTTMODE_FULL;
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, true);
         mImsCallSession.getCallListenerProxy().onCallStarted(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
@@ -1065,13 +1066,14 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.getCallListenerProxy().onCallStartFailed(mockMtcCall, mockCallReasonInfo);
         assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.TERMINATED);
 
-        // verify CALL_END_FINISHED
-        mCallDetails.set(mCallDetails.CALL_END_FINISHED);
+        // verify CALL_END_CALLBACK_NOTIFIED
+        mCallDetails.set(mCallDetails.CALL_END_CALLBACK_NOTIFIED);
         mImsCallSession.getCallListenerProxy().onCallStartFailed(mMockMtcCall, mockCallReasonInfo);
         assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.TERMINATED);
 
         // verify pre-incoming
-        mCallDetails.clear(mCallDetails.CALL_END_FINISHED);
+        mCallDetails.clear(mCallDetails.CALL_END_CALLBACK_NOTIFIED);
+
         when(mMockMtcCall.isOnPreIncoming()).thenReturn(true);
         mImsCallSession.getCallListenerProxy().onCallStartFailed(mMockMtcCall, mockCallReasonInfo);
         assertEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
@@ -1079,9 +1081,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, times(1)).setListener(eq(null));
 
         // verify TELEPHONY_LISTENING
-        mCallDetails.clear(mCallDetails.CALL_END_FINISHED);
+        mCallDetails.clear(mCallDetails.CALL_END_CALLBACK_NOTIFIED);
         when(mMockMtcCall.isOnPreIncoming()).thenReturn(false);
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mockCallReasonInfo.mCode = CallReasonInfo.CODE_SIP_BAD_REQUEST;
         mImsCallSession.getCallListenerProxy().onCallStartFailed(mMockMtcCall, mockCallReasonInfo);
         ImsReasonInfo reasonInfo = mImsCallSession.mImmediateCallEndReason;
@@ -1089,7 +1091,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
 
         // verify notifyCallStartFailed
-        mCallDetails.clear(mCallDetails.CALL_END_FINISHED);
+        mCallDetails.clear(mCallDetails.CALL_END_CALLBACK_NOTIFIED);
         when(mMockMtcCall.isOnPreIncoming()).thenReturn(false);
         mCallDetails.set(mCallDetails.TELEPHONY_LISTENING);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
@@ -1098,7 +1100,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mockCallReasonInfo.mExtraCode = 53;
         mImsCallSession.getCallListenerProxy().onCallStartFailed(mMockMtcCall, mockCallReasonInfo);
         assertEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         processAllMessages();
         verify(mMockImsCallSessionCallback).invokeStartFailed(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
@@ -1123,15 +1125,16 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         processAllMessages();
         verify(mMockImsCallSessionCallback, times(1)).setListener(eq(null));
 
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mCallDetails.set(mCallDetails.IMPLICIT_TERMINATED);
+        mCallDetails.set(mCallDetails.MO_PROGRESSING);
         mockCallReasonInfo.mCode = CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE;
         mImsCallSession.getCallListenerProxy().onCallTerminated(mMockMtcCall, mockCallReasonInfo);
         //verify clear IMPLICIT_TERMINATED
         assertFalse(mCallDetails.is(mCallDetails.IMPLICIT_TERMINATED));
         //verify checkAndHandleConferenceOnCallTerminated
         assertEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback).invokeTerminated(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
         processAllMessages();
@@ -1139,7 +1142,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockMtcCall, times(2)).close();
 
         //verify SESSION_TERMINATED_ON_CONFERENCE
-        mImsCallSession = createImsCallSession("2");
+        mImsCallSession = createImsCallSession("2", true);
         ConferenceProxy confProxy = new ConferenceProxy(mMockCallContext);
         mImsCallSession.setConferenceProxy(confProxy);
         mImsCallSession.getCallListenerProxy().onCallTerminated(mMockMtcCall, mockCallReasonInfo);
@@ -1153,9 +1156,10 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         //checkAndHandleTransferOnCallTerminated
         mImsCallProfile.setCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE, true);
-        mImsCallSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("3", true);
         mockCallReasonInfo.mCode = CallReasonInfo.CODE_USER_TERMINATED;
         mockCallReasonInfo.mExtraCode = CallReasonInfo.EXTRA_USER_TERMINATED_ECT;
+        mCallDetails.set(mCallDetails.MO_PROGRESSING);
         mCallDetails.set(mCallDetails.MO_STARTED);
         mImsCallSession.getCallListenerProxy().onCallTerminated(mMockMtcCall, mockCallReasonInfo);
         verify(mMockMtcCall, times(2)).setListener(null);
@@ -1165,17 +1169,17 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
 
         //verify notifyCallTerminated()
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback, times(2)).invokeTerminated(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         // verify not notifies the Telephony.
-        mImsCallSession = createImsCallSession("4");
+        mImsCallSession = createImsCallSession("4", true);
         mCallDetails.set(mCallDetails.MO_STARTED);
         CallReasonInfo mockSrvccReasonInfo = Mockito.mock(CallReasonInfo.class);
         mockSrvccReasonInfo.mCode = CallReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING;
         mImsCallSession.getCallListenerProxy().onCallTerminated(mMockMtcCall, mockSrvccReasonInfo);
-        assertTrue(mCallDetails.is(mCallDetails.CALL_END_FINISHED));
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
         verify(mMockImsCallSessionCallback, never()).invokeTerminated(
                 any(ImsCallSessionImplBase.class),
                 argThat(r -> r.getCode() == ImsReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING));
@@ -1208,7 +1212,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         //verify IMPLICIT_ON_HOLD
         assertTrue(mCallDetails.is(mCallDetails.IMPLICIT_ON_HOLD));
 
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         ConferenceProxy confProxy = new ConferenceProxy(mMockCallContext);
         mImsCallSession.setConferenceProxy(confProxy);
         mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
@@ -1524,7 +1528,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
     @Test
     public void testOnCallTransferred() {
-        mImsCallSession.mTransferTargetSession = createImsCallSession("1");
+        mImsCallSession.mTransferTargetSession = createImsCallSession("1", true);
         ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.mIsEctConfirmationRequired = false;
@@ -1541,8 +1545,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class));
 
         //verify {@link #invokeCallSessionTransferred} is called
-        mImsCallSession = createImsCallSession("2");
-        mImsCallSession.mTransferTargetSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("2", true);
+        mImsCallSession.mTransferTargetSession = createImsCallSession("3", true);
         targetSession = mImsCallSession.mTransferTargetSession;
         targetSession.getCallDetails().set(mCallDetails.ON_ECT);
         mImsCallSession.mIsEctConfirmationRequired = true;
@@ -1556,7 +1560,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
     @Test
     public void testOnCallTransferFailed() {
-        mImsCallSession.mTransferTargetSession = createImsCallSession("1");
+        mImsCallSession.mTransferTargetSession = createImsCallSession("1", true);
         ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
@@ -1579,8 +1583,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         //verify {@link #resume} and {@link #nvokeCallSessionTransferFailed} is called
-        mImsCallSession = createImsCallSession("2");
-        mImsCallSession.mTransferTargetSession = createImsCallSession("3");
+        mImsCallSession = createImsCallSession("2", true);
+        mImsCallSession.mTransferTargetSession = createImsCallSession("3", true);
         targetSession = mImsCallSession.mTransferTargetSession;
         targetSession.getCallDetails().set(mCallDetails.ON_ECT);
         mImsCallSession.mIsEctConfirmationRequired = true;
@@ -1610,7 +1614,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, never()).invokeUpdated(
                 any(ImsCallSessionImplBase.class), any(ImsCallProfile.class));
 
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.getCallListenerProxy().onCallTransferReceived(mMockMtcCall, mockMtcCall,
                 mMockCallInfo, mMockMediaInfo, mockSuppInfo);
         verify(mockMtcCall).setListener(mImsCallSession.getCallListenerProxy());
@@ -1655,7 +1659,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsStreamMediaProfile.RTT_MODE_FULL);
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), mediaProfile);
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.getCallListenerProxy().onCallRttMessageReceived(mMockMtcCall, "123");
         verify(mMockImsCallSessionCallback).invokeRttMessageReceived(
                 any(ImsCallSessionImplBase.class), eq("123"));
@@ -1676,7 +1680,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsStreamMediaProfile.RTT_MODE_FULL);
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), mediaProfile);
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.getCallListenerProxy().onCallRttAudioIndication(mMockMtcCall, true);
         verify(mMockImsCallSessionCallback).invokeRttAudioIndicatorChanged(
                 any(ImsCallSessionImplBase.class), any(ImsStreamMediaProfile.class));
@@ -1698,7 +1702,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         ConferenceProxy mockConferenceProxy = Mockito.mock(ConferenceProxy.class);
         mImsCallSession.getCallListenerProxy().onAudioSessionClosed(mockMtcCall);
         verify(mMockImsCallSessionCallback, never())
-                .invokeTerminated(any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+                .invokeStartFailed(any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         //verify conference call case
         mCallDetails.set(mCallDetails.MERGED);
@@ -1708,14 +1712,16 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertFalse(mCallDetails.is(mCallDetails.SESSION_TERMINATED_ON_CONFERENCE));
 
         //verify normal call case
-        mImsCallSession = createImsCallSession("1");
+        mImsCallSession = createImsCallSession("1", true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
-        verifyWaitOrNotifyCallTerminated();
+        mImsCallSession.terminate(0);
+        mCallDetails.set(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
+        mCallDetails.clear(mCallDetails.CALL_END_CALLBACK_NOTIFIED);
         mCallDetails.set(mCallDetails.CLOSE_PENDING);
         mImsCallSession.getCallListenerProxy().onAudioSessionClosed(mMockMtcCall);
         assertFalse(mCallDetails.is(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END));
         verify(mMockImsCallSessionCallback)
-                .invokeTerminated(any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+                .invokeStartFailed(any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         //verify closeSessionWithDelay is called.
         assertFalse(mCallDetails.is(mCallDetails.CLOSE_PENDING));
@@ -1768,9 +1774,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
     }
 
-    private TestImsCallSessionImpl createImsCallSession(String callId) {
+    private TestImsCallSessionImpl createImsCallSession(String callId, boolean isMo) {
         TestImsCallSessionImpl callSession =  new TestImsCallSessionImpl(mMockCallContext,
-                mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, true,
+                mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, isMo,
                 mMockImsCallSessionCallback, mVideoCallSession);
         mCallFeaturemap = new HashMap<Integer, Boolean>();
         mCallDetails = callSession.getCallDetails();
