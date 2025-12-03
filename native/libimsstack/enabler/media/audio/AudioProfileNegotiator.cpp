@@ -24,6 +24,7 @@
 #include "audio/AudioDef.h"
 #include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
+#include "config/CodecAudioConfig.h"
 
 #define EVS_NEGO_RETRY_COUNT 2
 #define RETURN_MODE_MATCHED  IMS_FALSE
@@ -279,8 +280,25 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
 
     pAmrFmtp->SetModeSetList(nNegoModeSetList);
     pAmrFmtp->SetDefaultRtpModeSet(nNegoDefaultRtpModeSet);
-    pAmrFmtp->SetVisibleModeSet(
-            pAmrFmtp->GetModeSetList() != 0 ? IMS_TRUE : pAmrFmtp->IsModeSetVisible());
+
+    const AString& strCodecName = pPeerPayload->GetRtpMap().GetPayloadType();
+
+    bool isFullModeSet = (pAmrFmtp->GetModeSetList() == CodecAudioConfig::FULL_MODESET_AMRWB &&
+                                 strCodecName.EqualsIgnoreCase("AMR-WB")) ||
+            (pAmrFmtp->GetModeSetList() == CodecAudioConfig::FULL_MODESET_AMRNB &&
+                    strCodecName.EqualsIgnoreCase("AMR"));
+
+    if (isFullModeSet && !pAmrFmtp->IsModeSetVisible())
+    {
+        pAmrFmtp->SetVisibleModeSet(IMS_FALSE);
+        IMS_TRACE_I("NegotiateAmrFmtp(): full mode-set negotiated, setting as implicit.", 0, 0, 0);
+    }
+    else
+    {
+        pAmrFmtp->SetVisibleModeSet(
+                pAmrFmtp->GetModeSetList() != 0 ? IMS_TRUE : pAmrFmtp->IsModeSetVisible());
+    }
+
     pAmrFmtp->SetDtx(pLocalFmtp->IsDtxEnabled());
     pAmrFmtp->SetVisibleModeChangeCapability(pLocalFmtp->IsModeChangeCapabilityVisible());
     pAmrFmtp->SetModeChangeCapability(pLocalFmtp->GetModeChangeCapability());
