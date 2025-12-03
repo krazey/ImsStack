@@ -66,7 +66,7 @@ public:
     MOCK_METHOD(IMtcSession*, GetSession, (IN const ISession* piSession), (const, override));
     MOCK_METHOD(IMtcSession*, GetSession, (), (const, override));
     MOCK_METHOD(const ImsList<IMtcSession*>&, GetSessions, (), (const, override));
-    MOCK_METHOD(IMtcService&, GetService, (), (override));
+    MOCK_METHOD(IMtcService&, GetService, (), (const, override));
     MOCK_METHOD(IMtcUiNotifier&, GetUiNotifier, (), (override));
     MOCK_METHOD(IMtcMediaManager&, GetMediaManager, (), (override));
     MOCK_METHOD(IMtcPreconditionManager&, GetPreconditionManager, (), (override));

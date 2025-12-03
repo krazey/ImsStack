@@ -266,6 +266,19 @@ TEST_F(TemplateFormatterTest, FormatWithMsisdn)
                     }));
 
     EXPECT_STREQ("<12345678901>", TemplateFormatter::Format("<#MSISDN#>", objContext).GetStr());
+
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetPhoneNumber(_))
+            .WillByDefault(Invoke(
+                    [](OUT AString& strMsisdn)
+                    {
+                        strMsisdn = "";
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objService, GetAosConnector()).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objAosConnector, GetAssociatedUri)
+            .WillByDefault(Return(AString("sip:12345678902@ims.mnc0.mcc0.3gppnetwork.org")));
+
+    EXPECT_STREQ("<12345678902>", TemplateFormatter::Format("<#MSISDN#>", objContext).GetStr());
 }
 
 TEST_F(TemplateFormatterTest, FormatWithHomeDomain)
