@@ -39,7 +39,8 @@ public:
 private:
     IMS_BOOL IsBlockedByTextVideoCall();
     IMS_BOOL IsBlockedByVideoMultipleCall();
-    static CallType GetRemoteCallTypeIncludingInactiveMedia(IN IMtcCallContext& objContext);
+    IMS_SINT32 GetRemotePort(IN IMS_SINT32 eMediaType) const;
+    static IMS_BOOL HasVideoRttSdp(IN IMS_SINT32 videoPort, IN IMS_SINT32 textPort);
     static IMS_BOOL HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL HasRttCall(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL IsVideoCall(IN CallType eCallType);

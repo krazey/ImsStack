@@ -22,6 +22,7 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
+#include "media/IMedia.h"
 #include <optional>
 
 class IMessage;
@@ -543,6 +544,17 @@ public:
      */
     virtual CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bActiveMediaOnly,
             IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0 = IMS_TRUE) = 0;
+
+    /**
+     * @brief Gets remote port number for the given media type from the current IMedia of the
+     * ISession.
+     *
+     * @param piSession
+     * @param eMediaType
+     * @return
+     */
+    virtual IMS_SINT32 GetRemotePortFromSdp(
+            IN ISession* piSession, IN IMS_SINT32 eMediaType = SdpMedia::TYPE_AUDIO) = 0;
 
     /**
      * @brief Checks

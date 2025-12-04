@@ -129,6 +129,7 @@ public:
             IN IMS_BOOL bCheckRemote) override;
     CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bActiveMediaOnly,
             IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0 = IMS_TRUE) override;
+    IMS_SINT32 GetRemotePortFromSdp(IN ISession* piSession, IN IMS_SINT32 eMediaType) override;
     IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) override;
     IMS_UINT32 GetNumberOfPreviousResponses(
             IN const ISession* piSession, IN IMS_SINT32 eServiceMethod) const override;

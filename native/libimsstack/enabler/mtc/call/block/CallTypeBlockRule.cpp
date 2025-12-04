@@ -23,6 +23,7 @@
 #include "call/IMtcSession.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "media/IMedia.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -81,13 +82,25 @@ PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByTextVideoCall()
         return IMS_TRUE;
     }
 
-    if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED &&
-            GetRemoteCallTypeIncludingInactiveMedia(m_objContext) == CallType::VIDEO_RTT)
+    if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED)
     {
-        // not supporting text and video media description simultaneously irrespective of port
-        // eg. VZW
-        IMS_TRACE_I("IsBlockedByTextVideoCall : SDP contains video and text", 0, 0, 0);
-        return IMS_TRUE;
+        IMS_SINT32 nVideoPort = GetRemotePort(SdpMedia::TYPE_VIDEO);
+        IMS_SINT32 nTextPort = GetRemotePort(SdpMedia::TYPE_TEXT);
+
+        IMS_TRACE_I(
+                "IsBlockedByTextVideoCall : video port=%d, text port=%d", nVideoPort, nTextPort, 0);
+
+        if (HasVideoRttSdp(nVideoPort, nTextPort))
+        {
+            // Allow downgrade request
+            if (nVideoPort == 0 && nTextPort == 0)
+            {
+                return IMS_FALSE;
+            }
+            // Block simultaneous video and text descriptions (e.g., VZW)
+            IMS_TRACE_I("IsBlockedByTextVideoCall : SDP contains video and text", 0, 0, 0);
+            return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
@@ -117,11 +130,10 @@ PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByVideoMultipleCall()
     return IMS_FALSE;
 }
 
-PRIVATE CallType CallTypeBlockRule::GetRemoteCallTypeIncludingInactiveMedia(
-        IN IMtcCallContext& objContext)
+PRIVATE IMS_SINT32 CallTypeBlockRule::GetRemotePort(IN IMS_SINT32 eMediaType) const
 {
-    return objContext.GetMessageUtils().GetCallTypeFromSdp(
-            &objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE, IMS_FALSE);
+    ISession* piSession = &m_objContext.GetSession()->GetISession();
+    return m_objContext.GetMessageUtils().GetRemotePortFromSdp(piSession, eMediaType);
 }
 
 PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls)
@@ -135,6 +147,11 @@ PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const ImsList<IMtcCall*>& ls
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoRttSdp(IN IMS_SINT32 videoPort, IN IMS_SINT32 textPort)
+{
+    return videoPort != -1 && textPort != -1;
 }
 
 PRIVATE IMS_BOOL CallTypeBlockRule::HasRttCall(IN const ImsList<IMtcCall*>& lstCalls)

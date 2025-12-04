@@ -1281,6 +1281,64 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
     return CallType::VOIP;
 }
 
+PUBLIC IMS_SINT32 MessageUtils::GetRemotePortFromSdp(
+        IN ISession* piSession, IN IMS_SINT32 eMediaType)
+{
+    if (piSession == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetRemotePortFromSdp : piSession is NULL", 0, 0, 0);
+        return -1;
+    }
+
+    ImsList<IMedia*> lstIMedia = piSession->GetMedia();
+    for (IMS_UINT32 nIndex = 0; nIndex < lstIMedia.GetSize(); nIndex++)
+    {
+        const IMedia* piMedia = lstIMedia.GetAt(nIndex);
+        if (piMedia == IMS_NULL)
+        {
+            continue;
+        }
+        const IMediaDescriptor* pDescriptor = IMS_NULL;
+
+        // Check if the media state is modified to get the correct remote descriptor
+        if (piMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
+        {
+            // Use the proposal descriptor for modified state
+            const IMedia* pIMediaProposal = piMedia->GetProposal();
+            if (pIMediaProposal != IMS_NULL)
+            {
+                pDescriptor = pIMediaProposal->GetMediaDescriptor();
+            }
+        }
+        else
+        {
+            pDescriptor = piMedia->GetMediaDescriptor();
+        }
+
+        if (pDescriptor == IMS_NULL)
+        {
+            continue;
+        }
+
+        // GetMediaDescriptionEx() retrieves the remote SDP media description
+        const SdpMedia* pSdpMedia = pDescriptor->GetMediaDescriptionEx();
+        if (pSdpMedia == IMS_NULL)
+        {
+            continue;
+        }
+
+        if (pSdpMedia->GetType() == eMediaType)
+        {
+            IMS_SINT32 nPort = pSdpMedia->GetPort();
+
+            IMS_TRACE_D("GetRemotePortFromSdp : type[%d] port[%d]", eMediaType, nPort, 0);
+            return nPort;
+        }
+    }
+
+    return -1;
+}
+
 PUBLIC IMS_BOOL MessageUtils::IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode)
 {
     IMS_BOOL bExist = IMS_FALSE;
