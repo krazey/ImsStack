@@ -16,6 +16,7 @@
 
 #include "AString.h"
 #include "Engine.h"
+#include "IImsPrivateProperty.h"
 #include "IMtcService.h"
 #include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"

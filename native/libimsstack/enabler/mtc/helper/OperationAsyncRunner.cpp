@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include "BaseThread.h"
 #include "EnablerUtils.h"
+#include "IThread.h"
 #include "ImsMessage.h"
 #include "ImsProcess.h"
 #include "ServiceTrace.h"

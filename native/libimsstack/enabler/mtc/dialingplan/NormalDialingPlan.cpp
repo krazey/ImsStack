@@ -18,6 +18,7 @@
 #include "CarrierConfig.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "INetworkConnection.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ImsIdentity.h"
 #include "ImsLib.h"

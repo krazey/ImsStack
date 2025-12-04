@@ -16,6 +16,7 @@
 
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "IImsPrivateProperty.h"
 #include "IMtcCallController.h"
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"

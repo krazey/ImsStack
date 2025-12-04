@@ -19,6 +19,7 @@
 
 #include "CallReasonInfo.h"
 #include "IMessage.h"
+#include "IPhoneInfoCall.h"
 #include "ImsTypeDef.h"
 #include "ServicePhoneInfo.h"
 #include "SipStatusCode.h"

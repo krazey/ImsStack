@@ -20,6 +20,7 @@
 #include "IJniEnablerThread.h"
 #include "IMtcCallController.h"
 #include "INativeEnabler.h"
+#include "IThread.h"
 #include "ImsProcess.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"

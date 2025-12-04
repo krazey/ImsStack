@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IImsRadio.h"
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
 #include "ImsEventDef.h"

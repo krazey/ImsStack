@@ -27,6 +27,7 @@
 #include "IMessageBodyPart.h"
 #include "IMtcImsEventReceiver.h"
 #include "INetworkWatcher.h"
+#include "IPhoneInfoSubscriber.h"
 #include "ISubscriberConfig.h"
 #include "ImsEventDef.h"
 #include "MtcDef.h"

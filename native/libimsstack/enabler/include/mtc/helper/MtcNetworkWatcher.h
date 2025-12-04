@@ -19,6 +19,7 @@
 #define MTC_NETWORK_WATCHER_H_
 
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 
 /**
  * This class checks the service's network status and notifies the listener if there's a change.

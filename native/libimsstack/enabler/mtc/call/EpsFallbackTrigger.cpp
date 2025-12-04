@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "IImsAosInfo.h"
+#include "IImsRadio.h"
 #include "INetworkWatcher.h"
 #include "ISession.h"
 #include "ImsTypeDef.h"
