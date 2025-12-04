@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
+#include "INetworkWatcher.h"
+#include "IPhoneInfoLocation.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "ServiceSystemTime.h"

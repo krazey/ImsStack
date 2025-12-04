@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "INetworkWatcher.h"
+#include "IWifiWatcher.h"
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
 #include "ImsEventDef.h"

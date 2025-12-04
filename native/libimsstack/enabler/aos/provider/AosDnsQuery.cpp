@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include "IThreadImpListener.h"
 #include "ServiceTrace.h"
 #include "OsMutex.h"
 #include "OsPthread.h"

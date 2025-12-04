@@ -20,10 +20,13 @@
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
+#include "IImsPrivateProperty.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
+#include "IPhoneInfoSubscriber.h"
 #include "ISipConfig.h"
 #include "ISubscriberConfig.h"
+#include "ISystemProperty.h"
 
 #include "CarrierConfig.h"
 
