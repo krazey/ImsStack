@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
+#include "ISystemProperty.h"
+#include "IZLib.h"
 #include "ImsStrLib.h"
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"

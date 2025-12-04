@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ImsLib.h"
+#include "RetryTimer.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 

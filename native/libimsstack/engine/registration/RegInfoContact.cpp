@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
+#include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 #include "IDigestAka.h"
+#include "IIsim.h"
+#include "INetworkConnection.h"
+#include "IUsim.h"
 #include "NatHelper.h"
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
-#include "ServicePhoneInfo.h"
-#include "ServiceTrace.h"
+#include "IPhoneInfoDevice.h"
 #include "ImsMd5.h"
 #include "ImsSha1.h"
 #include "ImsUuid.h"
+#include "ServiceMemory.h"
+#include "ServicePhoneInfo.h"
+#include "ServiceTrace.h"
 
 #include "SipUrnHelper.h"
 

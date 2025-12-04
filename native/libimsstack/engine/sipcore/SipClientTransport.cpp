@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "INetworkConnection.h"
 #include "NatHelper.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"

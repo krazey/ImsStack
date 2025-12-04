@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 #include "AccessNetworkInfoFormatter.h"
+#include "INetworkConnection.h"
+#include "INetworkWatcher.h"
+#include "IPhoneInfoLocation.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IPhoneInfoDevice.h"
 #include "ImsHmac.h"
 #include "ImsMd5.h"
 #include "ImsStrLib.h"

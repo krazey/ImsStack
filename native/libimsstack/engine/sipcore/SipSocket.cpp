@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 #include "CarrierConfig.h"
+#include "INetworkConnection.h"
 #include "INetworkIpSec.h"
+#include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceUtil.h"
