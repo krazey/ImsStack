@@ -16,18 +16,10 @@
 -->
 <!-- carrier_name: Orange (Spain) -->
 <carrier_config>
-    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
-    <!-- Aos -->
-    <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
-    <boolean name="ims.pdn_reconnect_on_all_pcscfs_unavailable_bool" value="true"/>
-    <boolean name="ims.update_ongoing_reg_retry_timer_on_ims_est_timer_expiry_bool" value="false"/>
-    <int name="ims.pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int" value="120"/>
-    <int name="ims.reg_retry_timer_f_policy_int" value="2"/>
-
-    <!-- Mtc Assets -->
-    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
-    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
-
-    <!-- Mts -->
-    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="9"/>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="2">
+        <item value="900001"/>
+        <item value="678"/>
+    </int-array>
 </carrier_config>
