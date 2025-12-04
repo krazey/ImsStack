@@ -25,6 +25,7 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 
+#include "INativeThreadMethods.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 

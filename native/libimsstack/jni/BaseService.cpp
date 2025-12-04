@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "IThread.h"
 #include "ServiceTrace.h"
 
 #include "BaseService.h"
+#include "BaseThread.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI");
 
