@@ -18,9 +18,9 @@
 
 #include "ImsList.h"
 #include "ImsNetworkConnection.h"
-#include "IpAddress.h"
 
 class IMutex;
+class IpAddress;
 
 GLOBAL void ImsNetworkConnectionState_ExitInstance();
 GLOBAL IMS_BOOL ImsNetworkConnectionState_InitInstance();

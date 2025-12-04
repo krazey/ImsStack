@@ -15,6 +15,8 @@
  */
 #include <binder/Parcel.h>
 
+#include "IPhoneInfoSubscriber.h"
+#include "ISystem.h"
 #include "PlatformContext.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"

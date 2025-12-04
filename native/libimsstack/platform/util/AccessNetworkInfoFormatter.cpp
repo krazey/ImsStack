@@ -15,6 +15,7 @@
  */
 #include "AccessNetworkInfoFormatter.h"
 #include "AStringBuffer.h"
+#include "ImsAccessNetworkInfoType.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 

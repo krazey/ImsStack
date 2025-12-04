@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISocket.h"
+#include "ISystem.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"

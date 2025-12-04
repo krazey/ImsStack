@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "ImsPrivateProperties.h"
+#include "IpAddress.h"
 #include "MockISystem.h"
 #include "OsUtil.h"
 #include "PlatformApi.h"

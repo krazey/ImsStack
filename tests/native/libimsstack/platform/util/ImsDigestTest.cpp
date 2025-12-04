@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
 #include "ImsDigest.h"
 
 namespace android

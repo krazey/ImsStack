@@ -16,17 +16,18 @@
 #ifndef SERVICE_PHONE_INFO_H_
 #define SERVICE_PHONE_INFO_H_
 
-#include "IIsim.h"
-#include "INetworkWatcher.h"
-#include "IPhoneInfoCall.h"
-#include "IPhoneInfoDevice.h"
-#include "IPhoneInfoLocation.h"
-#include "IPhoneInfoPower.h"
-#include "IPhoneInfoSubscriber.h"
-#include "IUsim.h"
-#include "IWifiWatcher.h"
 #include "PlatformService.h"
 
+class ICallInfo;
+class IDeviceInfo;
+class IIsim;
+class ILocationInfo;
+class INetworkWatcher;
+class IPowerInfo;
+class ISubscriberInfo;
+class IUsim;
+class IWifiWatcher;
+class ImsMessage;
 class PhoneInfoServicePrivate;
 
 class PhoneInfoService : public PlatformService

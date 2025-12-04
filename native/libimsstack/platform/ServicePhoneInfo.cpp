@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "INetworkWatcher.h"
+#include "IOsFactory.h"
+#include "IPhoneInfoPower.h"
+#include "IWifiWatcher.h"
 #include "ImsIsim.h"
 #include "ImsUsim.h"
 #include "PlatformContext.h"

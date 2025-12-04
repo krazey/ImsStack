@@ -16,7 +16,9 @@
 #ifndef IMS_DIGEST_H_
 #define IMS_DIGEST_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 /**
  * @brief This file implements the digest authentication scheme.

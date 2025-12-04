@@ -17,7 +17,6 @@
 #define IMS_TRACE_H_
 
 #include "ITrace.h"
-#include "ITraceOption.h"
 
 class ImsTrace : public ITrace
 {

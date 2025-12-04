@@ -16,10 +16,11 @@
 #ifndef INTERFACE_NETWORK_IPSEC_H_
 #define INTERFACE_NETWORK_IPSEC_H_
 
-#include "ISocket.h"
-#include "SocketAddress.h"
+#include "ImsTypeDef.h"
 
 class IIpSecPolicy;
+class ISocket;
+class SocketAddress;
 
 class INetworkIpSec
 {

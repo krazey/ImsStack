@@ -15,6 +15,7 @@
  */
 #include "INetworkPingListener.h"
 #include "ImsNetworkPing.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"

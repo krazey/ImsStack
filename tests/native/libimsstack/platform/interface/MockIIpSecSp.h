@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 
-#include "IpAddress.h"
 #include "IIpSecSp.h"
 
 class MockIIpSecSp : public IIpSecSp

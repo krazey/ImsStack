@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "IImsRadio.h"
+#include "ISystem.h"
 #include "ImsMessageDef.h"
 #include "PlatformContext.h"
 #include "ServiceMessage.h"

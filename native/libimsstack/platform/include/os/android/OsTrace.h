@@ -16,7 +16,6 @@
 #ifndef OS_TRACE_H_
 #define OS_TRACE_H_
 
-#include "AString.h"
 #include "ImsTrace.h"
 
 class IMutex;

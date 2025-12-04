@@ -18,10 +18,10 @@
 
 #include "ITimer.h"
 #include "ImsList.h"
-#include "ImsMessage.h"
 #include "PlatformService.h"
 
 class IMutex;
+class ImsMessage;
 
 class TimerService : public PlatformService
 {

@@ -16,9 +16,10 @@
 #ifndef ASYNC_EXECUTOR_H_
 #define ASYNC_EXECUTOR_H_
 
-#include "IThread.h"
 #include "ImsMessage.h"
 #include "ImsMessageDef.h"
+
+class IThread;
 
 /**
  * @brief An abstract helper class to execute a single task asynchronously.

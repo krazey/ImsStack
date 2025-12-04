@@ -17,10 +17,10 @@
 #define INTERFACE_SYSTEM_H_
 
 #include "AStringArray.h"
-#include "ByteArray.h"
-#include "ISystemListener.h"
-#include "ImsParcel.h"
-#include "IpSecSaParameter.h"
+
+class ISystemListener;
+class ImsParcel;
+class IpSecSaParameter;
 
 class ISystem
 {

@@ -17,6 +17,8 @@
 #include <utils/String8.h>
 
 #include "IDigestAkaListener.h"
+#include "ISystem.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "OsUtil.h"
 #include "PlatformContext.h"

@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 
-#include "AString.h"
 #include "IPhoneInfoLocation.h"
 
 class MockILocationProperties : public ILocationProperties

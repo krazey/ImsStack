@@ -18,6 +18,7 @@
 #define OS_IMS_RADIO_H_
 
 #include "IImsTraffic.h"
+#include "ISystemListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsRadio.h"

@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 
-#include "IpAddress.h"
 #include "IIpSecSa.h"
 
 class MockIIpSecSa : public IIpSecSa

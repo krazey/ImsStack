@@ -16,10 +16,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "ImsTypeDef.h"
+#include "ByteArray.h"
 #include "MockISystem.h"
-#include "PlatformContext.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 
 using ::testing::_;
 using ::testing::AnyOf;

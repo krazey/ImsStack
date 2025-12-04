@@ -16,9 +16,10 @@
 #ifndef INTERFACE_NETWORK_PING_H_
 #define INTERFACE_NETWORK_PING_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
 
 class INetworkPingListener;
+class IpAddress;
 
 class INetworkPing
 {

@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ByteArray.h"
 #include "IIpSecPolicyListener.h"
 #include "IIpSecSa.h"
 #include "IIpSecSp.h"
+#include "IpSecSaParameter.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"

@@ -16,10 +16,11 @@
 #ifndef INTERFACE_THREAD_H_
 #define INTERFACE_THREAD_H_
 
-#include "AString.h"
 #include "ImsList.h"
 #include "ImsMessage.h"
-#include "IRunnable.h"
+
+class AString;
+class IRunnable;
 
 class IThread
 {

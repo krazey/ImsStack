@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsActivity.h"
 #include "ImsActivityManager.h"
-#include "ServiceMemory.h"
 
 PUBLIC
 ImsActivityManager::ImsActivityManager() :

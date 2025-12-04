@@ -18,10 +18,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IIpSecPolicy.h"
 #include "INetworkIpSec.h"
-#include "ISocket.h"
-#include "SocketAddress.h"
 
 class MockINetworkIpSec : public INetworkIpSec
 {

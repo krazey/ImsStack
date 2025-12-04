@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "ImsNew.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This is a wrapper class using c++ stl vector class.

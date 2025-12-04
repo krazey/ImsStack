@@ -21,8 +21,6 @@
 
 #include "ITimer.h"
 
-class ITimerListener;
-
 class MockITimer : public ITimer
 {
 public:

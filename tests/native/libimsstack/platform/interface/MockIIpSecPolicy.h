@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsList.h"
 #include "IIpSecPolicy.h"
 
 class MockIIpSecPolicy : public IIpSecPolicy

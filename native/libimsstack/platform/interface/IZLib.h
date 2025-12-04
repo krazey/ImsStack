@@ -16,7 +16,9 @@
 #ifndef INTERFACE_ZLIB_H_
 #define INTERFACE_ZLIB_H_
 
-#include "ByteArray.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
 
 class IZLib
 {

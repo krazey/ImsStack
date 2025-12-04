@@ -21,6 +21,8 @@
 #include <private/android_filesystem_config.h>
 #include <sys/stat.h>
 
+#include "ISystem.h"
+#include "ImsNew.h"
 #include "OsFile.h"
 #include "PlatformContext.h"
 #include "ServiceTrace.h"

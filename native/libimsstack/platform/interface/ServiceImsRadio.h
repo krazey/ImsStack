@@ -16,11 +16,11 @@
 #ifndef SERVICE_IMS_RADIO_H_
 #define SERVICE_IMS_RADIO_H_
 
-#include "IImsRadio.h"
-#include "IImsTraffic.h"
-#include "ImsMessage.h"
 #include "PlatformService.h"
 
+class IImsRadio;
+class IImsTraffic;
+class ImsMessage;
 class ImsRadioServicePrivate;
 
 class ImsRadioService : public PlatformService

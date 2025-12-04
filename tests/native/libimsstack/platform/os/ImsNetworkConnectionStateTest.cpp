@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AStringArray.h"
 #include "ImsNetworkConnectionState.h"
 
 namespace android

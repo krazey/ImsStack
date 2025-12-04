@@ -16,11 +16,13 @@
 #ifndef SERVICE_THREAD_H_
 #define SERVICE_THREAD_H_
 
-#include "INativeThreadMethods.h"
-#include "IThread.h"
+#include "ImsList.h"
 #include "PlatformService.h"
 
+class AString;
 class IMutex;
+class INativeThreadMethods;
+class IThread;
 
 class ThreadService : public PlatformService
 {
