@@ -58,6 +58,7 @@ public:
             (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetUserPart, (IN const IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
+    MOCK_METHOD(AString, GetUserPart, (IN const AString&), (override));
     MOCK_METHOD(ImsList<AString>, GetUserIds, (IN IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
     MOCK_METHOD(AString, GetUserId, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));

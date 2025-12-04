@@ -30,6 +30,7 @@
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::Return;
@@ -45,6 +46,7 @@ public:
     MockReferenceInterfaceHolder* pReferenceInterfaceHolder;
     MockSubscriptionInterfaceHolder* pSubscriptionInterfaceHolder;
     MockIInterfaceHolderListener objInterfaceHolderListener;
+    MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -61,6 +63,7 @@ protected:
                 .WillByDefault(Return(pSubscriptionInterfaceHolder));
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pFactory = new ConferenceFactory(objContext);
     }

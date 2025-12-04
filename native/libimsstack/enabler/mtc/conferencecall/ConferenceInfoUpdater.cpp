@@ -23,17 +23,18 @@
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceParticipantList.h"
-#include "conferencecall/ConferenceUtils.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "utility/IMessageUtils.h"
 #include "algorithm"
 #include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ConferenceInfoUpdater::ConferenceInfoUpdater(
-        IN ConferenceFactory& objFactory, IN MtcConfigurationProxy& objConfigProxy) :
+ConferenceInfoUpdater::ConferenceInfoUpdater(IN ConferenceFactory& objFactory,
+        IN MtcConfigurationProxy& objConfigProxy, IN IMessageUtils& objMessageUtils) :
         m_objConfigProxy(objConfigProxy),
+        m_objMessageUtils(objMessageUtils),
         m_pConferenceInfo(IMS_NULL),
         m_objFactory(objFactory),
         m_pParticipantList(IMS_NULL),
@@ -272,11 +273,9 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
         }
         else
         {
-            AString strUserEntityXml;
-            ConferenceUtils::GetUserPart(pUser->GetEntity(), strUserEntityXml);
-            AString strReferTo;
-            ConferenceUtils::GetUserPart(
-                    m_pParticipantList->GetAt(nIndex)->GetReferInviteUri(), strReferTo);
+            AString strUserEntityXml = m_objMessageUtils.GetUserPart(pUser->GetEntity());
+            AString strReferTo = m_objMessageUtils.GetUserPart(
+                    m_pParticipantList->GetAt(nIndex)->GetReferInviteUri());
             IMS_TRACE_I("FindAndUpdate : index[%d] status[%s]", nIndex,
                     ConvertStatusToString(pUser->GetEndPoints().GetAt(0)->GetStatus()), 0);
             IMS_TRACE_I("FindAndUpdate : Entity[%s]=[%s]Refer-To", strUserEntityXml.GetStr(),
@@ -338,8 +337,7 @@ IMS_BOOL ConferenceInfoUpdater::UpdateParticipant(
 
     ConfUser* pConfUser = pParticipant->GetConfUser();
 
-    AString strUserEntity;
-    ConferenceUtils::GetUserPart(pUser->GetEntity(), strUserEntity);
+    AString strUserEntity = m_objMessageUtils.GetUserPart(pUser->GetEntity());
     pConfUser->strTarget = strUserEntity;
     pConfUser->strUserEntity = pUser->GetEntity();
     pConfUser->strEpEntity = pUser->GetEndPoints().GetAt(0)->GetEntity();
@@ -482,8 +480,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const Conferenc
 {
     IMS_UINT32 nMaxMatchingCount = 0;
     IMS_SINT32 nLocalParticipantIndex = -1;
-    AString strUserEntity;
-    ConferenceUtils::GetUserPart(pUser->GetEntity(), strUserEntity);
+    AString strUserEntity = m_objMessageUtils.GetUserPart(pUser->GetEntity());
     IMS_TRACE_I("FindParticipantByReferToUri : user-entity=[%s]", strUserEntity.GetStr(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
@@ -498,9 +495,8 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const Conferenc
             continue;
         }
 
-        AString strReferToUri;
-        ConferenceUtils::GetUserPart(
-                m_pParticipantList->GetAt(i)->GetReferInviteUri(), strReferToUri);
+        AString strReferToUri =
+                m_objMessageUtils.GetUserPart(m_pParticipantList->GetAt(i)->GetReferInviteUri());
 
         if (!IsSamePrivacyUri(strReferToUri, strUserEntity))
         {
@@ -512,7 +508,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const Conferenc
             continue;
         }
 
-        IMS_UINT32 nCount = GetMatchingCount(strReferToUri, strUserEntity);
+        IMS_UINT32 nCount = GetMatchingCount(strReferToUri, strUserEntity, m_objMessageUtils);
         if (nCount > 0 && nCount >= nMaxMatchingCount)
         {
             nLocalParticipantIndex = i;
@@ -540,9 +536,8 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const Conferenc
             continue;
         }
 
-        AString strReferToUri;
-        ConferenceUtils::GetUserPart(
-                m_pParticipantList->GetAt(i)->GetReferInviteUri(), strReferToUri);
+        AString strReferToUri =
+                m_objMessageUtils.GetUserPart(m_pParticipantList->GetAt(i)->GetReferInviteUri());
         if (!IsSamePrivacyUri(strReferToUri, strUserEntity))
         {
             continue;
@@ -569,8 +564,7 @@ PRIVATE
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const ConferenceInfo::User* pUser)
 {
     IMS_SINT32 nLocalParticipantIndex = -1;
-    AString strUserEntity;
-    ConferenceUtils::GetUserPart(pUser->GetEntity(), strUserEntity);
+    AString strUserEntity = m_objMessageUtils.GetUserPart(pUser->GetEntity());
     IMS_TRACE_I("FindParticipantByUserEntity : user-entity[%s]", strUserEntity.GetStr(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
@@ -580,9 +574,8 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
             continue;
         }
 
-        AString strParticipantUserEntity;
-        ConferenceUtils::GetUserPart(
-                m_pParticipantList->GetAt(i)->GetUserEntity(), strParticipantUserEntity);
+        AString strParticipantUserEntity =
+                m_objMessageUtils.GetUserPart(m_pParticipantList->GetAt(i)->GetUserEntity());
 
         IMS_TRACE_I("FindParticipantByUserEntity : [%s]", strParticipantUserEntity.GetStr(), 0, 0);
         if (!IsSamePrivacyUri(strParticipantUserEntity, strUserEntity))
@@ -595,7 +588,8 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
             continue;
         }
 
-        IMS_BOOL bSameUri = IsSameUri(strParticipantUserEntity, strUserEntity, IMS_FALSE);
+        IMS_BOOL bSameUri =
+                IsSameUri(strParticipantUserEntity, strUserEntity, m_objMessageUtils, IMS_FALSE);
         if (bSameUri &&
                 !IsSameUriParameter(
                         m_pParticipantList->GetAt(i)->GetUserEntity(), pUser->GetEntity()))
@@ -617,7 +611,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
             break;
         }
 
-        if (IsSameUri(strParticipantUserEntity, strUserEntity))
+        if (IsSameUri(strParticipantUserEntity, strUserEntity, m_objMessageUtils))
         {
             IMS_TRACE_I("FindParticipantByUserEntity : same allow prefix uri", 0, 0, 0);
             nLocalParticipantIndex = i;
@@ -776,36 +770,36 @@ PRIVATE
 IMS_BOOL ConferenceInfoUpdater::IsLocalUri(IN const AString& strUserEntity) const
 {
     // 'local' represents near device.
-    AString strUserPart;
-    if (ConferenceUtils::GetUserPart(strUserEntity, strUserPart).GetLength() == 0)
+    AString strUserPart = m_objMessageUtils.GetUserPart(strUserEntity);
+    if (strUserPart.GetLength() == 0)
     {
         IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    AString strLocalUserPart;
-    if (ConferenceUtils::GetUserPart(m_pParticipantList->GetLocalUri(), strLocalUserPart)
-                    .GetLength() == 0)
+    AString strLocalUserPart = m_objMessageUtils.GetUserPart(m_pParticipantList->GetLocalUri());
+    if (strLocalUserPart.GetLength() == 0)
     {
         IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_BOOL bSame = IsSameUri(strUserPart, strLocalUserPart);
+    IMS_BOOL bSame = IsSameUri(strUserPart, strLocalUserPart, m_objMessageUtils);
     IMS_TRACE_D("IsLocalUri : uri[%s] isLocal[%s]", strUserPart.GetStr(), _TRACE_B_(bSame), 0);
 
     return bSame;
 }
 
 PRIVATE GLOBAL IMS_BOOL ConferenceInfoUpdater::IsSameUri(IN const AString& strUriA,
-        IN const AString& strUriB, IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/)
+        IN const AString& strUriB, IN IMessageUtils& objMessageUtils,
+        IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/)
 {
     IMS_SINT32 nLengthA = strUriA.GetLength();
     IMS_SINT32 nLengthB = strUriB.GetLength();
 
     IMS_UINT32 nLongerLength = nLengthA > nLengthB ? nLengthA : nLengthB;
     IMS_UINT32 nMargin = bAllowPrefix ? 3 : 0;
-    if (GetMatchingCount(strUriA, strUriB) + nMargin >= nLongerLength)
+    if (GetMatchingCount(strUriA, strUriB, objMessageUtils) + nMargin >= nLongerLength)
     {
         // +821040044404 vs 01040044404
         // 10 + 3 >= 13(or 12)
@@ -880,16 +874,16 @@ PRIVATE GLOBAL IMS_UINT32 ConferenceInfoUpdater::GetMatchingScore(
 }
 
 PRIVATE GLOBAL IMS_UINT32 ConferenceInfoUpdater::GetMatchingCount(
-        IN const AString& strUriA, IN const AString& strUriB)
+        IN const AString& strUriA, IN const AString& strUriB, IN IMessageUtils& objMessageUtils)
 {
-    AString strA;
-    if (ConferenceUtils::GetUserPart(strUriA, strA).GetLength() == 0)
+    AString strA = objMessageUtils.GetUserPart(strUriA);
+    if (strA.GetLength() == 0)
     {
         strA = strUriA;
     }
 
-    AString strB;
-    if (ConferenceUtils::GetUserPart(strUriB, strB).GetLength() == 0)
+    AString strB = objMessageUtils.GetUserPart(strUriB);
+    if (strB.GetLength() == 0)
     {
         strB = strUriB;
     }

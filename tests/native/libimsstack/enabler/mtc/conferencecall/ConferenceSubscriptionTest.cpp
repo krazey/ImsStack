@@ -71,7 +71,8 @@ public:
             objMtcService(),
             objCoreService(),
             objFactory(objContext),
-            pInfoUpdater(new MockConferenceInfoUpdater(objFactory, objConfigurationProxy)),
+            pInfoUpdater(new MockConferenceInfoUpdater(
+                    objFactory, objConfigurationProxy, objMessageUtils)),
             objParticipantList(),
             objConferenceCall(),
             objConfCallContext(),
@@ -253,13 +254,15 @@ TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInvokesUpdateAndDoesNothing
             .WillOnce(Return(ConferenceInfoUpdater::RESULT_MALFORMED_XML));
     pConferenceSubscription->SubscriptionNotify(&objSubscription, &objNotifyMessage);
 
-    pInfoUpdater = new MockConferenceInfoUpdater(objFactory, objConfigurationProxy);
+    pInfoUpdater =
+            new MockConferenceInfoUpdater(objFactory, objConfigurationProxy, objMessageUtils);
     ON_CALL(objFactory, CreateInfoUpdater).WillByDefault(Return(pInfoUpdater));
     EXPECT_CALL(*pInfoUpdater, Update(&objParticipantList, objValueValid.ToString()))
             .WillOnce(Return(ConferenceInfoUpdater::RESULT_INFO_DELETED));
     pConferenceSubscription->SubscriptionNotify(&objSubscription, &objNotifyMessage);
 
-    pInfoUpdater = new MockConferenceInfoUpdater(objFactory, objConfigurationProxy);
+    pInfoUpdater =
+            new MockConferenceInfoUpdater(objFactory, objConfigurationProxy, objMessageUtils);
     ON_CALL(objFactory, CreateInfoUpdater).WillByDefault(Return(pInfoUpdater));
     EXPECT_CALL(*pInfoUpdater, Update(&objParticipantList, objValueValid.ToString()))
             .WillOnce(Return(ConferenceInfoUpdater::RESULT_AMBIGUOUS));

@@ -367,6 +367,30 @@ PUBLIC AString MessageUtils::GetUserPart(IN const IMessage* piMessage, IN IMS_SI
     return AString::ConstNull();
 }
 
+PUBLIC AString MessageUtils::GetUserPart(IN const AString& strUri)
+{
+    SipAddress objSipAddress;
+    if (!objSipAddress.Create(strUri))
+    {
+        return AString::ConstNull();
+    }
+
+    if (objSipAddress.IsSchemeTel())
+    {
+        return objSipAddress.GetHost();
+    }
+    else
+    {
+        const SipAddress::UserInfoPart* pUserInfoPart = objSipAddress.GetUserInfoPart();
+        if (pUserInfoPart != IMS_NULL)
+        {
+            return pUserInfoPart->GetUser();
+        }
+    }
+
+    return AString::ConstNull();
+}
+
 PUBLIC ImsList<AString> MessageUtils::GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {

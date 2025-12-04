@@ -23,6 +23,7 @@
 
 class ConferenceFactory;
 class ConferenceParticipantList;
+class IMessageUtils;
 class MtcConfigurationProxy;
 struct ConfUser;
 
@@ -37,8 +38,8 @@ enum class MatchingPolicy
 class ConferenceInfoUpdater
 {
 public:
-    explicit ConferenceInfoUpdater(
-            IN ConferenceFactory& objFactory, IN MtcConfigurationProxy& objConfigProxy);
+    explicit ConferenceInfoUpdater(IN ConferenceFactory& objFactory,
+            IN MtcConfigurationProxy& objConfigProxy, IN IMessageUtils& objMessageUtils);
     virtual ~ConferenceInfoUpdater();
     ConferenceInfoUpdater(IN const ConferenceInfoUpdater&) = delete;
     ConferenceInfoUpdater& operator=(IN const ConferenceInfoUpdater&) = delete;
@@ -80,14 +81,15 @@ private:
     IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
 
     static IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
-            IN IMS_BOOL bAllowPrefix = IMS_TRUE);
+            IN IMessageUtils& objMessageUtils, IN IMS_BOOL bAllowPrefix = IMS_TRUE);
     static IMS_BOOL IsSameUriParameter(
             IN const AString& strUserEntityA, IN const AString& strUserEntityB);
     static IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity);
     static IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB);
     static IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus);
     static IMS_UINT32 GetMatchingScore(IN const AString& strUriA, IN const AString& strUriB);
-    static IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB);
+    static IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB,
+            IN IMessageUtils& objMessageUtils);
 
 public:
     enum
@@ -102,6 +104,7 @@ public:
 
 private:
     MtcConfigurationProxy& m_objConfigProxy;
+    IMessageUtils& m_objMessageUtils;
     ConferenceInfo* m_pConferenceInfo;
     ConferenceFactory& m_objFactory;
     ConferenceParticipantList* m_pParticipantList;

@@ -176,6 +176,15 @@ public:
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
     /**
+     * @brief Extracts the user part from a given URI string.
+     *
+     * @param strUri The input URI string to parse.
+     * @return An AString containing the extracted user part. Returns an empty string
+     *         if the user part cannot be found or the URI is invalid.
+     */
+    virtual AString GetUserPart(IN const AString& strUri) = 0;
+
+    /**
      * @brief Gets
      *
      * @param piMessage
