@@ -21,6 +21,7 @@
 #include "ImsSlot.h"
 
 #include "ICarrierConfig.h"
+#include "ICarrierConfigListener.h"
 #include "IConfigurable.h"
 
 class IImsPrivateProperty;

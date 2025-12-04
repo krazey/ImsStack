@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "ImsNew.h"
 #include "MockIFile.h"
 #include "PlatformContext.h"
 #include "TestFileService.h"
