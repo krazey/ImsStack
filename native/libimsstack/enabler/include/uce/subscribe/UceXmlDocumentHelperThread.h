@@ -17,7 +17,9 @@
 #ifndef _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 #define _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 
+#include "AString.h"
 #include "ImsMap.h"
+#include "ImsMessage.h"
 #include "ImsQueue.h"
 #include "IRunnable.h"
 #include "IXmlStateListener.h"

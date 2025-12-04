@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "subscribe/UceXmlDocumentHelperThread.h"
-
 #include "IDocument.h"
 #include "IElement.h"
 #include "INodeList.h"
 #include "ISipHeader.h"
+#include "IThread.h"
 #include "IUce.h"
 #include "IXmlRequest.h"
 #include "IXmlResponse.h"
@@ -34,6 +32,7 @@
 #include "def/UceDef.h"
 #include "subscribe/UceNonCapabilityUser.h"
 #include "subscribe/UceNotifyMessageBody.h"
+#include "subscribe/UceXmlDocumentHelperThread.h"
 
 __IMS_TRACE_TAG_UCE__;
 

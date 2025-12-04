@@ -16,6 +16,7 @@
 #ifndef _UCE_APP_H_
 #define _UCE_APP_H_
 
+#include "IImsActivityController.h"
 #include "ImsApp.h"
 #include "INetworkWatcher.h"
 #include "ITimer.h"

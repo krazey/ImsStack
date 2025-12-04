@@ -22,6 +22,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISubscription.h"
+#include "IZLib.h"
 #include "ImsAosParameter.h"
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"

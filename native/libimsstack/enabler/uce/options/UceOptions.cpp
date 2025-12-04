@@ -22,6 +22,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IUce.h"
+#include "ServiceMessage.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "Sip.h"
