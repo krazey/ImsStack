@@ -355,6 +355,27 @@ public class SscServiceStateTest {
     }
 
     @Test
+    public void testDeInit_removesPendingMessages() {
+        // Verifies that deInit() cancels pending operations scheduled by init().
+        mSscServiceState = new SscServiceState(SLOT0, mLooper.getLooper());
+
+        // Call init(), which posts a delayed operation to check UT capability.
+        mSscServiceState.init();
+
+        // Call deInit() before the delayed operation has a chance to be processed.
+        // This should cancel the pending operation.
+        mSscServiceState.deInit();
+
+        // Advance the looper's time past the delay of the original operation.
+        processAllMessages();
+
+        // Verify that onServiceStateChanged was not called. This confirms that the pending
+        // operation was successfully canceled by deInit(), and that deInit() itself did not
+        // trigger a capability change notification because the state hadn't changed yet.
+        verify(mMockUtInterface, never()).onServiceStateChanged();
+    }
+
+    @Test
     public void testIsUtAvailable() {
         createAndInitSscServiceState();
 
