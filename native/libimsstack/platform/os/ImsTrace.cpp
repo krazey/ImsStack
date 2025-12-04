@@ -16,6 +16,7 @@
 #include <string.h>
 #include <cutils/log.h>
 
+#include "ITraceOption.h"
 #include "ImsStrLib.h"
 #include "ImsTrace.h"
 #include "ServiceMemory.h"

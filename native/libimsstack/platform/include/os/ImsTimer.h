@@ -16,8 +16,9 @@
 #ifndef IMS_TIMER_H_
 #define IMS_TIMER_H_
 
-#include "IThread.h"
 #include "ITimer.h"
+
+class IThread;
 
 class ImsTimer : public ITimer
 {

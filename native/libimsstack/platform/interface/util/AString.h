@@ -17,8 +17,8 @@
 #define ANSI_STRING_H_
 
 #include <stdarg.h>
+
 #include "ImsList.h"
-#include "ImsTypeDef.h"
 #include "RcObject.h"
 
 class WCharPtr;

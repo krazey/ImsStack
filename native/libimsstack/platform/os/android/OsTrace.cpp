@@ -21,11 +21,12 @@
 #include <string.h>
 #include <cutils/log.h>
 
-#include "ServiceMemory.h"
-#include "ServiceMutex.h"
+#include "ITraceOption.h"
 #include "ImsConstDef.h"
 #include "ImsTraceNode.h"
 #include "OsTrace.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
 
 class OsTraceNode : public ImsTraceNode
 {

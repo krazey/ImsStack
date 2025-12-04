@@ -17,7 +17,8 @@
 #define IMS_APP_H_
 
 #include "ImsActivity.h"
-#include "ImsService.h"
+
+class ImsService;
 
 class ImsApp : public ImsActivity
 {

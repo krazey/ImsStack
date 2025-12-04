@@ -16,6 +16,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "ImsMessage.h"
+#include "ImsMessageDef.h"
 #include "ImsMutex.h"
 #include "ImsTimer.h"
 #include "MockIOsFactory.h"

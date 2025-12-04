@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IOsFactory.h"
 #include "ImsCarrierConfig.h"
 #include "ImsMap.h"
+#include "ImsMessage.h"
 #include "ImsMessageDef.h"
 #include "PlatformContext.h"
 #include "ServiceConfig.h"

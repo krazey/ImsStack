@@ -16,13 +16,14 @@
 #ifndef SERVICE_NETWORK_H_
 #define SERVICE_NETWORK_H_
 
-#include "ImsMessage.h"
-#include "INetworkConnection.h"
 #include "ISocket.h"
 #include "PlatformService.h"
 
+class AString;
 class IIpcan;
+class INetworkConnection;
 class INetworkIpSec;
+class ImsMessage;
 class NetworkServicePrivate;
 class SslCertificate;
 

@@ -63,12 +63,12 @@ protected:
     }
 };
 
-ImsApp* CreateTestApp(IN const AString& strName)
+static ImsApp* CreateTestApp(IN const AString& strName)
 {
     return new ImsApp(strName);
 }
 
-ImsAppThread* CreateTestImsAppThread()
+static ImsAppThread* CreateTestImsAppThread()
 {
     return new ImsAppThread();
 }

@@ -16,13 +16,7 @@
 #ifndef MOCK_I_SYSTEM_H_
 #define MOCK_I_SYSTEM_H_
 
-#include "AStringArray.h"
-#include "ByteArray.h"
 #include "ISystem.h"
-#include "ISystemListener.h"
-#include "ImsAccessNetworkInfoType.h"
-#include "ImsParcel.h"
-#include "IpSecSaParameter.h"
 
 class MockISystem : public ISystem
 {

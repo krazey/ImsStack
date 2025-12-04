@@ -18,8 +18,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "IOsFactory.h"
+#include "IThreadImpListener.h"
 #include "ImsFdSet.h"
 #include "ImsSocketState.h"
+#include "OsMutex.h"
 #include "OsPthread.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"

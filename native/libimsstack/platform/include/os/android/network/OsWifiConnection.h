@@ -18,7 +18,6 @@
 
 #include "ISystemListener.h"
 #include "ImsNetworkConnection.h"
-#include "OsNetworkConstants.h"
 
 class IThread;
 class NetworkPolicy;

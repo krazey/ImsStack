@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "ImsMessageDef.h"
+#include "OsTimer.h"
 #include "OsTimerService.h"
 #include "PlatformContext.h"
 #include "ServiceMessage.h"

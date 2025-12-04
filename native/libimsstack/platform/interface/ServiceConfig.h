@@ -17,10 +17,10 @@
 #define SERVICE_IMS_CONFIG_H_
 
 #include "ICarrierConfig.h"
-#include "ImsMessage.h"
 #include "PlatformService.h"
 
 class ConfigServicePrivate;
+class ImsMessage;
 
 class ConfigService : public PlatformService
 {

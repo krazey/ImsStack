@@ -18,7 +18,7 @@
 
 #include "IThread.h"
 
-#include "IImsActivityController.h"
+class IImsActivityController;
 
 class ImsActivity
 {

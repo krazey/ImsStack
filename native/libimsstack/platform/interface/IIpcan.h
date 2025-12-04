@@ -16,8 +16,9 @@
 #ifndef INTERFACE_IPCAN_H_
 #define INTERFACE_IPCAN_H_
 
-#include "ByteArray.h"
 #include "ImsAccessNetworkInfoType.h"
+
+class AString;
 
 class IIpcan
 {

@@ -17,6 +17,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "INativeThreadMethods.h"
+#include "IRunnable.h"
+#include "ISystemProperty.h"
 #include "ImsMessageDef.h"
 #include "OsThread.h"
 #include "ServiceConfig.h"

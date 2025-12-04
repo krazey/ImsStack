@@ -16,8 +16,9 @@
 #ifndef IMS_STATE_MAP_H_
 #define IMS_STATE_MAP_H_
 
-#include "ImsMessage.h"
 #include "ImsStateObject.h"
+
+class ImsMessage;
 
 #define IMS_INVALID_STATE 0xFFFFFFFF
 #define IMS_INVALID_MSG   0xFFFFFFFF

@@ -16,7 +16,7 @@
 #ifndef SYSTEM_CONFIG_H_
 #define SYSTEM_CONFIG_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
 
 class SystemConfig
 {

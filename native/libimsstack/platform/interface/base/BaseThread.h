@@ -16,7 +16,10 @@
 #ifndef BASE_THREAD_H_
 #define BASE_THREAD_H_
 
-#include "IThread.h"
+#include "AString.h"
+#include "IRunnable.h"
+
+class IThread;
 
 class BaseThread : public IRunnable
 {

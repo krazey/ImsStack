@@ -16,8 +16,11 @@
 #ifndef IMS_ACTIVITY_MANAGER_H_
 #define IMS_ACTIVITY_MANAGER_H_
 
-#include "IImsActivityController.h"
-#include "ImsActivity.h"
+#include "AString.h"
+
+class IImsActivityController;
+class ImsActivity;
+class ImsMessage;
 
 class ImsActivityManager
 {

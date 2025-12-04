@@ -17,8 +17,8 @@
 #define OS_PTHREAD_H_
 
 #include "ImsThread.h"
-#include "IThreadImpListener.h"
 
+class IThreadImpListener;
 class OsPthreadPrivate;
 
 class OsPthread : public ImsThread

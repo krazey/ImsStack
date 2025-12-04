@@ -16,7 +16,9 @@
 #ifndef INTERFACE_RUNNABLE_H_
 #define INTERFACE_RUNNABLE_H_
 
-#include "ImsMessage.h"
+#include "ImsTypeDef.h"
+
+class ImsMessage;
 
 class IRunnable
 {

@@ -16,12 +16,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "RetryCmd.h"
-#include "RetryTaskHelper.h"
-
-#include "MockITimer.h"
 #include "MockIRetryTaskHelperListener.h"
+#include "MockITimer.h"
 #include "PlatformContext.h"
+#include "RetryCmd.h"
+#include "RetryCondition.h"
+#include "RetryTaskHelper.h"
+#include "RetryTimer.h"
 #include "TestTimerService.h"
 
 using ::testing::_;

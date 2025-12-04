@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsMessage.h"
 #include "ImsStateMachine.h"
-#include "ServiceMemory.h"
 
 PUBLIC
 ImsStateMachine::ImsStateMachine(IN IMS_UINT32 nState) :

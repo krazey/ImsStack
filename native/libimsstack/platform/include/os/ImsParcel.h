@@ -16,13 +16,11 @@
 #ifndef IMS_PARCEL_H_
 #define IMS_PARCEL_H_
 
-#include "ImsTypeDef.h"
-
 class ImsParcel
 {
 public:
-    inline ImsParcel() {}
-    inline virtual ~ImsParcel() {}
+    ImsParcel() = default;
+    virtual ~ImsParcel() = default;
 };
 
 #endif

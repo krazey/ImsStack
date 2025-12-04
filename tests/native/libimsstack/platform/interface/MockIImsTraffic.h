@@ -19,9 +19,6 @@
 #include <gmock/gmock.h>
 
 #include "IImsTraffic.h"
-#include "ImsTypeDef.h"
-
-class IImsTrafficListener;
 
 class MockIImsTraffic : public IImsTraffic
 {

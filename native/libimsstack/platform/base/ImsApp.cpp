@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ImsApp.h"
+#include "ImsService.h"
 #include "ServiceMemory.h"
 
 PUBLIC

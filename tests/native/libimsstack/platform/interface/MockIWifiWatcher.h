@@ -18,11 +18,6 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsList.h"
-#include "ImsMessageDef.h"
-#include "ServiceMessage.h"
-#include "ServiceThread.h"
-
 #include "IWifiWatcher.h"
 
 class MockIWifiWatcher : public IWifiWatcher

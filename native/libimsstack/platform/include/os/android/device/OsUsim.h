@@ -16,12 +16,13 @@
 #ifndef OS_USIM_H_
 #define OS_USIM_H_
 
+#include "ByteArray.h"
 #include "IDigestAka.h"
 #include "ISystemListener.h"
 #include "ImsUsim.h"
 
-class IThread;
 class IDigestAkaListener;
+class IThread;
 
 class OsUsimDigestAka : public IDigestAka
 {

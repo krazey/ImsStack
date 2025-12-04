@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "ImsMessageDef.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ImsNetworkConnectionState.h"
@@ -26,6 +27,7 @@
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
+#include "network/OsNetworkConstants.h"
 #include "network/OsWifiConnection.h"
 #include "system-intf/SystemConstants.h"
 

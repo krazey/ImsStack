@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ImsActivity.h"
+#include "ImsAppThread.h"
 #include "ImsProcess.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"

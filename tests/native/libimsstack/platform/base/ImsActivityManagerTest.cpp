@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "ImsApp.h"
+#include "ImsAppThread.h"
 #include "ImsActivityManager.h"
 #include "ImsMessageDef.h"
 #include "ImsProcess.h"
@@ -56,7 +57,7 @@ protected:
     }
 };
 
-ImsAppThread* CreateAppThread()
+static ImsAppThread* CreateAppThread()
 {
     return new ImsAppThread();
 }

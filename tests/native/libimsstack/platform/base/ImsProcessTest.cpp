@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "ImsAppThread.h"
 #include "ImsProcess.h"
 #include "MockIThread.h"
 #include "PlatformContext.h"
@@ -57,17 +58,17 @@ protected:
     }
 };
 
-ImsAppThread* TestAppThread()
+static ImsAppThread* TestAppThread()
 {
     return IMS_NULL;
 }
 
-ImsAppThread* TestAppThreadWithParam(void* /*pParam*/)
+static ImsAppThread* TestAppThreadWithParam(void* /*pParam*/)
 {
     return IMS_NULL;
 }
 
-ImsAppThread* CreateTestAppThread(void* /*pParam*/)
+static ImsAppThread* CreateTestAppThread(void* /*pParam*/)
 {
     return new ImsAppThread();
 }

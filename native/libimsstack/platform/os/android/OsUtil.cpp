@@ -16,6 +16,8 @@
 #include <cutils/properties.h>
 #include "zlib.h"
 
+#include "ByteArray.h"
+#include "ISystem.h"
 #include "ImsStrLib.h"
 #include "OsUtil.h"
 #include "PlatformContext.h"

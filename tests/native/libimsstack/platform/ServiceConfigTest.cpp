@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 
 #include "ImsCarrierConfig.h"
+#include "ImsMessage.h"
+#include "ImsMessageDef.h"
 #include "MockIOsFactory.h"
 #include "PlatformContext.h"
 #include "ServiceConfig.h"

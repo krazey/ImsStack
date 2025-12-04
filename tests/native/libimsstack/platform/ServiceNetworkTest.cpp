@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AStringArray.h"
+#include "ImsMessage.h"
 #include "ImsMessageDef.h"
 #include "ImsNetworkConnectionState.h"
 #include "ImsSocketState.h"
@@ -23,6 +25,7 @@
 #include "MockIIpcan.h"
 #include "PlatformContext.h"
 #include "ServiceNetwork.h"
+#include "SslCertificate.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;

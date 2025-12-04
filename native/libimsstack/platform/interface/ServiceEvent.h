@@ -16,11 +16,11 @@
 #ifndef SERVICE_EVENT_H_
 #define SERVICE_EVENT_H_
 
-#include "IEventListener.h"
 #include "ImsEventDef.h"
 #include "PlatformService.h"
 
 class EventServicePrivate;
+class IEventListener;
 
 // Event Service class
 class EventService : public PlatformService

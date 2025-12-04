@@ -18,7 +18,6 @@
 
 #include <vector>
 
-#include "ImsNew.h"
 #include "ImsVector.h"
 
 /**

@@ -18,11 +18,7 @@
 
 #include <gmock/gmock.h>
 
-#include "AStringArray.h"
-#include "IIpcan.h"
 #include "INetworkConnection.h"
-#include "INetworkPing.h"
-#include "IpAddress.h"
 
 class MockINetworkConnection : public INetworkConnection
 {

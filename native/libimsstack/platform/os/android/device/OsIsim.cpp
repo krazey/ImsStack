@@ -18,6 +18,8 @@
 
 #include "IDigestAkaListener.h"
 #include "IIsimListener.h"
+#include "ISystem.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "OsUtil.h"
 #include "PlatformContext.h"

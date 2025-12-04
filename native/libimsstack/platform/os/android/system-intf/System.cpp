@@ -15,8 +15,11 @@
  */
 #include <utils/String8.h>
 
+#include "ByteArray.h"
+#include "ISystemListener.h"
 #include "ImsMap.h"
 #include "ImsStrLib.h"
+#include "IpSecSaParameter.h"
 #include "OsParcel.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"

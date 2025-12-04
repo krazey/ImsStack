@@ -18,8 +18,6 @@
 
 #include <sys/socket.h>
 
-#include "OsMutex.h"
-
 class OsSocketBase;
 class OsSocketThread;
 

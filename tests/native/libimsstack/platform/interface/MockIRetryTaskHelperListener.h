@@ -18,9 +18,6 @@
 
 #include "IRetryTaskHelperListener.h"
 
-class RetryCmd;
-class RetryTaskHelper;
-
 class MockIRetryTaskHelperListener : public IRetryTaskHelperListener
 {
 public:

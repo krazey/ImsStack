@@ -18,6 +18,9 @@
 #ifdef __IMS_DEBUG__
 #include "AStringBuffer.h"
 #endif
+#include "ICarrierConfigListener.h"
+#include "ISystem.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "OsParcel.h"
 #include "PlatformContext.h"

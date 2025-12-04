@@ -19,7 +19,7 @@
 #include "AString.h"
 #include "ImsVector.h"
 
-#include "ICarrierConfigListener.h"
+class ICarrierConfigListener;
 
 class ICarrierConfig
 {

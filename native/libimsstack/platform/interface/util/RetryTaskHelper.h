@@ -18,11 +18,11 @@
 
 #include "IRetryCmdListener.h"
 #include "IRetryTimerListener.h"
-#include "RetryCmd.h"
-#include "RetryCondition.h"
-#include "RetryTimer.h"
 
 class IRetryTaskHelperListener;
+class RetryCmd;
+class RetryCondition;
+class RetryTimer;
 
 class RetryTaskHelper : public IRetryCmdListener, public IRetryTimerListener
 {

@@ -16,12 +16,12 @@
 #ifndef INTERFACE_NETWORK_CONNECTION_H_
 #define INTERFACE_NETWORK_CONNECTION_H_
 
-#include "AStringArray.h"
 #include "IIpcan.h"
-#include "INetworkPing.h"
 #include "IpAddress.h"
 
+class AStringArray;
 class INetworkConnectionListener;
+class INetworkPing;
 
 // Default network id - system default id
 #define IMS_NET_IFACE_DEFAULT_ID 0

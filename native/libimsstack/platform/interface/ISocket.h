@@ -16,9 +16,10 @@
 #ifndef INTERFACE_SOCKET_H_
 #define INTERFACE_SOCKET_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
 
 class ISocketListener;
+class IpAddress;
 
 class ISocket
 {

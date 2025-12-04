@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include "IIpcan.h"
+#include "IOsFactory.h"
+#include "ImsMessage.h"
 #include "ImsMessageDef.h"
 #include "ImsNetworkConnectionState.h"
 #include "ImsSocketState.h"

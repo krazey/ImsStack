@@ -18,12 +18,6 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsList.h"
-#include "ImsMessageDef.h"
-#include "ServiceMessage.h"
-#include "ServiceNetworkPolicy.h"
-#include "ServiceThread.h"
-
 #include "INetworkWatcher.h"
 
 class MockINetworkWatcher : public INetworkWatcher

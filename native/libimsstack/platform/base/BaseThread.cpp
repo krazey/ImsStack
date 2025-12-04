@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "BaseThread.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"

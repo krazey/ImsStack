@@ -16,6 +16,8 @@
 #ifndef IMS_STATE_OBJECT_H_
 #define IMS_STATE_OBJECT_H_
 
+#include "ImsTypeDef.h"
+
 /**
  * @brief This class is a base class for IMS state machine.
  */

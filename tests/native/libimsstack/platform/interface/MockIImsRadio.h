@@ -19,9 +19,6 @@
 #include <gmock/gmock.h>
 
 #include "IImsRadio.h"
-#include "ImsTypeDef.h"
-
-class IImsRadioTrafficPriorityListener;
 
 class MockIImsRadio : public IImsRadio
 {
