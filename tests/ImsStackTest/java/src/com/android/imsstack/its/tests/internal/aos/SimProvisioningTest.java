@@ -64,19 +64,15 @@ public class SimProvisioningTest extends RegistrationTestBase {
         tearDownBase(SLOT0);
     }
 
-    /**
-     * Mode : BOTH_ISIM_USIM
-     * UE supports ISIM application and USIM application.
-     */
-
-    // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
-    // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
-    //    both ISIM and USIM are fully supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the prioritized ISIM.
     @Test
     public void provisioning_supportIsimAndUsim_priorityIsimUsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
+        // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
+        //    both ISIM and USIM are fully supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the prioritized ISIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_BOTH_ISIM_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -84,14 +80,15 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
-    // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
-    //    both ISIM and USIM are fully supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the prioritized ISIM.
     @Test
     public void provisioning_supportIsimAndUsim_priorityIsimImsi_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
+        // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
+        //    both ISIM and USIM are fully supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the prioritized ISIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ISIM_ISIMIMSI);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -99,14 +96,15 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support only ISIM.
-    // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
-    //    both ISIM and USIM are fully supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the ISIM.
     @Test
     public void provisioning_supportIsimAndUsim_priorityIsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support only ISIM.
+        // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
+        //    both ISIM and USIM are fully supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the ISIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_ISIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -114,14 +112,15 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support only USIM.
-    // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
-    //    both ISIM and USIM are fully supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the USIM.
     @Test
     public void provisioning_supportIsimAndUsim_priorityUsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support only USIM.
+        // 2. Set the SIM support mode to BOTH_ISIM_USIM, simulating a device where
+        //    both ISIM and USIM are fully supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the USIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.BOTH_ISIM_USIM);
 
@@ -129,22 +128,16 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    /**
-     * Mode : INCOMP_ISIM_USIM
-     * UE supports incomplete ISIM application and USIM application.
-     * Incomplete ISIM : Simulates a scenario where IMPU, IMPI, and Home network domain
-     *                   cannot be obtained from the ISIM.
-     */
-
-    // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
-    // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
-    //    supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers by falling back to the valid USIM
-    //    application.
     @Test
     public void provisioning_supportIncompIsimAndUsim_priorityIsimUsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
+        // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
+        //    supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers by falling back to the valid USIM
+        //    application.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_BOTH_ISIM_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -152,14 +145,16 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
-    // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
-    //    supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers, likely using IMSI from the incomplete ISIM.
     @Test
     public void provisioning_supportIncompIsimAndUsim_priorityIsimImsi_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
+        // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
+        //    supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers, likely using IMSI from
+        //    the incomplete ISIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ISIM_ISIMIMSI);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -167,15 +162,16 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support only ISIM.
-    // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
-    //    supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device does not register, as the configuration prioritizes only
-    //    the incomplete ISIM and does not allow fallback.
     @Test
     public void provisioning_supportIncompIsimAndUsim_priorityIsim_fails()
             throws Exception {
+        // 1. Configure the IMS identity priority to support only ISIM.
+        // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
+        //    supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device does not register, as the configuration prioritizes only
+        //    the incomplete ISIM and does not allow fallback.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_ISIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -183,14 +179,15 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expectNot(5000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support only USIM.
-    // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
-    //    supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the valid USIM.
     @Test
     public void provisioning_supportIncompIsimAndUsim_priorityUsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support only USIM.
+        // 2. Set the SIM support mode to INCOMP_ISIM_USIM, where ISIM is incomplete but USIM is
+        //    supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the valid USIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.INCOMP_ISIM_USIM);
 
@@ -198,18 +195,14 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    /**
-     * Mode : ONLY_USIM
-     * UE only supports a USIM application.
-     */
-
-    // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
-    // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the available USIM.
     @Test
     public void provisioning_supportUsim_priorityIsimUsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
+        // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the available USIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_BOTH_ISIM_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
@@ -217,13 +210,14 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
-    // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the available USIM as a fallback.
     @Test
     public void provisioning_supportUsim_priorityIsimImsi_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
+        // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the available USIM as a fallback.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ISIM_ISIMIMSI);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
@@ -231,14 +225,15 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expect(30000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support only ISIM.
-    // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device does not register, as the required ISIM application is not
-    //    present.
     @Test
     public void provisioning_supportUsim_priorityIsim_fails()
             throws Exception {
+        // 1. Configure the IMS identity priority to support only ISIM.
+        // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device does not register, as the required ISIM application is not
+        //    present.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_ISIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
@@ -246,13 +241,14 @@ public class SimProvisioningTest extends RegistrationTestBase {
         mRegistration.expectNot(5000).registered();
     }
 
-    // 1. Configure the IMS identity priority to support only USIM.
-    // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
-    // 3. Trigger IMS registration.
-    // 4. Verify that the device successfully registers using the USIM.
     @Test
     public void provisioning_supportUsim_priorityUsim_succeeds()
             throws Exception {
+        // 1. Configure the IMS identity priority to support only USIM.
+        // 2. Set the SIM support mode to ONLY_USIM, where only USIM is supported.
+        // 3. Trigger IMS registration.
+        // 4. Verify that the device successfully registers using the USIM.
+
         mConfig.putIntArray(IMS_IDENTITY_PRIORITY, SUPPORT_ONLY_USIM);
         mInfoBuilder.addConfig(mConfig).setSimSupportMode(SimSupportMode.ONLY_USIM);
 
