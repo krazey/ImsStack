@@ -995,22 +995,6 @@ TEST_F(MessageUtilsTest, ContainsValue)
     EXPECT_FALSE(objMessageUtils.ContainsValue(piMessage, strValue, ANY_HEADER));
 }
 
-TEST_F(MessageUtilsTest, HasValue)
-{
-    AString strValue = "anyValue";
-    ImsList<AString> objHeaders;
-    objHeaders.Append(strValue);
-    objHeaders.Append("anotherValue");
-    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
-
-    EXPECT_TRUE(objMessageUtils.HasValue(piMessage, strValue, ANY_HEADER));
-
-    objHeaders.Clear();
-    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
-
-    EXPECT_FALSE(objMessageUtils.HasValue(piMessage, strValue, ANY_HEADER));
-}
-
 TEST_F(MessageUtilsTest, IsHeaderPresent)
 {
     ON_CALL(*piSipMessage, IsHeaderPresent(ANY_HEADER, _)).WillByDefault(Return(IMS_TRUE));

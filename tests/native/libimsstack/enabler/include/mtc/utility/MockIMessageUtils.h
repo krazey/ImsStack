@@ -92,8 +92,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsInitialRegistrationRequired, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsInitialEmergencyRegistrationRequired, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, ContainsValue,
-            (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(IMS_BOOL, HasValue,
             (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_BOOL, IsHeaderPresent, (IN const IMessage*, IN IMS_SINT32, IN const AString&),
             (override));

@@ -405,19 +405,7 @@ public:
      * @param strHeaderName
      * @return
      */
-    virtual IMS_BOOL ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
-            IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
-
-    /**
-     * @brief Hass
-     *
-     * @param piMessage
-     * @param strValue
-     * @param eHeaderType
-     * @param strHeaderName
-     * @return
-     */
-    virtual IMS_BOOL HasValue(IN const IMessage* piMessage, IN const AString& strValue,
+    virtual IMS_BOOL ContainsValue(IN const IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
     /**

@@ -966,9 +966,9 @@ PUBLIC IMS_BOOL MessageUtils::IsInitialEmergencyRegistrationRequired(IN const IM
     return IMS_FALSE;
 }
 
-// TODO: remove either ContainsValue or HasValue
-PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN const IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
     if (lstHeaders.IsEmpty())
@@ -979,26 +979,6 @@ PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN IMessage* piMessage, IN const ASt
     for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
         if (lstHeaders.GetAt(i).Contains(strValue))
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC IMS_BOOL MessageUtils::HasValue(IN const IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
-{
-    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
-    if (lstHeaders.IsEmpty())
-    {
-        return IMS_FALSE;
-    }
-
-    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
-    {
-        if (lstHeaders.GetAt(i).Equals(strValue))
         {
             return IMS_TRUE;
         }
@@ -1030,8 +1010,6 @@ PUBLIC IMS_BOOL MessageUtils::ContainsTag(IN const AString& strHeader, IN const 
     {
         return IMS_TRUE;
     }
-
-    // TODO, Decode if escaped string.
 
     return IMS_FALSE;
 }
@@ -1087,7 +1065,7 @@ PUBLIC IMS_RESULT MessageUtils::AddValueIfNotExists(IN IMessage* piMessage,
         IN const AString& strValue, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    if (HasValue(piMessage, strValue, eHeaderType, strHeaderName) == IMS_TRUE)
+    if (ContainsValue(piMessage, strValue, eHeaderType, strHeaderName))
     {
         return IMS_SUCCESS;
     }
@@ -1151,7 +1129,6 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
         AString strAnonymize;
         if (pConfUser->bAnonymize)
         {
-            // TODO: Check if no need to set false.
             strAnonymize = "true";
         }
 
@@ -1200,7 +1177,6 @@ PUBLIC CallType MessageUtils::GetCallType(
         return GetCallTypeFromSdp(piSession, IMS_FALSE, bCheckRemote);
     }
     return CallType::UNKNOWN;
-    // return CheckSessionTypeByAcceptContact(piMessage, piSession); // TODO: operator specific
 }
 
 PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
@@ -1378,7 +1354,6 @@ PRIVATE void MessageUtils::GetParameterValueFromUnknownHeaderBody(
 {
     strValue = AString::ConstNull();
 
-    // TODO, need to verify
     ImsList<AString> lstParameters = strBody.Split(TextParser::CHAR_SEMICOLON);
     for (IMS_UINT32 i = 0; i < lstParameters.GetSize(); i++)
     {
@@ -1465,7 +1440,6 @@ PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(
 PRIVATE AString MessageUtils::CreateResourceListXml(
         IN const ImsList<std::tuple<AString, AString, AString>>& objEntries)
 {
-    // TODO: use IXmlStreamWriter
     AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
     objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
@@ -1486,7 +1460,6 @@ PRIVATE AString MessageUtils::CreateResourceListXml(
 
         if (std::get<2>(objEntries.GetAt(i)).GetLength() > 0)
         {
-            // TODO: Not need to add false?
             objXml += " cp:anonymize=\"true\"";
         }
 
@@ -1534,7 +1507,6 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     }
 
     AString strRemoteUri = GetRemoteUri(&objSession, objCallContext.GetCallInfo().ePeerType);
-    // TODO: tel URI case will be covered after refactorying UriFormatter.
     SipAddress objSipAddress;
     if (!objSipAddress.Create(strRemoteUri))
     {
@@ -1546,8 +1518,6 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     // SIP URI + "?" + Call-ID
     AString strEntryUri(objSipAddress.ToString());
 
-    // TODO: According to the previous implementation, From is local and To is remote.
-    // Need to find requirement and leave a comment.
     AString strFromPart;
     AString strToPart;
     if (objCallContext.GetCallInfo().ePeerType == PeerType::MO)
