@@ -19,6 +19,7 @@
 #include "ImsEventDef.h"
 #include "IMtsContext.h"
 #include "IMtsService.h"
+#include "INetworkWatcher.h"
 #include "MtsDef.h"
 #include "MtsNetworkTracker.h"
 #include "ServiceEvent.h"

@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "INetworkConnection.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
