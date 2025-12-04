@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
+#include "IPhoneInfoSubscriber.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
