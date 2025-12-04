@@ -104,10 +104,7 @@ public:
     IMS_BOOL IsFocusConf(IN const IMessage* piMessage) override;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage* piMessage) override;
     IMS_BOOL IsInitialEmergencyRegistrationRequired(IN const IMessage* piMessage) override;
-    IMS_BOOL ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
-            IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) override;
-    IMS_BOOL HasValue(IN const IMessage* piMessage, IN const AString& strValue,
+    IMS_BOOL ContainsValue(IN const IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_BOOL IsHeaderPresent(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,

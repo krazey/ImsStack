@@ -52,12 +52,12 @@ protected:
     {
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objMessageUtils,
-                HasValue(&objMessageRequiresExtension, MtcExtensionSet::OPTION_TAG_PRECONDITION,
-                        ISipHeader::REQUIRE, _))
+                ContainsValue(&objMessageRequiresExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::REQUIRE, _))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMessageUtils,
-                HasValue(&objMessageSupportsExtension, MtcExtensionSet::OPTION_TAG_PRECONDITION,
-                        ISipHeader::SUPPORTED, _))
+                ContainsValue(&objMessageSupportsExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::SUPPORTED, _))
                 .WillByDefault(Return(IMS_TRUE));
 
         pExtension = new PreconditionExtension(objContext);
