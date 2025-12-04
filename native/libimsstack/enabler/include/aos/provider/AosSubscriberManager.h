@@ -16,6 +16,7 @@
 #ifndef AOS_SUBSCRIBER_MANAGERH_
 #define AOS_SUBSCRIBER_MANAGERH_
 
+#include "IPhoneInfoSubscriber.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTimer.h"
 #include "ISubscriberConfigListener.h"

@@ -17,8 +17,9 @@
 #define AOS_NET_TRACKER_H_
 
 #include "AString.h"
-#include "ITimer.h"
+#include "IEventListener.h"
 #include "INetworkWatcher.h"
+#include "ITimer.h"
 #include "IWifiWatcher.h"
 #include "interface/IAosConnectionListener.h"
 #include "interface/IAosNetTrackerTimerListener.h"

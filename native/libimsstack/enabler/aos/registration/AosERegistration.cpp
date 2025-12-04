@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "INetworkWatcher.h"
+#include "ISystemProperty.h"
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
