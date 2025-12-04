@@ -211,11 +211,11 @@ TEST_F(AlertingStateTest, OnExitStopsKeepAlive)
 TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseReliablyAndStartAlertingTimerIf100relIsOnlyInSupportedHeader)
 {
-    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
-            .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
             .WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -232,8 +232,9 @@ TEST_F(AlertingStateTest,
 
 TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFails)
 {
-    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
             .WillByDefault(Return(nAnyTime));
@@ -253,7 +254,7 @@ TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFail
 TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseReliablyIf100relIsInSupprtedAndRequireHeader)
 {
-    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
@@ -275,7 +276,7 @@ TEST_F(AlertingStateTest,
 TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseWithReliableParamAsTrueIfConfigurationOn)
 {
-    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
@@ -298,8 +299,12 @@ TEST_F(AlertingStateTest,
 
 TEST_F(AlertingStateTest, HandleUserAlertDoesNotSendProvisonalResponseIf180IsAlreadySent)
 {
-    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+    // make IsPrackRequiredForAlert true
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, SendProvisionalResponse(_, _)).Times(0);
     ON_CALL(*pConfigurationProxy,

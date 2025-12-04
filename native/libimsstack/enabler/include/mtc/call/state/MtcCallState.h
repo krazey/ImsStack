@@ -222,6 +222,7 @@ protected:
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
     IMS_BOOL IsRprRequired() const;
+    IMS_BOOL IsPrackRequiredForAlert() const;
 
     IMtcCallContext& m_objContext;
 
