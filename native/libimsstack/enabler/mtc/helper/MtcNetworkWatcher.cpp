@@ -115,7 +115,7 @@ PUBLIC void MtcNetworkWatcher::OnDisconnected()
 
 PUBLIC VIRTUAL void MtcNetworkWatcher::UpdateMobileRat(IN IMS_SINT32 eRatType)
 {
-    IMS_TRACE_D("UpdateMobileRat", eRatType, 0, 0);
+    IMS_TRACE_D("UpdateMobileRat : type[%d]", eRatType, 0, 0);
     m_eOldRatType = GetRatType();
 
     m_eMobileRatType = eRatType;

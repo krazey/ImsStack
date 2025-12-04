@@ -16,6 +16,7 @@
 
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "ImsEventDef.h"
 #include "ServiceImsRadio.h"
 #include "ServiceTrace.h"
@@ -41,8 +42,13 @@ PUBLIC VIRTUAL WfcBlockRule::Result WfcBlockRule::Check(
     if (!m_objContext.GetService().IsWlanIpCanType() || IsWfcOn() ||
             IsVoiceCallAvailableInCellular())
     {
+        // When registered via WLAN but WFC is turned off, if VoPS is enabled on the Cellular
+        // network, voice calls are permitted.
         return Result(Result::Status::UNBLOCKED);
     }
+
+    // On WLAN, but WFC is OFF and cellular voice is not available. Only one video call is allowed.
+    // VZW Requirements - VZ_REQ_VOWIFI_6230932, VZ_REQ_RCS_32003
 
     if (!IsVideoCall(m_eCallType))
     {
@@ -78,7 +84,13 @@ PRIVATE IMS_BOOL WfcBlockRule::HasVideoCall() const
 PRIVATE
 IMS_BOOL WfcBlockRule::IsVoiceCallAvailableInCellular() const
 {
-    return IsVopsAvailable() && !IsVoiceBlockedBySsac();
+    IMS_SINT32 eRatType = m_objContext.GetService().GetMobileRatType();
+    if (eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE ||
+            eRatType == INetworkWatcher::RADIOTECH_TYPE_NR)
+    {
+        return IsVopsAvailable() && !IsVoiceBlockedBySsac();
+    }
+    return IMS_FALSE;  // No cellular coverage for voice calls
 }
 
 PRIVATE
