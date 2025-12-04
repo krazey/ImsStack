@@ -73,7 +73,7 @@ PUBLIC VIRTUAL void AlertingState::OnExit()
 
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
-    // If IsPrackRequiredForAlert() returns true, a 180 provisional response has already been sent
+    // If IsPrackRequiredForAlert() returns true, a 180 or 183 for alerting has already been sent
     // by MtcCallState::OnReadyToAlert(), so don't need to send it again.
     if (!IsPrackRequiredForAlert())
     {

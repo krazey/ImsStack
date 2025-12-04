@@ -323,6 +323,51 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends180WithSdpIfUserAlertAndRprSu
     pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_TRUE);
 }
 
+TEST_F(MtcSessionTest, SendProvisionalResponseSends180RingingWhenUserAlerted)
+{
+    const IMS_BOOL bUserAlert = IMS_TRUE;
+    const IMS_BOOL bReliable = IMS_FALSE;
+    CreateMtcSession();
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_180, bReliable, _, _))
+            .WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(IMS_SUCCESS, pMtcSession->SendProvisionalResponse(bUserAlert, bReliable));
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183SessionProgressWhenForcedByConfig)
+{
+    const IMS_BOOL bUserAlert = IMS_TRUE;
+    const IMS_BOOL bReliable = IMS_FALSE;
+    CreateMtcSession();
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, bReliable, _, _))
+            .WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(IMS_SUCCESS, pMtcSession->SendProvisionalResponse(bUserAlert, bReliable));
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183SessionProgressWhenNotUserAlerted)
+{
+    const IMS_BOOL bUserAlert = IMS_FALSE;
+    const IMS_BOOL bReliable = IMS_FALSE;
+    CreateMtcSession();
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, bReliable, _, _))
+            .WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(IMS_SUCCESS, pMtcSession->SendProvisionalResponse(bUserAlert, bReliable));
+}
+
 TEST_F(MtcSessionTest, SendPrackSendsPrack)
 {
     CreateMtcSession();

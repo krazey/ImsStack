@@ -163,6 +163,7 @@
 
     <!-- MTC default -->
     <int name="imsvoice.18x_timer_millis_int" value="-1"/>
+    <boolean name="imsvoice.force_183_for_alerting_on_non_100rel_invite_bool" value="true"/>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
     </int-array>

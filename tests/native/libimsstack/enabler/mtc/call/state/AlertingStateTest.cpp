@@ -314,6 +314,48 @@ TEST_F(AlertingStateTest, HandleUserAlertDoesNotSendProvisonalResponseIf180IsAlr
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
 }
 
+TEST_F(AlertingStateTest, HandleUserAlertSendsProvisionalResponseIf183IsSentButConfigIsOff)
+{
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_183))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, _)).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
+}
+
+TEST_F(AlertingStateTest,
+        HandleUserAlertSendsProvisionalResponseIf183IsSentAndConfigIsOnButRprRequired)
+{
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_183))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
+}
+
 TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
 {
     CallType eAcceptCallType = CallType::VOIP;

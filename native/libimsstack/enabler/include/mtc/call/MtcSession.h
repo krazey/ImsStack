@@ -97,12 +97,13 @@ private:
     IMS_RESULT UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
-    CallType RestrictCallTypeByRegisteredFeature(IN CallType& eCallType);
-    CallType GetCallTypeForOfferlessInvite();
-    CallType GetCallTypeForOfferlessReInvite();
-    CallType GetCallTypeByRegisteredFeature();
-    CallType GetCallTypeByHistory();
-    CallType MayGetFirstCallType();
+    CallType RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const;
+    CallType GetCallTypeForOfferlessInvite() const;
+    CallType GetCallTypeForOfferlessReInvite() const;
+    CallType GetCallTypeByRegisteredFeature() const;
+    CallType GetCallTypeByHistory() const;
+    CallType MayGetFirstCallType() const;
+    IMS_SINT32 GetStatusCodeForAlerting() const;
     ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer,
             IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE,
             IN IMS_BOOL bInitialInvite = IMS_FALSE);

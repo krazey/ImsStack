@@ -83,6 +83,7 @@
     <!-- Mtc -->
     <int name="imsvoice.18x_timer_millis_int" value="130000"/>
     <boolean name="imsvoice.require_prack_for_alert_bool" value="false"/>
+    <boolean name="imsvoice.force_183_for_alerting_on_non_100rel_invite_bool" value="false"/>
     <int name="imsvt.convert_remote_response_timer_millis_int" value="20000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>

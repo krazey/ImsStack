@@ -1082,6 +1082,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "18x_timer_millis_int";
         public static final String KEY_REQUIRE_PRACK_FOR_ALERT_BOOL =
                 KEY_PREFIX + "require_prack_for_alert_bool";
+        public static final String KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL =
+                KEY_PREFIX + "force_183_for_alerting_on_non_100rel_invite_bool";
         public static final String KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL =
                 KEY_PREFIX + "support_conference_refer_subscribe_bool";
         public static final String KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL =

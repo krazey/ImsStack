@@ -131,8 +131,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
         }
     }
 
-    // TODO: determine the response code based on the configuration for KR carriers?
-    IMS_SINT32 nStatusCode = bUserAlert ? SipStatusCode::SC_180 : SipStatusCode::SC_183;
+    IMS_SINT32 nStatusCode = bUserAlert ? GetStatusCodeForAlerting() : SipStatusCode::SC_183;
 
     m_objExtensionSet.FormatResponse(
             ResponseType::PROVISIONAL_RESPONSE, *m_objSession.GetNextResponse());
@@ -533,7 +532,7 @@ void MtcSession::SetInConference(IN const IMessage& objMessage)
 }
 
 PRIVATE
-CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
+CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const
 {
     IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
     IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
@@ -548,7 +547,7 @@ CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
 }
 
 PRIVATE
-CallType MtcSession::GetCallTypeForOfferlessInvite()
+CallType MtcSession::GetCallTypeForOfferlessInvite() const
 {
     IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
             ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT);
@@ -563,7 +562,7 @@ CallType MtcSession::GetCallTypeForOfferlessInvite()
 }
 
 PRIVATE
-CallType MtcSession::GetCallTypeForOfferlessReInvite()
+CallType MtcSession::GetCallTypeForOfferlessReInvite() const
 {
     IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
             ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT);
@@ -583,7 +582,7 @@ CallType MtcSession::GetCallTypeForOfferlessReInvite()
 }
 
 PRIVATE
-CallType MtcSession::GetCallTypeByRegisteredFeature()
+CallType MtcSession::GetCallTypeByRegisteredFeature() const
 {
     IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
     IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
@@ -617,7 +616,21 @@ CallType MtcSession::GetCallTypeByRegisteredFeature()
 }
 
 PRIVATE
-CallType MtcSession::MayGetFirstCallType()
+CallType MtcSession::GetCallTypeByHistory() const
+{
+    std::vector<CallType> objCallTypesInPriority{
+            CallType::VIDEO_RTT, CallType::VT, CallType::RTT, CallType::VOIP};
+    auto pCallType = std::find_if(objCallTypesInPriority.begin(), objCallTypesInPriority.end(),
+            [this](CallType eType)
+            {
+                return IsInHistory(eType);
+            });
+
+    return (pCallType != objCallTypesInPriority.end()) ? *pCallType : CallType::UNKNOWN;
+}
+
+PRIVATE
+CallType MtcSession::MayGetFirstCallType() const
 {
     auto pCallType = std::find_if(m_objCallTypeHistory.begin(), m_objCallTypeHistory.end(),
             [](CallType callType)
@@ -629,17 +642,16 @@ CallType MtcSession::MayGetFirstCallType()
 }
 
 PRIVATE
-CallType MtcSession::GetCallTypeByHistory()
+IMS_SINT32 MtcSession::GetStatusCodeForAlerting() const
 {
-    std::vector<CallType> objCallTypesInPriority{
-            CallType::VIDEO_RTT, CallType::VT, CallType::RTT, CallType::VOIP};
-    auto pCallType = std::find_if(objCallTypesInPriority.begin(), objCallTypesInPriority.end(),
-            [this](CallType eType)
-            {
-                return IsInHistory(eType);
-            });
+    if (!m_objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR) &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+    {
+        return SipStatusCode::SC_183;
+    }
 
-    return (pCallType != objCallTypesInPriority.end()) ? *pCallType : CallType::UNKNOWN;
+    return SipStatusCode::SC_180;
 }
 
 PRIVATE
