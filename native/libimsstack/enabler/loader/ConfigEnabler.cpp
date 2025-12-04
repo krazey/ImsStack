@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CarrierConfig.h"
+#include "ISystemProperty.h"
 #include "ITraceOption.h"
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
