@@ -174,7 +174,7 @@ TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
     pCallController->HandleIncoming(&objService, IMS_NULL);
 }
 
-TEST_F(MtcCallControllerTest, HandleIncomingCallsTargetCall)
+TEST_F(MtcCallControllerTest, HandleIncomingInvokesTargetCall)
 {
     MockIMtcService objService;
     ISession* pSession = reinterpret_cast<ISession*>(0x1);
@@ -187,7 +187,7 @@ TEST_F(MtcCallControllerTest, HandleIncomingCallsTargetCall)
     pCallController->HandleIncoming(&objService, pSession);
 }
 
-TEST_F(MtcCallControllerTest, StartCallsTargetCall)
+TEST_F(MtcCallControllerTest, StartInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -195,7 +195,6 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
     MediaInfo objMediaInfo;
     ImsList<SuppService*> objSuppServices;
 
-    // TODO: Make a matcher for ImsList<SuppService*>
     MockIMtcCall objCall;
     EXPECT_CALL(objCall, Start(eCallType, strTarget, objMediaInfo, _)).Times(1);
 
@@ -204,7 +203,7 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
     pCallController->Start(nCallKey, eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
-TEST_F(MtcCallControllerTest, HandleUserAlertCallsTargetCall)
+TEST_F(MtcCallControllerTest, HandleUserAlertInvokesTargetCall)
 {
     CallKey nCallKey = 1;
 
@@ -216,7 +215,7 @@ TEST_F(MtcCallControllerTest, HandleUserAlertCallsTargetCall)
     pCallController->HandleUserAlert(nCallKey);
 }
 
-TEST_F(MtcCallControllerTest, AcceptCallsTargetCall)
+TEST_F(MtcCallControllerTest, AcceptInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -230,7 +229,7 @@ TEST_F(MtcCallControllerTest, AcceptCallsTargetCall)
     pCallController->Accept(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, RejectCallsTargetCall)
+TEST_F(MtcCallControllerTest, RejectInvokesTargetCall)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
@@ -243,7 +242,7 @@ TEST_F(MtcCallControllerTest, RejectCallsTargetCall)
     pCallController->Reject(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, HoldCallsTargetCall)
+TEST_F(MtcCallControllerTest, HoldInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     MediaInfo objMediaInfo;
@@ -256,7 +255,7 @@ TEST_F(MtcCallControllerTest, HoldCallsTargetCall)
     pCallController->Hold(nCallKey, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
+TEST_F(MtcCallControllerTest, ResumeInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     MediaInfo objMediaInfo;
@@ -269,7 +268,7 @@ TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
     pCallController->Resume(nCallKey, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, AcceptResumeCallsTargetCall)
+TEST_F(MtcCallControllerTest, AcceptResumeInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -283,7 +282,7 @@ TEST_F(MtcCallControllerTest, AcceptResumeCallsTargetCall)
     pCallController->AcceptResume(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, RejectResumeCallsTargetCall)
+TEST_F(MtcCallControllerTest, RejectResumeInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
@@ -315,7 +314,7 @@ TEST_F(MtcCallControllerTest, TerminateInvokesTerminateUsingAsyncRunner)
     pCallController->Terminate(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, UpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, UpdateInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -329,7 +328,7 @@ TEST_F(MtcCallControllerTest, UpdateCallsTargetCall)
     pCallController->Update(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, CancelUpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, CancelUpdateInvokesTargetCall)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
@@ -342,7 +341,7 @@ TEST_F(MtcCallControllerTest, CancelUpdateCallsTargetCall)
     pCallController->CancelUpdate(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, AcceptUpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, AcceptUpdateInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -356,7 +355,7 @@ TEST_F(MtcCallControllerTest, AcceptUpdateCallsTargetCall)
     pCallController->AcceptUpdate(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, RejectUpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, RejectUpdateInvokesTargetCall)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
@@ -369,7 +368,7 @@ TEST_F(MtcCallControllerTest, RejectUpdateCallsTargetCall)
     pCallController->RejectUpdate(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, SendUssdCallsTargetCall)
+TEST_F(MtcCallControllerTest, SendUssdInvokesTargetCall)
 {
     AString strUssd = "ussd";
     CallKey nCallKey = 1;
@@ -387,7 +386,6 @@ TEST_F(MtcCallControllerTest, MergeToConferenceCallsProcessesMerge)
     CallKey nCallKey = 1;
     ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::MERGE, _)).Times(1);
 
@@ -418,7 +416,6 @@ TEST_F(MtcCallControllerTest, AddToConferenceCallsProcessesAdd)
     CallKey nCallKey = 1;
     ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::ADD, _)).Times(1);
 
@@ -445,7 +442,6 @@ TEST_F(MtcCallControllerTest, RemoveFromConferenceCallsProcessesRemove)
     CallKey nCallKey = 1;
     ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::REMOVE, _)).Times(1);
 

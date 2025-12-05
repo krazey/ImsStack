@@ -84,7 +84,6 @@ PRIVATE GLOBAL AString& NormalDialingPlan::Translate(IN IMtcContext& objContext,
     IMS_TRACE_D("Translate Dialed number :: %s",
             UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
 
-    // TODO: validation check logic. if strNumber is not a number format, error.
     if (IsNameAddress(strNumber))
     {
         return strNumber;
@@ -198,7 +197,6 @@ PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsAddressSpec(IN const AString& strNu
 
 PRIVATE GLOBAL void NormalDialingPlan::AddAquotIfRequired(IN_OUT AString& strNumber)
 {
-    // TODO: can this be replaced by SipAddress apis?
     if (strNumber.Contains(TextParser::CHAR_SEMICOLON))
     {
         strNumber.Prepend(TextParser::CHAR_LAQUOT);
@@ -217,7 +215,6 @@ PRIVATE GLOBAL NormalDialingPlan::NumberFormat NormalDialingPlan::GetDialedNumbe
 
     if (strNumber.Equals(TextParser::CHAR_PLUS))
     {
-        // TODO: "+" is possible? in which case is it possible?
         return NumberFormat::NON_NUMBER;
     }
 
@@ -255,7 +252,6 @@ PRIVATE GLOBAL NormalDialingPlan::NumberFormat NormalDialingPlan::GetDialedNumbe
 PRIVATE GLOBAL AccessNetworkInfo& NormalDialingPlan::GetAccessNetworkInfo(
         IN IMtcContext& objContext, OUT AccessNetworkInfo& objAni)
 {
-    // TODO: service type. normal or emergency.
     IMS_SINT32 nApnType = objContext.GetServiceByType(ServiceType::NORMAL)
                                   ->GetAosConnector()
                                   ->GetConnectionType();

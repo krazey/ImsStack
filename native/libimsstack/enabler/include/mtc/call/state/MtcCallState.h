@@ -203,7 +203,6 @@ protected:
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
 
-    // TODO: move these into MtcTimerWrapper? Is it used by All MTC classes?
     void StartTimer(IN IMS_UINT32 nType) const;
     void StopTimer(IN IMS_UINT32 nType) const;
     IMS_SINT32 GetTimeInMilliseconds(IN IMS_UINT32 nType) const;

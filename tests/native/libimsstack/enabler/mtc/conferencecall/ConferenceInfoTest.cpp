@@ -166,7 +166,6 @@ TEST_F(ConferenceInfoTest, ParseFailsIfInvalidPackage)
     EXPECT_FALSE(objConferenceInfo.Parse(strXml));
 
     // no root element
-    // TODO: how to do this?
     strXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     strXml.Append("<not-element/>");
     EXPECT_FALSE(objConferenceInfo.Parse(strXml));

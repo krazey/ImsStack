@@ -409,7 +409,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
 
-    // TODO: need to check
     m_objContext.GetSession()->HandleRequest(RequestType::START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateServices(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
@@ -554,7 +553,7 @@ void IdleState::SetResourceListForConference(IN_OUT IMessage& objMessage)
         objUsers.Append(m_pConfUsers.GetAt(i).get());
     }
 
-    // TODO: LGU needs to set false the 5th param.
+    // LGU needs to set bMultiPart = false
     m_objContext.GetMessageUtils().SetResourceList(
             &objMessage, m_objContext, objUsers, IMS_TRUE, IMS_TRUE);
 }

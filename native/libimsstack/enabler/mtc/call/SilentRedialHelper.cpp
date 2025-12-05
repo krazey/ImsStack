@@ -161,7 +161,6 @@ void SilentRedialHelper::ReStart()
             m_objContext.GetSupplementaryService().GetServices();
     for (IMS_UINT32 i = 0; i < objOriginalSuppServices.GetSize(); i++)
     {
-        // TODO: consider the case Supplementary services are changed?
         objSuppServices.Append(new SuppService(*objOriginalSuppServices.GetAt(i)));
     }
 

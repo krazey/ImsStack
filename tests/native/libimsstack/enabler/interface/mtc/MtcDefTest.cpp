@@ -18,8 +18,6 @@
 #include <gtest/gtest.h>
 #include "MtcDef.h"
 
-// TODO: Unit tests of only the uncovered lines are added. The other cases will be added.
-
 LOCAL IMS_SINT32 ANY_A_DIR = 1;
 LOCAL IMS_SINT32 ANY_V_DIR = 2;
 LOCAL IMS_SINT32 ANY_T_DIR = 3;

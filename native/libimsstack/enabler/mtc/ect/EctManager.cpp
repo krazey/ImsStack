@@ -54,7 +54,6 @@ IMS_RESULT EctManager::Transfer(IN CallKey nCallKey, IN const AString& strNumber
     if (m_eState != IEctManager::State::IDLE)
     {
         IMS_TRACE_E(0, "no multiple ECT is supported.", 0, 0, 0);
-        // TODO: send error to UI.
         return IMS_FAILURE;
     }
 

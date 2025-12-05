@@ -105,7 +105,6 @@ PROTECTED VIRTUAL void EctController::OnSuccess()
 
 PROTECTED VIRTUAL void EctController::OnFailed()
 {
-    // TODO: Recover()?
     NotifyResult(IMS_FAILURE, CODE_USER_TERMINATED);
     StopTimer();
     m_objListener.OnEctCompleted();
@@ -116,7 +115,6 @@ void EctController::NotifyResult(
         IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = CODE_NONE*/) const
 {
     IMS_TRACE_D("NotifyResult [%d]", nResult, 0, 0);
-    // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
     IMtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
     objNotifier.SendEctCompleted(nResult, CallReasonInfo(nReason));
 }

@@ -106,11 +106,6 @@ protected:
     }
 };
 
-TEST_F(MtcDialingPlanTest, GetToUriNormal)
-{
-    // TODO
-}
-
 TEST_F(MtcDialingPlanTest, GetToUriReturnsConferenceUriFromConfig)
 {
     objCallInfo.bConference = IMS_TRUE;

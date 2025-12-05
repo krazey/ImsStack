@@ -597,8 +597,6 @@ void MessageFormatter::SetCarrierSpecificHeaders()
     {
         if (m_eFormType == FormType::TERMINATE)
         {
-            // TODO: add bye cause by the CallReasonInfo.
-            // TODO: update KT carrier's config for termination reason
             m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage, "normal",
                     ISipHeader::UNKNOWN, MessageUtil::STR_P_SKT_BYE_CAUSE);
         }

@@ -104,8 +104,6 @@ PUBLIC VIRTUAL void MtcApp::Start()
 
     if (MultiEndpointManager::IsRequired(GetConfigurationProxy()))
     {
-        // TODO: depends on which configuration to be checked, MultiEndpointManager can be created
-        // regardless of configuration value.
         m_pMultiEndpointManager = std::make_unique<MultiEndpointManager>(
                 *this, std::make_unique<MultiEndpointFactory>());
     }

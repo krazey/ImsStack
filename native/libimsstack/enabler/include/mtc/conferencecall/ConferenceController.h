@@ -199,8 +199,6 @@ protected:
 
     IConferenceControllerListener* m_piListener;
 
-    // FIXME : has IMtcCall reference or has only call id?
-
     CallKey m_nConfCallKey;
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;

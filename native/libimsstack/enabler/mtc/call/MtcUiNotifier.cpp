@@ -433,12 +433,6 @@ PUBLIC
 void MtcUiNotifier::SendReplacedBy(IN IMS_SINTP /* nKey */, IN IMS_UINTP /* nType */)
 {
     IMS_TRACE_I("SendReplacedBy", 0, 0, 0);
-
-    const IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
 }
 
 PUBLIC
@@ -460,12 +454,6 @@ void MtcUiNotifier::SendCallPushCompleted(
         IN IMS_RESULT /* nResult */, IN const CallReasonInfo& /* objReason */)
 {
     IMS_TRACE_I("SendCallPushCompleted", 0, 0, 0);
-
-    const IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
 }
 
 PUBLIC VIRTUAL void MtcUiNotifier::SendRatChanged(IN IMS_SINT32 eRatType)

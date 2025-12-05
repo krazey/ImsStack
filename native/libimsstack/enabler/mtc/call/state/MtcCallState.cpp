@@ -682,7 +682,6 @@ void MtcCallState::InitMediaSession(IN const MediaInfo& objMediaInfo)
 
     if (objMediaManager.GetMediaInfo(objISession).eVideoQuality == VIDEO_QUALITY_NOTUSED)
     {
-        // TODO: This will be verified and can be changed when Media Interface is ready.
         // Assumes VIDEO_QUALITY_NOTUSED used only in case of Call Pull
         objMediaManager.SetRtpPort(&objISession, MEDIATYPE_VIDEO, 0);
     }
@@ -807,7 +806,6 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
 
     if (piMessage->GetMethod().Equals(SipMethod::ACK))
     {
-        // TODO: isn't this invalid so need to terminate the call drop?
         IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
         return IMS_TRUE;
     }

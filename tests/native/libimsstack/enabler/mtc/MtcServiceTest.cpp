@@ -816,7 +816,7 @@ TEST_F(MtcServiceTest, CoreServiceCapabilityQueryReceivedInvokesHandleIncomingCa
     MockICapabilities objICapa;
     MockICoreService objICoreService;
 
-    // TODO: cannot check
+    // No means to check if HandleIncomingCapabilityQuery is invoked or not
     pNormalMtcService->CoreService_CapabilityQueryReceived(&objICoreService, &objICapa);
 }
 

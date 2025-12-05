@@ -476,7 +476,7 @@ IMS_UINT32 ConferenceController::AddUserToParticipantList(
 
     if (bReOrder && nAddingSize > 1)
     {
-        m_pParticipantList->ReOrder(m_objCallManager, m_objConnectionIdManager);  // TODO: callid
+        m_pParticipantList->ReOrder(m_objCallManager, m_objConnectionIdManager);
     }
     IMS_TRACE_D("AddUserToParticipantList size[%d]", m_pParticipantList->GetSize(), 0, 0);
     m_pParticipantList->LogLn();
@@ -750,7 +750,7 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfU
         IConferenceReference* piConfRefer = CreateReference(objUsers);
         AString strReferInviteUri;
         IMS_RESULT nResult = piConfRefer->SendInvite(strReferInviteUri, m_objConnectionIdManager);
-        m_objIConfReferences.Append(piConfRefer);  // TODO: check api call order.
+        m_objIConfReferences.Append(piConfRefer);
 
         for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
         {

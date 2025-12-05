@@ -194,7 +194,6 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
 PROTECTED VIRTUAL void ExpandController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
-    // TODO: how to check nullcall? never be null so no need to check?
     /*
     if (piCall is null Call)
     {
@@ -210,7 +209,7 @@ PROTECTED VIRTUAL void ExpandController::StartConferenceCall(
 
 PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() const
 {
-    // TODO: This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
+    // This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
     // when the state is EXPANDING only.
     /*
     if (GetState() != STATE_EXPANDING)
@@ -221,7 +220,7 @@ PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() cons
 
     IMS_TRACE_I("IsStartFinalSipfragWaitTimer : [%d]", m_nConditionFinalSipfragTimer, 0, 0);
 
-    // TODO: This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
+    // This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
     // with only CONDITION_SIPFRAG_100_RECEIVED.
     /*
     if (IsConditionMet(CONDITION_SIPFRAG_100_RECEIVED) == IMS_FALSE)
@@ -230,7 +229,7 @@ PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() cons
     }
     */
 
-    // TODO: This if-statement is always true because OnCallUpdated() ignores non-conference call.
+    // This if-statement is always true because OnCallUpdated() ignores non-conference call.
     /*
     if (IsConditionMet(CONDITION_1TO1_TERMINATED) == IMS_FALSE)
     {
@@ -244,7 +243,6 @@ PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() cons
 
 PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UINTP nCallKey)
 {
-    // TODO: session updated...
     // if (ntype != SESSION_UPDATED)
     // {
     //     return ConferenceController::OnCallUpdated(nType, nCallKey);
@@ -367,7 +365,6 @@ PROTECTED VIRTUAL void ExpandController::NotifyCmdResult()
         IMS_TRACE_D("NotifyCmdResult : Expanding conf. is completed, join new members", 0, 0, 0);
         ProcessJoinAfterExpand();
 
-        // TODO: control media manager.... params
         // m_objConfCallContext.GetMediaManager().Run();
     }
 }
@@ -382,16 +379,13 @@ void ExpandController::StopMedia1to1Session()
         return;
     }
 
-    // TODO: control media manager.
     // GetConferenceCall()->GetCallContext().GetMediaManager().SetLocalTone(IMS_FALSE);
-    // TODO: check if this is still required. No explicit 'stop' is needed.
     // 1to1 calls.GetMediaManager().();
 }
 
 PRIVATE
 void ExpandController::Resume1to1Session()
 {
-    // TODO: how to control??
     // for (IMS_UINT32 index = 0; index < m_objCallManager->GetNum(); index++)
     // {
     //     IMtcCall* pSession = m_objCallManager->GetAt(index);

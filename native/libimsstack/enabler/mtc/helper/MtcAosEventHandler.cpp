@@ -84,7 +84,6 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures)
         {
             pThread->OnServiceChanged(ConvertAosFeatureToServiceState(nFeatures), 0);
         }
-        // TODO: this must be called when registration is refreshed?
         m_objConfiguration.OnRegistrationRefreshed();
     }
 

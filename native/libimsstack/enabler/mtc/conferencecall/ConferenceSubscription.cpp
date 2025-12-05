@@ -146,7 +146,6 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStartFailed(
             }
             break;
         default:
-            // TODO: Other responses
             break;
     }
 
@@ -301,8 +300,6 @@ void ConferenceSubscription::SetHeaders()
 
     piSipMessage->AddHeader(ISipHeader::ACCEPT, ConferenceConst::APPLICATION_CONFERENCEINFO);
 
-    // TODO: messageformatter.
-    // TODO: null check?
     IFeatureCaps* piFeatureCaps =
             m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService()->GetFeatureCaps();
     if (piFeatureCaps != IMS_NULL)
@@ -328,7 +325,6 @@ void ConferenceSubscription::UpdateConferenceInfo(IN const IMessage* piNotify)
             m_objContext.GetMessageUtils().GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE);
     if (strSubState.Equals("terminated"))
     {
-        // TODO: needed? static final const value.
         return;
     }
 

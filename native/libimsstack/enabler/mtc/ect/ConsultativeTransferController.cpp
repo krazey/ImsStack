@@ -102,7 +102,7 @@ void ConsultativeTransferController::TerminateTransferTargetCall()
 {
     IMS_TRACE_I("TerminateTransferTargetCall", 0, 0, 0);
 
-    // TODO: this needs to be checked using the carrier network.
+    // This needs to be checked using the carrier network.
     // according to 3GPP 24.629, the TransferTarget sends BYE
     // so Transferror should wait.
     // It could be 'not safe' to send BYE to TransferTarget.

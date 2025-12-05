@@ -96,20 +96,15 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN ImsList<ConfUser
 PUBLIC VIRTUAL void GroupCallController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation*)
 {
-    // TODO: TEMP.
-    // IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
-
     /*
+    IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
+    if (piCall == IMS_NULL)
     {
-        IMS_TRACE_I("StartConferenceCall : session is null", 0, 0, 0);
         delete pParams;
         Recover();
         SendClosed();
     }
-    */
 
-    // TODO: CallType? start type?
-    /*
     piCall->StartConference(CallType::VOIP, pParams->objSuppServices, &(pParams->objMediaInfo),
             pParams->objUsers);
     */
