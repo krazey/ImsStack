@@ -109,7 +109,7 @@ private:
             IN IMS_BOOL bInitialInvite = IMS_FALSE);
 
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature) const;
-    IMS_BOOL IsCallWaiting() const;
+    IMS_BOOL IsAlertInfoRequired(IMS_SINT32 nStatusCode) const;
     IMS_BOOL IsInHistory(IN CallType eCallType) const;
     void SaveCallTypeHistory(IN CallType eCallType);
 

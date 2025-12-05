@@ -228,7 +228,7 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183ReliablyWithSdp)
     pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithAlertInfoIfUpdatingSessionExists)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends180WithAlertInfoIfUpdatingSessionExists)
 {
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
@@ -242,10 +242,34 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithAlertInfoIfUpdatingSes
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_TRUE))
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_TRUE, IMS_TRUE, IMS_TRUE))
             .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_TRUE);
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183ForAlertingWithoutAlertInfoEvenIfCallWaiting)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    CreateMtcSession();
+    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcCall objOtherCall1;
+    ON_CALL(objOtherCall1, GetState).WillByDefault(Return(IMtcCall::State::INCOMING));
+    objCalls.Append(&objOtherCall1);
+    MockIMtcCall objOtherCall2;
+    ON_CALL(objOtherCall2, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
+    objCalls.Append(&objOtherCall2);
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
+
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1);
+
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
 }
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithoutAlertInfoIfItIsConfirmedDialog)

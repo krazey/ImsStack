@@ -136,7 +136,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
     m_objExtensionSet.FormatResponse(
             ResponseType::PROVISIONAL_RESPONSE, *m_objSession.GetNextResponse());
     return m_pMessageSender->SendProvisionalResponse(
-            nStatusCode, bReliable, bIncludeSdp, IsCallWaiting());
+            nStatusCode, bReliable, bIncludeSdp, IsAlertInfoRequired(nStatusCode));
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bSdpOfferRequired)
@@ -706,8 +706,13 @@ IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature) const
 }
 
 PRIVATE
-IMS_BOOL MtcSession::IsCallWaiting() const
+IMS_BOOL MtcSession::IsAlertInfoRequired(IMS_SINT32 nStatusCode) const
 {
+    if (nStatusCode != SipStatusCode::SC_180)
+    {
+        return IMS_FALSE;
+    }
+
     if (m_objContext.GetCall().GetState() != IMtcCall::State::IDLE &&
             m_objContext.GetCall().GetState() != IMtcCall::State::INCOMING &&
             m_objContext.GetCall().GetState() != IMtcCall::State::ALERTING)
