@@ -318,16 +318,16 @@ protected:
             IN IMS_SINT32 nStatusCode, IN IMS_UINT32 nRetryAfter);
 
     virtual IMS_BOOL ProcessStartFailed_305();
-    virtual void ProcessStartFailed_420();
-    virtual void ProcessStartFailed_421();
-    virtual void ProcessStartFailed_423();
+    virtual IMS_BOOL ProcessStartFailed_420();
+    virtual IMS_BOOL ProcessStartFailed_421();
+    virtual IMS_BOOL ProcessStartFailed_423();
     virtual void ProcessStartFailed_503();
     virtual void ProcessRequiredWfcErrMessage_403();
     virtual void ProcessRequiredWfcErrMessage_500();
     virtual void ProcessRequiredWfcErrMessage_Others();
 
     virtual IMS_BOOL ProcessUpdateFailed_305();
-    virtual void ProcessUpdateFailed_423();
+    virtual IMS_BOOL ProcessUpdateFailed_423();
 
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
     virtual void ProcessStartFailed_TxnTimeout();

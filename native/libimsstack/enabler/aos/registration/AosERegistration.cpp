@@ -438,7 +438,7 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_305()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_420()
+PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_420()
 {
     if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming() &&
             m_piContext->GetNetTracker()->IsRoaming() &&
@@ -447,24 +447,22 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_420()
     {
         SetReinitiationRequested(IMS_TRUE);
         PostMessage(MSG_REG_PROCESS_GIBA, 0, 0);
+        return IMS_TRUE;
     }
-    else
-    {
-        ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_420);
-    }
+    return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_423()
+PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_423()
 {
     if (m_pUtil->IsErrorCodeExisted(
                 GET_N_CONFIG(m_nSlotId)->GetERegErrCodeNotSupportedCommonPolicy(),
                 SipStatusCode::SC_423))
     {
-        ProcessDefaultFlowRecovery_Start();
+        return IMS_FALSE;
     }
     else
     {
-        AosRegistration::ProcessStartFailed_423();
+        return AosRegistration::ProcessStartFailed_423();
     }
 }
 
@@ -474,21 +472,28 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SI
 
     StopTimer(TIMER_TRANSACTION);
 
+    IMS_BOOL bIsStandardHandled = IMS_FALSE;
     switch (nStatusCode)
     {
         case SipStatusCode::SC_420:
-            ProcessStartFailed_420();
+            bIsStandardHandled = ProcessStartFailed_420();
             break;
 
         case SipStatusCode::SC_423:
-            ProcessStartFailed_423();
+            bIsStandardHandled = ProcessStartFailed_423();
             break;
 
         default:
-            // Other 4xx, 5xx, 6xx response
-            ProcessDefaultFlowRecovery_Start(nStatusCode);
             break;
     }
+
+    if (bIsStandardHandled)
+    {
+        return;
+    }
+
+    // Other responses not processed above
+    ProcessDefaultFlowRecovery_Start(nStatusCode);
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_TxnTimeout()
@@ -517,18 +522,26 @@ PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_S
 {
     A_IMS_TRACE_I(REGID, "ProcessUpdateFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
+    IMS_BOOL bIsStandardHandled = IMS_FALSE;
     switch (nStatusCode)
     {
         // 423
         case SipStatusCode::SC_423:
-            ProcessUpdateFailed_423();
+            bIsStandardHandled = ProcessUpdateFailed_423();
             break;
 
         default:
             // other 4xx, 5xx, 6xx response
-            ProcessDefaultFlowRecovery_Update(nStatusCode);
             break;
     }
+
+    if (bIsStandardHandled)
+    {
+        return;
+    }
+
+    // Other responses not processed above
+    ProcessDefaultFlowRecovery_Update(nStatusCode);
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_TxnTimeout()
