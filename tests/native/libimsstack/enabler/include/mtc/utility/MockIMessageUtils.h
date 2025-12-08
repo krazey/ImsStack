@@ -20,7 +20,6 @@
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
 #include <optional>

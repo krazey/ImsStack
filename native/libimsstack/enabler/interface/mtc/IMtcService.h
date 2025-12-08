@@ -18,7 +18,6 @@
 #define INTERFACE_MTC_SERVICE_H_
 
 #include "INativeEnabler.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 
 class AString;
@@ -34,6 +33,8 @@ enum class PermanentSuppType;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
+template <class T>
+class ImsList;
 
 class IMtcService : public INativeEnabler
 {

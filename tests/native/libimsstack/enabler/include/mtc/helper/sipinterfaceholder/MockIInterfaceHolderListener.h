@@ -17,6 +17,7 @@
 #ifndef MOCK_I_INTERFACE_HOLDER_LISTENER_H_
 #define MOCK_I_INTERFACE_HOLDER_LISTENER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include <gmock/gmock.h>

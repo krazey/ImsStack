@@ -21,7 +21,6 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "ISipHeader.h"
-#include "Ims3gpp.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
 #include "ImsVector.h"

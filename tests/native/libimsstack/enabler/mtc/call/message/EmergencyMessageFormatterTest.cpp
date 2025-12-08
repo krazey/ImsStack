@@ -36,6 +36,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "call/message/EmergencyMessageFormatter.h"
+#include "configuration/ConfigDef.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockIMtcDialingPlan.h"

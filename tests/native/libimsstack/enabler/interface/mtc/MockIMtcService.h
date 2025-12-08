@@ -18,7 +18,6 @@
 #define MOCK_I_MTC_SERVICE_H_
 
 #include "IMtcService.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 
@@ -35,6 +34,8 @@ enum class PermanentSuppType;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
+template <class T>
+class ImsList;
 
 class MockIMtcService : public IMtcService
 {

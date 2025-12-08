@@ -17,6 +17,7 @@
 #ifndef MOCK_SESSION_INTERFACE_HOLDER_H_
 #define MOCK_SESSION_INTERFACE_HOLDER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include <gmock/gmock.h>

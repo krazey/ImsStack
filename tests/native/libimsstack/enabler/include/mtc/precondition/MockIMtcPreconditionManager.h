@@ -19,7 +19,6 @@
 
 #include "ImsTypeDef.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "precondition/QosDef.h"
 #include <gmock/gmock.h>
 
 class ISession;
