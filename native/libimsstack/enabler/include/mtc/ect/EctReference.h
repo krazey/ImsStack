@@ -20,14 +20,29 @@
 #include "IReferenceListener.h"
 #include "call/IMtcCall.h"
 
+class AString;
 class IReference;
 class IMtcCall;
 class IMtcContext;
 class IEctReferenceListener;
 
+/**
+ * @brief Manages the SIP REFER transaction for Explicit Call Transfer (ECT).
+ *
+ * This class is responsible for creating and sending the SIP REFER message to initiate
+ * a call transfer. It listens for events related to the REFER transaction via the
+ * IReferenceListener interface and forwards them to an IEctReferenceListener.
+ */
 class EctReference : public IReferenceListener
 {
 public:
+    /**
+     * @brief Constructs a new Ect Reference object.
+     *
+     * @param objContext The MTC context.
+     * @param nTransfereeKey The key of the call being transferred.
+     * @param objListener The listener for ECT reference events.
+     */
     explicit EctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey,
             IN IEctReferenceListener& objListener);
     virtual ~EctReference() override;
@@ -35,14 +50,40 @@ public:
     EctReference& operator=(IN const EctReference&) = delete;
 
 public:
-    // IReferenceListener interface implementation
+    /** See {@link IReferenceListener#ReferenceDelivered}. */
     void ReferenceDelivered(IN IReference* piReference) override;
+
+    /** See {@link IReferenceListener#ReferenceDeliveryFailed}. */
     void ReferenceDeliveryFailed(IN IReference* piReference) override;
+
+    /** See {@link IReferenceListener#ReferenceNotify}. */
     void ReferenceNotify(IN IReference* piReference, IN IMessage* piNotify) override;
+
+    /** See {@link IReferenceListener#ReferenceTerminated}. */
     void ReferenceTerminated(IN IReference* piReference) override;
 
+    /**
+     * @brief Sends a REFER request to transfer the call to an existing call (consultative
+     * transfer).
+     *
+     * @param nTransferTargetKey The key of the call to transfer to.
+     * @return IMS_RESULT Returns IMS_SUCCESS if the request is sent, otherwise IMS_FAILURE.
+     */
     virtual IMS_RESULT SendInvite(IN CallKey nTransferTargetKey);
+
+    /**
+     * @brief Sends a REFER request to transfer the call to a new number (blind transfer).
+     *
+     * @param strTransferTarget The target number to transfer to.
+     * @return IMS_RESULT Returns IMS_SUCCESS if the request is sent, otherwise IMS_FAILURE.
+     */
     virtual IMS_RESULT SendInvite(IN const AString& strTransferTarget);
+
+    /**
+     * @brief Gets the response code from the REFER transaction.
+     *
+     * @return IMS_UINT32 The SIP response code.
+     */
     IMS_UINT32 GetResponseCode() const;
 
 private:
@@ -51,7 +92,6 @@ private:
     AString GetReferToUri(IN const AString& strTransferTarget) const;
     void SetReplaces(IN IMtcCall* piTransferTargetCall);
     void SetReferredByHeader();
-    void SetHeadersForReferTo(OUT AString& strHeadersForReferTo);
 
 private:
     IMtcContext& m_objContext;

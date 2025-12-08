@@ -17,24 +17,45 @@
 #ifndef BLIND_TRANSFER_CONTROLLER_H_
 #define BLIND_TRANSFER_CONTROLLER_H_
 
+#include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
 #include "ect/EctController.h"
 
-class IMtcContext;
-class IMtcCall;
+class AString;
+class EctFactory;
 class IEctControllerListener;
+class IMtcContext;
 
+/**
+ * @brief This class is responsible for handling the blind call transfer.
+ *
+ * It inherits from EctController and implements the logic for a blind transfer.
+ */
 class BlindTransferController : public EctController
 {
 public:
+    /**
+     * @brief Constructs a new {@link BlindTransferController} object
+     *
+     * @param objContext The MTC context.
+     * @param nCallKey The key of the call to be transferred.
+     * @param objListener The listener for ECT controller events.
+     * @param objFactory The factory to create ECT related objects.
+     */
     explicit BlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,
             IN IEctControllerListener& objListener, IN EctFactory& objFactory);
     virtual ~BlindTransferController() override;
     BlindTransferController(IN const BlindTransferController&) = delete;
     BlindTransferController& operator=(IN const BlindTransferController&) = delete;
 
-    // IEctReferenceListener implementation
+    /** See {@link IEctReferenceListener#OnReferenceStarted}. */
     void OnReferenceStarted() override;
 
+    /**
+     * @brief Initiates a blind transfer of the call to the specified number.
+     *
+     * @param strNumber The target number for the transfer.
+     */
     void Transfer(IN const AString& strNumber) override;
 
 private:

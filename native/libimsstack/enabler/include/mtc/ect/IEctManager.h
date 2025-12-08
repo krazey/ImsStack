@@ -17,33 +17,48 @@
 #ifndef INTERFACE_ECT_MANAGER_H_
 #define INTERFACE_ECT_MANAGER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
+class AString;
+
+/**
+ * @brief Interface for managing Explicit Call Transfer (ECT) operations.
+ *
+ * This interface provides the entry point for initiating and querying the state of call transfers.
+ */
 class IEctManager
 {
 public:
+    /** Defines the possible states of the ECT manager. */
     enum class State
     {
-        IDLE,
-        BLIND_TRANSFERRING,
-        CONSULTATIVE_TRANSFERRING
+        IDLE,                      // The manager is not currently handling any transfer operation.
+        BLIND_TRANSFERRING,        // The manager is currently processing a blind transfer.
+        CONSULTATIVE_TRANSFERRING  // The manager is currently processing a consultative transfer.
     };
 
     virtual ~IEctManager() {}
 
     /**
-     * @brief Transfers
+     * @brief Initiates a call transfer.
      *
-     * @param nCallKey
-     * @param strNumber
-     * @return
+     * This can be a blind or consultative transfer. For a blind transfer, a target number
+     * must be provided. For a consultative transfer, the target number should be empty,
+     * and there must be another active call to transfer to.
+     *
+     * @param nCallKey The key of the call to be transferred.
+     * @param strNumber The target number for a blind transfer. Should be empty for a
+     *                  consultative transfer.
+     * @return IMS_RESULT Returns IMS_SUCCESS if the transfer is initiated successfully,
+     *                    otherwise an error code.
      */
     virtual IMS_RESULT Transfer(IN CallKey nCallKey, IN const AString& strNumber) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the current state of the ECT manager.
      *
-     * @return
+     * @return State The current state of the manager.
      */
     virtual State GetState() = 0;
 };
