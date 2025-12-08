@@ -382,6 +382,7 @@
         <item value="2"/>
         <item value="2"/>
     </int-array>
+    <int name="imsrtt.policy_on_text_qos_deactivation_int" value="1"/>
     <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
     <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
     <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
