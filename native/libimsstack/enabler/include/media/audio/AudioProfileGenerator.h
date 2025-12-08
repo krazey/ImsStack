@@ -41,6 +41,9 @@ protected:
     void SetAudioCodecFmtp(IN const CodecAudioConfig* pCodecConfig,
             IN const AudioConfiguration* pAudioConfig,
             OUT std::shared_ptr<AudioProfile::AudioFmtp> pFmtp);
+    IMS_BOOL UpdateAudioProfileBandwidth(
+            OUT AudioProfile* pAudioProfile, IN const AudioConfiguration* pConfig);
+
     AudioProfile::Payload* CreateAmrPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     AudioProfile::Payload* CreateEvsPayload(
