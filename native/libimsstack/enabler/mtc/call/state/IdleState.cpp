@@ -378,7 +378,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSessio
     m_objContext.GetCallInfo().bUssi = IMS_TRUE;
     m_objContext.CreateSession(piSession);
 
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
 
     if (m_objContext.GetConfigurationProxy().GetBoolean(
                 ConfigVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL) &&

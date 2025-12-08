@@ -477,7 +477,7 @@ void MessageFormatter::AddSrvccFeature()
         return;
     }
 
-    IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
+    const IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
     if (piPreviousMessage == IMS_NULL)
     {
         return;
@@ -508,7 +508,7 @@ void MessageFormatter::AddSrvccFeature()
 PRIVATE
 void MessageFormatter::SetSrvccContactParameter()
 {
-    IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
+    const IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
     if (piPreviousMessage == IMS_NULL)
     {
         return;

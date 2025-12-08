@@ -153,7 +153,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCa
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByServiceType(IN ServiceType eServiceType)
 {
     return GetCallsByFilter(
-            [eServiceType](MtcCall* pCall)
+            [eServiceType](const MtcCall* pCall)
             {
                 return pCall->GetService().GetServiceType() == eServiceType;
             });

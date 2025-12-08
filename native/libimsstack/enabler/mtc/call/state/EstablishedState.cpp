@@ -299,7 +299,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("UssiTerminated", 0, 0, 0);
 
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
     UssiController* pUssiController = m_objContext.GetUssiController();
 
     if (!pUssiController->IsByeForUssi(piMessage))
