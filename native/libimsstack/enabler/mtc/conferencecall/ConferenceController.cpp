@@ -264,8 +264,7 @@ PUBLIC VIRTUAL void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd,
 
     switch (nCmd)
     {
-        // TODO: use IConferenceController::GROUPCALL after checking the logic.
-        case IuMtcCall::STARTCONF:
+        case IConferenceController::GROUPCALL:
             ProcessGroupCall(objUsers, objCallInfo, objMediaInfo, objSuppServices);
             break;
         default:
@@ -298,11 +297,6 @@ PUBLIC VIRTUAL void ConferenceController::ProcessCommand(
         default:  // IConferenceController::GROUPCALL
             break;
     }
-}
-
-PUBLIC VIRTUAL IMS_SINT32 ConferenceController::GetState() const
-{
-    return m_nState;
 }
 
 PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConference(
@@ -371,6 +365,12 @@ PUBLIC VIRTUAL void ConferenceController::OnOperationReady()
 {
     IMS_TRACE_I("OnOperationReady", 0, 0, 0);
     DoNextOperation();
+}
+
+PUBLIC
+IMS_SINT32 ConferenceController::GetState() const
+{
+    return m_nState;
 }
 
 PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN ImsList<ConfUser*>& objUsers)

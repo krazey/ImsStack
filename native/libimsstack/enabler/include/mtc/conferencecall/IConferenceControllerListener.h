@@ -19,15 +19,25 @@
 
 class ConferenceController;
 
+/**
+ * @brief Listener for events from the ConferenceController.
+ *
+ * This interface allows for receiving notifications about the lifecycle of a
+ * ConferenceController, such as when it is closed.
+ */
 class IConferenceControllerListener
 {
 public:
     virtual ~IConferenceControllerListener() = default;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the ConferenceController has been closed and is about to be destroyed.
      *
-     * @param pController
+     * This callback is invoked when the ConferenceController has completed all its operations
+     * and is ready to be deallocated. The listener should release any references to the
+     * controller.
+     *
+     * @param pController A pointer to the ConferenceController that has been closed.
      */
     virtual void OnClosed(IN ConferenceController* pController) = 0;
 };

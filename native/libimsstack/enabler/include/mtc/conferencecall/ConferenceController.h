@@ -89,11 +89,13 @@ public:
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
             IN ImsList<SuppService*>& objSuppServices) override;
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers) override;
-    IMS_SINT32 GetState() const override;
     IndividualCallState GetCallStatusInConference(IN CallKey nKey) const override;
 
     // IConferenceOperationQueueListener interfaces implementation
     void OnOperationReady() override;
+
+    // The visibility of this internal method is currently public to allow for unit testing.
+    IMS_SINT32 GetState() const;
 
 protected:
     // basic operation set
