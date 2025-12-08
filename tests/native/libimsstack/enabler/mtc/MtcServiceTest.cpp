@@ -830,11 +830,25 @@ TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
-TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithIpcanTypeInvokesEventHandlerAndMtcNetworkWatcher)
 {
     IMS_UINT32 nType = IImsAosMonitor::TYPE_IPCAN;
     IMS_UINT32 nState = IIpcan::CATEGORY_WLAN;
+
     EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(nState)).Times(1);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithNonIpcanTypeInvokesEventHandlerOnly)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_HANDOVER;
+    IMS_UINT32 nState = IImsAosMonitor::HANDOVER_WIFI_TO_CELLULAR_START;
+
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
 
     pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
