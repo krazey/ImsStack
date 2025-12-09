@@ -19,7 +19,6 @@
 
 #include "AString.h"
 #include "ImsTypeDef.h"
-#include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include <gmock/gmock.h>
 

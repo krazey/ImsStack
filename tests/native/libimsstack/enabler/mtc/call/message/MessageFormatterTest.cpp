@@ -32,6 +32,7 @@
 #include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/MessageFormatter.h"
+#include "configuration/ConfigDef.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialogevent/MockIMultiEndpointManager.h"

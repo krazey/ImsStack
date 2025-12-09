@@ -19,12 +19,13 @@
 
 #include <gmock/gmock.h>
 
-#include "CallReasonInfo.h"
 #include "IJniMtcServiceThread.h"
-#include "ImsList.h"
 
 enum class OipType;
+struct CallReasonInfo;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class MockIJniMtcServiceThread : public IJniMtcServiceThread
 {

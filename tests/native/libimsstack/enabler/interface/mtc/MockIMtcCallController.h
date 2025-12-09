@@ -19,7 +19,6 @@
 
 #include "IMtcCallController.h"
 #include "IMtcService.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 
@@ -36,6 +35,8 @@ struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
 union Key;
+template <class T>
+class ImsList;
 
 class MockIMtcCallController : public IMtcCallController
 {

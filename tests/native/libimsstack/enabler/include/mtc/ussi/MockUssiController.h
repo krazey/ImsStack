@@ -18,11 +18,12 @@
 #define MOCK_USSI_CONTROLLER_H_
 
 #include "ImsTypeDef.h"
-#include "call/IMtcCallContext.h"
 #include "ussi/UssiController.h"
-#include "ussi/UssiData.h"
 #include "ussi/UssiDef.h"
 #include <gmock/gmock.h>
+
+class IMtcCallContext;
+class UssiDataParser;
 
 class MockUssiController : public UssiController
 {

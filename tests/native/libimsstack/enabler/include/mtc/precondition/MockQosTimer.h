@@ -17,14 +17,12 @@
 #ifndef MOCK_QOS_TIMER_H_
 #define MOCK_QOS_TIMER_H_
 
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "ServiceTimer.h"
-#include "precondition/IQosTimerListener.h"
+#include "precondition/QosDef.h"
 #include "precondition/QosTimer.h"
 #include <gmock/gmock.h>
 
-enum class QosTimerType;
+class IQosTimerListener;
 
 class MockQosTimer : public QosTimer
 {

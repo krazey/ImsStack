@@ -18,7 +18,6 @@
 #define MOCK_I_MULTI_ENDPOINT_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "dialogevent/DialogInfo.h"
 #include "dialogevent/IMultiEndpointManager.h"
 #include <gmock/gmock.h>
 

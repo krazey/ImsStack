@@ -19,15 +19,16 @@
 
 #include <gmock/gmock.h>
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "ImsList.h"
-#include "conferencecall/ConferenceDef.h"
 
 #include "IJniMtcCallThread.h"
 
 class SuppService;
 struct CallReasonInfo;
+struct ConfUser;
 struct JniCallInfo;
+struct MediaInfo;
+template <class T>
+class ImsList;
 
 class MockIJniMtcCallThread : public IJniMtcCallThread
 {
