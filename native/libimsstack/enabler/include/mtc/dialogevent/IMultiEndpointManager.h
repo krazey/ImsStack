@@ -23,9 +23,16 @@
 
 struct MediaInfo;
 
+/**
+ * @brief An interface for managing multi-endpoint (MEP) functionality.
+ *
+ * This manager handles dialog event subscriptions and provides information about external calls
+ * on other devices, which can be used for features like call pull.
+ */
 class IMultiEndpointManager
 {
 public:
+    /** A struct that holds information about a dialog that can be pulled. */
     struct PullingDialogInfo final
     {
     public:
@@ -66,9 +73,14 @@ public:
     virtual ~IMultiEndpointManager() = default;
 
     /**
-     * Returns PullingDialogInfo if a dialog exists with the address.
+     * @brief Returns PullingDialogInfo if a dialog exists with the {@link Dialog#strId}.
      *
-     * @param nId The Dialog ID to find.
+     * When an external call (DialogInfo) occurs, the IMS stack shares the corresponding ID with
+     * Telephony. When Telephony attempts a call pull, it passes the hash code of that ID to the
+     * IMS Stack. This function then finds the corresponding DialogInfo by comparing this hash
+     * code.
+     *
+     * @param nId The hash code of a Dialog ID to find.
      * @return The PullingDialogInfo of the dialog ID.
      *         If no matching dialog exists, a PullingDialogInfo with empty value will be returned.
      */
