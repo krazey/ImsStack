@@ -55,7 +55,7 @@
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
-        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
         <item value="403:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
         <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
         <item value="408:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->

@@ -76,7 +76,7 @@
         <item value="301:0"/> <!-- CSFB -->
         <item value="302:0"/> <!-- CSFB -->
         <item value="305:0"/> <!-- CSFB -->
-        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
         <item value="400:0"/> <!-- CSFB -->
         <item value="401:0"/> <!-- CSFB -->
         <item value="402:0"/> <!-- CSFB -->
