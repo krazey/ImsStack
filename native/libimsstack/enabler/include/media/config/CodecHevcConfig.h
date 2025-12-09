@@ -51,13 +51,13 @@ public:
      *
      * @return IMS_SINT32 Return hevc profile
      */
-    IMS_SINT32 GetHevcProfile() const;
+    virtual IMS_SINT32 GetHevcProfile() const;
     /**
      * @brief Get the hevc level
      *
      * @return IMS_SINT32 Return hevc level
      */
-    IMS_SINT32 GetHevcLevel() const;
+    virtual IMS_SINT32 GetHevcLevel() const;
     /**
      * @brief Generate default Hevc codec when Hevc bundle description is missing
      */

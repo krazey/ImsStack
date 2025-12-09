@@ -52,13 +52,13 @@ public:
      * @return IMS_BOOL Return true if m_bIncludeSpropParameterSets is enabled
      * Return false if m_bIncludeSpropParameterSets is disabled
      */
-    IMS_BOOL GetIncludeSpropParameterSets() const;
+    virtual IMS_BOOL GetIncludeSpropParameterSets() const;
     /**
      * @brief Get the profile level id
      *
      * @return const AString& Return profile level-id
      */
-    const AString& GetProfileLevelId() const;
+    virtual const AString& GetProfileLevelId() const;
     /**
      * @brief Generate default AVC codec when AVC bundle description is missing
      */
