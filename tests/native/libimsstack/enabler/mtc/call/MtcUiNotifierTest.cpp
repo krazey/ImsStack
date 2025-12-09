@@ -459,7 +459,7 @@ TEST_F(MtcUiNotifierTest, SendNotifyInfo)
 
 TEST_F(MtcUiNotifierTest, SendReplacedBy)
 {
-    // TODO: implement logic
+    // There's no implementation yet
     pNotifier->SendReplacedBy(1, 2);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
@@ -480,7 +480,7 @@ TEST_F(MtcUiNotifierTest, SendEctCompleted)
 
 TEST_F(MtcUiNotifierTest, SendCallPushCompleted)
 {
-    // TODO: implement logic
+    // There's no implementation yet
     pNotifier->SendCallPushCompleted(IMS_SUCCESS, *pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);

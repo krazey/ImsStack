@@ -57,9 +57,6 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
     {
         if (eState == State::TERMINATING)
         {
-            // TODO: check if conference call is failed or terminated.
-            // Or, set IsSynchronousCallRequired() false so ConferenceController::Recover()
-            // is called first.
             ClearConnectionIdsInConference(nControllerIndexOfHost);
             return;
         }
@@ -82,8 +79,7 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
 
         RemoveKeyConnectionId(GetListIndexByCallKey(nCallKey));
     }
-    else if (eState == State::OUTGOING || eState == State::INCOMING ||
-            eState == State::ALERTING)  // TODO: all?
+    else if (eState == State::OUTGOING || eState == State::INCOMING || eState == State::ALERTING)
     {
         AddKeyConnectionId(nCallKey);
     }

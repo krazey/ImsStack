@@ -118,7 +118,6 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eSt
     }
     if (m_objAsynchronousListeners.GetSize() > 0)
     {
-        // TODO: use OperationAsyncRunner?
         PostMessage(MESSAGE_ASYNC_NOTIFY, reinterpret_cast<IMS_UINTP>(pDetails),
                 static_cast<IMS_UINTP>(bTotalCallStateUpdated));
     }

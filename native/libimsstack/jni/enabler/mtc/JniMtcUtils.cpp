@@ -103,7 +103,7 @@ PUBLIC GLOBAL ImsList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN cons
     {
         ConfUser* pUser = new ConfUser();
 
-        pUser->nConnectionId = objParcel.readInt64();  // TODO: how to ... call key!!!!!???
+        pUser->nConnectionId = objParcel.readInt64();
         ConvertString(objParcel.readString16(), pUser->strTarget);
         ConvertString(objParcel.readString16(), pUser->strUserEntity);
         ConvertString(objParcel.readString16(), pUser->strEpEntity);
@@ -129,7 +129,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
     objParcel.writeInt32(bOffline);
     IMS_SINT32 bUssi = (objCallInfo.bUssi) ? 1 : 0;
     objParcel.writeInt32(bUssi);
-    IMS_SINT32 bConf = (objCallInfo.bConference) ? 1 : 0;  // nConf? nIsConf?
+    IMS_SINT32 bConf = (objCallInfo.bConference) ? 1 : 0;
     objParcel.writeInt32(bConf);
     IMS_SINT32 bEnabledConf = (objCallInfo.bConferenceEnabled) ? 1 : 0;
     objParcel.writeInt32(bEnabledConf);
@@ -193,7 +193,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
     {
         ConfUser* pUser = objUsers.GetAt(i);
 
-        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId));  // TODO: Int32.
+        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId));
         objParcel.writeString16(android::String16(pUser->strTarget.GetStr()));
         objParcel.writeString16(android::String16(pUser->strUserEntity.GetStr()));
         objParcel.writeString16(android::String16(pUser->strEpEntity.GetStr()));

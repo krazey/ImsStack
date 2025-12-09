@@ -31,8 +31,6 @@ struct MediaInfo;
 struct CallStartOperationParams
 {
 public:
-    // TODO: copy or reference.
-    // if copy and delete every time an operation is deleted, then too many copy.
     CallStartOperationParams(IN IMS_UINT32 _nType, IN CallInfo& _objCallInfo,
             IN MediaInfo& _objMediaInfo, IN ImsList<ConfUser*>& _objUsers,
             IN ImsList<SuppService*>& _objSuppServices) :

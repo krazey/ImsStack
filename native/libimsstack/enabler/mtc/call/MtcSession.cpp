@@ -183,7 +183,6 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::RespondToEarlyUpdate(IN IMS_SINT32 eStatus
 {
     IMS_TRACE_D("RespondToEarlyUpdate", 0, 0, 0);
 
-    // TODO: check status code in SetSdpToSend()?
     if (SipStatusCode::IsFinalSuccess(eStatusCode) &&
             SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
     {
@@ -212,7 +211,6 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Accept()
 {
     IMS_TRACE_D("Accept", 0, 0, 0);
 
-    // TODO: "REJECT_REASON_MEDIA_FORMFAIL" is required?
     if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
@@ -439,7 +437,6 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
     lstExtensions.Append(
             new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_SESSION_TIMER, {}, {}));
 
-    // TODO: check CallType.
     if (!m_objContext.GetCallInfo().bUssi &&
             m_objContext.GetConfigurationProxy().GetBoolean(
                     ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
@@ -685,7 +682,6 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
     IMS_TRACE_D("SetSdpToSend - Set Done", 0, 0, 0);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    // TODO: bFailure to true for failure cases is not in this api?
     objPreconditionManager.FormPreconditionSdp(&m_objSession, IMS_FALSE);
     objPreconditionManager.OnSdpSent(&m_objSession, bInitialInvite);
 

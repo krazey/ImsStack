@@ -432,7 +432,6 @@ TEST_F(OutgoingStateTest, OnMediaFailedReturnsTerminatingState)
 
 TEST_F(OutgoingStateTest, OnMediaFailedReturnsOutgoingStateIfSessionIsNull)
 {
-    // TODO: let's check if keeping current state is correct
     ON_CALL(objCallContext, GetSession()).WillByDefault(Return(nullptr));
     EXPECT_EQ(pOutgoingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED)),
             CallStateName::OUTGOING);
@@ -1231,7 +1230,6 @@ TEST_F(OutgoingStateTest,
                 IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall)
                 .WillByDefault(Return(IMS_FALSE));
 
-        // TODO: mock Ims3gpp for more coverage in StartErrorHandler
         Ims3gpp objIms3gpp;
         ON_CALL(objMessageUtils, GetIms3gppFromBody(_, _))
                 .WillByDefault(ReturnRef(objIms3gpp));

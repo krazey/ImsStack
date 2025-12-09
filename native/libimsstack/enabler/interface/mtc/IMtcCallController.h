@@ -244,13 +244,6 @@ public:
      */
     virtual void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) = 0;
 
-    // Handles conference call related IMS messages.
-    /*
-    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
-            IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsList<SuppService*>& objSuppServices);
-    */
-
     /**
      * @brief Merges
      *
@@ -274,8 +267,6 @@ public:
      * @param objUsers
      */
     virtual void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
-
-    // TODO: Consider ECT, SRVCC
 
     /**
      * @brief Transfers

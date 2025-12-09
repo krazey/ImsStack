@@ -540,9 +540,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
     objJniCallInfo.bUssi = m_objCallInfo.bUssi;
     objJniCallInfo.bConference = m_objCallInfo.bConference;
-    // TODO: conference extension for SKT
-    objJniCallInfo.bConferenceEnabled = IMS_FALSE;
-    // TODO: check host or participant
+    objJniCallInfo.bConferenceEnabled = IMS_FALSE;  // Conference extension for SKT
     objJniCallInfo.bConferenceSubscriptionRequired =
             m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT) !=
@@ -647,7 +645,7 @@ PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
         if (piReference != IMS_NULL)
         {
             piReference->Reject();
-            piReference->Destroy();  // TODO: Use ReferenceInterfaceHolder
+            piReference->Destroy();
         }
         OnInternalFailure();
         return;
@@ -1332,7 +1330,6 @@ PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServi
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
-                    // TODO: replace this by OnRatChanged.
                     return pState->OnIpcanChanged(eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN
                                     ? IIpcan::CATEGORY_WLAN
                                     : IIpcan::CATEGORY_MOBILE);

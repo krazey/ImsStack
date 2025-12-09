@@ -316,8 +316,6 @@ TEST_F(ParticipantInfoTest, HandleRequestDoesNothingIfNotStartMethod)
     EXPECT_EQ(strInitialRemoteNumber, pParticipantInfo->GetRemoteNumber());
 }
 
-// TODO: HandleRequestUpdatesRemoteUri
-
 TEST_F(ParticipantInfoTest, HandleRequestUpdatesRemoteNumber)
 {
     const AString strInitialRemoteNumber = pParticipantInfo->GetRemoteNumber();

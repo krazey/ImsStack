@@ -197,11 +197,9 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
 
     pSession->HandleRequest(RequestType::ACK, *piMessage);
 
-    // TODO: need to check NegotiationState::STATE_OFFER_SENT?
     CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
     if (objReason.nCode != CODE_NONE)
     {
-        // TODO TerminateAndToTerminating() ?
         pSession->Terminate(IMS_TRUE, objReason);
 
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
@@ -288,8 +286,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISe
 
 PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
-    // FIXME: It's same as IncomingState except QoS check and UI notifying
-
     const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
@@ -313,8 +309,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
 
 PUBLIC VIRTUAL CallStateName AlertingState::SessionPrackReceived(IN ISession* piSession)
 {
-    // FIXME: It's same as IncomingState except QoS check and UI notifying
-
     const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);

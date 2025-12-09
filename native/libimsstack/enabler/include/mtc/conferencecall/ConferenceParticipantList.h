@@ -46,7 +46,6 @@ public:
         ConferenceParticipant& operator=(IN const ConferenceParticipant&) = delete;
 
     public:
-        // TODO: determine copy or just reference.
         inline void SetConfUser(IN const ConfUser* pConfUser)
         {
             m_pConfUser = new ConfUser(*pConfUser);
@@ -162,8 +161,6 @@ private:
     IMS_SINT32 FindParticipant(IN const ConfUser* pConfUser) const;
 
 private:
-    // TODO: open ConferenceParticipant to all classes?
-    // Or, just open to ConferenceInfoUpdater?
     friend class ConferenceInfoUpdater;
 
     // the order of this list is same as the order of sending REFER.

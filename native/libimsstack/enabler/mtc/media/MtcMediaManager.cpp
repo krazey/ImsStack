@@ -868,7 +868,7 @@ void MtcMediaManager::HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType)
 {
     if (eMediaType == MEDIATYPE_VIDEO)
     {
-        // TODO: Send CVO Result, INFO_TYPE_VIDEO_DATA_RECV for 3rd party call UI.
+        // Send CVO Result, INFO_TYPE_VIDEO_DATA_RECV for 3rd party call UI.
     }
 }
 

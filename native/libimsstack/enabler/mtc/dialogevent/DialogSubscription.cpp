@@ -136,12 +136,12 @@ VIRTUAL PUBLIC void DialogSubscription::SubscriptionStartFailed(IN ISubscription
     m_objListener.OnSubscriptionStartFailed();
 }
 
-VIRTUAL PUBLIC void DialogSubscription::SubscriptionTerminated(IN ISubscription* piSubscription)
+VIRTUAL PUBLIC void DialogSubscription::SubscriptionTerminated(
+        IN [[maybe_unused]] ISubscription* piSubscription)
 {
     IMS_TRACE_D("SubscriptionTerminated", 0, 0, 0);
-    (void)piSubscription;
     m_objListener.OnSubscriptionTerminated();
-    // TODO: re-attempt based on RFC 3265
+    // Re-attempting based on RFC 3265 is not considered yet
 }
 
 PRIVATE

@@ -131,7 +131,6 @@ protected:
 
     void SetUpForUssi()
     {
-        // TODO: use MockUssiController
         pUssiController = new MockUssiController(objCallContext, new UssiDataParser());
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objISession, GetNextRequest()).WillByDefault(Return(&objIMessage));
@@ -514,7 +513,6 @@ TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionI
 
 TEST_F(AlertingStateTest, QosReserveFailedDoesNothingIfNextActionIsModify)
 {
-    // TODO: do modify
     EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE)).Times(0);
     EXPECT_CALL(objMtcSession, Reject(_)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);

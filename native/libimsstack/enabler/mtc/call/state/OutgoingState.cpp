@@ -339,8 +339,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
 
     MultipleDialogHandler().OnSessionForked(m_objContext, m_objContext.GetSession(piSession));
 
-    // TODO: need any timer for the forked session?
-
     return GetStateName();
 }
 
@@ -483,7 +481,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
-    // TODO: not to update precondition attributes?
     CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
     if (objReason.nCode != CODE_NONE)
     {
@@ -786,7 +783,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
             return CallStateName::TERMINATING;
         }
         case TIMER_RETRY_UPDATE:
-            // TODO: Not considering that multiple early sessions are in glare condition.
+            // Not considering that multiple early sessions are in glare condition.
             for (IMS_UINT32 i = 0; i < m_objContext.GetSessions().GetSize(); ++i)
             {
                 IMtcSession* pSession = m_objContext.GetSessions().GetAt(i);
@@ -1033,9 +1030,6 @@ PRIVATE
 void OutgoingState::OnStarted(IN const IMtcSession& objMtcSession)
 {
     MultipleDialogHandler().OnStarted(m_objContext, objMtcSession);
-
-    // TODO: stop call init timers
-
     m_objContext.GetUiNotifier().SendStarted();
 }
 

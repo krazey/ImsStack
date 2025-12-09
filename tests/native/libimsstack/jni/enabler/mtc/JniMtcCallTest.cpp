@@ -339,7 +339,6 @@ TEST_F(JniMtcCallTest, SendDataRejectResume)
     pJniCall->SendData(objParcel);
 }
 
-// TODO: deprecated
 TEST_F(JniMtcCallTest, SendDataSendUssd)
 {
     objParcel.writeInt32(IuMtcCall::SEND_USSD);
@@ -354,11 +353,9 @@ TEST_F(JniMtcCallTest, SendDataStartConf)
 {
     objParcel.writeInt32(IuMtcCall::STARTCONF);
     objParcel.setDataPosition(0);
-    // TODO: implement logic
-    /*
-        EXPECT_CALL(objMockController, (_))
-                .Times(1);
-    */
+
+    // There's no implementation yet
+
     pJniCall->SendData(objParcel);
 }
 
@@ -376,11 +373,9 @@ TEST_F(JniMtcCallTest, SendDataConfExpand)
 {
     objParcel.writeInt32(IuMtcCall::CONF_EXPAND);
     objParcel.setDataPosition(0);
-    // TODO: implement logic
-    /*
-        EXPECT_CALL(objMockController, (_))
-                .Times(1);
-    */
+
+    // There's no implementation yet
+
     pJniCall->SendData(objParcel);
 }
 

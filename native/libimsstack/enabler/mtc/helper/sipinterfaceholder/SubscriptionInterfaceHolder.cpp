@@ -51,7 +51,6 @@ PUBLIC VIRTUAL void SubscriptionInterfaceHolder::SubscriptionTerminated(
 {
     IMS_TRACE_D("SubscriptionTerminated", 0, 0, 0);
 
-    // TODO: delete piSubscription / timer???
     ReleaseISubscription(piSubscription, IMS_TRUE);
 }
 

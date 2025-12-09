@@ -159,7 +159,10 @@ VIRTUAL PUBLIC void MultiEndpointManager::OnSubscriptionStartFailed()
     // If the response code is 403, MEP must be stopped and re-started after an initial
     // registration. Here, not checking the response code because subscription retry is done
     // in DialogSubscription and if a subscription is failed, there is no way to keep MEP on.
-    // TODO: timer for Retry-After and call HandleConditionChanged() when the timer expires.
+
+    // Currently Retry-After timer handling and it's expiration handling(HandleConditionChanged) is
+    // not implemented.
+
     Stop();
 }
 
@@ -216,17 +219,15 @@ PRIVATE
 IMS_BOOL MultiEndpointManager::IsReady() const
 {
     IMS_TRACE_D("IsReady", 0, 0, 0);
-    // TODO: check config and service activation status.
     if (IsRequired(m_objContext.GetConfigurationProxy()) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
 
-    // TODO: need to check AoS behavior.
     if (m_objContext.GetAosConnector(ServiceType::NORMAL))
     {
         return (m_objContext.GetAosConnector(ServiceType::NORMAL)->GetFeatures() &
-                       ImsAosFeature::MMTEL) == ImsAosFeature::MMTEL;
+                ImsAosFeature::MMTEL);
     }
     return IMS_FALSE;
 }
@@ -297,7 +298,6 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
         if (IsOwnDialog(objDialog))
         {
             IMS_TRACE_D("GetJniExternalCalls ignores my own dialog", 0, 0, 0);
-            // TODO: this could be also done in Telephony Side.
             continue;
         }
 

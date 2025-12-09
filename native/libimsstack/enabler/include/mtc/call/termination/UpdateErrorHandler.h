@@ -57,8 +57,6 @@ private:
     void RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
     IMS_BOOL IsRegisterWithNextPcscfRequiredFor503(
             IN IMS_SINT32 nRetryAfter, IN const SipMethod& objMethod) const;
-
-    // TODO: b/383904089 - common utils in ErrorHandlers.
     CallReasonInfo GetDefaultCallReasonInfo(IN const IMessage& objMessage) const;
     IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
 

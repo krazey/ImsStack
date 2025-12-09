@@ -631,7 +631,7 @@ PROTECTED VIRTUAL CallStateName UpdatingState::HandleSrvccStarted()
 {
     IMS_TRACE_D("HandleSrvccStarted", 0, 0, 0);
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
-    if (m_objContext.GetUpdatingInfo().IsModifier())  // TODO: proper condition?
+    if (m_objContext.GetUpdatingInfo().IsModifier())
     {
         return CancelUpdate(objReason);
     }

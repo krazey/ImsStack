@@ -156,7 +156,6 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeAndRefer)
     objUsers.Append(pUser2);
 
     // Sets up CallType.
-    // TODO: Check the value of m_eStartCallType.
     MockIMtcCall objCall1;
     ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
     MockIMtcCall objCall2;
@@ -215,7 +214,6 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithReferAndSubscribeFlow)
     objUsers.Append(pUser2);
 
     // Sets up CallType.
-    // TODO: Check the value of m_eStartCallType.
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT))
             .WillByDefault(Return(1));  // VOIP
@@ -281,7 +279,6 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeNotifyReferFlow)
     objUsers.Append(pUser2);
 
     // Sets up CallType.
-    // TODO: Check the value of m_eStartCallType.
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT))
             .WillByDefault(Return(1));  // CallType::VOIP
@@ -343,7 +340,6 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithoutRefer)
     objUsers.Append(pUser2);
 
     // Sets up CallType.
-    // TODO: Check the value of m_eStartCallType.
     MockIMtcCall objCall1;
     ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VOIP));
     MockIMtcCall objCall2;

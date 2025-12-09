@@ -72,20 +72,10 @@ public:
             IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
     void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) override;
-
-    /*
-    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
-            IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsList<SuppService*>& objSuppServices);
-    */
-
     void MergeToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
     void AddToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
     void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
-
-    // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget) override;
-
     void HandleByeTransaction(
             IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation) override;
 

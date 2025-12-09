@@ -40,7 +40,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        // TODO: separate into different Test files?
         pParticipant = new ConferenceParticipantList::ConferenceParticipant();
         pParticipantList = new ConferenceParticipantList();
     }

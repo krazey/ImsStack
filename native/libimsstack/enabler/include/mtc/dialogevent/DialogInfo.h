@@ -39,7 +39,6 @@ public:
     inline IMS_UINT32 GetVersion() const { return m_nVersion; }
     inline const AString& GetEntity() const { return m_strEntity; }
 
-    // TODO: move to common area?
     static IElement* GetSubElement(IN const IElement* piElement, IN const IMS_CHAR* pszElement);
     static AString& GetSubElementValue(IN const IElement* piElement, IN const IMS_CHAR* pszElement,
             OUT AString& strElementValue);

@@ -112,7 +112,6 @@ PUBLIC VIRTUAL void ConferenceReference::ReferenceDelivered(IN IReference* piRef
     }
     else
     {
-        // TODO: is this reachable?
         IMS_TRACE_I("ReferenceDelivered : but response is failure", 0, 0, 0);
         return m_objListener.OnReferenceStartFailed(this);
     }
@@ -168,7 +167,6 @@ PUBLIC VIRTUAL IMS_RESULT ConferenceReference::SendInvite(
     const IMtcCall* piConfCall = GetConferenceCall();
     if (piConfCall == IMS_NULL)
     {
-        // TODO: check for KR conference call cases.
         return IMS_FAILURE;
     }
 

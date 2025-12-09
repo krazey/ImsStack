@@ -243,8 +243,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     pSession->HandleRequest(RequestType::UPDATE, *piMessage);
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    // TODO, conference
-
     CallStateName eStateName = CallStateName::UPDATING;
     CallReasonInfo objResultReason(CODE_NONE);
     if (m_objContext.GetMessageUtils().HasSdp(piMessage))
@@ -423,7 +421,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(
     {
         return Downgrade(CallType::VOIP);
     }
-    // TODO: check VIDEO_RTT case
 
     return GetStateName();
 }

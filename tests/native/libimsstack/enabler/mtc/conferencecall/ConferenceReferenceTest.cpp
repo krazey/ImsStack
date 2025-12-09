@@ -300,7 +300,6 @@ TEST_F(ConferenceReferenceTest, SendInviteFailedWithNoConfCall)
 {
     ON_CALL(objMockConferenceCall, GetKey).WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
 
-    // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     EXPECT_EQ(IMS_FAILURE,
             pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager));
@@ -310,7 +309,6 @@ TEST_F(ConferenceReferenceTest, SendInviteFailedWithTerminatingState)
 {
     ON_CALL(objMockConferenceCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
 
-    // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     EXPECT_EQ(IMS_FAILURE,
             pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager));
@@ -327,7 +325,6 @@ TEST_F(ConferenceReferenceTest, SendInviteInvokesSendInviteForSingleUser)
 
     ON_CALL(objMessageUtils, GetSessionId(&objMockJoiningSession)).WillByDefault(Return("12345"));
 
-    // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     ON_CALL(objMessageUtils, GetRemoteUri(_, _)).WillByDefault(Return(strReferToUri));
 
@@ -364,7 +361,6 @@ TEST_F(ConferenceReferenceTest, SendInviteInvokesSendInviteForMultipleUser)
             AddHeader(AString(SipHeaderName::CONTENT_DISPOSITION), AString("recipient-list")))
             .Times(1);
 
-    // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     IMS_RESULT nResult = pConferenceReferenceWithMultipleUser->SendInvite(
             strReferToUri, *pMockConnectionIdManager);
@@ -380,7 +376,6 @@ TEST_F(ConferenceReferenceTest, SendInviteFailedWithNoUsers)
     ConferenceReference* pConferenceReferenceWithNoUsers = new ConferenceReference(
             objMockContext, CONFERENCE_CALL_KEY, objConfUsers, objMockListener);
 
-    // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     EXPECT_EQ(IMS_FAILURE,
             pConferenceReferenceWithNoUsers->SendInvite(strReferToUri, *pMockConnectionIdManager));

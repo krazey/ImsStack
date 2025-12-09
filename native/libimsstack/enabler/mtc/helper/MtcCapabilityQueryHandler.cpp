@@ -198,8 +198,7 @@ PRIVATE GLOBAL AString MtcCapabilityQueryHandler::GetAdjustedCodecList(
     SdpMediaDescription objMediaDesc;
     objMediaDesc.Decode(objAudioCaps);
 
-    // TODO: use carrier-config
-    // Currently, media always add EVS. They will define how to judge the supportability of EVS
+    // Currently media always uses EVS
     if (IMS_TRUE)
     {
         return objMediaDesc.Encode();

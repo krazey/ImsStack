@@ -49,7 +49,6 @@ PUBLIC VIRTUAL void ReferenceInterfaceHolder::ReferenceTerminated(IN IReference*
 {
     IMS_TRACE_D("ReferenceTerminated", 0, 0, 0);
 
-    // TODO: delete piReference / timer???
     ReleaseIReference(piReference, IMS_TRUE);
 }
 

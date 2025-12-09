@@ -18,8 +18,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-// TODO: Unit tests of only the uncovered lines are added. The other cases will be added.
-
 LOCAL PeerType ANY_PEER_TYPE = PeerType::MT;
 LOCAL CallType ANY_CALL_TYPE = CallType::VIDEO_RTT;
 LOCAL EmergencyType ANY_EMERGENCY_TYPE = EmergencyType::NORMAL_ROUTING;
