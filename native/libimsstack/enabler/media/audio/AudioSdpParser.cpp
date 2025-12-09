@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
 #include "audio/AudioSdpParser.h"
+
+#include "ServiceTrace.h"
 #include "audio/AudioProfileUtil.h"
+#include "offeranswer/SdpAvCodec.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

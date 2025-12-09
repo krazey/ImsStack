@@ -1281,8 +1281,7 @@ void MediaSession::UpdateMediaSessions(
             m_pVideoController->IsSessionOpened())
     {
         m_pVideoController->UpdateRtpConfig(pMediaNego->GetVideoNego(),
-                pMediaNego->GetAudioNego()->GetNegotiatedDirection() !=
-                        MEDIA_DIRECTION_SEND_RECEIVE);
+                pMediaNego->GetNegotiatedAudioDirection() != MEDIA_DIRECTION_SEND_RECEIVE);
         m_pVideoController->UpdateAccessNetwork(nAccessNetwork);
 
         if (m_pVideoController->UpdateSession())

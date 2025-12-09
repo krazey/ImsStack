@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "audio/AudioNego.h"
+
 #include <map>
 
 #include "ISessionDescriptor.h"
@@ -22,10 +24,12 @@
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
 #include "ServiceTrace.h"
-#include "audio/AudioNego.h"
+#include "audio/AudioProfileNegotiator.h"
 #include "audio/AudioProfileUtil.h"
+#include "audio/AudioSdpParser.h"
 #include "audio/AudioSdpGenerator.h"
 #include "audio/AudioProfileGenerator.h"
+#include "config/AudioConfiguration.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"

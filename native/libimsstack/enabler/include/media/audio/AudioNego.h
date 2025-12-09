@@ -19,12 +19,20 @@
 
 #include "BaseNego.h"
 #include "audio/AudioDef.h"
-#include "audio/AudioSdpParser.h"
-#include "audio/AudioProfileNegotiator.h"
+#include "audio/AudioProfile.h"
+
+class AudioProfileNegotiator;
+class AudioSdpParser;
 
 /**
- * @brief The class to negotiate and form the SDP attribute belong to the m=audio line
+ * @brief Manages the negotiation of audio media attributes using SDP.
  *
+ * This class is responsible for handling the SDP offer/answer exchange for the audio
+ * media line (m=audio). It uses an `AudioSdpParser` to interpret incoming SDP offers/answers,
+ * an `AudioProfileNegotiator` to determine the common supported audio codecs and parameters,
+ * and an `AudioSdpGenerator` to construct outgoing SDP offers/answers based on local capabilities
+ * and negotiated results. It provides methods to retrieve detailed information about the
+ * negotiated audio stream, such as codec, bitrate, and bandwidth.
  */
 class AudioNego : public BaseNego
 {
@@ -35,23 +43,30 @@ public:
     virtual ~AudioNego() override;
 
     /**
-     * @brief Check if audio codec from SDP is supported
+     * @brief Checks if the remote SDP contains a supported audio codec configuration.
+     *
+     * This method parses the provided SDP and attempts to negotiate it against the local
+     * device's audio capabilities.
      *
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
      * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
-     * @return IMS_BOOL Returns IMS_TRUE when audio codec from SDP is supported and the remote audio
+     * @return IMS_TRUE if a compatible audio codec is found and the remote audio
      * port is not 0, otherwise returns IMS_FALSE
      */
     virtual IMS_BOOL IsMediaCodecFromSdpSupported(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
 
     /**
-     * @brief Get the negotiated audio codec
+     * @brief Gets the negotiated audio codec
+     * @return The negotiated audio codec type (e.g., AMR, AMR-WB, EVS).
      */
     virtual AUDIO_CODEC GetNegotiatedCodec(void);
 
     /**
-     * @brief Get the negotiated audio codec mode rate(bitrate)
+     * @brief Gets the negotiated audio codec mode rate (bitrate).
+     *
+     * For AMR/AMR-WB/EVS, this corresponds to the highest negotiated mode.
+     * @return The negotiated audio codec bitrate enum value.
      */
     virtual AUDIO_CODEC_BITRATE GetNegotiatedAudioCodecRate(void);
 
@@ -70,7 +85,7 @@ public:
     virtual IMS_FLOAT GetNegotiatedCodecBandwidthKhz(void);
 
     /**
-     * @brief Get the negotiated audio codec bitrate range
+     * @brief Gets the negotiated audio codec bitrate range (min and max).
      *
      * @param nBitrateStart The start of the bitrate range in kbps.
      * @param nBitrateEnd The end of the bitrate range in kbps.
@@ -79,7 +94,7 @@ public:
             OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd);
 
     /**
-     * @brief Get the negotiated audio codec bandwidth range
+     * @brief Gets the negotiated audio codec bandwidth range (min and max).
      *
      * @param nBandwidthStart The start of the bandwidth range in kHz.
      * @param nBandwidthEnd The end of the bandwidth range in kHz.
@@ -88,17 +103,18 @@ public:
             OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd);
 
     /**
-     * @brief Get if the telephony-event is negotiated
+     * @brief Checks if the DTMF (telephone-event) payload type was successfully negotiated.
+     * @return IMS_TRUE if DTMF is negotiated, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL HasNegotiatedDtmf(void);
 
     /**
-     * @brief Set the SDP parser object
+     * @brief Sets the SDP parser object to be used for parsing audio media lines.
      */
     void SetSdpParser(std::shared_ptr<AudioSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }
 
     /**
-     * @brief Set the profile negotiator object
+     * @brief Sets the profile negotiator object to be used for negotiating audio profiles.
      */
     void SetProfileNegotiator(std::shared_ptr<AudioProfileNegotiator> pNegotiator)
     {

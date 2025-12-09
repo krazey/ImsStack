@@ -23,6 +23,7 @@
 #include "ServiceTrace.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioProfileUtil.h"
+#include "config/AudioConfiguration.h"
 
 #define EVS_NEGO_RETRY_COUNT 2
 #define RETURN_MODE_MATCHED  IMS_FALSE
