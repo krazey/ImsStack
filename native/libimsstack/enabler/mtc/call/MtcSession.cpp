@@ -463,6 +463,38 @@ void MtcSession::UpdateSessionProperty()
             m_objSession.GetConfiguration() | ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED);
 
     m_objSession.SetImplicitRoutingRequired(IMS_TRUE);
+    SetSessionSdpPreviewMode();
+}
+
+PRIVATE
+void MtcSession::SetSessionSdpPreviewMode()
+{
+    switch (m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+    {
+        case ConfigVoice::SDP_PREVIEW_MODE_DISABLED:
+            return;
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY:
+            if (m_objContext.GetCallInfo().IsEmergency())
+            {
+                return;
+            }
+            break;
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY:
+            if (!m_objContext.GetCallInfo().IsEmergency())
+            {
+                return;
+            }
+            break;
+        default:  // case ConfigVoice::SDP_PREVIEW_MODE_FOR_ALL_CALLS:
+            break;
+    }
+
+    // If `Preview mode` is allowed to this session, 2 session configurations should be enabled.
+    // ISession::CONFIG_SUPPORT_PREVIEW be set to explicitly support Preview.
+    // ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR be set to allow SDP negotiation on non-RPR.
+    m_objSession.SetConfiguration(m_objSession.GetConfiguration() |
+            ISession::CONFIG_SUPPORT_PREVIEW | ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR);
 }
 
 PRIVATE

@@ -95,6 +95,7 @@ private:
     ImsList<IMtcExtension*> GetSupportedExtensions() const;
 
     void UpdateSessionProperty();
+    void SetSessionSdpPreviewMode();
     IMS_RESULT UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
 
