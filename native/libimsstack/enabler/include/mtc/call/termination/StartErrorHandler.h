@@ -75,6 +75,7 @@ private:
     CallReasonInfo HandleRegistrationToAlternatePcscf(IN const IMessage& objMessage) const;
     CallReasonInfo HandleSilentReinviteToAlternatePcscf(IN const IMessage& objMessage) const;
     CallReasonInfo HandleSilentReinviteToAlternatePcscfOnce(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleSilentReinviteWithAudio(IN const IMessage& objMessage) const;
 
     CallReasonInfo RegisterAfterMayPerformCsfb() const;
 

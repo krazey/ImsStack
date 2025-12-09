@@ -94,6 +94,8 @@ const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
             &StartErrorHandler::HandleSilentReinviteToAlternatePcscf},
     {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE,
             &StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce},
+    {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO,
+            &StartErrorHandler::HandleSilentReinviteWithAudio},
 };
 // clang-format on
 
@@ -679,6 +681,18 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
 
     pAosConnector->RegisterWithNextPcscf(0);
     return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+}
+
+CallReasonInfo StartErrorHandler::HandleSilentReinviteWithAudio(IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteWithAudio", 0, 0, 0);
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    if (eCallType == CallType::VT || eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
+    {
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE,
+                MtcMediaUtil::MediaTypesToString(MEDIATYPE_AUDIO));
+    }
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
