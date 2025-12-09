@@ -332,7 +332,7 @@ AString MtcLocationObject::GetEntityUri(IN const ISubscriberConfig& objSubscribe
 }
 
 PRIVATE
-IMS_BOOL MtcLocationObject::IsNoUicc(IN IMtcCallContext& objContext)
+IMS_BOOL MtcLocationObject::IsNoUicc(IN const IMtcCallContext& objContext)
 {
     const IMtcAosConnector* pAosConnector = objContext.GetService().GetAosConnector();
     const IMS_UINT32 nAosRegistrationMode =

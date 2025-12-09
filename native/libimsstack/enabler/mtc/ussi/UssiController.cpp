@@ -54,7 +54,7 @@ PUBLIC VIRTUAL UssiController::~UssiController()
 }
 
 PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
-        IN IMessageUtils& objMessageUtils, IN IMessage* piMessage)
+        IN IMessageUtils& objMessageUtils, IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_TRUE;
 
@@ -75,7 +75,7 @@ PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
 }
 
 PUBLIC
-IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage)
+IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
     IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
@@ -96,7 +96,7 @@ IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piM
 }
 
 PUBLIC
-IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
+IMS_BOOL UssiController::IsByeForUssi(IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
     if (m_objContext.GetMessageUtils().ContainsValue(
@@ -110,7 +110,7 @@ IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
 }
 
 PUBLIC
-IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection)
+IMS_BOOL UssiController::IsUssiInfoReceived(IN const ISipServerConnection* piSipServerConnection)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -136,7 +136,7 @@ IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServer
 }
 
 PUBLIC
-IMS_BOOL UssiController::HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection)
+IMS_BOOL UssiController::HasXmlBodyInInfo(IN const ISipServerConnection* piSipServerConnection)
 {
     IMS_BOOL bResult = IMS_FALSE;
     if (piSipServerConnection)
@@ -155,7 +155,7 @@ IMS_BOOL UssiController::HasXmlBodyInInfo(IN ISipServerConnection* piSipServerCo
 
 PUBLIC
 UssiResult UssiController::ParseUssiBodyAndCheckResult(
-        IN ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod)
+        IN const ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod)
 {
     UssiResult objResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
     std::unique_ptr<UssiData> pParsedData =
