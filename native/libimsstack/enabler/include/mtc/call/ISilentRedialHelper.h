@@ -39,9 +39,10 @@ public:
     virtual CallReasonInfo Redial(IN IMS_SINT32 nIntervalInMillis) = 0;
 
     /**
-     * Gets the type of redial.
+     * @brief Gets the type of redial.
      *
      * This method retrieves the type of redial used by the implementation.
+     * See {@link CallReasonInfo#CODE_INTERNAL_REDIAL_} enums.
      *
      * @return An integer value representing the redial type.
      */

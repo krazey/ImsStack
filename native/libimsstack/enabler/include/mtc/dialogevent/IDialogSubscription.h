@@ -21,37 +21,48 @@
 
 class AString;
 
+/**
+ * @brief Listener for dialog subscription events.
+ */
 class IDialogSubscriptionListener
 {
 public:
     virtual ~IDialogSubscriptionListener() = default;
 
-    /**
-     * @brief Notifies
-     *
-     */
+    /** Notifies that the subscription has been successfully started. */
     virtual void OnSubscriptionStarted() = 0;
+
+    /** Notifies that the subscription has failed to start. */
     virtual void OnSubscriptionStartFailed() = 0;
+
+    /** Notifies that the subscription has been terminated. */
     virtual void OnSubscriptionTerminated() = 0;
+
+    /**
+     * @brief Notifies that a dialog event package has been received.
+     *
+     * @param strBody The XML body of the received NOTIFY request.
+     */
     virtual void OnSubscriptionNotified(IN const AString& strBody) = 0;
 };
 
+/**
+ * @brief An interface for managing a subscription to the dialog event package.
+ */
 class IDialogSubscription
 {
 public:
     virtual ~IDialogSubscription() = default;
 
     /**
-     * @brief Subscribes the dialog package of strTarget.
+     * @brief Subscribes to the dialog event package for a target URI.
      *
-     * @return {@code IMS_SUCCESS} if a subscription is succeeded.
+     * @return {@code IMS_SUCCESS} if the subscription request is sent successfully,
+     *         {@code IMS_FAILURE} otherwise.
      */
     virtual IMS_RESULT Subscribe() = 0;
 
-    /**
-     * @brief Unsubscribes the ongoing subscription.
-     *
-     */
+    /** Unsubscribes from the ongoing subscription. */
     virtual void Unsubscribe() = 0;
 };
 

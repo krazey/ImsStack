@@ -29,7 +29,7 @@ public:
     virtual ~IDialogInfoManager() = default;
 
     /**
-     * Updates internal dialog-info data by parsing the dialog package..
+     * @brief Updates internal dialog-info data by parsing the dialog package..
      *
      * @param strEventPackage The dialog package will be parsed.
      * @return The result of updating.
@@ -37,14 +37,14 @@ public:
     virtual IMS_RESULT Update(IN const AString& strEventPackage) = 0;
 
     /**
-     * Gets Dialog list.
+     * @brief Gets Dialog list.
      *
      * @return The reference of Dialog pointer list.
      */
     virtual const ImsList<Dialog*>& GetDialogs() const = 0;
 
     /**
-     * Gets the state of last created DialogInfo.
+     * @brief Gets the state of last created DialogInfo.
      *
      * @return The state value of dialog-info element in the last received dialog event package.
      *         Valid values are
@@ -55,14 +55,14 @@ public:
     virtual IMS_UINT32 GetState() const = 0;
 
     /**
-     * Gets the version of last created DialogInfo.
+     * @brief Gets the version of last created DialogInfo.
      *
      * @return The version value of dialog-info element in the last received dialog event package.
      */
     virtual IMS_UINT32 GetVersion() const = 0;
 
     /**
-     * Gets the entity of last created DialogInfo.
+     * @brief Gets the entity of last created DialogInfo.
      *
      * @return The entity value of dialog-info element in the last received dialog event package.
      */

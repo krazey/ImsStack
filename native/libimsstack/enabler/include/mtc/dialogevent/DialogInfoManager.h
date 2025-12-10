@@ -25,6 +25,13 @@
 
 class AString;
 
+/**
+ * @brief Manages dialog information received from a dialog event package.
+ *
+ * This class is responsible for parsing an XML dialog event package and storing the
+ * resulting dialog information. It provides access to the list of dialogs and
+ * other metadata from the last processed package.
+ */
 class DialogInfoManager final : public IDialogInfoManager
 {
 public:
@@ -33,11 +40,19 @@ public:
     DialogInfoManager(IN const DialogInfoManager&) = delete;
     DialogInfoManager& operator=(IN const DialogInfoManager&) = delete;
 
+    /** See {@link IDialogInfoManager#Update}. */
     IMS_RESULT Update(IN const AString& strEventPackage) override;
 
+    /** See {@link IDialogInfoManager#GetDialogs}. */
     const ImsList<Dialog*>& GetDialogs() const override;
+
+    /** See {@link IDialogInfoManager#GetState}. */
     IMS_UINT32 GetState() const override;
+
+    /** See {@link IDialogInfoManager#GetVersion}. */
     IMS_UINT32 GetVersion() const override;
+
+    /** See {@link IDialogInfoManager#GetEntity}. */
     const AString& GetEntity() const override;
 
 private:

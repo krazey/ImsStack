@@ -165,10 +165,15 @@ public:
             IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE) = 0;
 
     /**
-     * @brief
+     * @brief Notifies that the call is replaced.
      *
-     * @param nReplaceKey
-     * @param nType
+     * @deprecated This function is not used.
+     *             This API was used to notify of a call where the Transfer Target has changed in a
+     *             server environment that implements ECT (Explicit Call Transfer) using the 3GPP
+     *             method.
+     * @param nReplaceKey The CallKey to be replaced by the new call.
+     * @param nType Not used.
+     *
      */
     virtual void SendReplacedBy(IN IMS_SINTP nReplaceKey = 0, IN IMS_UINTP nType = 0) = 0;
 
@@ -181,10 +186,13 @@ public:
     virtual void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief
+     * @brief Notifies that the Call push operation is completed.
      *
-     * @param nResult
-     * @param objReason
+     * @deprecated This function is not used.
+     *             Call push operation is not supported.
+     *
+     * @param nResult Not used.
+     * @param objReason Not used.
      */
     virtual void SendCallPushCompleted(
             IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;

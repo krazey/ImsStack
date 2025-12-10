@@ -197,15 +197,15 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample1)
     EXPECT_TRUE(objDialog1.GetDuration() == 274);
 
     EXPECT_TRUE(objDialog1.GetReplaces().GetCallId().GetLength() == 0);
-    EXPECT_TRUE(objDialog1.GetReplaces().GetLoalTag().GetLength() == 0);
+    EXPECT_TRUE(objDialog1.GetReplaces().GetLocalTag().GetLength() == 0);
     EXPECT_TRUE(objDialog1.GetReplaces().GetRemoteTag().GetLength() == 0);
 
-    EXPECT_TRUE(objDialog1.GetReferredBy().GetDiaplay().GetLength() == 0);
+    EXPECT_TRUE(objDialog1.GetReferredBy().GetDisplay().GetLength() == 0);
     EXPECT_TRUE(objDialog1.GetReferredBy().GetUri().GetLength() == 0);
 
     EXPECT_TRUE(objDialog1.GetLocalParticipant().GetIdentity().GetUri().Equals(
             "sip:alice@example.com"));
-    EXPECT_TRUE(objDialog1.GetLocalParticipant().GetIdentity().GetDiaplay().Equals("Alice"));
+    EXPECT_TRUE(objDialog1.GetLocalParticipant().GetIdentity().GetDisplay().Equals("Alice"));
     EXPECT_TRUE(objDialog1.GetLocalParticipant().GetTarget().GetUri().Equals(
             "sip:alice@pc33.example.com"));
     EXPECT_TRUE(objDialog1.GetLocalParticipant().GetTarget().GetParams().GetValue("isfocus").Equals(
@@ -220,7 +220,7 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample1)
 
     EXPECT_TRUE(
             objDialog1.GetRemoteParticipant().GetIdentity().GetUri().Equals("sip:bob@example.org"));
-    EXPECT_TRUE(objDialog1.GetRemoteParticipant().GetIdentity().GetDiaplay().Equals("Bob"));
+    EXPECT_TRUE(objDialog1.GetRemoteParticipant().GetIdentity().GetDisplay().Equals("Bob"));
     EXPECT_TRUE(objDialog1.GetRemoteParticipant().GetTarget().GetUri().Equals(
             "sip:bobster@phone21.example.org"));
 
@@ -249,15 +249,15 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample2)
     EXPECT_TRUE(objDialog1.GetDuration() == 222);
 
     EXPECT_TRUE(objDialog1.GetReplaces().GetCallId().GetLength() == 0);
-    EXPECT_TRUE(objDialog1.GetReplaces().GetLoalTag().GetLength() == 0);
+    EXPECT_TRUE(objDialog1.GetReplaces().GetLocalTag().GetLength() == 0);
     EXPECT_TRUE(objDialog1.GetReplaces().GetRemoteTag().GetLength() == 0);
 
-    EXPECT_TRUE(objDialog1.GetReferredBy().GetDiaplay().GetLength() == 0);
+    EXPECT_TRUE(objDialog1.GetReferredBy().GetDisplay().GetLength() == 0);
     EXPECT_TRUE(objDialog1.GetReferredBy().GetUri().GetLength() == 0);
 
     EXPECT_TRUE(objDialog1.GetLocalParticipant().GetIdentity().GetUri().Equals(
             "sip:alice@example.com"));
-    EXPECT_TRUE(objDialog1.GetLocalParticipant().GetIdentity().GetDiaplay().Equals("Alice"));
+    EXPECT_TRUE(objDialog1.GetLocalParticipant().GetIdentity().GetDisplay().Equals("Alice"));
     EXPECT_TRUE(objDialog1.GetLocalParticipant().GetTarget().GetUri().Equals(
             "sip:alice@pc33.example.com"));
     EXPECT_TRUE(objDialog1.GetLocalParticipant().GetTarget().GetParams().GetValue("isfocus").Equals(
@@ -272,7 +272,7 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample2)
 
     EXPECT_TRUE(
             objDialog1.GetRemoteParticipant().GetIdentity().GetUri().Equals("sip:bob@example.org"));
-    EXPECT_TRUE(objDialog1.GetRemoteParticipant().GetIdentity().GetDiaplay().Equals("Bob"));
+    EXPECT_TRUE(objDialog1.GetRemoteParticipant().GetIdentity().GetDisplay().Equals("Bob"));
     EXPECT_TRUE(objDialog1.GetRemoteParticipant().GetTarget().GetUri().Equals(
             "sip:bobster@phone21.example.org"));
 
@@ -294,15 +294,15 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample2)
     EXPECT_TRUE(objDialog2.GetDuration() == 333);
 
     EXPECT_TRUE(objDialog2.GetReplaces().GetCallId().Equals("prevcallid"));
-    EXPECT_TRUE(objDialog2.GetReplaces().GetLoalTag().Equals("prevlocaltag"));
+    EXPECT_TRUE(objDialog2.GetReplaces().GetLocalTag().Equals("prevlocaltag"));
     EXPECT_TRUE(objDialog2.GetReplaces().GetRemoteTag().Equals("prevremotetag"));
 
-    EXPECT_TRUE(objDialog2.GetReferredBy().GetDiaplay().GetLength() == 0);
+    EXPECT_TRUE(objDialog2.GetReferredBy().GetDisplay().GetLength() == 0);
     EXPECT_TRUE(objDialog2.GetReferredBy().GetUri().GetLength() == 0);
 
     EXPECT_TRUE(objDialog2.GetLocalParticipant().GetIdentity().GetUri().Equals(
             "sip:alice@example.com"));
-    EXPECT_TRUE(objDialog2.GetLocalParticipant().GetIdentity().GetDiaplay().Equals("Alice"));
+    EXPECT_TRUE(objDialog2.GetLocalParticipant().GetIdentity().GetDisplay().Equals("Alice"));
     EXPECT_TRUE(objDialog2.GetLocalParticipant().GetTarget().GetUri().Equals(
             "sip:alice@pc33.example.com"));
     EXPECT_TRUE(objDialog2.GetLocalParticipant().GetTarget().GetParams().GetValue("isfocus").Equals(
@@ -317,7 +317,7 @@ TEST_F(DialogInfoTest, UpdateUpdatesDialogListUsingSample2)
 
     EXPECT_TRUE(objDialog2.GetRemoteParticipant().GetIdentity().GetUri().Equals(
             "sip:Mark@example.org"));
-    EXPECT_TRUE(objDialog2.GetRemoteParticipant().GetIdentity().GetDiaplay().Equals("Mark"));
+    EXPECT_TRUE(objDialog2.GetRemoteParticipant().GetIdentity().GetDisplay().Equals("Mark"));
     EXPECT_TRUE(objDialog2.GetRemoteParticipant().GetTarget().GetUri().Equals(
             "sip:bobster@phone21.example.org"));
 
