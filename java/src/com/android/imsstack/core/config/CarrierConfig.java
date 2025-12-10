@@ -1358,6 +1358,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_rtcpxr_voip_metrics_bool";
         public static final String KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL =
                 KEY_PREFIX + "audio_rtcpxr_packet_loss_rle_bool";
+        public static final String KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL =
+                KEY_PREFIX + "amr_codec_payload_format_relaxed_matching_bool";
         public static final String KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL =
                 KEY_PREFIX + "audio_rtcpxr_packet_duplicate_rle_bool";
         public static final String KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL =
