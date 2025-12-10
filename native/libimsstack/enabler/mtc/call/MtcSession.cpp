@@ -487,6 +487,9 @@ IMS_RESULT MtcSession::UpdateCallTypeFromMessage(
 PRIVATE
 void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 {
+    const CallType eCallTypeFromRemoteSdp = m_objContext.GetMessageUtils().GetCallTypeFromSdp(
+            &m_objSession, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+
     if (m_objContext.GetConfigurationProxy().GetBoolean(
                 ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
     {
@@ -502,19 +505,51 @@ void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
     }
     else
     {
-        if (auto bFeature = m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage))
+        const std::optional<IMS_BOOL> bHasVideoSdp = (eCallTypeFromRemoteSdp == CallType::UNKNOWN)
+                ? std::nullopt
+                : std::optional(eCallTypeFromRemoteSdp == CallType::VT ||
+                          eCallTypeFromRemoteSdp == CallType::VIDEO_RTT);
+        if (auto bRemoteCapability = IdentifyRemoteCapability(
+                    m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage),
+                    bHasVideoSdp))
         {
-            m_bVideoCapable = *bFeature && IsRegisteredFeature(ImsAosFeature::VIDEO);
+            m_bVideoCapable = *bRemoteCapability && IsRegisteredFeature(ImsAosFeature::VIDEO);
         }
     }
 
-    if (auto bFeature = m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage))
+    const std::optional<IMS_BOOL> bHasTextSdp = (eCallTypeFromRemoteSdp == CallType::UNKNOWN)
+            ? std::nullopt
+            : std::optional(eCallTypeFromRemoteSdp == CallType::RTT ||
+                      eCallTypeFromRemoteSdp == CallType::VIDEO_RTT);
+    if (auto bRemoteCapability = IdentifyRemoteCapability(
+                m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage), bHasTextSdp))
     {
-        m_bRttCapable = *bFeature && IsRegisteredFeature(ImsAosFeature::TEXT);
+        m_bRttCapable = *bRemoteCapability && IsRegisteredFeature(ImsAosFeature::TEXT);
     }
 
     IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] RTT[%s]", _TRACE_B_(m_bVideoCapable),
             _TRACE_B_(m_bRttCapable), 0);
+}
+
+PRIVATE
+std::optional<IMS_BOOL> MtcSession::IdentifyRemoteCapability(
+        IN std::optional<IMS_BOOL> bHasFeatureTag,
+        IN std::optional<IMS_BOOL> bContainsMediaInSdp) const
+{
+    if (bHasFeatureTag.value_or(IMS_FALSE))
+    {
+        return IMS_TRUE;  // Feature tag exists, capable.
+    }
+
+    if (!bHasFeatureTag.has_value())
+    {
+        // Feature tag is unknown. Capable only if media is in SDP.
+        // Otherwise, the capability is unknown.
+        return bContainsMediaInSdp.value_or(IMS_FALSE) ? std::optional(IMS_TRUE) : std::nullopt;
+    }
+
+    // Feature tag does not exist. The capability depends on the SDP.
+    return bContainsMediaInSdp;
 }
 
 PRIVATE

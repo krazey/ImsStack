@@ -22,6 +22,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
+#include <optional>
 #include <vector>
 
 class IMessage;
@@ -96,6 +97,32 @@ private:
     void UpdateSessionProperty();
     IMS_RESULT UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
+
+    /**
+     * @brief Returns remote capability based on the media feature tag and SDP.
+     *
+     * The capability can be identified as following table:
+     *
+     * | Remote Tag              | Remote SDP                 | Remote Capability |
+     * | :---------------------- | :------------------------- | :---------------- |
+     * | Media tag exists        | Any                        | Capable           |
+     * | Media tag doesn't exist | Media exists in SDP        | Capable           |
+     * |                         | Media doesn't exist in SDP | Uncapable         |
+     * |                         | No SDP                     | Unknown           |
+     * | No Contact header       | Media exists in SDP        | Capable           |
+     * |                         | Media doesn't exist in SDP | Unknown           |
+     * |                         | No SDP                     | Unknown           |
+     *
+     * @param bHasFeatureTag Indicates if the remote has the media feature tag in the Contact header
+     *                       or not. {@code std::nullopt} if it's unknown. (e.g. No header)
+     * @param bContainsMediaInSdp Indicates if the SDP from the remote contains the media.
+     *                            {@code std::nullopt} if it's unknown. (e.g. No SDP)
+     * @return {@code true} if remote has the media capability, {@code false} if it doesn't.
+     *         {@code std::nullopt} if it cannot be identified.
+     */
+    std::optional<IMS_BOOL> IdentifyRemoteCapability(IN std::optional<IMS_BOOL> bHasFeatureTag,
+            IN std::optional<IMS_BOOL> bContainsMediaInSdp) const;
+
     void SetInConference(IN const IMessage& objMessage);
     CallType RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const;
     CallType GetCallTypeForOfferlessInvite() const;
