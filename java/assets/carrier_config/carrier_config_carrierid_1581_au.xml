@@ -105,7 +105,7 @@
         <item value="301:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
         <item value="302:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
         <item value="305:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
-        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
         <item value="400:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="401:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="402:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->

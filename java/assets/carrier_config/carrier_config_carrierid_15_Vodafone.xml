@@ -42,7 +42,7 @@
         <item value="301:5"/>
         <item value="302:5"/>
         <item value="305:5"/>
-        <item value="380:6,5,0"/>
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
         <item value="403:11,0"/>
         <item value="404:3,9"/>
         <item value="413:3"/>
