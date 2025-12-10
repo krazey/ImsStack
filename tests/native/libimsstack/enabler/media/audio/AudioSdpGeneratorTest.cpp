@@ -15,7 +15,13 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "audio/AudioSdpGenerator.h"
+
+#include "core/MockISessionDescriptor.h"
+#include "media/MockIMediaDescriptor.h"
+
+using ::testing::_;
 
 // for AudioFmtp
 const int MODESET_LIST = 7;
@@ -225,6 +231,94 @@ TEST_F(AudioSdpGeneratorAmrTest, TestAddMaxRedToFmtp)
 
     AddMaxRedToFmtp(m_pAmrFmtpFull, strFmtp);
     EXPECT_EQ(strFmtp, STR_MAXRED);
+}
+
+class AudioSdpGeneratorFullTest : public AudioSdpGenerator, public ::testing::Test
+{
+public:
+    std::unique_ptr<MockIMediaDescriptor> m_pMockIMediaDescriptor;
+    std::unique_ptr<MockISessionDescriptor> m_pMockISessionDescriptor;
+    std::unique_ptr<AudioProfile> m_pAudioProfile;
+
+protected:
+    virtual void SetUp() override
+    {
+        m_pMockIMediaDescriptor = std::make_unique<MockIMediaDescriptor>();
+        m_pMockISessionDescriptor = std::make_unique<MockISessionDescriptor>();
+        m_pAudioProfile = std::make_unique<AudioProfile>();
+
+        // Populate the profile with various attributes to test all generator functions
+        m_pAudioProfile->SetPtime(20);
+        m_pAudioProfile->SetMaxPtime(100);
+        m_pAudioProfile->SetSupportRtcpXr(IMS_TRUE);
+        m_pAudioProfile->GetRtcpXrAttr().SetSupportVoipMetrics(IMS_TRUE);
+        m_pAudioProfile->GetRtcpXrAttr().SetSupportStatisticMetrics(IMS_TRUE);
+        m_pAudioProfile->SetAnbr(IMS_TRUE);
+
+        ImsVector<AString> candidateAttr;
+        candidateAttr.Add("1 1 UDP 2122260223 192.168.1.1 8000 typ host");
+        m_pAudioProfile->SetCandidateAttr(candidateAttr);
+
+        // Add a payload to test payload generation
+        auto pPayload = new AudioProfile::Payload();
+        pPayload->SetRtpMap(97, "AMR-WB", 16000);
+        auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
+        pFmtp->SetModeSetList(0x07);  // mode-set=0,1,2
+        pFmtp->SetVisibleModeSet(IMS_TRUE);
+        pPayload->SetFmtp(pFmtp);
+        m_pAudioProfile->AddPayload(pPayload);
+    }
+
+    virtual void TearDown() override {}
+};
+
+TEST_F(AudioSdpGeneratorFullTest, TestGenerateFullSdp)
+{
+    // Set expectations on the mock descriptors
+    EXPECT_CALL(*m_pMockISessionDescriptor, SetConnectionAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockISessionDescriptor, SetOriginAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaDescription(_, _, _, _)).Times(1);
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetBandwidthInfo(_)).Times(1);
+
+    // GeneratePayload, check payload type and number except the fmtp
+    EXPECT_CALL(*m_pMockIMediaDescriptor,
+            SetMediaFormat(SdpMediaFormat::TYPE_RTP, AString("97"), AString("AMR-WB/16000"), _))
+            .Times(1);
+
+    // GenerateDirection
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetDirection(_)).Times(1);
+    EXPECT_CALL(*m_pMockISessionDescriptor, SetDirection(_)).Times(1);
+
+    // GeneratePtime
+    EXPECT_CALL(*m_pMockIMediaDescriptor, AddAttributeInt(SdpAttribute::PTIME, 20, _)).Times(1);
+
+    // GenerateMaxPtime
+    EXPECT_CALL(*m_pMockIMediaDescriptor, AddAttributeInt(SdpAttribute::MAXPTIME, 100, _)).Times(1);
+
+    // GenerateCandidateAttribute
+    EXPECT_CALL(*m_pMockIMediaDescriptor,
+            AddAttribute(SdpAttribute::CANDIDATE,
+                    AString("1, 1 1 UDP 2122260223 192.168.1.1 8000 typ host"),
+                    AString::ConstNull()))
+            .Times(1);
+
+    // GenerateRtcpXr
+    EXPECT_CALL(*m_pMockIMediaDescriptor,
+            AddAttribute(SdpAttribute::RTCP_XR, AString("voip-metrics"), _))
+            .Times(1);
+    EXPECT_CALL(*m_pMockIMediaDescriptor,
+            AddAttribute(SdpAttribute::RTCP_XR, AString("stat-summary=loss,dup,jitt,HL"), _))
+            .Times(1);
+
+    // GenerateAnbr
+    EXPECT_CALL(*m_pMockIMediaDescriptor, AddAttribute(SdpAttribute::ANBR, _, _)).Times(1);
+
+    // Act
+    IMS_BOOL result = Generate(
+            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pAudioProfile.get());
+
+    // Assert
+    EXPECT_TRUE(result);
 }
 
 class AudioSdpGeneratorEvsTest : public AudioSdpGenerator, public ::testing::Test
