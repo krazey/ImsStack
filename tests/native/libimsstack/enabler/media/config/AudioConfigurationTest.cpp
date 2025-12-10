@@ -43,6 +43,7 @@ static const IMS_BOOL DEFAULT_RTCPXR_PACKET_LOSS_RLE =
 static const IMS_BOOL DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE =
         AudioConfiguration::DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE;
 static const IMS_SINT32 DEFAULT_DTMF_DURATION = AudioConfiguration::DEFAULT_DTMF_DURATION;
+static const char* DEFAULT_CANDIDATE_ATTRIBUTE = "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host";
 static const IMS_SINT32 DEFAULT_AS = MediaConfiguration::DEFAULT_AS;
 static const IMS_SINT32 DEFAULT_RS = MediaConfiguration::DEFAULT_RS;
 static const IMS_SINT32 DEFAULT_RR = MediaConfiguration::DEFAULT_RR;
@@ -100,6 +101,10 @@ TEST_F(AudioConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->IsRtcpXrPlrEnabled(), DEFAULT_RTCPXR_PACKET_LOSS_RLE);
     EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(), DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
     EXPECT_EQ(m_pConfig->GetDtmfDuration(), DEFAULT_DTMF_DURATION);
+    EXPECT_EQ(m_pConfig->GetAudioCandidateAttribute().GetSize(), 1);
+    EXPECT_EQ(m_pConfig->GetAudioCandidateAttribute().GetAt(0), DEFAULT_CANDIDATE_ATTRIBUTE);
+    EXPECT_EQ(m_pConfig->IsAudioInactivityCallEndReason(RTCP_INACTIVITY_ON_HOLD), IMS_FALSE);
+    EXPECT_EQ(m_pConfig->IsAmrPayloadFormatRelaxedMatching(), IMS_FALSE);
 }
 
 TEST_F(AudioConfigurationTest, CreateNullConfig)
@@ -396,4 +401,26 @@ TEST_F(AudioConfigurationTest, testIsAudioInactivityCallEndReason)
             IMS_FALSE);
     EXPECT_EQ(
             m_pConfig->IsAudioInactivityCallEndReason(E911_RTP_INACTIVITY_ON_CONNECTED), IMS_TRUE);
+}
+
+TEST_F(AudioConfigurationTest, testNegotiateAmrPayloadFormatRelaxedMatching)
+{
+    // Test case 1: The carrier config value is true
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL,
+                    IMS_FALSE))
+            .WillByDefault(Return(IMS_TRUE));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->IsAmrPayloadFormatRelaxedMatching(), IMS_TRUE);
+
+    // Test case 2: The carrier config value is false (default)
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL,
+                    IMS_FALSE))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(m_pConfig->Update(m_pMockICarrierConfig));
+    EXPECT_EQ(m_pConfig->IsAmrPayloadFormatRelaxedMatching(), IMS_FALSE);
 }

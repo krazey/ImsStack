@@ -65,7 +65,8 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
     }
     else
     {
-        auto pNegotiatedPayload = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+        auto pNegotiatedPayload = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile,
+                static_cast<AudioConfiguration*>(pConfig)->IsAmrPayloadFormatRelaxedMatching());
 
         if (pNegotiatedPayload == IMS_NULL)
         {
@@ -109,7 +110,8 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
 PRIVATE
 AudioProfile::Payload* AudioProfileNegotiator::NegotiatePayload(IN AudioProfile* pLocalProfile,
-        IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile)
+        IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile,
+        IN IMS_BOOL bAmrPayloadFormatRelaxedMatching)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -117,8 +119,8 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePayload(IN AudioProfile*
         return IMS_NULL;
     }
 
-    auto pNegotiatedPayload =
-            NegotiateAudioPayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+    auto pNegotiatedPayload = NegotiateAudioPayload(
+            pLocalProfile, pPeerProfile, pNegotiatedProfile, bAmrPayloadFormatRelaxedMatching);
 
     if (pNegotiatedPayload == IMS_NULL)
     {
@@ -147,7 +149,8 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePayload(IN AudioProfile*
 
 PRIVATE
 AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
-        IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile)
+        IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
+        IN IMS_BOOL bAmrPayloadFormatRelaxedMatching)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -169,11 +172,11 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioPro
             IMS_UINT32 nNegoModeSetList = 0;
             IMS_UINT32 nNegoDefaultRtpModeSet = 0;
 
-            if (FindAmrInProfile(
-                        pLocalProfile, pPeerPayload, &nNegoModeSetList, &nNegoDefaultRtpModeSet))
+            if (FindAmrInProfile(pLocalProfile, pPeerPayload, bAmrPayloadFormatRelaxedMatching,
+                        &nNegoModeSetList, &nNegoDefaultRtpModeSet))
             {
                 return NegotiateAmr(pLocalProfile, pPeerProfile, pNegotiatedProfile, i,
-                        nNegoModeSetList, nNegoDefaultRtpModeSet);
+                        bAmrPayloadFormatRelaxedMatching, nNegoModeSetList, nNegoDefaultRtpModeSet);
             }
         }
         else if (pPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
@@ -202,8 +205,8 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioPro
 PRIVATE
 AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
-        IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nNegoModeSetList,
-        IN IMS_UINT32 nNegoDefaultRtpModeSet)
+        IN IMS_UINT32 nPayloadIndex, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching,
+        IN IMS_UINT32 nNegoModeSetList, IN IMS_UINT32 nNegoDefaultRtpModeSet)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -226,8 +229,9 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
     pAmr->SetRtpMap(pPeerPayload->GetRtpMap());
 
     IMS_SINT32 nLocalPayloadIndex = -1;
-    std::shared_ptr<AudioProfile::AmrFmtp> pAmrFmtp = NegotiateAmrFmtp(pLocalProfile, pPeerPayload,
-            nNegoModeSetList, nNegoDefaultRtpModeSet, nLocalPayloadIndex);
+    std::shared_ptr<AudioProfile::AmrFmtp> pAmrFmtp =
+            NegotiateAmrFmtp(pLocalProfile, pPeerPayload, bAmrPayloadFormatRelaxedMatching,
+                    nNegoModeSetList, nNegoDefaultRtpModeSet, nLocalPayloadIndex);
 
     pAmr->SetFmtp(pAmrFmtp);
     pNegotiatedProfile->AddPayload(pAmr);
@@ -261,8 +265,8 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
 PRIVATE
 std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
         IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pPeerPayload,
-        IN IMS_UINT32 nNegoModeSetList, IN IMS_UINT32 nNegoDefaultRtpModeSet,
-        OUT IMS_SINT32& nLocalPayloadIndex)
+        IN IMS_BOOL bAmrPayloadFormatRelaxedMatching, IN IMS_UINT32 nNegoModeSetList,
+        IN IMS_UINT32 nNegoDefaultRtpModeSet, OUT IMS_SINT32& nLocalPayloadIndex)
 {
     if (pLocalProfile == IMS_NULL || pPeerPayload == IMS_NULL)
     {
@@ -270,8 +274,8 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
         return IMS_NULL;
     }
 
-    nLocalPayloadIndex = FindPayloadIndexFromProfile(
-            pPeerPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pPeerPayload);
+    nLocalPayloadIndex = FindPayloadIndexFromProfile(pPeerPayload->GetRtpMap().GetPayloadType(),
+            pLocalProfile, pPeerPayload, bAmrPayloadFormatRelaxedMatching);
 
     auto pLocalFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
             pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp());
@@ -306,9 +310,18 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
     pAmrFmtp->SetModeChangeNeighbor(pLocalFmtp->GetModeChangeNeighbor());
     pAmrFmtp->SetVisibleModeChangePeriod(pLocalFmtp->IsModeChangePeriodVisible());
     pAmrFmtp->SetModeChangePeriod(pLocalFmtp->GetModeChangePeriod());
-    pAmrFmtp->SetOctetAlign(pLocalFmtp->GetOctetAlign());
-    pAmrFmtp->SetVisibleOctetAlign(
-            pLocalFmtp->GetOctetAlign() == 1 ? IMS_TRUE : pLocalFmtp->IsOctetAlignVisible());
+
+    if (!bAmrPayloadFormatRelaxedMatching)
+    {
+        pAmrFmtp->SetOctetAlign(pLocalFmtp->GetOctetAlign());
+        pAmrFmtp->SetVisibleOctetAlign(
+                pLocalFmtp->GetOctetAlign() == 1 ? IMS_TRUE : pLocalFmtp->IsOctetAlignVisible());
+    }
+    else
+    {
+        IMS_TRACE_I("NegotiateAmrFmtp(): Keep the peer octetAlign value[%d]",
+                pAmrFmtp->GetOctetAlign(), 0, 0);
+    }
 
     return pAmrFmtp;
 }
@@ -529,8 +542,9 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePcm(IN AudioProfile* pLo
     {
         // Set the index of negotiated payload from the list
         pPeerProfile->SetNegotiatedPayloadIndex(nPayloadIndex);
-        pLocalProfile->SetNegotiatedPayloadIndex(FindPayloadIndexFromProfile(
-                pPeerPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pPeerPayload));
+        pLocalProfile->SetNegotiatedPayloadIndex(
+                FindPayloadIndexFromProfile(pPeerPayload->GetRtpMap().GetPayloadType(),
+                        pLocalProfile, pPeerPayload, IMS_FALSE));
     }
 
     if (pNegotiatedProfile->GetNegotiatedPayloadIndex() == -1)
@@ -1054,8 +1068,8 @@ IMS_BOOL AudioProfileNegotiator::FindMatchingEvsPayload(
 
 PRIVATE
 IMS_BOOL AudioProfileNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
-        IN AudioProfile::Payload* pPayload, OUT IMS_UINT32* pnNegoModeSetList,
-        OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
+        IN AudioProfile::Payload* pPayload, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching,
+        OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
     {
@@ -1063,15 +1077,15 @@ IMS_BOOL AudioProfileNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
         return IMS_FALSE;
     }
 
-    IMS_BOOL bRetModeSetFound = FindMatchedAmrInProfile(
-            pProfile, pPayload, RETURN_MODE_MATCHED, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
+    IMS_BOOL bRetModeSetFound = FindMatchedAmrInProfile(pProfile, pPayload, RETURN_MODE_MATCHED,
+            bAmrPayloadFormatRelaxedMatching, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
     IMS_TRACE_D("FindMatchedAmrInProfile() Ended. the 1st bRetModeSetFound: %d", bRetModeSetFound,
             0, 0);
 
     if (!bRetModeSetFound)
     {
         bRetModeSetFound = FindMatchedAmrInProfile(pProfile, pPayload, RETURN_MODE_SIMILAR,
-                pnNegoModeSetList, pnNegoDefaultRtpModeSet);
+                bAmrPayloadFormatRelaxedMatching, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
         IMS_TRACE_D("FindMatchedAmrInProfile() Ended. the 2nd bRetModeSetFound: %d",
                 bRetModeSetFound, 0, 0);
     }
@@ -1082,7 +1096,8 @@ IMS_BOOL AudioProfileNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
 PRIVATE
 IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
         IN AudioProfile::Payload* pPayload, IN IMS_BOOL bReturnMode,
-        OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
+        IN IMS_BOOL bAmrPayloadFormatRelaxedMatching, OUT IMS_UINT32* pnNegoModeSetList,
+        OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
 {
     IMS_UINT32 nTempNegoModeSetList = 0;
     IMS_UINT32 nTempDefaultNegoModeSetList = 0;
@@ -1120,7 +1135,8 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
                 continue;
             }
 
-            if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign())
+            if ((pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign()) &&
+                    !bAmrPayloadFormatRelaxedMatching)
             {
                 continue;
             }
@@ -1659,7 +1675,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(
 
 PRIVATE IMS_SINT32 AudioProfileNegotiator::FindPayloadIndexFromProfile(
         IN const AString& strCodecName, IN AudioProfile* pLocalProfile,
-        IN AudioProfile::Payload* pPeerPayload)
+        IN AudioProfile::Payload* pPeerPayload, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching)
 {
     if (pLocalProfile == IMS_NULL || pPeerPayload == IMS_NULL)
     {
@@ -1669,15 +1685,15 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindPayloadIndexFromProfile(
 
     IMS_SINT32 nRetIndex = -1;
 
-    nRetIndex = FindMatchedPayloadIndexFromProfile(
-            strCodecName, pLocalProfile, pPeerPayload, RETURN_MODE_MATCHED);
+    nRetIndex = FindMatchedPayloadIndexFromProfile(strCodecName, pLocalProfile, pPeerPayload,
+            RETURN_MODE_MATCHED, bAmrPayloadFormatRelaxedMatching);
 
     IMS_TRACE_D("FindPayloadIndexFromProfile() the 1st nRetIndex: %d", nRetIndex, 0, 0);
 
     if (nRetIndex == -1)
     {
-        nRetIndex = FindMatchedPayloadIndexFromProfile(
-                strCodecName, pLocalProfile, pPeerPayload, RETURN_MODE_SIMILAR);
+        nRetIndex = FindMatchedPayloadIndexFromProfile(strCodecName, pLocalProfile, pPeerPayload,
+                RETURN_MODE_SIMILAR, bAmrPayloadFormatRelaxedMatching);
         IMS_TRACE_D("FindPayloadIndexFromProfile() the 2nd nRetIndex: %d", nRetIndex, 0, 0);
     }
 
@@ -1686,7 +1702,8 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindPayloadIndexFromProfile(
 
 PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
         IN const AString& strCodecName, IN AudioProfile* pLocalProfile,
-        IN AudioProfile::Payload* pPeerPayload, IN IMS_BOOL bReturnMode)
+        IN AudioProfile::Payload* pPeerPayload, IN IMS_BOOL bReturnMode,
+        IN IMS_BOOL bAmrPayloadFormatRelaxedMatching)
 {
     IMS_SINT32 nTempIndex = -1;
 
@@ -1733,7 +1750,8 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                         continue;
                     }
 
-                    if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign())
+                    if ((pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign()) &&
+                            !bAmrPayloadFormatRelaxedMatching)
                     {
                         continue;
                     }
@@ -1757,6 +1775,9 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                                         "at[%d], Codec[%s], OctetAlign[%d]",
                                     i, pComparedPayload->GetRtpMap().GetPayloadType().GetStr(),
                                     pCompareFmtp->GetOctetAlign());
+                            IMS_TRACE_I("FindMatchedPayloadIndexFromProfile()"
+                                        "AmrPayloadFormatRelaxedMatching[%d]",
+                                    bAmrPayloadFormatRelaxedMatching, 0, 0);
                             IMS_TRACE_I("FindMatchedPayloadIndexFromProfile() Local/Peer is not "
                                         "exactly matched[0x%04x][0x%04x] =>[0x%04x]. Try next",
                                     pCompareFmtp->GetModeSetList(), pReceivedFmtp->GetModeSetList(),
