@@ -79,6 +79,8 @@ private:
     CallReasonInfo HandleSilentReinviteCrossSimByPermFailure(IN const IMessage* piMessage) const;
     CallReasonInfo HandleTerminate(IN const IMessage* piMessage) const;
     CallReasonInfo HandleSilentReinviteToAlternatePcscfOnce(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteToAlternatePcscf(IN const IMessage* piMessage) const;
+    CallReasonInfo HandleSilentReinviteToAlternatePcscfInternal(IN IMS_SINT32 nExtraCode) const;
 
     IMS_SINT32 GetExtraCode(IN IMS_SINT32 nCode, IN const IMessage* piMessage) const;
     inline IMS_BOOL IsCrossSimRedialAvailable() const

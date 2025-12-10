@@ -402,4 +402,29 @@ TEST_F(EmergencyStartErrorHandlerTest, HandlePcscfOnceRetryTerminationCheckIfNon
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE));
 }
 
+TEST_F(EmergencyStartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfNullAosConnector)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF);
+
+    ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfSuccess)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_503;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE,
+            ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF);
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+}
+
 }  // namespace android
