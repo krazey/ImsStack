@@ -566,61 +566,33 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     // Make new Offer/Answer model, and copy source profile from previous negotiated profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
 
-    if (m_listOaModel.IsEmpty())
-    {
-        pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
-    }
-    else
-    {
-        std::shared_ptr<OaModel> pPrevOaModel = GetNegotiatedOaModel();
+    MediaBaseProfile* pSourceProfile = m_pBaseProfile.get();
+    std::shared_ptr<OaModel> pPrevOaModel = GetNegotiatedOaModel();
 
-        if (pPrevOaModel == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        const MediaSessionConfig* pMediaSessionConfig =
+    if (pPrevOaModel != IMS_NULL && pPrevOaModel->pNegotiatedProfile != IMS_NULL)
+    {
+        const auto pMediaSessionConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                         GetSlotId(), m_pEnvironment->eServiceType);
 
-        if (pMediaSessionConfig == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
+        const bool bUseFullCapability = bEnforceReofferMode ||
+                (pMediaSessionConfig != IMS_NULL &&
+                        pMediaSessionConfig->IsSdpReofferFullCapability());
 
-        // reuse previous profile when negotiated profile data port is 0
-        if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
-                    pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0))
+        // Reuse the previously negotiated profile if the call was on hold (port 0),
+        // or if we are not explicitly configured to use full capabilities for a re-offer.
+        if (pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0 || !bUseFullCapability)
         {
-            pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                    m_eType, GetNegotiatedProfile(*pPrevOaModel));
-        }
-        else
-        {
-            if (bEnforceReofferMode)
-            {
-                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                        m_eType, m_pBaseProfile.get());
-            }
-            else
-            {
-                IMS_TRACE_I("FormReoffer(): reuse previous profile, capability[%d]",
-                        pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
-
-                if (pMediaSessionConfig->IsSdpReofferFullCapability())
-                {
-                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, m_pBaseProfile.get());
-                }
-                else if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
-                {
-                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, GetNegotiatedProfile(*pPrevOaModel));
-                }
-            }
+            pSourceProfile = GetNegotiatedProfile(*pPrevOaModel);
         }
     }
+    else
+    {
+        IMS_TRACE_I("FormReoffer(): no previous negotiated profile, using base profile.", 0, 0, 0);
+    }
+
+    pNewOaModel->pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pSourceProfile);
 
     if (pNewOaModel->pLocalProfile == IMS_NULL)
     {
@@ -635,7 +607,6 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
     }
 
-    // Modify a direction by Enabler
     if (eDirection > MEDIA_DIRECTION_INVALID)
     {
         IMS_TRACE_I("FormReoffer(): direction[%d]", eDirection, 0, 0);
