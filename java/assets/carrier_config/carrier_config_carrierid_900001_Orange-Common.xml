@@ -27,6 +27,47 @@
     <!-- Mtc -->
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
+    <int-array name="imsvoice.csfb_block_condition_int_array" num="3">
+        <item value="0"/> <!-- CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH -->
+        <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
+        <item value="3"/> <!-- CSFB_BLOCK_CONDITION_IN_ROAMING -->
+    </int-array>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="22">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
+        <item value="403:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="408:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+        <item value="500:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="501:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="502:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="503:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="513:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="580:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
+    <boolean name="imsvoice.csfb_when_all_pcscf_unavailable_bool" value="true"/>
+        <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
+        <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
+        <item value="1"/> <!-- EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
+    </int-array>
 
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
