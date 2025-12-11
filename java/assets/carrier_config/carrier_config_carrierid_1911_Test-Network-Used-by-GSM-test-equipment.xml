@@ -20,6 +20,17 @@
     <!-- Aos -->
     <boolean name="ims.use_reginfo_contact_without_uri_check_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
+    <pbundle_as_map name="ims.notify_terminated_for_init_reg_bundle">
+        <int name="ims.notify_terminated_for_init_reg_with_wait_time_int" value="2"/>
+        <int-array name="ims.notify_terminated_for_init_reg_used_event_int_array" num="3">
+            <item value="1"/>
+            <item value="2"/>
+            <item value="3"/>
+        </int-array>
+        <int-array name="ims.notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="1">
+            <item value="2"/>
+        </int-array>
+    </pbundle_as_map>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
 
     <!-- Media -->
