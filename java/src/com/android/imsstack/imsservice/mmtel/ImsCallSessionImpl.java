@@ -1234,31 +1234,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         return PreciseCallState.PRECISE_CALL_STATE_NOT_VALID;
     }
 
-    public void alertUser() {
-        if (mCall == null) {
-            return;
-        }
-
-        if (mCall.isTerminatedByAutoRejectedCall()) {
-            log("alertUser for Auto Rejected Call");
-            int code = ImsReasonInfo.CODE_UNSPECIFIED;
-            String callDisconnectCause = mCallProfile.getCallExtra(
-                    ImsCallProfile.EXTRA_CALL_DISCONNECT_CAUSE, null);
-            if (callDisconnectCause != null) {
-                try {
-                    code = Integer.parseInt(callDisconnectCause);
-                } catch (NumberFormatException e) {
-                    loge("Call extra is invalid");
-                }
-            }
-
-            notifyCallEnd(ImsCallUtils.createImsReasonInfo(code));
-            return;
-        }
-
-        mCall.alertUser();
-    }
-
     /**
      * Called when the framework has been notified of an incoming call.
      *
@@ -1425,6 +1400,32 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             default:
                 return false;
         }
+    }
+
+    private void alertUser() {
+        if (mCall == null) {
+            return;
+        }
+
+        if (mCall.isTerminatedByAutoRejectedCall()) {
+            log("alertUser for Auto Rejected Call");
+            int code = ImsReasonInfo.CODE_UNSPECIFIED;
+            String callDisconnectCause = mCallProfile.getCallExtra(
+                    ImsCallProfile.EXTRA_CALL_DISCONNECT_CAUSE, null);
+            if (callDisconnectCause != null) {
+                try {
+                    code = Integer.parseInt(callDisconnectCause);
+                } catch (NumberFormatException e) {
+                    loge("Call extra is invalid");
+                }
+            }
+
+            setState(ImsCallSessionImplBase.State.TERMINATED);
+            notifyCallEnd(ImsCallUtils.createImsReasonInfo(code));
+            return;
+        }
+
+        mCall.alertUser();
     }
 
     private void clearConferenceProxy() {

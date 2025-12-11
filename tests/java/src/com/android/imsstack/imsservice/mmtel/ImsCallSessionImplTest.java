@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -853,7 +852,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testOnIncomingcallNotifieNotifyCallTerminated() {
+    public void testOnIncomingcallNotifiedNotifyCallTerminated() {
         mImsCallSession = createImsCallSession(mCallId, false);
         mImsCallSession.mImmediateCallEndReason = Mockito.mock(ImsReasonInfo.class);
 
@@ -880,10 +879,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
         mImsCallSession.onIncomingcallNotified(true);
-        assertNotEquals(ImsCallSessionImplBase.State.TERMINATING, mImsCallSession.getState());
-        assertNotEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
-        assertNotEquals(ImsCallSessionImplBase.State.INVALID, mImsCallSession.getState());
 
+        assertEquals(ImsCallSessionImplBase.State.TERMINATED, mImsCallSession.getState());
         verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
                 eq(mImsCallSession), any(ImsReasonInfo.class));
         verify(mMockImsCallSessionCallback).invokeTerminated(
