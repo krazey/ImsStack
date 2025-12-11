@@ -17,6 +17,7 @@
 <!-- carrier_name: Orange Group -->
 <carrier_config>
     <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
+    <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="3"/>
     <!-- Aos -->
     <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="ims.pdn_reconnect_on_all_pcscfs_unavailable_bool" value="true"/>
