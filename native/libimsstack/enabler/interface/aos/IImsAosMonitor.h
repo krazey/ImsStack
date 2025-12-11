@@ -47,12 +47,13 @@ public:
      *
      * @param nType Indicate the type for the specific information. \n
      *                  - IImsAosMonitor::TYPE_HANDOVER \n
-     *                  - IImsAosMonitor::TYPE_IPCAN
+     *                  - IImsAosMonitor::TYPE_IPCAN \n
+     *                  - IImsAosMonitor::TYPE_CROSS_SIM_STATUS
      * @param nState Indicate the detailed state for the designated type.
      */
     virtual void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) = 0;
 
-    /// Types and detailed state of notification
+    /// Types for notification
     enum
     {
         /// Handover notification from WIFI to Cellular like LTE or NR
@@ -63,12 +64,22 @@ public:
         /// @param nState IIpcan::CATEGORY_MOBILE, IIpcan::CATEGORY_WLAN
         TYPE_IPCAN = 2,
 
-        /// Detailed state for the handover type
-        /// Handover is started from WIFI to Cellular
-        HANDOVER_WIFI_TO_CELLULAR_START = 100,
-        /// Handover is completed from WIFI to Cellular
-        HANDOVER_WIFI_TO_CELLULAR_COMPLETED,
+        /// Cross SIM connection status change notification
+        /// @param nState CROSS_SIM_DISCONNECTED, CROSS_SIM_CONNECTED
+        TYPE_CROSS_SIM_STATUS = 3,
     };
+
+    /// Detailed state for the handover type
+    /// Handover is started from WIFI to Cellular
+    static const IMS_UINT32 HANDOVER_WIFI_TO_CELLULAR_START = 100;
+    /// Handover is completed from WIFI to Cellular
+    static const IMS_UINT32 HANDOVER_WIFI_TO_CELLULAR_COMPLETED = 101;
+
+    /// Detailed state for the cross SIM status type
+    /// Cross SIM is not used for IMS Service.
+    static const IMS_UINT32 CROSS_SIM_DISCONNECTED = 0;
+    /// Cross SIM is used for IMS Service
+    static const IMS_UINT32 CROSS_SIM_CONNECTED = 1;
 };
 
 #endif  // INTERFACE_IMS_AOS_MONITOR_H_

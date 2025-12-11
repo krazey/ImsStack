@@ -310,6 +310,7 @@ protected:
 
     // AosServicePhoneListener
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
+    void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bConnected) override;
 
 public:
     static const IMS_UINT32 RECONFIG_GUARD_TIME_MILLIS = 1000;

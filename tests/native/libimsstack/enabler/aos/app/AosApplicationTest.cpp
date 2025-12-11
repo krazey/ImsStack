@@ -286,6 +286,7 @@ enum
     using Base::Timer_TimerExpired;                             \
     using Base::RegistrationControl_ControlRegistration;        \
     using Base::ServicePhone_LocationInfoChanged;               \
+    using Base::ServicePhone_CrossSimStatusChanged;             \
     using Base::ProcessRegTerminating;                          \
     using Base::ProcessScscfRestoration;                        \
     using Base::GetImsEstablishmentTime;                        \
@@ -3663,6 +3664,37 @@ TEST_F(AosApplicationTest,
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REFRESH);
 
     EXPECT_TRUE(m_pAosApplication->IsPdnDeactivationRequired());
+}
+
+TEST_F(AosApplicationTest, NotifyCrossSimStatusChangedWhenCallbackTrueForNormalType)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor,
+            ImsAosMonitor_Notify(
+                    IImsAosMonitor::TYPE_CROSS_SIM_STATUS, IImsAosMonitor::CROSS_SIM_CONNECTED));
+
+    m_pAosApplication->ServicePhone_CrossSimStatusChanged(IMS_TRUE);
+}
+
+TEST_F(AosApplicationTest, NotifyCrossSimStatusChangedWhenCallbackFalseForNormalType)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor,
+            ImsAosMonitor_Notify(
+                    IImsAosMonitor::TYPE_CROSS_SIM_STATUS, IImsAosMonitor::CROSS_SIM_DISCONNECTED));
+
+    m_pAosApplication->ServicePhone_CrossSimStatusChanged(IMS_FALSE);
+}
+
+TEST_F(AosApplicationTest, ShouldNotNotifyCrossSimStatusChangedWhenCallbackForEmergencyType)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor, ImsAosMonitor_Notify(_, _)).Times(0);
+
+    m_pAosApplication->ServicePhone_CrossSimStatusChanged(IMS_TRUE);
 }
 
 TEST_F(AosApplicationTest, InvokeResetReadyRecoveryWhenReceiveResetPcscfRecoveryRequest)

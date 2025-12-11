@@ -3710,3 +3710,17 @@ PROTECTED VIRTUAL void AosApplication::ServicePhone_LocationInfoChanged(IN Locat
 
     PostMessage(MSG_REG_UPDATE, 0, 0);
 }
+
+PROTECTED VIRTUAL void AosApplication::ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bConnected)
+{
+    A_IMS_TRACE_I(APPID, "ServicePhone_CrossSimStatusChanged :: CrossSim is %s",
+            (bConnected) ? "connected" : "disconnected", 0, 0);
+
+    if (m_eRegType != AosRegistrationType::NORMAL)
+    {
+        return;
+    }
+    UpdateMonitorNotify(IImsAosMonitor::TYPE_CROSS_SIM_STATUS,
+            (bConnected) ? IImsAosMonitor::CROSS_SIM_CONNECTED
+                         : IImsAosMonitor::CROSS_SIM_DISCONNECTED);
+}
