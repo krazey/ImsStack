@@ -314,6 +314,20 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfBlockedByIn
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredBehavesAsNormalCallIfAosConnectorIsNull)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(IMS_NULL));
+
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredForNormalRoutingEmergencyCall)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
