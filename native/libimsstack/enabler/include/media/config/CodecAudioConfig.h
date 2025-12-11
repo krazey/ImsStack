@@ -52,77 +52,80 @@ public:
      *
      * @return IMS_SINT32 Return the channel id - default : 1
      */
-    IMS_SINT32 GetChannel() const { return m_nChannel; }
+    virtual IMS_SINT32 GetChannel() const { return m_nChannel; }
     /**
      * @brief Get the mode-set list
      *
      * @return IMS_UINT32 Return the audio codec mode-set list
      */
-    IMS_UINT32 GetModeSetList() const { return m_nModeSetList; }
+    virtual IMS_UINT32 GetModeSetList() const { return m_nModeSetList; }
     /**
      * @brief Get the default mode-set list
      *
      * @return IMS_UINT32 Return the audio codec default mode-set list
      */
-    IMS_UINT32 GetDefaultModeSetList() const { return m_nDefaultModeSetList; }
+    virtual IMS_UINT32 GetDefaultModeSetList() const { return m_nDefaultModeSetList; }
     /**
      * @brief Get the mode-change-capability
      *
      * @return IMS_SINT32 Return the mode-change-capability
      */
-    IMS_SINT32 GetModeChangeCapability() const { return m_nModeChangeCapability; }
+    virtual IMS_SINT32 GetModeChangeCapability() const { return m_nModeChangeCapability; }
     /**
      * @brief Get the mode-change-period
      *
      * @return IMS_SINT32 Return the mode-change-period
      */
-    IMS_SINT32 GetModeChangePeriod() const { return m_nModeChangePeriod; }
+    virtual IMS_SINT32 GetModeChangePeriod() const { return m_nModeChangePeriod; }
     /**
      * @brief Get the mode-change-neighbor
      *
      * @return IMS_SINT32 Return the mode-change-neighbor
      */
-    IMS_SINT32 GetModeChangeNeighbor() const { return m_nModeChangeNeighbor; }
+    virtual IMS_SINT32 GetModeChangeNeighbor() const { return m_nModeChangeNeighbor; }
     /**
      * @brief Get the information whether to include AMR codec modeset in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include modeset attribute to sdp
      * IMS_FALSE Not include modeset attribute to sdp
      */
-    IMS_BOOL GetVisibleModeSet() const { return m_bVisibleModeSet; }
+    virtual IMS_BOOL GetVisibleModeSet() const { return m_bVisibleModeSet; }
     /**
      * @brief Get the information whether to include the mode-change-capability in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include mode-change-capability attribute to sdp
      * IMS_FALSE Not include mode-change-capability attribute to sdp
      */
-    IMS_BOOL GetVisibleModeChangeCapability() const { return m_bVisibleModeChangeCapability; }
+    virtual IMS_BOOL GetVisibleModeChangeCapability() const
+    {
+        return m_bVisibleModeChangeCapability;
+    }
     /**
      * @brief Get the information whether to include the mode-change-period in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include mode-change-period attribute to sdp
      * IMS_FALSE Not include mode-change-period attribute to sdp
      */
-    IMS_BOOL GetVisibleModeChangePeriod() const { return m_bVisibleModeChangePeriod; }
+    virtual IMS_BOOL GetVisibleModeChangePeriod() const { return m_bVisibleModeChangePeriod; }
     /**
      * @brief Get the information whether to include the mode-change-neighbor in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include mode-change-neighbor attribute to sdp
      * IMS_FALSE Not include mode-change-neighbor attribute to sdp
      */
-    IMS_BOOL GetVisibleModeChangeNeighbor() const { return m_bVisibleModeChangeNeighbor; }
+    virtual IMS_BOOL GetVisibleModeChangeNeighbor() const { return m_bVisibleModeChangeNeighbor; }
     /**
      * @brief Get the dtx (scr) enabled
      *
      * @return IMS_SINT32 Return the Audio codec (AMR/EVS) dtx enabled
      */
-    IMS_BOOL GetDtx() const { return m_bDtx; }
+    virtual IMS_BOOL GetDtx() const { return m_bDtx; }
     /**
      * @brief Convert the mode-set array to mode-set list value
      *
      * @param objCodecModeset The mode-set value array
      */
-    IMS_SINT32 ConvertModeSetList(ImsVector<IMS_SINT32> objCodecModeset);
+    virtual IMS_SINT32 ConvertModeSetList(ImsVector<IMS_SINT32> objCodecModeset);
     /**
      * @brief Set whether to include the mode-change-capability in sdp
      *

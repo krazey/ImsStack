@@ -52,13 +52,13 @@ public:
      *
      * @return IMS_SINT32 Return bandwidth-efficient or octet-align
      */
-    IMS_SINT32 GetOctetAlign() const;
+    virtual IMS_SINT32 GetOctetAlign() const;
     /**
      * @brief Get the sampling rate
      *
      * @return IMS_SINT32 Return the audio codec sampling rate
      */
-    IMS_SINT32 GetSamplingRate() const;
+    virtual IMS_SINT32 GetSamplingRate() const;
     /**
      * @brief Create the amr codec with the default values
      *

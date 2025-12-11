@@ -45,10 +45,8 @@ protected:
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     AudioProfile::Payload* CreateEvsPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreateTelephoneEventPayload(
-            IN CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreatePcmPayload(
-            IN const CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreateTelephoneEventPayload(IN CodecConfig* pCodecConfig);
+    AudioProfile::Payload* CreatePcmPayload(IN const CodecConfig* pCodecConfig);
 };
 
 #endif

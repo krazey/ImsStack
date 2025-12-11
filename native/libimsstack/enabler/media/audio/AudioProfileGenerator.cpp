@@ -91,11 +91,11 @@ void AudioProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, I
         else if (nCodec == ImsCodec::AUDIO_TELEPHONE_EVENT ||
                 nCodec == ImsCodec::AUDIO_TELEPHONE_EVENT_WB)
         {
-            pTempPayload = CreateTelephoneEventPayload(pCodecConfig, pConfig);
+            pTempPayload = CreateTelephoneEventPayload(pCodecConfig);
         }
         else if (nCodec == ImsCodec::AUDIO_PCMA || nCodec == ImsCodec::AUDIO_PCMU)
         {
-            pTempPayload = CreatePcmPayload(pCodecConfig, pConfig);
+            pTempPayload = CreatePcmPayload(pCodecConfig);
         }
 
         if (pTempPayload != IMS_NULL)
@@ -303,9 +303,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
 }
 
 PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayload(
-        IN CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig)
+        IN CodecConfig* pCodecConfig)
 {
-    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    if (pCodecConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "CreateTelephoneEventPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
@@ -332,9 +332,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
 }
 
 PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
-        IN const CodecConfig* pCodecConfig, IN const MediaConfiguration* pConfig)
+        IN const CodecConfig* pCodecConfig)
 {
-    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    if (pCodecConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "CreatePcmPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;

@@ -41,10 +41,10 @@ std::shared_ptr<MediaBaseProfile> MediaProfileGenerator::Generate(MEDIA_SERVICE_
 {
     if (pIService == IMS_NULL || pConfig == IMS_NULL)
     {
-        return nullptr;
+        return IMS_NULL;
     }
 
-    IMS_TRACE_I("Generate() media type[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("Generate(): media type[%d]", m_eType, 0, 0);
 
     auto pProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
     SetPayloads(pProfile.get(), pConfig);

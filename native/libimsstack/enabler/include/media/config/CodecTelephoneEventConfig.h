@@ -53,19 +53,19 @@ public:
      *
      * @return const AString& Return the events string - default: "0-15"
      */
-    const AString& GetEvents() const;
+    virtual const AString& GetEvents() const;
     /**
      * @brief Get the redundancy count
      *
      * @return IMS_SINT32 Return the redundancy count
      */
-    IMS_SINT32 GetRedundancyCount() const;
+    virtual IMS_SINT32 GetRedundancyCount() const;
     /**
      * @brief Get the sampling rate
      *
      * @return IMS_SINT32 Return the sample rate for telephoneEvent
      */
-    IMS_SINT32 GetSamplingRate() const;
+    virtual IMS_SINT32 GetSamplingRate() const;
 
     static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT = 3;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE = 8000;

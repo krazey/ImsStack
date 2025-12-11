@@ -139,89 +139,89 @@ public:
      * @return IMS_BOOL Return IMS_TRUE Include dtx to sdp
      * IMS_FALSE Not include dtx to sdp
      */
-    IMS_BOOL GetVisibleDtx() const;
+    virtual IMS_BOOL GetVisibleDtx() const;
     /**
      * @brief Get the dtx recv
      *
      * @return IMS_BOOL Return true if dtx-recv is supported
      * Return false if dtx-recv is not supported
      */
-    IMS_BOOL GetDtxRecv() const;
+    virtual IMS_BOOL GetDtxRecv() const;
     /**
      * @brief Get the information whether to include Header-full only in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include HfOnly to sdp
      * IMS_FALSE Not include HfOnly to sdp
      */
-    IMS_BOOL GetVisibleHfOnly() const;
+    virtual IMS_BOOL GetVisibleHfOnly() const;
     /**
      * @brief Get the header-full only mode
      *
      * @return IMS_SINT32 Return the HFonly mode
      */
-    IMS_SINT32 GetHfOnly() const;
+    virtual IMS_SINT32 GetHfOnly() const;
     /**
      * @brief Get the information whether to include Evs mode switch in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include evs mode switch to sdp
      * IMS_FALSE Not include evs mode switc to sdp
      */
-    IMS_BOOL GetVisibleEvsModeSwitch() const;
+    virtual IMS_BOOL GetVisibleEvsModeSwitch() const;
     /**
      * @brief Get the evs mode switch
      *
      * @return IMS_SINT32 Return the evs-mode-switch
      */
-    IMS_SINT32 GetEvsModeSwitch() const;
+    virtual IMS_SINT32 GetEvsModeSwitch() const;
     /**
      * @brief Get the bitrate list
      *
      * @return IMS_UINT32 Return the bitrate list
      */
-    IMS_UINT32 GetBrList() const;
+    virtual IMS_UINT32 GetBrList() const;
     /**
      * @brief Get the bitrate
      *
      * @return IMS_SINT32 Return the bitrate
      */
-    IMS_SINT32 GetBr() const;
+    virtual IMS_SINT32 GetBr() const;
     /**
      * @brief Get the bandwidth list
      *
      * @return IMS_UINT32 Return the bandwidth list
      */
-    IMS_UINT32 GetBwList() const;
+    virtual IMS_UINT32 GetBwList() const;
     /**
      * @brief Get the information whether to include cmr in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include cmr to sdp
      * IMS_FALSE Not include cmr to sdp
      */
-    IMS_BOOL GetVisibleCmr() const;
+    virtual IMS_BOOL GetVisibleCmr() const;
     /**
      * @brief Get the cmr
      *
      * @return IMS_SINT32 Return cmr (code-mode_request) value
      */
-    IMS_SINT32 GetCmr() const;
+    virtual IMS_SINT32 GetCmr() const;
     /**
      * @brief Get the information whether to include channel-aware recv in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include channel-aware recv to sdp
      * IMS_FALSE Not include channel-aware recv to sdp
      */
-    IMS_BOOL GetVisibleChAwareRecv() const;
+    virtual IMS_BOOL GetVisibleChAwareRecv() const;
     /**
      * @brief Get the channel-aware recv
      *
      * @return IMS_SINT32 Return the channel-aware recv value
      */
-    IMS_SINT32 GetChAwareRecv() const;
+    virtual IMS_SINT32 GetChAwareRecv() const;
     /**
      * @brief Create the default Evs codec
      *
      */
-    VIRTUAL void CreateDefaultEvsCodec();
+    virtual void CreateDefaultEvsCodec();
 
 private:
     static IMS_SINT32 ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd);
