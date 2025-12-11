@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -31,14 +35,14 @@
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIPassiveTimerHolder.h"
+#include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
-#include "helper/OperationAsyncRunner.h"
 #include "media/MockIMtcMediaManager.h"
 #include <functional>
-#include <memory>
 #include <gtest/gtest.h>
 #include <initializer_list>
+#include <memory>
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -63,12 +67,18 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objISession;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
-    MockSessionInterfaceHolder objSessionInterfaceHolder;
+    MockSessionInterfaceHolder* pSessionInterfaceHolder;
+    TestConfigService objConfigService;
     MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
+
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
@@ -81,14 +91,19 @@ protected:
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(ReturnRef(objSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
         ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
                 .WillByDefault(ReturnRef(objMediaInfo));
 
         pCallController = new MtcCallController(objContext);
     }
 
-    virtual void TearDown() override { delete pCallController; }
+    virtual void TearDown() override
+    {
+        delete pSessionInterfaceHolder;
+        delete pCallController;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+    }
 
     MockIMtcCall* CreateMockIMtcCall(CallKey nKey)
     {
@@ -480,17 +495,17 @@ TEST_F(MtcCallControllerTest, HandleByeTransactionAddsListenerToSessionHolder)
     {
     };
 
-    EXPECT_CALL(objSessionInterfaceHolder, AddListener(_)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddListener(_)).Times(1);
 
     pCallController->HandleByeTransaction(nCallKey, objOperation);
 
-    EXPECT_CALL(objSessionInterfaceHolder, RemoveListener(_)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, RemoveListener(_)).Times(0);
 }
 
 TEST_F(MtcCallControllerTest, OnByeTransactionCompletedRemovesListenerAndDeletesHandler)
 {
     CallKey nCallKey = 1;
-    EXPECT_CALL(objSessionInterfaceHolder, RemoveListener(_));
+    EXPECT_CALL(*pSessionInterfaceHolder, RemoveListener(_));
 
     std::function<void(ISession&)> objOperation = [](ISession&)
     {
@@ -515,12 +530,12 @@ TEST_F(MtcCallControllerTest, OnByeTransactionCompletedRemovesListenerAndDeletes
     {
     };
 
-    EXPECT_CALL(objSessionInterfaceHolder, AddListener(_)).Times(2);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddListener(_)).Times(2);
 
     pCallController->HandleByeTransaction(nCallKey, objOperation);
     pCallController->HandleByeTransaction(nCallKey, objOperation);
 
-    EXPECT_CALL(objSessionInterfaceHolder, RemoveListener(_)).Times(2);
+    EXPECT_CALL(*pSessionInterfaceHolder, RemoveListener(_)).Times(2);
 
     std::unique_ptr<ByeTransactionHandler> pHandler =
             std::make_unique<ByeTransactionHandler>(nCallKey, *pCallController,

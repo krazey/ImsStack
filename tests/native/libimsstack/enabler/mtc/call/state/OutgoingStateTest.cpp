@@ -19,8 +19,8 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
-#include "INetworkWatcher.h"
 #include "IImsRadio.h"
+#include "INetworkWatcher.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "Ims3gpp.h"
@@ -110,15 +110,16 @@ public:
     MediaInfo objMediaInfo;
     ImsList<IMtcSession*> objSessions;
     MockIMtcCallManager objCallManager;
-    TestConfigService* pConfigService;
+    TestConfigService objConfigService;
     ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigService = new TestConfigService();
-        pConfigService->SetCarrierConfig(&(pConfigService->GetMockCarrierConfig()));
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, pConfigService);
+        objConfigService.SetCarrierConfig(&objConfigService.GetMockCarrierConfig());
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
 
         objAckMethod = SipMethod::ACK;
         objInviteMethod = SipMethod::INVITE;
@@ -179,7 +180,6 @@ protected:
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
 
-        delete pConfigService;
         delete pOutgoingState;
         delete pConfigurationProxy;
         delete pSupplementaryService;
@@ -1513,7 +1513,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
     IMS_SINT32 nAnyRetryAfter = 10;
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
-    ON_CALL(pConfigService->GetMockCarrierConfig(),
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
