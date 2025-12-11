@@ -115,6 +115,7 @@ PUBLIC VIRTUAL MtcService::~MtcService()
     if (piImsAos != IMS_NULL)
     {
         piImsAos->SetListener(IMS_NULL);
+        piImsAos->SetMonitor(IMS_NULL);
     }
 
     delete m_pAosEventHandler;
@@ -383,7 +384,14 @@ PUBLIC VIRTUAL void MtcService::ImsAosMonitor_Connected(
 
 PUBLIC VIRTUAL void MtcService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
+    IMS_TRACE_I("ImsAosMonitor_Notify :: nType(%d), nState(%d)", nType, nState, 0);
+
     m_pAosEventHandler->OnEventNotify(nType, nState);
+
+    if (nType == IImsAosMonitor::TYPE_IPCAN)
+    {
+        m_pNetworkWatcher->OnConnected(nState);
+    }
 }
 
 PRIVATE
@@ -468,6 +476,7 @@ void MtcService::AttachAosInterface()
         return;
     }
     piImsAos->SetListener(this);
+    piImsAos->SetMonitor(this);
     m_pAosConnector = new MtcAosConnector(*piImsAos, *(piImsAos->GetAosInfo()));
 }
 
