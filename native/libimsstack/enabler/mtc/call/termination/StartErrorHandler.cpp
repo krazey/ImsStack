@@ -412,6 +412,14 @@ CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy
             case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
                 ControlAos(ImsAosControl::REGISTER_REINITIATE);
                 return GetDefaultCallReasonInfo(m_objContext, objMessage);
+
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_THEN_SILENT_REDIAL:
+                if (HasActiveCalls())
+                {
+                    break;
+                }
+                ControlAos(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+                return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
         }
     }
 

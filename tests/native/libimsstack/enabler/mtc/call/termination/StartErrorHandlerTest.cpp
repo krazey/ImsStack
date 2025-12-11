@@ -1181,6 +1181,31 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistrationByIms3g
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
+TEST_F(StartErrorHandlerTest, Handle504ResponseRestoreRegistrationByIms3gppValidationThenRedial)
+{
+    SetMessageCode(SipStatusCode::SC_504);
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_RECOVER_THEN_SILENT_REDIAL));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(1);
+
+    Ims3gppData objIms3gppData;
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
+    objIms3gppData.eAlternativeServiceAction =
+            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
+    ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+}
+
 TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigNotAvailable)
 {
     SetActionConfig(SipStatusCode::SC_504,
