@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
@@ -25,6 +27,7 @@
 #include "MockINetworkWatcher.h"
 #include "MockISession.h"
 #include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "TestImsRadioService.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
@@ -61,7 +64,7 @@ public:
             m_objEmergencyService(),
             m_objIMtcRadioCheckerListener(),
             m_objSipInterfaceFactory(),
-            m_objSessionInterfaceHolder(),
+            m_pSessionInterfaceHolder(IMS_NULL),
             m_objImsRadioService(),
             m_piImsRadioConnectionListener(IMS_NULL),
             m_objCallContext(),
@@ -78,11 +81,12 @@ public:
     MockIMtcSipInterfaceFactory m_objSipInterfaceFactory;
     MockIMtcCallManager m_objCallManager;
     MockIMtcCall m_objCall;
-    MockSessionInterfaceHolder m_objSessionInterfaceHolder;
+    MockSessionInterfaceHolder* m_pSessionInterfaceHolder;
     TestImsRadioService m_objImsRadioService;
     IImsRadioConnectionListener* m_piImsRadioConnectionListener;
     MockIMtcCallContext m_objCallContext;
     MockEpsFallbackTrigger m_objEpsFbTrigger;
+    TestConfigService objConfigService;
     MtcRadioChecker* m_pMtcRadioChecker;
 
     void CaptureIImsRadioConnectionListener(
@@ -96,6 +100,10 @@ protected:
     {
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &m_objImsRadioService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
+        m_pSessionInterfaceHolder = new MockSessionInterfaceHolder();
 
         ON_CALL(m_objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
@@ -112,7 +120,7 @@ protected:
         ON_CALL(m_objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(m_objSipInterfaceFactory));
         ON_CALL(m_objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(ReturnRef(m_objSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*m_pSessionInterfaceHolder));
 
         ON_CALL(m_objContext, GetCallManager).WillByDefault(ReturnRef(m_objCallManager));
         ON_CALL(m_objCallManager, GetCallByCallKey(_)).WillByDefault(Return(&m_objCall));
@@ -130,7 +138,8 @@ protected:
     virtual void TearDown() override
     {
         delete m_pMtcRadioChecker;
-
+        delete m_pSessionInterfaceHolder;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
     }
@@ -143,13 +152,13 @@ TEST_F(MtcRadioCheckerTest, InitAddsListenersAndDeInitRemovesListeners)
 
     MtcRadioChecker objTempObject(m_objContext);
 
-    EXPECT_CALL(m_objSessionInterfaceHolder, AddListener(_));
+    EXPECT_CALL(*m_pSessionInterfaceHolder, AddListener(_));
     EXPECT_CALL(m_objNormalService, AddNetworkWatcherListener(_));
     EXPECT_CALL(m_objEmergencyService, AddNetworkWatcherListener(_));
 
     objTempObject.Init();
 
-    EXPECT_CALL(m_objSessionInterfaceHolder, RemoveListener(&objTempObject));
+    EXPECT_CALL(*m_pSessionInterfaceHolder, RemoveListener(&objTempObject));
     EXPECT_CALL(m_objNormalService, RemoveNetworkWatcherListener(_));
     EXPECT_CALL(m_objEmergencyService, RemoveNetworkWatcherListener(_));
 
