@@ -19,6 +19,7 @@
 #include "text/TextNego.h"
 #include "MediaDef.h"
 #include "MediaEnvironment.h"
+
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"
@@ -138,6 +139,22 @@ protected:
     }
 };
 
+TEST_F(TextNegoTest, testIsMediaCodecFromSdpSupportedNullArgs)
+{
+    MockIMediaDescriptor objTextDescriptor;
+    MockISessionDescriptor objSessionDescriptor;
+
+    EXPECT_FALSE(m_pTextNego->IsMediaCodecFromSdpSupported(nullptr, &objTextDescriptor));
+    EXPECT_FALSE(m_pTextNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, nullptr));
+
+    // Test with null base profile by having the generator return null
+    ON_CALL(*m_pMockProfileGenerator, Generate(_, _, _, _)).WillByDefault(Return(nullptr));
+    m_pTextNego->CreateProfiles(m_pEnvironment, m_pConfig);
+
+    EXPECT_FALSE(
+            m_pTextNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objTextDescriptor));
+}
+
 TEST_F(TextNegoTest, testIsMediaCodecFromSdpSupported)
 {
     MockIMediaDescriptor objTextDescriptor;
@@ -145,9 +162,16 @@ TEST_F(TextNegoTest, testIsMediaCodecFromSdpSupported)
     MockMediaProfileFactory objMediaProfileFactory;
     MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
+    // Test parse fail
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_FALSE));
     EXPECT_EQ(m_pTextNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objTextDescriptor),
             IMS_FALSE);
+
+    // Test negotiate fail
+    ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(
+            m_pTextNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objTextDescriptor));
 
     TextProfile::Payload* pT140 = new TextProfile::Payload();
     pT140->SetRtpMap(99, "t140", 1000);
@@ -374,6 +398,34 @@ TEST_F(TextNegoTest, testFormSdpInvalid)
             MEDIA_DIRECTION_INVALID, IMS_FALSE, IMS_FALSE));
 }
 
+TEST_F(TextNegoTest, testFormAnswerInvalid)
+{
+    MockISessionDescriptor objSessionDescriptor;
+    MockIMediaDescriptor objMediaDescriptor;
+
+    // No OaModel in the list
+    EXPECT_FALSE(m_pTextNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
+            &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
+
+    // Add an invalid OaModel
+    m_pTextNego->GetOaModelList().Append(std::make_shared<BaseNego::OaModel>());
+    EXPECT_FALSE(m_pTextNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
+            &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
+}
+
+TEST_F(TextNegoTest, testFormReofferInvalid)
+{
+    MockISessionDescriptor objSessionDescriptor;
+    MockIMediaDescriptor objMediaDescriptor;
+
+    // Test with null base profile by having the generator return null
+    ON_CALL(*m_pMockProfileGenerator, Generate(_, _, _, _)).WillByDefault(Return(nullptr));
+    m_pTextNego->CreateProfiles(m_pEnvironment, m_pConfig);
+
+    EXPECT_FALSE(m_pTextNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
+            MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_TRUE));
+}
+
 TEST_F(TextNegoTest, testFormSdpOfferIdleGenerateFail)
 {
     MockISessionDescriptor objSessionDescriptor;
@@ -423,6 +475,22 @@ TEST_F(TextNegoTest, testNegotiateSdpIdleNegotiateFail)
     ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_FALSE));
     m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+}
+
+TEST_F(TextNegoTest, testNegotiateSdpAnswerParseFail)
+{
+    MockISessionDescriptor objSessionDescriptor;
+    MockIMediaDescriptor objMediaDescriptor;
+    MEDIA_DIRECTION eDirection;
+
+    // Form offer first to have an OaModel
+    m_pTextNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
+            MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE);
+
+    ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_FALSE));
+    m_pTextNego->NegotiateSdp(
+            STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
@@ -617,6 +685,52 @@ TEST_F(TextNegoTest, testGetNegotiatedRtpPortValid)
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
     m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_NE(m_pTextNego->GetNegotiatedRtpPort(), -1);
+}
+
+TEST_F(TextNegoTest, testGetNegotiatedCodec)
+{
+    MockISessionDescriptor objSessionDescriptor;
+    MockIMediaDescriptor objMediaDescriptor;
+    MEDIA_DIRECTION eDirection;
+
+    // Setup for T140 negotiation
+    auto pNegoProfileT140 = std::make_shared<TextProfile>();
+    TextProfile::Payload* pT140Payload = new TextProfile::Payload();
+    pT140Payload->SetRtpMap(T140_PAYLOAD, "t140", 1000);
+    pNegoProfileT140->AddPayload(pT140Payload);
+
+    MockMediaProfileFactory objMediaProfileFactory;
+    MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
+    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
+            .WillRepeatedly(Return(pNegoProfileT140));
+
+    ON_CALL(*m_pMockTextSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+
+    EXPECT_EQ(m_pTextNego->GetNegotiatedCodec(), TEXT_CODEC_T140);
+
+    // Setup for RED negotiation
+    auto pNegoProfileRed = std::make_shared<TextProfile>();
+    TextProfile::Payload* pRedPayload = new TextProfile::Payload();
+    pRedPayload->SetRtpMap(RED_PAYLOAD, "red", 1000);
+    pNegoProfileRed->AddPayload(pRedPayload);
+
+    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
+            .WillRepeatedly(Return(pNegoProfileRed));
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+
+    EXPECT_EQ(m_pTextNego->GetNegotiatedCodec(), TEXT_CODEC_T140_RED);
+
+    // Setup for unsupported codec
+    auto pNegoProfileOther = std::make_shared<TextProfile>();
+    TextProfile::Payload* pOtherPayload = new TextProfile::Payload();
+    pOtherPayload->SetRtpMap(120, "other", 1000);
+    pNegoProfileOther->AddPayload(pOtherPayload);
+    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
+            .WillRepeatedly(Return(pNegoProfileOther));
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(m_pTextNego->GetNegotiatedCodec(), TEXT_CODEC_NONE);
 }
 
 TEST_F(TextNegoTest, testSetPort)

@@ -140,6 +140,117 @@ TEST_F(TextSessionTest, testUpdateMediaQualityThreshold)
     EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
 }
 
+TEST_F(TextSessionTest, testUpdateMediaQualityThresholdNoConfig)
+{
+    m_pSession->SetConfiguration(nullptr);
+    EXPECT_FALSE(m_pSession->UpdateMediaQualityThreshold());
+}
+
+TEST_F(TextSessionTest, testUpdateRtpConfigNullArgs)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+
+    EXPECT_FALSE(m_pSession->UpdateRtpConfig(nullptr, &objPeerProfile, &objNegoProfile));
+    EXPECT_FALSE(m_pSession->UpdateRtpConfig(&objLocalProfile, nullptr, &objNegoProfile));
+    EXPECT_FALSE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, nullptr));
+}
+
+TEST_F(TextSessionTest, testUpdateRtpConfigEmptyPayloads)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+
+    // Add payload to local and peer, but not nego
+    TextProfile::Payload* pPayload = new TextProfile::Payload();
+    pPayload->SetRtpMap(100, "t140", 1000);
+    objLocalProfile.AddPayload(pPayload);
+    objPeerProfile.AddPayload(new TextProfile::Payload(*pPayload));
+
+    // Nego profile is empty
+    EXPECT_FALSE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+
+    // Add to nego, but peer is empty
+    objNegoProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objPeerProfile.GetPayloadList().Clear();
+    EXPECT_FALSE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+}
+
+TEST_F(TextSessionTest, testUpdateRtpConfigT140)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+
+    TextProfile::Payload* pPayload = new TextProfile::Payload();
+    pPayload->SetRtpMap(100, "t140", 1000);
+
+    objLocalProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objPeerProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objNegoProfile.AddPayload(pPayload);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+    TextConfig* pTextConfig = reinterpret_cast<TextConfig*>(m_pSession->GetRtpConfig());
+    EXPECT_EQ(pTextConfig->getCodecType(), TextConfig::TEXT_T140);
+}
+
+TEST_F(TextSessionTest, testUpdateRtpConfigInvalidPayloadType)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+
+    TextProfile::Payload* pPayload = new TextProfile::Payload();
+    pPayload->SetRtpMap(100, "invalid", 1000);
+
+    objLocalProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objPeerProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objNegoProfile.AddPayload(pPayload);
+
+    EXPECT_FALSE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+}
+
+TEST_F(TextSessionTest, testUpdateRtpConfigRedNoFmtp)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+
+    TextProfile::Payload* pPayload = new TextProfile::Payload();
+    pPayload->SetRtpMap(100, "red", 1000);
+    pPayload->SetFmtp(nullptr);  // No fmtp
+
+    objLocalProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objPeerProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objNegoProfile.AddPayload(pPayload);
+
+    // The loop continues and finds no other valid codec, so it returns true but config is not set
+    // for RED.
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+    TextConfig* pTextConfig = reinterpret_cast<TextConfig*>(m_pSession->GetRtpConfig());
+    EXPECT_NE(pTextConfig->getCodecType(), TextConfig::TEXT_T140_RED);
+}
+
+TEST_F(TextSessionTest, testUpdateRtpConfigDirection)
+{
+    TextProfile objLocalProfile;
+    TextProfile objPeerProfile;
+    TextProfile objNegoProfile;
+    TextProfile::Payload* pPayload = new TextProfile::Payload();
+    pPayload->SetRtpMap(100, "t140", 1000);
+    objLocalProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objPeerProfile.AddPayload(new TextProfile::Payload(*pPayload));
+    objNegoProfile.AddPayload(pPayload);
+
+    // Test port 0 case
+    objNegoProfile.SetDataPort(0);
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+    TextConfig* pTextConfig = reinterpret_cast<TextConfig*>(m_pSession->GetRtpConfig());
+    EXPECT_EQ(pTextConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+}
+
 TEST_F(TextSessionTest, testUpdateRtpConfig)
 {
     TextProfile objLocalProfile;
@@ -192,13 +303,30 @@ TEST_F(TextSessionTest, UpdateRtpConfig_RedundantLevelIsZero)
     objNegoProfile.AddPayload(pNegoPayload);
 
     // Action: Update the RTP configuration.
-    EXPECT_TRUE(
-            m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(&objLocalProfile, &objPeerProfile, &objNegoProfile));
 
     // Verification: The internal redundant level should be floored at 0.
     TextConfig* pTextConfig = reinterpret_cast<TextConfig*>(m_pSession->GetRtpConfig());
     ASSERT_NE(pTextConfig, nullptr);
     EXPECT_EQ(pTextConfig->getRedundantLevel(), 0);
+}
+
+TEST_F(TextSessionTest, testOpenFail)
+{
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_OPEN_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_FALSE(m_pSession->Open());
+    EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_NONE);
+}
+
+TEST_F(TextSessionTest, testOpenNoListener)
+{
+    m_pSession->SetMediaSessionListener(nullptr);
+    EXPECT_FALSE(m_pSession->Open());
+    EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_NONE);
 }
 
 TEST_F(TextSessionTest, testOpen)
@@ -210,6 +338,24 @@ TEST_F(TextSessionTest, testOpen)
 
     EXPECT_TRUE(m_pSession->Open());
     EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_IDLE);
+}
+
+TEST_F(TextSessionTest, testModifyFail)
+{
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pSession->SetState(TextSession::STATE_IDLE);
+    EXPECT_FALSE(m_pSession->Modify());
+    EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_IDLE);  // State should not change
+}
+
+TEST_F(TextSessionTest, testModifyNoListener)
+{
+    m_pSession->SetMediaSessionListener(nullptr);
+    EXPECT_FALSE(m_pSession->Modify());
 }
 
 TEST_F(TextSessionTest, testModify)
@@ -224,6 +370,24 @@ TEST_F(TextSessionTest, testModify)
     EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_LIVE);
 }
 
+TEST_F(TextSessionTest, testCloseFail)
+{
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_CLOSE_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pSession->SetState(TextSession::STATE_IDLE);
+    EXPECT_FALSE(m_pSession->Close());
+    EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_IDLE);  // State should not change
+}
+
+TEST_F(TextSessionTest, testCloseNoListener)
+{
+    m_pSession->SetMediaSessionListener(nullptr);
+    EXPECT_FALSE(m_pSession->Close());
+}
+
 TEST_F(TextSessionTest, testClose)
 {
     EXPECT_CALL(m_objMockListener,
@@ -233,6 +397,24 @@ TEST_F(TextSessionTest, testClose)
 
     EXPECT_TRUE(m_pSession->Close());
     EXPECT_EQ(m_pSession->GetState(), TextSession::STATE_NONE);
+}
+
+TEST_F(TextSessionTest, testSetMediaQualityFail)
+{
+    m_pSession->SetState(TextSession::STATE_IDLE);
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_SET_MEDIA_QUALITY, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_FALSE(m_pSession->SetMediaQuality());
+}
+
+TEST_F(TextSessionTest, testSetMediaQualityNoListener)
+{
+    m_pSession->SetState(TextSession::STATE_IDLE);
+    m_pSession->SetMediaSessionListener(nullptr);
+    EXPECT_FALSE(m_pSession->SetMediaQuality());
 }
 
 TEST_F(TextSessionTest, testSetMediaQuality)
