@@ -308,6 +308,7 @@ void MtcMediaManager::DestroyAllMediaProfiles()
 PUBLIC
 void MtcMediaManager::SetLocalTone(IN IMS_BOOL bLocalTone)
 {
+    IMS_TRACE_D("SetLocalTone : use local ringback tone [%s]", _TRACE_B_(bLocalTone), 0, 0);
     m_bLocalTone = bLocalTone;
 }
 
@@ -705,9 +706,8 @@ PRIVATE
 void MtcMediaManager::UpdateLocalTone(
         IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState)
 {
-    IMS_TRACE_D("UpdateLocalTone", 0, 0, 0);
-    IMS_BOOL bUseLocalTone = IMS_FALSE;
-
+    IMS_SINT32 nStatusCode = piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+    IMS_TRACE_D("UpdateLocalTone status code[%d]", nStatusCode, 0, 0);
     /* 3GPP 24.628 - 4.7.2.1
      * NOTE 1 : In-band information received from the network overrides any locally generated
      * communication progress information also when the most recently received P-Early-Media header
@@ -715,48 +715,47 @@ void MtcMediaManager::UpdateLocalTone(
      */
     if (!m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_180))
     {
-        bUseLocalTone = IMS_FALSE;
+        SetLocalTone(IMS_FALSE);
+        return;
     }
-    else if (eNegoState != NegotiationState::STATE_NEGOTIATED)
+
+    if (nStatusCode == SipStatusCode::SC_181 || nStatusCode == SipStatusCode::SC_182)
+    {
+        SetLocalTone(IMS_FALSE);
+        return;
+    }
+
+    if (eNegoState != NegotiationState::STATE_NEGOTIATED)
     {
         // Play local tone when 180 response is received without negotiation
-        bUseLocalTone = IMS_TRUE;
+        SetLocalTone(IMS_TRUE);
+        return;
     }
-    else
+
+    IMS_SINT32 nLocalRbtPolicy = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
+
+    IMS_TRACE_D("UpdateLocalTone : local RBT policy[%d]", nLocalRbtPolicy, 0, 0);
+
+    switch (nLocalRbtPolicy)
     {
-        IMS_SINT32 nLocalRbtPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
-
-        IMS_TRACE_D("UpdateLocalTone : local RBT policy[%d]", nLocalRbtPolicy, 0, 0);
-
-        switch (nLocalRbtPolicy)
+        case USE_DYNAMIC_NW_TONE_TIMER:
+            SetLocalTone(IMS_FALSE);
+            return;
+        case NOT_USE_DYNAMIC_NW_TONE_TIMER:
         {
-            case USE_DYNAMIC_NW_TONE_TIMER:
-                bUseLocalTone = IMS_FALSE;
-                break;
-            case NOT_USE_DYNAMIC_NW_TONE_TIMER:
-            {
-                // AT&T, T-Mobile US
-                PemType eType = GetPemType(piSession);
-                bUseLocalTone = (eType != PemType::SENDONLY && eType != PemType::SENDRECV);
-                break;
-            }
-            case LOCAL_TONE_WITH_180_BY_FORCE:
-            {
-                // Verizon
-                IMS_SINT32 eCode =
-                        (piMessage) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
-
-                bUseLocalTone = (eCode == SipStatusCode::SC_180);
-                break;
-            }
-            default:
-                break;
+            // AT&T, T-Mobile US
+            PemType eType = GetPemType(piSession);
+            SetLocalTone(eType != PemType::SENDONLY && eType != PemType::SENDRECV);
+            return;
+        }
+        default:  // LOCAL_TONE_WITH_180_BY_FORCE
+        {
+            // Verizon
+            SetLocalTone(nStatusCode == SipStatusCode::SC_180);
+            return;
         }
     }
-
-    SetLocalTone(bUseLocalTone);
-    IMS_TRACE_D("UpdateLocalTone : use local ringback tone [%s]", _TRACE_B_(bUseLocalTone), 0, 0);
 }
 
 PRIVATE
@@ -768,8 +767,6 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bNetwo
     }
 
     SetLocalTone(!bNetworkToneReceived);
-    IMS_TRACE_D("UpdateLocalTone : use local ringback tone [%s]", _TRACE_B_(!bNetworkToneReceived),
-            0, 0);
 }
 
 PRIVATE
@@ -799,7 +796,7 @@ IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(
      * For SIP response 181 and 182 to the SIP INVITE, the UE must not locally render tones to
      * indicate diversion or queueing of calls.
      */
-    IMS_SINT32 nStatusCode = (piMessage) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+    IMS_SINT32 nStatusCode = piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
     if (nStatusCode == SipStatusCode::SC_181 || nStatusCode == SipStatusCode::SC_182)
     {
         IMS_TRACE_D("IsNecessaryToRunMedia Run the media in 181/182 response case.", 0, 0, 0);
@@ -848,7 +845,7 @@ IMS_UINT32 MtcMediaManager::GetWaitingNetworkToneDuration(
         return TIME_NO_WAIT_NW_TONE_RTP;
     }
 
-    IMS_SINT32 nStatusCode = (piMessage) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+    IMS_SINT32 nStatusCode = piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
     if (nStatusCode == SipStatusCode::SC_181 || nStatusCode == SipStatusCode::SC_182)
     {
         return TIME_NO_WAIT_NW_TONE_RTP;
