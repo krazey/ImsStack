@@ -375,19 +375,14 @@ PUBLIC VIRTUAL CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
 }
 
 PUBLIC VIRTUAL CallStateName AlertingState::QosReserveFailed(
-        IN ISession* piSession, IN QosLossPolicy eNextAction)
+        IN [[maybe_unused]] ISession* piSession, IN QosLossPolicy eNextAction)
 {
     if (eNextAction == QosLossPolicy::RELEASE)
     {
-        m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_QOS_FAILURE));
     }
 
-    if (eNextAction == QosLossPolicy::MODIFY)
-    {
-        // TODO: downgrade to voip. send early update or send re-INVITE after call established.
-    }
-
+    // Will be notified again by QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE after call establishing
     return GetStateName();
 }
 

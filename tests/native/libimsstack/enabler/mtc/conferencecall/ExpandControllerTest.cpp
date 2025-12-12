@@ -146,26 +146,6 @@ protected:
     }
 
     virtual void TearDown() override {}
-
-    // TODO: Check if it's meaningful in ExpandController.
-    // Currently, it doesn't work due to ExpandController#OnCallUpdated.
-    /*
-        void SetIndividualCallTerminated()
-        {
-            ON_CALL(*pOperationQueue, GetTypeOfCurrentOperation)
-                    .WillByDefault(Return(CONTROL_OPERATION_TERMINATE_1TO1_CALL));
-
-            const IMS_UINT32 nConnectionId = 10;
-            ConferenceOperationQueue::ConferenceOperation objOperation(0, 0);
-            objOperation.SetConnectionId(nConnectionId);
-            ON_CALL(*pOperationQueue, GetCurrentOperation).WillByDefault(Return(&objOperation));
-            ON_CALL(*pConnectionIdManager, GetCallKey(nConnectionId))
-                    .WillByDefault(Return(INDIVIDUAL_CALL_KEY));
-            pExpandController->OnCallStateChanged(
-                    INDIVIDUAL_CALL_KEY, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_TRUE,
-       0);
-        }
-    */
 };
 
 TEST_F(ExpandControllerTest, OnReferenceStartedNotiesExpandedIfExpandingAndNoReferSubRequired)
@@ -255,7 +235,6 @@ TEST_F(ExpandControllerTest,
 
     EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
     EXPECT_CALL(*pOperationQueue, Clear);
-    // TODO: Check that Resume1to1Session() is called after it's implemented.
 
     pExpandController->OnReferenceStartFailed(&objReference);
 
@@ -278,7 +257,6 @@ TEST_F(ExpandControllerTest,
 
     EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
     EXPECT_CALL(*pOperationQueue, Clear);
-    // TODO: Check that Resume1to1Session() is called after it's implemented.
     EXPECT_CALL(objConfCall, Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
 
     pExpandController->OnReferenceStartFailed(&objReference);
@@ -358,7 +336,6 @@ TEST_F(ExpandControllerTest, OnReferenceUpdatedInvokesStopMedia1to1SessionIfExpa
 
     EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
             .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
-    // TODO: Implementation required for ExpandController::StopMedia1to1Session().
     EXPECT_CALL(
             *pOperationQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_INVITE, IMS_NULL));
 
@@ -374,7 +351,6 @@ TEST_F(ExpandControllerTest, StopMedia1to1SessionDoesNothingIfConfigIsReferMulti
 
     EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
             .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
-    // TODO: Implementation required for ExpandController::StopMedia1to1Session().
 
     pExpandController->OnReferenceUpdated(
             &objReference, SipStatusCode::SC_202, ReferSubscriptionState::ACTIVE);
@@ -440,32 +416,6 @@ TEST_F(ExpandControllerTest,
     pExpandController->OnReferenceUpdated(
             &objReference, SipStatusCode::SC_100, ReferSubscriptionState::ACTIVE);
 }
-
-// TODO: Check if this is valid case. Otherwise, the implementation must be changed.
-/*
-TEST_F(ExpandControllerTest,
-        OnReferenceUpdatedStartsWaitTimerIfProvisionalResponseAfter1To1CallTerminated)
-{
-    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
-    SetIndividualCallTerminated();
-
-    MockIConferenceReference objReference;
-    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
-
-    std::unique_ptr<MockMtcTimerWrapper> pTimerWrapper = std::make_unique<MockMtcTimerWrapper>();
-
-    // EXPECT_CALL(*pTimerWrapper, Start(0, 3000));
-    ON_CALL(objContext, CreateTimer)
-            .WillByDefault(Invoke(
-                    [&]()
-                    {
-                        return std::move(pTimerWrapper);
-                    }));
-
-    pExpandController->OnReferenceUpdated(
-            &objReference, SipStatusCode::SC_100, ReferSubscriptionState::ACTIVE);
-}
-*/
 
 TEST_F(ExpandControllerTest, OnReferenceUpdatedWithErrorCodeChangesUserStatus)
 {

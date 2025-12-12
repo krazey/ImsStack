@@ -400,7 +400,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
     IMS_BOOL bRestorationRequired;
     if (nStatusCode != SipStatusCode::SC_INVALID)
     {
-        objReason.nCode = CODE_SIP_METHOD_NOT_ALLOWED;  // TODO: convert response code?
+        // Consider converting the response code to the reason code if there's any requirement
+        objReason.nCode = CODE_SIP_METHOD_NOT_ALLOWED;
         bRestorationRequired = IMS_FALSE;
     }
     else

@@ -88,7 +88,6 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionForParticipa
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationHelper::GetWaitTimeNotifyTerminated(
         IN MtcConfigurationProxy& /*objProxy*/)
 {
-    // TODO: Add configuration for VZW.
     // if this value is less than 0, no Un-Subscription
     return 3000;
 }

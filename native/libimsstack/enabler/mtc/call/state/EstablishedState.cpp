@@ -538,8 +538,6 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
         return GetStateName();
     }
 
-    // TODO: check ShouldPendOperation in MtcCallState#OnSrvccStateUpdated?
-    // Handling in UpdatingState is also needed.
     if (HandleUpdate(eType, m_objContext.GetSession()->GetCallType(),
                 m_objContext.GetMediaManager().GetMediaInfo(
                         m_objContext.GetSession()->GetISession())) == IMS_FAILURE)
@@ -650,10 +648,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo(objSession);
 
-    if (pMtcSession->AcceptUpdate() == IMS_FAILURE)
-    {
-        // TODO
-    }
+    pMtcSession->AcceptUpdate();
 
     const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
@@ -686,11 +681,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateN
         m_objContext.GetUpdatingInfo().UpdateRequestingTypeForOfferlessReInvite();
     }
 
-    if (m_objContext.GetSession()->AcceptUpdate() == IMS_FAILURE)
-    {
-        // TODO
-    }
-
+    m_objContext.GetSession()->AcceptUpdate();
     return CallReasonInfo(CODE_NONE);
 }
 
