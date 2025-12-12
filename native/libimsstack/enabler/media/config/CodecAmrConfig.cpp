@@ -88,7 +88,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 
     if (piCcBundle == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - Codec Description is NULL", 0, 0, 0);
         CreateDefaultAmrCodec();
     }
     else
@@ -97,12 +96,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
         strPayloadTypeNumber.SetNumber(m_nPayloadType);
         ICarrierConfig* piCcSubBundle = piCcBundle->GetBundle(strPayloadTypeNumber.GetStr());
 
-        IMS_TRACE_D("Create - current PayloadTypeNumber[%d]", m_nPayloadType, 0, 0);
-
         if (piCcSubBundle == IMS_NULL)
         {
-            IMS_TRACE_D("Create - Codec SubBundle is NULL", 0, 0, 0);
-
             CreateDefaultAmrCodec();
         }
         else

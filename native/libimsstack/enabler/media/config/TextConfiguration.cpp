@@ -43,7 +43,7 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_D("Create - piCc is null", 0, 0, 0);
+        IMS_TRACE_D("Create - piCc for Text is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -88,6 +88,7 @@ IMS_BOOL TextConfiguration::Update(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
+        IMS_TRACE_D("Update - piCc for Text is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -105,7 +106,7 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CreateCodecConfigs - piCc is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateCodecConfigs - Text piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -122,9 +123,6 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
     m_nRedPayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT);
 
     piCcBundle->ReleaseBundle();
-
-    IMS_TRACE_D("CreateCodecConfigs - T140PayloadTypeNumber[%d], RedPayloadTypeNumber[%d]",
-            m_nT140PayloadType, m_nRedPayloadType, 0);
 
     IMS_UINT32 nCodecCnt = 0;
     if (m_nRedPayloadType > 0)

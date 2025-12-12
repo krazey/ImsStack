@@ -102,8 +102,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
         {
             m_nResolutionWidth = DEFAULT_HEVC_RESOLUTION_WIDTH;
             m_nResolutionHeight = DEFAULT_HEVC_RESOLUTION_HEIGHT;
-            IMS_TRACE_D("Create - Default Hevc Resolution width[%d], height[%d]",
-                    m_nResolutionWidth, m_nResolutionHeight, 0);
         }
 
         m_nFramerate = piCcSubBundle->GetInt(

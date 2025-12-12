@@ -60,11 +60,9 @@ AudioConfiguration::~AudioConfiguration()
 
 PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create", 0, 0, 0);
-
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "piCc is null", 0, 0, 0);
+        IMS_TRACE_D("Create - piCc for Audio is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -167,6 +165,7 @@ IMS_BOOL AudioConfiguration::Update(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
+        IMS_TRACE_D("Update - piCc for Audio is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -182,11 +181,9 @@ IMS_BOOL AudioConfiguration::Update(IN ICarrierConfig* piCc)
 
 PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateCodecConfigs", 0, 0, 0);
-
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "piCc is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateCodecConfigs - piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -195,7 +192,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
 
     if (piCcBundle == IMS_NULL)
     {
-        IMS_TRACE_E(0, "piCcBundle is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateCodecConfigs - piCcBundle is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -217,8 +214,6 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
     if (m_bEvsSupported == IMS_TRUE && objEvsPayloadType.GetSize() > 0)
     {
         nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_EVS, nCodecCnt, objEvsPayloadType);
-        IMS_TRACE_D("CreateCodecConfigs - Read Evs Codecs", 0, 0, 0);
-        /**  TODO: evs is not supported for now */
     }
     if (objAmrwbPayloadType.GetSize() > 0)
     {
@@ -382,8 +377,6 @@ const ImsVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 PUBLIC
 IMS_BOOL AudioConfiguration::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const
 {
-    IMS_TRACE_D("IsAudioInactivityCallEndReason()", 0, 0, 0);
-
     for (IMS_UINT32 i = 0; i < m_objAudioInactivityCallEndReasons.GetSize(); i++)
     {
         if (m_objAudioInactivityCallEndReasons.GetAt(i) == nReason)

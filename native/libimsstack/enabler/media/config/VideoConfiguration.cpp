@@ -53,10 +53,9 @@ PUBLIC VIRTUAL VideoConfiguration::~VideoConfiguration()
 
 PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create", 0, 0, 0);
-
     if (piCc == IMS_NULL)
     {
+        IMS_TRACE_D("Create - piCc for Video is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -131,6 +130,7 @@ IMS_BOOL VideoConfiguration::Update(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
+        IMS_TRACE_D("Update - piCc for Video is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -166,9 +166,6 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
 
     ImsVector<IMS_SINT32> objHevcPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
-
-    IMS_TRACE_D("CreateCodecConfigs - AvcPayloadTypeSize[%d], HevcPayloadTypeSize[%d]",
-            objAvcPayloadType.GetSize(), objHevcPayloadType.GetSize(), 0);
 
     IMS_BOOL bHevcPriorityOrderEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL, false);

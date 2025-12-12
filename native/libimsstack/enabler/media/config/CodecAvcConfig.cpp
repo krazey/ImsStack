@@ -59,20 +59,16 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
 
     if (piCcBundle == IMS_NULL)
     {
-        IMS_TRACE_D("Create - H264 codec is invalid", 0, 0, 0);
         CreateDefaultAvcCodec();
     }
     else
     {
-        IMS_TRACE_D("Create - H264 codec is valid: PayloadType[%d]", m_nPayloadType, 0, 0);
-
         AString strPayloadTypeNumber;
         strPayloadTypeNumber.SetNumber(m_nPayloadType);
         ICarrierConfig* piCcSubBundle = piCcBundle->GetBundle(strPayloadTypeNumber.GetStr());
 
         if (piCcSubBundle == IMS_NULL)
         {
-            IMS_TRACE_D("Create - H.264 SubBundle[%d] is invalid", m_nPayloadType, 0, 0);
             CreateDefaultAvcCodec();
         }
         else

@@ -51,8 +51,6 @@ PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
 PUBLIC
 IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("Create", 0, 0, 0);
-
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
 
     if (piCc == IMS_NULL)
@@ -91,7 +89,6 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
 PUBLIC
 void MediaSessionConfig::SetServiceType(IN MEDIA_SERVICE_TYPE serviceType)
 {
-    IMS_TRACE_D("SetServiceType - ServiceType[%d]", serviceType, 0, 0);
     m_nServiceType = serviceType;
 }
 
@@ -155,8 +152,6 @@ IMS_BOOL MediaSessionConfig::IsSdpReofferFullCapability() const
 PRIVATE
 void MediaSessionConfig::Clear()
 {
-    IMS_TRACE_D("Clear()", 0, 0, 0);
-
     if (m_pAudioConfig != IMS_NULL)
     {
         delete m_pAudioConfig;
@@ -179,7 +174,6 @@ void MediaSessionConfig::Clear()
 PRIVATE
 void MediaSessionConfig::ResetMediaConfigurations(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("ResetMediaConfigurations()", 0, 0, 0);
     Clear();
     Create(nSlotId);
 }
@@ -196,8 +190,6 @@ PRIVATE VIRTUAL void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IM
 PROTECTED
 IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateAudioConfiguration()", 0, 0, 0);
-
     AudioConfiguration* pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
 
     if (pConfig == IMS_NULL)
@@ -221,8 +213,6 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 PROTECTED
 IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateVideoConfiguration()", 0, 0, 0);
-
     VideoConfiguration* pConfig = new VideoConfiguration(MEDIA_TYPE_AUDIOVIDEO);
 
     if (pConfig == IMS_NULL)
@@ -246,8 +236,6 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 PROTECTED
 IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateTextConfiguration()", 0, 0, 0);
-
     TextConfiguration* pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
 
     if (pConfig == IMS_NULL)

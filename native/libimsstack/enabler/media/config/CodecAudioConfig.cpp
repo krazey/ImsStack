@@ -101,9 +101,6 @@ IMS_SINT32 CodecAudioConfig::ConvertModeSetList(ImsVector<IMS_SINT32> objCodecMo
         nModeSetList = (nModeSetList | (1 << nModeSet));
     }
 
-    IMS_TRACE_D("ConvertModeSetList - ModeSetList size[%d] ListValue[%d]", nModeSetNum,
-            nModeSetList, 0);
-
     return nModeSetList;
 }
 

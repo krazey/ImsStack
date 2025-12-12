@@ -135,8 +135,6 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* pi
     if (m_objCodecConfigs.InsertAt(pCodecConfig, nCodecIndex))
     {
         nCodecIndex++;
-        IMS_TRACE_D("MakeCodec - Added PayloadTypeNumber[%d], CodecIndex[%d]",
-                pCodecConfig->GetPayloadType(), nCodecIndex, 0);
     }
     else
     {
