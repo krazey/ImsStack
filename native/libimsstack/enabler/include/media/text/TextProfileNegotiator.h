@@ -56,10 +56,9 @@ private:
     void NegotiateDirection(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
     void NegotiateBandwidth(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
-            IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT TextProfile* pNegotiatedProfile);
-    void NegotiateBandwidthForOfferReceived(IN TextProfile* pLocalProfile,
-            IN TextProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegotiatedCodec,
             OUT TextProfile* pNegotiatedProfile);
+    void NegotiateBandwidthForOfferReceived(IN TextProfile* pLocalProfile,
+            IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile);
     void NegotiateBandwidthForOfferSent(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
     void NegotiateRtcpInterval(

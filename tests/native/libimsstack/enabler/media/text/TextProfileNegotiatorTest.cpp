@@ -16,15 +16,10 @@
 
 #include <gtest/gtest.h>
 
+#include "text/TextProfile.h"
 #include "text/TextProfileNegotiator.h"
 
-#include "text/TextProfile.h"
 #include "config/MockTextConfiguration.h"
-
-const IMS_UINT32 kLocalT140Payload = 98;
-const IMS_UINT32 kPeerT140Payload = 100;
-const IMS_UINT32 kLocalRedPayload = 99;
-const IMS_UINT32 kPeerRedPayload = 101;
 
 using testing::Return;
 
@@ -32,25 +27,31 @@ class TextProfileNegotiatorTest : public ::testing::Test
 {
 protected:
     void SetUp() override;
-    void TearDown() override;
 
     TextProfile::Payload* CreateT140Payload(IMS_UINT32 nPayloadNum);
     TextProfile::Payload* CreateRedPayload(
             IMS_UINT32 nRedPayloadNum, IMS_UINT32 nT140PayloadNum, IMS_UINT32 nRedLevel);
 
     std::unique_ptr<TextProfileNegotiator> m_pNegotiator;
-    TextProfile* m_pLocalProfile;
-    TextProfile* m_pPeerProfile;
-    TextProfile* m_pNegotiatedProfile;
+    std::unique_ptr<TextProfile> m_pLocalProfile;
+    std::unique_ptr<TextProfile> m_pPeerProfile;
+    std::unique_ptr<TextProfile> m_pNegotiatedProfile;
     MockTextConfiguration m_objMockConfig;
+
+    const IMS_UINT32 kLocalT140Payload = 98;
+    const IMS_UINT32 kPeerT140Payload = 100;
+    const IMS_UINT32 kLocalRedPayload = 99;
+    const IMS_UINT32 kPeerRedPayload = 101;
+    const IMS_UINT32 kLocalDataPort = 7000;
+    const IMS_UINT32 kPeerDataPort = 7002;
 };
 
 void TextProfileNegotiatorTest::SetUp()
 {
     m_pNegotiator = std::make_unique<TextProfileNegotiator>();
-    m_pLocalProfile = new TextProfile();
-    m_pPeerProfile = new TextProfile();
-    m_pNegotiatedProfile = new TextProfile();
+    m_pLocalProfile = std::make_unique<TextProfile>();
+    m_pPeerProfile = std::make_unique<TextProfile>();
+    m_pNegotiatedProfile = std::make_unique<TextProfile>();
 
     // Default mock config values (adjust as needed for Text)
     ON_CALL(m_objMockConfig, GetRtcpIntervalOnActive()).WillByDefault(Return(5));
@@ -61,24 +62,17 @@ void TextProfileNegotiatorTest::SetUp()
 
     // Set default local profile values
     m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
-    m_pLocalProfile->SetDataPort(7000);
+    m_pLocalProfile->SetDataPort(kLocalDataPort);
     m_pLocalProfile->SetBandwidthAs(2);
     m_pLocalProfile->SetBandwidthRs(200);
     m_pLocalProfile->SetBandwidthRr(200);
 
     // set default peer profile values
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
-    m_pPeerProfile->SetDataPort(7002);
+    m_pPeerProfile->SetDataPort(kPeerDataPort);
     m_pPeerProfile->SetBandwidthAs(2);
     m_pPeerProfile->SetBandwidthRs(200);
     m_pPeerProfile->SetBandwidthRr(200);
-}
-
-void TextProfileNegotiatorTest::TearDown()
-{
-    delete m_pLocalProfile;
-    delete m_pPeerProfile;
-    delete m_pNegotiatedProfile;
 }
 
 TextProfile::Payload* TextProfileNegotiatorTest::CreateT140Payload(IMS_UINT32 nPayloadNum)
@@ -107,14 +101,14 @@ TextProfile::Payload* TextProfileNegotiatorTest::CreateRedPayload(
 
 TEST_F(TextProfileNegotiatorTest, NegotiateNullInputsReturnsFalse)
 {
+    EXPECT_FALSE(m_pNegotiator->Negotiate(nullptr, m_pPeerProfile.get(), IMS_FALSE,
+            m_pNegotiatedProfile.get(), &m_objMockConfig));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(m_pLocalProfile.get(), nullptr, IMS_FALSE,
+            m_pNegotiatedProfile.get(), &m_objMockConfig));
     EXPECT_FALSE(m_pNegotiator->Negotiate(
-            nullptr, m_pPeerProfile, IMS_FALSE, m_pNegotiatedProfile, &m_objMockConfig));
-    EXPECT_FALSE(m_pNegotiator->Negotiate(
-            m_pLocalProfile, nullptr, IMS_FALSE, m_pNegotiatedProfile, &m_objMockConfig));
-    EXPECT_FALSE(m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_FALSE, nullptr, &m_objMockConfig));
-    EXPECT_FALSE(m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_FALSE, m_pNegotiatedProfile, nullptr));
+            m_pLocalProfile.get(), m_pPeerProfile.get(), IMS_FALSE, nullptr, &m_objMockConfig));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(), IMS_FALSE,
+            m_pNegotiatedProfile.get(), nullptr));
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferReceivedSuccess)
@@ -125,8 +119,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferReceivedSuccess)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -150,8 +144,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferSentSuccess)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
     // Act: Offer Sent (bIsOfferReceived = false)
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_FALSE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_FALSE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -181,8 +175,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     m_pPeerProfile->SetDataPort(7004);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -206,6 +200,68 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
 }
 
+TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferSentPeerNoBw)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetBandwidthAs(0);  // Peer has no AS bandwidth
+    m_pPeerProfile->SetBandwidthRs(0);  // Peer has no RS bandwidth
+    m_pPeerProfile->SetBandwidthRr(0);  // Peer has no RR bandwidth
+
+    // Act: Offer Sent
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_FALSE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+
+    // AS bandwidth should fall back to local profile's values
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), m_pLocalProfile->GetBandwidthAs());
+    // RS/RR bandwidth should fall back to peer profile's values
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRs(), m_pPeerProfile->GetBandwidthRs());
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), m_pPeerProfile->GetBandwidthRr());
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferReceivedLocalNoBw)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->SetBandwidthAs(0);
+    m_pLocalProfile->SetBandwidthRs(0);
+    m_pLocalProfile->SetBandwidthRs(0);
+    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+    // Act: Offer Received
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+
+    // Bandwidth should be local profile's values except the RS
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), m_pLocalProfile->GetBandwidthAs());
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRs(), m_pPeerProfile->GetBandwidthRs());
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), m_pLocalProfile->GetBandwidthRr());
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateRedWithMissingT140InPeer)
+{
+    // Arrange: Local has T140, Peer has RED but is missing the T140 payload in its list.
+    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert: Should still succeed by finding the T140 in the local profile.
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+}
+
 TEST_F(TextProfileNegotiatorTest, NegotiateRedOnlyInPeer)
 {
     // Arrange
@@ -219,8 +275,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOnlyInPeer)
     m_pPeerProfile->SetDataPort(7018);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -257,8 +313,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInLocalPayloa
     m_pPeerProfile->SetDataPort(7004);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     // The overall negotiation should succeed because T140 is a valid fallback.
@@ -290,8 +346,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInPeerPayload
     m_pPeerProfile->SetDataPort(7004);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     // The overall negotiation should succeed because T140 is a valid fallback.
@@ -316,8 +372,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateNoMatchingPayloadReturnsFalse)
     m_pPeerProfile->SetDataPort(7006);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     // Negotiation "succeeds" but results in port 0 / invalid direction because no payload match
@@ -336,14 +392,33 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive)
     m_pPeerProfile->SetDataPort(7008);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_RECEIVE);  // Should be RECEIVE
     EXPECT_EQ(m_pNegotiatedProfile->GetRtcpInterval(), 3);                     // Hold interval
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateDirectionInvalidPeerDirReturnsInactive)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INVALID);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // If peer direction is invalid, negotiated direction should be inactive.
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), kLocalDataPort);
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend)
@@ -355,8 +430,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend)
     m_pPeerProfile->SetDataPort(7010);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -373,8 +448,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionInactiveReturnsInactive)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);  // Peer offers INACTIVE
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -396,8 +471,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRtcpIntervalDisabledWhenRsRrZero)
     m_pPeerProfile->SetBandwidthRr(0);
 
     // Act: Negotiate with offer received
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -421,8 +496,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerRedFirst)
     m_pPeerProfile->SetDataPort(7014);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);
@@ -452,8 +527,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerT140First)
     m_pPeerProfile->SetDataPort(7016);
 
     // Act
-    IMS_BOOL bResult = m_pNegotiator->Negotiate(
-            m_pLocalProfile, m_pPeerProfile, IMS_TRUE, m_pNegotiatedProfile, &m_objMockConfig);
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
     EXPECT_TRUE(bResult);

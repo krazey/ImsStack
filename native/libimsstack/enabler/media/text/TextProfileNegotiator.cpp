@@ -48,7 +48,7 @@ PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
     if (bPayloadNegotiated)
     {
         NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile);
-        NegotiateBandwidth(pLocalProfile, pPeerProfile, -1, pNegotiatedProfile);
+        NegotiateBandwidth(pLocalProfile, pPeerProfile, pNegotiatedProfile);
     }
     else
     {
@@ -188,8 +188,7 @@ void TextProfileNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
 
 PRIVATE
 void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
-        IN TextProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegotiatedCodec,
-        OUT TextProfile* pNegotiatedProfile)
+        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -203,30 +202,19 @@ void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
     pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
 
     m_bIsOfferReceived
-            ? NegotiateBandwidthForOfferReceived(
-                      pLocalProfile, pPeerProfile, nAsValueOfNegotiatedCodec, pNegotiatedProfile)
+            ? NegotiateBandwidthForOfferReceived(pLocalProfile, pPeerProfile, pNegotiatedProfile)
             : NegotiateBandwidthForOfferSent(pLocalProfile, pPeerProfile, pNegotiatedProfile);
 }
 
 PRIVATE
 void TextProfileNegotiator::NegotiateBandwidthForOfferReceived(IN TextProfile* pLocalProfile,
-        IN TextProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegotiatedCodec,
-        OUT TextProfile* pNegotiatedProfile)
+        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
 {
-    if (nAsValueOfNegotiatedCodec > 0)
-    {
-        pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegotiatedCodec);
-
-        if (nAsValueOfNegotiatedCodec > pPeerProfile->GetBandwidthAs() &&
-                pPeerProfile->GetBandwidthAs() > 0)
-        {
-            pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
-        }
-    }
-    else
-    {
-        pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
-    }
+    // For offer-received, the negotiated AS bandwidth is the minimum of the local and peer
+    // profile values. If one is zero, we take the other. If both are zero, it will be handled
+    // by the configuration default later if needed.
+    pNegotiatedProfile->SetBandwidthAs(
+            std::min(pLocalProfile->GetBandwidthAs(), pPeerProfile->GetBandwidthAs()));
 
     // Exception Handling (b=RS/RR line is not included in Answer SDP)
     if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
