@@ -759,6 +759,7 @@
     <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="false"/>
     <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="false"/>
     <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="true"/>
+    <boolean name="imsvoice.destroy_inactive_early_sessions_when_established_bool" value="true"/>
     <boolean name="imsvoice.stop_ringback_timer_by_183_with_sdp_body_bool" value="false"/>
     <!-- The index order matches the value of GeolocationPidfAllowedType -->
     <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">

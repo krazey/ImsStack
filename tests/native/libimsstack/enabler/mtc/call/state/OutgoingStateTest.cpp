@@ -1016,7 +1016,7 @@ TEST_F(OutgoingStateTest, SessionStartedSetsConferenceCallToMediaManagerIfConfer
     EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionStarted(&objSession));
 }
 
-TEST_F(OutgoingStateTest, SessionStartedRemovesInactiveSessions)
+TEST_F(OutgoingStateTest, SessionStartedDestroysInactiveSessionsIfConfigOn)
 {
     MockIMtcSession objMtcSession2;
     objSessions.Append(&objMtcSession2);
@@ -1031,7 +1031,37 @@ TEST_F(OutgoingStateTest, SessionStartedRemovesInactiveSessions)
     ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
             .WillByDefault(Return(IMS_TRUE));
 
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
     EXPECT_CALL(objMtcSession2, SetSessionTerminatedOrStartFailed);
+    EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(0);
+    EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession2))).Times(1);
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionStarted(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartedDoesNotDestroyInactiveSessionsIfConfigOff)
+{
+    MockIMtcSession objMtcSession2;
+    objSessions.Append(&objMtcSession2);
+    ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, IsHeaderPresent(_, _, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
+
+    ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession2, SetSessionTerminatedOrStartFailed).Times(0);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(0);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession2))).Times(1);
 

@@ -46,7 +46,11 @@ void MultipleDialogHandler::OnStarted(
             continue;
         }
         IMS_TRACE_D("OnStarted remove[%d]", i, 0, 0);
-        piMtcSession->SetSessionTerminatedOrStartFailed();
+        if (objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL))
+        {
+            piMtcSession->SetSessionTerminatedOrStartFailed();
+        }
         objContext.RemoveSession(*piMtcSession);
     }
 }

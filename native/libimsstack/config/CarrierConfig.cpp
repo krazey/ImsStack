@@ -1254,6 +1254,9 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_B
         KEY_IMS_VT_PREFIX "require_sip_signaling_on_multitasking_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[] =
         KEY_IMS_VOICE_PREFIX "maintain_multiple_early_sessions_by_forking_bool";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL[] =
+                KEY_IMS_VOICE_PREFIX "destroy_inactive_early_sessions_when_established_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[] =
         KEY_IMS_VOICE_PREFIX "stop_ringback_timer_by_183_with_sdp_body_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[] =

@@ -1261,6 +1261,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "check_server_outage_reason_for_vxlte_call_bool";
         public static final String KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL =
                 KEY_PREFIX + "maintain_multiple_early_sessions_by_forking_bool";
+        public static final String KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL =
+                KEY_PREFIX + "destroy_inactive_early_sessions_when_established_bool";
         public static final String KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL =
                 KEY_PREFIX + "stop_ringback_timer_by_183_with_sdp_body_bool";
         public static final String KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY =

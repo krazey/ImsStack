@@ -57,7 +57,7 @@
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
-     <string-array name="imsvt.video_codec_frame_size_string_array" num="2">
+    <string-array name="imsvt.video_codec_frame_size_string_array" num="2">
         <item value="119 240 320"/>
         <item value="120 240 320"/>
     </string-array>
@@ -102,4 +102,5 @@
         <item value="0"/> <!-- INVITE -->
     </int-array>
     <boolean name="imsvoice.eps_fallback_trigger_by_ac_barring_bool" value="false"/>
+    <boolean name="imsvoice.destroy_inactive_early_sessions_when_established_bool" value="false"/>
 </carrier_config>
