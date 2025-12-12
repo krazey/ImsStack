@@ -380,7 +380,22 @@ void MtsService::Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 n
     (void)nCauseCode;
     (void)nWaitTimeMillis;
 
-    m_pSmsInfo.reset();
+    IMtsTraffic* piMtsTraffic = GetTraffic(nType, nDirection);
+    if (piMtsTraffic != IMS_NULL)
+    {
+        m_piImsRadio->StopImsTraffic(piMtsTraffic);
+    }
+
+    if (m_pSmsInfo != IMS_NULL)
+    {
+        IJniMtsAppThread* piAppThread = m_objContext.GetJniAppThread();
+        if (piAppThread)
+        {
+            piAppThread->ReportMoStatus(MO_ERROR_GENERIC, m_pSmsInfo->eSmsFormat,
+                    m_pSmsInfo->nSeqId, m_objContext.GetSlotId());
+        }
+        m_pSmsInfo.reset();
+    }
     m_objContext.GetMessageController().ClearAllMessages();
 }
 
