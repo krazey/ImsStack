@@ -125,6 +125,7 @@ protected:
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
 
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
@@ -1490,6 +1491,48 @@ TEST_F(StartErrorHandlerTest, IsTransactionTimeout)
 
     SetTransactionTimeout();
     EXPECT_TRUE(pHandler->IsTransactionTimeout(pMessage));
+}
+
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteWithAudioForVt)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_488;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO);
+
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    AString strMediaTypes("audio");
+
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes));
+}
+
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteWithAudioForRtt)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_488;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO);
+
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+
+    AString strMediaTypes("audio");
+
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes));
+}
+
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteWithAudioForVideoRtt)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_488;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO);
+
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+
+    AString strMediaTypes("audio");
+
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes));
 }
 
 }  // namespace android
