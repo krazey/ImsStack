@@ -336,9 +336,9 @@ PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
-    IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
+    IMS_TRACE_I("ImsAos_Connected ipcan[%d]", nIpcan, 0, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
-    m_bCrossSimConnected = m_pAosConnector ? m_pAosConnector->IsCrossSimConnected() : IMS_FALSE;
+    m_bCrossSimConnected = m_pAosConnector->IsCrossSimConnected();
     if (!IsEmergency())
     {
         UpdateCallComposerFeature(nFeatures);
@@ -348,8 +348,6 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
     m_pAosEventHandler->OnConnected(nFeatures);
     SetAosReady(IMS_TRUE);
 }
-
-PUBLIC VIRTUAL void MtcService::ImsAos_Connecting() {}
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
@@ -388,9 +386,19 @@ PUBLIC VIRTUAL void MtcService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS
 
     m_pAosEventHandler->OnEventNotify(nType, nState);
 
-    if (nType == IImsAosMonitor::TYPE_IPCAN)
+    if (nType == IImsAosMonitor::TYPE_REG_RECOVERY_PENDING)
     {
-        m_pNetworkWatcher->OnConnected(nState);
+        // Registration refreshing is pending so AoS cannot trigger ImsAos_Connected() even if
+        // the registered IP CAN is updated.
+        IMS_UINT32 eStoredIpcanType =
+                m_pNetworkWatcher->GetRatType() == INetworkWatcher::RADIOTECH_TYPE_IWLAN
+                ? IIpcan::CATEGORY_WLAN
+                : IIpcan::CATEGORY_MOBILE;
+        IMS_UINT32 eCurrentPdnIpcanType = m_pAosConnector->GetIpcanType();
+        if (eStoredIpcanType != eCurrentPdnIpcanType)
+        {
+            m_pNetworkWatcher->OnConnected(eCurrentPdnIpcanType);
+        }
     }
 }
 

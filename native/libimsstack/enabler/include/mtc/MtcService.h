@@ -105,7 +105,7 @@ public:
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
-    void ImsAos_Connecting() override;
+    inline void ImsAos_Connecting() override {}
     void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
     void ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
     void ImsAos_Suspended(IN IMS_UINT32 nReason) override;

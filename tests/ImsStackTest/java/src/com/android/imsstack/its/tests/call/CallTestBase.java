@@ -68,6 +68,16 @@ public class CallTestBase extends ImsStackTestBase {
         SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
     }
 
+    protected void performRegistration(int regTech) {
+        mRegistrationHelper.performRegistration(this,
+                new RegistrationInfo.Builder()
+                        .setExpectedRegTech(regTech)
+                        .addConfig(mConfig).build());
+
+        // Add delay between registration and call.
+        SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
+    }
+
     // TODO: Move into CallTestUtilities / CallTestConfigManager.
     protected void turnOffQosAndPrecondition() {
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,

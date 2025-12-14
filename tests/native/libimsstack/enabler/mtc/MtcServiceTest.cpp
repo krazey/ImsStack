@@ -813,11 +813,11 @@ TEST_F(MtcServiceTest, CoreServiceSessionInvitationReceivedInvokesHandleIncoming
 
 TEST_F(MtcServiceTest, CoreServiceCapabilityQueryReceivedInvokesHandleIncomingCapabilityQuery)
 {
-    MockICapabilities objICapa;
+    MockICapabilities objICapabilities;
     MockICoreService objICoreService;
 
     // No means to check if HandleIncomingCapabilityQuery is invoked or not
-    pNormalMtcService->CoreService_CapabilityQueryReceived(&objICoreService, &objICapa);
+    pNormalMtcService->CoreService_CapabilityQueryReceived(&objICoreService, &objICapabilities);
 }
 
 TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
@@ -830,19 +830,51 @@ TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
-TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithIpcanTypeInvokesEventHandlerAndMtcNetworkWatcher)
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithRegPendingTypeInvokesNetworkWatcherIfChanged)
 {
-    IMS_UINT32 nType = IImsAosMonitor::TYPE_IPCAN;
-    IMS_UINT32 nState = IIpcan::CATEGORY_WLAN;
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_REG_RECOVERY_PENDING;
+    IMS_UINT32 nState = 0;  // meaningless.
 
+    IMS_UINT32 eIpcanType = IIpcan::CATEGORY_WLAN;
+    ON_CALL(*pNetworkWatcher, GetRatType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(eIpcanType));
     EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
-    EXPECT_CALL(*pNetworkWatcher, OnConnected(nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(eIpcanType)).Times(1);
 
     pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
-TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithNonIpcanTypeInvokesEventHandlerOnly)
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithRegPendingTypeDoesNotInvokeNetworkWatcherIfNotChanged)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_REG_RECOVERY_PENDING;
+    IMS_UINT32 nState = 0;  // meaningless.
+
+    IMS_UINT32 eIpcanType = IIpcan::CATEGORY_WLAN;
+    ON_CALL(*pNetworkWatcher, GetRatType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_IWLAN));
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(eIpcanType));
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithIpcanTypeInvokesEventHandlerOnly)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_IPCAN;
+    IMS_UINT32 nState = IIpcan::CATEGORY_WLAN;
+
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithHandoverTypeInvokesEventHandlerOnly)
 {
     IMS_UINT32 nType = IImsAosMonitor::TYPE_HANDOVER;
     IMS_UINT32 nState = IImsAosMonitor::HANDOVER_WIFI_TO_CELLULAR_START;
