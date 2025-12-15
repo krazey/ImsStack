@@ -52,13 +52,13 @@ public:
      *
      * @return IMS_SINT32 Return the red-level
      */
-    IMS_SINT32 GetRedLevel() const;
+    virtual IMS_SINT32 GetRedLevel() const;
     /**
      * @brief Get the sampling rate
      *
      * @return IMS_SINT32 Return the sampling rate for T140
      */
-    IMS_SINT32 GetSamplingRate() const;
+    virtual IMS_SINT32 GetSamplingRate() const;
 
     static const IMS_SINT32 DEFAULT_RED_LEVEL = 3;
     static const IMS_SINT32 DEFAULT_RED_LEVEL_NONE = 1;
