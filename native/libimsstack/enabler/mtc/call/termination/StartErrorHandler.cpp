@@ -691,7 +691,8 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
     return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
 }
 
-CallReasonInfo StartErrorHandler::HandleSilentReinviteWithAudio(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleSilentReinviteWithAudio(
+        IN [[maybe_unused]] const IMessage& objMessage) const
 {
     IMS_TRACE_I("HandleSilentReinviteWithAudio", 0, 0, 0);
     CallType eCallType = m_objContext.GetSession()->GetCallType();
