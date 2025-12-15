@@ -18,6 +18,8 @@
 #include "ServiceTrace.h"
 
 #include "Feature.h"
+#include "ICoreServiceConfig.h"
+#include "ServiceIdentifier.h"
 
 #include "Engine.h"
 #include "IConfiguration.h"
