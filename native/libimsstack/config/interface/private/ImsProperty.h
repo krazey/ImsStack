@@ -16,7 +16,9 @@
 #ifndef IMS_PROPERTY_H_
 #define IMS_PROPERTY_H_
 
-#include "ImsRegistry.h"
+#include "AStringArray.h"
+
+class ImsRegistry;
 
 class ImsProperty
 {

@@ -17,7 +17,9 @@
 #define CONFIG_FILE_BUFFER_H_
 
 #include "ConfigBuffer.h"
-#include "conf/ConfigSection.h"
+#include "conf/ConfigComment.h"
+
+class ConfigSection;
 
 class ConfigFileBuffer : public ConfigBuffer
 {

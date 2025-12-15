@@ -16,7 +16,9 @@
 #ifndef STATIC_CONFIG_H_
 #define STATIC_CONFIG_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class StaticConfig
 {

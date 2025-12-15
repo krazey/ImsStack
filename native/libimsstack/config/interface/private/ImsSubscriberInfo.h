@@ -16,6 +16,8 @@
 #ifndef IMS_SUBSCRIBER_INFO_H_
 #define IMS_SUBSCRIBER_INFO_H_
 
+#include "Credential.h"
+
 #include "IImsSubscriberInfo.h"
 
 class ImsSubscriberInfo : public IImsSubscriberInfo

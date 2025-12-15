@@ -16,11 +16,13 @@
 #ifndef APP_CONFIG_H_
 #define APP_CONFIG_H_
 
+#include "AStringArray.h"
+
 #include "IAppConfig.h"
-#include "ImsRegistry.h"
 
 class AppConfigPrivate;
 class CoreServiceConfig;
+class ImsRegistry;
 
 class AppConfig : public IAppConfig
 {

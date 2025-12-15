@@ -16,10 +16,12 @@
 #ifndef INTERFACE_SIP_CONFIG_H_
 #define INTERFACE_SIP_CONFIG_H_
 
-#include "AString.h"
-#include "ISipConfigV.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class IConfigurable;
+class ISipConfigV;
 
 class ISipConfig
 {

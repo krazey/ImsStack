@@ -16,8 +16,11 @@
 #ifndef INTERFACE_APP_CONFIG_H_
 #define INTERFACE_APP_CONFIG_H_
 
-#include "ICoreServiceConfig.h"
-#include "ImsRegistry.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class ICoreServiceConfig;
+class ImsRegistry;
 
 class IAppConfig
 {

@@ -18,6 +18,7 @@
 #include "ServiceTrace.h"
 #include "TextParser.h"
 
+#include "ImsRegistry.h"
 #include "private/ImsProperty.h"
 
 __IMS_TRACE_TAG_CONF__;

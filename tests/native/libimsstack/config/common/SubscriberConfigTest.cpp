@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "Credential.h"
 #include "PlatformContext.h"
 
 #include "ImsIdentity.h"

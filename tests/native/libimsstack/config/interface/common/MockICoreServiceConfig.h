@@ -16,13 +16,8 @@
 #ifndef MOCK_I_CORE_SERVICE_CONFIG_H_
 #define MOCK_I_CORE_SERVICE_CONFIG_H_
 
-#include "ImsList.h"
-#include "ImsTypeDef.h"
 #include "common/ICoreServiceConfig.h"
 #include <gmock/gmock.h>
-
-class AString;
-class ServiceIdentifier;
 
 class MockICoreServiceConfig : public ICoreServiceConfig
 {

@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "Feature.h"
+#include "ImsRegistry.h"
 #include "QosProperty.h"
 #include "private/CoreServiceConfig.h"
 

@@ -17,7 +17,8 @@
 #define CONFIG_SECTION_H_
 
 #include "conf/ConfigComment.h"
-#include "conf/ConfigSectionData.h"
+
+class ConfigSectionData;
 
 class ConfigSection
 {

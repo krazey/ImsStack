@@ -18,10 +18,6 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsVector.h"
-#include "CarrierConfig.h"
-#include "IAsyncConfig.h"
-#include "IImsSubscriberInfo.h"
 #include "ISubscriberConfig.h"
 
 class MockISubscriberConfig : public ISubscriberConfig

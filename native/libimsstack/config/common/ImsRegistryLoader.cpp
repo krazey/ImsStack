@@ -17,6 +17,8 @@
 #include "ServiceTrace.h"
 
 #include "ConfigLoader.h"
+#include "IConfigBuffer.h"
+#include "ImsRegistry.h"
 #include "StaticConfig.h"
 #include "private/ConfigBase.h"
 #include "private/ImsProperty.h"

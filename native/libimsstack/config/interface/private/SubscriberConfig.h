@@ -16,17 +16,18 @@
 #ifndef SUBSCRIBER_CONFIG_H_
 #define SUBSCRIBER_CONFIG_H_
 
+#include "AStringArray.h"
 #include "IIsimListener.h"
 
-#include "CarrierConfig.h"
+#include "IImsSubscriberInfo.h"
 #include "ISubscriberConfig.h"
 #include "private/ConfigBase.h"
-#include "private/ImsSubscriberInfo.h"
 
 class IIsim;
 
 class AsyncConfigHelper;
 class ISubscriberInfoListener;
+class ImsSubscriberInfo;
 
 class SubscriberConfig : public ConfigBase, public ISubscriberConfig, public IIsimListener
 {

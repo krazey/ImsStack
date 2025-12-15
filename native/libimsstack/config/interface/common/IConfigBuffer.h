@@ -16,7 +16,9 @@
 #ifndef INTERFACE_CONFIG_BUFFER_H_
 #define INTERFACE_CONFIG_BUFFER_H_
 
-#include "AStringArray.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class IConfigBuffer
 {

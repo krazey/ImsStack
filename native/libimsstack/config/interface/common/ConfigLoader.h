@@ -16,7 +16,10 @@
 #ifndef CONFIG_LOADER_H_
 #define CONFIG_LOADER_H_
 
-#include "IConfigBuffer.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class IConfigBuffer;
 
 class ConfigLoader
 {

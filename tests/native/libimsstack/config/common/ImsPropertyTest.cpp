@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "ImsRegistry.h"
 #include "private/ImsProperty.h"
 
 namespace android
