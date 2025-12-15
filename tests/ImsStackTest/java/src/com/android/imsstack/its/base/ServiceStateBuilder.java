@@ -19,6 +19,7 @@ import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN;
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
 import static android.telephony.DataSpecificRegistrationInfo.LTE_ATTACH_EXTRA_INFO_NONE;
 import static android.telephony.DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_COMBINED;
+import static android.telephony.DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_EPS_ONLY;
 import static android.telephony.DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_UNKNOWN;
 import static android.telephony.LteVopsSupportInfo.LTE_STATUS_NOT_SUPPORTED;
 import static android.telephony.LteVopsSupportInfo.LTE_STATUS_SUPPORTED;
@@ -97,6 +98,18 @@ public class ServiceStateBuilder {
         addNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN, REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, 0, false, null,
                 LTE_ATTACH_TYPE_COMBINED, LTE_ATTACH_EXTRA_INFO_NONE, true, true, false);
+        return this;
+    }
+
+    /**
+     * Adds a network registration for an LTE network where the device is attached with EPS only.
+     *
+     * @return The builder.
+     */
+    public @NonNull ServiceStateBuilder addNetworkRegistrationInfoForLteEpsOnly() {
+        addNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN, REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, 0, false, null,
+                LTE_ATTACH_TYPE_EPS_ONLY, LTE_ATTACH_EXTRA_INFO_NONE, true, true, false);
         return this;
     }
 

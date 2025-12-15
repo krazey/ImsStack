@@ -716,6 +716,19 @@ public class ImsStackTestBase {
     }
 
     /**
+     * Factory method to build a {@link ServiceState} object configured for LTE EPS-only.
+     * This state indicates that the device is registered to the PS domain only,
+     * without a combined CS attach (EPS Only mode).
+     *
+     * @return A new {@link ServiceState} object configured for LTE EPS-only.
+     */
+    protected final ServiceState buildLteEpsOnlyServiceState() {
+        return new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLteEpsOnly()
+                .build();
+    }
+
+    /**
      * Factory method to build a {@link ServiceState} object configured for NR.
      * Includes both PS and potentially CS registration info for NR.
      *
