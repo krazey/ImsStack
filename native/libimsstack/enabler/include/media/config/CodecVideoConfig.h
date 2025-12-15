@@ -44,7 +44,7 @@ public:
     /**
      * @brief Destroy the codec video config
      */
-    ~CodecVideoConfig() override;
+    virtual ~CodecVideoConfig() override;
 
     /**
      * @brief Create codec using the configuration
@@ -65,62 +65,62 @@ public:
      *
      * @return IMS_SINT32 Return the channel id - default : 0
      */
-    IMS_SINT32 GetChannel() const;
+    virtual IMS_SINT32 GetChannel() const;
 
     /**
      * @brief Get the resolution width
      *
      * @return IMS_SINT32 Return the resolution configuration - width for avc/hevc
      */
-    IMS_SINT32 GetResolutionWidth() const;
+    virtual IMS_SINT32 GetResolutionWidth() const;
 
     /**
      * @brief Get the resolution height
      *
      * @return IMS_SINT32 Return the resolution configuration - height for avc/hevc
      */
-    IMS_SINT32 GetResolutionHeight() const;
+    virtual IMS_SINT32 GetResolutionHeight() const;
 
     /**
      * @brief Get the framerate for avc/hevc
      *
      * @return IMS_SINT32 Return avc/hevc framerate
      */
-    IMS_SINT32 GetFramerate() const;
+    virtual IMS_SINT32 GetFramerate() const;
     /**
      * @brief Get the bitrate for avc/hevc
      *
      * @return IMS_SINT32 Return avc/hevc bitrate
      */
-    IMS_SINT32 GetBitrate() const;
+    virtual IMS_SINT32 GetBitrate() const;
 
     /**
      * @brief Get the packetization mode
      *
      * @return IMS_SINT32 Return the packetization mode
      */
-    IMS_SINT32 GetPacketizationMode() const;
+    virtual IMS_SINT32 GetPacketizationMode() const;
 
     /**
      * @brief Get the SpropParameterSets
      *
      * @return const AString& SpropParameterSets
      */
-    const AString& GetSpropParameterSets() const;
+    virtual const AString& GetSpropParameterSets() const;
 
     /**
      * @brief Get the image attribute
      *
      * @return const AString& Return a string of the image attribute for video resolution
      */
-    const AString& GetImageAttr() const;
+    virtual const AString& GetImageAttr() const;
 
     /**
      * @brief Get the frame size
      *
      * @return const AString& Return framesize
      */
-    const AString& GetFrameSize() const;
+    virtual const AString& GetFrameSize() const;
 
 public:
     /** Enum for packetization mode */

@@ -148,18 +148,9 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
             VideoProfileUtil::GetAvcProfileFromProfileLevelId(pAvcConfig->GetProfileLevelId()));
     pAvcFmtp->SetLevel(
             VideoProfileUtil::GetAvcLevelFromProfileLevelId(pAvcConfig->GetProfileLevelId()));
+
     IMS_TRACE_I("CreateAvcPayload(): Profile[%d], Level[%d]", pAvcFmtp->GetProfile(),
             pAvcFmtp->GetLevel(), 0);
-
-    const IMS_CHAR* pbAvc4SpropParameterSets;
-    pbAvc4SpropParameterSets = pAvcConfig->GetSpropParameterSets().GetStr();
-
-    /** TODO: later sprop need to find a way to get SpropPramaterSets
-    pbAvc4SpropParameterSets = GetAvcSpropParameterSets(
-            pAvcFmtp->GetResolution(), pAvcFmtp->GetProfile(), pAvcFmtp->GetLevel());
-    */
-
-    IMS_TRACE_I("CreateAvcPayload(): SpropParameterSets[%s]", pbAvc4SpropParameterSets, 0, 0);
 
     if (pAvcConfig->GetProfileLevelId().GetLength() != 0)
     {
@@ -169,7 +160,7 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
 
     if (pAvcConfig->GetIncludeSpropParameterSets())
     {
-        pAvcFmtp->SetSpropParam(pbAvc4SpropParameterSets);
+        pAvcFmtp->SetSpropParam(pAvcConfig->GetSpropParameterSets());
         pAvcFmtp->SetVisibleSpropParam(IMS_TRUE);
     }
 
@@ -190,8 +181,6 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
         return IMS_NULL;
     }
 
-    IMS_TRACE_I("CreateHevcPayload()", 0, 0, 0);
-
     const CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
     const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
     auto pHevcFmtp = std::make_shared<VideoProfile::HevcFmtp>();
@@ -209,6 +198,9 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
         pHevcFmtp->SetLevel(pHevcConfig->GetHevcLevel());
         pHevcFmtp->SetVisibleLevel(IMS_TRUE);
     }
+
+    IMS_TRACE_I("CreateHevcPayload(): Profile[%d], Level[%d]", pHevcFmtp->GetProfile(),
+            pHevcFmtp->GetLevel(), 0);
 
     if (pHevcConfig->GetSpropParameterSets().GetLength() != 0)
     {
