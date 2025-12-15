@@ -335,7 +335,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateFailed(
+        IN [[maybe_unused]] ISession* piSession)
 {
     CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
