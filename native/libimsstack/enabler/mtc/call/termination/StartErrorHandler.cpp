@@ -397,25 +397,23 @@ CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy
                 ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT);
         switch (nPolicy)
         {
-            case ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
+            case ConfigVoice::REGISTRATION_RESTORATION_NOT_APPLICABLE:
                 break;
-            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
+            case ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF_BY_NETWORK_CONTEXT:
                 if (m_objContext.IsCsfbAvailable())
                 {
                     break;
                 }
                 __IMS_FALLTHROUGH__
-            case ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
+            case ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF:
                 ControlAos(ImsAosControl::PCSCF_NEXT);
                 return GetDefaultCallReasonInfo(m_objContext, objMessage);
 
-            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
-                // If there is an operator that requires PDN reconnect, AoS I/F should be added.
-            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
+            case ConfigVoice::REGISTRATION_RESTORATION_SAME_PCSCF:
                 ControlAos(ImsAosControl::REGISTER_REINITIATE);
                 return GetDefaultCallReasonInfo(m_objContext, objMessage);
 
-            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_THEN_SILENT_REDIAL:
+            case ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF_WITH_SILENT_REDIAL:
                 if (HasActiveCalls())
                 {
                     break;

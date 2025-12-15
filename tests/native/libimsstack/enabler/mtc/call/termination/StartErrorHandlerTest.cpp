@@ -1059,8 +1059,7 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistrationByHeade
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
-            .WillByDefault(
-                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+            .WillByDefault(Return(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::
                             KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
@@ -1087,8 +1086,7 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseRestoresRegistrationWithHeaderVal
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
-            .WillByDefault(
-                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+            .WillByDefault(Return(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::
                             KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
@@ -1115,15 +1113,14 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseRestoresRegistrationWithHeaderVal
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
-TEST_F(StartErrorHandlerTest, Handle504ResponsetRestoresRegistrationWithoutHeaderValidation)
+TEST_F(StartErrorHandlerTest, Handle504ResponseRestoresRegistrationWithoutHeaderValidation)
 {
     SetMessageCode(SipStatusCode::SC_504);
     SetActionConfig(SipStatusCode::SC_504,
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
-            .WillByDefault(
-                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+            .WillByDefault(Return(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::
                             KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
@@ -1160,8 +1157,7 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistrationByIms3g
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
-            .WillByDefault(
-                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+            .WillByDefault(Return(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::
                             KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
@@ -1190,7 +1186,7 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseRestoreRegistrationByIms3gppValid
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
             .WillByDefault(
-                    Return(ConfigVoice::REGISTRATION_RESTORATION_RECOVER_THEN_SILENT_REDIAL));
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF_WITH_SILENT_REDIAL));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::
                             KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
@@ -1207,11 +1203,11 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseRestoreRegistrationByIms3gppValid
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
 }
 
-TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigNotAvailable)
+TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigNotApplicable)
 {
     SetActionConfig(SipStatusCode::SC_504,
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
-    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE);
+    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_NOT_APPLICABLE);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
@@ -1219,17 +1215,17 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRegisterNextPcscf)
 {
     SetActionConfig(SipStatusCode::SC_504,
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
-    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF);
+    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
-TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverRegistration)
+TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRegisterSamePcscf)
 {
     SetActionConfig(SipStatusCode::SC_504,
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
-    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION);
+    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_SAME_PCSCF);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
@@ -1240,7 +1236,7 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverByNetworkContext
     SetActionConfigs(SipStatusCode::SC_504,
             {ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY,
                     ConfigVoice::START_ERROR_ACTION_CSFB});
-    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT);
+    SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF_BY_NETWORK_CONTEXT);
 
     // combined attached case
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
@@ -1251,17 +1247,6 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverByNetworkContext
     ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
-}
-
-TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverWithoutPdnReconnection)
-{
-    SetActionConfig(SipStatusCode::SC_504,
-            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
-    SetUp504RegRestoration(
-            ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT);
-
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
@@ -1379,8 +1364,7 @@ TEST_F(StartErrorHandlerTest, HandleActionsProcessOneMatchedAction)
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
-            .WillByDefault(
-                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+            .WillByDefault(Return(ConfigVoice::REGISTRATION_RESTORATION_NEXT_PCSCF));
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
