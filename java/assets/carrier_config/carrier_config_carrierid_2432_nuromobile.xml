@@ -14,8 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<carrier_config>
-    <int-array name="ims.parent_carrier_ids_int_array" num="1">
-        <item value="850"/>
-    </int-array>
-</carrier_config>
+<carrier_config_list>
+    <carrier_config mnc="10">
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="850"/>
+        </int-array>
+    </carrier_config>
+    <carrier_config mnc="51">
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="1581"/>
+        </int-array>
+    </carrier_config>
+    <carrier_config mnc="20">
+        <int-array name="ims.parent_carrier_ids_int_array" num="1">
+            <item value="1894"/>
+        </int-array>
+    </carrier_config>
+</carrier_config_list>
