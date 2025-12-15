@@ -22,6 +22,7 @@
 #include "ServiceUtil.h"
 #include "ServicePhoneInfo.h"
 #include "CarrierConfig.h"
+#include "ISipConfigV.h"
 #include "Engine.h"
 #include "IConfigurable.h"
 #include "IConfiguration.h"

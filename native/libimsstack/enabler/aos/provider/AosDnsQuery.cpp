@@ -16,11 +16,13 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include "INativeThreadMethods.h"
+#include "INetworkConnection.h"
 #include "IThreadImpListener.h"
-#include "ServiceTrace.h"
 #include "OsMutex.h"
 #include "OsPthread.h"
-#include "INetworkConnection.h"
+#include "ServiceThread.h"
+#include "ServiceTrace.h"
 #include "provider/AosDnsQuery.h"
 
 __IMS_TRACE_TAG_AOS__;
@@ -249,7 +251,12 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
 
     IMS_TRACE_D("AosDnsQueryPrivate :: terminated", 0, 0, 0);
 
-    JniDetachNativeThread();
+    INativeThreadMethods* piNativeThreadMethods = ThreadService::GetNativeThreadMethods();
+
+    if (piNativeThreadMethods != IMS_NULL)
+    {
+        piNativeThreadMethods->DetachNativeThread();
+    }
 
     if (m_pQueryer != IMS_NULL)
     {
