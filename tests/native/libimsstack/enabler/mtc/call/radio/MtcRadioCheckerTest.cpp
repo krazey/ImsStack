@@ -426,17 +426,38 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficBecauseNoMtcTra
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficForEpsFbSilentRedial)
 {
-    EXPECT_EQ(IMtcRadioChecker::CheckResult::Unblocked(),
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT,
-                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(IMtcRadioChecker::CheckResult::Pending(),
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_NR, IMS_FALSE, CALL_KEY1));
     ON_CALL(m_objCall, GetKey).WillByDefault(Return(CALL_KEY1));
     ON_CALL(m_objEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
-                    IImsRadio::DIRECTION_MT, _))
+                    IImsRadio::DIRECTION_MO, _))
             .Times(0);
+
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_NR, INetworkWatcher::RADIOTECH_TYPE_LTE);
+}
+TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesStartImsTrafficForNotEpsFbSilentRedial)
+{
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_EQ(IMtcRadioChecker::CheckResult::Pending(),
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_IWLAN, IMS_FALSE, CALL_KEY1));
+    ON_CALL(m_objCall, GetKey).WillByDefault(Return(CALL_KEY1));
+    ON_CALL(m_objEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
+            .Times(1);
 
     m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
             INetworkWatcher::RADIOTECH_TYPE_NR, INetworkWatcher::RADIOTECH_TYPE_LTE);

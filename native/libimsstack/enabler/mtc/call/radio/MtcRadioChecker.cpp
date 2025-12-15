@@ -238,7 +238,7 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnRatChanged(IN ServiceType eServiceType,
             continue;
         }
 
-        if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_NR &&
+        if (pMtcTrafficInfo->m_eRat == INetworkWatcher::RADIOTECH_TYPE_NR &&
                 eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE &&
                 IsInEpsfbSilentRedial(pMtcTrafficInfo->m_objCallKeys))
         {
