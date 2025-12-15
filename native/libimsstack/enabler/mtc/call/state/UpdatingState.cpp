@@ -120,7 +120,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo(objSession);
 
-    // TODO: Internal error handling
     pSession->AcceptUpdate();
 
     const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
@@ -139,7 +138,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
     if (m_objContext.GetMediaManager().GetNegotiationState(&pMtcSession->GetISession()) !=
             NegotiationState::STATE_NEGOTIATED)
     {
-        // TODO: Use this reject code in MessageFormatter#GetRejectStatusCode.
         IMS_SINT32 nRejectCode = m_objContext.GetConfigurationProxy().GetInt(
                 ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
         if (nRejectCode == SipStatusCode::SC_200)
@@ -153,25 +151,16 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
 
     if (m_objContext.GetSession()->GetISession().GetState() == ISession::STATE_ESTABLISHED)
     {
-        if (SendRecoverUpdate() == IMS_FAILURE)
-        {
-            // TODO
-        }
-
-        return CallStateName::UPDATING;
+        return SendRecoverUpdate() == IMS_SUCCESS ? CallStateName::UPDATING
+                                                  : CallStateName::ESTABLISHED;
     }
-
-    // TODO: Internal error handling
     m_objContext.GetSession()->Reject(objReason);
-
     return CallStateName::UPDATING;
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::CancelUpdate(IN const CallReasonInfo& objReason)
 {
     m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
-
-    // TODO: Internal error handling
     m_objContext.GetSession()->CancelUpdate(objReason);
 
     return CallStateName::UPDATING;
@@ -190,8 +179,12 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo(objSession);
 
-    // TODO: Internal error handling
-    pSession->AcceptUpdate();
+    if (pSession->AcceptUpdate() == IMS_FAILURE)
+    {
+        pSession->Reject(
+                CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_488));
+        return CallStateName::ESTABLISHED;
+    }
 
     const IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
@@ -206,8 +199,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
 PUBLIC VIRTUAL CallStateName UpdatingState::RejectResume(IN const CallReasonInfo& objReason)
 {
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
-
-    // TODO: Internal error handling
     m_objContext.GetSession()->Reject(objReason);
 
     return CallStateName::UPDATING;
@@ -325,12 +316,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::SessionCancelDeliveryFailed(IN ISession*)
-{
-    // TODO: Add failure handle logic.
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     const IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
@@ -339,9 +324,10 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        // TODO: Send CANCEL
+        CancelUpdate(objReason);
         RecoverModificationFailure();
         NotifyFailure();
         return CallStateName::ESTABLISHED;
@@ -349,9 +335,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateFailed(IN ISession*)
+PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
-    // TODO: Send CANCEL. Handle retry if 491.
+    CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
     NotifyFailure();
     return CallStateName::ESTABLISHED;
@@ -404,13 +390,12 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDelivered(IN ISession* p
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     if (objMediaManager.GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
     {
-        // TODO: need to check this?
         return GetStateName();
     }
 
     if (pSession->SendEarlyUpdate(UpdateType::NORMAL) == IMS_FAILURE)
     {
-        // TODO: Send CANCEL
+        CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
         RecoverModificationFailure();
         NotifyFailure();
         return CallStateName::ESTABLISHED;
@@ -420,7 +405,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDelivered(IN ISession* p
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDeliveryFailed(IN ISession*)
 {
-    // TODO: send CANCEL.
+    CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
     NotifyFailure();
     return CallStateName::ESTABLISHED;
@@ -454,7 +439,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* pi
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprDeliveryFailed(IN ISession*)
 {
-    // TODO: send CANCEL.
+    CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
     NotifyFailure();
     return CallStateName::ESTABLISHED;
@@ -472,7 +457,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
 
     if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
-        // TODO: Send CANCEL
+        CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
         RecoverModificationFailure();
         NotifyFailure();
         return CallStateName::ESTABLISHED;
@@ -482,7 +467,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
                                     ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL) &&
                 IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
     {
-        // TODO: Send CANCEL
+        CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
         RecoverModificationFailure();
         NotifyFailure();
         return CallStateName::ESTABLISHED;
@@ -495,8 +480,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::Refresh_NotifyTimerExpired(
         OUT IMS_BOOL& bDoImplicitRefresh)
 {
     bDoImplicitRefresh = IMS_FALSE;
-    // TODO: if session_timer_update_required_in_session_update_by_reinvite_bool is true,
-    // no need to refresh. session timer is updated by re-INVITE.
     m_objContext.GetUpdatingInfo().SetPendingUpdate();
     return GetStateName();
 }
@@ -713,13 +696,14 @@ IMS_RESULT UpdatingState::SendRecoverUpdate()
             pSession->GetISession(), m_objContext.GetUpdatingInfo().GetModifyingInfo());
     pSession->SetCallType(pSession->GetPreviousCallType());
 
-    // TODO: Internal error handling
-    pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE);
+    if (pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
 
     m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
             m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVt::KEY_CONVERT_REMOTE_RESPONSE_TIMER_MILLIS_INT));
-
     return IMS_SUCCESS;
 }
 
@@ -839,7 +823,6 @@ CallStateName UpdatingState::HandleRetry()
     }
     else if (eType == UpdateType::SESSION)
     {
-        // TODO: receiving 491 for RejectUpdate->SendUpdate.
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [eCallType, objMediaInfo](IMtcCallState* pState) mutable
                 {

@@ -54,7 +54,6 @@ public:
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
 
-    CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;

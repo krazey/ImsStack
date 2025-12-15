@@ -687,26 +687,6 @@ PROTECTED VIRTUAL void ConferenceController::SubscribeConference(IN IMS_BOOL bUn
         {
             // re-SUBSCRIBTION
         }
-        // TODO: This code is useless so will be removed. m_pSubscription is always non-null.
-        /*
-        if (m_pSubscription != IMS_NULL)
-        {
-            if (m_pSubscription->GetState() == SubscriptionState::ACTIVE)
-            {
-                // re-SUBSCRIBTION
-            }
-        }
-        else if (IMS_FALSE) //not support conference w/o subscription
-        {
-            Recover();
-            return;
-        }
-        else
-        {
-            // carry on w/o subscription
-            CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
-        }
-        */
     }
 }
 

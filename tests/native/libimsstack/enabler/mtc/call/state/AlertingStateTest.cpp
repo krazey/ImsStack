@@ -85,8 +85,6 @@ protected:
     {
         ON_CALL(objISession, GetPreviousRequest(_)).WillByDefault(Return(&objIMessage));
         ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objISipMessage));
-        ON_CALL(objISession, GetPreviousRequest(_)).WillByDefault(Return(&objIMessage));
-        ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objISipMessage));
 
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
@@ -501,8 +499,7 @@ TEST_F(AlertingStateTest, OnTimerExpiredInvokesSendEarlyUpdateIfGlareConditionTi
 
 TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionIsRelease)
 {
-    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE))
-            .Times(2);  // TODO: duplicated code.
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE));
     const CallReasonInfo objReason(CODE_REJECT_QOS_FAILURE);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
