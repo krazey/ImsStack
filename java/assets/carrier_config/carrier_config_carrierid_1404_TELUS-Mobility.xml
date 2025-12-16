@@ -41,7 +41,7 @@
     <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="true"/>
 
     <!-- MTC -->
-    <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="3"/>
+    <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="2"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->

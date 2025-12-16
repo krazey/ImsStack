@@ -27,7 +27,7 @@
     <!-- Mtc -->
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
-    <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="5"/>
+    <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="4"/>
     <int-array name="imsvoice.csfb_block_condition_int_array" num="3">
         <item value="0"/> <!-- CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH -->
         <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
