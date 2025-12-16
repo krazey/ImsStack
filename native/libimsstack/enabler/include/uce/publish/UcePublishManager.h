@@ -171,6 +171,9 @@ protected:
     // ALL
     virtual IMS_BOOL StateALL_Terminated(IN IMSMSG& objMsg);
 
+    inline IMS_UINT32 GetLastResponseCode() const { return m_nLastResponseCode; }
+    inline void SetLastResponseCode(IMS_UINT32 nCode) { m_nLastResponseCode = nCode; }
+
 private:
     void LoadConfigValue();
     static IPublishResponseData* GetPublishResponseData(const ISipMessage* piMessage);
@@ -289,5 +292,6 @@ private:
     IMS_UINT32 m_nImmediatelyRetryCount;
     IMS_UINT32 m_nRetryCount;
     IMS_UINT32 m_nExponentialRetryCount;
+    IMS_UINT32 m_nLastResponseCode;
 };
 #endif  // _UCE_PUBLISH_MANAGER_H_

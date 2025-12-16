@@ -31,6 +31,7 @@
 #include "MockISipClientConnection.h"
 #include "TestTimerService.h"
 #include "PlatformContext.h"
+#include "TestThreadService.h"
 #include "def/UceDef.h"
 #include "config/UceConfig.h"
 #include "config/UceAssetItems.h"
@@ -184,17 +185,32 @@ public:
     IMS_BOOL TerminatingPublished(IMSMSG& objMsg) { return StateTERMINATING_Published(objMsg); }
     IMS_BOOL TerminatingFailed(IMSMSG& objMsg) { return StateTERMINATING_Failed(objMsg); }
     IMS_BOOL AllTerminated(IMSMSG& objMsg) { return StateALL_Terminated(objMsg); }
+
+    IMS_UINT32 GetResponseCode() { return GetLastResponseCode(); }
+    void SetResponseCode(IMS_UINT32 nCode) { return SetLastResponseCode(nCode); }
 };
 
 class UcePublishManagerTest : public ::testing::Test
 {
 public:
     inline UcePublishManagerTest() :
+            pThreadService(new TestThreadService()),
             objTimerService(),
-            objTimer(objTimerService.GetMockTimer())
+            objTimer(objTimerService.GetMockTimer()),
+            objMockThread()
     {
         pUcePublishManager = IMS_NULL;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
+        pThreadService->SetThread(&objMockThread);
     }
+
+    inline virtual ~UcePublishManagerTest()
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+        delete pThreadService;
+    }
+
+    TestThreadService* pThreadService;
     TestTimerService objTimerService;
     MockITimer& objTimer;
     TestUcePublishManager* pUcePublishManager;
@@ -203,6 +219,7 @@ public:
     MockIUceJniThread objMockIUceJniThread;
     MockIPublication objMockIPublication;
     MockIMessage objMockIMessage;
+    MockIThread objMockThread;
 
 protected:
     virtual void SetUp() override
@@ -354,13 +371,17 @@ TEST_F(UcePublishManagerTest, AosConnected)
 TEST_F(UcePublishManagerTest, AosDisConnected)
 {
     IMS_TRACE_D("AosDisConnected", 0, 0, 0);
+    pUcePublishManager->SetResponseCode(403);
     EXPECT_EQ(pUcePublishManager->AosDisConnected(), IMS_FALSE);
     EXPECT_EQ(pUcePublishManager->GetConectedService(), 0);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
+    EXPECT_EQ(pUcePublishManager->GetResponseCode(), 0);
 
     pUcePublishManager->UpdateState(TestUcePublishManager::ON);
+    pUcePublishManager->SetResponseCode(403);
     EXPECT_EQ(pUcePublishManager->AosDisConnected(), IMS_TRUE);
     EXPECT_EQ(pUcePublishManager->GetConectedService(), 0);
+    EXPECT_EQ(pUcePublishManager->GetResponseCode(), 0);
 }
 
 TEST_F(UcePublishManagerTest, AosDisConnecting)
@@ -411,14 +432,25 @@ TEST_F(UcePublishManagerTest, PublicationDelivered)
     pUcePublishManager->Delivered(&objMockIPublication);
 }
 
+TEST_F(UcePublishManagerTest, PublicationDeliveryFailedWithDifferentPublication)
+{
+    IMS_TRACE_D("PublicationDeliveryFailedWithDifferentPublication", 0, 0, 0);
+
+    pUcePublishManager->DeliveryFailed(&objMockIPublication);
+}
+
 TEST_F(UcePublishManagerTest, PublicationDeliveryFailed)
 {
     IMS_TRACE_D("PublicationDeliveryFailed", 0, 0, 0);
 
+    MockISipMessage objMockISipMessage;
+    ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(403));
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+
     pUcePublishManager->DeliveryFailed(&objMockIPublication);
 
-    pUcePublishManager->SetIPublication(&objMockIPublication);
-    pUcePublishManager->DeliveryFailed(&objMockIPublication);
+    EXPECT_EQ(pUcePublishManager->GetResponseCode(), 403);
 }
 
 TEST_F(UcePublishManagerTest, PublicationTerminated)
@@ -449,6 +481,7 @@ TEST_F(UcePublishManagerTest, PublicationRefreshCompleted)
     MockISipMessage objMockISipMessage;
     AString reason = "OK";
 
+    pUcePublishManager->SetResponseCode(403);
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
     ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(200));
     ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
@@ -456,12 +489,16 @@ TEST_F(UcePublishManagerTest, PublicationRefreshCompleted)
     pUcePublishManager->SetIPublication(&objMockIPublication);
     pUcePublishManager->RefreshCompleted(&objMockIPublication);
 
+    EXPECT_EQ(pUcePublishManager->GetResponseCode(), 0);
+
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
     ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(403));
     ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
 
     pUcePublishManager->SetIPublication(&objMockIPublication);
     pUcePublishManager->RefreshCompleted(&objMockIPublication);
+
+    EXPECT_EQ(pUcePublishManager->GetResponseCode(), 403);
 }
 
 TEST_F(UcePublishManagerTest, RefreshNotifyCompleted)
@@ -692,6 +729,43 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Failed)
 
     EXPECT_EQ(pUcePublishManager->GetKey(), 0);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
+}
+
+TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWith403Twice)
+{
+    IMS_TRACE_D("StatePUBLISHING_FailedWith403Twice", 0, 0, 0);
+
+    IMS_UINT32 nErrorCode = 403;
+    UceAssetItems* objNew = new UceAssetItems();
+    ImsVector<IMS_SINT32> temporary;
+    temporary.Add(nErrorCode);
+    objNew->m_objReAttemptRegistrationPublishResponse = temporary;
+    UceConfig::GetInstance()->SetConfig(0, objNew);
+
+    MockISipMessage objMockISipMessage;
+    ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+
+    AString reason = "Not Implemented";
+    ImsList<AString> objReasonHeaders;
+    objReasonHeaders.Clear();
+
+    ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(nErrorCode));
+    ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
+    ON_CALL(objMockISipMessage, GetHeaders).WillByDefault(Return(objReasonHeaders));
+
+    IMSMSG objMsg(TestUcePublishManager::PUBLISH_FAILED, 0, 0);
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+    pUcePublishManager->SetKey(10);
+    EXPECT_CALL(objMockThread, PostMessageI(_)).Times(1);
+
+    pUcePublishManager->PublishingFailed(objMsg);  // First failure.
+
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+    pUcePublishManager->SetKey(11);
+    pUcePublishManager->SetResponseCode(nErrorCode);  // Set previous error to 403.
+    EXPECT_CALL(objMockThread, PostMessageI(_)).Times(0);
+
+    pUcePublishManager->PublishingFailed(objMsg);  // Second failure.
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWithNoKey)

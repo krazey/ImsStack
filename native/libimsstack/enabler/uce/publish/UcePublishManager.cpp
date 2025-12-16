@@ -136,7 +136,8 @@ UcePublishManager::UcePublishManager(
         m_bUnpublishSent(IMS_FALSE),
         m_nImmediatelyRetryCount(0),
         m_nRetryCount(0),
-        m_nExponentialRetryCount(0)
+        m_nExponentialRetryCount(0),
+        m_nLastResponseCode(0)
 {
     IMS_TRACE_I("UCE_M : UcePublishManager = %" PFLS_u, sizeof(UcePublishManager), 0, 0);
     if (m_piCoreService == IMS_NULL)
@@ -453,6 +454,7 @@ IMS_BOOL UcePublishManager::AosDisConnected()
 {
     m_nConnectedServices = 0;
     m_bEnablePIDFCompression = IMS_FALSE;
+    SetLastResponseCode(0);
     IMSMSG objMsg(AOS_DISCONNECTED, 0, 0);
     return OnStateMessage(objMsg);
 }
@@ -517,6 +519,8 @@ void UcePublishManager::PublicationDelivered(IN IPublication* piPublication)
     }
     IMSMSG objMsg(PUBLISH_SUCCEEDED, 0, 0);
     OnStateMessage(objMsg);
+
+    SetLastResponseCode(0);
 }
 
 void UcePublishManager::PublicationDeliveryFailed(IN IPublication* piPublication)
@@ -527,8 +531,17 @@ void UcePublishManager::PublicationDeliveryFailed(IN IPublication* piPublication
         IMS_TRACE_I("PublicationDeliveryFailed:IPublication from Engine is not mine.", 0, 0, 0);
         return;
     }
+
+    const ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
+    IMS_UINT32 nResponseCode = (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : 0;
+
     IMSMSG objMsg(PUBLISH_FAILED, 0, 0);
     OnStateMessage(objMsg);
+
+    if (nResponseCode != 0)
+    {
+        SetLastResponseCode(nResponseCode);
+    }
 }
 
 void UcePublishManager::PublicationTerminated(IN IPublication* piPublication)
@@ -577,12 +590,19 @@ void UcePublishManager::PublicationRefreshCompleted(IN IPublication* piPublicati
         IMS_TRACE_I("PublicationRefreshCompleted:success refresh PUBLISH.", 0, 0, 0);
         IMSMSG objMsg(PUBLISH_REFRESHED, 0, 0);
         OnStateMessage(objMsg);
+
+        SetLastResponseCode(0);
     }
     else
     {
         IMS_TRACE_I("PublicationRefreshCompleted:failed refresh PUBLISH.", 0, 0, 0);
         IMSMSG objMsg(PUBLISH_REFRESH_FAILED, 0, 0);
         OnStateMessage(objMsg);
+
+        if (nResponseCode != 0)
+        {
+            SetLastResponseCode(nResponseCode);
+        }
     }
 }
 
@@ -1708,6 +1728,12 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     if (strReasonPhrs.Contains(NOT_AUTHORIZED_FOR_PRESENCE) == IMS_TRUE)
     {
         IMS_TRACE_I("ReasonPhrase:Not Authorized for presence (ReasonPhrase)", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (GetLastResponseCode() == piMessage->GetStatusCode())
+    {
+        IMS_TRACE_I("Same error response received twice", 0, 0, 0);
         return IMS_TRUE;
     }
 
