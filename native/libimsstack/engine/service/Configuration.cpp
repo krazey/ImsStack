@@ -17,6 +17,7 @@
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
 
+#include "ImsRegistry.h"
 #include "private/AppConfig.h"
 #include "private/ConfigurationManager.h"
 #include "private/EngineConfig.h"

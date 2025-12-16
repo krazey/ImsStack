@@ -19,6 +19,7 @@
 #include "SystemConfig.h"
 
 #include "private/ConfigurationManager.h"
+#include "private/ImsSubscriberInfo.h"
 #include "private/SubscriberConfig.h"
 
 #include "SipDebug.h"

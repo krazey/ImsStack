@@ -16,6 +16,8 @@
 #ifndef INTERFACE_CONFIGURATION_H_
 #define INTERFACE_CONFIGURATION_H_
 
+#include "AStringArray.h"
+
 #include "IAppConfig.h"
 #include "IMediaConfig.h"
 #include "ISipConfig.h"
