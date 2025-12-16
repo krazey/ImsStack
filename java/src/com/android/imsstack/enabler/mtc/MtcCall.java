@@ -2134,6 +2134,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                     Message.obtain(mHandler, MSG_CLEAR_INTERFACE,
                             Long.valueOf(getNativeCallId())).sendToTarget();
                     updateNativeCallObject(0);
+                    mJniCreated = false;
                     return;
                 }
             }

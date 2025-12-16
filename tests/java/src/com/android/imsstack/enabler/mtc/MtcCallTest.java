@@ -911,6 +911,7 @@ public class MtcCallTest extends ImsStackTest {
         verify(mEmergencyCallFailureListener, times(1))
                 .onEmergencyCallFailedByAlreadyOpenedServiceClosed();
         assertEquals(mTestMtcCallWithMockJniProxy.getNativeCallId(), 0);
+        assertFalse(mTestMtcCallWithMockJniProxy.mJniCreated);
     }
 
     @Test
