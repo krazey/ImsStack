@@ -784,34 +784,57 @@ void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
 PROTECTED
 IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const
 {
-    NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
-    if (eState != NegotiationState::STATE_NEGOTIATED)
-    {
-        return IMS_FALSE;
-    }
+    const NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
+    const SipMethod& eMethod = piMessage->GetMethod();
 
-    if (piMessage->GetMethod().Equals(SipMethod::INVITE))
+    if (eMethod.Equals(SipMethod::INVITE))
     {
         if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
         {
-            if (m_objContext.GetMediaManager().IsPreviewMode(piSession))
+            if (eState == NegotiationState::STATE_NEGOTIATED)
             {
-                IMS_TRACE_D("IsNeedToIgnore - Handle a subsequent answer on preview mode", 0, 0, 0);
-                return IMS_FALSE;
+                // RFC 6337. 3.1.1.INVITE Request with SDP, UAC behavior 2.
+                // in case of the UE is in preview mode, need to handle subsequent sdp.
+                return !m_objContext.GetMediaManager().IsPreviewMode(piSession);
             }
-            // RFC 6337. 3.1.1.INVITE Request with SDP, UAC behavior 2.
-            IMS_TRACE_I("IsNeedToIgnore - Ignore a subsequent answer in a response", 0, 0, 0);
+            else
+            {
+                // For non-RPRs, should not ignore SDP if preview mode is allowed.
+                if (SipStatusCode::IsProvisional(piMessage->GetStatusCode()) &&
+                        !piMessage->GetMessage()->IsMessageRpr())
+                {
+                    return !IsSdpPreviewModeAllowedByPolicy();
+                }
+            }
+        }
+    }
+    else if (eMethod.Equals(SipMethod::ACK))
+    {
+        if (eState == NegotiationState::STATE_NEGOTIATED)
+        {
+            IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
             return IMS_TRUE;
         }
     }
 
-    if (piMessage->GetMethod().Equals(SipMethod::ACK))
-    {
-        IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
     return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsSdpPreviewModeAllowedByPolicy() const
+{
+    switch (m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+    {
+        case ConfigVoice::SDP_PREVIEW_MODE_DISABLED:
+            return IMS_FALSE;
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY:
+            return !m_objContext.GetCallInfo().IsEmergency();
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY:
+            return m_objContext.GetCallInfo().IsEmergency();
+        default:  // ConfigVoice::SDP_PREVIEW_MODE_FOR_ALL_CALLS:
+            return IMS_TRUE;
+    }
 }
 
 PROTECTED

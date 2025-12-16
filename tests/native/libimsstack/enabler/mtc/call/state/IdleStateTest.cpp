@@ -16,6 +16,7 @@
 
 #include "IMessage.h"
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ImsList.h"
 #include "MediaDef.h"
 #include "MockIMessage.h"
@@ -23,6 +24,7 @@
 #include "MockIMtcService.h"
 #include "MockIPhoneInfoLocation.h"
 #include "MockISession.h"
+#include "MockISipMessage.h"
 #include "MtcDef.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
@@ -1518,6 +1520,11 @@ TEST_F(IdleStateTest, OnAttachedUpdatesCallTypeAndMediaInfoToNegotiatedTypeIfSdp
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
+    SipMethod objMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
