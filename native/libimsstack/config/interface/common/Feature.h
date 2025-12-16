@@ -16,10 +16,10 @@
 #ifndef FEATURE_H_
 #define FEATURE_H_
 
-#include "AStringArray.h"
+#include "AString.h"
 #include "RcObject.h"
 
-#include "ServiceIdentifier.h"
+class ServiceIdentifier;
 
 class Feature : public RcObject
 {

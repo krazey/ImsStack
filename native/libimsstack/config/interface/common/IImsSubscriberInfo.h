@@ -16,8 +16,10 @@
 #ifndef INTERFACE_IMS_SUBSCRIBER_INFO_H_
 #define INTERFACE_IMS_SUBSCRIBER_INFO_H_
 
-#include "AStringArray.h"
-#include "Credential.h"
+#include "ImsTypeDef.h"
+
+class AStringArray;
+class Credential;
 
 class IImsSubscriberInfo
 {

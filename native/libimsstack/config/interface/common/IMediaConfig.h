@@ -16,7 +16,10 @@
 #ifndef INTERFACE_MEDIA_CONFIG_H_
 #define INTERFACE_MEDIA_CONFIG_H_
 
-#include "AStringArray.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class AStringArray;
 
 class IMediaConfig
 {

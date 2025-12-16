@@ -18,6 +18,7 @@
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
+#include "ICarrierConfig.h"
 #include "private/SipConfig.h"
 
 __IMS_TRACE_TAG_CONF__;

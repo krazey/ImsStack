@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "ImsRegistry.h"
 #include "private/ImsRegistryLoader.h"
 #include "private/TestAppConfig.h"
 

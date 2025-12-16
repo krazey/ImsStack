@@ -34,7 +34,7 @@ namespace android
 {
 static const AString THREAD_NAME("TT00");
 
-ImsAppThread* CreateTestImsApplicationThread()
+static ImsAppThread* CreateTestImsApplicationThread()
 {
     return new ImsAppThread();
 }

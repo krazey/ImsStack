@@ -28,6 +28,7 @@
 #include "ISubscriberInfoListener.h"
 #include "ImsIdentity.h"
 #include "ServerAddress.h"
+#include "private/ImsSubscriberInfo.h"
 #include "private/SubscriberConfig.h"
 
 __IMS_TRACE_TAG_CONF__;

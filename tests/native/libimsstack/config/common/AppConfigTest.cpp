@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "ImsRegistry.h"
 #include "private/ImsRegistryLoader.h"
 #include "private/TestAppConfig.h"
 

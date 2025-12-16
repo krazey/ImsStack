@@ -17,6 +17,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ImsRegistry.h"
 #include "private/AppConfig.h"
 #include "private/CapProperty.h"
 #include "private/CoreServiceConfig.h"

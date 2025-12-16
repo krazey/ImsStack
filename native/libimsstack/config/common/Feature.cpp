@@ -20,6 +20,7 @@
 #include "TextParser.h"
 
 #include "Feature.h"
+#include "ServiceIdentifier.h"
 
 __IMS_TRACE_TAG_CONF__;
 

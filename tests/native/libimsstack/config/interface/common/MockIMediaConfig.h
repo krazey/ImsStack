@@ -16,12 +16,8 @@
 #ifndef MOCK_I_MEDIA_CONFIG_H_
 #define MOCK_I_MEDIA_CONFIG_H_
 
-#include "ImsTypeDef.h"
 #include "common/IMediaConfig.h"
 #include <gmock/gmock.h>
-
-class AString;
-class AStringArray;
 
 class MockIMediaConfig : public IMediaConfig
 {

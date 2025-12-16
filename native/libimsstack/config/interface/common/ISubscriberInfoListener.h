@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SUBSCRIBER_INFO_LISTENER_H_
 #define INTERFACE_SUBSCRIBER_INFO_LISTENER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class ISubscriberInfoListener
 {

@@ -16,7 +16,11 @@
 #ifndef IMS_REGISTRY_LOADER_H_
 #define IMS_REGISTRY_LOADER_H_
 
-#include "ImsRegistry.h"
+#include "ImsTypeDef.h"
+
+class AString;
+
+class ImsRegistry;
 
 class ImsRegistryLoader
 {

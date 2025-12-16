@@ -17,6 +17,7 @@
 #include "TextParser.h"
 
 #include "conf/ConfigSection.h"
+#include "conf/ConfigSectionData.h"
 
 PUBLIC
 ConfigSection::ConfigSection() :
