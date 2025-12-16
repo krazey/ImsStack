@@ -96,14 +96,6 @@ public:
     static IMS_BOOL IsTransportParameterIgnoredForIncomingRequestRouting(IN IMS_SINT32 nSlotId);
 
     /**
-     * @brief Indicates that "transport" parameter with "udp" should not be evaluated
-     *        when forming the outgoing request from SIP routing address URI.
-     *
-     * @param nSlotId Slot id
-     */
-    static IMS_BOOL IsTransportParameterUdpIgnoredForOutgoingRequest(IN IMS_SINT32 nSlotId);
-
-    /**
      * @brief Indicates that "transport" parameter should be removed from the Contact header
      *        before evaluating the registration binding.
      *

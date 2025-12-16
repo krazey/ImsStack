@@ -176,6 +176,10 @@ public:
         return HasFeature(
                 SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST);
     }
+    inline IMS_BOOL IsUdpTransportParameterIgnoredForOutgoingRequest() const
+    {
+        return HasFeature(SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST);
+    }
     inline IMS_BOOL IsSessionIdHeaderSupported() const
     {
         return HasFeature(SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER);

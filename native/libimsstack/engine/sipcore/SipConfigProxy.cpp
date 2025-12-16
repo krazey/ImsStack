@@ -686,6 +686,22 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSipInstanceParamRequiredInContactForNon
     return pSipConfig->IsSipInstanceParamRequiredInContactForNonRegisterRequest();
 }
 
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(
+        IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
+{
+    if (pProfile != IMS_NULL)
+    {
+        if (pProfile->IsSipFeatureProvisioned())
+        {
+            return pProfile->IsUdpTransportParameterIgnoredForOutgoingRequest();
+        }
+    }
+
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+
+    return pSipConfig->IsUdpTransportParameterIgnoredForOutgoingRequest();
+}
+
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSessionIdHeaderSupported(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {

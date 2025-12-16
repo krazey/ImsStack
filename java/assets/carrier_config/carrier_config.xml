@@ -421,6 +421,7 @@
     <boolean name="ims.request_uri_validation_required_in_mid_dialog_bool" value="true"/>
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="true"/>
     <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="false"/>
+    <boolean name="ims.ignore_udp_transport_parameter_for_outgoing_request_bool" value="false"/>
     <int name="ims.sip_timer_100_trying_millis_int" value="200"/>
     <boolean name="ims.use_reset_when_closing_sip_tcp_connection_bool" value="false"/>
     <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="false"/>

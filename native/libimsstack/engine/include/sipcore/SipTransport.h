@@ -94,7 +94,8 @@ public:
     }
     virtual IMS_BOOL ReserveResource(IN const SipProfile* pProfile = IMS_NULL);
     inline virtual IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* /*pSipMsg*/,
-            IN IMS_BOOL bRoutingLr = IMS_TRUE, IN SipAddrSpec* pImplicitRoute = IMS_NULL)
+            IN const SipProfile* /*pProfile*/, IN IMS_BOOL bRoutingLr = IMS_TRUE,
+            IN SipAddrSpec* pImplicitRoute = IMS_NULL)
     {
         (void)bRoutingLr;
         (void)pImplicitRoute;
