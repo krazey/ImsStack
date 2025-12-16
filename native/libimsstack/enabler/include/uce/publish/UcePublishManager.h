@@ -121,7 +121,7 @@ public:
     IMS_BOOL AosDisConnecting();                        // AoS-disconnecting
     IMS_BOOL ClosedService();                           // core service closed
 
-    void UpdateState(IMS_UINT32 _eState);
+    void SetPublishState(IMS_UINT32 _eState);
 
 protected:
     virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
@@ -215,7 +215,7 @@ private:
 
     void SendPendingPublishRequest();
     void ClearPendingPublishRequest();
-    IMS_UINT32 GetState() const;
+    IMS_UINT32 GetPublishState() const;
     static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
     IUceJniThread* GetJniThread();
     /* ------------------------------------------------------------------------------------------
