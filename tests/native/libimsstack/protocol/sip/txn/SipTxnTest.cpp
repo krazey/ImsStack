@@ -147,7 +147,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInviteClient)
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
+    const SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
 
     /* Calling NonInvCli Fsm in idle state with send NonInvReq event
        timer E will be started and txn will move to trying state */

@@ -621,7 +621,7 @@ PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppT
 PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType,
         IN const SipTxnKey* pTxnKey, IN_OUT SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError)
 {
-    SipTimerContext* pSipTimerContext = SIP_NULL;
+    const SipTimerContext* pSipTimerContext = SIP_NULL;
 
     if (pTxnFsmData->m_pUserData != SIP_NULL)
     {
@@ -842,7 +842,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
 
     if (pTxn == SIP_NULL)
     {
-        SipTimerContext* pSipTimerContext = SIP_NULL;
+        const SipTimerContext* pSipTimerContext = SIP_NULL;
         if (pTxnFsmData->m_pUserData != SIP_NULL)
         {
             SIP_VOID* objUserData = pTxnFsmData->m_pUserData->GetUserData();

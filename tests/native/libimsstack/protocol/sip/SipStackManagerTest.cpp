@@ -36,7 +36,7 @@ class SipTestNetworkUtil : public ISipNetworkUtil
 public:
     static SIP_BOOL bSendStatus;
     SipTestNetworkUtil() {}
-    ~SipTestNetworkUtil() {}
+    ~SipTestNetworkUtil() override {}
 
 public:
     SIP_BOOL SendToNetwork(SipTransportBuffer*, SipTransportParameter*, ISipUserData*) override

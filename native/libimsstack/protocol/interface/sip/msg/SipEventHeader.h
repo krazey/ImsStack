@@ -24,7 +24,7 @@ private:
     SipVector<SIP_CHAR*> m_objEventTemplates;
 
 public:
-    SipEventHeader(SIP_INT32 eHdrType);
+    explicit SipEventHeader(SIP_INT32 eHdrType);
     SipEventHeader(const SipEventHeader& objHeader);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams = SIP_TRUE) const override;

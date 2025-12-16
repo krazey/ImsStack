@@ -307,7 +307,7 @@ public:
     inline void SetRprTxnTerminated(IN SIP_BOOL bTerminated) { m_bRprTxnTerminated = bTerminated; }
 
 private:
-    virtual ~SipTxn();
+    ~SipTxn() override;
 };
 
 /*Timer Callback API*/
