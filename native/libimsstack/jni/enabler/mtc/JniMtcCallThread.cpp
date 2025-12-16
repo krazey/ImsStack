@@ -16,6 +16,7 @@
 
 #define IMS_STL_USE
 
+#include "ImsList.h"
 #include "IuMtcCall.h"
 #include "JniMtcCallThread.h"
 #include "JniMtcUtils.h"

@@ -19,7 +19,6 @@
 
 #include "IMtcService.h"
 #include "INativeEnabler.h"
-#include "ImsList.h"
 #include "call/IMtcCall.h"
 #include <functional>
 
@@ -34,6 +33,8 @@ enum class SuppType;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 union Key;
 
 class IMtcCallController : public INativeEnabler

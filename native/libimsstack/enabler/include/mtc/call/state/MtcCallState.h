@@ -17,7 +17,6 @@
 #ifndef MTC_CALL_STATE_H_
 #define MTC_CALL_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
@@ -26,7 +25,6 @@
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "helper/IMtcAosStateListener.h"
-#include "media/IMtcMediaManager.h"
 #include "ussi/UssiDef.h"
 
 class AString;
@@ -42,7 +40,8 @@ class MtcSession;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
-struct MediaInfo;
+template <class T>
+class ImsList;
 
 class MtcCallState : public IMtcCallState
 {

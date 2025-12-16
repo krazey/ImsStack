@@ -17,7 +17,6 @@
 #define INTERFACE_JNI_MTC_CALL_THREAD_H_
 
 #include "IJniEnablerThread.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 
 class SuppService;
@@ -26,6 +25,8 @@ struct CallReasonInfo;
 struct ConfUser;
 struct JniCallInfo;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class IJniMtcCallThread : public IJniEnablerThread
 {

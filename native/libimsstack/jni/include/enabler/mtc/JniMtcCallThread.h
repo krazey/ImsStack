@@ -19,7 +19,6 @@
 
 #include "BaseServiceThread.h"
 #include "IJniMtcCallThread.h"
-#include "ImsList.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 
@@ -28,6 +27,8 @@ struct CallReasonInfo;
 struct ConfUser;
 struct JniCallInfo;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class JniMtcCallThread final : public BaseServiceThread, public IJniMtcCallThread
 {

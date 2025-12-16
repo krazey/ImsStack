@@ -21,6 +21,7 @@
 #include "IMtcCallController.h"
 #include "INativeEnabler.h"
 #include "IThread.h"
+#include "ImsList.h"
 #include "ImsProcess.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"

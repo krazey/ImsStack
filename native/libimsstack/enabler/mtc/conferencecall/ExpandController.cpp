@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "IMtcContext.h"
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "call/IMtcCallContext.h"

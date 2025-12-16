@@ -19,11 +19,11 @@
 
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
-#include "media/IMediaSession.h"
 
-class ISession;
+class IMediaSession;
 class IMessage;
 class IMtcPreconditionListener;
+class ISession;
 
 class IMtcPreconditionManager
 {

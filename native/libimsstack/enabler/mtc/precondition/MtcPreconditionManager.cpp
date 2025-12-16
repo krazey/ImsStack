@@ -36,6 +36,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
 #include "media/IMediaDescriptor.h"
+#include "media/IMediaSession.h"
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaStringUtils.h"
 #include "media/MtcMediaUtil.h"

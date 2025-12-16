@@ -19,9 +19,9 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
 class AString;
+class SuppService;
 
 /**
  * This class contains utility functions for handle a list of SuppService.

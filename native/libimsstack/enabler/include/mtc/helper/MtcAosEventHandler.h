@@ -23,7 +23,6 @@
 #include "helper/IMtcAosStateListener.h"
 
 class IMessage;
-class IMtcAosStateListener;
 class IMtcService;
 class MtcConfigurationProxy;
 class MtcEmergencyServiceManager;

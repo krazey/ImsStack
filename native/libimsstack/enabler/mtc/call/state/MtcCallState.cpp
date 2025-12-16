@@ -22,6 +22,7 @@
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsAosReason.h"
+#include "ImsList.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "MediaDef.h"

@@ -17,7 +17,6 @@
 #ifndef GROUP_CALL_CONTROLLER_H_
 #define GROUP_CALL_CONTROLLER_H_
 
-#include "ImsList.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -27,6 +26,8 @@ struct CallStartOperationParams;
 struct CallInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class GroupCallController final : public ConferenceController
 {

@@ -18,10 +18,10 @@
 #define MOCK_MTC_NETWORK_WATCHER_H_
 
 #include "ImsTypeDef.h"
-#include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/MtcNetworkWatcher.h"
 #include <gmock/gmock.h>
 
+class IMtcNetworkWatcherListener;
 class INetworkWatcher;
 
 class MockMtcNetworkWatcher : public MtcNetworkWatcher

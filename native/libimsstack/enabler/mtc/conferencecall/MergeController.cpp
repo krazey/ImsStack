@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "call/CallConnectionIdManager.h"
 #include "call/IMtcCallContext.h"
@@ -364,7 +365,7 @@ void MergeController::ClearIndividualCallOnMergeFailed()
 }
 
 PRIVATE
-void MergeController::UpdateStartCallType(IN const ImsList<ConfUser*> objUsers)
+void MergeController::UpdateStartCallType(IN const ImsList<ConfUser*>& objUsers)
 {
     IMS_BOOL bVoip = IMS_FALSE;
     IMS_BOOL bVt = IMS_FALSE;

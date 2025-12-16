@@ -17,12 +17,13 @@
 #ifndef INTERFACE_CONFERENCE_CONTROLLER_H_
 #define INTERFACE_CONFERENCE_CONTROLLER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 
 class ConferenceParticipantList;
 class SuppService;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 /**
  * @brief Represents the state of an individual call within a conference.

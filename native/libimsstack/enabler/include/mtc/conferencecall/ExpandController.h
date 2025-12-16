@@ -17,7 +17,6 @@
 #ifndef EXPAND_CONTROLLER_H_
 #define EXPAND_CONTROLLER_H_
 
-#include "ImsList.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -26,6 +25,8 @@ class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;
+template <class T>
+class ImsList;
 
 class ExpandController : public ConferenceController
 {

@@ -17,7 +17,6 @@
 #ifndef CONFERENCE_FACTORY_H_
 #define CONFERENCE_FACTORY_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
@@ -32,6 +31,8 @@ class IConferenceReference;
 class IConferenceReferenceListener;
 class IConferenceSubscriptionListener;
 class IMtcContext;
+template <class T>
+class ImsList;
 
 class ConferenceFactory
 {

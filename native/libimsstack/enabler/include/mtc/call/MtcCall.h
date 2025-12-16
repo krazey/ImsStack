@@ -23,7 +23,6 @@
 #include "ISipErrorListener.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "base/IRefreshListener.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
@@ -75,11 +74,13 @@ class MessageUtils;
 class MtcConfigurationProxy;
 class MtcLocationRefresher;
 class OperationAsyncRunner;
+class SuppService;
 class UdpKeepAliveSender;
 class UpdatingInfo;
 class UssiController;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 class MtcCall final :
         public IMtcCall,

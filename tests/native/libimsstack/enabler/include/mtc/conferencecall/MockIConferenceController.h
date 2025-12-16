@@ -18,13 +18,14 @@
 #define MOCK_I_CONFERENCE_CONTROLLER_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/IConferenceController.h"
 #include <gmock/gmock.h>
 
 class ConferenceParticipantList;
 class SuppService;
 struct ConfUser;
+struct MediaInfo;
 template <typename T>
 class ImsList;
 

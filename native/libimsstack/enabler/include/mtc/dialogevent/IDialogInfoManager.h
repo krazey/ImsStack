@@ -17,11 +17,12 @@
 #ifndef INTERFACE_DIALOG_INFO_MANAGER_H_
 #define INTERFACE_DIALOG_INFO_MANAGER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 
 class AString;
 class Dialog;
+template <class T>
+class ImsList;
 
 class IDialogInfoManager
 {

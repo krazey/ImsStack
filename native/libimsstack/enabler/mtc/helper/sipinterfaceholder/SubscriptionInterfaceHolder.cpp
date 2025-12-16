@@ -17,6 +17,7 @@
 #include "ICoreService.h"
 #include "ISession.h"
 #include "ISubscription.h"
+#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"

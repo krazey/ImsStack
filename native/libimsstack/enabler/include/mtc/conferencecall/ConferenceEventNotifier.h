@@ -17,7 +17,6 @@
 #ifndef CONFERENCE_EVENT_NOTIFIER_H_
 #define CONFERENCE_EVENT_NOTIFIER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
@@ -25,6 +24,8 @@ class IJniMtcCallThread;
 class IMtcCallManager;
 class CallConnectionIdManager;
 class ConferenceParticipantList;
+template <class T>
+class ImsList;
 
 class ConferenceEventNotifier
 {

@@ -21,6 +21,8 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
+#include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcUiNotifier.h"
 #include <functional>
 
@@ -29,7 +31,6 @@ class IMtcCallContext;
 class IJniMtcCallThread;
 class SuppService;
 enum class CallType;
-struct MediaInfo;
 
 class MtcUiNotifier final : public IMtcUiNotifier
 {

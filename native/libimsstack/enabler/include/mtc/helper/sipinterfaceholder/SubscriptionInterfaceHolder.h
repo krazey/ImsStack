@@ -20,7 +20,7 @@
 #include "ISubscriptionListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "ServiceTimer.h"
+#include "ImsTypeDef.h"
 
 class ISession;
 class ICoreService;

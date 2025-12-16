@@ -17,7 +17,6 @@
 #ifndef INTERFACE_MTC_CALL_STATE_H_
 #define INTERFACE_MTC_CALL_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -37,6 +36,8 @@ enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 using CallStateName = IMtcCall::State;
 

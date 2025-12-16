@@ -17,13 +17,14 @@
 #ifndef CALL_TYPE_BLOCK_RULE_H_
 #define CALL_TYPE_BLOCK_RULE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
 class MtcConfigurationProxy;
+template <class T>
+class ImsList;
 
 class CallTypeBlockRule final : public IMtcBlockRule
 {

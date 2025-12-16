@@ -20,6 +20,7 @@
 #include "ISessionListener.h"
 #include "ITimer.h"
 #include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include <unordered_map>
 

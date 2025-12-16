@@ -33,6 +33,7 @@
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceReference.h"
+#include "conferencecall/ConferenceSubscription.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/MtcTimerWrapper.h"

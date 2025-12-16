@@ -18,7 +18,6 @@
 #define USSI_EVENT_NOTIFIER_H_
 
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "ussi/UssiDef.h"
 
 class AString;

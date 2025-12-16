@@ -17,7 +17,6 @@
 #ifndef MERGE_CONTROLLER_H_
 #define MERGE_CONTROLLER_H_
 
-#include "ImsList.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -25,6 +24,8 @@ class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;
+template <class T>
+class ImsList;
 
 class MergeController final : public ConferenceController
 {
@@ -49,7 +50,7 @@ private:
     void RecoverOnReferring();
     IMS_BOOL RecoverOnConferenceCallFailed();
     void ClearIndividualCallOnMergeFailed();
-    void UpdateStartCallType(IN const ImsList<ConfUser*> objUsers);
+    void UpdateStartCallType(IN const ImsList<ConfUser*>& objUsers);
     CallType m_eStartCallType;
 };
 

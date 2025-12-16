@@ -17,7 +17,6 @@
 #ifndef INTERFACE_MTC_CALL_H_
 #define INTERFACE_MTC_CALL_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 
 class AString;
@@ -27,6 +26,8 @@ class IMtcCallContext;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 using CallKey = IMS_ULONG;
 

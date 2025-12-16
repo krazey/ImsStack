@@ -18,7 +18,6 @@
 
 #include "IJniEnablerThread.h"
 #include "IMtcService.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
 
@@ -28,6 +27,8 @@ struct CallReasonInfo;
 struct JniCallInfo;
 struct JniExternalCall;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class IJniMtcServiceThread : public IJniEnablerThread
 {

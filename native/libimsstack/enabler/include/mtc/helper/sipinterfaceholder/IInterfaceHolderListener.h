@@ -17,6 +17,7 @@
 #ifndef INTERFACE_INTERFACE_HOLDER_LISTENER_H_
 #define INTERFACE_INTERFACE_HOLDER_LISTENER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
 class IInterfaceHolderListener

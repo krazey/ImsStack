@@ -24,6 +24,8 @@
 
 class SuppService;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
 {

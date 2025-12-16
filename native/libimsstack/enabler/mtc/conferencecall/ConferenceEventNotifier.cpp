@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "IJniEnabler.h"
 #include "IJniMtcCallThread.h"
+#include "ImsList.h"
 #include "IuMtcCall.h"
 #include "JniEnablerConnector.h"
 #include "MtcDef.h"

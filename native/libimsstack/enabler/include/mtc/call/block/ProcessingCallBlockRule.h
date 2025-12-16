@@ -17,12 +17,13 @@
 #ifndef PROCESSING_CALL_BLOCK_RULE_H_
 #define PROCESSING_CALL_BLOCK_RULE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCall;
 class IMtcCallContext;
+template <class T>
+class ImsList;
 
 class ProcessingCallBlockRule final : public IMtcBlockRule
 {

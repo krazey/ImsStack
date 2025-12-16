@@ -17,13 +17,14 @@
 #ifndef CALL_WAITING_BLOCK_RULE_H_
 #define CALL_WAITING_BLOCK_RULE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCall;
 class IMtcCallContext;
 class IMtcCallManager;
+template <class T>
+class ImsList;
 
 class CallWaitingBlockRule final : public IMtcBlockRule
 {

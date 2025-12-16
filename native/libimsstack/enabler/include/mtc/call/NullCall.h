@@ -17,7 +17,6 @@
 #ifndef NULL_CALL_H_
 #define NULL_CALL_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
@@ -27,6 +26,8 @@ class SuppService;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 /**
  * This class represents the call that doesn't exist. It has no states and basically does nothing.

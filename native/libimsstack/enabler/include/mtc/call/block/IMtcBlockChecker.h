@@ -17,7 +17,6 @@
 #ifndef INTERFACE_MTC_BLOCK_CHECKER_H_
 #define INTERFACE_MTC_BLOCK_CHECKER_H_
 
-#include "MtcDef.h"
 #include "call/block/IMtcBlockRule.h"
 
 /*
