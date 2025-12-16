@@ -22,6 +22,7 @@
 #include "IConfiguration.h"
 
 #include "GeolocationHelper.h"
+#include "GeolocationPidfCreator.h"
 
 class GeolocationHelperPrivate
 {

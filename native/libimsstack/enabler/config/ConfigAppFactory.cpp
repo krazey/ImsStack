@@ -16,6 +16,7 @@
 #include "ServiceMemory.h"
 
 #include "ConfigAppFactory.h"
+#include "base/ConfigApp.h"
 
 static AString configAppFactory_CreateName(IN IMS_SINT32 nSlotId)
 {

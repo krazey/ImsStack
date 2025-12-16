@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-#include "Engine.h"
 #include "IConfigurable.h"
-#include "IConfiguration.h"
+#include "ISipConfigV.h"
 #include "ImsConfig.h"
+
+#include "Engine.h"
+#include "IConfiguration.h"
 
 #include "base/ConfigApp.h"
 

@@ -16,9 +16,10 @@
 #ifndef GEOLOCATION_HELPER_H_
 #define GEOLOCATION_HELPER_H_
 
-#include "GeolocationPidfCreator.h"
+#include "AString.h"
 
 class GeolocationHelperPrivate;
+class GeolocationPidfCreator;
 
 class GeolocationHelper
 {

@@ -16,7 +16,7 @@
 #ifndef GEOLOCATION_PIDF_CREATOR_H_
 #define GEOLOCATION_PIDF_CREATOR_H_
 
-#include "ByteArray.h"
+#include "AString.h"
 #include "IPhoneInfoLocation.h"
 #include "ImsSlot.h"
 #include <initializer_list>
@@ -26,6 +26,7 @@ namespace enabler
 class Element;
 }
 
+class ByteArray;
 class ILocationProperties;
 
 class GeolocationPidfCreator : public ImsSlot

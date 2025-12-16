@@ -16,8 +16,6 @@
 #ifndef INTERFACE_ENABLER_H_
 #define INTERFACE_ENABLER_H_
 
-#include "ImsList.h"
-
 class IEnabler
 {
 protected:

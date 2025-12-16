@@ -31,6 +31,7 @@
 #include "ConfigAppFactory.h"
 #include "ConfigEnabler.h"
 #include "GeolocationHelper.h"
+#include "GeolocationPidfCreator.h"
 
 PUBLIC
 ConfigEnabler::ConfigEnabler(IN IMS_SINT32 nSlotId) :

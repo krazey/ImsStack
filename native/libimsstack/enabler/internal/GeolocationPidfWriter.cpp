@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#include "AString.h"
-#include "ByteArray.h"
 #include "GeolocationPidfWriter.h"
 #include "IXmlStreamWriter.h"
-#include "ImsTypeDef.h"
 #include "ServiceMemory.h"
 #include "TextParser.h"
 #include "XmlFactory.h"

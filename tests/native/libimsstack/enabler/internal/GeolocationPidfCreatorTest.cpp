@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "ByteArray.h"
 #include "GeolocationPidfCreator.h"
 #include "MockIPhoneInfoLocation.h"
 #include "PlatformContext.h"
