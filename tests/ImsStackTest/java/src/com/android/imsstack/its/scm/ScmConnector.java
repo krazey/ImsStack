@@ -37,7 +37,7 @@ public class ScmConnector extends ExternalResource {
     private static final String KEY_SCM = "use_scm";
     private static final String VALUE_TRUE = "true";
 
-    private static final int CONTROL_HOST_PORT = 9999;
+    private static final int CONTROL_HOST_PORT = 9527;
     private static final String HOST_IP = "192.168.98.1";
 
     private final WifiAgent mWifiAgent = WifiAgent.getInstance();
