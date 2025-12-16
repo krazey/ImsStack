@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "AStringArray.h"
 #include "INetworkConnection.h"
 #include "IPhoneInfoCall.h"
 #include "IPhoneInfoDevice.h"
@@ -26,6 +27,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "TextParser.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/TemplateFormatter.h"
 #include "device/OsLocationInfo.h"
