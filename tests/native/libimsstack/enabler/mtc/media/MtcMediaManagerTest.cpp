@@ -731,9 +731,7 @@ TEST_F(MtcMediaManagerTest, RunIf180IsNotReceived)
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
     ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(3)
-            .WillRepeatedly(Return(SipStatusCode::SC_183));
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_183));
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::INACTIVE));
@@ -741,9 +739,9 @@ TEST_F(MtcMediaManagerTest, RunIf180IsNotReceived)
             .WillOnce(Return(IMS_TRUE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
 
-    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(3);
-    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(3).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(3);
+    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(2);
+    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(2).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(2);
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::INACTIVE));
@@ -753,9 +751,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsNotReceived)
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::SENDRECV));
-    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-
-    EXPECT_CALL(objIMessage, GetStatusCode()).WillOnce(Return(SipStatusCode::SC_182));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
 }
 
@@ -810,30 +805,21 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfUsingDynamicNwToneTimer)
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
     ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objIMessage, GetStatusCode()).WillOnce(Return(SipStatusCode::SC_183));
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_183));
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::INACTIVE));
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_TRUE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
 
-    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(3);
-    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(4).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(4);
+    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(2);
+    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(3).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(3);
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .Times(2)
             .WillRepeatedly(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, nullptr, IMS_TRUE);
-
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(2)
-            .WillRepeatedly(Return(SipStatusCode::SC_182));
-    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(4)
-            .WillRepeatedly(Return(SipStatusCode::SC_183));
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .Times(2)
@@ -863,46 +849,31 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfNotUsingDynamicNwToneTimer
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
     ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(3)
-            .WillRepeatedly(Return(SipStatusCode::SC_183));
-    EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
-            .Times(4)
-            .WillRepeatedly(Return(PemType::INACTIVE));
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_180));
 
-    EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
-            .WillOnce(Return(IMS_TRUE));
+    ON_CALL(*pMediaProfileManager, GetPemType(&objISession)).WillByDefault(Return(PemType::NONE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
-    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(4);
-    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(4).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(4);
-
-    EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
-            .WillOnce(Return(IMS_FALSE));
+    ON_CALL(*pMediaProfileManager, GetPemType(&objISession))
+            .WillByDefault(Return(PemType::INACTIVE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
-    EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
-            .Times(2)
-            .WillRepeatedly(Return(PemType::SENDRECV));
+    ON_CALL(*pMediaProfileManager, GetPemType(&objISession))
+            .WillByDefault(Return(PemType::RECVONLY));
+    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
+    EXPECT_TRUE(pMediaManager->IsLocalTone());
+
+    ON_CALL(*pMediaProfileManager, GetPemType(&objISession))
+            .WillByDefault(Return(PemType::SENDONLY));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_FALSE(pMediaManager->IsLocalTone());
 
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(2)
-            .WillRepeatedly(Return(SipStatusCode::SC_182));
-
-    EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
-            .WillOnce(Return(PemType::SENDRECV));
+    ON_CALL(*pMediaProfileManager, GetPemType(&objISession))
+            .WillByDefault(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_FALSE(pMediaManager->IsLocalTone());
-
-    EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
-            .WillOnce(Return(PemType::INACTIVE));
-    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_TRUE(pMediaManager->IsLocalTone());
 }
 
 TEST_F(MtcMediaManagerTest, RunIf180IsReceivedAndMessageIsNullInCaseOfLocalToneWith180ByForce)
@@ -950,33 +921,39 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfLocalToneWith180ByForce)
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
     ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(3);
-    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(3).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(3);
+    EXPECT_CALL(objMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(2);
+    EXPECT_CALL(objMediaSession, Run(NEGO_ID)).Times(2).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(2);
 
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(4)
-            .WillRepeatedly(Return(SipStatusCode::SC_180));
+    ON_CALL(*pMediaProfileManager, GetPemType(&objISession))
+            .WillByDefault(Return(PemType::SENDRECV));
 
-    EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
-            .WillOnce(Return(PemType::INACTIVE));
-    EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
-            .WillOnce(Return(IMS_FALSE));
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_180));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
-    EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
-            .WillOnce(Return(PemType::SENDRECV));
-    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_TRUE(pMediaManager->IsLocalTone());
-
-    EXPECT_CALL(objIMessage, GetStatusCode())
-            .Times(2)
-            .WillRepeatedly(Return(SipStatusCode::SC_182));
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_183));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_FALSE(pMediaManager->IsLocalTone());
 }
 
+TEST_F(MtcMediaManagerTest, RunIf181Or182IsReceivedAfterReceiving180)
+{
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objMediaSession, GetNegoState(NEGO_ID))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_181));
+    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
+    EXPECT_FALSE(pMediaManager->IsLocalTone());
+
+    ON_CALL(objIMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_182));
+    pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
+    EXPECT_FALSE(pMediaManager->IsLocalTone());
+}
 TEST_F(MtcMediaManagerTest, SetRtpPortInvokesMediaSessionSetOptions)
 {
     IMS_UINT32 eMediaType = MEDIATYPE_AUDIO;
