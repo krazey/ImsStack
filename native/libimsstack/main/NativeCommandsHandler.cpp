@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DeviceConfig.h"
 #include "ServiceTrace.h"
+
+#include "IEnablerLoader.h"
 
 #include "NativeCommands.h"
 #include "NativeCommandsHandler.h"

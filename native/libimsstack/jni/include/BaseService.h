@@ -18,10 +18,9 @@
 
 #include <binder/Parcel.h>
 
-#include "EnablerUtils.h"
-#include "ImsMessage.h"
-#include "ImsProcess.h"
 #include "IJniEnabler.h"
+
+class ImsMessage;
 
 class IJniEnablerThread;
 

@@ -18,6 +18,8 @@
 
 #include "DeviceConfig.h"
 
+#include "IEnablerLoader.h"
+
 #include "NativeCommands.h"
 #include "NativeCommandsHandler.h"
 

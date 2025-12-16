@@ -16,7 +16,6 @@
 #ifndef INTERFACE_JNI_ENABLER_H_
 #define INTERFACE_JNI_ENABLER_H_
 
-#include "ImsTypeDef.h"
 #include "ImsMessage.h"
 
 class IJniEnablerThread;

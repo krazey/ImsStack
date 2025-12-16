@@ -18,10 +18,9 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "INativeEnabler.h"
-#include "ServiceMutex.h"
 
 class IJniEnabler;
+class IMutex;
 class INativeEnabler;
 class JniConnection;
 enum class EnablerType

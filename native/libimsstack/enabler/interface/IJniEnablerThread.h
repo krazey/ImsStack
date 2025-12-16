@@ -16,8 +16,6 @@
 #ifndef INTERFACE_JNI_ENABLER_THREAD_H_
 #define INTERFACE_JNI_ENABLER_THREAD_H_
 
-#include "ImsTypeDef.h"
-
 class IJniEnablerThread
 {
 public:

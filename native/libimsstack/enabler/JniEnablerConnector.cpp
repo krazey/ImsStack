@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ImsTypeDef.h"
-#include "ImsList.h"
 #include "ImsMap.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"

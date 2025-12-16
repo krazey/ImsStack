@@ -25,6 +25,7 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 
+#include "DeviceConfig.h"
 #include "INativeThreadMethods.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
@@ -93,7 +94,7 @@ static int SendDataToJava(long nNativeObject, const android::Parcel& objParcel)
     return 1;
 }
 
-int SendDataToJavaForSystem(
+static int SendDataToJavaForSystem(
         long nNativeObject, const android::Parcel& parcelIn, android::Parcel& parcelOut, int fd)
 {
     JNIEnv* env;
@@ -176,7 +177,7 @@ int SendDataToJavaForSystem(
     return 1;
 }
 
-IMS_UINTP GetCommandParam(IN JNIEnv* env, IN jint cmd, IN jbyteArray jData)
+static IMS_UINTP GetCommandParam(IN JNIEnv* env, IN jint cmd, IN jbyteArray jData)
 {
     if (jData == NULL)
     {
@@ -225,7 +226,7 @@ IMS_UINTP GetCommandParam(IN JNIEnv* env, IN jint cmd, IN jbyteArray jData)
     return pnParam;
 }
 
-void ReleaseCommandParam(IN jint cmd, IN IMS_UINTP pnParam)
+static void ReleaseCommandParam(IN jint cmd, IN IMS_UINTP pnParam)
 {
     if (pnParam == 0)
     {
@@ -246,7 +247,7 @@ void ReleaseCommandParam(IN jint cmd, IN IMS_UINTP pnParam)
     }
 }
 
-void JniAttachNativeThread(const char* threadName)
+static void JniAttachNativeThread(const char* threadName)
 {
     IMS_TRACE_D("JniAttachNativeThread: name=%s", threadName, 0, 0);
 
@@ -272,7 +273,7 @@ void JniAttachNativeThread(const char* threadName)
     }
 }
 
-void JniDetachNativeThread()
+static void JniDetachNativeThread()
 {
     IMS_TRACE_D("JniDetachNativeThread:", 0, 0, 0);
 
@@ -402,7 +403,7 @@ static jint JniIms_nativeSendData(
     return (nResult == 1) ? JNI_IMS_OK : JNI_IMS_ERROR;
 }
 
-jbyteArray JniIms_nativeSendDataForSystem(
+static jbyteArray JniIms_nativeSendDataForSystem(
         JNIEnv* env, jobject /*object*/, jlong jNativeObject, jbyteArray jData)
 {
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
