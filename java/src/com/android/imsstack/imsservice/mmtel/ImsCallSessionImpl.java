@@ -1434,21 +1434,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mConferenceProxy = null;
 
             // Recover the listener for this session
-            if ((mCall != null) && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
-                if (!mCall.isTerminated()) {
-                    mCall.setListener(mListenerProxy);
-                    MtcCall.setListener(mCall, mConferenceListenerProxy);
-                } else {
-                    postAndRunTask(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mCall != null) {
-                                mCall.setListener(mListenerProxy);
-                                MtcCall.setListener(mCall, mConferenceListenerProxy);
-                            }
-                        }
-                    });
-                }
+            if ((mCall != null)
+                    && mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
+                mCall.setListener(mListenerProxy);
+                MtcCall.setListener(mCall, mConferenceListenerProxy);
             }
         }
     }
@@ -4746,7 +4735,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         mCallExtManagerProxy = proxy;
     }
 
-    private class MtcConferenceListenerProxy extends MtcConference.Listener
+    protected class MtcConferenceListenerProxy extends MtcConference.Listener
             implements ConferenceInfo.User.Listener {
         private int mSlotId = 0;
         private boolean mIsConferenceHost = false;
@@ -5315,6 +5304,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                             mCallContext.getSlotId(), false, null);
                 } else {
                     if (transientConfSession != null) {
+                        transientConfSession.mCallDetails.set(CallDetails.MO_PROGRESSING);
                         transientConfSession.mCallDetails.set(CallDetails.MO_STARTED);
                         transientConfSession.mCallDetails.set(
                                 CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);

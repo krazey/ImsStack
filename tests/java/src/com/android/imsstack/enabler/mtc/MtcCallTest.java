@@ -501,17 +501,10 @@ public class MtcCallTest extends ImsStackTest {
 
     @Test
     public void testSetListener() {
-        mTestMtcCall.setCallTerminated();
         mTestMtcCall.setListener(mListener);
-        processAllMessages();
-
-        verify(mListener, times(1)).onCallStartFailed(eq(mTestMtcCall), any());
-
-        mTestMtcCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-        mTestMtcCall.setListener(mListener);
-        processAllMessages();
-
-        verify(mListener, times(1)).onCallTerminated(eq(mTestMtcCall), any());
+        assertTrue(mTestMtcCall.hasListener());
+        mTestMtcCall.setListener(null);
+        assertFalse(mTestMtcCall.hasListener());
     }
 
     @Test

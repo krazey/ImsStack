@@ -63,6 +63,7 @@ import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
+import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.MtcEmergencyServiceManager;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
@@ -490,6 +491,24 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.terminate(501);
         verify(mMockMtcCall).terminate(anyInt());
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.TERMINATING);
+
+        // verify clearConferenceProxy on terminate and listener recovery
+        MtcCall mockMtcCall2 = Mockito.mock(MtcCall.class);
+        TestImsCallSessionImpl session2 = new TestImsCallSessionImpl(mMockCallContext,
+                mMockCallTracker, mockMtcCall2, "5", mImsCallProfile, true,
+                mMockImsCallSessionCallback, mVideoCallSession);
+        ImsCallSessionImpl.CallDetails callDetails2 = session2.getCallDetails();
+        ConferenceProxy mockConferenceProxy2 = Mockito.mock(ConferenceProxy.class);
+        session2.setConferenceProxy(mockConferenceProxy2);
+        callDetails2.set(ImsCallSessionImpl.CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
+        MtcCall.Listener listener2 = session2.getMtcCallListenerProxy();
+
+        assertTrue(session2.isConferenceTransitionInProgress());
+        session2.terminate(501);
+
+        // Called once in constructor, and again in listener recovery
+        verify(mockMtcCall2, times(2)).setListener(listener2);
+        assertFalse(session2.isConferenceTransitionInProgress());
     }
 
     @Test
@@ -1948,6 +1967,106 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
     }
 
+    @Test
+    public void testOnCallMergedAsFirstCallMergeInitiator() {
+        MtcConference mockConference = Mockito.mock(MtcConference.class);
+        CallInfo mockCallInfo = Mockito.mock(CallInfo.class);
+        MediaInfo mockMediaInfo = Mockito.mock(MediaInfo.class);
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+        UsersInfo mockUsersInfo = Mockito.mock(UsersInfo.class);
+        ConferenceProxy mockConferenceProxy = Mockito.mock(ConferenceProxy.class);
+        ArgumentCaptor<MtcConference.Listener> captor =
+                ArgumentCaptor.forClass(MtcConference.Listener.class);
+        mImsCallSession.setConferenceProxy(mockConferenceProxy);
+        verify(mockConferenceProxy).addListener(any(), captor.capture());
+        MtcConference.Listener listener = captor.getValue();
+
+        TestImsCallSessionImpl mockConfSession = createImsCallSession("conf_id", true);
+        ImsConferenceHelper ich = ImsConferenceHelper.getInstance();
+
+        when(mMockMtcCall.isConference()).thenReturn(false);
+        ich.setTransientConferenceSession(mockConfSession);
+        when(mockConferenceProxy.isInitialConferenceExtension()).thenReturn(true);
+        when(mockConferenceProxy.isConferenceExtensionRequestor(mMockMtcCall)).thenReturn(true);
+        when(mockConference.isSameCall(MtcCall.getConference(mMockMtcCall))).thenReturn(true);
+        when(mMockMtcCall.getCallConnectionId()).thenReturn(123);
+        when(mMockMtcCall.getConferenceUserId()).thenReturn("user1");
+
+        ((ImsCallSessionImpl.MtcConferenceListenerProxy) listener).onCallMerged(
+                mockConference, mockCallInfo, mockMediaInfo, mockSuppInfo, mockUsersInfo);
+        processAllMessages();
+
+        assertTrue(mImsCallSession.getCallDetails()
+                .is(ImsCallSessionImpl.CallDetails.MERGED_N_DETACHED));
+        verify(mMockImsCallSessionCallback).invokeMergeComplete(
+                eq(mImsCallSession), eq(mockConfSession));
+        assertTrue(mockConfSession.getCallDetails()
+                .is(ImsCallSessionImpl.CallDetails.MO_PROGRESSING));
+        assertTrue(mockConfSession.getCallDetails()
+                .is(ImsCallSessionImpl.CallDetails.MO_STARTED));
+        assertEquals(ImsCallSessionImplBase.State.ESTABLISHED, mockConfSession.getState());
+        // clean up
+        ich.setTransientConferenceSession(null);
+    }
+
+    @Test
+    public void testOnCallMergedAsNonConferenceParticipant() {
+        MtcConference mockConference = Mockito.mock(MtcConference.class);
+        CallInfo mockCallInfo = Mockito.mock(CallInfo.class);
+        MediaInfo mockMediaInfo = Mockito.mock(MediaInfo.class);
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+        UsersInfo mockUsersInfo = Mockito.mock(UsersInfo.class);
+        ConferenceProxy mockConferenceProxy = Mockito.mock(ConferenceProxy.class);
+        ArgumentCaptor<MtcConference.Listener> captor =
+                ArgumentCaptor.forClass(MtcConference.Listener.class);
+        mImsCallSession.setConferenceProxy(mockConferenceProxy);
+        verify(mockConferenceProxy).addListener(any(), captor.capture());
+        MtcConference.Listener listener = captor.getValue();
+
+        when(mMockMtcCall.isConference()).thenReturn(false);
+        when(mockConferenceProxy.isInitialConferenceExtension()).thenReturn(false);
+        ImsConferenceHelper.getInstance().setTransientConferenceSession(null);
+        when(mockConference.isSameCall(MtcCall.getConference(mMockMtcCall))).thenReturn(true);
+
+        ((ImsCallSessionImpl.MtcConferenceListenerProxy) listener).onCallMerged(
+                mockConference, mockCallInfo, mockMediaInfo, mockSuppInfo, mockUsersInfo);
+
+        assertFalse(mImsCallSession.getCallDetails()
+                .is(ImsCallSessionImpl.CallDetails.MERGED_N_DETACHED));
+        assertTrue(mImsCallSession.getCallDetails().is(ImsCallSessionImpl.CallDetails.MERGED));
+    }
+
+    @Test
+    public void testOnCallMergedAsConferenceHost() {
+        MtcConference mockConference = Mockito.mock(MtcConference.class);
+        CallInfo mockCallInfo = Mockito.mock(CallInfo.class);
+        MediaInfo mockMediaInfo = Mockito.mock(MediaInfo.class);
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+        UsersInfo mockUsersInfo = Mockito.mock(UsersInfo.class);
+        ConferenceProxy mockConferenceProxy = Mockito.mock(ConferenceProxy.class);
+        ArgumentCaptor<MtcConference.Listener> captor =
+                ArgumentCaptor.forClass(MtcConference.Listener.class);
+        mImsCallSession.setConferenceProxy(mockConferenceProxy);
+        verify(mockConferenceProxy).addListener(any(), captor.capture());
+        MtcConference.Listener listener = captor.getValue();
+        ImsConferenceHelper ich = ImsConferenceHelper.getInstance();
+        ich.setTransientConferenceSession(null);
+
+        when(mMockMtcCall.isConference()).thenReturn(true);
+        when(mockConference.isSameCall(MtcCall.getConference(mMockMtcCall))).thenReturn(true);
+
+        ((ImsCallSessionImpl.MtcConferenceListenerProxy) listener).onCallMerged(
+                mockConference, mockCallInfo, mockMediaInfo, mockSuppInfo, mockUsersInfo);
+        processAllMessages();
+
+        assertFalse(mImsCallSession.getCallDetails()
+                .is(ImsCallSessionImpl.CallDetails.MERGED));
+        assertFalse(mImsCallSession.getCallDetails()
+                .is(ImsCallSessionImpl.CallDetails.MERGED_N_DETACHED));
+        verify(mMockImsCallSessionCallback).invokeMergeComplete(
+                eq(mImsCallSession), eq(null));
+    }
+
     private TestImsCallSessionImpl createImsCallSession(String callId, boolean isMo) {
         TestImsCallSessionImpl callSession =  new TestImsCallSessionImpl(mMockCallContext,
                 mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, isMo,
@@ -1974,16 +2093,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
             } else {
                 return false;
             }
-        }
-
-        @Override
-        public boolean isConferenceTransitionInProgress() {
-            return (mConferenceProxy != null) ? true : false;
-        }
-
-        @Override
-        public void setConferenceProxy(ConferenceProxy confProxy) {
-            mConferenceProxy = confProxy;
         }
 
         @Override

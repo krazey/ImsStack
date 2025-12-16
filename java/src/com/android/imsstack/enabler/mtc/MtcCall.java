@@ -376,7 +376,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 return;
             }
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 log("onRttMessageReceived :: Listener is null");
                 return;
             }
@@ -392,7 +392,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 return;
             }
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 log("onRttAudioIndication :: Listener is null");
                 return;
             }
@@ -537,6 +537,11 @@ public class MtcCall extends Call implements ConferenceTracker {
         return mTextListener;
     }
 
+    @VisibleForTesting
+    boolean hasListener() {
+        return mListener != null;
+    }
+
     @Override
     public void close() {
         if (mHandler.hasMessages(MSG_CLOSE)) {
@@ -615,7 +620,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         sendRequest(parcel);
 
-        if (immediateCallback && (mListener != null)) {
+        if (immediateCallback && hasListener()) {
             CallReasonInfo callReasonInfo = new CallReasonInfo(
                     CallReasonInfo.CODE_USER_TERMINATED, 0, "");
 
@@ -861,15 +866,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         logi("setListener :: " + ((listener != null) ? getCallId() : "(null)"));
 
         mListener = listener;
-
-        if ((mListener != null) && isTerminated()) {
-            if (!isOnceInCall()) {
-                notifyStartFailed();
-            } else {
-                Message.obtain(mHandler, MSG_CALL_TERMINATED,
-                        getOrCreateTerminationReason()).sendToTarget();
-            }
-        }
     }
 
     /**
@@ -1860,7 +1856,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             // Checks if the listener is alive
-            if ((mListener == null) && isTerminated()) {
+            if ((!hasListener()) && isTerminated()) {
                 loge("Listener is null & terminated");
                 handleStartFailedOrTerminated(msg, parcel);
                 return;
@@ -2072,7 +2068,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
             logi("INITIATING");
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo, ratType);
             }
         }
@@ -2087,7 +2083,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setCallState(CallTracker.CALL_STATE_RINGBACK);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallProgressing(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2116,7 +2112,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_ESTABLISHED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallStarted(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2157,7 +2153,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
             }
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallStartFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2174,7 +2170,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
 
             // SYNC_WITH_MEDIA_CLOSE
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallTerminated(MtcCall.this, callReasonInfo);
             }
         }
@@ -2191,7 +2187,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallHeld(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2200,7 +2196,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onHoldFailed(CallReasonInfo callReasonInfo) {
             logi("HOLD_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallHoldFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2217,7 +2213,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallHoldReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2241,7 +2237,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallResumed(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2250,7 +2246,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onResumeFailed(CallReasonInfo callReasonInfo) {
             logi("RESUME_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallResumeFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2267,7 +2263,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallResumeReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2287,7 +2283,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallAutoUpdated(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2339,7 +2335,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdated(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2354,7 +2350,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setUpdateState(UPDATE_STATE_IDLE);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdateFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2373,7 +2369,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setUpdateState(UPDATE_STATE_RECEIVED);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdateReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2387,7 +2383,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setUpdateState(UPDATE_STATE_RESUME_RECEIVED);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdateResumeReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2402,13 +2398,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             mCT.updateCallState(
                     MtcCall.this, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallIncomingReceived(MtcCall.this, incomingCall, ratType);
             }
         }
 
         private void onRatChanged(int ratType) {
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallRatChanged(ratType);
             }
         }
@@ -2416,7 +2412,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onEctCompleted(int result, CallReasonInfo callReasonInfo) {
             logi("ECT_COMPLETED :: result=" + result);
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 return;
             }
 
@@ -2434,7 +2430,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                     + ", " + MtcCallUtils.toString(mediaInfo)
                     + ", " + MtcCallUtils.toString(suppInfo));
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 // FIXME: close Mtc call if present
                 return;
             }
@@ -2465,7 +2461,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onCallPushCompleted(int result, CallReasonInfo callReasonInfo) {
             logi("CALL_PUSH_COMPLETED :: result=" + result);
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 return;
             }
 
@@ -2483,7 +2479,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (MtcCallUtils.isInfoTypeForMediaSession(type)) {
                 mMediaSession.notifyMediaInfoChanged(type, intValue, strValue);
             } else {
-                if (mListener != null) {
+                if (hasListener()) {
                     mListener.onCallInfoUpdated(
                             MtcCall.this, type, strValue, intValue, boolValue);
                 }
