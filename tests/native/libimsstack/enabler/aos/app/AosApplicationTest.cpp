@@ -219,6 +219,8 @@ enum
     using Base::GetReportState;                                 \
     using Base::OnMessage;                                      \
     using Base::ProcessMessage;                                 \
+    using Base::ProcessRegRecovery;                             \
+    using Base::ProcessPcscfRecovery;                           \
     using Base::PreprocessStateMessage;                         \
     using Base::PreprocessStateMessage_Connection;              \
     using Base::StateNotReady_Condition;                        \
@@ -4320,4 +4322,72 @@ TEST_F(AosApplicationTest, KeepPendingRegFeatureIfProcessPendingPcscfChangeIsTru
     // THEN
     EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
     EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_STOP_HELD));
+}
+
+TEST_F(AosApplicationTest, NotifyMonitorWithRegRecoveryPendingIfRegRecoveryHeldUponRegRecovery)
+{
+    // GIVEN
+    ImsMessage objMessage(MSG_REG_RECOVER, 0, 0);
+    m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor,
+            ImsAosMonitor_Notify(IImsAosMonitor::TYPE_REG_RECOVERY_PENDING, 0))
+            .Times(1);
+
+    // WHEN
+    m_pAosApplication->ProcessRegRecovery(objMessage);
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+}
+
+TEST_F(AosApplicationTest, NotNotifyMonitorIfRegRecoveryIsNotHeldUponRegRecovery)
+{
+    // GIVEN
+    ImsMessage objMessage(MSG_REG_RECOVER, 0, 0);
+    m_pAosApplication->SetRegRecoveryHeld(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor,
+            ImsAosMonitor_Notify(IImsAosMonitor::TYPE_REG_RECOVERY_PENDING, 0))
+            .Times(0);
+
+    // WHEN
+    m_pAosApplication->ProcessRegRecovery(objMessage);
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+}
+
+TEST_F(AosApplicationTest, NotifyMonitorWithRegRecoveryPendingIfRegRecoveryHeldUponPcscfRecovery)
+{
+    // GIVEN
+    ImsMessage objMessage(MSG_PCSCF_RECOVER, 0, 0);
+    m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor,
+            ImsAosMonitor_Notify(IImsAosMonitor::TYPE_REG_RECOVERY_PENDING, 0))
+            .Times(1);
+
+    // WHEN
+    m_pAosApplication->ProcessPcscfRecovery(objMessage);
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+}
+
+TEST_F(AosApplicationTest, NotNotifyMonitorIfRegRecoveryIsNotHeldUponPcscfRecovery)
+{
+    // GIVEN
+    ImsMessage objMessage(MSG_PCSCF_RECOVER, 0, 0);
+    m_pAosApplication->SetRegRecoveryHeld(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIImsAosMonitor,
+            ImsAosMonitor_Notify(IImsAosMonitor::TYPE_REG_RECOVERY_PENDING, 0))
+            .Times(0);
+
+    // WHEN
+    m_pAosApplication->ProcessPcscfRecovery(objMessage);
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
 }

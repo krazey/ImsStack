@@ -1302,6 +1302,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRecovery(IN IMSMSG& objMsg)
         A_IMS_TRACE_I(APPID, "ProcessRegRecovery :: recover is held", 0, 0, 0);
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
         m_nRecoverReason = nReason;
+        UpdateMonitorNotify(IImsAosMonitor::TYPE_REG_RECOVERY_PENDING, 0);
         return;
     }
 
@@ -1409,6 +1410,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPcscfRecovery(IN IMSMSG& objMsg)
         A_IMS_TRACE_I(APPID, "ProcessPcscfRecovery :: recover is held", 0, 0, 0);
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
         m_nRecoverReason = nReason;
+        UpdateMonitorNotify(IImsAosMonitor::TYPE_REG_RECOVERY_PENDING, 0);
         return;
     }
 

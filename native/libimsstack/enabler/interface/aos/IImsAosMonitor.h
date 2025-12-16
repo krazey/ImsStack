@@ -67,6 +67,18 @@ public:
         /// Cross SIM connection status change notification
         /// @param nState CROSS_SIM_DISCONNECTED, CROSS_SIM_CONNECTED
         TYPE_CROSS_SIM_STATUS = 3,
+
+        /**
+         * When an initial registration is required for any of the following reasons,
+         * the registration recovery procedure is pended if an IMS call is ongoing.
+         * The procedure will be initiated immediately after the call is released.
+         *
+         * Reasons: P-CSCF change or invocation of ImsAosControl::REGISTER_REINITIATE
+         * / ImsAosControl::PCSCF_NEXT via enablers(MTC, etc).
+         *
+         * @param nState N/A
+         */
+        TYPE_REG_RECOVERY_PENDING = 4
     };
 
     /// Detailed state for the handover type
