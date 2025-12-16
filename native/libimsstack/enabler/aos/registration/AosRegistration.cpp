@@ -29,6 +29,7 @@
 #include "ISystemProperty.h"
 
 #include "CarrierConfig.h"
+#include "ISipConfigV.h"
 
 #include "IConfiguration.h"
 #include "IRegContact.h"
@@ -50,6 +51,7 @@
 #include "SipHeaderName.h"
 
 #include "GeolocationHelper.h"
+#include "GeolocationPidfCreator.h"
 
 #include "AosAppRequestType.h"
 #include "IAosService.h"
