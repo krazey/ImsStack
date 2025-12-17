@@ -472,9 +472,9 @@ IMS_BOOL UcePublishManager::ClosedService()
     return OnStateMessage(objMsg);
 }
 
-void UcePublishManager::UpdateState(IMS_UINT32 _eState)
+void UcePublishManager::SetPublishState(IMS_UINT32 _eState)
 {
-    IMS_TRACE_I("UpdateState - State : [ %s ] -> [ %s ]", StateToString(m_eState),
+    IMS_TRACE_I("SetPublishState - State : [ %s ] -> [ %s ]", StateToString(GetPublishState()),
             StateToString(_eState), 0);
     m_eState = _eState;
     if (m_eState == PUBLISHED || m_eState == REFRESHING)
@@ -659,7 +659,7 @@ IMS_BOOL UcePublishManager::StateIDLE_AoSConnected(IN IMSMSG& objMsg)
     m_bEnablePIDFCompression =
             UceConfig::GetInstance()->GetBoolValue(UceConfig::KEY_ENCODE_PUBLISH_BODY, m_nSimSlot);
 
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_TRUE;
 }
 
@@ -702,7 +702,7 @@ IMS_BOOL UcePublishManager::StateON_PublishRequested(IN IMSMSG& objMsg)
 
     if (Publish() == IMS_TRUE)
     {
-        UpdateState(PUBLISHING);
+        SetPublishState(PUBLISHING);
     }
     else
     {
@@ -719,7 +719,7 @@ IMS_BOOL UcePublishManager::StateON_AoSDisConnected(IN IMSMSG& objMsg)
     StopTimer(TIMER_ALL);
     DestroyPublication();
     m_bAoSConnected = IMS_FALSE;
-    UpdateState(IDLE);
+    SetPublishState(IDLE);
     return IMS_TRUE;
 }
 
@@ -760,7 +760,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_AoSDisConnected(IN IMSMSG& objMsg)
     m_nImmediatelyRetryCount = 0;
     m_nRetryCount = 0;
     m_nExponentialRetryCount = 0;
-    UpdateState(IDLE);
+    SetPublishState(IDLE);
     return IMS_TRUE;
 }
 
@@ -793,19 +793,19 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Published(IN IMSMSG& objMsg)
         SendUnpublishedInd();
         if (CreatePublication() == IMS_FALSE)
         {
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
         if (Unpublish() == IMS_FALSE)
         {
             DestroyPublication();
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
-        UpdateState(TERMINATING);
+        SetPublishState(TERMINATING);
         return IMS_TRUE;
     }
-    UpdateState(PUBLISHED);
+    SetPublishState(PUBLISHED);
     return IMS_TRUE;
 }
 
@@ -845,7 +845,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
                 break;
         }
         StopTimer(TIMER_ALL);
-        UpdateState(ON);
+        SetPublishState(ON);
         return IMS_TRUE;
     }
 
@@ -857,7 +857,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
         StopTimer(TIMER_ALL);
         m_strEtag = AString::ConstNull();
         DestroyPublication();
-        UpdateState(ON);
+        SetPublishState(ON);
         return SendPublishRequest(m_nKey, m_strPidfXml, "", m_nCapability, m_nExtended);
     }
 
@@ -878,7 +878,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
     m_nKey = 0;
     if (!bNeedToRetry)
     {
-        UpdateState(ON);
+        SetPublishState(ON);
     }
     return IMS_TRUE;
 }
@@ -917,7 +917,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHED_PublishRequested(IN IMSMSG& objMsg)
 
     if (Publish() == IMS_TRUE)
     {
-        UpdateState(PUBLISHING);
+        SetPublishState(PUBLISHING);
     }
     else
     {
@@ -937,12 +937,12 @@ IMS_BOOL UcePublishManager::StatePUBLISHED_AoSDisconnecting(IN IMSMSG& objMsg)
     {
         if (Unpublish() == IMS_TRUE)
         {
-            UpdateState(TERMINATING);
+            SetPublishState(TERMINATING);
             return IMS_TRUE;
         }
         IMS_TRACE_E(0, "StatePUBLISHED_AoSDisconnecting:Sending UnPublish Failed.", 0, 0, 0);
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     DestroyPublication();
     return IMS_TRUE;
 }
@@ -957,7 +957,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHED_AoSDisconnected(IN IMSMSG& objMsg)
     m_bReceivedUnPublishRequest = IMS_FALSE;
     SendUnpublishedInd();
     DestroyPublication();
-    UpdateState(IDLE);
+    SetPublishState(IDLE);
     return IMS_TRUE;
 }
 
@@ -965,7 +965,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHED_RefreshStarted(IN IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_I("StatePUBLISHED_RefreshStarted ", 0, 0, 0);
-    UpdateState(REFRESHING);
+    SetPublishState(REFRESHING);
     return IMS_TRUE;
 }
 
@@ -1018,7 +1018,7 @@ IMS_BOOL UcePublishManager::StateREFRESHING_AoSDisConnected(IN IMSMSG& objMsg)
     ClearPendingPublishRequest();
     SendUnpublishedInd();
     DestroyPublication();
-    UpdateState(IDLE);
+    SetPublishState(IDLE);
     return IMS_TRUE;
 }
 
@@ -1037,26 +1037,26 @@ IMS_BOOL UcePublishManager::StateREFRESHING_Refreshed(IN IMSMSG& objMsg)
         SendUnpublishedInd();
         if (CreatePublication() == IMS_FALSE)
         {
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
         if (Unpublish() == IMS_FALSE)
         {
             DestroyPublication();
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
-        UpdateState(TERMINATING);
+        SetPublishState(TERMINATING);
         return IMS_TRUE;
     }
     if (m_pPendingPublicationData != IMS_NULL)
     {
-        UpdateState(ON);
+        SetPublishState(ON);
         SendPendingPublishRequest();
     }
     else
     {
-        UpdateState(PUBLISHED);
+        SetPublishState(PUBLISHED);
     }
     return IMS_TRUE;
 }
@@ -1090,22 +1090,22 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg)
         SendUnpublishedInd();
         if (CreatePublication() == IMS_FALSE)
         {
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
         if (Unpublish() == IMS_FALSE)
         {
             DestroyPublication();
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
-        UpdateState(TERMINATING);
+        SetPublishState(TERMINATING);
         return IMS_TRUE;
     }
 
     if (HandleFailResponse(nResponseCode) == IMS_TRUE)
     {
-        UpdateState(PUBLISHING);
+        SetPublishState(PUBLISHING);
         return IMS_TRUE;
     }
     if (m_pPendingPublicationData != IMS_NULL)
@@ -1131,16 +1131,16 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailedWithNoResponse(IN IMSMS
         SendUnpublishedInd();
         if (CreatePublication() == IMS_FALSE)
         {
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
         if (Unpublish() == IMS_FALSE)
         {
             DestroyPublication();
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_TRUE;
         }
-        UpdateState(TERMINATING);
+        SetPublishState(TERMINATING);
         return IMS_TRUE;
     }
 
@@ -1169,7 +1169,7 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailedWithNoResponse(IN IMSMS
     }
     StopTimer(TIMER_ALL);
     SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_TRUE;
 }
 
@@ -1193,7 +1193,7 @@ IMS_BOOL UcePublishManager::StateTERMINATING_AoSDisconnected(IN IMSMSG& objMsg)
     (void)objMsg;
     IMS_TRACE_I("StateTERMINATING_AoSDisconnected ", 0, 0, 0);
     DestroyPublication();
-    UpdateState(IDLE);
+    SetPublishState(IDLE);
     return IMS_TRUE;
 }
 
@@ -1202,7 +1202,7 @@ IMS_BOOL UcePublishManager::StateTERMINATING_Published(IN IMSMSG& objMsg)
     (void)objMsg;
     IMS_TRACE_I("StateTERMINATING_Published ", 0, 0, 0);
     DestroyPublication();
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_TRUE;
 }
 
@@ -1211,16 +1211,16 @@ IMS_BOOL UcePublishManager::StateTERMINATING_Failed(IN IMSMSG& objMsg)
     (void)objMsg;
     IMS_TRACE_I("StateTERMINATING_Failed ", 0, 0, 0);
     DestroyPublication();
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_TRUE;
 }
 
 IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG& objMsg)
 {
     (void)objMsg;
-    IMS_TRACE_I("StateALL_Terminated:current State[%s]", StateToString(m_eState), 0, 0);
+    IMS_TRACE_I("StateALL_Terminated:current State[%s]", StateToString(GetPublishState()), 0, 0);
     DestroyPublication();
-    switch (GetState())
+    switch (GetPublishState())
     {
         case PUBLISHING:
             SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
@@ -1235,7 +1235,7 @@ IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG& objMsg)
             break;
     }
     ClearPendingPublishRequest();
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_TRUE;
 }
 
@@ -1606,7 +1606,7 @@ IMS_BOOL UcePublishManager::HandleFailResponse(IMS_SINT32 nResponseCode)
         case SipStatusCode::SC_412:  // conditianal request failed - initial full
                                      // publish request
         {
-            UpdateState(ON);
+            SetPublishState(ON);
             if (Process412Scenario() == IMS_TRUE)
             {
                 return IMS_TRUE;
@@ -1618,11 +1618,11 @@ IMS_BOOL UcePublishManager::HandleFailResponse(IMS_SINT32 nResponseCode)
             // Interval Too Short :re attempt changing the expiration interval in the
             // expires header
             IMS_BOOL bIsRefresh = INITIAL;
-            if (GetState() == REFRESHING)
+            if (GetPublishState() == REFRESHING)
             {
                 bIsRefresh = REFRESH;
             }
-            UpdateState(ON);
+            SetPublishState(ON);
             if (Process423Scenario(bIsRefresh) == IMS_TRUE)
             {
                 return IMS_TRUE;
@@ -1634,7 +1634,7 @@ IMS_BOOL UcePublishManager::HandleFailResponse(IMS_SINT32 nResponseCode)
     }
     if (UceConfig::GetInstance()->IsImsRegistrationRequired(IMS_TRUE, nResponseCode, m_nSimSlot))
     {
-        UpdateState(ON);
+        SetPublishState(ON);
         Process403Scenario();
         DestroyPublication();
         return IMS_FALSE;
@@ -1810,10 +1810,10 @@ IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()
         IMS_TRACE_I("ProcessImmediatelyRetryResponseScenario:over max "
                     "ImmediatelyRetryMaxCount",
                 0, 0, 0);
-        UpdateState(ON);
+        SetPublishState(ON);
         return IMS_FALSE;
     }
-    if (GetState() == PUBLISHING)
+    if (GetPublishState() == PUBLISHING)
     {
         if (RetryPublish(INITIAL) == IMS_TRUE)
         {
@@ -1821,7 +1821,7 @@ IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()
             return IMS_TRUE;
         }
     }
-    else if (GetState() == REFRESHING)
+    else if (GetPublishState() == REFRESHING)
     {
         if (RetryPublish(REFRESH) == IMS_TRUE)
         {
@@ -1829,7 +1829,7 @@ IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()
             return IMS_TRUE;
         }
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_FALSE;
 }
 
@@ -1839,7 +1839,7 @@ IMS_BOOL UcePublishManager::ProcessRetryResponseScenario()
                                  UceConfig::KEY_RETRY_PUBLISH_RESPONSE_MAX_COUNT, m_nSimSlot))
     {
         IMS_TRACE_I("ProcessRetryResponseScenario:over max RetryMaxCount", 0, 0, 0);
-        UpdateState(ON);
+        SetPublishState(ON);
         return IMS_FALSE;
     }
     if (StartTimer(TIMER_RETRY,
@@ -1849,7 +1849,7 @@ IMS_BOOL UcePublishManager::ProcessRetryResponseScenario()
         m_nRetryCount++;
         return IMS_TRUE;
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_FALSE;
 }
 
@@ -1862,7 +1862,7 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
         if (m_nExponentialRetryCount >= nExponentialRetryMaxCount)
         {
             IMS_TRACE_I("ProcessExponentialRetryResponseScenario:over max MaxCount", 0, 0, 0);
-            UpdateState(ON);
+            SetPublishState(ON);
             return IMS_FALSE;
         }
     }
@@ -1880,9 +1880,9 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
     {
         DestroyPublication();
         m_nExponentialRetryCount++;
-        if (GetState() == PUBLISHING || GetState() == REFRESHING)
+        if (GetPublishState() == PUBLISHING || GetPublishState() == REFRESHING)
         {
-            if (GetState() == REFRESHING)
+            if (GetPublishState() == REFRESHING)
             {
                 IMS_TRACE_D(
                         "ProcessExponentialRetryResponseScenario:reset m_nExponentialRetryCount", 0,
@@ -1890,11 +1890,11 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
                 m_nExponentialRetryCount = 0;
             }
             // Set state to ON to invoke the initial PUBLISH.
-            UpdateState(ON);
+            SetPublishState(ON);
         }
         return IMS_TRUE;
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     return IMS_FALSE;
 }
 
@@ -2006,68 +2006,71 @@ void UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
 
 void UcePublishManager::HandleExponentialRetryTimer()
 {
+    IMS_UINT32 eState = GetPublishState();
     IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%s], m_nExponentialRetryCount[%d]",
-            StateToString(m_eState), m_nExponentialRetryCount, 0);
-    if (GetState() == PUBLISHING || GetState() == ON)
+            StateToString(eState), m_nExponentialRetryCount, 0);
+    if (eState == PUBLISHING || eState == ON)
     {
         m_strEtag = AString::ConstEmpty();
         if (RetryPublish(INITIAL) == IMS_TRUE)
         {
-            UpdateState(PUBLISHING);
+            SetPublishState(PUBLISHING);
             return;
         }
     }
-    else if (GetState() == REFRESHING)
+    else if (eState == REFRESHING)
     {
         if (RetryPublish(REFRESH) == IMS_TRUE)
         {
             return;
         }
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     SendPendingPublishRequest();
 }
 
 void UcePublishManager::HandleRetryTimer()
 {
-    IMS_TRACE_I("HandleRetryTimer:Current State[%s], m_nRetryCount[%d]", StateToString(m_eState),
+    IMS_UINT32 eState = GetPublishState();
+    IMS_TRACE_I("HandleRetryTimer:Current State[%s], m_nRetryCount[%d]", StateToString(eState),
             m_nRetryCount, 0);
-    if (GetState() == PUBLISHING)
+    if (eState == PUBLISHING)
     {
         if (RetryPublish(INITIAL) == IMS_TRUE)
         {
             return;
         }
     }
-    else if (GetState() == REFRESHING)
+    else if (eState == REFRESHING)
     {
         if (RetryPublish(REFRESH) == IMS_TRUE)
         {
             return;
         }
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     SendPendingPublishRequest();
 }
 
 void UcePublishManager::HandleRetryAfterTimer()
 {
-    IMS_TRACE_I("HandleRetryAfterTimer:Current State[%s]", StateToString(m_eState), 0, 0);
-    if (GetState() == PUBLISHING)
+    IMS_UINT32 eState = GetPublishState();
+    IMS_TRACE_I("HandleRetryAfterTimer:Current State[%s]", StateToString(eState), 0, 0);
+    if (eState == PUBLISHING)
     {
         if (RetryPublish(INITIAL) == IMS_TRUE)
         {
             return;
         }
     }
-    else if (GetState() == REFRESHING)
+    else if (eState == REFRESHING)
     {
         if (RetryPublish(REFRESH) == IMS_TRUE)
         {
             return;
         }
     }
-    UpdateState(ON);
+    SetPublishState(ON);
     SendPendingPublishRequest();
 }
 
@@ -2115,7 +2118,7 @@ void UcePublishManager::ClearPendingPublishRequest()
     }
 }
 
-IMS_UINT32 UcePublishManager::GetState() const
+IMS_UINT32 UcePublishManager::GetPublishState() const
 {
     return m_eState;
 }
