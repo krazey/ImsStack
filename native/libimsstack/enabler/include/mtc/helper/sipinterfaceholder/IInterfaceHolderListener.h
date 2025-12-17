@@ -17,34 +17,40 @@
 #ifndef INTERFACE_INTERFACE_HOLDER_LISTENER_H_
 #define INTERFACE_INTERFACE_HOLDER_LISTENER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
+/**
+ * @brief A listener interface for receiving notifications about state changes in SIP interface
+ * holders.
+ *
+ * This class defines callback methods for major state changes in the Session, Reference, and
+ * Subscription interface holders.
+ */
 class IInterfaceHolderListener
 {
 public:
     inline virtual ~IInterfaceHolderListener() {};
 
     /**
-     * @brief Notifies that all ISession interfaces associated with the given call key have been
-     * released.
+     * @brief Notifies that the last ISession interface associated with the given call key has been
+     *        released.
      *
      * @param nKey The call key for which the sessions were released.
-     * @param objSession The session interface that was released for this call key.
+     * @param objSession The last session interface that was released for this call key.
      */
     inline virtual void OnSessionInterfaceReleased(
             IN [[maybe_unused]] CallKey nKey, IN [[maybe_unused]] ISession& objSession) {};
 
     /**
      * @brief Notifies that all IReference interfaces have been cleared from the
-     * ReferenceInterfaceHolder.
-     *
+     *        ReferenceInterfaceHolder.
      */
     inline virtual void OnReferenceInterfaceCleared() {};
 
     /**
      * @brief Notifies that all ISubscription interfaces have been cleared from the
-     * SubscriptionInterfaceHolder.
-     *
+     *        SubscriptionInterfaceHolder.
      */
     inline virtual void OnSubscriptionInterfaceCleared() {};
 };
