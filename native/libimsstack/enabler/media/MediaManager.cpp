@@ -59,11 +59,6 @@ PROTECTED VIRTUAL MediaManager::~MediaManager()
     {
         IMS_TRACE_D("~MediaManager(): MediaManager released.", 0, 0, 0);
     }
-    else
-    {
-        IMS_TRACE_E(0, "~MediaManager(): MediaSession IS NOT released. Size[%d]",
-                m_lstSessionNode.GetSize(), 0, 0);
-    }
 
     JniEnablerConnector::GetInstance().SetNativeEnabler(
             m_nSlotId, EnablerType::MEDIA_SESSION, IMS_NULL);
@@ -156,7 +151,6 @@ PUBLIC VIRTUAL MediaSession* MediaManager::GetSession(IN IMS_SINTP nCallKey)
 
     if (pSessionNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "GetSession(): cannot find matched session node", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -185,7 +179,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(
             {
                 if (!pSessionNode->pMediaSession->SendMessage(nMsg, pParam))
                 {
-                    IMS_TRACE_E(0, "SendMessage() failed MSG[%d, %s], CallKey[%d]", nMsg,
+                    IMS_TRACE_I("SendMessage() failed MSG[%d, %s], CallKey[%d]", nMsg,
                             IJniMedia::PrintMsg(nMsg), pSessionNode->nCallKey);
                     bResult = IMS_FALSE;
                 }
@@ -200,7 +194,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(
     {
         if (!SendMessageToSessions(nMsg, nCallKey, pParam))
         {
-            IMS_TRACE_E(0, "SendMessage(): Fail to process nMsg", 0, 0, 0);
+            IMS_TRACE_I("SendMessage(): Fail to process nMsg", 0, 0, 0);
             bResult = IMS_FALSE;
         }
     }
@@ -317,9 +311,6 @@ PROTECTED VIRTUAL std::shared_ptr<MediaManager::MediaSessionNode> MediaManager::
         }
     }
 
-    IMS_TRACE_E(0, "FindSessionNode(): nCallKey[%d], nListSize[%d]", nCallKey,
-            m_lstSessionNode.GetSize(), 0);
-
     return IMS_NULL;
 }
 
@@ -331,13 +322,8 @@ PROTECTED VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
     if (pMediaSession != IMS_NULL)
     {
         IMS_TRACE_I("SendMessageToSessions(): nMsg[%d], CallKey[%d]", nMsg, nCallKey, 0);
-
-        if (!pMediaSession->SendMessage(nMsg, pParam))
-        {
-            IMS_TRACE_E(0, "SendMessageToSessions(): failed", 0, 0, 0);
-            return IMS_FALSE;
-        }
+        return pMediaSession->SendMessage(nMsg, pParam);
     }
 
-    return IMS_TRUE;
+    return IMS_FALSE;
 }

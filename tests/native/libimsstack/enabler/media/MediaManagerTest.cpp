@@ -75,6 +75,13 @@ protected:
     virtual void TearDown() override {}
 };
 
+TEST_F(MediaManagerTest, TestMediaSessionCreateWithNullArgument)
+{
+    EXPECT_EQ(m_pMediaManager->CreateSession(
+                      MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, IMS_NULL, CALL_KEY_1),
+            IMS_NULL);
+}
+
 TEST_F(MediaManagerTest, TestMediaSessionCreateAndDestroy)
 {
     IMediaSession* pIMediaSession = m_pMediaManager->CreateSession(
@@ -146,6 +153,24 @@ TEST_F(MediaManagerTest, TestSendMessageBroadcast)
     auto pParam = std::make_unique<ImsMediaMsgParamBase>();
     EXPECT_TRUE(m_pMediaManager->SendMessage(IJniMedia::NOTIFY_MEDIA_DETACH, CALL_KEY_BROADCAST,
             reinterpret_cast<IMS_UINTP>(pParam.release())));
+}
+
+TEST_F(MediaManagerTest, TestSendMessageSessionNotFound)
+{
+    // No session created for CALL_KEY_1
+    auto pParam = new ImsMediaMsgParamBase();
+    // Expect SendMessage to return false because the session doesn't exist
+    EXPECT_FALSE(m_pMediaManager->SendMessage(
+            IJniMedia::NOTIFY_MEDIA_DETACH, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam)));
+}
+
+TEST_F(MediaManagerTest, TestSendMessageBroadcastNoSessions)
+{
+    // No sessions are created.
+    auto pParam = new ImsMediaMsgParamBase();
+    // Broadcast should still return true, even if there are no sessions to send to.
+    EXPECT_TRUE(m_pMediaManager->SendMessage(IJniMedia::NOTIFY_MEDIA_DETACH, CALL_KEY_BROADCAST,
+            reinterpret_cast<IMS_UINTP>(pParam)));
 }
 
 TEST_F(MediaManagerTest, TestSendMessageCommonResponse)
@@ -254,6 +279,19 @@ TEST_F(MediaManagerTest, TestSendMessageEtc)
             IJniMedia::SEND_DTMF, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam1.release())));
 }
 
+TEST_F(MediaManagerTest, TestHandleMessageAndDispatch)
+{
+    // This test covers HandleMessage and DispatchMessage
+    m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
+
+    auto pParam = new ImsMediaMsgDtmfParam();
+    ImsMessage msg(IJniMedia::NOTIFY_QOS_INFO, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam));
+
+    // DispatchMessage calls HandleMessage, which in turn calls SendMessage.
+    EXPECT_TRUE(m_pMediaManager->DispatchMessage(msg));
+}
+
 TEST_F(MediaManagerTest, TestHandleRequestMsgCommon)
 {
     IMediaSession* pIMediaSession = m_pMediaManager->CreateSession(
@@ -340,4 +378,14 @@ TEST_F(MediaManagerTest, TestHandleRequestMsgVideo)
             .WillOnce(Return(IMS_TRUE));
     EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
             IJniMedia::REQUEST_SET_PREVIEW_SURFACE, CALL_KEY_1, pParam.get()));
+}
+
+TEST_F(MediaManagerTest, TestHandleRequestMsgSessionNotFound)
+{
+    // No session created for CALL_KEY_1
+    auto pParam = std::make_unique<ImsMediaMsgOpenConfigParam>(MEDIA_TYPE_AUDIO);
+
+    // Expect HandleRequestMsg to return false because the session doesn't exist
+    EXPECT_FALSE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_OPEN_SESSION, CALL_KEY_1, pParam.get()));
 }
