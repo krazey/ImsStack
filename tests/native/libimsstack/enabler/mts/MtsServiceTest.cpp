@@ -450,9 +450,23 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
+    EXPECT_CALL(
+            objMockJniAppThread, ReportMoStatus(MO_ERROR_GENERIC, eSmsFormat, SEQ_ID_2, SLOT_ID))
+            .Times(1);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
     pNormalService->SendMoSms(
             eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergencyNumber, RETRY_COUNT);
+    pNormalService->Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
+            IImsRadio::REASON_ACCESS_DENIED, 400, 2000);
+}
+
+TEST_F(MtsServiceTest, TrafficOnConnectionFailedWithoutPendingSms)
+{
+    EXPECT_CALL(objMockJniAppThread, ReportMoStatus(_, _, _, _)).Times(0);
+    EXPECT_CALL(objMockMessageController, ClearAllMessages()).Times(1);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
+
     pNormalService->Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_ACCESS_DENIED, 400, 2000);
 }
