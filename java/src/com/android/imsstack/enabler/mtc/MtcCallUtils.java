@@ -66,7 +66,6 @@ public class MtcCallUtils {
         UsersInfo usersInfo = new UsersInfo();
 
         for (String participant : participants) {
-            // FIXME: is it possible to use "entity" field as a conference id for this user???
             usersInfo.addUser(0L, participant, "", "", "",
                     UsersInfo.USER_STATUS_IDLE, UsersInfo.CCTYPE_TO, false);
         }
@@ -213,7 +212,6 @@ public class MtcCallUtils {
     }
 
     public static boolean isInfoTypeForMediaSession(int infoType) {
-        // FIXME: common or operator-specific?
         return (infoType == INFO_TYPE_MEDIA_VIDEO_NO_DATA)
                 || (infoType == INFO_TYPE_MEDIA_VIDEO_DATA_RECEIVED)
                 || (infoType == INFO_TYPE_MEDIA_CVO_CAPABILITY);
