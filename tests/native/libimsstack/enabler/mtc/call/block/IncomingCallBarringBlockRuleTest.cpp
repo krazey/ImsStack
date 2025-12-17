@@ -47,36 +47,36 @@ protected:
     {
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
-
-        pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::RTT);
     }
 
     virtual void TearDown() override { delete pBlockRule; }
 };
 
-TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAllCalls)
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAllVoiceCalls)
 {
     ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CB_INCOMING_ALL_VOICE))
             .WillByDefault(Return(IMS_TRUE));
 
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::VOIP);
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
 }
 
-TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedWhenRoaming)
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForVoiceCallsWhenRoaming)
 {
     ON_CALL(objService,
             IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CB_INCOMING_ROAMING_VOICE))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsRoaming).WillByDefault(Return(IMS_TRUE));
 
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::RTT);
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
 }
 
-TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAnonymousCalls)
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAnonymousVoiceCalls)
 {
     ON_CALL(objService,
             IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VOICE))
@@ -88,7 +88,58 @@ TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAnonymousCalls)
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
 
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::VOIP);
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+}
+
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAllVideoCalls)
+{
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CB_INCOMING_ALL_VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::VT);
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+}
+
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForVideoCallsWhenRoaming)
+{
+    ON_CALL(objService,
+            IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CB_INCOMING_ROAMING_VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsRoaming).WillByDefault(Return(IMS_TRUE));
+
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::VIDEO_RTT);
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+}
+
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsBlockedForAnonymousVideoCalls)
+{
+    ON_CALL(objService,
+            IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+    MockMtcConfigurationProxy objConfigProxy;
+    MtcSupplementaryService objSuppService(objContext, objConfigProxy);
+    objSuppService.Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(OipType::RESTRICTED));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSuppService));
+    ParticipantInfo objParticipantInfo(objContext);
+    ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
+
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::VT);
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+}
+
+TEST_F(IncomingCallBarringBlockRuleTest, CheckReturnsUnblockedForUnknownCallType)
+{
+    pBlockRule = new IncomingCallBarringBlockRule(objContext, CallType::UNKNOWN);
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
