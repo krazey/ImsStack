@@ -70,8 +70,6 @@ PUBLIC VIRTUAL CodecEvsConfig::~CodecEvsConfig()
 
 PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create - EvsCodecConfig", 0, 0, 0);
-
     if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
@@ -289,7 +287,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
                 CarrierConfig::ImsVoice::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY);
         IMS_SINT32 nDefaultModeSetList = ConvertModeSetList(objCodecDefaultModeset);
         SetDefaultModeSetList(nDefaultModeSetList);
-        IMS_TRACE_D("Create - DefaultAmrWBModeSetList[%d]", nDefaultModeSetList, 0, 0);
         // TODO(b/414484057) : need to change the default value like the amrcodec and check the
         // display asset for the AMR-IO mode again
         piCcSubBundle->ReleaseBundle();
@@ -316,8 +313,6 @@ IMS_SINT32 CodecEvsConfig::ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IM
 {
     IMS_SINT32 nBitrateSet = 0;
 
-    IMS_TRACE_D("ConvertEvsBitrateToList - Bitrate range:[%d]~[%d]", nBrStart, nBrEnd, 0);
-
     if (nBrStart < EVS_PRIMARY_MODE_BITRATE_5_9_KBPS ||
             nBrEnd < EVS_PRIMARY_MODE_BITRATE_5_9_KBPS ||
             nBrStart > EVS_PRIMARY_MODE_BITRATE_128_0_KBPS ||
@@ -329,7 +324,6 @@ IMS_SINT32 CodecEvsConfig::ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IM
     {
         for (IMS_SINT32 nBitrate = nBrStart; nBitrate <= nBrEnd; nBitrate++)
         {
-            IMS_TRACE_D("ConvertEvsBitrateToList - Bitrate[%d] ", nBitrate, 0, 0);
             nBitrateSet = (nBitrateSet | (1 << nBitrate));
         }
     }
@@ -341,9 +335,6 @@ PRIVATE
 IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
         IN IMS_SINT32 nBwList, IN IMS_SINT32 nBrList)
 {
-    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - BandwidthList[%d] BitrateList[%d]", nBwList,
-            nBrList, 0);
-
     if ((nBrList & 0xFF8) == IMS_FALSE)
     {
         switch (nBwList)
@@ -363,7 +354,6 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
                 nBwList = EVS_ENCODED_BW_TYPE_NB_WB;
                 break;
         }
-        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed BandwidthList[%d]", nBwList, 0, 0);
     }
     else if ((nBrList & 0xFE0) == IMS_FALSE)
     {
@@ -384,7 +374,6 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
                 nBwList = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
                 break;
         }
-        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed BandwidthList[%d]", nBwList, 0, 0);
     }
 
     switch (nBwList)
@@ -414,7 +403,7 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             break;
     }
 
-    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - new changed BandwidthList[0x%04x]", nBwList, 0, 0);
+    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed BandwidthList[0x%04x]", nBwList, 0, 0);
 
     return nBwList;
 }
@@ -520,6 +509,7 @@ PUBLIC VIRTUAL void CodecEvsConfig::CreateDefaultEvsCodec()
 {
     IMS_TRACE_D(
             "CreateDefaultEvsCodec: codec[%d], payloadTypeNumber[%d]", m_nCodec, m_nPayloadType, 0);
+
     SetChannel(DEFAULT_CHANNEL);
     m_bVisibleDtx = IMS_FALSE;
     SetDtx(CodecAudioConfig::DEFAULT_DTX);

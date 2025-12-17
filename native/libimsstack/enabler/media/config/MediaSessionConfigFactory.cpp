@@ -52,9 +52,6 @@ void MediaSessionConfigFactory::CreateMediaSessionConfig(
         MediaSessionConfig* objMediaSessionConfig = new MediaSessionConfig(nSlotId, eServiceType);
         pListMediaSessionConfig->Append(objMediaSessionConfig);
     }
-
-    IMS_TRACE_D("CreateMediaSessionConfig - SlotId[%d], ListSize[%d], ServiceType[%d]", nSlotId,
-            pListMediaSessionConfig->GetSize(), (IMS_SINT32)eServiceType);
 }
 
 PUBLIC
@@ -67,9 +64,6 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
     {
         pListMediaSessionConfig = new ImsList<MediaSessionConfig*>();
         pListMediaSessionConfig->Append(pMediaSessionConfig);
-
-        IMS_TRACE_D("AddMediaSessionConfig - SlotId[%d], ListSize[%d]", nSlotId,
-                pListMediaSessionConfig->GetSize(), 0);
 
         m_mapListMediaSessionConfig.Add(nSlotId, pListMediaSessionConfig);
     }
@@ -86,9 +80,6 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
         }
 
         pListMediaSessionConfig->Append(pMediaSessionConfig);
-
-        IMS_TRACE_D("AddMediaSessionConfig - SlotId[%d], ListSize[%d]", nSlotId,
-                pListMediaSessionConfig->GetSize(), 0);
     }
 }
 
@@ -99,9 +90,6 @@ void MediaSessionConfigFactory::DestroyListSessionConfigImpl(IN IMS_SINT32 nSlot
 
     if (pListMediaSessionConfig != IMS_NULL)
     {
-        IMS_TRACE_D("DestroyListSessionConfigImpl - ListSize[%d]",
-                pListMediaSessionConfig->GetSize(), 0, 0);
-
         while (!pListMediaSessionConfig->IsEmpty())
         {
             DestroySessionConfig(pListMediaSessionConfig->GetAt(0));
@@ -159,12 +147,6 @@ MediaSessionConfig* MediaSessionConfigFactory::FindMediaSessionConfig(
         }
     }
 
-    if (pMediaSessionConfig != IMS_NULL)
-    {
-        IMS_TRACE_D("FindMediaSessionConfig() - ServiceType[%d]",
-                pMediaSessionConfig->GetServiceType(), 0, 0);
-    }
-
     return pMediaSessionConfig;
 }
 
@@ -178,9 +160,6 @@ void MediaSessionConfigFactory::DestroySessionConfig(
 
         if (pListMediaSessionConfig != IMS_NULL)
         {
-            IMS_TRACE_D("DestroySessionConfig - ListSize[%d]", pListMediaSessionConfig->GetSize(),
-                    0, 0);
-
             for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
             {
                 const MediaSessionConfig* pTempMediaSessionConfig =

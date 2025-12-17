@@ -31,9 +31,6 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
-    IMS_TRACE_D("CreateAudioPayloadConfig - Codec[%d], PayloadTypeNumber[%d]", nCodec,
-            nPayloadTypeNum, 0);
-
     if (nCodec == ImsCodec::AUDIO_NONE)
     {
         return IMS_NULL;
@@ -50,7 +47,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
 
             if (pAmrConfig == IMS_NULL || !pAmrConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateAudioPayloadConfig - AmrConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - AmrConfig Create failure", 0, 0, 0);
 
                 delete pAmrConfig;
                 return IMS_NULL;
@@ -66,7 +63,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
 
             if (pPcmConfig == IMS_NULL || !pPcmConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateAudioPayloadConfig - PcmConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - PcmConfig Create failure", 0, 0, 0);
 
                 delete pPcmConfig;
                 return IMS_NULL;
@@ -82,8 +79,8 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
 
             if (pTelephoneEventConfig == IMS_NULL || !pTelephoneEventConfig->Create(piCc))
             {
-                IMS_TRACE_D(
-                        "CreateAudioPayloadConfig - TelephoneEventConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - TelephoneEventConfig Create failure", 0,
+                        0, 0);
 
                 delete pTelephoneEventConfig;
                 return IMS_NULL;
@@ -98,7 +95,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
 
             if (pEvsConfig == IMS_NULL || !pEvsConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateAudioPayloadConfig - EvsConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - EvsConfig Create failure", 0, 0, 0);
 
                 delete pEvsConfig;
                 return IMS_NULL;
@@ -122,9 +119,6 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
 
     CodecConfig* pCodecConfig = IMS_NULL;
 
-    IMS_TRACE_D("CreateVideoPayloadConfig - Codec[%d], PayloadTypeNumber[%d]", nCodec,
-            nPayloadTypeNum, 0);
-
     switch (nCodec)
     {
         case ImsCodec::VIDEO_AVC:
@@ -133,7 +127,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
 
             if (pAvcConfig == IMS_NULL || !pAvcConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateVideoPayloadConfig - AvcConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateVideoPayloadConfig - AvcConfig Create failure", 0, 0, 0);
 
                 delete pAvcConfig;
                 return IMS_NULL;
@@ -149,7 +143,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
 
             if (pHevcConfig == IMS_NULL || !pHevcConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateVideoPayloadConfig - HevcConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateVideoPayloadConfig - HevcConfig Create failure", 0, 0, 0);
 
                 delete pHevcConfig;
                 return IMS_NULL;
@@ -172,9 +166,6 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
 
     CodecConfig* pCodecConfig = IMS_NULL;
 
-    IMS_TRACE_D("CreateTextPayloadConfig - Codec[%d], PayloadTypeNumber[%d]", nCodec,
-            nPayloadTypeNum, 0);
-
     switch (nCodec)
     {
         case ImsCodec::TEXT_T140:
@@ -184,7 +175,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
 
             if (pT140Config == IMS_NULL || !pT140Config->Create(piCc))
             {
-                IMS_TRACE_D("CreateTextPayloadConfig - T140Config Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateTextPayloadConfig - T140Config Create failure", 0, 0, 0);
 
                 delete pT140Config;
                 return IMS_NULL;
