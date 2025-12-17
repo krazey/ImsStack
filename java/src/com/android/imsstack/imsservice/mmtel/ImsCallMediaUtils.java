@@ -73,7 +73,6 @@ public class ImsCallMediaUtils {
                 null : new VideoProfile(profile.getVideoState(), profile.getQuality());
     }
 
-    // FIXME: May we use MediaInfo instead of ImsCallProfile?
     public static MediaInfo createMediaInfoForCallAccept(final ImsCallProfile profile,
             final int callType, final int audioCapabilities, final int videoCapabilities) {
         switch (callType) {

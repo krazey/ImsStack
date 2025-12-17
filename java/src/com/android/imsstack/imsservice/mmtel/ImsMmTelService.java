@@ -173,7 +173,6 @@ public class ImsMmTelService extends MmTelFeature
             return false;
         }
 
-        // FIXME: P-GII
         switch (capability) {
             case MmTelCapabilities.CAPABILITY_TYPE_VOICE:
                 return (radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_LTE) ?
@@ -239,7 +238,6 @@ public class ImsMmTelService extends MmTelFeature
 
     @Override
     public @ProcessCallResult int shouldProcessCall(String[] numbers) {
-        // FIXME: P-GII
         return super.shouldProcessCall(numbers);
     }
 

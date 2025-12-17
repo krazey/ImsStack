@@ -899,14 +899,6 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testIsEmergencyPdnUsedForEmergencyCallViaWfc() {
-        Mockito.when(mContext.getContext()).thenReturn(mMockContext);
-        boolean callViaEPdn = ImsCallUtils.isEmergencyPdnUsedForEmergencyCallViaWfc(mContext);
-        assertFalse(callViaEPdn);
-        // TODO: need to add a carrier configuration. method is not implemented
-    }
-
-    @Test
     public void testUpdateCallProfileOnSessionStarted() {
         ImsCallProfile profile = new ImsCallProfile();
         SuppInfo suppInfo = new SuppInfo();

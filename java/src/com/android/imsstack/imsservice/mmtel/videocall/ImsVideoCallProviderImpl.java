@@ -223,9 +223,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             handleCallSessionEvent(Connection.VideoProvider.SESSION_EVENT_RX_RESUME);
         } else if (mediaInfo == MtcCallUtils.INFO_TYPE_MEDIA_CVO_CAPABILITY) {
             if (intParam == MtcCallUtils.MEDIA_CVO_DISABLED) {
-                // TODO: how to handle this?
             } else if (intParam == MtcCallUtils.MEDIA_CVO_ENABLED) {
-                // TODO: how to handle this?
             }
         }
         return;

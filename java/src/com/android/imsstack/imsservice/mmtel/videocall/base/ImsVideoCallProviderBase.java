@@ -119,7 +119,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
             return;
         }
 
-        // FIXME: Do we need to handle the float?
         Float f = Float.valueOf(value);
 
         mMediaSession.setCameraZoom(f.intValue());
@@ -153,7 +152,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     @Override
     public void onSetPauseImage(Uri uri) {
-        // TODO : add implementation
     }
 
     @Override

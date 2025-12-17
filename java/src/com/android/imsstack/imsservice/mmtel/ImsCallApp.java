@@ -65,7 +65,6 @@ public class ImsCallApp extends ImsApp {
         mCallManager = new ImsCallManager(mCallContext,
                 mCallContext.getMtcApp(), callListener);
 
-        // FIXME: remove later if SS control configuration is properly provided
         getUtInterface();
 
         mFeatureManager.setRegistrationTracker(mRegTracker);
@@ -196,7 +195,6 @@ public class ImsCallApp extends ImsApp {
                 return;
             }
 
-            // FIXME: P-GII
             mRegTracker.refreshCallRegistrationState();
 
             // Initialize Ut before initializing ImsCallContext since ImsCallContext adds a listener
@@ -364,7 +362,6 @@ public class ImsCallApp extends ImsApp {
         if (serviceType == ImsCallProfile.SERVICE_TYPE_NONE) {
             videoCallCapable = true;
         } else if (serviceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            // FIXME : need to add another conditions? (LTE system info. ?)
             videoCallCapable = true;
         } else {
             if ((mRegTracker.isCallVideoRegistered()
@@ -404,7 +401,6 @@ public class ImsCallApp extends ImsApp {
                 volteCallCapable = true;
             }
         } else if (serviceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            // FIXME : need to add another conditions? (LTE system info. ?)
             volteCallCapable = true;
         } else {
             if ((mCallContext.hasAccessBearerCapabilitiesForHDCall() || isAccessBearerUnknown())
@@ -428,7 +424,6 @@ public class ImsCallApp extends ImsApp {
     }
 
     private int getCallTypeByImsState(int serviceType, int callType) {
-        // FIXME: needs to improve for call type
         if (callType == ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO) {
             if (serviceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
                 callType = ImsCallProfile.CALL_TYPE_VOICE;

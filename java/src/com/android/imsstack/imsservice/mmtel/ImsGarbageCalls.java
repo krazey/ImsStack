@@ -96,7 +96,6 @@ public class ImsGarbageCalls {
     }
 
     public void removeAll(int slotId) {
-        // FIXME: enforce session close here
         synchronized (mCalls) {
             log("ImsGarbageCalls :: removeAll=" + mCalls.size());
 

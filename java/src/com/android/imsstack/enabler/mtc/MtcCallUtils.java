@@ -196,14 +196,6 @@ public class MtcCallUtils {
         return (reason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
-    public static boolean isCallTerminatedByECallRetry(int reason) {
-        return false;
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*(reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_1X)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_VOLTE)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_R_RAT)*/
-    }
-
     public static boolean isCallTerminatedByJoiningConference(int reason) {
         return (reason == CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE);
     }
