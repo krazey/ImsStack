@@ -18,6 +18,7 @@
 
 #include "audio/AudioProfileNegotiator.h"
 
+#include "config/CodecAudioConfig.h"
 #include "config/MockAudioConfiguration.h"
 
 using testing::Return;
@@ -68,6 +69,29 @@ protected:
             IMS_UINT32 nPayloadNum, IMS_UINT32 nModeSet, IMS_SINT32 octetAlign)
     {
         auto pPayload = CreateAmrWbPayload(nPayloadNum, nModeSet);
+        std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp())
+                ->SetOctetAlign(octetAlign);
+        return pPayload;
+    }
+
+    // Helper to create a basic AMR payload
+    AudioProfile::Payload* CreateAmrPayload(IMS_UINT32 nPayloadNum, IMS_UINT32 nModeSet)
+    {
+        auto pPayload = new AudioProfile::Payload();
+        pPayload->GetRtpMap().SetPayloadType("AMR");
+        pPayload->GetRtpMap().SetSamplingRate(8000);
+        pPayload->GetRtpMap().SetPayloadNumber(nPayloadNum);
+        auto pFmtp = std::make_shared<AudioProfile::AmrFmtp>();
+        pFmtp->SetModeSetList(nModeSet);
+        pPayload->SetFmtp(pFmtp);
+        return pPayload;
+    }
+
+    // Helper to create a basic AMR payload with octet-align
+    AudioProfile::Payload* CreateAmrPayload(
+            IMS_UINT32 nPayloadNum, IMS_UINT32 nModeSet, IMS_SINT32 octetAlign)
+    {
+        auto pPayload = CreateAmrPayload(nPayloadNum, nModeSet);
         std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp())
                 ->SetOctetAlign(octetAlign);
         return pPayload;
@@ -322,6 +346,154 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateAmrFmtpPeerModeSetNotVisible)
     // Check negotiated mode-set 0x0F
     EXPECT_EQ(pNegoFmtp->GetModeSetList(), 0x0F);
     // Since negotiated mode-set is 0, visibility should be inherited from the peer (false).
+    EXPECT_TRUE(pNegoFmtp->IsModeSetVisible());
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrWbFmtpFullModeSetShouldBeNotVisible)
+{
+    // Arrange
+    // Local profile has a Full mode-set
+    m_pLocalProfile->AddPayload(
+            CreateAmrWbPayload(kLocalPayload, CodecAudioConfig::FULL_MODESET_AMRWB, 0));
+    auto localFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+    // Force to set mode-set visible
+    localFmtp->SetVisibleModeSet(IMS_TRUE);
+
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, 0x000, 0));
+    auto peerFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pPeerProfile->GetPayloadAt(0)->GetFmtp());
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Check negotiated mode-set FULL_MODESET_AMRWB
+    EXPECT_EQ(pNegoFmtp->GetModeSetList(), CodecAudioConfig::FULL_MODESET_AMRWB);
+    // Since negotiated mode-set is full modeset, The mode-set should NOT be visible.
+    EXPECT_FALSE(pNegoFmtp->IsModeSetVisible());
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrNbFmtpFullModeSetShouldBeNotVisible)
+{
+    // Arrange
+    // Local profile has a Full mode-set for AMR-NB
+    m_pLocalProfile->AddPayload(
+            CreateAmrPayload(kLocalPayload, CodecAudioConfig::FULL_MODESET_AMRNB, 0));
+    auto localFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+    // Force to set mode-set visible
+    localFmtp->SetVisibleModeSet(IMS_TRUE);
+
+    m_pPeerProfile->AddPayload(CreateAmrPayload(kPeerPayload, 0x000, 0));
+    auto peerFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pPeerProfile->GetPayloadAt(0)->GetFmtp());
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Check negotiated mode-set is FULL_MODESET_AMRNB
+    EXPECT_EQ(pNegoFmtp->GetModeSetList(), CodecAudioConfig::FULL_MODESET_AMRNB);
+    // Since negotiated mode-set is full modeset, The mode-set should NOT be visible.
+    EXPECT_FALSE(pNegoFmtp->IsModeSetVisible());
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrWbFmtpFullModeSetPeerVisibleShouldBeVisible)
+{
+    // Arrange
+    // Local profile has a full mode-set
+    m_pLocalProfile->AddPayload(
+            CreateAmrWbPayload(kLocalPayload, CodecAudioConfig::FULL_MODESET_AMRWB, 0));
+    auto localFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+    // Force to set mode-set visible
+    localFmtp->SetVisibleModeSet(IMS_TRUE);
+
+    // Peer profile also has a full mode-set, and it is visible
+    m_pPeerProfile->AddPayload(
+            CreateAmrWbPayload(kPeerPayload, CodecAudioConfig::FULL_MODESET_AMRWB, 0));
+    auto peerFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pPeerProfile->GetPayloadAt(0)->GetFmtp());
+    // Force to set peer's mode-set visible to test the 'else' branch
+    peerFmtp->SetVisibleModeSet(IMS_TRUE);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Check negotiated mode-set is FULL_MODESET_AMRWB
+    EXPECT_EQ(pNegoFmtp->GetModeSetList(), CodecAudioConfig::FULL_MODESET_AMRWB);
+    // Since peer's full modeset was visible, the negotiated mode-set should also be visible.
+    EXPECT_TRUE(pNegoFmtp->IsModeSetVisible());
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrNbFmtpFullModeSetPeerVisibleShouldBeVisible)
+{
+    // Arrange
+    // Local profile has a Full mode-set for AMR-NB
+    m_pLocalProfile->AddPayload(
+            CreateAmrPayload(kLocalPayload, CodecAudioConfig::FULL_MODESET_AMRNB, 0));
+    auto localFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
+    // Force to set mode-set visible
+    localFmtp->SetVisibleModeSet(IMS_TRUE);
+
+    // Peer profile also has a Full mode-set, and it is visible
+    m_pPeerProfile->AddPayload(
+            CreateAmrPayload(kPeerPayload, CodecAudioConfig::FULL_MODESET_AMRNB, 0));
+    auto peerFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
+            m_pPeerProfile->GetPayloadAt(0)->GetFmtp());
+    // Force to set peer's mode-set visible to test the 'else' branch
+    peerFmtp->SetVisibleModeSet(IMS_TRUE);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    AudioProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Check negotiated mode-set is FULL_MODESET_AMRNB
+    EXPECT_EQ(pNegoFmtp->GetModeSetList(), CodecAudioConfig::FULL_MODESET_AMRNB);
+    // Since peer's full modeset was visible, the negotiated mode-set should also be visible.
     EXPECT_TRUE(pNegoFmtp->IsModeSetVisible());
 }
 
