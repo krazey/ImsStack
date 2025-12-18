@@ -4604,7 +4604,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStartFailed_305()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_420()
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStartFailed_420()
 {
     IMS_BOOL bIsExtensionUnsupported =
             m_pUtil->IsParameterIncluded(m_piRegistration->GetPreviousResponse(),
@@ -4613,14 +4613,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_420()
     if (bIsExtensionUnsupported)
     {
         ProcessIpsecFallback(IMS_FALSE);
+        return IMS_TRUE;
     }
-    else
-    {
-        ProcessDefaultFlowRecovery_Start();
-    }
+
+    return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_421()
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStartFailed_421()
 {
     IMS_BOOL bIsExtensionRequired = m_pUtil->IsParameterIncluded(
             m_piRegistration->GetPreviousResponse(), ISipHeader::REQUIRE, AosString::STR_SEC_AGREE);
@@ -4628,14 +4627,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_421()
     if (m_pUtil->IsFeatureOn(FEATURE_IPSEC, m_nFeature) && bIsExtensionRequired)
     {
         ProcessIpsecFallback(IMS_TRUE);
+        return IMS_TRUE;
     }
-    else
-    {
-        ProcessDefaultFlowRecovery_Start();
-    }
+
+    return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_423()
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStartFailed_423()
 {
     IMS_SINT32 nMinTime = m_pUtil->GetMinExpiresValue(m_piRegistration->GetPreviousResponse());
 
@@ -4644,15 +4642,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_423()
         if (!SendRegisterEx(nMinTime))
         {
             ProcessUnpredictableFailure();
-            return;
+            return IMS_TRUE;
         }
 
         SetState(STATE_REGISTERING);
+        return IMS_TRUE;
     }
-    else
-    {
-        ProcessDefaultFlowRecovery_Start();
-    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
@@ -4800,7 +4797,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_305()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_423()
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_423()
 {
     IMS_SINT32 nMinTime = m_pUtil->GetMinExpiresValue(m_piRegistration->GetPreviousResponse());
 
@@ -4809,15 +4806,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_423()
         if (!SendRegisterEx(nMinTime))
         {
             ProcessUnpredictableFailure();
-            return;
+            return IMS_TRUE;
         }
 
         SetState(STATE_REFRESHING);
+        return IMS_TRUE;
     }
-    else
-    {
-        ProcessDefaultFlowRecovery_Update();
-    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
@@ -4876,6 +4872,32 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         return;
     }
 
+    IMS_BOOL bIsStandardHandled = IMS_FALSE;
+    switch (nStatusCode)
+    {
+        // 420
+        case SipStatusCode::SC_420:
+            bIsStandardHandled = ProcessStartFailed_420();
+            break;
+        // 421
+        case SipStatusCode::SC_421:
+            bIsStandardHandled = ProcessStartFailed_421();
+            break;
+        // 423
+        case SipStatusCode::SC_423:
+            bIsStandardHandled = ProcessStartFailed_423();
+            break;
+
+        default:
+            break;
+    }
+
+    if (bIsStandardHandled)
+    {
+        return;
+    }
+
+    // Other responses not processed above
     if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED)
     {
@@ -4893,26 +4915,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         }
     }
 
-    switch (nStatusCode)
-    {
-        // 420
-        case SipStatusCode::SC_420:
-            ProcessStartFailed_420();
-            break;
-        // 421
-        case SipStatusCode::SC_421:
-            ProcessStartFailed_421();
-            break;
-        // 423
-        case SipStatusCode::SC_423:
-            ProcessStartFailed_423();
-            break;
-
-        default:
-            // Other 4xx, 5xx, 6xx response
-            ProcessDefaultFlowRecovery_Start(nStatusCode);
-            break;
-    }
+    ProcessDefaultFlowRecovery_Start(nStatusCode);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
@@ -5085,16 +5088,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         return;
     }
 
-    const ImsVector<IMS_SINT32>& objReregRetryErrCode =
-            GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf();
-    if (m_pUtil->IsErrorCodeExisted(
-                objReregRetryErrCode, CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP) ||
-            m_pUtil->IsErrorCodeExisted(objReregRetryErrCode, nStatusCode))
-    {
-        ProcessRegRequiredWithSamePcscf();
-        return;
-    }
-
     if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() !=
             CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
     {
@@ -5111,18 +5104,33 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         }
     }
 
+    IMS_BOOL bIsStandardHandled = IMS_FALSE;
     switch (nStatusCode)
     {
         // 423
         case SipStatusCode::SC_423:
-            ProcessUpdateFailed_423();
+            bIsStandardHandled = ProcessUpdateFailed_423();
             break;
 
         default:
-            // other 4xx, 5xx, 6xx response
-            ProcessDefaultFlowRecovery_Update(nStatusCode);
             break;
     }
+
+    if (bIsStandardHandled)
+    {
+        return;
+    }
+
+    if (m_pUtil->IsErrorCodeExisted(
+                GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf(),
+                nStatusCode))
+    {
+        ProcessRegRequiredWithSamePcscf();
+        return;
+    }
+
+    // Other responses not processed above
+    ProcessDefaultFlowRecovery_Update(nStatusCode);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()

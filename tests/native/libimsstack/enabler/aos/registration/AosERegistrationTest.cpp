@@ -191,11 +191,23 @@ public:
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
     // Functions where calls are being counted
+    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosERegistration::ProcessDefaultFlowRecovery_Start(nStatusCode);
+    }
+
     void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
             IN IMS_UINT32 nRetryAfter) override
     {
         m_pCounter->AddCount(__IMS_FUNC__);
         AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
+    }
+
+    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosERegistration::ProcessDefaultFlowRecovery_Update(nStatusCode);
     }
 
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration) override
@@ -1034,7 +1046,7 @@ TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorSc
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL))
             .Times(1);
 
-    m_pAosERegistration->ProcessDefaultFlowRecovery_Update();
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Update(0);
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
@@ -1183,6 +1195,13 @@ TEST_F(AosERegistrationTest, SetRegstopStateWhenStartFailedWith420AndNotIncluded
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
+TEST_F(AosERegistrationTest, TriggerDefaultFlowRecoveryIfNotIncludeMinExpiresWhenStartFailedWith423)
+{
+    m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
 TEST_F(AosERegistrationTest, SetRegisteringStateWhenStartFailedWith423)
 {
     ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
@@ -1238,6 +1257,14 @@ TEST_F(AosERegistrationTest, UpdateFailedWithStatusCode423)
     m_pAosERegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_423);
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REFRESHING);
+}
+
+TEST_F(AosERegistrationTest,
+        TriggerDefaultFlowRecoveryIfNotIncludeMinExpiresWhenUpdateFailedWith423)
+{
+    m_pAosERegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_423);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
 }
 
 TEST_F(AosERegistrationTest, UpdateFailedWithOtherStatusCode)

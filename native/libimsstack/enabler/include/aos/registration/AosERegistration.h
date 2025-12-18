@@ -103,14 +103,14 @@ protected:
 
     void ProcessAuthenticationFailed() final;
 
-    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) final;
+    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) override;
     void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
             IN IMS_UINT32 nRetryAfter) override;
-    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
+    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) override;
 
     IMS_BOOL ProcessStartFailed_305() final;
-    void ProcessStartFailed_420() final;
-    void ProcessStartFailed_423() final;
+    IMS_BOOL ProcessStartFailed_420() final;
+    IMS_BOOL ProcessStartFailed_423() final;
 
     void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
     void ProcessStartFailed_TxnTimeout() final;
