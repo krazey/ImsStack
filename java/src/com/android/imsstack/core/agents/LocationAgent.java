@@ -758,7 +758,12 @@ public class LocationAgent implements LocationInterface {
         locationInfo[0] = Double.toString(location.getLatitude());
         locationInfo[1] = Double.toString(location.getLongitude());
         locationInfo[2] = Float.toString(h_accuracy);
-        locationInfo[3] = mPolicy.getShape();
+        if (!location.hasAltitude() && LocationPolicy.SHAPE_ELLIPSOID.equals(mPolicy.getShape())) {
+            ImsLog.d(this, mSlotId, "Altitude is invalid");
+            locationInfo[3] = LocationPolicy.SHAPE_CIRCLE;
+        } else {
+            locationInfo[3] = mPolicy.getShape();
+        }
         locationInfo[4] = Integer.toString(confidence);
         locationInfo[5] = ImsUtils.getUtcTimeFormat(location.getTime());
         locationInfo[6] = method;

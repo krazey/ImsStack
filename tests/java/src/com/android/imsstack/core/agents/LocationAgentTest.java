@@ -21,6 +21,7 @@ import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,6 +29,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.location.Location;
+import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.CancellationSignal;
 import android.testing.AndroidTestingRunner;
@@ -45,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -58,9 +62,19 @@ public class LocationAgentTest {
     @Mock private CarrierConfig mCarrierConfig;
     @Mock private SubsInfoInterface mSubsInfoInterface;
     @Mock private LocationInterface.Listener mLocationInfoListener;
+    @Mock private Location mLocation;
+
+    @Captor private ArgumentCaptor<Consumer<Location>> mLocationConsumerCaptor;
 
     private TestAppContext mTestAppContext;
     private LocationAgent mLocationAgent;
+
+    private static final double TEST_LATITUDE = 37.7749;
+    private static final double TEST_LONGITUDE = -122.4194;
+    private static final float TEST_ACCURACY = 10.0f;
+    private static final double TEST_ALTITUDE = 50.0;
+    private static final long TEST_TIME = System.currentTimeMillis();
+    private static final float TEST_VERTICAL_ACCURACY = 5.0f;
 
     @Before
     public void setUp() throws Exception {
@@ -76,6 +90,16 @@ public class LocationAgentTest {
         mLocationAgent = new LocationAgent(SLOT0);
         mLocationAgent.init(mTestAppContext.getContext());
         mLocationAgent.addListener(mLocationInfoListener);
+
+        when(mLocation.getLatitude()).thenReturn(TEST_LATITUDE);
+        when(mLocation.getLongitude()).thenReturn(TEST_LONGITUDE);
+        when(mLocation.getAccuracy()).thenReturn(TEST_ACCURACY);
+        when(mLocation.getAltitude()).thenReturn(TEST_ALTITUDE);
+        when(mLocation.getTime()).thenReturn(TEST_TIME);
+        when(mLocation.getProvider()).thenReturn(LocationManager.FUSED_PROVIDER);
+        when(mLocation.getVerticalAccuracyMeters()).thenReturn(TEST_VERTICAL_ACCURACY);
+        when(mLocation.isMock()).thenReturn(false);
+        when(mLocation.hasAltitude()).thenReturn(true);
     }
 
     @After
@@ -205,5 +229,84 @@ public class LocationAgentTest {
         mLocationAgent.cancelLocationUpdate(requestId);
 
         assertTrue(cancellationSignalCaptor.getValue().isCanceled());
+    }
+
+    @Test
+    @SmallTest
+    public void testParseLocationInfoEllipsoidConfigAltitudeAvailable() {
+        setLocationPolicyShape(LocationPolicy.SHAPE_ELLIPSOID);
+        when(mLocation.hasAltitude()).thenReturn(true);
+
+        deliverMockLocation();
+        String[] locationInfo =
+                mLocationAgent.getLastKnownLocation(LocationInterface.LOCATION_CATEGORY_ALL);
+
+        assertNotNull(locationInfo);
+        assertEquals(LocationPolicy.SHAPE_ELLIPSOID, locationInfo[3]);
+        assertEquals(Double.toString(TEST_ALTITUDE), locationInfo[11]);
+    }
+
+    @Test
+    @SmallTest
+    public void testParseLocationInfoEllipsoidConfigAltitudeNotAvailable() {
+        setLocationPolicyShape(LocationPolicy.SHAPE_ELLIPSOID);
+        when(mLocation.hasAltitude()).thenReturn(false);
+
+        deliverMockLocation();
+        String[] locationInfo =
+                mLocationAgent.getLastKnownLocation(LocationInterface.LOCATION_CATEGORY_ALL);
+
+        assertNotNull(locationInfo);
+        assertEquals(LocationPolicy.SHAPE_CIRCLE, locationInfo[3]);
+    }
+
+    @Test
+    @SmallTest
+    public void testParseLocationInfoCircleConfigAltitudeAvailable() {
+        setLocationPolicyShape(LocationPolicy.SHAPE_CIRCLE);
+        when(mLocation.hasAltitude()).thenReturn(true);
+
+        deliverMockLocation();
+        String[] locationInfo =
+                mLocationAgent.getLastKnownLocation(LocationInterface.LOCATION_CATEGORY_ALL);
+
+        assertNotNull(locationInfo);
+        assertEquals(LocationPolicy.SHAPE_CIRCLE, locationInfo[3]);
+    }
+
+    @Test
+    @SmallTest
+    public void testParseLocationInfoCircleConfigAltitudeNotAvailable() {
+        setLocationPolicyShape(LocationPolicy.SHAPE_CIRCLE);
+        when(mLocation.hasAltitude()).thenReturn(false);
+
+        deliverMockLocation();
+        String[] locationInfo =
+                mLocationAgent.getLastKnownLocation(LocationInterface.LOCATION_CATEGORY_ALL);
+
+        assertNotNull(locationInfo);
+        assertEquals(LocationPolicy.SHAPE_CIRCLE, locationInfo[3]);
+    }
+
+    private void setLocationPolicyShape(String shape) {
+        LocationPolicy lp = mLocationAgent.getLocationPolicy();
+        lp.setShape(shape);
+        mLocationAgent.setLocationPolicy(lp);
+    }
+
+    private void deliverMockLocation() {
+        int waitTimeMs = 2000; // 2s
+        mLocationAgent.requestLocationUpdate(waitTimeMs);
+
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
+        verify(lmp).getCurrentLocation(
+                any(String.class),
+                any(LocationRequest.class),
+                any(CancellationSignal.class),
+                any(Executor.class),
+                mLocationConsumerCaptor.capture());
+
+        mLocationConsumerCaptor.getValue().accept(mLocation);
     }
 }
