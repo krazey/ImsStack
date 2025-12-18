@@ -171,6 +171,7 @@ private:
 
     void SetMediaPemType(IN IMS_UINTP nNegoId, IN PemType ePemType);
     AudioCodecAttributes GetNegotiatedAudioCodecAttributes(IN const ISession& objISession) const;
+    IMS_BOOL ContainsSendInPem(IN ISession* piSession) const;
 
 protected:
     MediaManager& m_objMediaManager;
@@ -185,13 +186,6 @@ protected:
 
     static const IMS_UINT32 TIME_WAIT_NW_TONE_RTP = 1000;
     static const IMS_UINT32 TIME_NO_WAIT_NW_TONE_RTP = 0;
-
-    enum
-    {
-        USE_DYNAMIC_NW_TONE_TIMER = 0,
-        NOT_USE_DYNAMIC_NW_TONE_TIMER,
-        LOCAL_TONE_WITH_180_BY_FORCE
-    };
 };
 
 #endif
