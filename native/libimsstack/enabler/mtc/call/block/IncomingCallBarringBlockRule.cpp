@@ -49,8 +49,8 @@ PUBLIC VIRTUAL IncomingCallBarringBlockRule::Result IncomingCallBarringBlockRule
                 PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO);
     }
 
-    IMS_TRACE_E(0, "Unknown call is barred", 0, 0, 0);
-    return Result(IMtcBlockRule::Result::Status::BLOCKED, CallReasonInfo(CODE_CALL_BARRED));
+    IMS_TRACE_D("Check : Unknown call", 0, 0, 0);
+    return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
 }
 
 PRIVATE IncomingCallBarringBlockRule::Result
