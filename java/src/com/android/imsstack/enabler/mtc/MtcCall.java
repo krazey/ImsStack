@@ -841,7 +841,6 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         setCallType(MtcCallInfo.getCallType(incomingCall.callInfo));
 
-        // FIXME: is this required?
         updateCallParameters(incomingCall.callInfo,
                 incomingCall.mediaInfo, incomingCall.suppInfo);
         updateCallExtraForEmergency(incomingCall.callInfo);
@@ -1312,7 +1311,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     }
 
     public MtcMediaSession getMediaSession() {
-        // FIXME: define the media session
         return mMediaSession;
     }
 
@@ -1368,7 +1366,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         confCall.setAdhocGroup();
         confCall.setCallType(getCallType());
         confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-        // FIXME: Is it a correct information for the new call?
         confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
 
         return confCall;
@@ -1380,7 +1377,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     getCallType() + " >> " + callType);
             setCallType(callType);
 
-            // FIXME: how to restore the conversation state?
             clearHoldState();
             return true;
         }
@@ -2432,7 +2428,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     + ", " + MtcCallUtils.toString(suppInfo));
 
             if (!hasListener()) {
-                // FIXME: close Mtc call if present
                 return;
             }
 
@@ -2446,7 +2441,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                 newCall.updateNativeCallObject(newNativeCallId);
                 newCall.setCallType(MtcCallInfo.getCallType(callInfo));
                 newCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-                // FIXME: Is it a correct information for the new call?
                 newCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
                 mCT.updateCallState(newCall, CallTracker.CALL_EVENT_CREATE, null);
             }
@@ -2454,8 +2448,6 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (typeForReplacedBy == IUMtcCall.REPLACED_BY_TYPE_ECT) {
                 mListener.onCallTransferReceived(MtcCall.this, newCall, callInfo, mediaInfo,
                         suppInfo);
-            } else {
-                // FIXME: close new Mtc call ?
             }
         }
 

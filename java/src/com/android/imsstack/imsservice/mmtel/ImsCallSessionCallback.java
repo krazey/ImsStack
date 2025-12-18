@@ -674,7 +674,6 @@ public class ImsCallSessionCallback {
     // @QUALCOMM_API
     public void invokeHandover(final ImsCallSessionImplBase session,
             final int srcAccessTech, final int targetAccessTech) {
-        // FIXME: need to implement
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
@@ -700,7 +699,6 @@ public class ImsCallSessionCallback {
     public void invokeHandoverFailed(final ImsCallSessionImplBase session,
             final int srcAccessTech, final int targetAccessTech,
             final ImsReasonInfo reasonInfo) {
-        // FIXME: need to implement
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
@@ -722,7 +720,6 @@ public class ImsCallSessionCallback {
     // @QUALCOMM_API
     public void invokeTtyModeReceived(final ImsCallSessionImplBase session,
             final int mode) {
-        // FIXME: need to implement
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
@@ -742,45 +739,11 @@ public class ImsCallSessionCallback {
 
     // @QUALCOMM_API
     public void invokeDeflected(final ImsCallSessionImplBase session) {
-        // FIXME: need to implement
-        postAndRunTask(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (mListener == null) {
-                        return;
-                    }
-
-                    // FIXME: M_OS_GII
-                    //mListener.callSessionDeflected();
-                } catch (Throwable t) {
-                    log(t, "invokeDeflected");
-                    closeSession(session, t);
-                }
-            }
-        });
     }
 
     // @QUALCOMM_API
     public void invokeDeflectFailed(final ImsCallSessionImplBase session,
             final ImsReasonInfo reasonInfo) {
-        // FIXME: need to implement
-        postAndRunTask(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (mListener == null) {
-                        return;
-                    }
-
-                    // FIXME: M_OS_GII
-                    //mListener.callSessionDeflectFailed(reasonInfo);
-                } catch (Throwable t) {
-                    log(t, "invokeDeflectFailed");
-                    closeSession(session, t);
-                }
-            }
-        });
     }
 
     // @QUALCOMM_API

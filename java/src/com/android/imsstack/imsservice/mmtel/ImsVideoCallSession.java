@@ -107,7 +107,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     public void sendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
         if (isSessionModificationInProgress()
                 || isSessionModificationFinalizing()) {
-            // FIXME: exception handling
             log("SessionModification-InProgress: "
                     + ImsCallMediaUtils.toString(toProfile));
 
@@ -164,7 +163,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         } else {
             // Changes the video profile only
             setSessionModificationType(MODIFICATION_VIDEO_PROFILE);
-            // FIXME : Is operator checked required.?
             handleVideoProfileUpdate(fromProfile, toProfile, callProfile.getMediaProfile());
             if (!isClearedSessionModificationInfo()) {
                 mediaProfile = createProposalMedia(getProposalProfile(), true);
@@ -322,7 +320,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         ImsCallProfile callProfile = getCallProfile();
 
         if (callProfile == null) {
-            // FIXME:
             rejectSessionModification(ImsReasonInfo.CODE_USER_DECLINE);
             clearSessionModificationInfo();
 
@@ -366,7 +363,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
                 rejectSessionModification(ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
             }
         } else if (modificationType == MODIFICATION_VIDEO_PROFILE) {
-            // FIXME: how to identify if the response video profile is for accept?
 
             /* When remote device goes in background local device will be in paused state.
              * Update the device paused state by remote.
@@ -388,7 +384,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
     @Override
     public void setCameraSetting(int setting) {
-        // FIXME: is operator check required?
         if (mCameraSetting != setting) {
             logi("setCameraSetting :: " + mCameraSetting + " >> " + setting);
             mCameraSetting = setting;
@@ -397,7 +392,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
     @Override
     public void setMultitaskingState(int state) {
-        // FIXME: is operator check required?
         if (mMultitaskingState != state) {
             logi("setMultitaskingState :: " + mMultitaskingState + " >> " + state);
             mMultitaskingState = state;
@@ -699,7 +693,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
     private void acceptSessionModification(int callType, ImsStreamMediaProfile mediaProfile) {
         try {
-            // FIXME: needs to be checked if the video property is changed
             int oldState = mCallSession.getState();
 
             mCallSession.accept(callType, mediaProfile);

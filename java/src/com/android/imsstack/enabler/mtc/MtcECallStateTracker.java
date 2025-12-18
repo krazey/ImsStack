@@ -192,11 +192,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private void setEcbmSupportType(int ecbmType) {
-        // TODO : need to apply below to carreir id xml.
-        //USC : VoLTE ECBM supported
-        //SPR : VoLTE ECBM supported
-        //ACG : VoLTE ECBM supported
-
         mEcbmSupportType = ecbmType;
     }
 
@@ -340,7 +335,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
      * Sends an emergency call status to modem.
      */
     private void sendStatus(int status, int reason) {
-        // TODO : need to consider this after modem side work is finished
         log("ECallState(forModem) :: status="
                 + e911StatusToString(status) + ", reason=" + reason);
     }
@@ -358,9 +352,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private boolean isRetryReason(int reason) {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*if ((reason >= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY)
-                && (reason <= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_RAT)) {*/
         if ((reason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED)
                 || reason == CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED) {
             return true;

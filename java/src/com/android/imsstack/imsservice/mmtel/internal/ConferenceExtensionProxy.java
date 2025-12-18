@@ -248,13 +248,11 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
         @Override
         public void onCallHoldReceived(MtcCall call,
                 CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            // FIXME: what to do?
         }
 
         @Override
         public void onCallResumeReceived(MtcCall call,
                 CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            // FIXME: what to do?
         }
     }
 

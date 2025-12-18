@@ -119,8 +119,6 @@ public class MtcStateUtils {
                 initializeImsStateInternal(MSimUtils.DEFAULT_PHONE_ID, initFlags);
             }
         }
-
-        // FIXME: Is it required to turn off "volte/vt provisioned" state?
     }
 
     public static int getRegisteredServiceType(Context context, int phoneId) {

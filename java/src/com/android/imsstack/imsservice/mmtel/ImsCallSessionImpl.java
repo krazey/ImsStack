@@ -43,7 +43,6 @@ import android.text.TextUtils;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
-import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
@@ -509,18 +508,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if ((state != ImsCallSessionImplBase.State.NEGOTIATING)
                 && (state != ImsCallSessionImplBase.State.RENEGOTIATING)) {
-            // FIXME: notify the event result - Illegal state
             loge("accept :: Illegal state; callId=" + getCallId() +
                     ", state=" + ImsCallSessionImplBase.State.toString(state));
             return;
         }
 
-        // FIXME: If the media profile is not matched with the call type,
-        // it needs to be re-formed properly based on the call type.
         MediaInfo mediaInfo;
 
         if (ImsCallMediaUtils.isDefaultMediaProfile(profile)) {
-            // FIXME: check the network type
             int audioCaps = mCallContext.getMediaCapabilities(callType, ICallContext.MEDIA_AUDIO);
             int videoCaps = mCallContext.getMediaCapabilities(callType, ICallContext.MEDIA_VIDEO);
 
@@ -575,7 +570,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if ((state != ImsCallSessionImplBase.State.NEGOTIATING)
                 && (state != ImsCallSessionImplBase.State.RENEGOTIATING)) {
-            // FIXME: notify the event result - Illegal state
             loge("reject :: Illegal state; callId=" + getCallId() +
                     ", state=" + ImsCallSessionImplBase.State.toString(state));
 
@@ -606,8 +600,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void transfer(@NonNull String number, boolean isConfirmationRequired) {
-       // FIXME : This is for blind/assured Call Transfer need to confirm than Call App support this
-
        /** UE-B -> Transferor , UE-A -> Transferee  UE-C -> Transfer Target (number)
         * a) blind transfer: the transferor wants to perform the transfer without any further
         *    ````action on the transfer operation; or
@@ -930,7 +922,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void extendToConference(String[] participants) {
-        // FIXME: notify the event result - Illegal state
         if (participants == null) {
             return;
         }
@@ -963,7 +954,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void inviteParticipants(String[] participants) {
-        // FIXME: notify the event result - Illegal state
         log("inviteParticipants :: participants=" + ImsLog.hiddenString(participants));
 
         if ((participants == null) || (participants.length == 0)) {
@@ -989,7 +979,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void removeParticipants(String[] participants) {
-        // FIXME: notify the event result - Illegal state
         log("removeParticipants :: participants=" + ImsLog.hiddenString(participants));
 
         if ((participants == null) || (participants.length == 0)) {
@@ -1067,8 +1056,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendUssd(String ussdMessage) {
-        // FIXME: notify the event result - Illegal state
-
         mCall.sendUssd(ussdMessage);
     }
 
@@ -1194,13 +1181,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     // @Override
     // @QUALCOMM_API
     public void deflect(String deflectNumber) {
-        // FIXME: IMPL_REQUIRED
     }
 
     // @Override
     // @QUALCOMM_API
     public int getCallSubstate() {
-        // FIXME: IMPL_REQUIRED
         return 0;
     }
 
@@ -1642,7 +1627,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (user != null) {
                 // Depends on the MTC enabler's behavior.
-                // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                 long callId = Long.parseLong(user.getCallId());
                 // MTC enabler expects to set the same value
                 // which has been updated by the event for conference participants' change.
@@ -1690,7 +1674,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private void initCallProfile(ImsCallProfile profile) {
         mLocalCallProfile = profile;
         mCallProfile = ImsCallUtils.cloneCallProfile(profile);
-        // FIXME: how to handle this call profile?
         mRemoteCallProfile = new ImsCallProfile(profile.getServiceType(), profile.getCallType());
     }
 
@@ -2026,7 +2009,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         if (!ImsCallUtils.isVoiceCall(mCallProfile.getCallType())) {
-            // FIXME: should we consider downgrade case?
             return;
         }
 
@@ -2193,7 +2175,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private void updateInternal(int callType, ImsStreamMediaProfile profile) {
         if (getState() != ImsCallSessionImplBase.State.ESTABLISHED) {
-            // FIXME: event notification
             loge("updateInternal :: Illegal state; callId=" + getCallId() +
                     ", state=" + ImsCallSessionImplBase.State.toString(getState()));
 
@@ -2222,8 +2203,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         mCall.update(ImsCallUtils.getCallTypeFromProfile(
                 callType, mCallProfile.getMediaProfile().isRttCall()),
                 mediaInfo);
-
-        // FIXME: Stores the proposed media profile?
     }
 
     private void updateCallExtraForHDVoice(ImsCallProfile profile, MediaInfo mediaInfo) {
@@ -2727,7 +2706,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            // FIXME: video call scenario
             if ((mCall != null) && (mListenerProxy != null)
                     && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
                 // ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE
@@ -2738,19 +2716,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 if (mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
                     code = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                     extraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-
-                    // TODO : need to modify this
-                    // after emergency domain selection policy is decided.
-                    /*if ("VZW") {
-                        code = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_RAT;
-                    }*/
-                } else {
-                    String operator = ImsPrivateProperties.getSimOperator(slotId);
-                    if (ImsCallUtils.isVideoCall(mCallProfile.getCallType())
-                            && ("SKT".equals(operator) || "KT".equals(operator))) {
-                        code = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-                        extraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-                    }
                 }
 
                 mListenerProxy.onCallStartFailed(mCall, new CallReasonInfo(code, extraCode, ""));
@@ -3195,18 +3160,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private int getApnType(ImsCallProfile profile) {
-        if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            //To-Do:- Need to find the way Emergency call Over VoWiFi
-            if (!ImsCallUtils.isEmergencyPdnUsedForEmergencyCallViaWfc(mCallContext)) {
-                return EApnType.IMS.getType();
-            }
-            return EApnType.EMERGENCY.getType();
-        } else {
-            return EApnType.IMS.getType();
-        }
-    }
-
     protected class EmergencyCallFailureListener implements MtcCall.IEmergencyCallFailureListener {
         @Override
         public boolean onEmergencyCallFailedByAlreadyOpenedServiceClosed() {
@@ -3294,7 +3247,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, mCallProfile, mediaInfo);
             updateCallExtraForHDVoice(mCallProfile, mediaInfo);
 
-            // FIXME: MTC_NEW_IF - it should be changed to ImsCallProfile
             mCallback.invokeProgressing(ImsCallSessionImpl.this,
                     ImsCallMediaUtils.createMediaProfileFromMediaInfo(mediaInfo));
 
@@ -3319,7 +3271,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             setState(ImsCallSessionImplBase.State.ESTABLISHED);
 
-            // FIXME : how to remove the existing values?
             ImsCallUtils.updateCallProfileForEmergency(mCallProfile, callInfo);
             ImsCallUtils.updateCallProfileFromCallInfo(
                     mCallContext, mCallProfile, callInfo);
@@ -3367,9 +3318,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             notifyCallEventForVideoCallSession(IVideoCallSession.EVENT_CALL_ESTABLISHED);
 
             notifyE2eeCallInfo(suppInfo, mCall.getRemoteNumber());
-
-            // FIXME: If the call setup failure is not a re-dial case,
-            // we need to call the callSessionTerminated() to adapt the original Android Framework.
         }
 
         @Override
@@ -3434,7 +3382,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             mCallDetails.clear(CallDetails.IMPLICIT_TERMINATED);
 
-            // FIXME : close MtcCall according to the reason (call merge); ignore the terminated
             if (checkAndHandleConferenceOnCallTerminated(callReasonInfo)) {
                 return;
             }
@@ -3690,9 +3637,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             notifyCallSessionMultipartyStateChanged(conferenceExtendedByRemote);
-
-            // FIXME: checks if audio direction needs to be restored
-            // when local hold tone is enforced.
         }
 
         @Override
@@ -3727,8 +3671,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (isCallFeatureSupported(CF_INCOMING_RESUME_EVENT)
                     && !mCallDetails.is(CallDetails.ON_UNHOLDING)) {
                 logi("Ignore onCallResumed() by IncomingResume");
-                // FIXME: is this call required?
-                // onCallUpdated(call, callInfo, mediaInfo, suppInfo);
                 return;
             }
 
@@ -3782,8 +3724,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (mCallDetails.is(CallDetails.ON_ECT)
                     && mCallDetails.is(CallDetails.IMPLICIT_ON_HOLD)) {
-                // TODO(b/451717299): mTransferRequestedSession.mCallback.
-                // invokeCallSessionTransferFailed is required here?
                 getCallHandler().postDelayed(
                         () -> mCall.resume(MtcCallUtils.createUnholdMedia(
                             mCall.getCallInfo(), mCall.getMediaInfo(),
@@ -3881,7 +3821,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             setCallInfo(profile);
 
-            // FIXME: need to verify it.
             mCallback.invokeUpdated(ImsCallSessionImpl.this, profile);
 
             notifyCallSessionMultipartyStateChanged(conferenceExtendedByRemote);
@@ -4017,7 +3956,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            // FIXME: Check the race condition
             int slotId = mCallContext.getSlotId();
             log("onCallUpdateReceived :: slotId" + slotId);
 
@@ -4091,7 +4029,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            // FIXME: Consider the priority of RTT Upgrade vs. VT Upgrade
             if (MtcCallUtils.isGttEnabled(mediaInfo.gttMode)
                     && !MtcCallUtils.isGttEnabled(mCall.getMediaInfo().gttMode)) {
                 log("onCallUpdateReceived :: RTT upgrade request");
@@ -4595,7 +4532,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 setState(ImsCallSessionImplBase.State.TERMINATED);
 
                 if (!isConferenceTransitionInProgress()) {
-                    // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                     ConferenceInfoHelper.setListenerForConferenceUser(
                             mCall.getCallConnectionId() + "", mCall.getConferenceUserId(),
                             null);
@@ -4866,9 +4802,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             log("onCallProxyExtendToConference :: host=" + hostCallL);
 
-            //setState(ImsCallSessionImplBase.State.RENEGOTIATING);
-
-            // FIXME: Creates the interim event states
             ConferenceInfoHelper.addConferenceUser(confCallL.getCallId(),
                     hostCallL.getConferenceUserId(), 0);
 
@@ -4915,7 +4848,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             confCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHING);
             mCT.updateCallState(confCallSession, CallTracker.CALL_EVENT_CREATE, null);
 
-            // FIXME: which profile should be passed to the current call?
             setCallInfo(profile);
 
             // Store the transient conference call to handle the result of call merge
@@ -5040,7 +4972,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 notifyCallSessionMergeFailed(ImsCallUtils.createImsReasonInfo(callReasonInfo));
             }
 
-            // FIXME: is it required?
             closeMtcCallIfSessionTerminatedOnConference(mCall);
 
             // CASE: initial merge failure
@@ -5223,7 +5154,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mCallback.invokeInviteParticipantsRequestFailed(ImsCallSessionImpl.this, reasonInfo);
 
             // Notify the status changed for some users
-            // FIXME: For LGU+, "connect-fail" ?
             ConferenceInfoHelper.removeConferenceUsersOnInvitationFailed(mCall.getCallId());
             notifyCallSessionConferenceStateUpdated();
         }
@@ -5297,7 +5227,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 if (!isFirstCallMergeInitiator()) {
                     mCallDetails.set(CallDetails.MERGED);
 
-                    // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                     ConferenceInfoHelper.setListenerForConferenceUser(
                             mCall.getCallConnectionId() + "", mCall.getConferenceUserId(), this);
                     mConferenceListenerProxy.setConferenceAttributes(
@@ -5323,12 +5252,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         transientConfSession.updateCallExtraForHDVoice(
                                 transientConfSession.mCallProfile, mediaInfo);
 
-                        // CALL_CONNECTION_ID
                         transientConfSession.setCallConnectionId(getCallConnectionId());
                         setCallConnectionId(0);
 
-                        // CALL_CONNECTION_ID
-                        // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                         ConferenceInfoHelper.setListenerForConferenceUser(
                                 mCall.getCallConnectionId() + "", mCall.getConferenceUserId(),
                                 transientConfSession.mConferenceListenerProxy);
@@ -5377,7 +5303,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     updateEventStateOnly = call.getCallExtraBoolean(
                             Call.EXTRA_CONFERENCE_EVENT, false);
 
-                    // FIXME: enforce it to false
                     updateEventStateOnly = false;
                 }
 
@@ -5407,7 +5332,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            // FIXME: Is it required to update the conference state changed event?
             ConferenceInfo ci = ConferenceInfoHelper.getConferenceInfo(mCall.getCallId());
 
             if (ci == null) {

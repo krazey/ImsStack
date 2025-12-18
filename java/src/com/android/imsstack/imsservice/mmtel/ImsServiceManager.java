@@ -137,10 +137,6 @@ public class ImsServiceManager {
             callAppCreated = true;
         } else {
             logi("createCallApp :: app is already opened");
-
-            // FIXME: P-GII
-            //callApp.getCallManager().setPendingIntentForIncomingRequest(incomingCallIntent);
-            //callApp.setRegistrationListener(listener);
         }
 
         // Bind ImsCallApp and other required modules
@@ -158,7 +154,6 @@ public class ImsServiceManager {
 
         setCallAppForServiceRecord(callApp.getPhoneId(), null);
 
-        // FIXME: according to the "flags", do any proper operationis...
         callApp.close();
 
         removeCallApp(phoneId);
@@ -206,7 +201,6 @@ public class ImsServiceManager {
     }
 
     public int getDefaultPhoneId() {
-        // FIXME: we need to consider the case of multi-sim & multi-volte.
         return mDefaultPhoneId;
     }
 
@@ -498,7 +492,6 @@ public class ImsServiceManager {
         }
 
         // VOLTE_EMERGENCY_CALLING
-        // FIXME: Dual VoLTE
         if (serviceFeatures == 0) {
             logi("NonVoLteSim: VoLTE is enabled for IMS e-call");
             serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;

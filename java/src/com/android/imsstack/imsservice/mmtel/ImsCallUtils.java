@@ -647,21 +647,10 @@ public class ImsCallUtils {
         if (MtcCallUtils.isCallTerminatedByCSRetry(code)) {
             if (extraCode == CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL) {
                 return ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-            } else {
-                return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
             }
-        } else if (MtcCallUtils.isCallTerminatedByECallRetry(code)) {
-            return (extraCode >= 300) ? extraCode : getEmergencyServiceCode(extraCode);
-        } else if (extraCode > 0) {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*else if (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE) {
-            // SIP status code
-            return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
-        }*/
-            return extraCode;
-        } else {
-            return ImsReasonInfo.CODE_UNSPECIFIED;
         }
+
+        return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
     }
 
     /**
@@ -977,11 +966,6 @@ public class ImsCallUtils {
         profile.updateCallType(new ImsCallProfile(profile.getServiceType(), callType));
     }
 
-    public static boolean isEmergencyPdnUsedForEmergencyCallViaWfc(ICallContext context) {
-        // TODO: need to add a carrier configuration.
-        return false;
-    }
-
     /**
      * Convert the Dtmf digit from int to char
      *
@@ -996,7 +980,6 @@ public class ImsCallUtils {
         } else if (numDtmf == 11) {
             return '#';
         }
-        // TODO : Need to check if DTMF service supports alphabets from A to D
 
         return (char) numDtmf;
     }
@@ -1056,26 +1039,6 @@ public class ImsCallUtils {
         }
 
         return ImsSuppInfoUtils.getCallExtraNameForString(context, suppInfo);
-    }
-
-    private static int getEmergencyServiceCode(int code) {
-        switch (code) {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_GENERIC:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_GENERIC;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_POLICE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_POLICE;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_AMBULANCE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_AMBULANCE;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_FIRE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_FIRE_BRIGADE;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_MARINE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MARINE_GUARD;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_MOUNTAIN:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MOUNTAIN_RESCUE;*/
-            default:
-                return CallReasonInfo.EXTRA_CODE_CALL_RETRY_NORMAL;
-        }
     }
 
     private static boolean isFromNetworkOrSim(ICallContext context, String callee) {

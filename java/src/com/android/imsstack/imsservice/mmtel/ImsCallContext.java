@@ -176,7 +176,6 @@ public class ImsCallContext implements ICallContext {
 
     @Override
     public int getSlotId() {
-        // FIXME: slot-id equals to phone-id
         return getPhoneId();
     }
 
