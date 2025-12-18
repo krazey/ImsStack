@@ -854,9 +854,7 @@ TEST_F(EstablishedStateTest, UssiTerminateInvokesCheckingUssiBodyAndSendTerminat
     SipMethod objSipMethod(SipMethod::PUBLISH);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objSipMethod));
     UssiResult objResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
-            .Times(1)
-            .WillOnce(Return(objResult));
+    EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _)).Times(1).WillOnce(Return(objResult));
     EXPECT_CALL(objUiNotifier, SendTerminated(_)).Times(1);
 
     pEstablishedState->UssiTerminated(&objMockISession);
@@ -888,7 +886,7 @@ TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNot
     EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_200));
     EXPECT_CALL(objMockISipServerConnection, Send);
     EXPECT_CALL(objMockISipServerConnection, Close);
-    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _)).Times(0);
+    EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _)).Times(0);
 
     pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
 }
@@ -903,7 +901,7 @@ TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNot
     EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_469));
     EXPECT_CALL(objMockISipServerConnection, Send);
     EXPECT_CALL(objMockISipServerConnection, Close);
-    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _)).Times(0);
+    EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _)).Times(0);
 
     pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
 }
@@ -920,7 +918,7 @@ TEST_F(EstablishedStateTest,
     EXPECT_CALL(objMockISipServerConnection, Send);
     EXPECT_CALL(objMockISipServerConnection, Close);
     UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1);
-    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+    EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _))
             .Times(1)
             .WillOnce(Return(objUssiResult));
     EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, IsEmptyString(), UssiError::CODE_1));
@@ -939,7 +937,7 @@ TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesTransactionResponseAndSendIn
     EXPECT_CALL(objMockISipServerConnection, Send);
     EXPECT_CALL(objMockISipServerConnection, Close);
     UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+    EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _))
             .Times(1)
             .WillOnce(Return(objUssiResult));
     EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, IsEmptyString(), UssiError::CODE_NONE));
@@ -958,7 +956,7 @@ TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNoP
     EXPECT_CALL(objMockISipServerConnection, Send);
     EXPECT_CALL(objMockISipServerConnection, Close);
     UssiResult objUssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+    EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _))
             .Times(1)
             .WillOnce(Return(objUssiResult));
     EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).Times(0);

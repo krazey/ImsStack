@@ -78,10 +78,8 @@ PUBLIC
 IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
-    IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
     if (piMessage)
     {
-        IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
         std::unique_ptr<UssiData> pParsedData =
                 std::unique_ptr<UssiData>(GetParsedUssiData(piMessage->GetMessage()));
 
@@ -154,7 +152,7 @@ IMS_BOOL UssiController::HasXmlBodyInInfo(IN const ISipServerConnection* piSipSe
 }
 
 PUBLIC
-UssiResult UssiController::ParseUssiBodyAndCheckResult(
+UssiResult UssiController::HandleUssiBody(
         IN const ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod)
 {
     UssiResult objResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
@@ -163,11 +161,11 @@ UssiResult UssiController::ParseUssiBodyAndCheckResult(
 
     if (!pParsedData)
     {
-        IMS_TRACE_D("ParseUssiBodyAndCheckResult : there's no xml body.", 0, 0, 0);
+        IMS_TRACE_D("HandleUssiBody : there's no xml body.", 0, 0, 0);
         return objResult;
     }
 
-    IMS_TRACE_D("ParseUssiBodyAndCheckResult : Method[%d] received.", nReceivedMethod, 0, 0);
+    IMS_TRACE_D("HandleUssiBody : Method[%d] received.", nReceivedMethod, 0, 0);
     UssiModeType eReceivedType = pParsedData->GetAnyExtension().GetUssiModeType();
 
     if (nReceivedMethod == SipMethod::BYE)
@@ -188,7 +186,7 @@ UssiResult UssiController::ParseUssiBodyAndCheckResult(
     }
     else if (nReceivedMethod == SipMethod::INFO && IsUeInitiated())
     {
-        // if UE receives INFo request during UE initiated ussi.
+        // if UE receives INFO request during UE initiated ussi.
         eReceivedType = UssiModeType::REQUEST;
     }
     else if (!IsUeInitiated() && eReceivedType == UssiModeType::NOTIFY)
@@ -205,8 +203,8 @@ UssiResult UssiController::ParseUssiBodyAndCheckResult(
     SetUssiModeTypeForNetworkInitiated(eReceivedType);
     SetLastResult(objResult);
 
-    IMS_TRACE_D("ParseUssiBodyAndCheckResult : action[%d] error-code[%d] ussd mode[%d]",
-            m_objLastResult.eAction, m_objLastResult.eErrorCode, m_eUssiModeType);
+    IMS_TRACE_D("HandleUssiBody : action[%d] error-code[%d] ussd mode[%d]", m_objLastResult.eAction,
+            m_objLastResult.eErrorCode, m_eUssiModeType);
 
     return objResult;
 }
