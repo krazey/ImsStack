@@ -51,8 +51,6 @@ __IMS_TRACE_TAG_IPL__;
 #define IMSSOCKET_DEBUG(ec)
 #endif
 
-#define IMS_MAX_RETRY_COUNT_ON_BIND_FAILED 3
-
 static void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT32 nAddrLen,
         OUT IpAddress& objIpAddr, OUT IMS_UINT32& nPort)
 {
@@ -638,34 +636,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
 
         stSockAddr.sin_port = htons(static_cast<u_short>(nSocketPort));
 
-        // Linux auto configuration takes the several seconds when the local IP address is changed.
-        // So, waiting for the auto configuration completion during 3 seconds.
-        {
-            IMS_SINT32 nRetryCount = 0;
-
-            do
-            {
-                nBindResult = bind(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
-                        sizeof(stSockAddr));
-
-                if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_BIND_FAILED)
-                {
-                    break;
-                }
-
-                // "Cannot assign requested address"
-                if ((nBindResult == SOCKET_ERROR) && (errno == EADDRNOTAVAIL))
-                {
-                    ++nRetryCount;
-                    IMS_TRACE_D("Waiting for linux network interface (%d) ...", nRetryCount, 0, 0);
-                    usleep(1000000);  // 1 seconds
-                }
-                else
-                {
-                    break;
-                }
-            } while (1);
-        }
+        nBindResult = bind(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                sizeof(stSockAddr));
     }
     // IPv6 address format
     else
@@ -691,35 +663,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
             return RESULT_ERROR;
         }
 
-        // Linux auto configuration takes the several seconds
-        // when the local IP address is changed.
-        // So, waiting for the auto configuration completion during 3 seconds.
-        {
-            IMS_SINT32 nRetryCount = 0;
-
-            do
-            {
-                nBindResult = bind(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
-                        sizeof(stSockAddr));
-
-                if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_BIND_FAILED)
-                {
-                    break;
-                }
-
-                // "Cannot assign requested address"
-                if ((nBindResult == SOCKET_ERROR) && (errno == EADDRNOTAVAIL))
-                {
-                    ++nRetryCount;
-                    IMS_TRACE_D("Waiting for linux network interface (%d) ...", nRetryCount, 0, 0);
-                    usleep(1000000);  // 1 seconds
-                }
-                else
-                {
-                    break;
-                }
-            } while (1);
-        }
+        nBindResult = bind(m_hSocket, reinterpret_cast<const struct sockaddr*>(&stSockAddr),
+                sizeof(stSockAddr));
     }
 
     if (nBindResult == SOCKET_ERROR)
