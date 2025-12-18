@@ -92,6 +92,9 @@ protected:
         ON_CALL(objNormalService, GetJniServiceThread)
                 .WillByDefault(Return(&objJniMtcServiceThread));
 
+        ON_CALL(objAosConnector, Control(ImsAosControl::REGISTER_START))
+                .WillByDefault(Return(IMS_TRUE));
+
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
         ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
@@ -779,4 +782,16 @@ TEST_F(EmergencyServiceControllerTest, OnTotalCallStateChangedDoesNothing)
     const IMtcCall::State ANY_STATE = IMtcCall::State::IDLE;
     pController->OnTotalCallStateChanged(ANY_STATE);
     // Nothing to be checked.
+}
+
+TEST_F(EmergencyServiceControllerTest, StartAndAosControlFailsNotifiesUnavailable)
+{
+    ON_CALL(objAosConnector, Control(ImsAosControl::REGISTER_START))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objContext, RunAsyncOperation(pController, _));
+
+    pController->Start();
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
 }

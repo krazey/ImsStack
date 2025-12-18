@@ -74,7 +74,15 @@ PUBLIC VIRTUAL void EmergencyServiceController::Start()
         case IEmergencyServiceController::State::IDLE:
             AddListeners();
 
-            ControlAos(ImsAosControl::REGISTER_START);
+            if (!ControlAos(ImsAosControl::REGISTER_START))
+            {
+                m_objContext.RunAsyncOperation(this,
+                        [&]()
+                        {
+                            HandleServiceUnavailable(ImsAosReason::NOT_SPECIFIED);
+                        });
+                break;
+            }
             SetState(IEmergencyServiceController::State::OPENING);
             Notify(IuMtcService::EmergencyServiceState::OPENING);
             break;
@@ -329,15 +337,15 @@ void EmergencyServiceController::Notify(IN IuMtcService::EmergencyServiceState e
     pThread->OnEmergencyServiceChanged(eState, eReason, ServiceType::EMERGENCY);
 }
 
-PRIVATE void EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) const
+PRIVATE IMS_BOOL EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) const
 {
     const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
-    pAosConnector->Control(nType);
+    return pAosConnector->Control(nType);
 }
 
 PRIVATE void EmergencyServiceController::Finish()

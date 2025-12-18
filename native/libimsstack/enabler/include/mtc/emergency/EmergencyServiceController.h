@@ -90,7 +90,7 @@ private:
     void Notify(IN IuMtcService::EmergencyServiceState eState,
             IN EmergencyServiceUnavailableReason eReason =
                     EmergencyServiceUnavailableReason::UNKNOWN) const;
-    void ControlAos(IN IMS_UINT32 nType) const;
+    IMS_BOOL ControlAos(IN IMS_UINT32 nType) const;
     void Finish();
     void FinishAndRetryOverImsPdn();
     void SetState(IN IEmergencyServiceController::State eState);

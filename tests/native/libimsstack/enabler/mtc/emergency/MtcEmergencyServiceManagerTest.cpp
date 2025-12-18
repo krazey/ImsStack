@@ -71,6 +71,8 @@ protected:
         ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objJniMtcServiceThread));
         pLocationRefresher = new MtcLocationRefresher(objLocationInfo);
         ON_CALL(objContext, GetLocationRefresher).WillByDefault(ReturnRef(*pLocationRefresher));
+        ON_CALL(objAosConnector, Control(ImsAosControl::REGISTER_START))
+                .WillByDefault(Return(IMS_TRUE));
 
         pEsm = new TestEmergencyServiceManager(objContext);
     }
