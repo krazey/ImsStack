@@ -22,6 +22,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsAosParameter.h"
 #include "ImsVector.h"
 #include "IuMtcService.h"
 #include "MediaDef.h"
@@ -449,6 +450,11 @@ CallStateName IdleState::ContinueStart(IN const MediaInfo& objMediaInfo)
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
+        if (MaybeStopEmergencyRegistration())
+        {
+            return GetStateName();
+        }
+
         m_objContext.GetUiNotifier().SendStartFailed(GetInternalErrorReason());
         return CallStateName::TERMINATING;
     }
@@ -712,4 +718,27 @@ void IdleState::PerformPreRadioCheckForMo()
                 m_objContext.GetService().GetRatType(), objCallInfo.bUssi,
                 m_objContext.GetCallKey());
     }
+}
+
+PRIVATE
+IMS_BOOL IdleState::MaybeStopEmergencyRegistration()
+{
+    if (!m_objContext.GetService().IsEmergency())
+    {
+        return IMS_FALSE;
+    }
+
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (!pAosConnector)
+    {
+        return IMS_FALSE;
+    }
+
+    // Clear the current emergency registration.
+    // By stopping the service, AoS will emit a DISCONNECTED event.
+    // This event, under specific conditions triggers the retry mechanism.
+    // IEmergencyCallFailureListener::onEmergencyCallFailedByAlreadyOpenedServiceClosed
+    // will be invoked, prompting a new emergency registration attempt on the currently selected
+    // RAT by Telephony.
+    return pAosConnector->Control(ImsAosControl::REGISTER_STOP);
 }
