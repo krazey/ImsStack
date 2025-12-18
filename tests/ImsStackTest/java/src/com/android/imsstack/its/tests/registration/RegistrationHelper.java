@@ -51,7 +51,7 @@ public class RegistrationHelper {
     /**
      * Performs IMS registration based on the provided {@link ImsStackTestBase} instance.
      * This method calls the overloaded method using a default {@link RegistrationInfo} object
-     * created with {@code new RegistrationInfo.Builder().build()}.
+     * created with {@code new RegistrationInfo.Builder().withDefaultConfig().build()}.
      *
      * @param testBase The {@link ImsStackTestBase} instance to perform registration.
      *                 Must not be null.
@@ -60,7 +60,8 @@ public class RegistrationHelper {
      */
     public boolean performRegistration(@NonNull ImsStackTestBase testBase) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
-        return performRegistration(testBase, new RegistrationInfo.Builder().build());
+        return performRegistration(testBase,
+                new RegistrationInfo.Builder().withDefaultConfig().build());
     }
 
     /**
@@ -98,7 +99,8 @@ public class RegistrationHelper {
     public void triggerRegistration(@NonNull ImsStackTestBase testBase) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
 
-        triggerRegistration(testBase, new RegistrationInfo.Builder().build());
+        triggerRegistration(testBase,
+                new RegistrationInfo.Builder().withDefaultConfig().build());
     }
 
     /**
@@ -120,7 +122,8 @@ public class RegistrationHelper {
         Objects.requireNonNull(testBase, "testBase must not be null.");
         Objects.requireNonNull(config, "config must not be null.");
 
-        triggerRegistration(testBase, new RegistrationInfo.Builder().addConfig(config).build());
+        triggerRegistration(testBase,
+                new RegistrationInfo.Builder().withDefaultConfig().addConfig(config).build());
     }
 
     /**

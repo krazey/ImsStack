@@ -37,12 +37,16 @@ public class RegistrationTestBase extends ImsStackTestBase {
             RegistrationTestBase.class.getSimpleName());
     protected static final int REG_ERROR_CODE_403 = 403;
     protected static final int REG_ERROR_CODE_404 = 404;
+    protected static final int REG_ERROR_CODE_406 = 406;
     protected static final int REG_ERROR_CODE_5XX = 5;
     protected static final int REG_ERROR_CODE_503 = 503;
     protected static final int REG_ERROR_CODE_504 = 504;
 
+    protected static final int ERROR_TYPE_NOT_SPECIFIED = 0;
     protected static final int ERROR_TYPE_REPEATED = 1;
     protected static final int ERROR_TYPE_CRITICAL = 2;
+    protected static final int ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4;
+    protected static final int ERROR_TYPE_RAT_BLOCK = 5;
 
     protected static final int NOTIFY_TERMINATED_EXPIRED = 1;
     protected static final int NOTIFY_TERMINATED_DEACTIVATED = 2;

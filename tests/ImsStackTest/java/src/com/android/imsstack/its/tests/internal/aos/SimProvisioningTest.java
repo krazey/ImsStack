@@ -53,7 +53,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
         mRegistrationHelper = new RegistrationHelper();
         mConfig = new PersistableBundle();
-        mInfoBuilder = new RegistrationInfo.Builder();
+        mInfoBuilder = new RegistrationInfo.Builder().withDefaultConfig();
 
         setDefaultRegistrationScenario();
     }

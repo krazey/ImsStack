@@ -258,13 +258,24 @@ public final class RegistrationInfo {
         private final CapabilityPairs mDisablePairs = new CapabilityPairs();
 
         /**
-         * Constructs a new {@code RegistrationInfo.Builder} with default values.
+         * Constructs a new {@code RegistrationInfo.Builder} with an empty configuration.
          */
         public Builder() {
             mConfig = new PersistableBundle();
+        }
+
+        /**
+         * Adds the default IMS configuration values to this builder.
+         * This includes settings for IPsec and the preferred SIP transport type.
+         *
+         * @return This {@code Builder} object to allow for chaining of method calls.
+         */
+        @NonNull
+        public Builder withDefaultConfig() {
             mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
             mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT,
                     CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
+            return this;
         }
 
         /**

@@ -62,7 +62,7 @@ public class CallTestBase extends ImsStackTestBase {
 
     protected void performRegistration() {
         mRegistrationHelper.performRegistration(this,
-                new RegistrationInfo.Builder().addConfig(mConfig).build());
+                new RegistrationInfo.Builder().withDefaultConfig().addConfig(mConfig).build());
 
         // Add delay between registration and call.
         SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
