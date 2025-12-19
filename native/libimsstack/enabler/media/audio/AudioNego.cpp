@@ -42,8 +42,6 @@ AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         m_pSdpParser(std::make_shared<AudioSdpParser>()),
         m_pProfileNegotiator(std::make_shared<AudioProfileNegotiator>())
 {
-    IMS_TRACE_I("+AudioNego(): slot[%d]", nSlotId, 0, 0);
-
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
     m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
 }
@@ -54,8 +52,6 @@ AudioNego::AudioNego(IN const AudioNego& obj) :
         m_pSdpParser(std::make_shared<AudioSdpParser>()),
         m_pProfileNegotiator(std::make_shared<AudioProfileNegotiator>())
 {
-    IMS_TRACE_I("+AudioNego(): slot[%d]", GetSlotId(), 0, 0);
-
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
     m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
     Copy(&obj);

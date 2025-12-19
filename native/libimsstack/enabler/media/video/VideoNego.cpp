@@ -15,6 +15,7 @@
  */
 
 #include "video/VideoNego.h"
+
 #include "ISessionDescriptor.h"
 #include "MediaEnvironment.h"
 #include "MediaProfileFactory.h"
@@ -32,8 +33,6 @@ PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         m_pSdpParser(std::make_shared<VideoSdpParser>()),
         m_pProfileNegotiator(std::make_shared<VideoProfileNegotiator>())
 {
-    IMS_TRACE_I("+VideoNego(): slot[%d]", nSlotId, 0, 0);
-
     m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
     m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
 }
@@ -44,8 +43,6 @@ VideoNego::VideoNego(IN const VideoNego& obj) :
         m_pSdpParser(std::make_shared<VideoSdpParser>()),
         m_pProfileNegotiator(std::make_shared<VideoProfileNegotiator>())
 {
-    IMS_TRACE_I("+VideoNego(): slot[%d]", GetSlotId(), 0, 0);
-
     m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
     m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
     Copy(&obj);

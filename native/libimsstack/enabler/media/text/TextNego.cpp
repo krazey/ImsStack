@@ -15,12 +15,11 @@
  */
 
 #include "text/TextNego.h"
+
 #include "ISessionDescriptor.h"
 #include "MediaEnvironment.h"
 #include "MediaProfileFactory.h"
 #include "ServiceTrace.h"
-#include "config/MediaSessionConfig.h"
-#include "config/MediaSessionConfigFactory.h"
 #include "text/TextProfileGenerator.h"
 #include "text/TextSdpGenerator.h"
 
@@ -31,7 +30,6 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         m_pSdpParser(std::make_shared<TextSdpParser>()),
         m_pProfileNegotiator(std::make_shared<TextProfileNegotiator>())
 {
-    IMS_TRACE_I("+TextNego(): slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
     m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
 }
@@ -42,8 +40,6 @@ TextNego::TextNego(IN const TextNego& obj) :
         m_pSdpParser(std::make_shared<TextSdpParser>()),
         m_pProfileNegotiator(std::make_shared<TextProfileNegotiator>())
 {
-    IMS_TRACE_I("+TextNego(): slot[%d]", GetSlotId(), 0, 0);
-
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
     m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
     Copy(&obj);

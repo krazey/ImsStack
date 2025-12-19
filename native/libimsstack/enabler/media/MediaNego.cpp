@@ -47,14 +47,10 @@ MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
         m_bForking(IMS_FALSE),
         m_bPreviewMode(IMS_FALSE)
 {
-    IMS_TRACE_I("MediaNego(): Slot[%d]", nSlotId, 0, 0);
 }
 
 PUBLIC
-MediaNego::~MediaNego()
-{
-    IMS_TRACE_I("~MediaNego()", 0, 0, 0);
-}
+MediaNego::~MediaNego() {}
 
 PUBLIC
 IMS_BOOL MediaNego::CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment)
