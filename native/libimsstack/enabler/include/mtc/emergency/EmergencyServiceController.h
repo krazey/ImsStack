@@ -53,6 +53,10 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
+    inline void OnEventNotify(
+            IN [[maybe_unused]] IMS_UINT32 nType, IN [[maybe_unused]] IMS_UINT32 nState) override
+    {
+    }
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;

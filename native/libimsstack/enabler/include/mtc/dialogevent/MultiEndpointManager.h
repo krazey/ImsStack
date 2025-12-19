@@ -54,6 +54,10 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
+    inline void OnEventNotify(
+            IN [[maybe_unused]] IMS_UINT32 nType, IN [[maybe_unused]] IMS_UINT32 nState) override
+    {
+    }
 
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 

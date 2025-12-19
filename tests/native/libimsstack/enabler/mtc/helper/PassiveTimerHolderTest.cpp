@@ -286,3 +286,8 @@ TEST_F(PassiveTimerHolderTest, ReleaseAllTimerInfoByCheckingKeepOnAosDisconnectA
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD));
 }
+
+TEST_F(PassiveTimerHolderTest, OnEventNotifyDoesNothing)
+{
+    pPassiveTimerHolder->OnEventNotify(0, 0);
+}

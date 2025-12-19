@@ -2574,6 +2574,12 @@ TEST_F(MtcCallTest, OnAosStateChangedCallsState)
     objCall.OnAosStateChanged(objService, eAnyState, eAnyReason, nDataFailureReason);
 }
 
+TEST_F(MtcCallTest, OnEventNotifyDoesNothing)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+    objCall.OnEventNotify(0, 0);
+}
+
 TEST_F(MtcCallTest, OnRatChangedCallsState)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();

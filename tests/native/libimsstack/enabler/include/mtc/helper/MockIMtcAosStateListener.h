@@ -28,6 +28,7 @@ class MockIMtcAosStateListener : public IMtcAosStateListener
 public:
     MOCK_METHOD(void, OnAosStateChanged,
             (IN IMtcService&, IN MtcAosState, IN IMS_UINT32, IN IMS_SINT32), (override));
+    MOCK_METHOD(void, OnEventNotify, (IN IMS_UINT32, IN IMS_UINT32), (override));
 };
 
 #endif

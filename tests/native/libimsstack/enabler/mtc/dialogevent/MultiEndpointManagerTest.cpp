@@ -494,6 +494,12 @@ TEST_F(MultiEndpointManagerTest, OnAosStateChangedChecksCondition)
             objService, MtcAosState::CONNECTED, nAnyReason, nAnyDataFailureReason);
 }
 
+TEST_F(MultiEndpointManagerTest, OnEventNotifyDoesNothing)
+{
+    CreateManager(IMS_FALSE);
+    pMultiEndpointManager->OnEventNotify(0, 0);
+}
+
 TEST_F(MultiEndpointManagerTest, OnRatChangedChecksCondition)
 {
     CreateManager(IMS_TRUE);

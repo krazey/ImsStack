@@ -777,6 +777,11 @@ TEST_F(EmergencyServiceControllerTest,
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
 }
 
+TEST_F(EmergencyServiceControllerTest, OnEventNotifyDoesNothing)
+{
+    pController->OnEventNotify(0, 0);
+}
+
 TEST_F(EmergencyServiceControllerTest, OnTotalCallStateChangedDoesNothing)
 {
     const IMtcCall::State ANY_STATE = IMtcCall::State::IDLE;

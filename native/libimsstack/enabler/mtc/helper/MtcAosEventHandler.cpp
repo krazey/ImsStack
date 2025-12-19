@@ -144,6 +144,10 @@ void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState
 {
     IMS_TRACE_I("OnEventNotify emergency[%s] nType[%d] nState[%d]",
             _TRACE_B_(m_objService.IsEmergency()), nType, nState);
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
+    {
+        m_objListeners.GetAt(i)->OnEventNotify(nType, nState);
+    }
 }
 
 PRIVATE
