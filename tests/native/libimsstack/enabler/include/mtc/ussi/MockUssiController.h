@@ -38,8 +38,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsUssiInfoReceived, (IN const ISipServerConnection*), (override));
     MOCK_METHOD(IMS_BOOL, HasXmlBodyInInfo, (IN const ISipServerConnection*), (override));
 
-    MOCK_METHOD(UssiResult, ParseUssiBodyAndCheckResult, (IN const ISipMessage*, IN IMS_SINT32),
-            (override));
+    MOCK_METHOD(UssiResult, HandleUssiBody, (IN const ISipMessage*, IN IMS_SINT32), (override));
 
     MOCK_METHOD(IMS_RESULT, FormStartUssiRequest, (IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, FormAcceptUssi, (), (override));

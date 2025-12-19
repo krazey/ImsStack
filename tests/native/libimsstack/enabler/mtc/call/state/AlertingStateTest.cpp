@@ -783,19 +783,22 @@ TEST_F(AlertingStateTest, AcceptUssiRejectsIncomingUssiIfFormAcceptUssiFails)
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->AcceptUssi(CallType::VOIP, objMediaInfo));
 }
 
-TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
+TEST_F(AlertingStateTest, UssiStartedParsesBodyInInvite)
 {
+    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_ACK))
+            .WillByDefault(Return(&objIMessage));
     MtcSupplementaryService objSupplementaryService(objCallContext, *pConfigurationProxy);
     ON_CALL(objCallContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
     SetUpForUssi();
-    SipMethod objMethod = SipMethod::ACK;
-    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    MockIMessage objInviteMessage;
+    SipMethod objMethod = SipMethod::INVITE;
+    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objInviteMessage));
+    ON_CALL(objInviteMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     UssiResult objResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
-    EXPECT_CALL(*pUssiController, ParseUssiBodyAndCheckResult(_, _))
-            .Times(1)
-            .WillOnce(Return(objResult));
+    EXPECT_CALL(*pUssiController, HandleUssiBody(_, _)).Times(1).WillOnce(Return(objResult));
     EXPECT_CALL(objCallContext, CreateClientConnection(_))
             .Times(1)
             .WillOnce(Return(reinterpret_cast<ISipClientConnection*>(0x0)));

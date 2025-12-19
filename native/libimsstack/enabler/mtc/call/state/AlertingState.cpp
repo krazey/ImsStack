@@ -174,11 +174,13 @@ PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
 PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("UssiStarted - ACK received", 0, 0, 0);
-    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
-    m_objContext.GetSession()->HandleRequest(RequestType::ACK, *piMessage);
+    m_objContext.GetSession()->HandleRequest(
+            RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
 
-    UssiResult objResult = m_objContext.GetUssiController()->ParseUssiBodyAndCheckResult(
-            piMessage->GetMessage(), piMessage->GetMethod().ToInt());
+    // Retrieves the USSI body from the INVITE message.
+    const IMessage* piInviteMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+    UssiResult objResult = m_objContext.GetUssiController()->HandleUssiBody(
+            piInviteMessage->GetMessage(), piInviteMessage->GetMethod().ToInt());
 
     m_objContext.GetUiNotifier().SendStarted();
 

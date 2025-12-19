@@ -305,8 +305,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
         return SessionTerminated(piSession);
     }
 
-    pUssiController->ParseUssiBodyAndCheckResult(
-            piMessage->GetMessage(), piMessage->GetMethod().ToInt());
+    pUssiController->HandleUssiBody(piMessage->GetMessage(), piMessage->GetMethod().ToInt());
 
     m_objContext.GetUiNotifier().SendTerminated(
             TerminationHandler(m_objContext).Handle(*piSession));
@@ -342,8 +341,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiInfoReceived(
         return GetStateName();
     }
 
-    UssiResult objResult = pUssiController->ParseUssiBodyAndCheckResult(
-            piSipServerConnection->GetMessage(), nMethod);
+    UssiResult objResult =
+            pUssiController->HandleUssiBody(piSipServerConnection->GetMessage(), nMethod);
 
     SendTransactionResponse(piSipServerConnection, SipStatusCode::SC_200);
 

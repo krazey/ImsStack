@@ -43,7 +43,7 @@ public:
     virtual IMS_BOOL IsByeForUssi(IN const IMessage* piMessage);
     virtual IMS_BOOL IsUssiInfoReceived(IN const ISipServerConnection* piSipServerConnection);
     virtual IMS_BOOL HasXmlBodyInInfo(IN const ISipServerConnection* piSipServerConnection);
-    virtual UssiResult ParseUssiBodyAndCheckResult(
+    virtual UssiResult HandleUssiBody(
             IN const ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod);
 
     virtual IMS_RESULT FormStartUssiRequest(IN const AString& strTargetNumber);
