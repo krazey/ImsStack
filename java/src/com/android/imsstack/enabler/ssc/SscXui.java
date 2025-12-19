@@ -75,10 +75,10 @@ public class SscXui {
         }
 
         ImsLog.d("XUI :" + xui);
-        return setUserInfoWithPassword(xui, password);
+        return setUserInfoWithPassword(slotId, xui, password);
     }
 
-    private String setUserInfoWithPassword(String xui, String password) {
+    private String setUserInfoWithPassword(int slotId, String xui, String password) {
         if (TextUtils.isEmpty(xui)) {
             return null;
         }
@@ -89,6 +89,11 @@ public class SscXui {
 
         if (!xui.toLowerCase(Locale.ROOT).startsWith("sip")) {
             ImsLog.e("XUI isn't a SIP URI.");
+            return xui;
+        }
+
+        if (SscConfig.isUpdateCbWithoutPassword(slotId)) {
+            ImsLog.d("Call Barring Password is omitted for this carrier.");
             return xui;
         }
 

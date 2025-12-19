@@ -22,8 +22,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.PreferenceInterface;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,6 +43,8 @@ public class SscXuiTest {
 
     @Mock private PreferenceInterface mMockPreference;
     @Mock private SimInterface mMockSimInterface;
+    @Mock private ConfigInterface mMockConfigInterface;
+    @Mock private CarrierConfig mMockCarrierConfig;
 
     @Before
     public void setup() {
@@ -48,12 +52,17 @@ public class SscXuiTest {
 
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, mMockPreference);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
     }
 
     @After
     public void cleanup() {
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+
+        SscConfig.clear(SLOT_0);
     }
 
     @Test
@@ -186,5 +195,26 @@ public class SscXuiTest {
         String xui = SscXui.getInstance().getXui(SLOT_0, password);
 
         assertEquals("sip:+11234567890:0000@test.3gpp.com", xui);
+    }
+
+    @Test
+    public void getXui_omitPasswordByConfig() {
+        final String telPaid = "tel:1234567890";
+        final String sipPaid = "sip:+11234567890@test.3gpp.com";
+        final String password = "0000";
+        when(mMockPreference.getString(SscXui.IMPU_FILE_NAME, SscXui.IMPU_LIST_SIZE, SLOT_0))
+                .thenReturn("2");
+        when(mMockPreference.getString(SscXui.IMPU_FILE_NAME, "0", SLOT_0))
+                .thenReturn(telPaid);
+        when(mMockPreference.getString(SscXui.IMPU_FILE_NAME, "1", SLOT_0))
+                .thenReturn(sipPaid);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITHOUT_PASSWORD_BOOL))
+                .thenReturn(true);
+
+        String xui = SscXui.getInstance().getXui(SLOT_0, password);
+
+        assertEquals(sipPaid, xui);
     }
 }
