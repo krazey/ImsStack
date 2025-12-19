@@ -81,10 +81,15 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
         int width = (vd != null) ? vd.getWidth() : size.getWidth();
         int height = (vd != null) ? vd.getHeight() : size.getHeight();
 
-        logi("ImsCamera :: previewSize=" + size
+        if (camera.isLandscape() && width < height) {
+            int tmp = width;
+            width = height;
+            height = tmp;
+        }
+
+        logi("ImsCamera :: previewSize=" + width + "x" + height
                 + ", maxZoom=" + maxZoom
-                + ", zoomSupported=" + zoomSupported
-                + ", " + ((vd != null) ? vd.toString() : "(null)"));
+                + ", zoomSupported=" + zoomSupported);
 
         VideoProfile.CameraCapabilities cc = new VideoProfile.CameraCapabilities(width, height,
                 zoomSupported, maxZoom);

@@ -43,6 +43,7 @@ public class ImsCamera {
 
     private String mCameraId = String.valueOf(CAMERA_FRONT);
     private CameraCharacteristics mCharacteristics = null;
+    private int mOrientation = -1;
 
     public ImsCamera() {
     }
@@ -53,12 +54,11 @@ public class ImsCamera {
     }
 
     public Size getPreviewSize() {
-        if (mCharacteristics == null) {
-            mCharacteristics = getCameraCharacteristics(mCameraId);
+        getCameraCharacteristics(mCameraId);
 
-            if (mCharacteristics == null) {
-                return DEFAULT_PREVIEW_SIZE;
-            }
+        if (mCharacteristics == null) {
+            loge("mCharacteristics is null, return default preview size");
+            return DEFAULT_PREVIEW_SIZE;
         }
 
         StreamConfigurationMap configs = null;
@@ -86,13 +86,21 @@ public class ImsCamera {
         return previewSizes[0];
     }
 
-    public float getMaxZoom() {
-        if (mCharacteristics == null) {
-            mCharacteristics = getCameraCharacteristics(mCameraId);
+    public boolean isLandscape() {
+        return getCameraOrientation() == 90 || getCameraOrientation() == 270;
+    }
 
-            if (mCharacteristics == null) {
-                return ZOOM_RATIO_UNZOOMED;
-            }
+    /**
+     * Returns the maximum digital zoom for the current camera.
+     *
+     * @return The maximum digital zoom value.
+     */
+    public float getMaxZoom() {
+        getCameraCharacteristics(mCameraId);
+
+        if (mCharacteristics == null) {
+            loge("mCharacteristics is null, return unzoomed ratio");
+            return ZOOM_RATIO_UNZOOMED;
         }
 
         try {
@@ -108,22 +116,35 @@ public class ImsCamera {
         return zoomRatio > ZOOM_RATIO_UNZOOMED;
     }
 
-    private CameraCharacteristics getCameraCharacteristics(String cameraId) {
+    private void getCameraCharacteristics(String cameraId) {
+        if (mCharacteristics != null) {
+            return;
+        }
+
         CameraManager cm = getCameraManager();
 
         if (cm == null) {
-            return null;
+            return;
         }
 
         try {
-            return cm.getCameraCharacteristics(cameraId);
+            mCharacteristics = cm.getCameraCharacteristics(cameraId);
         } catch (CameraAccessException e) {
             loge("getCameraCharacteristics: " + e);
         } catch (Exception e) {
             loge("getCameraCharacteristics: " + e);
         }
+    }
 
-        return null;
+    private int getCameraOrientation() {
+        getCameraCharacteristics(mCameraId);
+        if (mCharacteristics == null) {
+            return 0;
+        }
+        if (mOrientation == -1) {
+            mOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+        }
+        return mOrientation;
     }
 
     private CameraManager getCameraManager() {
