@@ -150,9 +150,11 @@ public class ImsCallUtilsTest {
         ImsCallProfile profile = ImsCallUtils.createCallProfile(
                 serviceType, callType, audioQuality, audioDirection, videoQuality, videoDirection);
         assertNotNull(profile);
+        profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, 1);
 
         ImsCallProfile clone = ImsCallUtils.cloneCallProfile(profile);
         assertNotNull(clone);
+        assertEquals(1, clone.getCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
     }
 
     @Test
@@ -769,11 +771,13 @@ public class ImsCallUtilsTest {
         MtcCallInfo.setVideoCapable(ci, true);
         MtcCallInfo.setUssi(ci, true);
         MtcCallInfo.setRttCapable(ci, true);
+        ci.ratType = 1;
         ImsCallUtils.updateCallProfileFromCallInfo(mContext, profile, ci);
         assertTrue(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE));
         assertTrue(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
         assertEquals("true", profile.getCallExtra(ImsCallProfile.EXTRA_USSD));
         assertTrue(profile.getCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL));
+        assertEquals(1, profile.getCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
     }
 
     @Test

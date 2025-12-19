@@ -114,6 +114,7 @@ public class IncomingMtcCall implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        // This is not actually used.
         ImsLog.i("");
 
         dest.writeInt(callKey);

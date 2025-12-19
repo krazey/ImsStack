@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,18 +25,19 @@ import com.android.imsstack.util.ImsLog;
 
 public class CallInfo implements Parcelable
 {
-    public int            serviceType;
-    public int            callType;
-    public int            emergencyType;
+    public int serviceType;
+    public int callType;
+    public int emergencyType;
 
-    public boolean        offline;
-    public boolean        ussi;
-    public boolean        isConf;
-    public boolean        enabledConf;
-    public boolean        confSub;
-    public boolean        rttCapable;
-    public boolean        videoCapable;
-    public boolean        crossSim;
+    public boolean offline;
+    public boolean ussi;
+    public boolean isConf;
+    public boolean enabledConf;
+    public boolean confSub;
+    public boolean rttCapable;
+    public boolean videoCapable;
+    public boolean crossSim;
+    public int ratType;
 
     //------------------------------------------------------------------------------------------//
 
@@ -50,6 +53,7 @@ public class CallInfo implements Parcelable
         rttCapable = false;
         videoCapable = false;
         crossSim = false;
+        ratType = NETWORK_TYPE_UNKNOWN;
 
         logLn("init");
     }
@@ -65,6 +69,8 @@ public class CallInfo implements Parcelable
         confSub = callInfo.confSub;
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
+        crossSim = callInfo.crossSim;
+        ratType = callInfo.ratType;
 
         logLn("init");
     }
@@ -85,6 +91,7 @@ public class CallInfo implements Parcelable
         rttCapable = false;
         videoCapable = false;
         crossSim = false;
+        ratType = NETWORK_TYPE_UNKNOWN;
 
         logLn("init");
     }
@@ -101,6 +108,7 @@ public class CallInfo implements Parcelable
         rttCapable = false;
         videoCapable = false;
         crossSim = false;
+        ratType = NETWORK_TYPE_UNKNOWN;
 
         logLn("init");
     }
@@ -117,6 +125,7 @@ public class CallInfo implements Parcelable
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
         crossSim = callInfo.crossSim;
+        ratType = callInfo.ratType;
 
         logLn("update");
     }
@@ -132,7 +141,8 @@ public class CallInfo implements Parcelable
                 + " offline : " + offline
                 + " ussi : " + ussi
                 + " videoCapable : " + videoCapable
-                + " crossSim : " + crossSim);
+                + " crossSim : " + crossSim
+                + " ratType : " + ratType);
     }
 
     /**
@@ -155,11 +165,13 @@ public class CallInfo implements Parcelable
         rttCapable = source.readInt() == 1;
         videoCapable = source.readInt() == 1;
         crossSim = source.readInt() == 1;
+        ratType = source.readInt();
 
         logLn("read");
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        // This is not actually used.
         ImsLog.i("");
 
         dest.writeInt(serviceType);
@@ -174,6 +186,7 @@ public class CallInfo implements Parcelable
         dest.writeInt(rttCapable ? 1 : 0);
         dest.writeInt(videoCapable ? 1 : 0);
         dest.writeInt(crossSim ? 1 : 0);
+        dest.writeInt(ratType);
     }
 
     public int describeContents() {

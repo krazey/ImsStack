@@ -198,11 +198,9 @@ public:
             IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief Notifies the RAT has changed.
-     *
-     * @param eRatType The changed RAT type.
+     * @brief Notifies the call information has changed.
      */
-    virtual void SendRatChanged(IN IMS_SINT32 eRatType) = 0;
+    virtual void SendCallInfoChanged() = 0;
 
     virtual void OnCallSessionReleased() = 0;
 

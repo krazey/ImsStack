@@ -18,6 +18,7 @@
 #define JNI_CALL_INFO_H_
 
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
@@ -35,7 +36,8 @@ public:
             bConferenceSubscriptionRequired(IMS_FALSE),
             bRttCapable(IMS_FALSE),
             bVideoCapable(IMS_FALSE),
-            bCrossSim(IMS_FALSE)
+            bCrossSim(IMS_FALSE),
+            eRatType(INetworkWatcher::RADIOTECH_TYPE_INVALID)
     {
     }
 
@@ -50,7 +52,8 @@ public:
             bConferenceSubscriptionRequired(objRhs.bConferenceSubscriptionRequired),
             bRttCapable(objRhs.bRttCapable),
             bVideoCapable(objRhs.bVideoCapable),
-            bCrossSim(objRhs.bCrossSim)
+            bCrossSim(objRhs.bCrossSim),
+            eRatType(objRhs.eRatType)
     {
     }
 
@@ -69,6 +72,7 @@ public:
             bRttCapable = objRhs.bRttCapable;
             bVideoCapable = objRhs.bVideoCapable;
             bCrossSim = objRhs.bCrossSim;
+            eRatType = objRhs.eRatType;
         }
 
         return *this;
@@ -87,7 +91,7 @@ public:
                 bConferenceEnabled == objRhs.bConferenceEnabled &&
                 bConferenceSubscriptionRequired == objRhs.bConferenceSubscriptionRequired &&
                 bRttCapable == objRhs.bRttCapable && bVideoCapable == objRhs.bVideoCapable &&
-                bCrossSim == objRhs.bCrossSim;
+                bCrossSim == objRhs.bCrossSim && eRatType == objRhs.eRatType;
     }
 
 public:
@@ -103,6 +107,7 @@ public:
     IMS_BOOL bRttCapable;
     IMS_BOOL bVideoCapable;
     IMS_BOOL bCrossSim;
+    IMS_SINT32 eRatType;
 };
 
 #endif

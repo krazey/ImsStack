@@ -61,13 +61,12 @@ void JniMtcCallThread::OnStartFailed(IN const CallReasonInfo& objReason)
 
 PUBLIC
 void JniMtcCallThread::OnInitiating(
-        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo, IN IMS_SINT32 eRatType)
+        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::INITIATING);
     JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(objMediaInfo, objParcel);
-    objParcel.writeInt32(eRatType);
     SendData2Java(objParcel);
 }
 
@@ -274,6 +273,7 @@ void JniMtcCallThread::OnConferenceParticipantsInfoChanged(IN const ImsList<Conf
     SendData2Java(objParcel);
 }
 
+PUBLIC
 void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
@@ -284,10 +284,11 @@ void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const CallReason
     SendData2Java(objParcel);
 }
 
+PUBLIC
 void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
         IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
         IN const ImsList<SuppService*>& objSuppServices, IN OipType eOipType,
-        IN const AString& strRemoteNumber, IN IMS_SINT32 eRatType)
+        IN const AString& strRemoteNumber)
 {
     IMS_TRACE_D("OnIncomingCallReceived", 0, 0, 0);
     Parcel objParcel;
@@ -306,11 +307,10 @@ void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
     /* Supp Info */
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
 
-    objParcel.writeInt32(eRatType);
-
     SendData2Java(objParcel);
 }
 
+PUBLIC
 void JniMtcCallThread::OnInformationNotificationReceived(
         IN IMS_UINT32 eType, IN const AString strValue, IN IMS_SINT32 nValue, IN IMS_BOOL bValue)
 {
@@ -324,11 +324,12 @@ void JniMtcCallThread::OnInformationNotificationReceived(
     SendData2Java(objParcel);
 }
 
-void JniMtcCallThread::OnRatChanged(IN IMS_SINT32 eRatType)
+PUBLIC
+void JniMtcCallThread::OnCallInfoChanged(IN const JniCallInfo& objCallInfo)
 {
     Parcel objParcel;
-    objParcel.writeInt32(IuMtcCall::NETWORK_CHANGED);
-    objParcel.writeInt32(eRatType);
+    objParcel.writeInt32(IuMtcCall::CALL_INFO_CHANGED);
+    JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
 
     SendData2Java(objParcel);
 }

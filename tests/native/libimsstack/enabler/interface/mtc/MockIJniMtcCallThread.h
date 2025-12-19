@@ -37,8 +37,7 @@ public:
             (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnStartFailed, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, OnInitiating, (IN const JniCallInfo&, IN const MediaInfo&, IN IMS_SINT32),
-            (override));
+    MOCK_METHOD(void, OnInitiating, (IN const JniCallInfo&, IN const MediaInfo&), (override));
     MOCK_METHOD(void, OnProgressing,
             (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsList<SuppService*>&)),
             (override));
@@ -88,12 +87,11 @@ public:
     MOCK_METHOD(void, OnEctCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnIncomingCallReceived,
             (IN IMS_UINTP, IN const JniCallInfo&, IN const MediaInfo&,
-                    (IN const ImsList<SuppService*>&), IN OipType, IN const AString&,
-                    IN IMS_SINT32),
+                    (IN const ImsList<SuppService*>&), IN OipType, IN const AString&),
             (override));
     MOCK_METHOD(void, OnInformationNotificationReceived, (IN IMS_UINT32, IN const AString,
             IN IMS_SINT32, IN IMS_BOOL), (override));
-    MOCK_METHOD(void, OnRatChanged, (IN IMS_SINT32), (override));
+    MOCK_METHOD(void, OnCallInfoChanged, (IN const JniCallInfo&), (override));
 };
 
 #endif

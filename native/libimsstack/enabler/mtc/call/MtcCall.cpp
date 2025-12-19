@@ -548,6 +548,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.bRttCapable = GetSession() ? GetSession()->IsRttCapable() : IMS_FALSE;
     objJniCallInfo.bVideoCapable = GetSession() ? GetSession()->IsVideoCapable() : IMS_FALSE;
     objJniCallInfo.bCrossSim = GetService().IsCrossSimConnected();
+    objJniCallInfo.eRatType = GetService().GetRatType();
 
     return objJniCallInfo;
 }
@@ -1322,7 +1323,7 @@ PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServi
             MtcCallStringUtils::ConvertRatType(eRatType));
 
     m_objPreconditionManager.OnRatChanged(eRatType);
-    m_objUiNotifier.SendRatChanged(eRatType);
+    m_objUiNotifier.SendCallInfoChanged();
 
     if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN ||
             eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN)

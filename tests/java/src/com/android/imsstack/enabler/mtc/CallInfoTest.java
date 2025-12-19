@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,6 +44,8 @@ public class CallInfoTest  {
         assertFalse(callInfo.confSub);
         assertFalse(callInfo.rttCapable);
         assertFalse(callInfo.videoCapable);
+        assertFalse(callInfo.crossSim);
+        assertEquals(NETWORK_TYPE_UNKNOWN, callInfo.ratType);
     }
 
     @Test
@@ -59,6 +63,8 @@ public class CallInfoTest  {
         assertFalse(callInfo.confSub);
         assertFalse(callInfo.rttCapable);
         assertFalse(callInfo.videoCapable);
+        assertFalse(callInfo.crossSim);
+        assertEquals(NETWORK_TYPE_UNKNOWN, callInfo.ratType);
     }
 
     @Test
@@ -76,6 +82,8 @@ public class CallInfoTest  {
         assertFalse(callInfo.confSub);
         assertFalse(callInfo.rttCapable);
         assertFalse(callInfo.videoCapable);
+        assertFalse(callInfo.crossSim);
+        assertEquals(NETWORK_TYPE_UNKNOWN, callInfo.ratType);
     }
 
     @Test
@@ -91,6 +99,8 @@ public class CallInfoTest  {
         callInfo.confSub = true;
         callInfo.rttCapable = true;
         callInfo.videoCapable = true;
+        callInfo.crossSim = true;
+        callInfo.ratType = 1;
 
         CallInfo callInfo2 = new CallInfo(callInfo);
 
@@ -104,6 +114,8 @@ public class CallInfoTest  {
         assertTrue(callInfo2.confSub);
         assertTrue(callInfo2.rttCapable);
         assertTrue(callInfo2.videoCapable);
+        assertTrue(callInfo.crossSim);
+        assertEquals(1, callInfo.ratType);
     }
 
     @Test
@@ -119,6 +131,8 @@ public class CallInfoTest  {
         callInfo.confSub = true;
         callInfo.rttCapable = true;
         callInfo.videoCapable = true;
+        callInfo.crossSim = true;
+        callInfo.ratType = 1;
 
         CallInfo callInfo2 = new CallInfo();
         callInfo2.update(callInfo);
@@ -133,6 +147,8 @@ public class CallInfoTest  {
         assertTrue(callInfo2.confSub);
         assertTrue(callInfo2.rttCapable);
         assertTrue(callInfo2.videoCapable);
+        assertTrue(callInfo2.crossSim);
+        assertEquals(1, callInfo2.ratType);
     }
 
     @Test
@@ -156,5 +172,7 @@ public class CallInfoTest  {
         assertEquals(callInfo.confSub, callInfo2.confSub);
         assertEquals(callInfo.rttCapable, callInfo2.rttCapable);
         assertEquals(callInfo.videoCapable, callInfo2.videoCapable);
+        assertEquals(callInfo.crossSim, callInfo2.crossSim);
+        assertEquals(callInfo.ratType, callInfo2.ratType);
     }
 }
