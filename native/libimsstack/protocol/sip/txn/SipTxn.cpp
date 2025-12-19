@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISipNetworkUtil.h"
 #include "SipConfiguration.h"
 #include "SipDebug.h"
 #include "SipStackError.h"

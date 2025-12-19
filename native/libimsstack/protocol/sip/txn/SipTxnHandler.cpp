@@ -20,7 +20,9 @@
 #include "msg/SipMessage.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
+#include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnHandler.h"
+#include "txn/SipTxnInfo.h"
 
 static SIP_INT32 GetNonInvCliFsmEvt(SIP_UINT16 nStatusCode);
 static SIP_INT32 GetNonInvSerFsmEvt(SIP_UINT16 nStatusCode);

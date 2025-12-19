@@ -17,6 +17,8 @@
 #include "SipDebug.h"
 #include "msg/SipAddrSpec.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipParameters.h"
+#include "msg/SipPercentEncoding.h"
 #include "platform/SipString.h"
 
 SipUri::SipUri() :

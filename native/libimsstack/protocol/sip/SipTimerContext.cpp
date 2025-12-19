@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "SipTimerContext.h"
+#include "txn/SipTxnTimerValues.h"
 
 SipTimerContext::SipTimerContext() :
         m_pTxnSipTxnTimers(new SipTxnTimerValues()),

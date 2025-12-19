@@ -22,6 +22,7 @@
 #include "SipUtil.h"
 #include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
+#include "txn/SipTxn.h"
 #include "txn/include/MockISipTransactionCallback.h"
 
 using ::testing::_;

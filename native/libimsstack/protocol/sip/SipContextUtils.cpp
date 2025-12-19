@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "SipContextUtils.h"
+#include "SipTxnContext.h"
 
 static SipContextUtils* gpUtil = SIP_NULL;
 

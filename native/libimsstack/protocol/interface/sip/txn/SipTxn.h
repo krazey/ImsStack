@@ -21,7 +21,6 @@
 #include "SipTimerContext.h"
 #include "msg/SipMessage.h"
 #include "transport/SipTransportInfo.h"
-#include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
 

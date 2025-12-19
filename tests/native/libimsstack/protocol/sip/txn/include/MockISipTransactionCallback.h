@@ -20,7 +20,8 @@
 #include <gmock/gmock.h>
 
 #include "ISipTransactionCallback.h"
-#include "txn/SipTxn.h"
+
+class SipTxn;
 
 class MockISipTransactionCallback : public ISipTransactionCallback
 {

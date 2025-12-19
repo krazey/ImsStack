@@ -17,7 +17,6 @@
 #define __SIP_TRANSPORT_HANDLER_H__
 
 #include "transport/SipTransportInfo.h"
-#include "txn/SipTxn.h"
 
 class SipTransportHandler
 {

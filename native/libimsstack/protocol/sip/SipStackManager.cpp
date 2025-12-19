@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISipNetworkUtil.h"
 #include "SipDebug.h"
 #include "SipMessageBuffer.h"
 #include "SipStackManager.h"
@@ -22,6 +23,7 @@
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnHandler.h"
+#include "txn/SipTxnInfo.h"
 
 static SipStackManager* gpStackMngr = SIP_NULL;
 

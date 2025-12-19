@@ -16,7 +16,6 @@
 #ifndef __SIP_TIMEOUT_DATA_H__
 #define __SIP_TIMEOUT_DATA_H__
 
-#include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 
 /*Timerdata returned at timeout of Timer */
