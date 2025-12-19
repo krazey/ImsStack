@@ -1002,6 +1002,21 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     _))
             .WillOnce(Return(objPlmnsReleaseEPdnUponECallEndInFakeMode));
 
+    // Ims General
+    ImsVector<IMS_SINT32> objIpsecUeClientPortRange;
+    objIpsecUeClientPortRange.Add(38000);
+    objIpsecUeClientPortRange.Add(39000);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Ims::KEY_IPSEC_UE_CLIENT_PORT_RANGE_INT_ARRAY, _))
+            .WillOnce(Return(objIpsecUeClientPortRange));
+
+    ImsVector<IMS_SINT32> objIpsecUeServerPortRange;
+    objIpsecUeServerPortRange.Add(39000);
+    objIpsecUeServerPortRange.Add(40000);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Ims::KEY_IPSEC_UE_SERVER_PORT_RANGE_INT_ARRAY, _))
+            .WillOnce(Return(objIpsecUeServerPortRange));
+
     m_pAosNConfiguration->InitAssetsConfig(&objCarrierConfig);
 
     EXPECT_FALSE(m_pAosNConfiguration->IsCdmalessFeatureTagRequired());
@@ -1181,6 +1196,16 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     ImsVector<AString> objPlmns = m_pAosNConfiguration->GetPlmnsReleaseEPdnUponECallEndInFakeMode();
     EXPECT_EQ(AString("310410"), objPlmns.GetAt(0));
     objPlmns.Clear();
+
+    // Ims General
+    ImsVector<IMS_SINT32> objPorts = m_pAosNConfiguration->GetIpsecUeClientPortRange();
+    EXPECT_EQ(38000, objPorts.GetAt(0));
+    EXPECT_EQ(39000, objPorts.GetAt(1));
+    objPorts.Clear();
+    objPorts = m_pAosNConfiguration->GetIpsecUeServerPortRange();
+    EXPECT_EQ(39000, objPorts.GetAt(0));
+    EXPECT_EQ(40000, objPorts.GetAt(1));
+    objPorts.Clear();
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfigForExtraRegErr)

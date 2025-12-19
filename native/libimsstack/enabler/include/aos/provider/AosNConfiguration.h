@@ -230,6 +230,10 @@ public:
     ImsVector<IMS_SINT32>& GetNetworkAttachRejectCausesForCrossStackRedial() override;
     ImsVector<AString>& GetPlmnsReleaseEPdnUponECallEndInFakeMode() override;
 
+    // For Ims General config
+    ImsVector<IMS_SINT32>& GetIpsecUeClientPortRange() override;
+    ImsVector<IMS_SINT32>& GetIpsecUeServerPortRange() override;
+
 private:
     friend class AosBuildDirector;
 

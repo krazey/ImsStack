@@ -1056,6 +1056,16 @@ PUBLIC VIRTUAL ImsVector<AString>& AosNConfiguration::GetPlmnsReleaseEPdnUponECa
     return m_objAsset.objPlmnsReleaseEPdnUponECallEndInFakeMode;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetIpsecUeClientPortRange()
+{
+    return m_objAsset.objIpsecUeClientPortRange;
+}
+
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetIpsecUeServerPortRange()
+{
+    return m_objAsset.objIpsecUeServerPortRange;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -1865,6 +1875,11 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::ImsWfc::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
     m_objAsset.objPlmnsReleaseEPdnUponECallEndInFakeMode = piCc->GetStringArray(CarrierConfig::
                     ImsEmergency::KEY_PLMNS_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_STRING_ARRAY);
+
+    m_objAsset.objIpsecUeClientPortRange =
+            piCc->GetIntArray(CarrierConfig::Ims::KEY_IPSEC_UE_CLIENT_PORT_RANGE_INT_ARRAY);
+    m_objAsset.objIpsecUeServerPortRange =
+            piCc->GetIntArray(CarrierConfig::Ims::KEY_IPSEC_UE_SERVER_PORT_RANGE_INT_ARRAY);
 }
 
 PROTECTED

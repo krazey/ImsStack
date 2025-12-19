@@ -2076,6 +2076,30 @@ public:
      */
     virtual ImsVector<AString>& GetPlmnsReleaseEPdnUponECallEndInFakeMode() = 0;
 
+    /**
+     * @brief Indicate the IPSec UE client port range.
+     *
+     *        This is applied if CarrierConfig::Ims::KEY_SIP_OVER_IPSEC_ENABLED_BOOL is true.
+     *        The first value is the start of port range. (inclusive)
+     *        The second value is the end of port range. (non-inclusive)
+     *
+     * @return vector of port number range
+     * @see {@code ims.ipsec_ue_client_port_range_int_array}
+     */
+    virtual ImsVector<IMS_SINT32>& GetIpsecUeClientPortRange() = 0;
+
+    /**
+     * @brief Indicate the IPSec UE server port range.
+     *
+     *        This is applied if CarrierConfig::Ims::KEY_SIP_OVER_IPSEC_ENABLED_BOOL is true.
+     *        The first value is the start of port range. (inclusive)
+     *        The second value is the end of port range. (non-inclusive)
+     *
+     * @return vector of port number range
+     * @see {@code ims.ipsec_ue_server_port_range_int_array}
+     */
+    virtual ImsVector<IMS_SINT32>& GetIpsecUeServerPortRange() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,
