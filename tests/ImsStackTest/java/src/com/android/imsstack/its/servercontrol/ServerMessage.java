@@ -27,7 +27,7 @@ public class ServerMessage extends SipMessage {
     private final String mTarget;
     private final String mBodySdp;
     private final String mBodyXml;
-    private final String mNewBody;
+    private final List<String> mNewBodies;
     private final List<Pair<String, String>> mHeaders;
 
     private ServerMessage(Builder builder) {
@@ -35,7 +35,7 @@ public class ServerMessage extends SipMessage {
         mTarget = builder.mTarget;
         mBodySdp = builder.mBodySdp;
         mBodyXml = builder.mBodyXml;
-        mNewBody = builder.mNewBody;
+        mNewBodies = builder.mNewBodies;
         mHeaders = builder.mHeaders;
     }
 
@@ -62,6 +62,13 @@ public class ServerMessage extends SipMessage {
             });
         }
 
+        // Append New Bodies if present
+        if (!mNewBodies.isEmpty()) {
+            mNewBodies.forEach(newBody ->
+                    appendSetting(message, ControlProtocolConstants.BODY_ADDITION, newBody)
+            );
+        }
+
         // Append SDP body if present
         if (mBodySdp != null) {
             appendSetting(message, ControlProtocolConstants.MESSAGE_SDP, mBodySdp);
@@ -70,11 +77,6 @@ public class ServerMessage extends SipMessage {
         // Append XML body if present
         if (mBodyXml != null) {
             appendSetting(message, ControlProtocolConstants.MESSAGE_XML, mBodyXml);
-        }
-
-        // Append New Body if present
-        if (mNewBody != null) {
-            appendSetting(message, ControlProtocolConstants.BODY_ADDITION, mNewBody);
         }
 
         // Append configs
@@ -92,7 +94,7 @@ public class ServerMessage extends SipMessage {
         private String mTarget;
         private String mBodySdp;
         private String mBodyXml;
-        private String mNewBody;
+        private List<String> mNewBodies = new ArrayList<>();
         private List<Pair<String, String>> mHeaders = new ArrayList<>();
         private MessageConfig mConfig = new MessageConfig();
 
@@ -168,8 +170,8 @@ public class ServerMessage extends SipMessage {
          */
         public Builder addBodyContent(String type, String name, String content) {
             final String newlinePlaceholder = "\\n";
-            mNewBody = type + "##" + name + "##"
-                    + content.replace(ControlProtocolConstants.CRLF, newlinePlaceholder);
+            mNewBodies.add(type + "##" + name + "##"
+                    + content.replace(ControlProtocolConstants.CRLF, newlinePlaceholder));
             return this;
         }
 
