@@ -39,7 +39,7 @@ private:
     explicit JniEnablerConnector();
 
 public:
-    virtual ~JniEnablerConnector();
+    ~JniEnablerConnector();
     JniEnablerConnector(IN const JniEnablerConnector&) = delete;
     JniEnablerConnector& operator=(IN const JniEnablerConnector&) = delete;
 

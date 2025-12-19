@@ -26,7 +26,7 @@ class UpdatingInfo final
 {
 public:
     explicit UpdatingInfo(IN IMtcCallContext& objContext);
-    virtual ~UpdatingInfo();
+    ~UpdatingInfo();
     UpdatingInfo(IN const UpdatingInfo&) = delete;
     UpdatingInfo& operator=(IN const UpdatingInfo&) = delete;
 

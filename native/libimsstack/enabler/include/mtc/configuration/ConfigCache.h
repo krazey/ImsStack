@@ -29,7 +29,7 @@ class ConfigCache final
 {
 public:
     inline explicit ConfigCache() {}
-    inline virtual ~ConfigCache() = default;
+    inline ~ConfigCache() = default;
     ConfigCache(IN const ConfigCache&) = delete;
     ConfigCache& operator=(IN const ConfigCache&) = delete;
 

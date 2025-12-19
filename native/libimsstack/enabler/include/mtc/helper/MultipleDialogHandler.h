@@ -32,7 +32,7 @@ public:
     };
 
     MultipleDialogHandler();
-    virtual ~MultipleDialogHandler() = default;
+    ~MultipleDialogHandler() = default;
     MultipleDialogHandler(IN const MultipleDialogHandler&) = delete;
     MultipleDialogHandler& operator=(IN const MultipleDialogHandler&) = delete;
 
