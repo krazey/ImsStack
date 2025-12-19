@@ -175,6 +175,7 @@ public:
     IMS_SINT32 GetRegRetryCountWithIpsecOnAuthFailure() const override;
     IMS_SINT32 GetRegRetryDefaultPolicy() const override;
     IMS_SINT32 GetRegRetryTimerFPolicy() const override;
+    IMS_SINT32 GetRegTransactionTimeoutOnPcscfRestoration() const override;
     IMS_SINT32 GetRegTimerForEmcCall() const override;
     IMS_SINT32 GetExtraRegErrFinalType() const override;
     IMS_SINT32 GetExtraRegErrPolicy() const override;

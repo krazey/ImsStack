@@ -356,6 +356,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REG_RETRY_DEFAULT_POLICY_INT[] =
         KEY_IMS_PREFIX "reg_retry_default_policy_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_REG_RETRY_TIMER_F_POLICY_INT[] =
         KEY_IMS_PREFIX "reg_retry_timer_f_policy_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_REG_TRANSACTION_TIMEOUT_ON_PCSCF_RESTORATION_SEC_INT[] =
+        KEY_IMS_PREFIX "reg_transaction_timeout_on_pcscf_restoration_sec_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_RELEASE_PDN_DELAY_SEC_AFTER_TEMP_PLMN_BLOCK_INT[] =
         KEY_IMS_PREFIX "release_pdn_delay_sec_after_temp_plmn_block_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_REREG_RETRY_305_POLICY_INT[] =

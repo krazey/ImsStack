@@ -801,6 +801,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryTimerFPolicy() const
     return m_objAsset.nRegRetryTimerFPolicy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegTransactionTimeoutOnPcscfRestoration() const
+{
+    return m_objAsset.nRegTransactionTimeoutOnPcscfRestoration;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegTimerForEmcCall() const
 {
     return m_objAsset.nRegTimerForEmcCallMillis;
@@ -1820,6 +1825,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_DEFAULT_POLICY_INT);
     m_objAsset.nRegRetryTimerFPolicy =
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_RETRY_TIMER_F_POLICY_INT);
+    m_objAsset.nRegTransactionTimeoutOnPcscfRestoration = piCc->GetInt(
+            CarrierConfig::Ims::KEY_REG_TRANSACTION_TIMEOUT_ON_PCSCF_RESTORATION_SEC_INT);
     m_objAsset.nRegTimerForEmcCallMillis =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT);
     m_objAsset.nReleasePdnDelaySecAfterTempPlmnBlock =

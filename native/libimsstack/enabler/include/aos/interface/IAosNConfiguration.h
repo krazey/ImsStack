@@ -1461,6 +1461,15 @@ public:
     virtual IMS_SINT32 GetRegRetryTimerFPolicy() const = 0;
 
     /**
+     * @brief Specify a transaction timeout for sending SIP REGISTER messages which are triggered by
+     *        P-CSCF restoration procedure.
+     *
+     * @return IMS_SINT32 Return transaction timeout (Sec)
+     * @see {@code ims.reg_transaction_timeout_on_pcscf_restoration_sec_int}
+     */
+    virtual IMS_SINT32 GetRegTransactionTimeoutOnPcscfRestoration() const = 0;
+
+    /**
      * @brief Get a waiting max timer to proceed IMS registration for an emergency call.
      *
      *        After the timer expires, the emergency call is handled as failure.
