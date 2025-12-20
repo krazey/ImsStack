@@ -1544,4 +1544,18 @@ TEST_F(StartErrorHandlerTest, HandleSilentReinviteWithAudioForVideoRtt)
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes));
 }
 
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteWithAudioForVoipReturnsNone)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_488;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO);
+
+    // Set call type to VOIP, which is not a video or RTT call.
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+
+    // The handler should return CODE_NONE, and the call should fall back to default handling for
+    // 488.
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, ANY_REJECT_CODE));
+}
+
 }  // namespace android
