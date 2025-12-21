@@ -285,7 +285,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
         }
     }
 
-    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg, bRoutingLr,
+    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg, GetSipProfile(), bRoutingLr,
                 (bImplicitRouteRequired == IMS_TRUE) ? m_pImplicitRoute : IMS_NULL))
     {
         return IMS_FALSE;

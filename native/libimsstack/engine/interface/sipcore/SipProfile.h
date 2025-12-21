@@ -664,6 +664,21 @@ public:
     }
 
     /**
+     * @brief Checks if the transport parameter with "udp" should not be evaluated
+     *        when forming the outgoing request from SIP routing address URI.
+     *
+     * If it's a false, the transport parameter will be used to determine the transport protocol
+     * while sending an SIP request.
+     *
+     * @return IMS_TRUE if the transport parameter with "udp" is ignored, IMS_FALSE otherwise.
+     */
+    inline IMS_BOOL IsUdpTransportParameterIgnoredForOutgoingRequest() const
+    {
+        return HasFeature(
+                ISipConfig::SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST);
+    }
+
+    /**
      * @brief Checks if the Session-Id header is supported or not.
      *
      * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.

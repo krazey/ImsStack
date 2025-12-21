@@ -21,6 +21,7 @@
     <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <boolean name="ims.allow_no_position_in_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.ignore_udp_transport_parameter_for_outgoing_request_bool" value="true"/>
     <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
     <int name="ims.cellular_network_info_cache_expiration_sec_int" value="0"/>
     <int name="ims.location_policy_update_type_int" value="2"/>

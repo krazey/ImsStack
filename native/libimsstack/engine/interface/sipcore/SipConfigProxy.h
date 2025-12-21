@@ -558,6 +558,22 @@ public:
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
+     * @brief Checks if the transport parameter with "udp" should not be evaluated
+     *        when forming the outgoing request from SIP routing address URI.
+     *
+     * If it's a false, the transport parameter will be used to determine the transport protocol
+     * while sending an SIP request.
+     *
+     * SipProfile is preferred than a default SipConfig.
+     *
+     * @param nSlotId The current slot id
+     * @param pProfile The dynamic SIP profile
+     * @return IMS_TRUE if the transport parameter with "udp" is ignored, IMS_FALSE otherwise.
+     */
+    static IMS_BOOL IsUdpTransportParameterIgnoredForOutgoingRequest(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
+
+    /**
      * @brief Checks if the Session-Id header is supported or not.
      *
      * SipProfile is preferred than a default SipConfig.

@@ -1169,7 +1169,7 @@ PRIVATE GLOBAL IMS_RESULT SipServerTransactionState::SendResponse100Trying(
     // Update the transport information to route the response to the proper network entity
     if (pStState->m_pTransport != IMS_NULL)
     {
-        pStState->m_pTransport->UpdateDestinationInfo(pSipMsg100Trying);
+        pStState->m_pTransport->UpdateDestinationInfo(pSipMsg100Trying, pStState->GetSipProfile());
     }
 
     // Send SIP message to the network

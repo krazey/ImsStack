@@ -112,7 +112,8 @@ PUBLIC VIRTUAL IMS_BOOL SipServerTransport::FormViaHeader(
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipServerTransport::UpdateDestinationInfo(IN ::SipMessage* pSipMsg,
-        IN IMS_BOOL /*bRoutingLr = IMS_TRUE*/, IN SipAddrSpec* /*pImplicitRoute = IMS_NULL*/)
+        IN const SipProfile* /*pProfile*/, IN IMS_BOOL /*bRoutingLr = IMS_TRUE*/,
+        IN SipAddrSpec* /*pImplicitRoute = IMS_NULL*/)
 {
     // For a response which is being sent out, updating the destination info. is done as follows:
     //

@@ -198,6 +198,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL[] =
 const IMS_CHAR CarrierConfig::Ims::
         KEY_ALLOW_SIP_INSTANCE_PARAM_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL[] =
                 KEY_IMS_PREFIX "allow_sip_instance_param_in_contact_for_non_register_request_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST_BOOL[] =
+        KEY_IMS_PREFIX "ignore_udp_transport_parameter_for_outgoing_request_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_TIMER_100_TRYING_MILLIS_INT[] =
         KEY_IMS_PREFIX "sip_timer_100_trying_millis_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL[] =

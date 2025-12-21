@@ -270,6 +270,7 @@ TEST_F(SipConfigTest, Update)
     EXPECT_TRUE(objSipConfig.IsRequestUriValidationRequiredInMidDialog());
     EXPECT_TRUE(objSipConfig.IsSessionTimerUpdateRequiredByReInvite());
     EXPECT_TRUE(objSipConfig.IsSipInstanceParamRequiredInContactForNonRegisterRequest());
+    EXPECT_TRUE(objSipConfig.IsUdpTransportParameterIgnoredForOutgoingRequest());
     EXPECT_TRUE(objSipConfig.IsSessionIdHeaderSupported());
     EXPECT_EQ(objSipConfig.GetHideMacInPaniHeaderPolicy(), ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_FALSE(objSipConfig.IsLocalTimezoneParameterSupportedInPaniHeader());

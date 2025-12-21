@@ -298,7 +298,7 @@ PUBLIC VIRTUAL IMS_RESULT SipTransactionState::RetransmitMessage()
 
 PUBLIC VIRTUAL IMS_BOOL SipTransactionState::UpdateTransportDetails()
 {
-    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg))
+    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg, GetSipProfile()))
     {
         return IMS_FALSE;
     }

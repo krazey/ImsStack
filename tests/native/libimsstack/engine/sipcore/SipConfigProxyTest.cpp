@@ -91,6 +91,7 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_FALSE(SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(IMS_SLOT_0));
     EXPECT_FALSE(
             SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(IMS_SLOT_0));
+    EXPECT_FALSE(SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0));
     EXPECT_EQ(
             SipConfigProxy::GetHideMacInPaniHeaderPolicy(IMS_SLOT_0), ISipConfig::HIDE_MAC_IN_PANI);
@@ -274,6 +275,8 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
             SipConfigProxy::IsRequestUriValidationRequiredInMidDialog(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
+            IMS_SLOT_0, &objSipProfile));
+    EXPECT_TRUE(SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(
             IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0, &objSipProfile));
     EXPECT_EQ(SipConfigProxy::GetHideMacInPaniHeaderPolicy(IMS_SLOT_0, &objSipProfile),
