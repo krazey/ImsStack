@@ -86,7 +86,8 @@ public class AnonymousEmergencyCallTest extends CallTestBase {
 
         performRegistration();
 
-        mCall.start("911", ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE);
+        mCall.start("911", ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE,
+                null);
         mCall.expectWithin(10000).initiated();
         mCall.expectWithin(2000).nothing();
         mCall.terminate(ImsReasonInfo.CODE_USER_TERMINATED);

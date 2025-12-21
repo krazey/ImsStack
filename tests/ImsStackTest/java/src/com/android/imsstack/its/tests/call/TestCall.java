@@ -62,31 +62,41 @@ public class TestCall extends ServerFailureHandler {
     }
 
     /** Triggers {@link ImsCallSessionWrapper#start}. */
-    public void start(@NonNull String callee, int serviceType, int callType) {
+    public void start(@NonNull String callee, int serviceType, int callType,
+            @Nullable Bundle extras) {
         final ImsCallProfile profile = mMmTelFeature.createCallProfile(serviceType, callType);
+        if (extras != null) {
+            profile.getCallExtras().putAll(extras);
+        }
         mCallSession = mMmTelFeature.createCallSession(profile, mCallSessionListener);
         if (mCallSession == null) {
+            fail("Failed to create call session");
             return;
         }
 
         mCallSession.start(callee, profile);
     }
 
+    /** Triggers {@link ImsCallSessionWrapper#start} with parameters for a voice call. */
+    public void startVoiceCall() {
+        start("123456789", ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE,
+                null);
+    }
+
     /** Triggers {@link ImsCallSessionWrapper#startConference}. */
-    public void startConference(
-            @NonNull String[] participants, int serviceType, int callType) {
+    public void startConference(@NonNull String[] participants, int serviceType, int callType,
+            @Nullable Bundle extras) {
         final ImsCallProfile profile = mMmTelFeature.createCallProfile(serviceType, callType);
+        if (extras != null) {
+            profile.getCallExtras().putAll(extras);
+        }
         mCallSession = mMmTelFeature.createCallSession(profile, mCallSessionListener);
         if (mCallSession == null) {
             fail("Failed to create call session");
             return;
         }
-        mCallSession.startConference(participants, profile);
-    }
 
-    /** Triggers {@link ImsCallSessionWrapper#start} with parameters for a voice call. */
-    public void startVoiceCall() {
-        start("123456789", ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
+        mCallSession.startConference(participants, profile);
     }
 
     /** Triggers {@link ImsCallSessionWrapper#accept}. */
