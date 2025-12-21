@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.its.tests.call;
 
+import android.os.Bundle;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
@@ -44,8 +45,13 @@ public abstract class Expectation {
     /** Expects nothing. */
     public abstract void nothing();
 
-    /** Expects there's an incoming call. */
-    public abstract void incomingCall();
+    /** Expects there's an incoming call with the specific extras. */
+    public abstract void incomingCall(@NonNull Predicate<Bundle> extrasMatcher);
+
+    /** Expects there's an incoming call with any extras. */
+    public final void incomingCall() {
+        incomingCall(extras -> true);
+    }
 
     /** Expects the call initiation is failed with the specific reason. */
     public abstract void initiatingFailed(@NonNull Predicate<ImsReasonInfo> reasonMatcher);
