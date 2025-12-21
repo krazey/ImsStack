@@ -227,6 +227,7 @@ public class TestCall extends ServerFailureHandler {
         mEventRecords.put(eventType, record);
 
         if (!mExpectedEvent.is(eventType)) {
+            Log.i(this, "Expected Event : " + mExpectedEvent + ", actual Event : " + eventType);
             return;
         }
 

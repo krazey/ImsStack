@@ -48,9 +48,8 @@ import java.util.Objects;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NetworkInitiatedUssiTest extends CallTestBase {
-    static final int DEFAULT_TERMINATE_TIME_MS = 1000;
-    static final int TIMING_MARGIN_MS = 1000;
-    static final int MODE_REQUEST = 1;
+    private static final int TIMING_MARGIN_MS = 1000;
+    private static final int MODE_REQUEST = 1;
 
     @NonNull private TestCall mCall = null;
 
@@ -214,6 +213,6 @@ public class NetworkInitiatedUssiTest extends CallTestBase {
         mCall.expectWithin(timeToTerminateMs + TIMING_MARGIN_MS).terminated(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
         logi(this, "terminated");
-        mCall.expectWithin(1000).nothing();
+        mCall.expectWithin(TIMING_MARGIN_MS).nothing();
     }
 }
