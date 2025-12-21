@@ -1678,10 +1678,12 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     m_pAosHandle->SetServiceType(ImsAosService::MTC);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_PERMANENTLY_FAILED),
             ImsAosReason::NOT_SPECIFIED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::REG_FAILURE), ImsAosReason::NOT_SPECIFIED);
 
     m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_PERMANENTLY_FAILED),
             ImsAosReason::DATA_PERMANENTLY_FAILED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::REG_FAILURE), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::REG_ALL_PCSCF_FAILED),
             ImsAosReason::REG_ALL_PCSCF_FAILED);
 }
@@ -4670,6 +4672,18 @@ TEST_F(AosHandleTest, ShouldSetRegToNexePcscfRequestedToTrueIfMtcService)
 {
     // GIVEN
     m_pAosHandle->SetServiceType(ImsAosService::MTC);
+
+    // WHEN
+    m_pAosHandle->RegisterWithNextPcscf(0);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsRegToNextPcscfRequested());
+}
+
+TEST_F(AosHandleTest, ShouldSetRegToNexePcscfRequestedToTrueIfEmergencyMtcService)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
 
     // WHEN
     m_pAosHandle->RegisterWithNextPcscf(0);

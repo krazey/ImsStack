@@ -504,6 +504,17 @@ TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenESmsIsInitiated)
     EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
 }
 
+TEST_F(AosEApplicationTest, ShouldPostScscfRestorationMessageIfRequestedPcscfNextWithDiscovery)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(MSG_SCSCF_RESTORATION)));
+
+    // WHEN
+    m_pTestAosEApplication->RequestCmd(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+
+    // THEN: The GIVEN expectation should be met.
+}
+
 TEST_F(AosEApplicationTest, GetProperty)
 {
     IMS_UINT32 nValue;
@@ -1571,6 +1582,20 @@ TEST_F(AosEApplicationTest, ShouldNotNotifyRegistrationIfIpcanIsChangedWhileTheC
     m_pTestAosEApplication->ProcessMessage(objMessage);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEApplicationTest, ShouldRequestScscfRestorationToRegistrationIfTheMessageReceived)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_INCREASE_FAILURE_COUNT_FOR_PDN_REACTIVATED, _));
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, _));
+
+    // WHEN
+    ImsMessage objMessage(MSG_SCSCF_RESTORATION, 0, 0);
+    m_pTestAosEApplication->ProcessMessage(objMessage);
+
+    // THEN: The GIVEN expectaiton should be met.
 }
 
 TEST_F(AosEApplicationTest, ShouldPostMessageForIpcanChangeIfConnectionNotifiesIpcanChanged)

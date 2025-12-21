@@ -25,6 +25,7 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
+#include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
@@ -95,6 +96,10 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
         case CMD_ECALL_INIT:  // FALL-THROUGH
         case CMD_ESMS_INIT:
             SetRegBlockInCbm(IMS_FALSE);
+            break;
+
+        case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
+            PostMessage(MSG_SCSCF_RESTORATION, 0, nReason);
             break;
 
         default:
@@ -275,6 +280,10 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
             {
                 ProcessIpcanChanged(objMsg);
             }
+            break;
+
+        case MSG_SCSCF_RESTORATION:
+            ProcessScscfRestoration(objMsg);
             break;
 
         default:

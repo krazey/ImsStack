@@ -124,6 +124,7 @@ protected:
     void ProcessModeTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
     void ProcessWaitEmergencyNetworkTimerExpired() final;
+    void ProcessScscfRestoration(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) final;
 
     void SetRefreshPolicy() final;
     void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired) final;

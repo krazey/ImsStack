@@ -28,12 +28,14 @@
 #include "IRegistration.h"
 #include "SipStatusCode.h"
 #include "IAosService.h"
+#include "ImsAosParameter.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
 #include "interface/IAosEmergencyListener.h"
+#include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosPcscf.h"
@@ -640,6 +642,34 @@ PROTECTED VIRTUAL void AosERegistration::ProcessWaitEmergencyNetworkTimerExpired
 {
     Start();
     StopTimer(TIMER_WAIT_EMERGENCY_NETWORK);
+}
+
+PROTECTED VIRTUAL void AosERegistration::ProcessScscfRestoration(
+        IN IMS_UINT32 /* nUnavailableTimeForCurrentPcscf */)
+{
+    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration", 0, 0, 0);
+
+    IAosPcscf* piPcscf = m_piContext->GetPcscf();
+
+    if (piPcscf == IMS_NULL)
+    {
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_INTERNAL);
+        return;
+    }
+
+    piPcscf->SetCurrentPcscfInvalid();
+    m_nConsecutiveFailure++;
+
+    if (piPcscf->HasNextPcscf())
+    {
+        DestroyEx();
+        SetNextPcscf(IMS_FALSE);
+        Start();
+    }
+    else
+    {
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_INTERNAL);
+    }
 }
 
 PROTECTED VIRTUAL void AosERegistration::SetRefreshPolicy()

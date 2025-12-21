@@ -92,6 +92,7 @@ using ::testing::ReturnRef;
     using Base::ProcessNormalDefaultFlowRecovery_Start;                      \
     using Base::ProcessRearrangePcscf;                                       \
     using Base::ProcessReinitiateWithRegState;                               \
+    using Base::ProcessScscfRestoration;                                     \
     using Base::ProcessStartFailed_StatusCode;                               \
     using Base::ProcessStartFailed_TxnTimeout;                               \
     using Base::ProcessTransactionTimerExpired;                              \
@@ -152,6 +153,8 @@ public:
     inline EmergencyModeInfo* GetEModeInfo() { return m_pEModeInfo; }
 
     inline void SetConsecutiveFailure(IN IMS_UINT32 nValue) { m_nConsecutiveFailure = nValue; }
+
+    inline IMS_UINT32 GetConsecutiveFailure() { return m_nConsecutiveFailure; }
 
     inline ITimer* GetTransactionTimer() { return m_piTransactionTimer; }
 
@@ -2289,4 +2292,68 @@ TEST_F(AosERegistrationTest, ShouldSetNextPcscfWithRearrangeIfAllPcscfsFailedWhe
     m_pAosERegistration->ProcessTransactionTimerExpired();
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosERegistrationTest, ShouldReportFailureIfAosPcscfIsNullOnScscfRestoration)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetPcscf()).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    // WHEN
+    m_pAosERegistration->ProcessScscfRestoration(0);
+
+    // THEN: The GIVEN expectation should be met.
+}
+
+TEST_F(AosERegistrationTest, ShouldIncreasConsecutiveFailureCountOnScscfRestoration)
+{
+    // WHEN
+    m_pAosERegistration->ProcessScscfRestoration(0);
+
+    // THEN
+    EXPECT_EQ(m_pAosERegistration->GetConsecutiveFailure(), 1);
+}
+
+TEST_F(AosERegistrationTest, ShouldSetCurrentPcscfInvalidOnScscfRestoration)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0));
+
+    // WHEN
+    m_pAosERegistration->ProcessScscfRestoration(0);
+
+    // THEN: The GIVEN expectation should be met.
+}
+
+TEST_F(AosERegistrationTest, ShouldSendRegisterToNextPcscfIfNextPcscfAvailableOnScscfRestoration)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _));
+    EXPECT_CALL(m_objMockIRegistration, Register(_));
+
+    // WHEN
+    m_pAosERegistration->ProcessScscfRestoration(0);
+
+    // THEN: The GIVEN expectations should be met.
+}
+
+TEST_F(AosERegistrationTest, ShouldReportFailureIfNoPcscfAvailableOnScscfRestoration)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    // WHEN
+    m_pAosERegistration->ProcessScscfRestoration(0);
+
+    // THEN: The GIVEN expectation should be met.
 }

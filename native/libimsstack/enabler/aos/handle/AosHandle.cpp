@@ -437,7 +437,7 @@ PUBLIC VIRTUAL void AosHandle::RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableT
     A_IMS_TRACE_D(APPPROFILE, "RegisterWithNextPcscf :: nUnavailableTimeForCurrentPcscf (%d)",
             nUnavailableTimeForCurrentPcscf, 0, 0);
 
-    if (m_nServiceType == ImsAosService::MTC)
+    if (m_nServiceType == ImsAosService::MTC || m_nServiceType == ImsAosService::EMERGENCY_MTC)
     {
         m_bRegToNextPcscfRequested = IMS_TRUE;
     }
@@ -694,6 +694,12 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason) const
             break;
         case AosReason::REG_ALL_PCSCF_FAILED:
             nImsAosReason = ImsAosReason::REG_ALL_PCSCF_FAILED;
+            break;
+        case AosReason::REG_FAILURE:
+            if (m_nServiceType == ImsAosService::EMERGENCY_MTC)
+            {
+                nImsAosReason = ImsAosReason::REG_TERMINATED;
+            }
             break;
         case AosReason::IP_CHANGED:
             nImsAosReason = ImsAosReason::IP_CHANGED;
