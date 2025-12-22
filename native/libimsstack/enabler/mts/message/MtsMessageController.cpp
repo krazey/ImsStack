@@ -33,6 +33,7 @@
 #include "IJniMtsAppThread.h"
 #include "IMessage.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "ISipHeader.h"
 #include "IPageMessage.h"
 #include "IMtsContext.h"
