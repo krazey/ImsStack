@@ -156,6 +156,7 @@ using ::testing::SetArgReferee;
     using Base::ProcessStartFailed_Others;                          \
     using Base::ProcessSubReinitiate;                               \
     using Base::ProcessSubscriberFailed;                            \
+    using Base::ProcessTransactionTimerExpired;                     \
     using Base::ProcessUpdateFailed_Others;                         \
     using Base::ProcessUnpredictableFailure;                        \
     using Base::Registration_AuthenticationChallenged;              \
@@ -338,6 +339,10 @@ public:
         return AosRegistration::CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
     }
     inline IMS_UINT32 GetPdnReactivateWaitTime() { return m_nPdnReactivateWaitTime; }
+    inline void SetRegByPcscfRestored(IN IMS_BOOL bIsRegByPcscfRestoration)
+    {
+        m_bRegByPcscfRestoration = bIsRegByPcscfRestoration;
+    }
 
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
     IMS_BOOL CheckRadioReadyAndSetTxnPending() override
@@ -449,6 +454,11 @@ public:
     {
         m_pCounter->AddCount(__IMS_FUNC__);
         AosRegistration::CloseUnsecureTcpSocket();
+    }
+    void ProcessScscfRestoration(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessScscfRestoration(nUnavailableTimeForCurrentPcscf);
     }
 
 private:
@@ -1380,6 +1390,148 @@ TEST_F(AosRegistrationTest, ShouldDestroyRegistrationIfDeregisterFailedWhileScsc
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotStartTransactionTimerIfTheRestorationIsNotByMtc)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, HasPcscf(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTransactionTimeoutOnPcscfRestoration())
+            .WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objAvailableImpus));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, ShouldStartTransactionTimerIfTimeoutForRestorationIsGreaterThanZero)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasPcscf(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTransactionTimeoutOnPcscfRestoration())
+            .WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objAvailableImpus));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, ShouldNotStartTransactionTimerIfTimeoutForRestorationIsZero)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasPcscf(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTransactionTimeoutOnPcscfRestoration())
+            .WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objAvailableImpus));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest,
+        TransactionTimerShouldStopIfRegIsByPcscfRestorationWhenRegAuthenticationChallenged)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegByPcscfRestored(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 3000);
+
+    // WHEN
+    IMS_BOOL bResponseToChallenge = IMS_FALSE;
+    m_pAosRegistration->Registration_AuthenticationChallenged(
+            Credential::TYPE_MD5, bResponseToChallenge);
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, TransactionTimerShouldStopIfRegIsByPcscfRestorationWhenRegStarted)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegByPcscfRestored(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 3000);
+
+    // WHEN
+    m_pAosRegistration->Registration_Started();
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, TransactionTimerShouldStopIfRegIsByPcscfRestorationWhenRegStartFailed)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegByPcscfRestored(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 3000);
+
+    // WHEN
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, TransactionTimerShouldStopIfRegIsNotByPcscfRestorationWhenExpired)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegByPcscfRestored(IMS_FALSE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 3000);
+
+    // WHEN
+    m_pAosRegistration->ProcessTransactionTimerExpired();
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, TransactionTimerShouldStopIfRegIsByPcscfRestorationWhenExpired)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegByPcscfRestored(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 3000);
+
+    // WHEN
+    m_pAosRegistration->ProcessTransactionTimerExpired();
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldRunProcessScscfRestorationIfTransactionTimerExpiredWhenRegIsByPcscfRestoration)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegByPcscfRestored(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 3000);
+
+    // WHEN
+    m_pAosRegistration->ProcessTransactionTimerExpired();
+
+    // THEN
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessScscfRestoration"), 1);
 }
 
 TEST_F(AosRegistrationTest, ClearErrorCountWhenRequestToClearServerSocketErrorCount)

@@ -143,6 +143,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_eImsReasonCode(AosReasonCode::UNSPECIFIED),
         m_nPdnReactivateWaitTime(RETRY_DEFAULT_WAIT_TIME),
         m_nDataFailureReason(0),
+        m_bRegByPcscfRestoration(IMS_FALSE),
         m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
 {
     // Init Object
@@ -2106,6 +2107,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
         return IMS_FALSE;
     }
 
+    StartTransactionTimerForPcscfRestoration();
+
     SetContactAddressConfiguration(IMS_TRUE);
 
     return IMS_TRUE;
@@ -2140,6 +2143,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegisterEx(
         A_IMS_TRACE_I(REGID, "register is failed", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    StartTransactionTimerForPcscfRestoration();
 
     return IMS_TRUE;
 }
@@ -3433,16 +3438,25 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
         }
     }
 
+    const IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+    IMS_BOOL bIsRegToNextPcscfRequestedByMtc =
+            piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested();
+
     if (piPcscf->HasNextPcscf())
     {
         DestroyEx();
         SetNextPcscf(IMS_FALSE);
+
+        if (bIsRegToNextPcscfRequestedByMtc)
+        {
+            m_bRegByPcscfRestoration = IMS_TRUE;
+        }
+
         Start();
     }
     else
     {
-        const IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
-        if (piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested())
+        if (bIsRegToNextPcscfRequestedByMtc)
         {
             ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_NO_PCSCF_AVAILABLE);
 
@@ -5360,6 +5374,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
         return;
     }
 
+    StopTransactionTimerForPcscfRestoration();
+
     m_nAuthChallengeCount++;
 
     if (!IsAuthChallengeMoreAllowed() || IsAuthFailureMaxCountReached())
@@ -5560,6 +5576,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     ClearAuthChallengedCount();
     ClearAuthIpsecCount();
 
+    StopTransactionTimerForPcscfRestoration();
+
     if (m_eRegType != AosRegistrationType::NORMAL ||
             GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
                     CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
@@ -5609,6 +5627,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     {
         return;
     }
+
+    StopTransactionTimerForPcscfRestoration();
 
     if (!IsAuthChallengeMoreAllowed())
     {
@@ -5950,6 +5970,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessModeTimerExpired()
 PROTECTED VIRTUAL void AosRegistration::ProcessTransactionTimerExpired()
 {
     StopTimer(TIMER_TRANSACTION);
+
+    if (m_bRegByPcscfRestoration)
+    {
+        m_bRegByPcscfRestoration = IMS_FALSE;
+        ProcessScscfRestoration(0);
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessInternalErrorTimerExpired()
@@ -6117,6 +6143,7 @@ PROTECTED VIRTUAL void AosRegistration::ClearTimers()
     if (m_piTransactionTimer != IMS_NULL)
     {
         StopTimer(TIMER_TRANSACTION);
+        m_bRegByPcscfRestoration = IMS_FALSE;
     }
 
     if (m_piInternalErrorTimer != IMS_NULL)
@@ -7003,6 +7030,30 @@ void AosRegistration::NotifyTechnologyChangeFailed()
                 nImsRegType, m_eImsReasonCode, 0);
         piService->NotifyTechnologyChangeFailed(
                 nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode);
+    }
+}
+
+PRIVATE
+void AosRegistration::StartTransactionTimerForPcscfRestoration()
+{
+    if (m_bRegByPcscfRestoration)
+    {
+        IMS_SINT32 nTimeoutSec =
+                GET_N_CONFIG(m_nSlotId)->GetRegTransactionTimeoutOnPcscfRestoration();
+        if (nTimeoutSec > 0)
+        {
+            StartTimer(TIMER_TRANSACTION, nTimeoutSec * 1000);
+        }
+    }
+}
+
+PRIVATE
+void AosRegistration::StopTransactionTimerForPcscfRestoration()
+{
+    if (m_bRegByPcscfRestoration)
+    {
+        StopTimer(TIMER_TRANSACTION);
+        m_bRegByPcscfRestoration = IMS_FALSE;
     }
 }
 

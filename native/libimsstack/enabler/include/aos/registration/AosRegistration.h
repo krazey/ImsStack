@@ -442,6 +442,8 @@ private:
     void UpdateUserInfoInContact();
     void UpdateModeToHandles();
     void NotifyTechnologyChangeFailed();
+    void StartTransactionTimerForPcscfRestoration();
+    void StopTransactionTimerForPcscfRestoration();
 
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
@@ -645,6 +647,9 @@ protected:
 
     /// Data failure reason for PDN disconnection
     IMS_SINT32 m_nDataFailureReason;
+
+    /// Flag indicating if the registration is triggered by Pcscf restoration procedure
+    IMS_BOOL m_bRegByPcscfRestoration;
 
     AString m_strTag;
 
