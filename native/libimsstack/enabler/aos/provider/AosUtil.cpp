@@ -28,6 +28,7 @@
 #include "IConfiguration.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "IRegistration.h"
 #include "ISipRtConfigHelper.h"
 #include "SipFactory.h"
