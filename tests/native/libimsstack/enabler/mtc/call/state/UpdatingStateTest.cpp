@@ -989,12 +989,66 @@ TEST_F(UpdatingStateTest, SessionEarlyMediaUpdatedReturnsEstablishedStateIfNegoF
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionEarlyMediaUpdated(&objSession));
 }
 
-TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateFailedReturnsEstablishedState)
+TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateFailed)
 {
+    // Expect CancelUpdate to be called
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE));
+    EXPECT_CALL(objMtcSession, CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED)));
+
+    // Expect RecoverModificationFailure to be called
+    EXPECT_CALL(objMtcSession, GetPreviousCallType());
+    EXPECT_CALL(objMtcSession, SetCallType(_));
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+    // Expect NotifyFailure to be called (default case)
     EXPECT_CALL(objUiNotifier,
             SendUpdateFailed(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION)));
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pUpdatingState->SessionEarlyMediaUpdateFailed(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateFailedNotifiesHoldFailed)
+{
+    // Set up conditions for IsHeld() to be true
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+
+    // Expect CancelUpdate to be called
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE));
+    EXPECT_CALL(objMtcSession, CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED)));
+
+    // Expect RecoverModificationFailure to be called
+    EXPECT_CALL(objMtcSession, GetPreviousCallType());
+    EXPECT_CALL(objMtcSession, SetCallType(_));
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+
+    // Expect NotifyFailure to call SendHoldFailed
+    EXPECT_CALL(objUiNotifier, SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED)));
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pUpdatingState->SessionEarlyMediaUpdateFailed(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateFailedNotifiesResumeFailed)
+{
+    // Set up conditions for IsResumed() to be true
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    // Expect CancelUpdate to be called
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE));
+    EXPECT_CALL(objMtcSession, CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED)));
+
+    // Expect RecoverModificationFailure to be called
+    EXPECT_CALL(objMtcSession, GetPreviousCallType());
+    EXPECT_CALL(objMtcSession, SetCallType(_));
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+
+    // Expect NotifyFailure to call SendResumeFailed
+    EXPECT_CALL(objUiNotifier, SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED)));
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->SessionEarlyMediaUpdateFailed(&objSession));
