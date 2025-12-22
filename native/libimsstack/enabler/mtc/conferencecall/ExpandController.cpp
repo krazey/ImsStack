@@ -173,7 +173,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
 
     if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
     {
-        // TODO: Check if it's okay that objUsers is empty.
+        // This is not a verified operation.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         m_pOperationQueue->CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
@@ -262,18 +262,18 @@ PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UIN
         return;
     }
 
-    // Session is updated to conference during EXPANDING state - LGU+
-    // expanded_by will be notified via LGUPUCSession::StateCONVERSATION_Updated()
+    // Session is updated to conference during STATE_EXPANDING - LGU+.
 
     // Add the user of exist 1-to-1 session to participant list
     IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
 
-    ConfUser* p1to1User = new ConfUser();  // TODO: delete
+    ConfUser* p1to1User = new ConfUser();
     SipAddress objSIPAddress(
             GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
     p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
 
     m_pParticipantList->AddUser(p1to1User);
+    delete p1to1User;
     m_pParticipantList->LogLn();
 
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);

@@ -82,7 +82,7 @@ void ConferenceParticipantList::AddUser(IN const ConfUser* pConfUser)
 {
     ConferenceParticipant* pParticipant = new ConferenceParticipant();
     m_objParticipants.Append(pParticipant);
-    pParticipant->SetConfUser(pConfUser);  // TODO: CopyConfUser
+    pParticipant->SetConfUser(pConfUser);
 }
 
 PUBLIC

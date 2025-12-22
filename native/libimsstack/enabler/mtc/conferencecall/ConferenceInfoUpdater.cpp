@@ -223,8 +223,7 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 
     if (!bFound)
     {
-        // TODO: reaching here means there is a user-entity which is invalidstatusupdate
-        // return IMS_FAILURE;
+        IMS_TRACE_E(0, "UpdateParticipantList : No update found.", 0, 0, 0);
     }
 
     if (m_nInfoState == ConferenceInfo::STATE_FULL)
@@ -324,9 +323,13 @@ IMS_BOOL ConferenceInfoUpdater::UpdateParticipant(
 
     if (nParticipantIndex < 0)
     {
-        IMS_TRACE_D("UpdateParticipant : Add Participant via xml body", 0, 0, 0);
+        // An already disconnected/deleted user can be remained in the CEP.
+        // Or, a real new user can be added through the CEP.
+        IMS_TRACE_D("UpdateParticipant : New user is added via CEP.", 0, 0, 0);
         nParticipantIndex = m_pParticipantList->GetSize();
-        m_pParticipantList->AddUser(new ConfUser());
+        ConfUser* pNewUserAddedByCep = new ConfUser();
+        m_pParticipantList->AddUser(pNewUserAddedByCep);
+        delete pNewUserAddedByCep;
     }
 
     ConferenceParticipantList::ConferenceParticipant* pParticipant =

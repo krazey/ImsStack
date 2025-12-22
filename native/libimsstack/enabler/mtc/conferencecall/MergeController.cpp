@@ -47,7 +47,7 @@ PUBLIC VIRTUAL MergeController::~MergeController()
 
 PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objUsers)
 {
-    IMS_TRACE_I("ProcessMerge user size[%d]", objUsers.GetSize(), 0, 0);
+    IMS_TRACE_I("ProcessMerge user state[%d] size[%d]", GetState(), objUsers.GetSize(), 0);
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
@@ -79,10 +79,12 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
 
     if (nOldState == STATE_CREATED)
     {
+        // Initial Merge.
         UpdateStartCallType(objUsers);
         ClearListForConfUsers(objUsers);
 
-        // TODO: Check if it's okay to use CreateNPut() due to no users.
+        // 'objUsers' is empty for the traditional merge operation.
+        // During the conference call creation, the users list is not required.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
@@ -91,6 +93,11 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
         {
             m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         }
+    }
+    else
+    {
+        // Additional Merge.
+        ClearListForConfUsers(objUsers);
     }
 
     IMS_TRACE_I("ProcessMerge [%d]", m_pParticipantList->GetSize(), 0, 0);
@@ -204,6 +211,7 @@ void MergeController::ProcessMergeWithoutRefer(IN ImsList<ConfUser*>& objUsers)
     if (nOldState == STATE_CREATED)
     {
         UpdateStartCallType(objUsers);
+        // 'objUsers` must be passed so that the INVITE contains the users list in the XML body.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_pOperationQueue->SetAddingOperationSetCompleted();

@@ -87,14 +87,10 @@ PUBLIC VIRTUAL void ConferenceController::OnCallStateChanged(
     switch (eState)
     {
         case State::ESTABLISHED:
-            // TODO: how to distinguish 'started' / 'updated'
             OnCallUpdated(CALL_STARTED, nCallKey);
-            // OnCallUpdated(CALL_UPDATED, nCallKey);
             break;
         case State::TERMINATING:
-            // TODO: how to distinguish 'start failed' / 'terminated'...
             OnCallUpdated(CALL_TERMINATED, nCallKey);
-            // OnCallUpdated(CALL_STARTFAILED, nCallKey);
             break;
         default:
             break;
@@ -141,7 +137,6 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
 
             NotifyConferenceInfo();
             NotifyUsersInfo();
-            // TODO: check user entity status.
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_CHECK_CONNECTED);
             break;
 
@@ -206,12 +201,7 @@ PUBLIC VIRTUAL void ConferenceController::OnReferenceStartFailed(IN IConferenceR
 PUBLIC VIRTUAL void ConferenceController::OnReferenceUpdated(IN IConferenceReference* piConfRef,
         IN IMS_SINT32 nSipFragCode, IN ReferSubscriptionState eState)
 {
-    // TODO: separate functions. : HandleSuccessSipFrag / HandleFailureSipFrag
-    // ExpandController to override them.
-
     IMS_TRACE_D("OnReferenceUpdated : R-NOTIFY is received.", 0, 0, 0);
-
-    // TODO: check confref is in the references list.
 
     if (piConfRef->GetType() == REFERENCE_TYPE_INVITE)
     {
@@ -345,8 +335,6 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
         ConfUser* pConfUser = m_pParticipantList->GetConfUser(i);
         if (pConfUser->eStatus == STATUS_DISCONNECTED)
         {
-            // TODO: check if removing ConfUser when it's disconnected is okay.
-            // Otherwise, just update the connection id of the disconnected ConfUser
             continue;
         }
 
@@ -471,6 +459,9 @@ IMS_UINT32 ConferenceController::AddUserToParticipantList(
 
     for (IMS_UINT32 i = 0; i < nAddingSize; i++)
     {
+        // This copies the ConfUser.
+        // 'ConferenceController#ClearListForConfUsers' deletes the original ConfUsers
+        // after invoking 'AddUserToParticipantList'.
         m_pParticipantList->AddUser(objConfUsers.GetAt(i));
     }
     IMS_TRACE_D("AddUserToParticipantList size[%d]", m_pParticipantList->GetSize(), 0, 0);
@@ -1028,8 +1019,7 @@ void ConferenceController::SendClosed()
 PROTECTED
 void ConferenceController::NotifyResultToConferenceCall()
 {
-    // TODO: resume conference call if held.
-    // piConfSession->OnConferenceCompleted(IMS_SUCCESS);
+    // No operation here currently.
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL);
 }
 
