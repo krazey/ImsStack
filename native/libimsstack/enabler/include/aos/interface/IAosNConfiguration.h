@@ -696,6 +696,16 @@ public:
     virtual IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const = 0;
 
     /**
+     * @brief Flag specifying whether to release the Emergency PDN for an emergency-attached UE
+     *        after an emergency call terminates.
+     *
+     * @return IMS_TRUE to release the EPDN immediately.
+     *         IMS_FALSE to follow legacy behavior.
+     * @see {@code imsemergency.release_epdn_upon_ecall_end_if_eattach_bool}
+     */
+    virtual IMS_BOOL IsReleaseEPdnUponECallEndIfEAttach() const = 0;
+
+    /**
      * @brief Flag specifying if emergency PDN would be released upon emergency call is terminated
      *        in fake mode.
      *

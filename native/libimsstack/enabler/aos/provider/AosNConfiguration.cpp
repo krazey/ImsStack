@@ -484,6 +484,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReleaseEPdnOfUnavailableNetwork() c
     return m_objAsset.bReleaseEPdnOfUnavailableNetwork;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReleaseEPdnUponECallEndIfEAttach() const
+{
+    return m_objAsset.bReleaseEPdnUponECallEndIfEAttach;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReleaseEPdnUponECallEndInFakeMode() const
 {
     return m_objAsset.bReleaseEPdnUponECallEndInFakeMode;
@@ -1712,6 +1717,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL);
     m_objAsset.bReleaseEPdnOfUnavailableNetwork = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_OF_UNAVAILABLE_NETWORK_BOOL);
+    m_objAsset.bReleaseEPdnUponECallEndIfEAttach = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IF_EATTACH_BOOL);
     m_objAsset.bReleaseEPdnUponECallEndInFakeMode = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =

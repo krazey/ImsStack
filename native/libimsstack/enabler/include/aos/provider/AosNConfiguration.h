@@ -123,6 +123,7 @@ public:
     IMS_BOOL IsUseRegInfoContactWithoutUriCheck() const override;
     IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const override;
     IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const override;
+    IMS_BOOL IsReleaseEPdnUponECallEndIfEAttach() const override;
     IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const override;
     IMS_BOOL ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const override;
 

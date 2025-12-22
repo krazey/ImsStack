@@ -664,6 +664,10 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IF_EATTACH_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL,
                     IMS_FALSE))
@@ -1032,6 +1036,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsContactUriValidationChecked());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegRetryWithIpVerFallback());
+    EXPECT_FALSE(m_pAosNConfiguration->IsReleaseEPdnUponECallEndIfEAttach());
     EXPECT_TRUE(m_pAosNConfiguration->IsReleaseEPdnUponECallEndInFakeMode());
     EXPECT_FALSE(m_pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(m_pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
