@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SIP_IPSEC_STATE_H_
 #define INTERFACE_SIP_IPSEC_STATE_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
+
+class IpAddress;
 
 class ISipIpSecStateListener;
 

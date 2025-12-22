@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "SipClientConnectionImpl.h"
 #include "SipConfigProxy.h"
+#include "SipConnectionNotifier.h"
 #include "SipConnectionNotifierImpl.h"
 #include "SipDebug.h"
 #include "SipFactoryProxy.h"

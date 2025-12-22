@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Credential.h"
+#include "ImsDigest.h"
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
-#include "ImsDigest.h"
+#include "ServiceTrace.h"
 
+#include "ISipGenericChallenge.h"
 #include "ISipHeader.h"
 #include "SipAuHelper.h"
 #include "SipDebug.h"

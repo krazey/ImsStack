@@ -20,7 +20,9 @@
 #include "SipClientTransactionState.h"
 #include "SipClientTransmissionProxy.h"
 #include "SipConfigProxy.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
+#include "SipSocket.h"
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 

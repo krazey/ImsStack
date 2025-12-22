@@ -16,7 +16,9 @@
 #ifndef SIP_FACTORY_H_
 #define SIP_FACTORY_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class ISipIpSecState;
 class ISipKeepAliveHelper;

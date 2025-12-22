@@ -16,10 +16,14 @@
 #ifndef SIP_MESSAGE_H_
 #define SIP_MESSAGE_H_
 
-#include "ISipMessage.h"
-#include "SipMessageBodyPart.h"
-#include "SipStatusCode.h"
 #include "msg/SipMessage.h"
+
+#include "ISipMessage.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "SipUnknownHeaders.h"
+
+class SipMessageBodyPart;
 
 namespace sipcore
 {

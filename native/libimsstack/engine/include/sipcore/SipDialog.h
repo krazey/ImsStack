@@ -20,6 +20,7 @@
 
 class ISipHeader;
 class SipClientConnection;
+class SipMethod;
 
 /**
  * @brief This class represents one SIP dialog.

@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SIP_GENERIC_CHALLENGE_H_
 #define INTERFACE_SIP_GENERIC_CHALLENGE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 /**
  * @brief This class provides an interface to handle SIP authentication challenge.

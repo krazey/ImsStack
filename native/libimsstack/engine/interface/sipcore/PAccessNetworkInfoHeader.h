@@ -16,12 +16,14 @@
 #ifndef P_ACCESS_NETWORK_INFO_HEADER_H_
 #define P_ACCESS_NETWORK_INFO_HEADER_H_
 
-#include "ImsAccessNetworkInfoType.h"
-#include "IpAddress.h"
-#include "SipMethod.h"
+#include "ImsTypeDef.h"
 
+class AccessNetworkInfo;
 class INetworkConnection;
+class IpAddress;
+
 class ISipMessage;
+class SipMethod;
 class SipProfile;
 
 /**

@@ -16,8 +16,9 @@
 #ifndef SIP_MESSAGE_INFO_H_
 #define SIP_MESSAGE_INFO_H_
 
-#include "SipMethod.h"
 #include "msg/SipMessage.h"
+
+class SipMethod;
 
 /**
  * @brief This class includes an information of the current processing SIP Message.

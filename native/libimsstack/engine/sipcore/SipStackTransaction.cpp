@@ -15,6 +15,8 @@
  */
 #include "ServiceMemory.h"
 
+#include "txn/SipTxn.h"
+
 #include "SipStack.h"
 #include "SipStackTransaction.h"
 

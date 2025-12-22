@@ -16,8 +16,13 @@
 #ifndef SIP_MANAGER_H_
 #define SIP_MANAGER_H_
 
-#include "SipConnectionNotifier.h"
-#include "SipDialogState.h"
+#include "AString.h"
+
+#include "msg/SipMessage.h"
+
+class SipConnectionNotifier;
+class SipDialogState;
+class SipTransportAddress;
 
 class SipManager
 {

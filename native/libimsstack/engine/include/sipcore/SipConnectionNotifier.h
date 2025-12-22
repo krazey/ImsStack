@@ -16,13 +16,14 @@
 #ifndef SIP_CONNECTION_NOTIFIER_H_
 #define SIP_CONNECTION_NOTIFIER_H_
 
+#include "IpAddress.h"
+
 #include "Connection.h"
 #include "ISipServerTransactionStateListener.h"
 #include "ISipSocketListener.h"
 #include "Sip.h"
 #include "SipProfile.h"
 #include "SipServerTransactionState.h"
-#include "SipTransportAddress.h"
 
 class IOnSipConnectionNotifierErrorListener;
 class IOnSipServerConnectionListener;
@@ -31,6 +32,7 @@ class ISipServerConnection;
 class SipParameter;
 class SipSocket;
 class SipSocketAddress;
+class SipTransportAddress;
 class SipTransportHelper;
 
 class SipConnectionNotifier :

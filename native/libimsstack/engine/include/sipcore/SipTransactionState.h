@@ -16,19 +16,24 @@
 #ifndef SIP_TRANSACTION_STATE_H_
 #define SIP_TRANSACTION_STATE_H_
 
-#include "IpAddress.h"
 #include "RcObject.h"
+
+#include "msg/SipMessage.h"
+#include "txn/SipTxnKey.h"
 
 #include "Sip.h"
 #include "SipDialogEx.h"
 #include "SipProfile.h"
-#include "SipTimerValues.h"
-#include "SipTxnContext.h"
-#include "msg/SipMessage.h"
-#include "txn/SipTxnKey.h"
+
+class ByteArray;
+class IpAddress;
+
+class SipTxnContext;
 
 class ISipTransactionStateListener;
 class ISipTransportListener;
+class SipMethod;
+class SipTimerValues;
 class SipTransport;
 
 class SipTransactionState : public RcObject

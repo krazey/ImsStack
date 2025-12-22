@@ -26,6 +26,7 @@
 
 #include "private/SipConfigV.h"
 
+#include "ISipConfig.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipRtConfigHelper.h"
@@ -35,7 +36,9 @@
 #include "SipFactory.h"
 #include "SipFeatures.h"
 #include "SipHeaderName.h"
+#include "SipMethod.h"
 #include "SipParsingHelper.h"
+#include "SipProfile.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

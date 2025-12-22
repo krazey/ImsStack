@@ -18,9 +18,10 @@
 
 #include "SipForkedTransactionManager.h"
 #include "SipTransactionState.h"
-#include "SipTransportAddress.h"
 
 class ISipClientTransactionStateListener;
+class SipMethod;
+class SipTransportAddress;
 
 class SipClientTransactionState : public SipTransactionState
 {

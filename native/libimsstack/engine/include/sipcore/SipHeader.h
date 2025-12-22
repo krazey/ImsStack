@@ -17,7 +17,8 @@
 #define SIP_HEADER_H_
 
 #include "ISipHeader.h"
-#include "msg/SipHeaderBase.h"
+
+class SipHeaderBase;
 
 class SipParameter;
 

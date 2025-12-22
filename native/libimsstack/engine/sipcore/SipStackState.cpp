@@ -15,6 +15,7 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
+#include "ServiceTrace.h"
 
 #include "private/SipConfigV.h"
 

@@ -16,9 +16,10 @@
 #ifndef INTERFACE_SIP_MESSAGE_TRACKER_H_
 #define INTERFACE_SIP_MESSAGE_TRACKER_H_
 
-#include "SipMethod.h"
+#include "ImsTypeDef.h"
 
 class ISipMessageTrackerListener;
+class SipMethod;
 
 /**
  * @brief This class provides an interface to add/remove any filters or set a listener

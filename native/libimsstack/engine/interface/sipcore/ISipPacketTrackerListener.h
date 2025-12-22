@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SIP_PACKET_TRACKER_LISTENER_H_
 #define INTERFACE_SIP_PACKET_TRACKER_LISTENER_H_
 
-#include "ByteArray.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
 
 class ISipMessage;
 

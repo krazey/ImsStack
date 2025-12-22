@@ -18,12 +18,14 @@
 
 #include "RcObject.h"
 
-#include "SipDState.h"
-#include "SipHeader.h"
-#include "SipMessageInfo.h"
+#include "msg/SipMessage.h"
 
+class ISipHeader;
 class SipDialogEx;
 class SipDialogSharedState;
+class SipHeader;
+class SipMessageInfo;
+class SipMethod;
 
 /**
  * @brief This class contains certain pieces of state needed for further message transmissions

@@ -17,11 +17,12 @@
 #define SIP_ROUTING_REJECT_NOTIFIER_H_
 
 #include "ImsList.h"
+
 #include "ISipRoutingRejectNotifier.h"
-#include "SipStatusCode.h"
 
 class ISipMessage;
 class ISipServerConnection;
+class SipStatusCode;
 
 class SipRoutingRejectNotifier : public ISipRoutingRejectNotifier
 {

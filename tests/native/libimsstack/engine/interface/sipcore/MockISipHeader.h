@@ -18,9 +18,11 @@
 #define MOCK_I_SIP_HEADER_H_
 
 #include <gmock/gmock.h>
+
 #include "ISipHeader.h"
-#include "SipAddress.h"
-#include "SipParameter.h"
+
+class SipAddress;
+class SipParameter;
 
 class MockISipHeader : public ISipHeader
 {

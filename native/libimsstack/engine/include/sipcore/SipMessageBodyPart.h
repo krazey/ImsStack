@@ -16,9 +16,13 @@
 #ifndef SIP_MESSAGE_BODY_PART_H_
 #define SIP_MESSAGE_BODY_PART_H_
 
+#include "ByteArray.h"
+
 #include "ISipMessageBodyPart.h"
 #include "SipUnknownHeaders.h"
-#include "msg/SipMsgBody.h"
+
+class SipHeaderBase;
+class SipMsgBody;
 
 class SipMessageBodyPart : public ISipMessageBodyPart
 {

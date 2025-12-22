@@ -16,8 +16,6 @@
 #ifndef SIP_D_STATE_H_
 #define SIP_D_STATE_H_
 
-#include "ImsTypeDef.h"
-
 class SipDState
 {
 public:

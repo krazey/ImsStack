@@ -19,7 +19,9 @@
 #include "ITimer.h"
 
 #include "SipTransactionState.h"
-#include "SipTransportAddress.h"
+
+class SipMethod;
+class SipTransportAddress;
 
 class SipServerTransactionState : public SipTransactionState, public ITimerListener
 {

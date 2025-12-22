@@ -18,6 +18,8 @@
 
 #include "SipDialogUsage.h"
 
+class SipMethod;
+
 /**
  * @brief This class defines a SUBSCRIBE dialog usage.
  *

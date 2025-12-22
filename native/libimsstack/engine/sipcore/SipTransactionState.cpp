@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
+
+#include "SipStackManager.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTxn.h"
 
 #include "ISipTransactionStateListener.h"
 #include "SipFactoryProxy.h"

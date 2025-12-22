@@ -15,6 +15,7 @@
  */
 #include "ServiceMemory.h"
 
+#include "Sip.h"
 #include "SipPrivate.h"
 #include "SipTransportAddress.h"
 

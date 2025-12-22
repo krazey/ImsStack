@@ -16,12 +16,16 @@
 #ifndef SIP_IPSEC_STATE_H_
 #define SIP_IPSEC_STATE_H_
 
-#include "EngineActivity.h"
-#include "ISipIpSecState.h"
-#include "SipTransportAddress.h"
-#include "SipTxnKey.h"
+#include "IpAddress.h"
+
 #include "msg/SipMessage.h"
 #include "txn/SipTxnKey.h"
+
+#include "EngineActivity.h"
+#include "ISipIpSecState.h"
+#include "SipTxnKey.h"
+
+class SipTransportAddress;
 
 class SipIpSecState : public EngineActivity, public ISipIpSecState
 {

@@ -15,12 +15,16 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
+#include "SipDState.h"
 #include "SipDebug.h"
+#include "SipDialog.h"
+#include "SipError.h"
 #include "SipFeatures.h"
 #include "SipPrivate.h"
 #include "SipServerConnection.h"

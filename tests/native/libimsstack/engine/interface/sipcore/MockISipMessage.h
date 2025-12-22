@@ -19,11 +19,10 @@
 
 #include <gmock/gmock.h>
 
-#include "ISipMessageBodyPart.h"
-#include "ISipObject.h"
-#include "SipMethod.h"
-
 #include "ISipMessage.h"
+
+class ISipMessageBodyPart;
+class SipMethod;
 
 class MockISipMessage : public ISipMessage
 {

@@ -16,7 +16,9 @@
 #ifndef SIP_RT_CONFIG_UTILS_H_
 #define SIP_RT_CONFIG_UTILS_H_
 
-#include "SipRtConfigHelper.h"
+#include "ImsTypeDef.h"
+
+class SipRtConfigHelper;
 
 class SipRtConfigUtils
 {

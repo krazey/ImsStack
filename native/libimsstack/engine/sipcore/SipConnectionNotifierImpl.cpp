@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipConnectionNotifierErrorListener.h"
 #include "ISipServerConnectionListener.h"

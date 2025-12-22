@@ -18,12 +18,12 @@
 #define MOCK_I_SIP_CLIENT_CONNECTION_H_
 
 #include <gmock/gmock.h>
-#include "ImsTypeDef.h"
-#include "IpAddress.h"
+
 #include "ISipClientConnection.h"
-#include "Sip.h"
 
 class Credential;
+class IpAddress;
+
 class ISipClientConnectionListener;
 class ISipConnectionNotifier;
 class ISipGenericChallenge;

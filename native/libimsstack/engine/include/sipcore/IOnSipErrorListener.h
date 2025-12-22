@@ -16,7 +16,11 @@
 #ifndef INTERFACE_ON_SIP_ERROR_LISTENER_H_
 #define INTERFACE_ON_SIP_ERROR_LISTENER_H_
 
-#include "SipConnection.h"
+#include "ImsTypeDef.h"
+
+class AString;
+
+class SipConnection;
 
 /**
  * @brief This class defines a listener interface for notifications about failure of

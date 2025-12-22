@@ -16,7 +16,9 @@
 #ifndef SIP_WAKE_LOCK_H_
 #define SIP_WAKE_LOCK_H_
 
-#include "SipMethod.h"
+#include "ImsTypeDef.h"
+
+class SipMethod;
 
 class SipWakeLock
 {

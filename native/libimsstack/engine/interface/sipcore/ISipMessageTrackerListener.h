@@ -16,7 +16,11 @@
 #ifndef INTERFACE_SIP_MESSAGE_TRACKER_LISTENER_H_
 #define INTERFACE_SIP_MESSAGE_TRACKER_LISTENER_H_
 
-#include "SipMethod.h"
+#include "ImsTypeDef.h"
+
+class AString;
+
+class SipMethod;
 
 /**
  * @brief This class provides a listener interface to notify SIP messages

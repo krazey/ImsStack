@@ -16,25 +16,28 @@
 #ifndef SIP_STACK_H_
 #define SIP_STACK_H_
 
-#include "ByteArray.h"
-
-#include "SipContextUtils.h"
-#include "SipMethod.h"
-#include "SipParameter.h"
-#include "SipStackManager.h"
-#include "SipStatusCode.h"
-#include "SipTransactionCallback.h"
-#include "SipTxnContextData.h"
-#include "SipTxnKey.h"
+#include "ISipTransactionCallback.h"
+#include "ISipUserData.h"
 #include "SipStackError.h"
+#include "SipTxnContext.h"
 #include "msg/SipMessage.h"
-#include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 
+#include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "SipTxnContextData.h"
+#include "SipTxnKey.h"
+
+class ByteArray;
+
 class ISipConfigV;
-class ISipHeader;
-class SipProfile;
+
 class SipTimeoutData;
+class SipTxn;
+
+class ISipHeader;
+class SipParameter;
+class SipProfile;
 class SipTimerValues;
 
 namespace SipStack

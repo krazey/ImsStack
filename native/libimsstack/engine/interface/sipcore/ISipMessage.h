@@ -16,10 +16,14 @@
 #ifndef INTERFACE_SIP_MESSAGE_H_
 #define INTERFACE_SIP_MESSAGE_H_
 
-#include "ISipHeader.h"
-#include "ISipMessageBodyPart.h"
+#include "AString.h"
+#include "ByteArray.h"
+
 #include "ISipObject.h"
-#include "SipMethod.h"
+
+class ISipHeader;
+class ISipMessageBodyPart;
+class SipMethod;
 
 /**
  * @brief This class provides an interface to handle SIP message.

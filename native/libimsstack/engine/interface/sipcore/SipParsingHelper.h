@@ -16,7 +16,9 @@
 #ifndef SIP_PARSING_HELPER_H_
 #define SIP_PARSING_HELPER_H_
 
-#include "ByteArray.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
 
 class ISipHeader;
 class ISipMessage;

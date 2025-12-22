@@ -16,8 +16,6 @@
 #ifndef SIP_STREAM_SOCKET_NOTIFIER_H_
 #define SIP_STREAM_SOCKET_NOTIFIER_H_
 
-#include "private/SipConfig.h"
-
 #include "SipSocket.h"
 
 class ISipStreamSocketListener;

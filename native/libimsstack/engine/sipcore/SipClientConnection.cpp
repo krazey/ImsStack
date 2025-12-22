@@ -15,14 +15,18 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "IOnSipClientConnectionListener.h"
+#include "ISipHeader.h"
 #include "SipAuHelper.h"
 #include "SipClientConnection.h"
 #include "SipClientTransmissionProxy.h"
 #include "SipConfigProxy.h"
 #include "SipConnectionNotifier.h"
 #include "SipDebug.h"
+#include "SipDialog.h"
+#include "SipError.h"
 #include "SipMessage.h"
 #include "SipMethod.h"
 #include "SipPrivate.h"

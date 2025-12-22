@@ -17,15 +17,17 @@
 #define INTERFACE_SIP_CONNECTION_H_
 
 #include "AString.h"
+
 #include "IConnection.h"
-#include "SipTimerValues.h"
 
 class ByteArray;
+
 class ISipDialog;
 class ISipErrorListener;
 class ISipMessage;
 class SipMethod;
 class SipProfile;
+class SipTimerValues;
 
 /**
  * @brief This class provides a base interface for SIP transactions.

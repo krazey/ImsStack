@@ -15,8 +15,8 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
-#include "Connector.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 #include "SipStackState.h"
