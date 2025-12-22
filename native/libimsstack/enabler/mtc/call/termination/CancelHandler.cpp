@@ -26,7 +26,41 @@ __IMS_TRACE_TAG_COM_MTC__;
 const LOCAL AString REASON_TEXT_CALL_BUSY_VZW = "another device sent all devices busy response";
 const LOCAL AString REASON_TEXT_CALL_COMPLETED_VZW = "call completion elsewhere";
 
-LOCAL IMS_SINT32 GetCodeFromReason(const ReasonHeaderValue& objReasonResult)
+PUBLIC
+CancelHandler::CancelHandler(IN IMtcCallContext& objContext) :
+        m_objContext(objContext)
+{
+}
+
+PUBLIC
+CancelHandler::~CancelHandler() {}
+
+PUBLIC
+CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
+{
+    return GetCallReasonInfo(m_objContext, objMessage);
+}
+
+PRIVATE
+CallReasonInfo CancelHandler::GetCallReasonInfo(
+        IMtcCallContext& objContext, const IMessage& objMessage)
+{
+    ReasonHeaderValue objReasonResult = objContext.GetMessageUtils().GetPrioritizedReasonHeader(
+            &objMessage, {REASON_SIP_PROTOCOL, REASON_Q850_PROTOCOL, AString::ConstNull()});
+
+    const IMS_SINT32 nCode = GetCodeFromReason(objReasonResult);
+    CallReasonInfo objReasonInfo(nCode);
+
+    EnrichCallReasonInfo(objContext, objReasonResult, objReasonInfo);
+
+    IMS_TRACE_D("GetCallReasonInfo: code=[%d], cause=[%d], extraMessage=[%s]", objReasonInfo.nCode,
+            objReasonInfo.nExtraCode, objReasonInfo.strExtraMessage.GetStr());
+
+    return objReasonInfo;
+}
+
+PRIVATE
+IMS_SINT32 CancelHandler::GetCodeFromReason(const ReasonHeaderValue& objReasonResult)
 {
     if (objReasonResult.strProtocol.EqualsIgnoreCase(REASON_SIP_PROTOCOL))
     {
@@ -53,7 +87,8 @@ LOCAL IMS_SINT32 GetCodeFromReason(const ReasonHeaderValue& objReasonResult)
     return CODE_USER_TERMINATED_BY_REMOTE;
 }
 
-LOCAL void EnrichCallReasonInfo(IMtcCallContext& objContext,
+PRIVATE
+void CancelHandler::EnrichCallReasonInfo(IMtcCallContext& objContext,
         const ReasonHeaderValue& objReasonResult, CallReasonInfo& objReasonInfo)
 {
     if (objContext.GetConfigurationProxy().GetBoolean(
@@ -64,35 +99,4 @@ LOCAL void EnrichCallReasonInfo(IMtcCallContext& objContext,
                         objReasonResult.nCause, objReasonResult.strText, IMS_FALSE);
         objReasonInfo.nExtraCode = objReasonResult.nCause;
     }
-}
-
-LOCAL CallReasonInfo GetCallReasonInfo(IMtcCallContext& objContext, const IMessage& objMessage)
-{
-    ReasonHeaderValue objReasonResult = objContext.GetMessageUtils().GetPrioritizedReasonHeader(
-            &objMessage, {REASON_SIP_PROTOCOL, REASON_Q850_PROTOCOL, AString::ConstNull()});
-
-    const IMS_SINT32 nCode = GetCodeFromReason(objReasonResult);
-    CallReasonInfo objReasonInfo(nCode);
-
-    EnrichCallReasonInfo(objContext, objReasonResult, objReasonInfo);
-
-    IMS_TRACE_D("GetCallReasonInfo: code=[%d], cause=[%d], extraMessage=[%s]", objReasonInfo.nCode,
-            objReasonInfo.nExtraCode, objReasonInfo.strExtraMessage.GetStr());
-
-    return objReasonInfo;
-}
-
-PUBLIC
-CancelHandler::CancelHandler(IN IMtcCallContext& objContext) :
-        m_objContext(objContext)
-{
-}
-
-PUBLIC
-CancelHandler::~CancelHandler() {}
-
-PUBLIC
-CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
-{
-    return GetCallReasonInfo(m_objContext, objMessage);
 }

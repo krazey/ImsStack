@@ -21,7 +21,7 @@
 #include "SipStatusCode.h"
 #include <unordered_map>
 
-static const std::unordered_map<IMS_SINT32, IMS_SINT32> s_defaultStatusCodeAndReasonCodeMap = {
+inline const std::unordered_map<IMS_SINT32, IMS_SINT32> s_defaultStatusCodeAndReasonCodeMap = {
         {SipStatusCode::SC_INVALID, CODE_NETWORK_RESP_TIMEOUT             },
         {SipStatusCode::SC_300,     CODE_SIP_REDIRECTED                   },
         {SipStatusCode::SC_301,     CODE_SIP_REDIRECTED                   },

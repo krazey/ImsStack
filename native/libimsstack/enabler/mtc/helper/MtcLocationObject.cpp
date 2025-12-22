@@ -36,6 +36,7 @@
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "TextParser.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "call/message/TemplateFormatter.h"
@@ -57,22 +58,6 @@ LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_RENDER[] = "render";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_HANDLING_OPTIONAL[] = "handling=optional";
 LOCAL const IMS_CHAR ANONYMOUS_DOMAIN[] = "anonymous.invalid";
-
-LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN EmergencyType eEmergencyType, IN IMS_BOOL bWifi)
-{
-    switch (eEmergencyType)
-    {
-        case EmergencyType::EMERGENCY_ROUTING:
-            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
-                         : ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
-        case EmergencyType::NORMAL_ROUTING:
-            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI
-                         : ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR;
-        default:
-            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI
-                         : ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
-    }
-}
 
 PUBLIC
 MtcLocationObject::MtcLocationObject(IN IMtcCallContext& objContext) :
@@ -400,4 +385,22 @@ IMS_BOOL MtcLocationObject::IsGeolocationBlockedBySuppService(IN IMtcCallContext
     const SuppService* pSuppService =
             objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION);
     return pSuppService != IMS_NULL && !pSuppService->bValue;
+}
+
+PRIVATE
+IMS_SINT32 MtcLocationObject::GetGeolocationPidfAllowedType(
+        IN EmergencyType eEmergencyType, IN IMS_BOOL bWifi)
+{
+    switch (eEmergencyType)
+    {
+        case EmergencyType::EMERGENCY_ROUTING:
+            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+                         : ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
+        case EmergencyType::NORMAL_ROUTING:
+            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI
+                         : ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR;
+        default:
+            return bWifi ? ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI
+                         : ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
+    }
 }

@@ -22,6 +22,7 @@
 
 class IMtcCallContext;
 class IMessage;
+class ReasonHeaderValue;
 
 class CancelHandler final
 {
@@ -34,6 +35,12 @@ public:
     CallReasonInfo Handle(IN const IMessage& objMessage) const;
 
 private:
+    static CallReasonInfo GetCallReasonInfo(
+            IN IMtcCallContext& objContext, IN const IMessage& objMessage);
+    static IMS_SINT32 GetCodeFromReason(IN const ReasonHeaderValue& objReasonResult);
+    static void EnrichCallReasonInfo(IN IMtcCallContext& objContext,
+            IN const ReasonHeaderValue& objReasonResult, IN CallReasonInfo& objReasonInfo);
+
     IMtcCallContext& m_objContext;
 };
 
