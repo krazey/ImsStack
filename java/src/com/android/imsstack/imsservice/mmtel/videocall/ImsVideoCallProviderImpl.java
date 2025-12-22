@@ -48,57 +48,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
     }
 
     @Override
-    public void onSetCamera(String cameraId) {
-        if (mMediaSession == null) {
-            return;
-        }
-        mCameraId = cameraId;
-        if (cameraId == null) {
-            mMediaSession.selectCamera(CAMERA_ID_NONE);
-        } else {
-            int camId = getCameraIdInt(cameraId);
-            if (camId >= ImsCamera.CAMERA_REAR) {
-                mMediaSession.selectCamera(camId);
-            }
-        }
-
-        mCallSession.onSetCamera(cameraId);
-    }
-
-    @Override
-    public void onRequestCameraCapabilities() {
-        if (mCameraId == null) {
-            log("No camera selected");
-            return;
-        }
-
-        VideoDimension vd = getVideoDimensionForPreview();
-        ImsCamera camera = new ImsCamera(mCameraId);
-        float maxZoom = camera.getMaxZoom();
-        boolean zoomSupported = camera.isZoomSupported(maxZoom);
-        Size size = camera.getPreviewSize();
-
-        int width = (vd != null) ? vd.getWidth() : size.getWidth();
-        int height = (vd != null) ? vd.getHeight() : size.getHeight();
-
-        if (camera.isLandscape() && width < height) {
-            int tmp = width;
-            width = height;
-            height = tmp;
-        }
-
-        logi("ImsCamera :: previewSize=" + width + "x" + height
-                + ", maxZoom=" + maxZoom
-                + ", zoomSupported=" + zoomSupported);
-
-        VideoProfile.CameraCapabilities cc = new VideoProfile.CameraCapabilities(width, height,
-                zoomSupported, maxZoom);
-
-        changeCameraCapabilities(cc);
-        return;
-    }
-
-    @Override
     public void receiveSessionModifyRequest(VideoProfile videoProfile) {
         IVideoCallSession callSession = getVideoCallSession();
         boolean callTypeChangeRequest = (callSession != null)
@@ -118,16 +67,8 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
 
         if (callTypeChangeRequest) {
             if (isAudioOnly) {
-                // Auto acceptance for voice call downgrade
-                Handler h = getCallHandler();
-                h.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        logi("Voice call is automatically accepted");
-                        onSendSessionModifyResponse(
-                                new VideoProfile(VideoProfile.STATE_AUDIO_ONLY));
-                    }
-                });
+                logi("Voice call is automatically accepted");
+                sendSessionModifyResponse(new VideoProfile(VideoProfile.STATE_AUDIO_ONLY));
                 return;
             } else {
                 logi("Prepare preview for video call upgrade request (RX)");
@@ -179,9 +120,38 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
         }
     }
 
+    /**
+     * Provides the call data usage to the telephony framework.
+     *
+     * @param dataSize The data usage of the video call in bytes.
+     */
+    public void changeCallDataUsage(long dataSize) {
+        log("changeCallDataUsage :: " + dataSize);
+        super.changeCallDataUsage(dataSize);
+    }
+
     @Override
-    public void onSendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
-        super.onSendSessionModifyRequest(fromProfile, toProfile);
+    protected void setCamera(String cameraId) {
+        if (mMediaSession == null) {
+            return;
+        }
+        mCameraId = cameraId;
+        if (cameraId == null) {
+            mMediaSession.selectCamera(CAMERA_ID_NONE);
+        } else {
+            int camId = getCameraIdInt(cameraId);
+            if (camId >= ImsCamera.CAMERA_REAR) {
+                mMediaSession.selectCamera(camId);
+            }
+        }
+
+        mCallSession.onSetCamera(cameraId);
+    }
+
+    @Override
+    protected void sendSessionModifyRequest(
+            VideoProfile fromProfile, VideoProfile toProfile) {
+        super.sendSessionModifyRequest(fromProfile, toProfile);
 
         IVideoCallSession callSession = getVideoCallSession();
 
@@ -199,18 +169,43 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
     }
 
     @Override
-    public void onSendSessionModifyResponse(VideoProfile responseProfile) {
-        super.onSendSessionModifyResponse(responseProfile);
+    protected void sendSessionModifyResponse(VideoProfile responseProfile) {
+        super.sendSessionModifyResponse(responseProfile);
         synchronized (mLock) {
             setCallState(CALL_STATE_ESTABLISHED);
         }
     }
 
-    public void changeCallDataUsage(long dataSize) {
+    @Override
+    protected void requestCameraCapabilities() {
+        if (mCameraId == null) {
+            log("No camera selected");
+            return;
+        }
 
-        log("changeCallDataUsage :: " + dataSize);
+        VideoDimension vd = getVideoDimensionForPreview();
+        ImsCamera camera = new ImsCamera(mCameraId);
+        float maxZoom = camera.getMaxZoom();
+        boolean zoomSupported = camera.isZoomSupported(maxZoom);
+        Size size = camera.getPreviewSize();
 
-        super.changeCallDataUsage(dataSize);
+        int width = (vd != null) ? vd.getWidth() : size.getWidth();
+        int height = (vd != null) ? vd.getHeight() : size.getHeight();
+
+        if (camera.isLandscape() && width < height) {
+            int tmp = width;
+            width = height;
+            height = tmp;
+        }
+
+        logi("ImsCamera :: previewSize=" + width + "x" + height
+                + ", maxZoom=" + maxZoom
+                + ", zoomSupported=" + zoomSupported);
+
+        VideoProfile.CameraCapabilities cc = new VideoProfile.CameraCapabilities(width, height,
+                zoomSupported, maxZoom);
+
+        changeCameraCapabilities(cc);
     }
 
     @Override
@@ -231,13 +226,11 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             } else if (intParam == MtcCallUtils.MEDIA_CVO_ENABLED) {
             }
         }
-        return;
     }
 
     @Override
     protected void handleMediaSessionPeerFirstVideoReceived() {
         handleCallSessionEvent(Connection.VideoProvider.SESSION_EVENT_RX_RESUME);
-        return;
     }
 
     @Override
@@ -257,7 +250,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
         } else {
             updateReversedPeerDimensionFromMediaProfile(changedOrientation, enforceUpdate);
         }
-        return;
     }
 
     @Override
@@ -266,7 +258,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             setCurrentVideoDimension(width, height);
             super.changePeerDimensions(width, height);
         }
-        return;
     }
 
     private boolean isDynamicVideoQualitySupportedOnSessionModification() {
@@ -328,7 +319,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
 
     private void enforcePeerDimensionsChanged() {
         IVideoCallSession callSession = getVideoCallSession();
-        boolean callbackRequired = false;
         ImsStreamMediaProfile mediaProfile = callSession.getStreamMediaProfile();
 
         if (mediaProfile != null) {
