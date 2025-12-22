@@ -23,6 +23,7 @@
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "IZLib.h"
 #include "ImsAosParameter.h"
 #include "ServiceMessage.h"
