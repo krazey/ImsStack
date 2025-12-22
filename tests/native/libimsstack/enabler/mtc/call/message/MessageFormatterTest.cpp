@@ -18,6 +18,7 @@
 #include "CarrierConfig.h"
 #include "FeatureCaps.h"
 #include "IMtcService.h"
+#include "ISipHeader.h"
 #include "ImsList.h"
 #include "MediaDef.h"
 #include "MockICoreService.h"

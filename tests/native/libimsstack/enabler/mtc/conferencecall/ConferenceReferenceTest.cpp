@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
 #include "ImsList.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"

@@ -20,6 +20,7 @@
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "ISipServerConnection.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"

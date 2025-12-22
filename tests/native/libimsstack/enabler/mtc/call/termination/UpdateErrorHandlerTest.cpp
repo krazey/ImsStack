@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "ISipHeader.h"
 #include "ImsTypeDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"

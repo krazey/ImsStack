@@ -18,6 +18,7 @@
 #include "AStringArray.h"
 #include "FeatureCaps.h"
 #include "IImsAosInfo.h"
+#include "ISipHeader.h"
 #include "ImsVector.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"

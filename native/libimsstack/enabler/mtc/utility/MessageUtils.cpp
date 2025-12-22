@@ -23,6 +23,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "Ims3gpp.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"

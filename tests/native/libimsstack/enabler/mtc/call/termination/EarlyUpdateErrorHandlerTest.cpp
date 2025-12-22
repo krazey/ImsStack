@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "ISipHeader.h"
 #include "ImsAosParameter.h"
 #include "ImsTypeDef.h"
 #include "MockIMessage.h"

@@ -16,6 +16,7 @@
 
 #include "IMessage.h"
 #include "INetworkWatcher.h"
+#include "ISipHeader.h"
 #include "ImsEventDef.h"
 #include "MediaDef.h"
 #include "MockIMediaSession.h"

@@ -21,6 +21,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "ISipServerConnection.h"
 #include "ImsTypeDef.h"
 #include "RetryTaskHelper.h"
