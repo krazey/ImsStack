@@ -1021,6 +1021,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING[] 
         KEY_IMS_VOICE_PREFIX "content_id_for_geolocation_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL[] =
         KEY_IMS_VOICE_PREFIX "enrich_callreasoninfo_with_reason_header_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT[] =
+        KEY_IMS_VOICE_PREFIX "policy_for_multiple_p_asserted_identity_headers_int";
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";

@@ -1406,6 +1406,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "codec_attribute_visible_mode_change_neighbor_bool";
         public static final String KEY_EVS_CODEC_ATTRIBUTE_VISIBLE_DTX_BOOL =
                 KEY_PREFIX + "evs_codec_attribute_visible_dtx_bool";
+        public static final String KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT =
+                KEY_PREFIX + "policy_for_multiple_p_asserted_identity_headers_int";
 
         private ImsVoice() {}
     }

@@ -27,6 +27,7 @@
 
 class IMessage;
 class ISession;
+class SipAddress;
 struct ConfUser;
 struct Ims3gppData;
 struct ReasonHeaderValue;
@@ -161,17 +162,6 @@ public:
      * @param strHeaderName
      * @return
      */
-    virtual ImsList<AString> GetUserParts(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @param piMessage
-     * @param eHeaderType
-     * @param strHeaderName
-     * @return
-     */
     virtual AString GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
@@ -214,17 +204,6 @@ public:
      * @param strHeaderName
      * @return
      */
-    virtual ImsList<AString> GetDisplayNames(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @param piMessage
-     * @param eHeaderType
-     * @param strHeaderName
-     * @return
-     */
     virtual AString GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
@@ -251,17 +230,34 @@ public:
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the value of a specified parameter from the URI of a specified header in a SIP
+     *        message.
      *
-     * @param piMessage
-     * @param strParameterName
-     * @param eHeaderType
-     * @param strHeaderName
-     * @return
+     * This method searches for the first occurrence of the specified header and extracts the
+     * parameter value from its URI.
+     *
+     * @param piMessage The SIP message to inspect.
+     * @param strParameterName The name of the parameter to retrieve the value for.
+     * @param eHeaderType The type of the header to search for (e.g., ISipHeader::FROM).
+     * @param strHeaderName The name of the header if eHeaderType is UNKNOWN.
+     * @return The value of the parameter if found. A null string otherwise.
      */
     virtual AString GetParameterValueFromUri(IN IMessage* piMessage,
             IN const AString& strParameterName, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets the value of a specified parameter from a SipAddress object.
+     *
+     * It first checks for the parameter in the user-info part of the URI (for sip/sips schemes)
+     * and then in the main URI parameters.
+     *
+     * @param objAddress The SipAddress object to extract the parameter from.
+     * @param strParameterName The name of the parameter to retrieve.
+     * @return The value of the parameter if found. A null string otherwise.
+     */
+    virtual AString GetParameterValueFromUri(
+            IN const SipAddress& objAddress, IN const AString& strParameterName) = 0;
 
     /**
      * @brief Gets
@@ -437,6 +433,19 @@ public:
      */
     virtual IMS_BOOL ContainsAddressInPaid(
             IN const IMessage* piMessage, IN const AString& strAddress) = 0;
+
+    /**
+     * @brief Gets a P-Asserted-Identity header from the message, handling multiple headers based on
+     *        carrier configuration.
+     *
+     * The policy is configured by KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT.
+     *   - PAI_POLICY_PREFER_TOPMOST: Use the first value.
+     *   - PAI_POLICY_PREFER_SIP_URI: Use the first value that is a SIP/SIPS URI.
+     *
+     * @param objMessage The message to get the P-Asserted-Identity header.
+     * @return The selected P-Asserted-Identity header string, or a null string if not found.
+     */
+    virtual AString GetPai(IN const IMessage& objMessage) = 0;
 
     /**
      * @brief Sets

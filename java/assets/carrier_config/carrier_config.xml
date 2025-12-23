@@ -849,6 +849,7 @@
         <item value="ba,,122,123,124"/>
     </string-array>
     <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="false"/>
+    <int name="imsvoice.policy_for_multiple_p_asserted_identity_headers_int" value="0"/>
 
     <!-- Media -->
     <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>

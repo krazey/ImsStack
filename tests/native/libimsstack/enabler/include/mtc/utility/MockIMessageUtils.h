@@ -52,16 +52,12 @@ public:
             (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetParameterValue,
             (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(ImsList<AString>, GetUserParts,
-            (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetUserPart, (IN const IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
     MOCK_METHOD(AString, GetUserPart, (IN const AString&), (override));
     MOCK_METHOD(ImsList<AString>, GetUserIds, (IN IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
     MOCK_METHOD(AString, GetUserId, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(ImsList<AString>, GetDisplayNames, (IN IMessage*, IN IMS_SINT32, IN const AString&),
-            (override));
     MOCK_METHOD(
             AString, GetDisplayName, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(ImsList<AString>, GetHosts, (IN IMessage*, IN IMS_SINT32, IN const AString&),
@@ -69,6 +65,8 @@ public:
     MOCK_METHOD(AString, GetHost, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetParameterValueFromUri,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
+    MOCK_METHOD(AString, GetParameterValueFromUri, (IN const SipAddress&, IN const AString&),
+            (override));
     MOCK_METHOD(ImsList<AString>, GetUris,
             (IN const IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetUri,
@@ -96,6 +94,7 @@ public:
     MOCK_METHOD(IMS_BOOL, ContainsTag, (IN const AString&, IN const AString&), (override));
     MOCK_METHOD(
             IMS_BOOL, ContainsAddressInPaid, (IN const IMessage*, IN const AString&), (override));
+    MOCK_METHOD(AString, GetPai, (IN const IMessage&), (override));
     MOCK_METHOD(IMS_RESULT, SetHeader,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, AddValueIfNotExists,

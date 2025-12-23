@@ -42,4 +42,5 @@
         <item value="20000"/>
         <item value="20000"/>
     </int-array>
+    <int name="imsvoice.policy_for_multiple_p_asserted_identity_headers_int" value="1"/>
 </carrier_config>
