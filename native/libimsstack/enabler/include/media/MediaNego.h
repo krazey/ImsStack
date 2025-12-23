@@ -17,6 +17,8 @@
 #ifndef MEDIA_NEGO_H_
 #define MEDIA_NEGO_H_
 
+#include <memory>
+
 #include "ImsSlot.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"

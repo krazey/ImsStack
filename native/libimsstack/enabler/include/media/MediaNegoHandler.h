@@ -17,6 +17,8 @@
 #ifndef MEDIA_NEGO_HANDLER_H_
 #define MEDIA_NEGO_HANDLER_H_
 
+#include <memory>
+
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"

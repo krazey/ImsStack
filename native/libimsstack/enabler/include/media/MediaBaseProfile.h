@@ -17,6 +17,8 @@
 #ifndef MEDIA_BASE_PROFILE_H_
 #define MEDIA_BASE_PROFILE_H_
 
+#include <memory>
+
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
