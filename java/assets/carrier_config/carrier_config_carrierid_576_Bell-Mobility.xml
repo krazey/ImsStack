@@ -23,6 +23,7 @@
     <!-- Aos -->
     <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
     <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="true"/>
+    <int name="ims.reg_actual_wait_time_policy_int" value="2"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
@@ -37,6 +38,10 @@
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
     <pbundle_as_map name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="2"/>
+        <int-array name="ims.extra_reg_err_code_int_array" num="2">
+            <item value="0"/>
+            <item value="2"/>
+        </int-array>
     </pbundle_as_map>
     <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="true"/>
 
