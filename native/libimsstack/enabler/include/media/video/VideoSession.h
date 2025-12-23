@@ -122,6 +122,14 @@ public:
      */
     void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
 
+    /**
+     * @brief Send RequestRtpReceptionStats api for the AV sync feature
+     *
+     * @param nReportingIntervalMs The interval period to notify the rtpReceptionStats
+     * @return IMS_BOOL returns IMS_TRUE when the requestRtpReceptionStats request is triggered
+     */
+    IMS_BOOL RequestRtpReceptionStats(IN IMS_UINT32 nReportingIntervalMs);
+
 private:
     IMS_BOOL OnSetSurfaceCmd(IN IMS_UINTP pParam);
     IMS_BOOL OnSelectCameraCmd(IN IMS_UINTP pParam);

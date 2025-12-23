@@ -579,4 +579,24 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
 
         verify(mMockVideoSessionCallbackHandler, never()).openSessionResponse(anyInt());
     }
+
+    @Test
+    public void testRequestRtpReceptionStats() {
+        final int testInterval = 3000;
+
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(testInterval);
+        testParcel.setDataPosition(0);
+
+        // Set the session state to live
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+
+        // Trigger the message handler
+        mVideoSessionHandler.onImsMediaVideoMessage(
+                MediaConstants.REQUEST_RTP_RECEPTION_STATS, testParcel);
+        processAllMessages();
+
+        // Verify that the ImsVideoSession method was called with the correct interval
+        verify(mMockVideoSession).requestRtpReceptionStats(eq(testInterval));
+    }
 }

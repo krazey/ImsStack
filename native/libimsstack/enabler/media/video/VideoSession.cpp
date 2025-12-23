@@ -492,6 +492,26 @@ IMS_BOOL VideoSession::SetMediaQuality()
 }
 
 PUBLIC
+IMS_BOOL VideoSession::RequestRtpReceptionStats(IN IMS_UINT32 nReportingIntervalMs)
+{
+    IMS_TRACE_I("RequestRtpReceptionStats() - state[%d], reportingIntervalMs[%d]", m_nState,
+            nReportingIntervalMs, 0);
+    IMS_BOOL bResult = IMS_FALSE;
+
+    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_NONE)
+    {
+        ImsMediaMsgRtpReceptionStatsParam* pParam =
+                new ImsMediaMsgRtpReceptionStatsParam(MEDIA_TYPE_VIDEO);
+        pParam->m_nIntervalMs = static_cast<IMS_SINT32>(nReportingIntervalMs);
+
+        bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
+                IJniMedia::REQUEST_RTP_RECEPTION_STATS, pParam);
+    }
+
+    return bResult;
+}
+
+PUBLIC
 IMS_SINT32 VideoSession::GetCameraId()
 {
     return m_nCameraId;

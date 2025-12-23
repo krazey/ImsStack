@@ -180,6 +180,9 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IJniMedia::NOTIFY_ANBR_RECEIVED:
             OnNotifyAnbrReceived(nMsg, objParcel);
             break;
+        case IJniMedia::REQUEST_RTP_RECEPTION_STATS:
+            OnNotifyRtpReceptionStats(nMsg, objParcel);
+            break;
         case IJniMedia::SETSURFACE_CMD:
         case IJniMedia::SELECT_CAMERA_CMD:
         case IJniMedia::CHANGE_CAMERA_ZOOM_CMD:
@@ -268,6 +271,18 @@ void JniMediaSession::OnNotifyAnbrReceived(IN IMS_SINT32 nMsg, IN const Parcel& 
     pParam->m_nAnbrDirection = objParcel.readInt32();
     pParam->m_nAnbrBitrate = objParcel.readInt32();
 
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnNotifyRtpReceptionStats(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+{
+    ImsMediaMsgRtpReceptionStatsParam* pParam =
+            new ImsMediaMsgRtpReceptionStatsParam(MEDIA_TYPE_AUDIO);
+
+    pParam->m_nIntervalMs = objParcel.readInt32();
+    IMS_TRACE_D("OnNotifyRtpReceptionStats() - interval[%d], nCallKey[%d]", pParam->m_nIntervalMs,
+            m_nCallKey, 0);
     GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 

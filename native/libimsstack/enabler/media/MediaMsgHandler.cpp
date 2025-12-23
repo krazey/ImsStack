@@ -95,6 +95,9 @@ IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsg
         case IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
             return piThread->OnRequestUpdateAnbrEnabledConfig(
                     static_cast<ImsMediaMsgAnbrNegotiationParam*>(pParam));
+        case IJniMedia::REQUEST_RTP_RECEPTION_STATS:
+            return piThread->OnRequestRtpReceptionStats(
+                    static_cast<ImsMediaMsgRtpReceptionStatsParam*>(pParam));
         default:
             IMS_TRACE_E(0, "SendMessageToJava() - eEvent[%d], not handled", eEvent, 0, 0);
             return IMS_FALSE;

@@ -39,6 +39,7 @@ public class MediaConstants {
 
     public static final int REQUEST_SET_QNS_MEDIA_THRESHOLD = (IMSMEDIA_REQUEST + 11);
     public static final int REQUEST_UPDATE_ANBR_ENABLED_CONFIG = (IMSMEDIA_REQUEST + 12);
+    public static final int REQUEST_RTP_RECEPTION_STATS = (IMSMEDIA_REQUEST + 13);
 
     // Requests for video
     public static final int IMSMEDIA_VIDEO_REQUEST        = (IMSMEDIA_REQUEST + 50);

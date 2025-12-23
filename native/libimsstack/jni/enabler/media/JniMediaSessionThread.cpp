@@ -240,6 +240,26 @@ IMS_BOOL JniMediaSessionThread::OnRequestUpdateAnbrEnabledConfig(
 }
 
 PUBLIC
+IMS_BOOL JniMediaSessionThread::OnRequestRtpReceptionStats(
+        IN ImsMediaMsgRtpReceptionStatsParam* pParam)
+{
+    if (pParam == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("OnRequestRtpReceptionStats type[%d]", pParam->m_eMediaType, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IJniMedia::REQUEST_RTP_RECEPTION_STATS);
+    objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
+    objParcel.writeInt32(pParam->m_nIntervalMs);
+    SendData2Java(objParcel);
+    delete pParam;
+    return IMS_TRUE;
+}
+
+PUBLIC
 void JniMediaSessionThread::OnSetPreviewSurface()
 {
     IMS_TRACE_D("OnSetPreviewSurface", 0, 0, 0);

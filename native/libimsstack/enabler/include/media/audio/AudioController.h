@@ -286,6 +286,18 @@ public:
      */
     virtual MEDIA_DIRECTION GetMediaDirection();
 
+    /**
+     * @brief Send RequestRtpReceptionStats message to java to enable the AV sync logic for video
+     * call
+     *
+     * @param nNegoId The identification of the target AudioSession instance
+     * @param nReportingIntervalMs The reporting interval for AV sync feature
+     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
+     * failed to send
+     */
+    virtual IMS_BOOL RequestRtpReceptionStats(
+            IN IMS_UINTP nNegoId, IN IMS_UINT32 nReportingIntervalMs);
+
 protected:
     virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
 

@@ -528,3 +528,23 @@ TEST_F(AudioControllerTest, testUpdateSessionNoRtpConfigChange)
     // Second call, config should not have changed
     EXPECT_TRUE(m_pController->UpdateSession(NEGO_ID, ACCESS_NETWORK, m_pAudioNego));
 }
+
+TEST_F(AudioControllerTest, RequestRtpReceptionStats)
+{
+    // Arrange
+    const IMS_UINT32 intervalMs = 3000;
+
+    // Create a session, which will be a MockAudioSession due to the override
+    m_pController->CreateSession(&m_objListener, NEGO_ID, m_pConfig.get(), MEDIA_SERVICE_DEFAULT);
+    m_pController->SetCallSessionState(true);
+
+    // Act
+    EXPECT_TRUE(m_pController->RequestRtpReceptionStats(NEGO_ID, intervalMs));
+}
+
+TEST_F(AudioControllerTest, RequestRtpReceptionStats_InvalidNegoId)
+{
+    // Arrange: No session is added, or a session with a different negoId is added.
+    // Act & Assert
+    EXPECT_FALSE(m_pController->RequestRtpReceptionStats(999, 3000));
+}

@@ -209,6 +209,9 @@ public class VideoSessionHandler extends MediaState {
                 case MediaConstants.REQUEST_ADJUST_DELAY:
                     handleAdjustDelay((int) msg.obj);
                     break;
+                case MediaConstants.REQUEST_RTP_RECEPTION_STATS:
+                    handleVideoRequestRtpReceptionStats(msg.arg1);
+                    break;
                 case MediaConstants.RESPONSE_OPEN_SESSION:
                     handleVideoOpenSessionResponse((ImsMediaSession) msg.obj, msg.arg1);
                     break;
@@ -432,6 +435,15 @@ public class VideoSessionHandler extends MediaState {
                 Message.obtain(
                         mVideoMessageHandler, requestType, parcel.readInt()).sendToTarget();
                 break;
+            case MediaConstants.REQUEST_RTP_RECEPTION_STATS:
+            {
+                int intervalMs = parcel.readInt();
+
+                Message.obtain(
+                        mVideoMessageHandler, requestType, intervalMs, UNUSED).sendToTarget();
+            }
+                break;
+
             default:
             {
                 parcel.recycle();
@@ -576,9 +588,12 @@ public class VideoSessionHandler extends MediaState {
     private void handleVideoSetMediaQualityThreshold(MediaQualityThreshold threshold) {
         if (mVideoSession != null) {
             mVideoSession.setMediaQualityThreshold(threshold);
+        }
+    }
 
-            final int reportingIntervalMillis = 3000;
-            ImsLog.d("requestRtpReceptionStats - intervalMs=" + reportingIntervalMillis);
+    private void handleVideoRequestRtpReceptionStats(int reportingIntervalMillis) {
+        if (mVideoSession != null) {
+            ImsLog.d("handleVideoRequestRtpReceptionStats - intervalMs=" + reportingIntervalMillis);
             mVideoSession.requestRtpReceptionStats(reportingIntervalMillis);
         }
     }

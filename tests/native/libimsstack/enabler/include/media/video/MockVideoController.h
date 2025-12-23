@@ -45,6 +45,8 @@ public:
     MOCK_METHOD(IMS_BOOL, ApplyQualityThreshold, (IN IMS_BOOL bIsConference), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionOpened, (), (override));
     MOCK_METHOD(void, SetMediaPemType, (IN MEDIA_PEM_TYPE ePemType), (override));
+    MOCK_METHOD(
+            IMS_BOOL, RequestRtpReceptionStats, (IN IMS_UINT32 nReportingIntervalMs), (override));
 };
 
 #endif  // MOCK_VIDEO_CONTROLLER_H_

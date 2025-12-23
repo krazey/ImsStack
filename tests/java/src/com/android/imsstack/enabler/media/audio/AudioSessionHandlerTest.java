@@ -994,7 +994,6 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         processAllMessages();
 
         verify(mMockAudioSession).setMediaQualityThreshold(eq(mediaQualityThreshold));
-        verify(mMockAudioSession).requestRtpReceptionStats(eq(3000));
         testParcel.recycle();
     }
 
@@ -1069,5 +1068,25 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         processAllMessages();
 
         verify(mMockAudioSessionCallbackHandler, never()).openSessionResponse(anyInt());
+    }
+
+    @Test
+    public void testRequestRtpReceptionStats() {
+        final int testInterval = 500;
+
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(testInterval);
+        testParcel.setDataPosition(0);
+
+        // Set the session state to live
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+
+        // Trigger the message handler
+        mAudioSessionHandler.onImsMediaAudioMessage(
+                MediaConstants.REQUEST_RTP_RECEPTION_STATS, testParcel);
+        processAllMessages();
+
+        // Verify that the ImsAudioSession method was called with the correct interval
+        verify(mMockAudioSession).requestRtpReceptionStats(eq(testInterval));
     }
 }

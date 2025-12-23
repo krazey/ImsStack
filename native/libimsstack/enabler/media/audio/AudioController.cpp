@@ -704,3 +704,27 @@ MEDIA_DIRECTION AudioController::GetMediaDirection()
     IMS_TRACE_E(0, "GetMediaDirection(): session is not found", 0, 0, 0);
     return MEDIA_DIRECTION_INVALID;
 }
+
+PUBLIC
+IMS_BOOL AudioController::RequestRtpReceptionStats(
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nReportingIntervalMs)
+{
+    IMS_TRACE_I("RequestRtpReceptionStats(): NegoId[%" PFLS_x "] intervalMs[%d]", nNegoId,
+            nReportingIntervalMs, 0);
+
+    if (nNegoId == UNDEFINED_NEGO_ID)
+    {
+        IMS_TRACE_E(0, "RequestRtpReceptionStats(): NegoId is not valid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
+
+    if (pAudioSession != IMS_NULL)
+    {
+        return pAudioSession->RequestRtpReceptionStats(nReportingIntervalMs);
+    }
+
+    IMS_TRACE_E(0, "RequestRtpReceptionStats(): session is not found", 0, 0, 0);
+    return IMS_FALSE;
+}

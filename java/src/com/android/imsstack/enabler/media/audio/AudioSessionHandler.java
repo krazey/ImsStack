@@ -316,6 +316,12 @@ public class AudioSessionHandler extends MediaState {
                 }
                     break;
 
+                case MediaConstants.REQUEST_RTP_RECEPTION_STATS:
+                {
+                    handleRequestRtpReceptionStats(msg.arg1);
+                }
+                    break;
+
                 case MediaConstants.NOTIFY_ANBR_RECEIVED:
                 {
                     handleAudioAnbrReceived((int) msg.obj, msg.arg1, msg.arg2);
@@ -662,9 +668,16 @@ public class AudioSessionHandler extends MediaState {
             case MediaConstants.REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
             {
                 Boolean anbrEnabled = parcel.readBoolean();
-                ImsLog.d("anbr config=" + anbrEnabled);
+                ImsLog.d("ANBR  config= " + anbrEnabled);
 
                 Message.obtain(mAudioMessageHandler, requestType, anbrEnabled).sendToTarget();
+            }
+                break;
+
+            case MediaConstants.REQUEST_RTP_RECEPTION_STATS:
+            {
+                Message.obtain(mAudioMessageHandler, requestType, parcel.readInt(), UNUSED)
+                        .sendToTarget();
             }
                 break;
 
@@ -673,8 +686,8 @@ public class AudioSessionHandler extends MediaState {
                 int mediaType = parcel.readInt();
                 int direction = parcel.readInt();
                 int bitrate = parcel.readInt();
-                ImsLog.d("media type=" + mediaType + " direction=" + direction
-                        + " bitrate=" + bitrate);
+                ImsLog.d("media type= " + mediaType + " direction= " + direction
+                        + " bitrate= " + bitrate);
                 Message.obtain(mAudioMessageHandler, requestType, direction, bitrate, mediaType)
                         .sendToTarget();
             }
@@ -785,6 +798,13 @@ public class AudioSessionHandler extends MediaState {
                     MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT,
                     MediaConstants.RESPONSE_WAIT_TIMEOUT);
             mCodecType = UNUSED;
+        }
+    }
+
+    private void handleRequestRtpReceptionStats(int reportingIntervalMillis) {
+        if (mAudioSession != null) {
+            ImsLog.d("requestRtpReceptionStats - intervalMs=" + reportingIntervalMillis);
+            mAudioSession.requestRtpReceptionStats(reportingIntervalMillis);
         }
     }
 
@@ -941,10 +961,6 @@ public class AudioSessionHandler extends MediaState {
             MediaQualityThreshold mediaQualityThreshold = mMediaConfig.getMediaQualityThreshold();
             ImsLog.d("setMediaQualityThreshold: " + mediaQualityThreshold.toString());
             mAudioSession.setMediaQualityThreshold(mediaQualityThreshold);
-
-            final int reportingIntervalMillis = 3000;
-            ImsLog.d("requestRtpReceptionStats - intervalMs=" + reportingIntervalMillis);
-            mAudioSession.requestRtpReceptionStats(reportingIntervalMillis);
         }
     }
 
