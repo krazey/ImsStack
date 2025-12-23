@@ -951,6 +951,12 @@ TEST_F(MessageFormatterTest, SetTerminateReason)
 
     objReasonInfo.nCode = CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE;
     pFormatter->FormTerminateMessage(objReasonInfo);
+
+    objReasonInfo.nCode = CODE_RADIO_OFF;
+    pFormatter->FormTerminateMessage(objReasonInfo);
+
+    objReasonInfo.nCode = CODE_OEM_CAUSE_3;
+    pFormatter->FormTerminateMessage(objReasonInfo);
 }
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersByNoConfiguration)

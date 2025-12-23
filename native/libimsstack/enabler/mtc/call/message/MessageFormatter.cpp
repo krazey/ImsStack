@@ -927,6 +927,10 @@ void MessageFormatter::GetTerminateReason(
         case CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE:
             strReason = GetTerminateReason(TerminateType::CONFERENCE_CALL_JOINED);
             break;
+        case CODE_RADIO_OFF:
+        case CODE_OEM_CAUSE_3:
+            strReason = GetTerminateReason(TerminateType::NETWORK_LOST);
+            break;
         default:
             strReason = AString::ConstNull();
             break;
