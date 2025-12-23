@@ -57,6 +57,11 @@ LOCAL AString ANY_TRANSFER_TARGET = "1111";
 class EctReferenceTest : public ::testing::Test
 {
 public:
+    inline EctReferenceTest() :
+            objMessageUtils(objMockContext)
+    {
+    }
+
     MockIMtcContext objMockContext;
     MockIMtcService objMtcService;
     MockICoreService objCoreService;

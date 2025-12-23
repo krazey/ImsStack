@@ -43,6 +43,11 @@ namespace android
 class TemplateFormatterTest : public ::testing::Test
 {
 public:
+    inline TemplateFormatterTest() :
+            objMessageUtils(objContext)
+    {
+    }
+
     MockIMtcCallContext objContext;
     TestPhoneInfoService objPhoneInfoService;
     TestNetworkService objNetworkService;

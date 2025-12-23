@@ -554,8 +554,7 @@ void IdleState::SetResourceListForConference(IN_OUT IMessage& objMessage)
     }
 
     // LGU needs to set bMultiPart = false
-    m_objContext.GetMessageUtils().SetResourceList(
-            &objMessage, m_objContext, objUsers, IMS_TRUE, IMS_TRUE);
+    m_objContext.GetMessageUtils().SetResourceList(&objMessage, objUsers, IMS_TRUE, IMS_TRUE);
 }
 
 PRIVATE

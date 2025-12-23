@@ -25,7 +25,6 @@
 #include <optional>
 
 class IMessage;
-class IMtcContext;
 class ISession;
 struct ConfUser;
 struct Ims3gppData;
@@ -474,13 +473,12 @@ public:
      * @brief Sets
      *
      * @param piMessage
-     * @param objContext
      * @param lstConfUser
      * @param bWithDialogId
      * @param bMultiPart
      * @return
      */
-    virtual IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
+    virtual IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage,
             IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId,
             IN IMS_BOOL bMultiPart) = 0;
 

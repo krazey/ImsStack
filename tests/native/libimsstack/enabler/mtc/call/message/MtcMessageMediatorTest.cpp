@@ -52,6 +52,11 @@ MATCHER_P(NotContains, str, "Contains unexpected string")
 class MtcMessageMediatorTest : public ::testing::Test
 {
 public:
+    inline MtcMessageMediatorTest() :
+            objMessageUtils(objContext)
+    {
+    }
+
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;

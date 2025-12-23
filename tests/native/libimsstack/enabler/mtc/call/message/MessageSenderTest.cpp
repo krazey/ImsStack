@@ -40,6 +40,11 @@ namespace android
 class MessageSenderTest : public ::testing::Test
 {
 public:
+    inline MessageSenderTest() :
+            objMessageUtils(objContext)
+    {
+    }
+
     MessageSender* pSender;
 
     CallInfo objCallInfo;
