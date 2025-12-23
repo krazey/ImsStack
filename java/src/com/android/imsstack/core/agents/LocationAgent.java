@@ -1956,7 +1956,9 @@ public class LocationAgent implements LocationInterface {
             LocationRequest locationRequest = new LocationRequest.Builder(0)
                     .setMinUpdateIntervalMillis(0)
                     .setMaxUpdates(1)
-                    .setQuality(LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
+                    .setQuality(LocationApi.NETWORK_PROVIDER.equals(provider)
+                            ? LocationRequest.QUALITY_BALANCED_POWER_ACCURACY
+                            : LocationRequest.QUALITY_HIGH_ACCURACY)
                     .setLocationSettingsIgnored(forEmergency)
                     .build();
             mLocationApi.getCurrentLocation(provider, locationRequest,

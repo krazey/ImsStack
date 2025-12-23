@@ -65,6 +65,7 @@ public class LocationAgentTest {
     @Mock private Location mLocation;
 
     @Captor private ArgumentCaptor<Consumer<Location>> mLocationConsumerCaptor;
+    @Captor private ArgumentCaptor<LocationRequest> mLocationRequestCaptor;
 
     private TestAppContext mTestAppContext;
     private LocationAgent mLocationAgent;
@@ -288,6 +289,48 @@ public class LocationAgentTest {
         assertEquals(LocationPolicy.SHAPE_CIRCLE, locationInfo[3]);
     }
 
+    @Test
+    @SmallTest
+    public void testRequestLocationUpdateGpsProviderQuality() {
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
+        when(lmp.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
+        when(lmp.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(false);
+        when(lmp.isProviderEnabled(LocationManager.FUSED_PROVIDER)).thenReturn(false);
+
+        mLocationAgent.requestLocationUpdate(1000);
+        verifyLocationRequest(LocationManager.GPS_PROVIDER,
+                LocationRequest.QUALITY_HIGH_ACCURACY);
+    }
+
+    @Test
+    @SmallTest
+    public void testRequestLocationUpdateFusedProviderQuality() {
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
+        when(lmp.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
+        when(lmp.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(false);
+        when(lmp.isProviderEnabled(LocationManager.FUSED_PROVIDER)).thenReturn(true);
+
+        mLocationAgent.requestLocationUpdate(1000);
+        verifyLocationRequest(LocationManager.FUSED_PROVIDER,
+                LocationRequest.QUALITY_HIGH_ACCURACY);
+    }
+
+    @Test
+    @SmallTest
+    public void testRequestLocationUpdateNetworkProviderQuality() {
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
+        when(lmp.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
+        when(lmp.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
+        when(lmp.isProviderEnabled(LocationManager.FUSED_PROVIDER)).thenReturn(false);
+
+        mLocationAgent.requestLocationUpdate(1000);
+        verifyLocationRequest(LocationManager.NETWORK_PROVIDER,
+                LocationRequest.QUALITY_BALANCED_POWER_ACCURACY);
+    }
+
     private void setLocationPolicyShape(String shape) {
         LocationPolicy lp = mLocationAgent.getLocationPolicy();
         lp.setShape(shape);
@@ -308,5 +351,16 @@ public class LocationAgentTest {
                 mLocationConsumerCaptor.capture());
 
         mLocationConsumerCaptor.getValue().accept(mLocation);
+    }
+
+    private void verifyLocationRequest(String expectedProvider, int expectedQuality) {
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
+        verify(lmp).getCurrentLocation(eq(expectedProvider), mLocationRequestCaptor.capture(),
+                any(CancellationSignal.class), any(Executor.class), any(Consumer.class));
+
+        LocationRequest request = mLocationRequestCaptor.getValue();
+        assertEquals(expectedQuality, request.getQuality());
+        assertTrue(request.isLocationSettingsIgnored());
     }
 }
