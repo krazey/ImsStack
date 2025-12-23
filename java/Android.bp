@@ -17,6 +17,11 @@ package {
 }
 
 android_library {
+    name: "imsstack-debuggable",
+    manifest: "AndroidManifest-debuggable.xml",
+}
+
+android_library {
     name: "imsstack",
     platform_apis: true,
     manifest: "AndroidManifest-lib.xml",
@@ -57,6 +62,13 @@ android_library {
         javacflags: [
             "-Xep:UnnecessaryStringBuilder:OFF",
         ],
+    },
+    product_variables: {
+        debuggable: {
+            static_libs: [
+                "imsstack-debuggable",
+            ],
+        },
     },
 }
 
