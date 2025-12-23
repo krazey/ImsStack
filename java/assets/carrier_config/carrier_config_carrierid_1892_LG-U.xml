@@ -128,6 +128,7 @@
     <boolean name="imsvoice.add_replace_header_for_conference_bool" value="false"/>
     <!-- TODO: default value must be true -->
     <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
+    <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string">SIP;cause=103;text=&quot;Session-Expire&quot;;fc=9602</string>
 
     <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="2">
         <item value="P-SKT-BYE-CAUSE"/>

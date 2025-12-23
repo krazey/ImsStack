@@ -75,28 +75,24 @@ PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetHeader(
     {
         return;
     }
+    IMS_TRACE_D("ReasonHeaderSetter_SetHeader [%d]", nTerminationReason, 0, 0);
 
-    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
-    if (objConfig.Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
-                MessageUtil::STR_REASON_USER_SESSIONEXPIRED))
+    if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
+            (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
     {
-        IMS_TRACE_D("ReasonHeaderSetter_SetHeader [%d]", nTerminationReason, 0, 0);
-        if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
-                (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
+        AString strReason = GetTerminateReason(TerminateType::SESSION_REFRESH_FAILURE);
+        if (strReason.GetLength() > 0)
         {
-            piSipMsg->AddHeader(ISipHeader::REASON, "USER;text=\"Session Expired\"");
+            piSipMsg->AddHeader(ISipHeader::REASON, strReason);
         }
     }
-
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
     if (objConfig.Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                 MessageUtil::STR_P_SKT_BYE_CAUSE))
     {
-        IMS_TRACE_D("ReasonHeaderSetter_SetHeader [%d]", nTerminationReason, 0, 0);
         if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
                 (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
         {
-            piSipMsg->AddHeader(
-                    ISipHeader::REASON, "SIP; cause=103; text=\"Session-Expire\"; fc=9602");
             piSipMsg->AddHeader(ISipHeader::UNKNOWN, "no_upd", MessageUtil::STR_P_SKT_BYE_CAUSE);
         }
         else
