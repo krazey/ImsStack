@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AStringBuffer.h"
 #include "SipConfiguration.h"
 #include "msg/SipEventHeader.h"
 

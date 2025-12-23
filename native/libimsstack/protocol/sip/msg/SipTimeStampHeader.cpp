@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringBuffer.h"
 #include "SipDebug.h"
 #include "msg/SipMsgUtil.h"
 #include "msg/SipTimeStampHeader.h"
