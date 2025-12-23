@@ -43,6 +43,7 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_bAudioRtcpXrVoipMetricsEnabled(DEFAULT_RTCPXR_VOIP_METRICS),
         m_bAudioRtcpXrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
         m_bAudioRtcpXrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
+        m_bAmrPayloadFormatRelaxedMatching(IMS_FALSE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
         m_objAudioCandidateAttribute(ImsVector<AString>()),
         m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
@@ -143,6 +144,9 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     m_bAudioRtcpXrPacketDuplicateRleEnabled =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
+
+    m_bAmrPayloadFormatRelaxedMatching = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL, IMS_FALSE);
 
     // DTMF Duration Parameter
     m_nDtmfDuration =
@@ -255,6 +259,7 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             m_bAudioRtcpXrVoipMetricsEnabled, m_bAudioRtcpXrPacketLossRleEnabled,
             m_bAudioRtcpXrPacketDuplicateRleEnabled);
     IMS_TRACE_D("RecvOnlyEarlySessionEnabled[%d]", m_bRecvOnlyEarlySessionEnabled, 0, 0);
+    IMS_TRACE_D("AmrPayloadFormatRelaxedMatching[%d]", m_bAmrPayloadFormatRelaxedMatching, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
@@ -360,6 +365,12 @@ PUBLIC
 IMS_BOOL AudioConfiguration::IsRtcpXrPdrEnabled() const
 {
     return m_bAudioRtcpXrPacketDuplicateRleEnabled;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsAmrPayloadFormatRelaxedMatching() const
+{
+    return m_bAmrPayloadFormatRelaxedMatching;
 }
 
 PUBLIC

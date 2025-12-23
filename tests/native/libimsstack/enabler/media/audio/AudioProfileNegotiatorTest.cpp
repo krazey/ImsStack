@@ -628,6 +628,53 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingAudioPayloadReturnsFalse)
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
 }
 
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrPayloadFormatRelaxedMatching)
+{
+    // Arrange
+    // Local and Peer profiles have different octet-align values but compatible mode-sets.
+    // Local prefers octet-align=0, Peer prefers octet-align=1.
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, (1 << 8), 0));  // mode 8, oa=0
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(kPeerPayload, (1 << 8), 1));    // mode 8, oa=1
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // --- Test Case 1: bAmrPayloadFormatRelaxedMatching = false ---
+    // Negotiation should fail because octet-align values do not match and preference is false.
+    ON_CALL(m_objMockConfig, IsAmrPayloadFormatRelaxedMatching()).WillByDefault(Return(IMS_FALSE));
+
+    // Act 1
+    IMS_BOOL bResult1 = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert 1
+    EXPECT_FALSE(bResult1);  // Expect failure
+    // The negotiated profile should be reset (inactive)
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
+
+    // --- Test Case 2: bAmrPayloadFormatRelaxedMatching = true ---
+    // Negotiation should succeed. The negotiated octet-align should match the peer's preference,
+    // and the mode-set should be the common mode.
+    ON_CALL(m_objMockConfig, IsAmrPayloadFormatRelaxedMatching()).WillByDefault(Return(IMS_TRUE));
+    // Reset negotiated profile for the second run
+    m_pNegotiatedProfile = std::make_unique<AudioProfile>();
+    m_pLocalProfile->SetNegotiatedPayloadIndex(-1);
+    m_pPeerProfile->SetNegotiatedPayloadIndex(-1);
+
+    // Act 2
+    IMS_BOOL bResult2 = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert 2
+    EXPECT_TRUE(bResult2);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    auto pNegoPayload2 = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload2, nullptr);
+    auto pNegoFmtp2 = std::static_pointer_cast<AudioProfile::AmrFmtp>(pNegoPayload2->GetFmtp());
+    ASSERT_NE(pNegoFmtp2, nullptr);
+    EXPECT_EQ(pNegoFmtp2->GetOctetAlign(), 1);     // Should keep peer's value (1)
+    EXPECT_EQ(pNegoFmtp2->GetModeSetList(), 256);  // Should be the common mode 8 (1 << 8)
+}
+
 TEST_F(AudioProfileNegotiatorTest, NegotiateEmptyPeerPayloadListCopiesLocal)
 {
     // Arrange

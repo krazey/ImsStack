@@ -187,6 +187,15 @@ public:
      */
     virtual IMS_BOOL IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const;
 
+    /**
+     * @brief Determines whether AMR codec payload formats BE/OA should be treated as relaxed
+     matching comparisons during codec negotiation.
+     *
+     * @return IMS_TRUE if the internal asset is set to TRUE to ignore the differences in AMR codec
+     * payload formats (BE/OA) and perform codec negotiation, otherwise IMS_FALSE
+     */
+    virtual IMS_BOOL IsAmrPayloadFormatRelaxedMatching() const;
+
 public:
     enum
     {
@@ -253,6 +262,8 @@ private:
     IMS_BOOL m_bAudioRtcpXrPacketLossRleEnabled;
     /** Indicates whether RTCP-XR Packet Duplicate RLE reporting is enabled. */
     IMS_BOOL m_bAudioRtcpXrPacketDuplicateRleEnabled;
+    /** Indicates whether to treat amr codec payload format BE/OA as preferred */
+    IMS_BOOL m_bAmrPayloadFormatRelaxedMatching;
     /** The duration for playing a DTMF tone in milliseconds. */
     IMS_SINT32 m_nDtmfDuration;
     /** A list of ICE candidate attributes for audio. */

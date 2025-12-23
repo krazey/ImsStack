@@ -50,16 +50,19 @@ public:
 
 private:
     AudioProfile::Payload* NegotiatePayload(IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
+            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile,
+            IN IMS_BOOL bAmrPayloadFormatRelaxedMatching);
     AudioProfile::Payload* NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile);
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
+            IN IMS_BOOL bAmrPayloadFormatRelaxedMatching);
     AudioProfile::Payload* NegotiateAmr(IN AudioProfile* pLocalProfile,
             IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
-            IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nNegoModeSetList,
-            IN IMS_UINT32 nNegoDefaultRtpModeSet);
+            IN IMS_UINT32 nPayloadIndex, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching,
+            IN IMS_UINT32 nNegoModeSetList, IN IMS_UINT32 nNegoDefaultRtpModeSet);
     std::shared_ptr<AudioProfile::AmrFmtp> NegotiateAmrFmtp(IN AudioProfile* pLocalProfile,
-            IN AudioProfile::Payload* pPeerPayload, IN IMS_UINT32 nNegoModeSetList,
-            IN IMS_UINT32 nNegoDefaultRtpModeSet, OUT IMS_SINT32& nLocalPayloadIndex);
+            IN AudioProfile::Payload* pPeerPayload, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching,
+            IN IMS_UINT32 nNegoModeSetList, IN IMS_UINT32 nNegoDefaultRtpModeSet,
+            OUT IMS_SINT32& nLocalPayloadIndex);
     AudioProfile::Payload* NegotiateEvs(IN AudioProfile::Payload* pLocalPayload,
             IN AudioProfile::Payload* pPeerPayload, IN AudioProfile* pNegotiatedProfile);
     std::shared_ptr<AudioProfile::EvsFmtp> NegotiateEvsFmtp(IN AudioProfile::Payload* pLocalPayload,
@@ -97,10 +100,11 @@ private:
     IMS_BOOL FindMatchedEvsFmtp(
             IN AudioProfile::Payload* pComparedPayload, IN AudioProfile::Payload* pPeerPayload);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
-    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bReturnMode, OUT IMS_UINT32* pnNegoModeSetList,
+            IN IMS_BOOL bAmrPayloadFormatRelaxedMatching, OUT IMS_UINT32* pnNegoModeSetList,
             OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
+    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
+            IN IMS_BOOL bReturnMode, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching,
+            OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
     IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 CompareModeSet(IN std::shared_ptr<AudioProfile::AmrFmtp> pLocalFmtp,
             IN std::shared_ptr<AudioProfile::AmrFmtp> pPeerFmtp, IN IMS_BOOL bReturnMode,
@@ -119,9 +123,11 @@ private:
             IN std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp, OUT IMS_UINT32* nNegoBwList,
             OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
     IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
+            IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pPeerPayload,
+            IN IMS_BOOL bAmrPayloadFormatRelaxedMatching);
     IMS_SINT32 FindMatchedPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload, IN IMS_BOOL bReturnMode);
+            IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pPeerPayload,
+            IN IMS_BOOL bReturnMode, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching);
     MEDIA_DIRECTION UpdateDirectionToMine(
             IN MEDIA_DIRECTION ePeerDirection, IN MEDIA_DIRECTION eLocalDirection);
     IMS_BOOL IsValidEvsBwList(IN IMS_UINT32 nBwList);
