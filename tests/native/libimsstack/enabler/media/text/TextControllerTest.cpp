@@ -109,9 +109,23 @@ TEST_F(TextControllerTest, testUpdateLocalAddressFail)
     EXPECT_EQ(m_pController->UpdateLocalAddress(nullptr), IMS_FALSE);
 }
 
-TEST_F(TextControllerTest, testOpenSessionFail)
+TEST_F(TextControllerTest, testOpenSessionNoSessionFail)
 {
     EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testOpenSessionNoLocalAddressFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    // OpenSession without calling UpdateLocalAddress first
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigNullNegoFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(nullptr), IMS_FALSE);
 }
 
 TEST_F(TextControllerTest, testCloseSessionWithSessionCreated)
@@ -240,4 +254,22 @@ TEST_F(TextControllerTest, testIsSessionOpened)
     EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
     // Session is closed (state is STATE_NONE)
     EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateAccessNetworkNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(1), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateAccessNetworkSuccess)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(1), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionNoRtpConfigFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
 }

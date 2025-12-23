@@ -82,11 +82,14 @@ public:
     virtual IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<TextNego> pNego);
 
     /**
-     * @brief Update AccessNetwork information in the RtpConfig
+     * @brief Updates the access network information for the current text session.
+     * This information can be used for media quality adaptation and other
+     * network-dependent behaviors.
      *
-     * @param nAccessNetwork : AccessNetwork information
+     * @param nAccessNetwork The new access network type, as defined in
+     * `android.telephony.AccessNetworkConstants.AccessNetworkType`.
      */
-    virtual void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+    virtual IMS_BOOL UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
 
     /**
      * @brief Update MediaQualityThreshold and send message to java
