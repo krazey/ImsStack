@@ -957,6 +957,9 @@ TEST_F(MessageFormatterTest, SetTerminateReason)
 
     objReasonInfo.nCode = CODE_OEM_CAUSE_3;
     pFormatter->FormTerminateMessage(objReasonInfo);
+
+    objReasonInfo.nCode = CODE_MEDIA_NOT_ACCEPTABLE;
+    pFormatter->FormTerminateMessage(objReasonInfo);
 }
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersByNoConfiguration)

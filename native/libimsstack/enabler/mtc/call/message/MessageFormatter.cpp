@@ -931,6 +931,9 @@ void MessageFormatter::GetTerminateReason(
         case CODE_OEM_CAUSE_3:
             strReason = GetTerminateReason(TerminateType::NETWORK_LOST);
             break;
+        case CODE_MEDIA_NOT_ACCEPTABLE:
+            strReason = GetTerminateReason(TerminateType::MEDIA_NOT_SUPPORTED);
+            break;
         default:
             strReason = AString::ConstNull();
             break;
