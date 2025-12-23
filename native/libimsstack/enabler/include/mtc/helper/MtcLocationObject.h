@@ -20,6 +20,7 @@
 #include "AString.h"
 #include "ByteArray.h"
 #include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
 
 class IMessage;
 class IMtcCallContext;
@@ -72,6 +73,9 @@ private:
     static IMS_BOOL IsGeolocationBlockedByConfig(IN IMtcCallContext& objContext);
     static IMS_BOOL IsGeolocationBlockedByPlmn(IN IMtcCallContext& objContext);
     static IMS_BOOL IsGeolocationBlockedBySuppService(IN IMtcCallContext& objContext);
+
+    static IMS_SINT32 GetGeolocationPidfAllowedType(
+            IN EmergencyType eEmergencyType, IN IMS_BOOL bWifi);
 
     IMtcCallContext& m_objContext;
 };

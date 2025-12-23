@@ -17,10 +17,10 @@
 #ifndef NULL_CALL_H_
 #define NULL_CALL_H_
 
+#include "AString.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
-class AString;
 class ISession;
 class SuppService;
 struct CallReasonInfo;
