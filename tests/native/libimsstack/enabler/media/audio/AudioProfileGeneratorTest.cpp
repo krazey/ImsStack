@@ -20,6 +20,8 @@
 #include "gmock/gmock.h"
 #include "media/audio/AudioProfile.h"
 #include "media/audio/AudioProfileGenerator.h"
+#include "media/audio/AudioProfileUtil.h"
+#include "media/audio/AudioDef.h"
 
 #include "MockICoreService.h"
 #include "MockMediaProfileFactory.h"
@@ -36,14 +38,14 @@ using ::testing::ReturnRef;
 
 const AString LOCAL_IP = "127.0.0.1";
 
-class AudioProfileGeneratorTest : public ::testing::Test
+class AudioProfileGeneratorTest : public ::testing::Test, protected AudioProfileGenerator
 {
 protected:
     virtual void SetUp() override
     {
         m_pGenerator = std::make_unique<AudioProfileGenerator>();
         m_pProfile = std::make_shared<AudioProfile>();
-        m_pConfig = std::make_unique<NiceMock<MockAudioConfiguration>>();
+        m_pConfig = std::make_unique<NiceMock<MockAudioConfiguration>>(MEDIA_TYPE_AUDIO);
         m_pIService = std::make_unique<NiceMock<MockICoreService>>();
 
         MockMediaProfileFactory::SetInstance(&m_objMediaProfileFactory);
@@ -243,4 +245,135 @@ TEST_F(AudioProfileGeneratorTest, CreatePcmPayloadTest)
     EXPECT_EQ(pPayload->GetRtpMap().GetSamplingRate(), 8000);  // Default for PCMA
 
     m_lstCodecConfig.Clear();
+}
+
+TEST_F(AudioProfileGeneratorTest, ConvertToBandwidthAS_AMR)
+{
+    // AMR-NB, octet-aligned, IPv6, mode 7 (12.2 kbps)
+    IMS_SINT32 asValue = AudioProfileUtil::ConvertToBandwidthAS(AUDIO_CODEC_AMR, 1, IMS_TRUE, 7);
+    EXPECT_EQ(asValue, 38);
+
+    // AMR-WB, bandwidth-efficient, IPv4, mode 8 (23.85 kbps)
+    asValue = AudioProfileUtil::ConvertToBandwidthAS(AUDIO_CODEC_AMRWB, 0, IMS_FALSE, 8);
+    EXPECT_EQ(asValue, 41);
+
+    // Test bGetMaxValue
+    // AMR-WB, octet-aligned, IPv6, mode 0, but get max value
+    asValue = AudioProfileUtil::ConvertToBandwidthAS(AUDIO_CODEC_AMRWB, 1, IMS_TRUE, 0, IMS_TRUE);
+    EXPECT_EQ(asValue, 49);  // Max value for this config
+}
+
+TEST_F(AudioProfileGeneratorTest, ConvertToBandwidthAS_EVS)
+{
+    // EVS Primary, IPv4, mode 6 (24.4 kbps)
+    IMS_SINT32 asValue = AudioProfileUtil::ConvertToBandwidthAS(AUDIO_CODEC_EVS, IMS_FALSE, 0, 6);
+    EXPECT_EQ(asValue, 42);
+
+    // EVS AMR-WB IO, IPv6, mode 8 (23.85 kbps)
+    asValue = AudioProfileUtil::ConvertToBandwidthAS(AUDIO_CODEC_EVS, IMS_TRUE, 1, 8);
+    EXPECT_EQ(asValue, 48);
+
+    // Test bGetMaxValue
+    // EVS Primary, IPv6, mode 0, but get max value
+    asValue = AudioProfileUtil::ConvertToBandwidthAS(AUDIO_CODEC_EVS, IMS_TRUE, 0, 0, IMS_TRUE);
+    EXPECT_EQ(asValue, 153);  // Max value for this config
+}
+
+TEST_F(AudioProfileGeneratorTest, UpdateAudioProfileBandwidth_AMR)
+{
+    AudioProfile audioProfile;
+    AudioConfiguration audioConfig;
+
+    // Setup profile with AMR-WB payload
+    auto pAmrPayload = new AudioProfile::Payload();
+    pAmrPayload->GetRtpMap().SetPayloadType("AMR-WB");
+    pAmrPayload->GetRtpMap().SetSamplingRate(16000);
+    auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>();
+    pAmrFmtp->SetModeSetList(1 << 8);  // 23.85kbps
+    pAmrFmtp->SetOctetAlign(1);        // octet-aligned
+    pAmrPayload->SetFmtp(pAmrFmtp);
+    audioProfile.AddPayload(std::shared_ptr<AudioProfile::Payload>(pAmrPayload));
+
+    // Set IPv6
+    audioProfile.SetIpAddress(IpAddress("2001:db8::1"));
+
+    UpdateAudioProfileBandwidth(&audioProfile, &audioConfig);
+
+    // AMR-WB, OA, IPv6, mode 8 -> AS=49
+    EXPECT_EQ(audioProfile.GetBandwidthAs(), 49);
+}
+
+TEST_F(AudioProfileGeneratorTest, UpdateAudioProfileBandwidth_EVS)
+{
+    AudioProfile audioProfile;
+    AudioConfiguration audioConfig;
+
+    // Setup profile with EVS payload
+    auto pEvsPayload = new AudioProfile::Payload();
+    pEvsPayload->GetRtpMap().SetPayloadType("EVS");
+    pEvsPayload->GetRtpMap().SetSamplingRate(16000);
+    auto pEvsFmtp = std::make_shared<AudioProfile::EvsFmtp>();
+    pEvsFmtp->SetBrList(1 << 11);   // 128kbps
+    pEvsFmtp->SetEvsModeSwitch(0);  // Primary mode
+    pEvsPayload->SetFmtp(pEvsFmtp);
+    audioProfile.AddPayload(std::shared_ptr<AudioProfile::Payload>(pEvsPayload));
+
+    // Set IPv4
+    audioProfile.SetIpAddress(IpAddress("192.168.1.1"));
+
+    UpdateAudioProfileBandwidth(&audioProfile, &audioConfig);
+
+    // EVS Primary, IPv4, mode 11 (128kbps) -> AS=145
+    EXPECT_EQ(audioProfile.GetBandwidthAs(), 145);
+}
+
+TEST_F(AudioProfileGeneratorTest, UpdateAudioProfileBandwidth_Fallback)
+{
+    AudioProfile audioProfile;
+    AudioConfiguration audioConfig;  // Uses default AS value
+
+    // No payloads in profile
+
+    UpdateAudioProfileBandwidth(&audioProfile, &audioConfig);
+
+    // Should fall back to the AS value from AudioConfiguration
+    EXPECT_EQ(audioProfile.GetBandwidthAs(), audioConfig.GetAsBandwidthKbps());
+}
+
+TEST_F(AudioProfileGeneratorTest, SetProfile_IPVersionChange)
+{
+    AudioProfile audioProfile;
+    AudioConfiguration audioConfig;
+    MockICoreService mockService;
+
+    // Setup profile with AMR-WB payload, mode 8 (23.85kbps), octet-aligned
+    auto pAmrPayload = new AudioProfile::Payload();
+    pAmrPayload->GetRtpMap().SetPayloadType("AMR-WB");
+    pAmrPayload->GetRtpMap().SetSamplingRate(16000);
+    auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>();
+    pAmrFmtp->SetModeSetList(1 << 8);
+    pAmrFmtp->SetOctetAlign(1);
+    pAmrPayload->SetFmtp(pAmrFmtp);
+    audioProfile.AddPayload(std::shared_ptr<AudioProfile::Payload>(pAmrPayload));
+
+    // 1. Test with IPv4
+    IpAddress ipv4Address("192.168.1.1");
+    ON_CALL(mockService, GetIpAddress()).WillByDefault(ReturnRef(ipv4Address));
+
+    SetProfile(&audioProfile, &audioConfig, MEDIA_SERVICE_DEFAULT, &mockService, 0);
+
+    // Expected AS for AMR-WB, mode 8, OA, IPv4 is 41 (from AMR_AS table)
+    EXPECT_EQ(audioProfile.GetBandwidthAs(), 41);
+    EXPECT_FALSE(audioProfile.GetIpAddress().IsIPv6Address());
+
+    // 2. Simulate IP version change to IPv6
+    IpAddress ipv6Address("2001:db8::1");
+    ON_CALL(mockService, GetIpAddress()).WillByDefault(ReturnRef(ipv6Address));
+
+    // Call SetProfile again to simulate profile regeneration
+    SetProfile(&audioProfile, &audioConfig, MEDIA_SERVICE_DEFAULT, &mockService, 0);
+
+    // Expected AS for AMR-WB, mode 8, OA, IPv6 is 49 (from AMR_AS table)
+    EXPECT_EQ(audioProfile.GetBandwidthAs(), 49);
+    EXPECT_TRUE(audioProfile.GetIpAddress().IsIPv6Address());
 }

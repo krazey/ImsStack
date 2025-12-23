@@ -18,6 +18,7 @@
 
 #include "ServiceTrace.h"
 
+#include "audio/AudioDef.h"
 #include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
 #include "config/CodecAmrConfig.h"
@@ -59,6 +60,10 @@ void AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetAnbr(pAudioProfile, eServiceType, nSlotId);
+
+    UpdateAudioProfileBandwidth(pAudioProfile, pAudioConfig);
+
+    IMS_TRACE_D("SetProfile(): Call UpdateAudioProfileBandwidth", 0, 0, 0);
 
     IMS_TRACE_D("SetProfile(): Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
             pAudioProfile->GetMaxPtime(), 0);
@@ -360,4 +365,79 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
     IMS_TRACE_I(
             "CreatePcmPayload(): Codec[%s], Payload[%d]", strCodecName.GetStr(), nPayloadNum, 0);
     return pPcmPayload;
+}
+
+PROTECTED
+IMS_BOOL AudioProfileGenerator::UpdateAudioProfileBandwidth(
+        OUT AudioProfile* pAudioProfile, IN const AudioConfiguration* pConfig)
+{
+    if ((pAudioProfile == nullptr) || (pConfig == nullptr))
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("UpdateAudioProfileBandwidth(): Enter UpdateAudioProfileBandwidth", 0, 0, 0);
+
+    IMS_SINT32 nAS_Optimal = -1;
+    IMS_SINT32 nCurrAS = 0;
+    AUDIO_CODEC nCurrCodec = AUDIO_CODEC_NONE;
+
+    for (IMS_UINT32 i = 0; i < pAudioProfile->GetPayloadList().GetSize(); i++)
+    {
+        AudioProfile::Payload* pAudioPayload = pAudioProfile->GetPayloadAt(i);
+        if (pAudioPayload == nullptr)
+            continue;
+
+        nCurrAS = 0;
+        if ((pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
+                (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") == IMS_TRUE))
+        {
+            auto pAMRFmtp =
+                    std::static_pointer_cast<AudioProfile::AmrFmtp>(pAudioPayload->GetFmtp());
+            if (pAMRFmtp == nullptr)
+                continue;
+
+            nCurrCodec = (pAudioPayload->GetRtpMap().GetSamplingRate() == 16000) ? AUDIO_CODEC_AMRWB
+                                                                                 : AUDIO_CODEC_AMR;
+
+            IMS_SINT32 nMaxModeset = AudioProfileUtil::GetLargestModesetInFmtp(
+                    ImsCodec::CodecToString(nCurrCodec), pAudioPayload);
+
+            nCurrAS = AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec, pAMRFmtp->GetOctetAlign(),
+                    pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset);
+
+            if (nCurrAS > nAS_Optimal)
+                nAS_Optimal = nCurrAS;
+        }
+        else if (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS") == IMS_TRUE)
+        {
+            nCurrCodec = AUDIO_CODEC_EVS;
+            auto pEVSFmtp =
+                    std::static_pointer_cast<AudioProfile::EvsFmtp>(pAudioPayload->GetFmtp());
+            if (pEVSFmtp == nullptr)
+                continue;
+
+            IMS_SINT32 nMaxBr = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pAudioPayload);
+
+            nCurrAS = AudioProfileUtil::ConvertToBandwidthAS(
+                    nCurrCodec, pAudioProfile->GetIpAddress().IsIPv6Address(), 0, nMaxBr);
+
+            if (nCurrAS > nAS_Optimal)
+                nAS_Optimal = nCurrAS;
+        }
+        else if ((pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ==
+                         IMS_TRUE) ||
+                (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA") == IMS_TRUE))
+        {
+            if (72 > nAS_Optimal)  // 72 is PCMU/PCMA AS value at IPv6
+                nAS_Optimal = 72;
+        }
+    }
+
+    pAudioProfile->SetBandwidthAs(nAS_Optimal > 0 ? nAS_Optimal : pConfig->GetAsBandwidthKbps());
+
+    IMS_TRACE_D("AudioProfileGenerator::UpdateAudioProfileBandwidth() update AS[%d] config AS[%d]",
+            pAudioProfile->GetBandwidthAs(), pConfig->GetAsBandwidthKbps(), 0);
+
+    return IMS_TRUE;
 }
