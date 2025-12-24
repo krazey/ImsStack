@@ -38,7 +38,7 @@ struct ConfUser;
 class MessageUtils : public IMessageUtils
 {
 public:
-    MessageUtils();
+    explicit MessageUtils(IN IMtcContext& objContext);
     virtual ~MessageUtils() override;
     MessageUtils(IN const MessageUtils&) = delete;
     MessageUtils& operator=(IN const MessageUtils&) = delete;
@@ -119,9 +119,8 @@ public:
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GenerateContentId(IN const AString& strHost) override;
-    IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
-            IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId,
-            IN IMS_BOOL bMultiPart) override;
+    IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN const ImsList<ConfUser*>& lstConfUser,
+            IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) override;
     std::optional<IMS_BOOL> IsMmtelFeatureIncluded(IN const IMessage* piMessage) override;
     std::optional<IMS_BOOL> IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
     std::optional<IMS_BOOL> IsTextFeatureIncluded(IN const IMessage* piMessage) override;
@@ -147,9 +146,10 @@ private:
             IN_OUT IMessage* piMessage, IN IMS_BOOL bMultiPart, IN const AString& strXml);
     AString CreateResourceListXml(
             IN const ImsList<std::tuple<AString, AString, AString>>& objEntries);
-    AString CreateEntryUri(
-            IN IMtcContext& objContext, IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId);
+    AString CreateEntryUri(IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId);
     AString CreateFromToPartWithTagValue(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType);
+
+    IMtcContext& m_objContext;
 };
 
 #endif

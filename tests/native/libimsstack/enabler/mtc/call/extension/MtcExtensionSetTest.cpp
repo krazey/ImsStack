@@ -185,7 +185,7 @@ TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForNotAvailableE
 TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsFalseForNotAvailableExtension)
 {
     MockIMtcCallContext objContext;
-    MessageUtils objMessageUtils;
+    MessageUtils objMessageUtils(objContext);
     ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
     MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly(objContext);

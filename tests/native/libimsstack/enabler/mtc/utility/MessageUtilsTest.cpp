@@ -80,10 +80,16 @@ static const IMS_CHAR IMS_3GPP_XML[] = {
 class MessageUtilsTest : public ::testing::Test
 {
 public:
+    inline MessageUtilsTest() :
+            objMessageUtils(objContext)
+    {
+    }
+
     MockIMessage* piMessage;
     MockISipMessage* piSipMessage;
     MockISession* piSession;
     ImsList<IMessage*> objMessages;
+    MockIMtcContext objContext;
     MessageUtils objMessageUtils;
 
 protected:
@@ -1084,7 +1090,6 @@ TEST_F(MessageUtilsTest, GenerateContentId)
 
 TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
 {
-    MockIMtcContext objContext;
     ImsList<ConfUser*> lstConfUser;
     ConfUser objUser1;
     objUser1.strTarget = "sip:user1Target";
@@ -1100,13 +1105,11 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
     lstConfUser.Append(&objUser2);
     lstConfUser.Append(&objUser3);
 
-    EXPECT_EQ(
-            objMessageUtils.SetResourceList(IMS_NULL, objContext, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(IMS_NULL, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1130,15 +1133,13 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
             "entry uri=\"sip:user3Target\" cp:copyControl=\"bcc\" cp:anonymize=\"true\"");
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_SUCCESS);
 }
 
 TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 {
     // Sets up to get a ISession using a ConfUser#nCallConnectionId
-    MockIMtcContext objContext;
     MockICallStateProxy objStateProxy;
     ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objStateProxy));
     MockCallConnectionIdManager objIdManager(objContext);
@@ -1202,13 +1203,11 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::SESSION_ID, _))
             .WillByDefault(Return(objSessionIdHeaders));
 
-    EXPECT_EQ(
-            objMessageUtils.SetResourceList(IMS_NULL, objContext, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(IMS_NULL, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(
-            objMessageUtils.SetResourceList(piMessage, objContext, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1224,8 +1223,7 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(
-            objMessageUtils.SetResourceList(piMessage, objContext, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_SUCCESS);
 }
 

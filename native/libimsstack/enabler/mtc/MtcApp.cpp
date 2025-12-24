@@ -68,7 +68,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objConferenceManager(ConferenceManager(*this)),
         m_pEctManager(nullptr),
         m_pEmergencyServiceManager(nullptr),
-        m_objMessageUtils(MessageUtils()),
+        m_objMessageUtils(*this),
         m_objPassiveTimerHolder(PassiveTimerHolder()),
         m_pMultiEndpointManager(nullptr),
         m_objMtcRadioChecker(*this),

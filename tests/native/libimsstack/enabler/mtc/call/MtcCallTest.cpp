@@ -94,6 +94,11 @@ MATCHER_P(IsEqualSipMethod, method, "")
 class MtcCallTest : public ::testing::Test
 {
 public:
+    inline MtcCallTest() :
+            objMessageUtils(objContext)
+    {
+    }
+
     MockIMtcService objService;
     MockIMtcContext objContext;
     CallInfo objCallInfo;

@@ -47,7 +47,11 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC MessageUtils::MessageUtils() {}
+PUBLIC MessageUtils::MessageUtils(IN IMtcContext& objContext) :
+        m_objContext(objContext)
+{
+}
+
 PUBLIC VIRTUAL MessageUtils::~MessageUtils() {}
 
 PUBLIC IMessage* MessageUtils::GetPreviousResponse(IN const ISession* piSession,
@@ -1099,8 +1103,7 @@ PUBLIC AString MessageUtils::GenerateContentId(IN const AString& strHost)
 }
 
 PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
-        IN IMtcContext& objContext, IN const ImsList<ConfUser*>& lstConfUser,
-        IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart)
+        IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart)
 {
     ImsList<std::tuple<AString, AString, AString>> objEntries;
     for (IMS_UINT32 i = 0; i < lstConfUser.GetSize(); i++)
@@ -1111,7 +1114,7 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
             continue;
         }
 
-        AString strEntry = CreateEntryUri(objContext, *pConfUser, bWithDialogId);
+        AString strEntry = CreateEntryUri(*pConfUser, bWithDialogId);
 
         AString strCc;
         switch (pConfUser->eCcType)
@@ -1473,8 +1476,7 @@ PRIVATE AString MessageUtils::CreateResourceListXml(
     return objXml.GetString();
 }
 
-PRIVATE AString MessageUtils::CreateEntryUri(
-        IN IMtcContext& objContext, IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId)
+PRIVATE AString MessageUtils::CreateEntryUri(IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId)
 {
     if (!bWithDialogId)
     {
@@ -1489,7 +1491,7 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     // <entry uri="B?Call-ID=1a&amp;From=A%3Btag%3Da1&amp;To=B%3Btag%3Db&amp;Session-ID=1"
     // cp:copyControl="to"/>
 
-    CallKey nKey = objContext.GetCallConnectionIdManager().GetCallKey(objUser.nConnectionId);
+    CallKey nKey = m_objContext.GetCallConnectionIdManager().GetCallKey(objUser.nConnectionId);
     if (nKey == 0)
     {
         IMS_TRACE_E(0, "No call exists.", 0, 0, 0);
@@ -1497,7 +1499,7 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     }
 
     IMtcCallContext& objCallContext =
-            objContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext();
+            m_objContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext();
     ISession& objSession = objCallContext.GetSession()->GetISession();
 
     // To get a dialog ID, a confirmed dialog message is needed.

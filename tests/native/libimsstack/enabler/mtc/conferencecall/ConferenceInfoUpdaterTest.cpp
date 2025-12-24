@@ -54,6 +54,11 @@ namespace android
 class ConferenceInfoUpdaterTest : public ::testing::Test
 {
 public:
+    inline ConferenceInfoUpdaterTest() :
+            objMessageUtils(objContext)
+    {
+    }
+
     MockConferenceInfo* pInfo;
     MockConferenceDescription* pDescription;
     ImsList<AString> objUris;
