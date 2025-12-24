@@ -504,10 +504,9 @@ TEST_F(StartErrorHandlerTest,
             .WillByDefault(Return(IMS_FALSE));
 
     AString strAnyPath("sip:anyPath");
-    AString strPai("sip:anyPai");
     ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strAnyPath)));
-    ON_CALL(objMessageUtils, GetHeaderValue(pMessage, ISipHeader::P_ASSERTED_IDENTITY, _))
-            .WillByDefault(Return(AString(strPai)));
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strAnyPath))
+            .WillByDefault(Return(IMS_FALSE));
 
     IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_POLICE;
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(pMessage, ISipHeader::CONTACT_NORMAL, _))

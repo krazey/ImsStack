@@ -453,8 +453,7 @@ CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
     if (!m_objContext.GetConfigurationProxy().GetBoolean(ConfigEmergency::
             KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
     {
-        if (m_objContext.GetMessageUtils().GetHeaderValue(&objMessage, ISipHeader::
-                P_ASSERTED_IDENTITY) != GetPathHeader())
+        if (!m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()))
         {
             return CallReasonInfo(CODE_NONE);
         }
