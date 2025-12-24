@@ -53,6 +53,8 @@ const std::unordered_map<IMS_SINT32, EmergencyStartErrorHandler::ActionFunc>
             &EmergencyStartErrorHandler::HandleTerminate},
     {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE,
             &EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce},
+    {ConfigEmergency::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF,
+            &EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscf},
 };
 // clang-format on
 
@@ -271,7 +273,21 @@ CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfO
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
     IMS_TRACE_I("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
+    return HandleSilentReinviteToAlternatePcscfInternal(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+}
 
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscf(
+        IN [[maybe_unused]] const IMessage* piMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscf", 0, 0, 0);
+    return HandleSilentReinviteToAlternatePcscfInternal(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfInternal(
+        IN IMS_SINT32 nExtraCode) const
+{
     const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (!pAosConnector)
     {
@@ -279,7 +295,7 @@ CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfO
     }
 
     pAosConnector->RegisterWithNextPcscf(0);
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, nExtraCode);
 }
 
 PRIVATE

@@ -2968,3 +2968,20 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentRedialWithNextPcsc
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
+
+TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedForEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY)));
+
+    pOutgoingState->OnAosStateChanged(
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED, 0);
+}

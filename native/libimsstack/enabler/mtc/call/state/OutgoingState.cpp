@@ -751,13 +751,21 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosDisconnectedByAllPcscfFa
 {
     StopTimer(TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL);
 
-    IMS_SINT32 eCode = (m_objContext.GetConfigurationProxy().GetBoolean(
-                                ConfigVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL) &&
-                               m_objContext.IsCsfbAvailable())
-            ? CODE_LOCAL_CALL_CS_RETRY_REQUIRED
-            : CODE_LOCAL_NOT_REGISTERED;
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        m_objContext.GetUiNotifier().SendStartFailed(
+                CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+    }
+    else
+    {
+        IMS_SINT32 eCode = (m_objContext.GetConfigurationProxy().GetBoolean(
+                                    ConfigVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL) &&
+                                   m_objContext.IsCsfbAvailable())
+                ? CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                : CODE_LOCAL_NOT_REGISTERED;
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(eCode));
+    }
 
-    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(eCode));
     return CallStateName::TERMINATING;
 }
 
