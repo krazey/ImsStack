@@ -19,13 +19,16 @@
 #include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
 #include "ISipKeepAliveListener.h"
 #include "ISipSocketListener.h"
+#include "Sip.h"
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "SipPrivate.h"
+#include "SipRtConfigHelper.h"
 #include "SipRtConfigUtils.h"
 #include "SipSocket.h"
 

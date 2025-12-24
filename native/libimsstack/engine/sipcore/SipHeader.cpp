@@ -17,6 +17,7 @@
 #include "AStringBuffer.h"
 
 #include "SipAddress.h"
+#include "SipError.h"
 #include "SipHeader.h"
 #include "SipHeaderName.h"
 #include "SipParameter.h"

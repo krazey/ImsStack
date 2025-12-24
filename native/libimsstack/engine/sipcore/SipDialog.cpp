@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "SipClientConnection.h"
+#include "SipDState.h"
 #include "SipDebug.h"
 #include "SipDialog.h"
+#include "SipError.h"
+#include "SipMethod.h"
 #include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP_CORE__;

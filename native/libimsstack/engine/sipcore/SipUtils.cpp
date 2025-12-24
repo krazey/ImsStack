@@ -22,6 +22,7 @@
 #include "ServiceSystemTime.h"
 #include "SystemConfig.h"
 
+#include "Sip.h"
 #include "SipFeatures.h"
 #include "SipPrivate.h"
 #include "SipUtils.h"

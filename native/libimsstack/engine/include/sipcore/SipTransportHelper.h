@@ -22,12 +22,12 @@
 #include "ISipDatagramSocketListener.h"
 #include "ISipStreamSocketListener.h"
 #include "ISipTransportHelper.h"
-#include "SipSocketAddress.h"
 #include "SipTransportAddress.h"
 
 class ISipLocalDnsQueryListener;
 class ISipSocketListener;
 class ISipTransportMessageListener;
+class SipSocketAddress;
 
 /**
  * TCP active connection MUST be created at the start time of raw SIP message transmission.

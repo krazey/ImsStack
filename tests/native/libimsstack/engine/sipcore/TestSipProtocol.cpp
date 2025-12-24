@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "TextParser.h"
+
 #include "Sip.h"
 
 #include "TestSipProtocol.h"

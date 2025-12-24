@@ -19,11 +19,11 @@
 
 #include <gmock/gmock.h>
 
-#include "ISipClientConnection.h"
-#include "ISipConnection.h"
-#include "ISipHeader.h"
-
 #include "ISipDialog.h"
+
+class ISipClientConnection;
+class ISipConnection;
+class ISipHeader;
 
 class MockISipDialog : public ISipDialog
 {

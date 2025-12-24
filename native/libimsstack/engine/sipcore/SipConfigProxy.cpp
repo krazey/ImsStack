@@ -18,6 +18,7 @@
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
+#include "SipProfile.h"
 
 PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetDeviceId(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)

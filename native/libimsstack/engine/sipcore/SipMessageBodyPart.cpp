@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
+#include "msg/SipMsgBody.h"
+
+#include "SipError.h"
 #include "SipMessageBodyPart.h"
 #include "SipPrivate.h"
 #include "SipStack.h"

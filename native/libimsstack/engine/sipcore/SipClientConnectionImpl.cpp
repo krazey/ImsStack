@@ -21,7 +21,9 @@
 #include "SipClientConnection.h"
 #include "SipClientConnectionImpl.h"
 #include "SipConnectionNotifierImpl.h"
+#include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP_CORE__;

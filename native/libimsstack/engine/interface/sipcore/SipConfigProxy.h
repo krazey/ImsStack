@@ -16,7 +16,13 @@
 #ifndef SIP_CONFIG_PROXY_H_
 #define SIP_CONFIG_PROXY_H_
 
-#include "SipProfile.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class AStringArray;
+
+class ISipConfigV;
+class SipProfile;
 
 /**
  * @brief This class providers a helper interface to check SIP configuration

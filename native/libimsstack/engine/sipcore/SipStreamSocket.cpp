@@ -17,10 +17,10 @@
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
 
-#include "Connector.h"
 #include "ISipSocketListener.h"
 #include "ISipStreamSocketListener.h"
 #include "SipDebug.h"

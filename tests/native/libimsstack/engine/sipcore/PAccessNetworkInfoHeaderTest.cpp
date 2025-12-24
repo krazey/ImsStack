@@ -26,11 +26,13 @@
 
 #include "ISipConfig.h"
 
+#include "ISipHeader.h"
 #include "ISipRtConfigHelper.h"
 #include "MockISipMessage.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "SipFactory.h"
 #include "SipHeaderName.h"
+#include "SipMethod.h"
 #include "SipProfile.h"
 #include "SipRtConfig.h"
 

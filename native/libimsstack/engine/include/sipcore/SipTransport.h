@@ -18,15 +18,19 @@
 
 #include "ImsSlot.h"
 
-#include "ISipSocketListener.h"
-#include "SipPrivate.h"
-#include "SipSocket.h"
-#include "SipTransportAddress.h"
-#include "msg/SipAddrSpec.h"
 #include "msg/SipMessage.h"
+
+#include "ISipSocketListener.h"
+#include "Sip.h"
+#include "SipPrivate.h"
+#include "SipSocketAddress.h"
+#include "SipTransportAddress.h"
+
+class SipAddrSpec;
 
 class ISipTransportListener;
 class SipProfile;
+class SipSocket;
 class SipTransportHelper;
 
 class SipTransport : public ImsSlot, public ISipSocketListener

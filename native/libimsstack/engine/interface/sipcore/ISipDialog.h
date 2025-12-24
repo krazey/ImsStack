@@ -16,9 +16,12 @@
 #ifndef INTERFACE_SIP_DIALOG_H_
 #define INTERFACE_SIP_DIALOG_H_
 
-#include "ISipClientConnection.h"
+#include "AString.h"
+
 #include "ISipObject.h"
 
+class ISipClientConnection;
+class ISipConnection;
 class ISipHeader;
 
 /**

@@ -16,11 +16,11 @@
 #ifndef SIP_AU_HELPER_H_
 #define SIP_AU_HELPER_H_
 
-#include "Credential.h"
-
-#include "ISipGenericChallenge.h"
 #include "msg/SipMessage.h"
 
+class Credential;
+
+class ISipGenericChallenge;
 class SipAuHelperPrivate;
 
 class SipAuHelper

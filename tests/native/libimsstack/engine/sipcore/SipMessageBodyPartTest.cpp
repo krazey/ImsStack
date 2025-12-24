@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "msg/SipMsgBody.h"
+
 #include "SipMessageBodyPart.h"
 
 namespace android

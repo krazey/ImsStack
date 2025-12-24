@@ -18,11 +18,13 @@
 #define MOCK_I_SIP_CONNECTION_H_
 
 #include <gmock/gmock.h>
+
 #include "AString.h"
-#include "ImsTypeDef.h"
+
 #include "ISipConnection.h"
 
 class ByteArray;
+
 class ISipDialog;
 class ISipErrorListener;
 class ISipMessage;

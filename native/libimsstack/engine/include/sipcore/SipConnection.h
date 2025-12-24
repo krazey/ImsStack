@@ -19,12 +19,12 @@
 #include "Connection.h"
 #include "ISipTransactionStateListener.h"
 #include "ISipTransportListener.h"
-#include "SipDialog.h"
 #include "SipMessage.h"
-#include "SipTimerValues.h"
 
 class IOnSipErrorListener;
+class SipDialog;
 class SipProfile;
+class SipTimerValues;
 
 class SipConnection :
         public Connection,

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipHeader.h"
 #include "SipAddress.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 #include "SipServerTransport.h"
 #include "SipStack.h"

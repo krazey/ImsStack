@@ -21,6 +21,7 @@
 #include "SipClientConnectionImpl.h"
 #include "SipConnectionNotifier.h"
 #include "SipConnectionNotifierImpl.h"
+#include "SipError.h"
 #include "SipManager.h"
 #include "SipPrivate.h"
 #include "SipProtocol.h"

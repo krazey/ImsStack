@@ -17,6 +17,7 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
+#include "ServiceTrace.h"
 
 #include "private/SipConfig.h"
 
@@ -24,6 +25,7 @@
 #include "ISipTransportListener.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
 #include "SipMessageBuffer.h"
 #include "SipPortManager.h"

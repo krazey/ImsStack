@@ -16,6 +16,7 @@
 #include "ByteArray.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 
 #include "ISipStreamSocketListener.h"
 #include "SipDebug.h"

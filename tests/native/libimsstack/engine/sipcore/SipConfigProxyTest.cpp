@@ -18,6 +18,8 @@
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
+#include "SipProfile.h"
+#include "SipTimerValues.h"
 
 namespace android
 {

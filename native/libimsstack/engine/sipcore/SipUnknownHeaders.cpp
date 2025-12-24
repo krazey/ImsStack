@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "TextParser.h"
 
+#include "SipError.h"
 #include "SipHeader.h"
 #include "SipPrivate.h"
 #include "SipUnknownHeaders.h"

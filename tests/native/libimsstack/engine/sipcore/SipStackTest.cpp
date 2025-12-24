@@ -16,6 +16,12 @@
 #include <gtest/gtest.h>
 
 #include "ImsStrLib.h"
+
+#include "SipTimerContext.h"
+#include "msg/SipMsgUtil.h"
+#include "txn/SipTxn.h"
+#include "txn/SipTxnTimerValues.h"
+
 #include "SipStack.h"
 
 namespace android

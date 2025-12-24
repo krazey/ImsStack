@@ -19,6 +19,7 @@
 #include "ISipIpSecStateListener.h"
 #include "SipIpSecState.h"
 #include "SipStack.h"
+#include "SipTransportAddress.h"
 
 __IMS_TRACE_TAG_SIP_CORE__;
 

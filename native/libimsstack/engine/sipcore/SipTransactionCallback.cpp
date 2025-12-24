@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ByteArray.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
+#include "txn/SipTxn.h"
 
 #include "SipClientTransactionState.h"
 #include "SipStack.h"

@@ -19,6 +19,7 @@
 #include "SipDialogBase.h"
 
 class SipDialogUsage;
+class SipMethod;
 
 /**
  * @brief This class defines an extended SIP dialog.

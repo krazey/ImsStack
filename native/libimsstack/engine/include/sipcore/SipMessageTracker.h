@@ -17,6 +17,7 @@
 #define SIP_MESSAGE_TRACKER_H_
 
 #include "ISipMessageTracker.h"
+#include "SipMethod.h"
 
 class SipMessageTracker : public ISipMessageTracker
 {

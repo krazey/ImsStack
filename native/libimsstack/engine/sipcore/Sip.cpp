@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
-
 #include "Sip.h"
-#include "SipPrivate.h"
 
 PUBLIC GLOBAL const IMS_CHAR Sip::CONNECTION_SCHEME_SIP[] = "sip";
 PUBLIC GLOBAL const IMS_CHAR Sip::CONNECTION_SCHEME_SIPS[] = "sips";

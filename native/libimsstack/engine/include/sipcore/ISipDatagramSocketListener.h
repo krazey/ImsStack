@@ -16,7 +16,10 @@
 #ifndef INTERFACE_SIP_DATAGRAM_SOCKET_LISTENER_H_
 #define INTERFACE_SIP_DATAGRAM_SOCKET_LISTENER_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
+class IpAddress;
 
 class SipSocket;
 

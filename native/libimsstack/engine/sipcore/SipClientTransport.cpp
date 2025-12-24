@@ -17,6 +17,7 @@
 #include "NatHelper.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 
 #include "private/SipConfig.h"
 
@@ -25,10 +26,12 @@
 #include "SipClientTransport.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipFeatures.h"
 #include "SipMessageBuffer.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
+#include "SipSocket.h"
 #include "SipStack.h"
 #include "SipTransportHelper.h"
 #include "SipUtils.h"

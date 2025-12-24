@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 #include "SystemConfig.h"
 
 #include "private/SipConfig.h"
@@ -25,6 +26,7 @@
 #include "SipDebug.h"
 #include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
 #include "SipManager.h"
 #include "SipParameter.h"

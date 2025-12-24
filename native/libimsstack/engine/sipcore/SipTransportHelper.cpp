@@ -22,6 +22,7 @@
 #include "ISipTransportMessageListener.h"
 #include "SipDatagramSocket.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
 #include "SipSocket.h"

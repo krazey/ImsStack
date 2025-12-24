@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "SipFactoryProxy.h"
+#include "SipRtConfigHelper.h"
 #include "SipRtConfigUtils.h"
 
 PUBLIC GLOBAL SipRtConfigHelper* SipRtConfigUtils::GetConfigHelper(IN IMS_SINT32 nSlotId)

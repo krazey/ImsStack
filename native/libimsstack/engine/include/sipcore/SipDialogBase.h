@@ -18,6 +18,8 @@
 
 #include "SipDialogState.h"
 
+class SipMethod;
+
 /**
  * @brief This class is a base class for SIP dialog.
  */

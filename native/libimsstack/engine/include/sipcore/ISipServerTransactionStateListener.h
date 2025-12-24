@@ -16,7 +16,10 @@
 #ifndef INTERFACE_SIP_SERVER_TRANSACTION_STATE_LISTENER_H_
 #define INTERFACE_SIP_SERVER_TRANSACTION_STATE_LISTENER_H_
 
-#include "SipServerTransactionState.h"
+#include "ImsTypeDef.h"
+
+class SipDialogEx;
+class SipServerTransactionState;
 
 /**
  * @brief This class defines a listener interface for an incoming SIP requests.

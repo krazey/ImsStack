@@ -16,9 +16,7 @@
 #ifndef SIP_PRIVATE_H_
 #define SIP_PRIVATE_H_
 
-#include "ServiceTrace.h"
-
-#include "Sip.h"
+#include "ImsTypeDef.h"
 
 class SipPrivate
 {
