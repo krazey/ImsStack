@@ -26,6 +26,7 @@
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
+#include "ISipHeader.h"
 #include "MockIPhoneInfoLocation.h"
 #include "MockIThread.h"
 #include "MockITimer.h"

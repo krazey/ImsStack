@@ -26,6 +26,7 @@
 
 #include "CarrierConfig.h"
 #include "IRegistration.h"
+#include "ISipHeader.h"
 #include "SipStatusCode.h"
 #include "IAosService.h"
 #include "ImsAosParameter.h"

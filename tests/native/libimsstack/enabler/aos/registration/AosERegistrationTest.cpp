@@ -23,6 +23,7 @@
 #include "CarrierConfig.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
+#include "ISipHeader.h"
 #include "PlatformContext.h"
 #include "SipMessageBodyPart.h"
 #include "SipStatusCode.h"
