@@ -601,7 +601,7 @@ TEST_F(AosEApplicationTest, ProcessRegStop)
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     ImsMessage objMessage(MSG_REG_STOP, 0, 0);
     EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
 }
 
 TEST_F(AosEApplicationTest, ReleaseEPdnWhenStateIsReadyWithRegFailedMessage)
@@ -664,7 +664,7 @@ TEST_F(AosEApplicationTest, StateReady_Connection)
     // CONNECTION_DEACTIVATED
     objMessageCnx.nWparam = CONNECTION_DEACTIVATED;
     m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
 }
 
 TEST_F(AosEApplicationTest,
@@ -766,7 +766,7 @@ TEST_F(AosEApplicationTest,
 
     // CONNECTION_ACTIVATED
     m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
-    EXPECT_EQ(m_pTestAosEApplication->GetAppState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetAppState(), IAosApplication::STATE_READY);
 }
 
 TEST_F(AosEApplicationTest, ConnectorStartWhenConnectionDeactivatedInReadyStateDuringCbm)
@@ -792,7 +792,7 @@ TEST_F(AosEApplicationTest, SetReasonDisconnectedWhenConnectionDeactivatedInRead
     m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
 
     // THEN
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
 }
 
@@ -808,7 +808,7 @@ TEST_F(AosEApplicationTest,
     m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
 
     // THEN
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_PERMANENTLY_FAILED);
 }
 
@@ -834,7 +834,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_StateUpdating)
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_UPDATING);
     ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE, 0);
     m_pTestAosEApplication->StateUpdating_Registration(objMessageReg);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
@@ -843,7 +843,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_StateConnecting)
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
     ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE, 0);
     m_pTestAosEApplication->StateConnecting_Registration(objMessageReg);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
@@ -852,7 +852,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_StateConnected)
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE, 0);
     m_pTestAosEApplication->StateConnected_Registration(objMessageReg);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
@@ -874,7 +874,7 @@ TEST_F(AosEApplicationTest, ProcessConnectionUpdated_StateDisconnecting)
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
     ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_UPDATED, 0);
     m_pTestAosEApplication->StateDisconnecting_Connection(objMessageCnx);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
@@ -897,7 +897,7 @@ TEST_F(AosEApplicationTest, ProcessConnectionDeactivated)
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_DEACTIVATED, 0);
     m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
 }
 
@@ -908,7 +908,7 @@ TEST_F(AosEApplicationTest, ProcessConnectionUpdated)
     // STATE_CONNECTED or STATE_UPDATING -  REASON_IP_CHANGED
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::IP_CHANGED);
 
     // STATE_CONNECTED or STATE_UPDATING -  REASON_OTHERS
@@ -956,7 +956,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_Start)
             IAosRegistration::REASON_FAILURE_GENERAL);
 
     m_pTestAosEApplication->StateConnecting_Registration(objMessageReg);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
@@ -967,7 +967,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_Update)
             IAosRegistration::REASON_FAILURE_GENERAL);
 
     m_pTestAosEApplication->StateUpdating_Registration(objMessageReg);
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
@@ -980,7 +980,7 @@ TEST_F(AosEApplicationTest, ProcessAppActivatedTimerExpired)
 
     m_pTestAosEApplication->ProcessAppActivatedTimerExpired();
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_ACTIVATED));
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::NONE);
 }
 
@@ -1004,7 +1004,7 @@ TEST_F(AosEApplicationTest, ProcessAppConnectedTimerExpired)
             .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
     m_pTestAosEApplication->ProcessAppConnectedTimerExpired();
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
 }
 
@@ -1026,7 +1026,7 @@ TEST_F(AosEApplicationTest, ProcessAppTerminatedTimerExpired)
     m_pTestAosEApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
     m_pTestAosEApplication->ProcessAppTerminatedTimerExpired();
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
 }
 
 TEST_F(AosEApplicationTest, ProcessReconfigTimerExpired)

@@ -257,6 +257,18 @@ PROTECTED IMS_BOOL AosEApplication::MaybeRedialOverCrossStack()
     return IMS_FALSE;
 }
 
+PROTECTED void AosEApplication::UpdateReadyState()
+{
+    if (!IsEmergencyBlocked())
+    {
+        SetAppState(STATE_READY);
+    }
+    else
+    {
+        SetAppState(STATE_NOTREADY);
+    }
+}
+
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
 {
     m_pConnector->Stop();
@@ -270,8 +282,8 @@ PROTECTED VIRTUAL void AosEApplication::ProcessCleanAll(IN IMS_UINT32 nReason /*
         m_piNetTracker = IMS_NULL;
     }
     CleanAll(nReason);
+    UpdateReadyState();
     Report_StateChanged(IMS_FALSE);
-    ProcessStateStart();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
@@ -382,17 +394,13 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStop(IN IMSMSG& objMsg)
 {
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
     CleanAll(nReason);
+    UpdateReadyState();
     Report_StateChanged(IMS_FALSE);
-    ProcessStateStart();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateNotReady_Condition(IN IMSMSG& /* objMsg */)
 {
-    if (!IsEmergencyBlocked())
-    {
-        SetAppState(STATE_READY);
-    }
-
+    UpdateReadyState();
     return IMS_TRUE;
 }
 
@@ -459,11 +467,7 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Condition(IN IMSMSG& /* objMsg */)
 {
-    if (IsEmergencyBlocked())
-    {
-        SetAppState(STATE_NOTREADY);
-    }
-
+    UpdateReadyState();
     return IMS_TRUE;
 }
 
@@ -502,10 +506,6 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionDeactivated(IN IMS_UINT
     if (m_piRegistration->IsInCallbackMode())
     {
         ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
-        if (!IsEmergencyBlocked())
-        {
-            SetAppState(STATE_READY);
-        }
     }
     else
     {

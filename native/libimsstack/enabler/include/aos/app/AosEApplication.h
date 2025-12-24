@@ -45,6 +45,7 @@ protected:
     IMS_BOOL IsRegBlockInCbm() const;
     IMS_BOOL IsReleaseEmergencyPdnUponEmergencyCallEnd();
     IMS_BOOL MaybeRedialOverCrossStack();
+    void UpdateReadyState();
 
     // Clean
     void ClearConnection() override;
