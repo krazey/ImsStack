@@ -25,6 +25,7 @@
 #include "call/block/MockIMtcBlockRule.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "media/MockIMtcMediaManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -45,6 +46,7 @@ public:
     ImsList<IMtcCall*> lstOtherCalls;
     MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMessageUtils objMessageUtils;
+    MockIMtcMediaManager objMediaManager;
     MockIMtcSession objMtcSession;
     MockISession objSession;
     MockIMtcCall objMtcCall;
@@ -57,6 +59,7 @@ protected:
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objMtcCall));
@@ -107,14 +110,33 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
             objResult.objReason);
 }
 
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedTextPortZeroAndVideoIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(12345));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(0));
+    CallTypeBlockRule objBlockRule(objContext, CallType::VT);
+
+    Result objResult = objBlockRule.Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResult.objReason);
+}
+
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsNotAllowed)
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
             .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
 
-    // video port = 0
-    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
-            .WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(0));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(12346));
     CallTypeBlockRule objBlockRule(objContext, CallType::RTT);
 
     Result objResult = objBlockRule.Check(objListener);
@@ -122,6 +144,58 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsN
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
             objResult.objReason);
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsUnBlockedVideoTextPortZeroIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(0));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(0));
+
+    CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
+    Result objResultForVoip = objBlockRuleForVoip.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVoip.eStatus);
+
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
+    Result objResultForVt = objBlockRuleForVt.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVt.eStatus);
+
+    CallTypeBlockRule objBlockRuleForRtt(objContext, CallType::RTT);
+    Result objResultForRtt = objBlockRuleForRtt.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForRtt.eStatus);
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoAndTextIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(12345));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(12346));
+
+    CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
+    Result objResultForVoip = objBlockRuleForVoip.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResultForVoip.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResultForVoip.objReason);
+
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
+    Result objResultForVt = objBlockRuleForVt.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResultForVt.objReason);
+
+    CallTypeBlockRule objBlockRuleForRtt(objContext, CallType::RTT);
+    Result objResultForRtt = objBlockRuleForRtt.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResultForRtt.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResultForRtt.objReason);
 }
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedVideoPortZeroAndTextIfConfigIsNotAllowedIfActive)

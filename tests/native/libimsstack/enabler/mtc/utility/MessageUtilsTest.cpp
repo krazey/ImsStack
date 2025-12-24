@@ -1506,6 +1506,91 @@ TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithActiveMediaOnly)
             CallType::VOIP);
 }
 
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpReturnsCorrectPort)
+{
+    ImsList<IMedia*> lstIMedia;
+
+    // Setup Audio Media
+    MockIMedia objAudioMedia;
+    lstIMedia.Append(&objAudioMedia);
+    MockIMediaDescriptor objAudioMediaDescriptor;
+    ON_CALL(objAudioMedia, GetMediaDescriptor).WillByDefault(Return(&objAudioMediaDescriptor));
+
+    SdpMedia objAudioSdpMedia;
+    objAudioSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objAudioSdpMedia.SetPort(12345);
+    // Use GetMediaDescriptionEx to simulate Remote SDP
+    ON_CALL(objAudioMediaDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objAudioSdpMedia));
+
+    // Setup Video Media
+    MockIMedia objVideoMedia;
+    lstIMedia.Append(&objVideoMedia);
+    MockIMediaDescriptor objVideoMediaDescriptor;
+    ON_CALL(objVideoMedia, GetMediaDescriptor).WillByDefault(Return(&objVideoMediaDescriptor));
+
+    SdpMedia objVideoSdpMedia;
+    objVideoSdpMedia.SetType(SdpMedia::TYPE_VIDEO);
+    objVideoSdpMedia.SetPort(54321);
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objVideoSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), 12345);
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_VIDEO), 54321);
+}
+
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpHandlesModifiedState)
+{
+    ImsList<IMedia*> lstIMedia;
+    MockIMedia objMedia;
+    lstIMedia.Append(&objMedia);
+
+    // UPDATE_MODIFIED state
+    ON_CALL(objMedia, GetUpdateState).WillByDefault(Return(IMedia::UPDATE_MODIFIED));
+
+    // Setup Proposal Media
+    MockIMedia objProposalMedia;
+    ON_CALL(objMedia, GetProposal).WillByDefault(Return(&objProposalMedia));
+
+    MockIMediaDescriptor objProposalDescriptor;
+    ON_CALL(objProposalMedia, GetMediaDescriptor).WillByDefault(Return(&objProposalDescriptor));
+
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objSdpMedia.SetPort(12345);
+    ON_CALL(objProposalDescriptor, GetMediaDescriptionEx).WillByDefault(Return(&objSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), 12345);
+}
+
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpReturnsZeroIfNotFound)
+{
+    ImsList<IMedia*> lstIMedia;
+
+    // Setup Media with Port 0
+    MockIMedia objMedia;
+    lstIMedia.Append(&objMedia);
+    MockIMediaDescriptor objDescriptor;
+    ON_CALL(objMedia, GetMediaDescriptor).WillByDefault(Return(&objDescriptor));
+
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objSdpMedia.SetPort(0);
+    ON_CALL(objDescriptor, GetMediaDescriptionEx).WillByDefault(Return(&objSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), 0);
+
+    // Verify returns -1 for non-existent media type
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_VIDEO), -1);
+}
+
 TEST_F(MessageUtilsTest, IsResponseExist)
 {
     IMS_SINT32 nAnyCode = SipStatusCode::SC_200;
