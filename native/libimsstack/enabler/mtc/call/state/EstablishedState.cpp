@@ -764,6 +764,11 @@ CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
     IMS_TRACE_D("TerminateUssiAfterInfoTransaction", 0, 0, 0);
 
     CallReasonInfo objReason(CODE_UNSPECIFIED);
+
+    // In accordance with 3GPP TS 24.390, the network is expected to initiate the BYE.
+    // However, since the call session is already ended in the telephony layer,
+    // and the spec permits the UE to trigger a BYE whenever necessary,
+    // gImsStack sends the BYE directly as a safeguard.
     m_objContext.GetSession()->Terminate(IMS_TRUE, objReason);
 
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
