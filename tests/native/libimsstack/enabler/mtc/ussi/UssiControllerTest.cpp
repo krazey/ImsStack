@@ -527,7 +527,7 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfConnectionIsNull)
             objUssiController.FormInfoRequest(IMS_NULL, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingInfoPackageFails)
+TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingInfoPackageFails)
 {
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_FAILURE));
@@ -538,7 +538,7 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingInfoPackageFail
                     &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingApplicationUssdxmlFails)
+TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingApplicationUssdxmlFails)
 {
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_SUCCESS));
@@ -552,7 +552,7 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingApplicationUssd
                     &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingContentDispositionFails)
+TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingContentDispositionFails)
 {
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_SUCCESS));

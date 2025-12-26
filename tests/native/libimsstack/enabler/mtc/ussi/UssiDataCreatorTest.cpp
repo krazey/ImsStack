@@ -30,13 +30,22 @@ LOCAL const AString ERROR_ELEMENT_2("<error-code>2</error-code>");
 LOCAL const AString ERROR_ELEMENT_3("<error-code>3</error-code>");
 LOCAL const AString ERROR_ELEMENT_4("<error-code>4</error-code>");
 
-TEST(UssiDataCreatorTest, GetXmlBodyWithEmptyUssdStringDoesNothing)
+TEST(UssiDataCreatorTest, GetXmlBodyWithEmptyUssdDataReturnsEmptyUssdDataXml)
 {
     AStringBuffer objXml(UssiConstants::XML_BUFFER_SIZE);
     UssiDataCreator::GetXmlBody(
             AString::ConstEmpty(), objXml, UssiModeType::NONE, UssiError::CODE_NONE);
 
-    EXPECT_EQ(objXml.GetLength(), 0);
+    EXPECT_TRUE(objXml.GetString().Contains(UssiConstants::ELEMENT_USSD_DATA));
+}
+
+TEST(UssiDataCreatorTest, GetXmlBodyWithEmptyUssdDataReturnsErrorCodeBody)
+{
+    AStringBuffer objXml(UssiConstants::XML_BUFFER_SIZE);
+    UssiDataCreator::GetXmlBody(
+            AString::ConstEmpty(), objXml, UssiModeType::NONE, UssiError::CODE_1);
+
+    EXPECT_TRUE(objXml.GetString().Contains(ERROR_ELEMENT_1));
 }
 
 TEST(UssiDataCreatorTest, GetXmlBodyWithModeTypeNone)
