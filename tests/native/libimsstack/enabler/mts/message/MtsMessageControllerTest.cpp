@@ -2605,4 +2605,30 @@ TEST_F(MtsMessageControllerTest, OutOfOrderRpAckForMoSms)
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
 }
 
+TEST_F(MtsMessageControllerTest, ProcessMtSmsAndAcceptFailed)
+{
+    MtsServiceType eServiceType = MtsServiceType::NORMAL;
+    ByteArray objRpData = CreateSmsPdu(SMS_3GPP_MTI_RP_DATA_FROM_N, 0x01);
+    SetUpForReceivingRpMessage(objRpData);
+    SipAddress objSipAddress;
+    objSipAddress.Create("sip:user@example.com");
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+
+    // First MT SMS, Accept() fails
+    ON_CALL(objMockPageMessage, Accept(_)).WillByDefault(Return(IMS_FAILURE));
+    EXPECT_CALL(objJniMtsAppThread, ReportMtSms(_, _, _)).Times(0);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage, eServiceType);
+    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
+
+    // Second MT SMS, Accept() succeeds
+    ByteArray objRpData2 = CreateSmsPdu(SMS_3GPP_MTI_RP_DATA_FROM_N, 0x02);
+    SetUpForReceivingRpMessage(objRpData2);
+    ON_CALL(objMockPageMessage, Accept(_)).WillByDefault(Return(IMS_SUCCESS));
+    EXPECT_CALL(objJniMtsAppThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage, eServiceType);
+    // After processing, if an ACK is not sent back, the message stays in the list.
+    // In this test, we are not sending an ACK back, so it should be in the list.
+    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
+}
 }  // namespace android
