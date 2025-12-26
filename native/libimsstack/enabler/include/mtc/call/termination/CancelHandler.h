@@ -22,7 +22,7 @@
 
 class IMtcCallContext;
 class IMessage;
-class ReasonHeaderValue;
+struct ReasonHeaderValue;
 
 class CancelHandler final
 {
