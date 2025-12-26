@@ -886,4 +886,16 @@ TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithHandoverTypeInvokesEventHandlerOnl
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithCrossSimStatusTypeSetsStatus)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_CROSS_SIM_STATUS;
+    IMS_UINT32 nState = IImsAosMonitor::CROSS_SIM_CONNECTED;
+
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_TRUE(pNormalMtcService->IsCrossSimConnected());
+}
+
 }  // namespace android

@@ -1962,6 +1962,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 mCallProfile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
 
+        ImsCallUtils.setCallExtraIfPresent(mCallProfile,
+                 ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL, ImsCallUtils.VAR_TYPE_BOOLEAN, profile);
         // Call RAT type : NR/ LTE / IWLAN / UNKNOWN
         ImsCallUtils.setCallExtraIfPresent(mCallProfile,
                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, profile);

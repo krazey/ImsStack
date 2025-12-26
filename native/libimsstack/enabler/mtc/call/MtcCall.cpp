@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "IIpcan.h"
 #include "MediaManager.h"
+#include "IImsAosMonitor.h"
 #include "IMessage.h"
 #include "INetworkWatcher.h"
 #include "IReference.h"
@@ -1313,6 +1314,15 @@ PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(IN IMtcService& /*objMtcService*/
             {
                 return pState->OnAosStateChanged(eState, eAosReason, nDataFailureReason);
             });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnEventNotify(
+        IN IMS_UINT32 nType, IN [[maybe_unused]] IMS_UINT32 nState)
+{
+    if (nType == IImsAosMonitor::TYPE_CROSS_SIM_STATUS)
+    {
+        m_objUiNotifier.SendCallInfoChanged();
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,

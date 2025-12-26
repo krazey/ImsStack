@@ -18,10 +18,14 @@
 #include "CallReasonInfo.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "IImsAosMonitor.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ImsList.h"
+#include "JniEnablerConnector.h"
+#include "MockIJniEnabler.h"
+#include "MockIJniMtcCallThread.h"
 #include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
@@ -83,6 +87,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Unused;
 
+LOCAL IMS_SINT32 SLOT_ID = 0;
+
 const AString TEST_CALL_LOG_TAG = "TestCall";
 
 // SipMethod
@@ -111,6 +117,9 @@ public:
     MockIMtcCallManager objCallManager;
     PlatformService* m_pOldConfigService;
     TestConfigService* m_pConfigService;
+    MockIJniEnabler objJniEnabler;
+    MockIJniMtcCallThread objCallThread;
+    JniEnablerConnector* pConnector;
 
 protected:
     virtual void SetUp() override
@@ -155,6 +164,7 @@ protected:
 
         delete pConfigurationProxy;
         delete pSessionInterfaceHolder;
+        delete pConnector;
     }
 
     std::unique_ptr<MockIMtcCallStateFactory> CreateStateFactory(IN IMtcCallState* pState)
@@ -2580,6 +2590,19 @@ TEST_F(MtcCallTest, OnEventNotifyDoesNothing)
     objCall.OnEventNotify(0, 0);
 }
 
+TEST_F(MtcCallTest, OnEventNotifyInvokesSendCallInfoChangedWithCrossSimStatus)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+
+    pConnector = &JniEnablerConnector::GetInstance();
+    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, &objJniEnabler, objCall.GetCallKey());
+    ON_CALL(objJniEnabler, GetJniThread()).WillByDefault(Return(&objCallThread));
+    ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+    EXPECT_CALL(objCallThread, OnCallInfoChanged(_)).Times(1);
+
+    objCall.OnEventNotify(IImsAosMonitor::TYPE_CROSS_SIM_STATUS, 0);
+}
+
 TEST_F(MtcCallTest, OnRatChangedCallsState)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
@@ -2587,6 +2610,12 @@ TEST_F(MtcCallTest, OnRatChangedCallsState)
 
     MtcCall objCall(
             objContext, objService, objCallInfo, CreateStateFactory(pState), TEST_CALL_LOG_TAG);
+
+    pConnector = &JniEnablerConnector::GetInstance();
+    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, &objJniEnabler, objCall.GetCallKey());
+    ON_CALL(objJniEnabler, GetJniThread()).WillByDefault(Return(&objCallThread));
+    ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+    EXPECT_CALL(objCallThread, OnCallInfoChanged(_)).Times(1);
 
     objCall.OnRatChanged(objService.GetServiceType(), INetworkWatcher::RADIOTECH_TYPE_IWLAN,
             INetworkWatcher::RADIOTECH_TYPE_IWLAN);

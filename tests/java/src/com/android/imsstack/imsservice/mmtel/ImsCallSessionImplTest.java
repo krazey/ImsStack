@@ -1710,6 +1710,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
 
         CallInfo callInfo = new CallInfo();
+        MtcCallInfo.setCrossSim(callInfo, true);
         MtcCallInfo.setRatType(callInfo, 1);
         mImsCallSession.getCallListenerProxy().onCallInfoChanged(mMockMtcCall, callInfo);
         processAllMessages();
@@ -1720,6 +1721,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class), profileCaptor.capture());
         assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
                 profileCaptor.getValue().getMediaProfile().getVideoDirection());
+        assertTrue(profileCaptor.getValue().getCallExtraBoolean(
+                ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL));
         assertEquals(1, profileCaptor.getValue().getCallExtraInt(
                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
     }
