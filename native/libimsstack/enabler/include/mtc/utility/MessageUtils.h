@@ -63,16 +63,12 @@ public:
     AString GetParameterValue(IN const IMessage* piMessage, IN const AString& strParameterName,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    ImsList<AString> GetUserParts(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserPart(IN const AString& strUri) override;
     ImsList<AString> GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) override;
-    ImsList<AString> GetDisplayNames(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
@@ -83,6 +79,8 @@ public:
     AString GetParameterValueFromUri(IN IMessage* piMessage, IN const AString& strParameterName,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
+    AString GetParameterValueFromUri(
+            IN const SipAddress& objAddress, IN const AString& strParameterName) override;
     ImsList<AString> GetUris(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
@@ -112,6 +110,7 @@ public:
     IMS_BOOL ContainsTag(IN const AString& strHeader, IN const AString& strTag) override;
     IMS_BOOL ContainsAddressInPaid(
             IN const IMessage* piMessage, IN const AString& strAddress) override;
+    AString GetPai(IN const IMessage& objMessage) override;
     IMS_RESULT SetHeader(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;

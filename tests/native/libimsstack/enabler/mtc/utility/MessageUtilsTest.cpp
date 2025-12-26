@@ -34,6 +34,8 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
 #include "media/IMedia.h"
 #include "media/MockIMedia.h"
@@ -90,6 +92,7 @@ public:
     MockISession* piSession;
     ImsList<IMessage*> objMessages;
     MockIMtcContext objContext;
+    MockMtcConfigurationProxy objConfigurationProxy;
     MessageUtils objMessageUtils;
 
 protected:
@@ -98,6 +101,8 @@ protected:
         piMessage = new MockIMessage();
         piSipMessage = new MockISipMessage();
         piSession = new MockISession();
+
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
         ON_CALL(*piSession, GetNextRequest).WillByDefault(Return(piMessage));
         ON_CALL(*piSession, GetNextResponse).WillByDefault(Return(piMessage));
@@ -398,28 +403,12 @@ TEST_F(MessageUtilsTest, GetParameterValueFromUnknownHeaderBody)
     EXPECT_STREQ(strParameterValue.GetStr(), "value");
 }
 
-TEST_F(MessageUtilsTest, GetUserParts)
-{
-    ImsList<AString> objHeaders;
-    objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
-    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
-    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
-
-    ImsList<AString> objUserParts = objMessageUtils.GetUserParts(piMessage, ANY_HEADER);
-    EXPECT_EQ(objUserParts.GetSize(), 2);
-    EXPECT_STREQ(objUserParts.GetAt(0).GetStr(), "anyname1");
-    EXPECT_STREQ(objUserParts.GetAt(1).GetStr(), "12345");
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    objUserParts = objMessageUtils.GetUserParts(piMessage, ANY_HEADER);
-    EXPECT_EQ(objUserParts.GetSize(), 0);
-}
-
 TEST_F(MessageUtilsTest, GetUserPart)
 {
     AString strUserPart;
     ImsList<AString> objHeaders;
     objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
     ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
 
     strUserPart = objMessageUtils.GetUserPart(piMessage, ANY_HEADER);
@@ -482,29 +471,12 @@ TEST_F(MessageUtilsTest, GetUserId)
     EXPECT_STREQ(strUserId.GetStr(), "");
 }
 
-TEST_F(MessageUtilsTest, GetDisplayNames)
-{
-    ImsList<AString> objDisplayNames;
-    ImsList<AString> objHeaders;
-    objHeaders.Append("\"any display name1\" <sip:anyname1@ims.google.com>");
-    objHeaders.Append("\"any display name2\" <tel:12345>");
-    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
-
-    objDisplayNames = objMessageUtils.GetDisplayNames(piMessage, ANY_HEADER);
-    EXPECT_EQ(objDisplayNames.GetSize(), 2);
-    EXPECT_STREQ(objDisplayNames.GetAt(0).GetStr(), "any display name1");
-    EXPECT_STREQ(objDisplayNames.GetAt(1).GetStr(), "any display name2");
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    objDisplayNames = objMessageUtils.GetDisplayNames(piMessage, ANY_HEADER);
-    EXPECT_EQ(objDisplayNames.GetSize(), 0);
-}
-
 TEST_F(MessageUtilsTest, GetDisplayName)
 {
     AString strDisplayName;
     ImsList<AString> objHeaders;
     objHeaders.Append("\"any display name\" <sip:anyname1@ims.google.com>");
+    objHeaders.Append("\"any display name2\" <tel:12345>");
     ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
 
     strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
@@ -524,6 +496,16 @@ TEST_F(MessageUtilsTest, GetDisplayNameWithPercentEncodedValueReturnsDecodedValu
 
     strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
     EXPECT_STREQ(strDisplayName.GetStr(), "Alphanumeric 01");
+}
+
+TEST_F(MessageUtilsTest, GetDisplayNameReturnsNullIfNoHeader)
+{
+    ImsList<AString> objHeaders;
+    ON_CALL(*piSipMessage, GetHeaders(_, _)).WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("", objMessageUtils.GetDisplayName(piMessage, ANY_HEADER).GetStr());
+    EXPECT_STREQ("",
+            objMessageUtils.GetDisplayName(piMessage, ISipHeader::P_ASSERTED_IDENTITY).GetStr());
 }
 
 TEST_F(MessageUtilsTest, GetHosts)
@@ -1046,6 +1028,76 @@ TEST_F(MessageUtilsTest, ContainsAddressInPaid)
 
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     EXPECT_FALSE(objMessageUtils.ContainsAddressInPaid(piMessage, strAddress));
+}
+
+TEST_F(MessageUtilsTest, GetPaiReturnsNullIfNoHeader)
+{
+    ImsList<AString> objHeaders;
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("", objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithTopmostPreferredConfiguration)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_TOPMOST));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("<tel:12345;anyuriparam>;anyparam", objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithSipPreferredConfigurationReturnsSipUri)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_SIP_URI));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("<sip:anyname1;userparam@ims.google.com>;anyheaderparam",
+            objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithSipPreferredConfigurationReturnsSipsUri)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_SIP_URI));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    objHeaders.Append("<sips:anyname1;userparam@ims.google.com>;anyheaderparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("<sips:anyname1;userparam@ims.google.com>;anyheaderparam",
+            objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithSipPreferredConfigurationReturnsNullIfNotFound)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_SIP_URI));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("", objMessageUtils.GetPai(*piMessage).GetStr());
 }
 
 TEST_F(MessageUtilsTest, SetHeader)

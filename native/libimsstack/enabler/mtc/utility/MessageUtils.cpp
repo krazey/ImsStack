@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "AStringBuffer.h"
 #include "CallReasonInfo.h"
 #include "Const3GPP.h"
@@ -40,6 +41,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
@@ -319,50 +321,18 @@ PUBLIC AString MessageUtils::GetParameterValue(IN const IMessage* piMessage,
     return AString::ConstNull();
 }
 
-PUBLIC ImsList<AString> MessageUtils::GetUserParts(IN const IMessage* piMessage,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
-{
-    ImsList<AString> lstUserParts;
-
-    ImsList<SipAddress> lstAddresses;
-    if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
-    {
-        return lstUserParts;
-    }
-
-    for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
-    {
-        const SipAddress& objSipAddress = lstAddresses.GetAt(i);
-
-        AString strUserPart;
-        if (objSipAddress.IsSchemeTel())
-        {
-            strUserPart = objSipAddress.GetHost();
-        }
-        else
-        {
-            const SipAddress::UserInfoPart* pUserInfoPart = objSipAddress.GetUserInfoPart();
-            if (pUserInfoPart == IMS_NULL)
-            {
-                continue;
-            }
-            strUserPart = pUserInfoPart->GetUser();
-        }
-
-        lstUserParts.Append(strUserPart);
-    }
-
-    return lstUserParts;
-}
-
 PUBLIC AString MessageUtils::GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ImsList<AString> lstUserParts = GetUserParts(piMessage, eHeaderType, strHeaderName);
-
-    for (IMS_UINT32 i = 0; i < lstUserParts.GetSize(); i++)
+    if (eHeaderType == ISipHeader::P_ASSERTED_IDENTITY)
     {
-        AString strUserPart = lstUserParts.GetAt(i);
+        return GetUserPart(GetPai(*piMessage));
+    }
+
+    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
+    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+    {
+        AString strUserPart = GetUserPart(lstHeaders.GetAt(i));
         if (strUserPart.GetLength() > 0)
         {
             return strUserPart;
@@ -449,44 +419,24 @@ PUBLIC AString MessageUtils::GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHe
     return AString::ConstNull();
 }
 
-PUBLIC ImsList<AString> MessageUtils::GetDisplayNames(IN IMessage* piMessage,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
-{
-    ImsList<SipAddress> lstAddresses;
-    if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
-    {
-        return ImsList<AString>();
-    }
-
-    ImsList<AString> lstDisplayNames;
-    for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
-    {
-        const SipAddress& objSipAddress = lstAddresses.GetAt(i);
-
-        lstDisplayNames.Append(objSipAddress.GetDisplayName());
-    }
-
-    return lstDisplayNames;
-}
-
 PUBLIC AString MessageUtils::GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ImsList<AString> lstDisplayNames = GetDisplayNames(piMessage, eHeaderType, strHeaderName);
-    if (lstDisplayNames.IsEmpty())
+    if (eHeaderType == ISipHeader::P_ASSERTED_IDENTITY)
     {
-        return AString::ConstNull();
+        SipAddress objAddress(GetPai(*piMessage));
+        return TextParser::DoPercentDecoding(objAddress.GetDisplayName());
     }
 
-    for (IMS_UINT32 i = 0; i < lstDisplayNames.GetSize(); i++)
+    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
+    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
-        AString strDisplayName = lstDisplayNames.GetAt(i);
+        AString strDisplayName = SipAddress(lstHeaders.GetAt(i)).GetDisplayName();
         if (strDisplayName.GetLength() > 0)
         {
             return TextParser::DoPercentDecoding(strDisplayName);
         }
     }
-
     return AString::ConstNull();
 }
 
@@ -535,6 +485,11 @@ PUBLIC AString MessageUtils::GetParameterValueFromUri(IN IMessage* piMessage,
         IN const AString& strParameterName, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
+    if (eHeaderType == ISipHeader::P_ASSERTED_IDENTITY)
+    {
+        return GetParameterValueFromUri(SipAddress(GetPai(*piMessage)), strParameterName);
+    }
+
     ImsList<SipAddress> lstAddresses;
     if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
     {
@@ -544,38 +499,38 @@ PUBLIC AString MessageUtils::GetParameterValueFromUri(IN IMessage* piMessage,
     for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
     {
         const SipAddress& objSipAddress = lstAddresses.GetAt(i);
-        AString strValue;
-
-        if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips())
+        AString strParameterValue = GetParameterValueFromUri(objSipAddress, strParameterName);
+        if (strParameterValue.GetLength() > 0)
         {
-            const SipAddress::UserInfoPart* pUserInfoPart = objSipAddress.GetUserInfoPart();
-            if (pUserInfoPart == IMS_NULL)
-            {
-                continue;
-            }
+            return strParameterValue;
+        }
+    }
 
-            const SipParameter* pParameter = pUserInfoPart->GetParameter(strParameterName);
-            if (pParameter != IMS_NULL)
-            {
-                strValue = pParameter->GetValue();
-            }
+    return AString::ConstNull();
+}
 
-            if (strValue.GetLength() > 0)
-            {
-                return strValue;
-            }
+PUBLIC AString MessageUtils::GetParameterValueFromUri(
+        IN const SipAddress& objAddress, IN const AString& strParameterName)
+{
+    if (objAddress.IsSchemeSip() || objAddress.IsSchemeSips())
+    {
+        const SipAddress::UserInfoPart* pUserInfoPart = objAddress.GetUserInfoPart();
+        if (pUserInfoPart == IMS_NULL)
+        {
+            return AString::ConstNull();
         }
 
-        const SipParameter* pParameter = objSipAddress.GetParameter(strParameterName);
-        if (pParameter != IMS_NULL)
+        const SipParameter* pParameter = pUserInfoPart->GetParameter(strParameterName);
+        if (pParameter != IMS_NULL && pParameter->GetValue().GetLength() > 0)
         {
-            strValue = pParameter->GetValue();
+            return pParameter->GetValue();
         }
+    }
 
-        if (strValue.GetLength() > 0)
-        {
-            return strValue;
-        }
+    const SipParameter* pParameter = objAddress.GetParameter(strParameterName);
+    if (pParameter != IMS_NULL && pParameter->GetValue().GetLength() > 0)
+    {
+        return pParameter->GetValue();
     }
 
     return AString::ConstNull();
@@ -1052,6 +1007,34 @@ PUBLIC IMS_BOOL MessageUtils::ContainsAddressInPaid(
     objAddressInHeader.SetPort(0);
 
     return objAddress.Equals(objAddressInHeader);
+}
+
+PUBLIC AString MessageUtils::GetPai(IN const IMessage& objMessage)
+{
+    const ImsList<AString> lstHeaders = GetHeaders(&objMessage, ISipHeader::P_ASSERTED_IDENTITY);
+    if (lstHeaders.IsEmpty())
+    {
+        return AString::ConstNull();
+    }
+
+    if (m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT) ==
+            ConfigVoice::PAI_POLICY_PREFER_SIP_URI)
+    {
+        for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+        {
+            const AString& strHeader = lstHeaders.GetAt(i);
+            SipAddress objSipAddress;
+            if (objSipAddress.Create(strHeader) &&
+                    (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips()))
+            {
+                return strHeader;
+            }
+        }
+        return AString::ConstNull();
+    }
+
+    return lstHeaders.GetAt(0);
 }
 
 PUBLIC IMS_RESULT MessageUtils::SetHeader(IN IMessage* piMessage, IN const AString& strValue,
