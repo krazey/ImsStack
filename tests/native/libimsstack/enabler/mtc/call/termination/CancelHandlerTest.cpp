@@ -246,3 +246,25 @@ TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolNoMatch_ReturnsTerminated
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
+
+TEST_F(CancelHandlerTest, HandleMessageWithVzwBusySubstringReturnsRejectedElsewhere)
+{
+    // Verifies that the VZW "busy" reason text is detected even when it's part of a larger
+    // string, leveraging the 'Contains' logic.
+    SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999,
+            "Some other info; another device sent all devices busy response; some more info");
+
+    // Expect the call to be classified as rejected elsewhere.
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, HandleMessageWithVzwCompletedSubstringReturnsAnsweredElsewhere)
+{
+    // Verifies that the VZW "call completed" reason text is detected even when it's part of a
+    // larger string, leveraging the 'Contains' logic.
+    SetUpPrioritizedReasonHeader(
+            REASON_SIP_PROTOCOL, 999, "Some other info; call completion elsewhere; some more info");
+
+    // Expect the call to be classified as answered elsewhere.
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
