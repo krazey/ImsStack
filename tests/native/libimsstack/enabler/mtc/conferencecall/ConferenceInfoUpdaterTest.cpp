@@ -507,6 +507,29 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotSetDisconnectedBeforeConnected)
     EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
 }
 
+TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotUpdateWhenInvalidStatusUpdate)
+{
+    // This test verifies that a participant is not updated if the status update is invalid.
+    // For example, updating a newly added participant directly to 'disconnected'.
+    // This should trigger the "!bFound" case in UpdateParticipantList, where no matching
+    // policy succeeds for a user.
+
+    IMS_UINT32 eStatusBefore = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter = STATUS_DISCONNECTED;
+
+    // Add a participant that is not yet part of the conference (IsInfoUpdated() is false).
+    const ConfUser* pUser = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore);
+
+    // Conference info reports this user as 'disconnected'.
+    AddUserToInfo(USER_ENTITY1, eStatusAfter);
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    // Update should not change the participant's status because a new participant
+    // cannot go directly to disconnected state.
+    pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY);
+    EXPECT_EQ(pUser->eStatus, eStatusBefore);
+}
+
 TEST_F(ConferenceInfoUpdaterTest, UpdateSetsDisconnectedAfterConnected)
 {
     IMS_UINT32 eStatusBefore1 = STATUS_CONNECTED;
