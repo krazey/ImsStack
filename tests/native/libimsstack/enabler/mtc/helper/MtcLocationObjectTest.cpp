@@ -372,6 +372,42 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredForNormalRoutingEmergency
     EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredForNormalRoutingEmergencyCallOnCellular)
+{
+    // GIVEN: The device is on a cellular network
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    // GIVEN: Geolocation is allowed for normal routing emergency calls on cellular
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // GIVEN: Other conditions are met (not roaming, SS enabled, etc.)
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    AddGeolocationValue(IMS_TRUE);
+
+    // GIVEN: The call is a normal routing emergency call
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+
+    // WHEN: The block condition for normal routing emergency calls is NOT set
+    // THEN: Geolocation info is required
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    // WHEN: The block condition for normal routing emergency calls IS set
+    // THEN: Geolocation info is NOT required
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
 TEST_F(MtcLocationObjectTest, GetLocationFromMessageIfNoContent)
 {
     MockIMessageBodyPart objOtherBody;
