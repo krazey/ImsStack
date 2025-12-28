@@ -1400,11 +1400,14 @@ TEST_F(ConferenceControllerTest, ProcessSubscribeOnParticipantPutsSubscribeOpera
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
 
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, IMS_FALSE))
+            .Times(1);
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, IMS_TRUE)).Times(1);
 
-    ImsList<ConfUser*> objUsers;
-    pController->ProcessCommand(IConferenceController::JOINED, objUsers);
+    pController->ProcessCommand(IConferenceController::JOINED);
 
     EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
 }
@@ -1417,8 +1420,19 @@ TEST_F(ConferenceControllerTest, ProcessSubscribeOnParticipantDoesNothingIfConfi
 
     EXPECT_CALL(*pMockQueue, CreateNPut(_, _)).Times(0);
 
-    ImsList<ConfUser*> objUsers;
-    pController->ProcessCommand(IConferenceController::JOINED, objUsers);
+    pController->ProcessCommand(IConferenceController::JOINED);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT));
+
+    EXPECT_CALL(*pMockQueue, CreateNPut(_, _)).Times(0);
+
+    pController->ProcessCommand(IConferenceController::JOINED);
 
     EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
 }

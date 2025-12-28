@@ -92,6 +92,8 @@ public:
      */
     virtual void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers) = 0;
 
+    virtual void ProcessCommand(IN IMS_UINT32 nCmd) = 0;
+
     /**
      * @brief Gets the status of a specific call within the conference, identified by its CallKey.
      *

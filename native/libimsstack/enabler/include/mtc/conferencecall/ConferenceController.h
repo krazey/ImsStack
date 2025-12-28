@@ -21,6 +21,7 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "SipStatusCode.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/ConferenceParticipantList.h"
@@ -40,6 +41,7 @@ class SuppService;
 class CallConnectionIdManager;
 class ConferenceFactory;
 class ConferenceSubscription;
+class MtcConfigurationProxy;
 struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;
@@ -89,6 +91,7 @@ public:
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
             IN ImsList<SuppService*>& objSuppServices) override;
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers) override;
+    void ProcessCommand(IN IMS_UINT32 nCmd) override;
     IndividualCallState GetCallStatusInConference(IN CallKey nKey) const override;
 
     // IConferenceOperationQueueListener interfaces implementation
@@ -96,6 +99,11 @@ public:
 
     // The visibility of this internal method is currently public to allow for unit testing.
     IMS_SINT32 GetState() const;
+
+    inline static IMS_BOOL IsRequiredForParticipant(IN const MtcConfigurationProxy& objConfigProxy)
+    {
+        return ConferenceConfigurationHelper::IsSubscriptionForParticipantRequired(objConfigProxy);
+    }
 
 protected:
     // basic operation set
