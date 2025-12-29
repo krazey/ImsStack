@@ -290,6 +290,7 @@ enum
     using Base::RegistrationControl_ControlRegistration;        \
     using Base::ServicePhone_LocationInfoChanged;               \
     using Base::ServicePhone_CrossSimStatusChanged;             \
+    using Base::ServicePhone_PlmnChanged;                       \
     using Base::ProcessRegTerminating;                          \
     using Base::ProcessScscfRestoration;                        \
     using Base::GetImsEstablishmentTime;                        \
@@ -4279,6 +4280,26 @@ TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToAirplan
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
 }
 
+TEST_F(AosApplicationTest, ShouldClearIpsecBlockWhenDisconnectingForAirplaneMode)
+{
+    m_pAosApplication->ProcessDisconnectingState(AosReason::AIRPLANE_MODE);
+
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_CLEAR_IPSEC_BLOCK, 0)).Times(1);
+
+    m_pAosApplication->Connector_Deactivated(1);
+}
+
+TEST_F(AosApplicationTest, ShouldNotClearIpsecBlockWhenDisconnectingForOtherReasons)
+{
+    m_pAosApplication->ProcessDisconnectingState(AosReason::NONE);
+
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_CLEAR_IPSEC_BLOCK, 0)).Times(0);
+
+    m_pAosApplication->Connector_Deactivated(1);
+}
+
 TEST_F(AosApplicationTest, ReturnTrueIfRegisteredOnTheGivenNetworkType)
 {
     // GIVEN
@@ -4422,4 +4443,34 @@ TEST_F(AosApplicationTest, NotNotifyMonitorIfRegRecoveryIsNotHeldUponPcscfRecove
 
     // THEN
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
+}
+
+TEST_F(AosApplicationTest, ShouldClearIpsecBlockWhenPlmnChangedThenConnectionDeactivated)
+{
+    // GIVEN
+
+    // WHEN
+    m_pAosApplication->ServicePhone_PlmnChanged(AString("any_plmn"));
+
+    // THEN
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_CLEAR_IPSEC_BLOCK, 0)).Times(1);
+    m_pAosApplication->Connector_Deactivated(1);
+}
+
+TEST_F(AosApplicationTest, ShouldClearIpsecBlockOnPdnDisconnectWhenPlmnBlockNotified)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(
+                    Return(CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_NR);
+
+    // WHEN
+    m_pAosApplication->ProcessPdnDisconnect();
+
+    // THEN
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_CLEAR_IPSEC_BLOCK, 0)).Times(1);
+    m_pAosApplication->Connector_Deactivated(1);
 }

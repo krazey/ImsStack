@@ -415,6 +415,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             ReinitiateRegistration(nReason);
             break;
 
+        case CMD_CLEAR_IPSEC_BLOCK:
+            ClearIpsecBlock();
+            break;
+
         default:
             break;
     }
