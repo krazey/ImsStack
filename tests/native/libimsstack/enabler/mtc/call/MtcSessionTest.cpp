@@ -36,6 +36,8 @@
 #include "call/MtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/message/MockIMessageSender.h"
+#include "conferencecall/MockIConferenceController.h"
+#include "conferencecall/MockIConferenceManager.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -1356,6 +1358,55 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithInitia
     EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
 }
 
+TEST_F(MtcSessionTest, HandleUpdateRequestDoesNotCreateConferenceIfAlreadyExists)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::VOIP);
+    RequestType eType = RequestType::UPDATE;
+
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    MockIConferenceManager objConferenceManager;
+    ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
+    MockIConferenceController objConferenceController;
+    ON_CALL(objConferenceManager, GetController(_)).WillByDefault(Return(&objConferenceController));
+    EXPECT_CALL(objConferenceManager, CreateController(_, ConferenceType::PARTICIPANT)).Times(0);
+    pMtcSession->HandleRequest(eType, objMessage);
+}
+
+TEST_F(MtcSessionTest, HandleUpdateRequestCreatesConferenceControllerIfIsfocusAndConfigEnabled)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::VOIP);
+    RequestType eType = RequestType::UPDATE;
+
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    MockIConferenceManager objConferenceManager;
+    ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
+    ON_CALL(objConferenceManager, GetController(_)).WillByDefault(Return(IMS_NULL));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+
+    MockIConferenceController objConferenceController;
+    EXPECT_CALL(objConferenceManager, CreateController(_, ConferenceType::PARTICIPANT))
+            .WillOnce(ReturnRef(objConferenceController));
+    EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::JOINED));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+}
+
 TEST_F(MtcSessionTest, HandleResponseInvokesSetCallTypeIfDifferentCallType)
 {
     CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -1453,6 +1504,9 @@ TEST_F(MtcSessionTest, HandleResponseSetsInConferenceIfIsFocus)
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VT));
     ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    MockIConferenceManager objConferenceManager;
+    ON_CALL(objContext, GetConferenceManager()).WillByDefault(ReturnRef(objConferenceManager));
 
     EXPECT_FALSE(objCallInfo.bConference);
 

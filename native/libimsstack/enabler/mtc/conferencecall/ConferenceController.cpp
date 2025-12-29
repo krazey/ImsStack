@@ -282,10 +282,21 @@ PUBLIC VIRTUAL void ConferenceController::ProcessCommand(
         case IConferenceController::REMOVE:
             ProcessDrop(objUsers);
             break;
-        case IConferenceController::JOINED:  // participant case
+        default:
+            break;
+    }
+}
+
+PUBLIC VIRTUAL void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd)
+{
+    IMS_TRACE_D("ProcessCommand : [%d]", nCmd, 0, 0);
+
+    switch (nCmd)
+    {
+        case IConferenceController::JOINED:
             ProcessSubscribeOnParticipant();
             break;
-        default:  // IConferenceController::GROUPCALL
+        default:
             break;
     }
 }
@@ -446,6 +457,7 @@ void ConferenceController::ProcessSubscribeOnParticipant()
 
     IMS_TRACE_I("ProcessSubscribeOnParticipant", 0, 0, 0);
 
+    m_pOperationQueue->CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_CALL);
     m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE, IMS_TRUE);
 }
 

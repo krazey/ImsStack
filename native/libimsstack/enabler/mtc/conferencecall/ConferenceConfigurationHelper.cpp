@@ -82,7 +82,9 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReferToExHeaderUsed(
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionForParticipantRequired(
         IN const MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL);
+    return objProxy.GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL) &&
+            objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT) !=
+            ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT;
 }
 
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationHelper::GetWaitTimeNotifyTerminated(

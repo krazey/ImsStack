@@ -123,7 +123,7 @@ private:
     std::optional<IMS_BOOL> IdentifyRemoteCapability(IN std::optional<IMS_BOOL> bHasFeatureTag,
             IN std::optional<IMS_BOOL> bContainsMediaInSdp) const;
 
-    void SetInConference(IN const IMessage& objMessage);
+    void HandleInConference(IN const IMessage& objMessage);
     CallType RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const;
     CallType GetCallTypeForOfferlessInvite() const;
     CallType GetCallTypeForOfferlessReInvite() const;

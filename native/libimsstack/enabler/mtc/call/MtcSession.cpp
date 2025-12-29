@@ -32,6 +32,9 @@
 #include "call/extension/MtcExtension.h"
 #include "call/extension/PreconditionExtension.h"
 #include "call/message/IMessageSender.h"
+#include "conferencecall/ConferenceController.h"
+#include "conferencecall/IConferenceController.h"
+#include "conferencecall/IConferenceManager.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -308,7 +311,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
                 SetCallType(GetCallTypeForOfferlessInvite());
             }
 
-            SetInConference(objRequest);
+            HandleInConference(objRequest);
             break;
 
         case RequestType::PRACK:
@@ -327,7 +330,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
                 SetCallType(GetCallTypeForOfferlessReInvite());
             }
 
-            SetInConference(objRequest);
+            HandleInConference(objRequest);
             break;
 
         default:
@@ -374,7 +377,7 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
 
     if (eType == ResponseType::PROVISIONAL_RESPONSE || eType == ResponseType::ACCEPT_UPDATE)
     {
-        SetInConference(objResponse);
+        HandleInConference(objResponse);
     }
 }
 
@@ -551,15 +554,29 @@ std::optional<IMS_BOOL> MtcSession::IdentifyRemoteCapability(
     return bContainsMediaInSdp;
 }
 
+// This handles the case for a conference participant. The conference host sets bConference when it
+// starts.
 PRIVATE
-void MtcSession::SetInConference(IN const IMessage& objMessage)
+void MtcSession::HandleInConference(IN const IMessage& objMessage)
 {
-    if (m_objContext.GetCallInfo().bConference == IMS_TRUE)
+    if (m_objContext.GetCallInfo().bConference ||
+            !m_objContext.GetMessageUtils().IsFocusConf(&objMessage))
     {
         return;
     }
-    m_objContext.GetCallInfo().bConference =
-            m_objContext.GetMessageUtils().IsFocusConf(&objMessage);
+
+    m_objContext.GetCallInfo().bConference = IMS_TRUE;
+    IConferenceController* pController =
+            m_objContext.GetConferenceManager().GetController(m_objContext.GetCallKey());
+    if (!pController &&
+            ConferenceController::IsRequiredForParticipant(m_objContext.GetConfigurationProxy()))
+    {
+        // This operation must be performed after the call state changes to EstablishedState,
+        // and this is guaranteed by the ConferenceController itself.
+        pController = &m_objContext.GetConferenceManager().CreateController(
+                m_objContext.GetCallKey(), ConferenceType::PARTICIPANT);
+        pController->ProcessCommand(IConferenceController::JOINED);
+    }
 }
 
 PRIVATE

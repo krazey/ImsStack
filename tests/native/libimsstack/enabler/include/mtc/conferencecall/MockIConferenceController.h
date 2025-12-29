@@ -38,6 +38,7 @@ public:
             (override));
     MOCK_METHOD(void, ProcessCommand, (IN IMS_UINT32 nCmd, (IN ImsList<ConfUser*> & objUsers)),
             (override));
+    MOCK_METHOD(void, ProcessCommand, (IN IMS_UINT32 nCmd), (override));
     MOCK_METHOD(
             IndividualCallState, GetCallStatusInConference, (IN CallKey nKey), (const, override));
 };
