@@ -99,6 +99,16 @@
     <string-array name="imsemergency.reject_code_and_action_set_string_array" num="1">
         <item value="380:4"/> <!-- CROSS_SIM_TEMP_FAILURE -->
     </string-array>
+    <!-- MTC terminate reason -->
+    <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">SIP;text=&quot;USER DISCONNECTED&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_rtp_timeout_string">SIP;text=&quot;No Media&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_media_bearer_loss_string">SIP;text=&quot;DRB LOST&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_sip_response_timeout_string">SIP;text=&quot;TIME OUT&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_call_setup_timeout_string">SIP;text=&quot;No RESPONSE&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string">SIP;text=&quot;EXPIRE&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_network_lost_string">SIP;text=&quot;NETWORK COVERAGE LOST&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_media_not_supported_string">SIP;text=&quot;Offer Refused&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_media_bearer_not_met_string">SIP;text=&quot;QOS&quot;</string>
 
     <!-- Audio -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
