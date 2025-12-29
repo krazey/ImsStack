@@ -1669,18 +1669,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
         return IMS_FALSE;
     }
 
-    /*
-    IAosLocationStarter* piLs = AosProvider::GetInstance()->GetLocationStarter(m_nSlotId);
-    if (piLs != IMS_NULL &&
-            !piLs->IsPolicyEnabled(IAosLocationStarter::POLICY_START_ON_VOLTE_AVAILABLE))
-    {
-        if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
-        {
-            return IMS_FALSE;
-        }
-    }
-    */
-
     if (!bRequired)
     {
         return IMS_FALSE;

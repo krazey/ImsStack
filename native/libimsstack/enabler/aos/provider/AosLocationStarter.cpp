@@ -223,7 +223,6 @@ void AosLocationStarter::HandleStartConditionChanged()
     IMS_BOOL bStart = IMS_FALSE;
     IAosBlock* piBlock = m_piAppContext->GetBlock();
 
-    // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_ON_WFC_AVAILABILITY))
     {
         if (piBlock->IsCleared(SERVICE_WIFI) ||
@@ -234,7 +233,6 @@ void AosLocationStarter::HandleStartConditionChanged()
         }
     }
 
-    // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_ON_VOLTE_AVAILABLE))
     {
         if (piBlock->IsCleared(SERVICE_CELLULAR))
@@ -243,7 +241,6 @@ void AosLocationStarter::HandleStartConditionChanged()
         }
     }
 
-    // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_ON_WFC_SETTING))
     {
         if (m_bWfcSetting)
@@ -254,7 +251,6 @@ void AosLocationStarter::HandleStartConditionChanged()
 
     ImsList<IMS_UINT32> objBlocks;
 
-    // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON))
     {
         piBlock->GetBlockReasons(objBlocks, SERVICE_CELLULAR);
@@ -264,7 +260,6 @@ void AosLocationStarter::HandleStartConditionChanged()
         }
     }
 
-    // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON))
     {
         piBlock->GetBlockReasons(objBlocks, SERVICE_WIFI);
