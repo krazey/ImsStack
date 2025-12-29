@@ -107,6 +107,7 @@ public:
             nRegRetryCntWithIpsecOnAuthFailure(3),
             nRegRetryDefaultPolicy(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC),
             nRegRetryTimerFPolicy(CarrierConfig::Ims::TIMER_F_POLICY_NONE),
+            nRegTransactionTimeoutOnPcscfRestoration(0),
             nRegTimerForEmcCallMillis(0),
             nReleasePdnDelaySecAfterTempPlmnBlock(5),
             nReregRetry305Policy(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT),
@@ -222,6 +223,7 @@ public:
     IMS_SINT32 nRegRetryCntWithIpsecOnAuthFailure;
     IMS_SINT32 nRegRetryDefaultPolicy;
     IMS_SINT32 nRegRetryTimerFPolicy;
+    IMS_SINT32 nRegTransactionTimeoutOnPcscfRestoration;
     IMS_SINT32 nRegTimerForEmcCallMillis;
     IMS_SINT32 nReleasePdnDelaySecAfterTempPlmnBlock;
     IMS_SINT32 nReregRetry305Policy;

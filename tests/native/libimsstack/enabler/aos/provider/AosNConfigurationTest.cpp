@@ -837,6 +837,10 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REG_RETRY_TIMER_F_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Ims::TIMER_F_POLICY_NONE));
     EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Ims::KEY_REG_TRANSACTION_TIMEOUT_ON_PCSCF_RESTORATION_SEC_INT,
+                    -1))
+            .WillOnce(Return(0));
+    EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig,
@@ -1093,6 +1097,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             m_pAosNConfiguration->GetRegRetryDefaultPolicy());
     EXPECT_EQ(CarrierConfig::Ims::TIMER_F_POLICY_NONE,
             m_pAosNConfiguration->GetRegRetryTimerFPolicy());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetRegTransactionTimeoutOnPcscfRestoration());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());
 
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegTimerForEmcCall());
