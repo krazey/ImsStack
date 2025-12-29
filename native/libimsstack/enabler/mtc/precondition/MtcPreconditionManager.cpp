@@ -372,9 +372,9 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnMessageReceived(
         return;
     }
 
-    IMS_BOOL bHasSupportedHeader = m_objContext.GetMessageUtils().ContainsValue(
+    IMS_BOOL bHasSupportedHeader = m_objContext.GetMessageUtils().ContainsValueIgnoreCase(
             piMessage, MessageUtil::STR_PRECONDITION, ISipHeader::SUPPORTED);
-    IMS_BOOL bHasRequireHeader = m_objContext.GetMessageUtils().ContainsValue(
+    IMS_BOOL bHasRequireHeader = m_objContext.GetMessageUtils().ContainsValueIgnoreCase(
             piMessage, MessageUtil::STR_PRECONDITION, ISipHeader::REQUIRE);
 
     IMS_BOOL bRemoteSupported = (bHasSupportedHeader || bHasRequireHeader) &&

@@ -1499,9 +1499,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
@@ -1524,9 +1526,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
@@ -1551,9 +1555,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
@@ -1576,9 +1582,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
@@ -1602,9 +1610,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
 
@@ -1626,9 +1636,11 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
@@ -1651,9 +1663,11 @@ TEST_F(MtcPreconditionManagerTest, UnsetsSupportingPreconditionOn183ReliableResp
     ON_CALL(*pSdpPreconditionHelper, IsPreconditionIncludedInSdp(&objISession, MEDIATYPE_NONE))
             .WillByDefault(Return(IMS_FALSE));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pInfo, SetSupportingPrecondition(IMS_FALSE)).Times(1);
@@ -1669,9 +1683,11 @@ TEST_F(MtcPreconditionManagerTest, DoNotUpdateSupportingPreconditionOnInviteRece
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objISipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     AString strPrecondition = "precondition";
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::SUPPORTED, _))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, ContainsValue(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(&objIMessage, strPrecondition, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pInfo, SetSupportingPrecondition(_)).Times(0);

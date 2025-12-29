@@ -405,6 +405,19 @@ public:
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
     /**
+     * @brief Checks if a header in the message contains a specific value, ignoring case.
+     *
+     * @param piMessage The SIP message to check.
+     * @param strValue The value to search for within the header.
+     * @param eHeaderType The type of header to check (e.g., SIP_HEADER_TYPE_CONTACT).
+     * @param strHeaderName The name of the header if eHeaderType is SIP_HEADER_TYPE_GENERIC.
+     * @return IMS_TRUE if the value is found in the header (case-insensitive), IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL ContainsValueIgnoreCase(IN const IMessage* piMessage,
+            IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+            IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
      * @brief Checks
      *
      * @param piMessage

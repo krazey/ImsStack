@@ -59,6 +59,14 @@ protected:
                 ContainsValue(&objMessageSupportsExtension,
                         MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::SUPPORTED, _))
                 .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMessageUtils,
+                ContainsValueIgnoreCase(&objMessageRequiresExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::REQUIRE, _))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMessageUtils,
+                ContainsValueIgnoreCase(&objMessageSupportsExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::SUPPORTED, _))
+                .WillByDefault(Return(IMS_TRUE));
 
         pExtension = new PreconditionExtension(objContext);
 

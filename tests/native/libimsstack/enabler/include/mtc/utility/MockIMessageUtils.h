@@ -89,6 +89,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsInitialEmergencyRegistrationRequired, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, ContainsValue,
             (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
+    MOCK_METHOD(IMS_BOOL, ContainsValueIgnoreCase,
+            (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_BOOL, IsHeaderPresent, (IN const IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
     MOCK_METHOD(IMS_BOOL, ContainsTag, (IN const AString&, IN const AString&), (override));

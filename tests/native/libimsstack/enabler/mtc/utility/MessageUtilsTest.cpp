@@ -983,6 +983,23 @@ TEST_F(MessageUtilsTest, ContainsValue)
     EXPECT_FALSE(objMessageUtils.ContainsValue(piMessage, strValue, ANY_HEADER));
 }
 
+TEST_F(MessageUtilsTest, ContainsValueIgnoreCase)
+{
+    AString strValue = "anyValue";
+    AString strUppercasedValue = strValue.MakeUpper();
+    ImsList<AString> objHeaders;
+    objHeaders.Append(strUppercasedValue);
+    objHeaders.Append("anotherValue");
+    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
+
+    EXPECT_TRUE(objMessageUtils.ContainsValueIgnoreCase(piMessage, strValue, ANY_HEADER));
+
+    objHeaders.Clear();
+    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
+
+    EXPECT_FALSE(objMessageUtils.ContainsValueIgnoreCase(piMessage, strValue, ANY_HEADER));
+}
+
 TEST_F(MessageUtilsTest, IsHeaderPresent)
 {
     ON_CALL(*piSipMessage, IsHeaderPresent(ANY_HEADER, _)).WillByDefault(Return(IMS_TRUE));

@@ -947,6 +947,28 @@ PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN const IMessage* piMessage,
     return IMS_FALSE;
 }
 
+PUBLIC IMS_BOOL MessageUtils::ContainsValueIgnoreCase(IN const IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
+{
+    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
+    if (lstHeaders.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
+
+    AString strLowercased = strValue.MakeLower();
+    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+    {
+        if (lstHeaders.GetAt(i).MakeLower().Contains(strLowercased))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
 PUBLIC IMS_BOOL MessageUtils::IsHeaderPresent(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {

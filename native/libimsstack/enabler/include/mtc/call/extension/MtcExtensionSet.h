@@ -87,11 +87,42 @@ public:
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
 private:
+    class CaseInsensitiveExtensionMap
+    {
+    public:
+        inline void Add(const AString& strKey, IMtcExtension* pExtension)
+        {
+            m_objMap.Add(strKey.MakeLower(), pExtension);
+        }
+
+        inline const AString& GetKeyAt(IMS_UINT32 nIndex) const
+        {
+            return m_objMap.GetKeyAt(nIndex);
+        }
+
+        inline IMS_SLONG GetIndexOfKey(const AString& strKey) const
+        {
+            return m_objMap.GetIndexOfKey(strKey.MakeLower());
+        }
+
+        inline IMtcExtension* GetValueAt(IMS_UINT32 nIndex) const
+        {
+            return m_objMap.GetValueAt(nIndex);
+        }
+
+        inline IMS_UINT32 GetSize() const { return m_objMap.GetSize(); }
+
+        inline void Clear() { m_objMap.Clear(); }
+
+    private:
+        ImsMap<AString, IMtcExtension*> m_objMap;
+    };
+
     void CopyFrom(IN const MtcExtensionSet& objRhs);
     void Clear();
 
     IMtcCallContext& m_objContext;
-    ImsMap<AString, IMtcExtension*> m_objExtensions;
+    CaseInsensitiveExtensionMap m_objExtensions;
 };
 
 #endif

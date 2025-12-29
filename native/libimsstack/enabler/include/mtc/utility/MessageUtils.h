@@ -105,6 +105,9 @@ public:
     IMS_BOOL ContainsValue(IN const IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
+    IMS_BOOL ContainsValueIgnoreCase(IN const IMessage* piMessage, IN const AString& strValue,
+            IN IMS_SINT32 eHeaderType,
+            IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_BOOL IsHeaderPresent(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_BOOL ContainsTag(IN const AString& strHeader, IN const AString& strTag) override;
