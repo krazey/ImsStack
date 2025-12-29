@@ -980,12 +980,10 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersB
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwConfiguration)
 {
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
-                    MessageUtil::STR_REASON_USER_SESSIONEXPIRED))
-            .WillByDefault(Return(IMS_TRUE));
-
     const AString strReasonHeaderValue("USER;text=\"Session Expired\"");
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING))
+            .WillByDefault(Return(strReasonHeaderValue));
     MockISipMessage objMessage;
     EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, strReasonHeaderValue, _)).Times(2);
     pFormatter->ReasonHeaderSetter_SetHeader(
@@ -1017,6 +1015,9 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrCon
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strReasonHeaderSip("SIP; cause=103; text=\"Session-Expire\"; fc=9602");
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING))
+            .WillByDefault(Return(strReasonHeaderSip));
     const AString strReasonHeaderUser("USER; cause=101;text=\"USER triggered\"; fc=9501");
     const AString strReasonHeaderEtc("ETC; cause=104; text=\"Unknown\"; fc=9999");
     const AString strByeCauseNormal("normal");
@@ -1070,6 +1071,31 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetPrivateHeaderSetsPrivateHeader
     EXPECT_CALL(objNewMessage, SetHeader(ISipHeader::UNKNOWN, strAnyCause, strPSktByeCause));
 
     pFormatter->ReasonHeaderSetter_SetPrivateHeader(&objOldMessage, &objNewMessage);
+}
+
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeaderForRefreshTimeouts)
+{
+    const AString strReasonHeaderValue("SIP;cause=408;text=\"Session Timeout\"");
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING))
+            .WillByDefault(Return(strReasonHeaderValue));
+
+    MockISipMessage objMessage;
+    // Verify that the Reason header is added for both timeout types
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, strReasonHeaderValue, _)).Times(2);
+
+    pFormatter->ReasonHeaderSetter_SetHeader(
+            &objMessage, ISession::TERMINATION_REASON_REFRESH_TIMEOUT);
+    pFormatter->ReasonHeaderSetter_SetHeader(
+            &objMessage, ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT);
+
+    // Verify that no header is added if the configuration returns an empty string
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, _, _)).Times(0);
+    pFormatter->ReasonHeaderSetter_SetHeader(
+            &objMessage, ISession::TERMINATION_REASON_REFRESH_TIMEOUT);
 }
 
 }  // namespace android
