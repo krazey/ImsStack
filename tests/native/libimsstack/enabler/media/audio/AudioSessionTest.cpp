@@ -20,6 +20,8 @@
 #include <config/MockAudioConfiguration.h>
 #include <MockIMediaSessionListener.h>
 
+#include "MockICarrierConfig.h"
+
 using namespace android::telephony::imsmedia;
 using ::testing::_;
 using ::testing::NiceMock;
@@ -30,6 +32,7 @@ class AudioSessionTest : public ::testing::Test
 public:
     std::unique_ptr<AudioSession> m_pSession;
     NiceMock<MockAudioConfiguration>* m_pAudioConfig;
+    std::unique_ptr<NiceMock<MockICarrierConfig>> mCarrierConfig;
     MockIMediaSessionListener m_objMockListener;
 
 protected:
@@ -37,6 +40,7 @@ protected:
     {
         m_pSession = std::unique_ptr<AudioSession>(new AudioSession());
         m_pAudioConfig = new NiceMock<MockAudioConfiguration>();
+        mCarrierConfig = std::make_unique<NiceMock<MockICarrierConfig>>();
         m_pSession->SetConfiguration(m_pAudioConfig);
         m_pSession->SetMediaSessionListener(&m_objMockListener);
     }
@@ -143,16 +147,26 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
     }
 
-    // Case 2: PEM type is SENDONLY -> should be RECEIVE_ONLY
+    // Case 2: PEM type is SENDONLY
     {
+        // Subcase 2.1: RecvOnlyEarlySession is enabled -> should be RECEIVE_ONLY
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::SENDONLY);
+        EXPECT_CALL(*m_pAudioConfig, IsRecvOnlyEarlySessionEnabled()).WillOnce(Return(true));
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+
+        // Subcase 2.2: RecvOnlyEarlySession is disabled -> should be SEND_RECEIVE
+        m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::SENDONLY);
+        EXPECT_CALL(*m_pAudioConfig, IsRecvOnlyEarlySessionEnabled()).WillOnce(Return(false));
+        pConfig = m_pSession->UpdateRtpConfig(
+                0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
+        ASSERT_NE(pConfig, nullptr);
+        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
     }
 
-    // Case 3: PEM type is RECVONLY -> should be RECEIVE_ONLY
+    // Case 3: PEM type is RECVONLY -> should be SEND_ONLY
     {
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::RECVONLY);
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
@@ -161,13 +175,26 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
     }
 
-    // Case 4: PEM type is INACTIVE -> should be RECEIVE_ONLY
+    // Case 4: PEM type is INACTIVE
     {
+        // Subcase 4.1: Config is disabled (default) -> should be RECEIVE_ONLY
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::INACTIVE);
+        EXPECT_CALL(*m_pAudioConfig, IsRecvOnlyEarlySessionEnabled()).WillOnce(Return(true));
+        EXPECT_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+                .WillOnce(Return(false));
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+
+        // Subcase 4.2: Config is enabled -> should be INACTIVE
+        m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::INACTIVE);
+        EXPECT_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+                .WillOnce(Return(true));
+        pConfig = m_pSession->UpdateRtpConfig(
+                0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
+        ASSERT_NE(pConfig, nullptr);
+        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
     }
 
     // Case 5: PEM type is NONE, and RecvOnlyEarlySession is enabled -> should be RECEIVE_ONLY

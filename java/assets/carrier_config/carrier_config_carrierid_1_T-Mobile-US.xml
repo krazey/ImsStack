@@ -380,6 +380,7 @@
         <item value="2"/>
     </int-array>
     <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
+    <boolean name="imsvoice.early_media_inactive_direction_on_pem_inactive_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
     <int name="imsvt.video_lowest_bitrate_bps_int" value="100000"/>

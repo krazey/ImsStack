@@ -961,13 +961,28 @@ AudioConfiguration* AudioSession::GetConfiguration()
 PRIVATE
 IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 nMediaDirection)
 {
-    IMS_SINT32 nEarlyAudioDirection = nMediaDirection;
+    const AudioConfiguration* pConfig = GetConfiguration();
+    if (pConfig == IMS_NULL)
+    {
+        IMS_TRACE_E(0,
+                "UpdateEarlyMediaDirection() - Configuration is null, using default direction", 0,
+                0, 0);
+        return nMediaDirection;
+    }
+
+    // Default early media direction is receive-only, unless overridden below.
+    IMS_SINT32 nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
 
     switch (m_ePemType)
     {
         case MEDIA_PEM_TYPE::SENDONLY:
-        case MEDIA_PEM_TYPE::INACTIVE:
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+            break;
+        case MEDIA_PEM_TYPE::INACTIVE:
+            if (pConfig->IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+            {
+                nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+            }
             break;
         case MEDIA_PEM_TYPE::SENDRECV:
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
@@ -977,14 +992,13 @@ IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 nMediaDirection)
             break;
         case MEDIA_PEM_TYPE::NONE:
         default:
-        {
-            if (GetConfiguration() != IMS_NULL &&
-                    GetConfiguration()->IsRecvOnlyEarlySessionEnabled())
+            // For NONE, or any other unhandled PEM type, default to RECEIVE_ONLY.
+            if (!pConfig->IsRecvOnlyEarlySessionEnabled())
             {
-                nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                // If the general early media feature is disabled, respect the original direction.
+                nEarlyAudioDirection = nMediaDirection;
             }
-        }
-        break;
+            break;
     }
 
     IMS_TRACE_D("UpdateEarlyMediaDirection() - PEM direction[%d], direction[%d]->[%d]", m_ePemType,
