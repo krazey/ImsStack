@@ -134,17 +134,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             if (nModeChangeCapability != NOT_DEFINED)
             {
                 SetModeChangeCapability(nModeChangeCapability);
-                SetVisibleModeChangeCapability(IMS_TRUE);
-
-                IMS_BOOL bVisibleFlag = piCc->GetBoolean(
+                SetVisibleModeChangeCapability(piCc->GetBoolean(
                         CarrierConfig::ImsVoice::
                                 KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_CAPABILITY_BOOL,
-                        IMS_TRUE);
-
-                if (!bVisibleFlag)
-                {
-                    SetVisibleModeChangeCapability(IMS_FALSE);
-                }
+                        IMS_TRUE));
             }
             else
             {
@@ -158,17 +151,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             if (nModeChangePeriod != NOT_DEFINED)
             {
                 SetModeChangePeriod(nModeChangePeriod);
-                SetVisibleModeChangePeriod(IMS_TRUE);
-
-                IMS_BOOL bVisibleFlag = piCc->GetBoolean(
+                SetVisibleModeChangePeriod(piCc->GetBoolean(
                         CarrierConfig::ImsVoice::
                                 KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_PERIOD_BOOL,
-                        IMS_TRUE);
-
-                if (!bVisibleFlag)
-                {
-                    SetVisibleModeChangePeriod(IMS_FALSE);
-                }
+                        IMS_TRUE));
             }
             else
             {
@@ -182,17 +168,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             if (nModeChangeNeighbor != NOT_DEFINED)
             {
                 SetModeChangeNeighbor(nModeChangeNeighbor);
-                SetVisibleModeChangeNeighbor(IMS_TRUE);
-
-                IMS_BOOL bVisibleFlag = piCc->GetBoolean(
+                SetVisibleModeChangeNeighbor(piCc->GetBoolean(
                         CarrierConfig::ImsVoice::
                                 KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_NEIGHBOR_BOOL,
-                        IMS_TRUE);
-
-                if (!bVisibleFlag)
-                {
-                    SetVisibleModeChangeNeighbor(IMS_FALSE);
-                }
+                        IMS_TRUE));
             }
             else
             {
