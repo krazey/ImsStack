@@ -131,7 +131,6 @@ protected:
 TEST_F(SessionTest, SetConfiguration)
 {
     EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE |
-                    Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR |
                     Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE,
             m_pSession->GetConfiguration());
 
@@ -139,13 +138,11 @@ TEST_F(SessionTest, SetConfiguration)
             m_pSession->GetConfiguration() | Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED);
 
     EXPECT_TRUE(m_pSession->IsConfigurationSet(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE));
-    EXPECT_TRUE(m_pSession->IsConfigurationSet(Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR));
     EXPECT_TRUE(
             m_pSession->IsConfigurationSet(Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
     EXPECT_TRUE(m_pSession->IsConfigurationSet(
             Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE));
     EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE |
-                    Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR |
                     Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED |
                     Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE,
             m_pSession->GetConfiguration());
@@ -154,7 +151,6 @@ TEST_F(SessionTest, SetConfiguration)
             (~Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
 
     EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE |
-                    Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR |
                     Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE,
             m_pSession->GetConfiguration());
 }

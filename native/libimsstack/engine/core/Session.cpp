@@ -78,8 +78,7 @@ Session::Session(IN Service* pService) :
         m_bSessionUpdateNotificationInProgress(IMS_FALSE),
         m_bImplicitRoutingRequired(IMS_TRUE),
         m_bSessionCanceledOnAccepted(IMS_FALSE),
-        m_nConfigValue(
-                CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE | CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR),
+        m_nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
         m_nCompletedListenerCalls(0),
         m_nTerminationReason(TERMINATION_REASON_UNKNOWN),
         m_strTerminationReasonFromApp(AString::ConstNull()),
@@ -1687,6 +1686,11 @@ IMS_RESULT Session::Start()
         IMS_TRACE_E(0, "Media is not ready", 0, 0, 0);
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
+    }
+
+    if (m_pOaState != IMS_NULL && IsConfigurationSet(CONFIG_SUPPORT_PREVIEW))
+    {
+        m_pOaState->EnablePreviewModeSupport();
     }
 
     // Send INVITE request

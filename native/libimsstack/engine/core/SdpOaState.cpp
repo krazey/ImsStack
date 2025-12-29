@@ -328,6 +328,7 @@ SdpOaState::SdpOaState(IN IMS_BOOL bSdpVersionCheck /*= IMS_TRUE*/,
         m_nState(STATE_IDLE),
         m_nOldState(STATE_IDLE),
         m_nMode(MODE_IDLE),
+        m_bPreviewModeSupported(IMS_FALSE),
         m_bPreviewMode(IMS_FALSE),
         m_bStateChanged(IMS_FALSE),
         m_bOfferProgress(IMS_FALSE),
@@ -348,6 +349,7 @@ SdpOaState::SdpOaState(IN const SdpOaState& other) :
         m_nState(other.m_nState),
         m_nOldState(other.m_nOldState),
         m_nMode(other.m_nMode),
+        m_bPreviewModeSupported(other.m_bPreviewModeSupported),
         m_bPreviewMode(other.m_bPreviewMode),
         m_bStateChanged(other.m_bStateChanged),
         m_bOfferProgress(other.m_bOfferProgress),
@@ -1014,7 +1016,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
                 }
                 else
                 {
-                    if (m_nOldState == STATE_OFFER_SENT &&
+                    if (IsPreviewModeSupported() && m_nOldState == STATE_OFFER_SENT &&
                             piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE &&
                             !(piSipMsg->IsMessageRpr() ||
                                     SipStatusCode::IsFinalSuccess(piSipMsg->GetStatusCode())))

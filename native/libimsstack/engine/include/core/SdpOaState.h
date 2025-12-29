@@ -109,6 +109,14 @@ public:
      *        and the last offer made view if present.
      */
     void IncreaseSessionVersion();
+    /**
+     * @brief Checks if the preview mode is supported or not.
+     */
+    inline IMS_BOOL IsPreviewModeSupported() { return m_bPreviewModeSupported; }
+    /**
+     * @brief Enables the flag for preview mode support.
+     */
+    inline void EnablePreviewModeSupport() { m_bPreviewModeSupported = IMS_TRUE; }
 
 private:
     SessionParameter* GetCurrentCapabilities();
@@ -193,6 +201,8 @@ private:
     IMS_SINT32 m_nOldState;
     // Mode of agent
     IMS_SINT32 m_nMode;
+    // Specify whether the preview mode is supported or not.
+    IMS_BOOL m_bPreviewModeSupported;
     // Flag specifying whether the current SDP OA mode is in preview mode or not.
     // 1) The preview mode is set when non-RPR message with SDP is received and
     //    kept until the call is completely established.

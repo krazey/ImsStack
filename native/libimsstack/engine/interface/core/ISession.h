@@ -830,7 +830,9 @@ public:
         CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4,
         /// Specify whether the subsequent SDP answer should be ignored
         /// when SDP OA state is in preview mode.
-        CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE = 1 << 5
+        CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE = 1 << 5,
+        /// Specify whether the preview mode is supported.
+        CONFIG_SUPPORT_PREVIEW = 1 << 6
     };
 
     /// Index for the most recent response message
