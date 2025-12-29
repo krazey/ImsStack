@@ -128,6 +128,17 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testIsEmergencyCallbackModeSupported() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL),
+                anyBoolean()))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(mDcSettingsUT.isEmergencyCallbackModeSupported());
+        assertFalse(mDcSettingsUT.isEmergencyCallbackModeSupported());
+    }
+
+    @Test
     public void testGetPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
                 eq(CarrierConfig.Ims.KEY_IMS_PREFERRED_IPTYPE_INT), anyInt()))
@@ -200,6 +211,7 @@ public class DcSettingsTest {
         assertTrue(mDcSettingsUT.isVopsIgnored());
         assertTrue(mDcSettingsUT.getImsSupportedAccessNetworks().isEmpty());
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
+        assertFalse(mDcSettingsUT.isEmergencyCallbackModeSupported());
         assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
                 CarrierConfig.Ims.IPV6_PREFERRED);

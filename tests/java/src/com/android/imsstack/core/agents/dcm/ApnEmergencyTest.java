@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -199,6 +200,42 @@ public class ApnEmergencyTest {
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnEmergency.getDataState());
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+    }
+
+    @Test
+    public void testHandleNetworkLost_releaseNetworkDependingOnWhetherEcbmSupported() throws Exception {
+        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
+
+        // if ECBM is supported, do not release network
+        when(mMockIDcSettings.isEmergencyCallbackModeSupported()).thenReturn(true);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
+        mTestableLooper.processAllMessages();
+
+        verify(mConnectivityManager, never()).unregisterNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class));
+
+        // if ECBM is not supported, release network
+        clearInvocations(mConnectivityManager);
+        when(mMockIDcSettings.isEmergencyCallbackModeSupported()).thenReturn(false);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
+        mTestableLooper.processAllMessages();
+
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
+
+        // if whether ECBM is supported is unknown, do not release network
+        clearInvocations(mConnectivityManager);
+        replaceInstance(Apn.class, "mDcSettings", mApnEmergency, null);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
+        mTestableLooper.processAllMessages();
+
+        verify(mConnectivityManager, never()).unregisterNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class));
     }
 
     @Test

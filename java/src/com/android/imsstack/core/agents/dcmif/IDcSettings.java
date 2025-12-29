@@ -53,6 +53,11 @@ public interface IDcSettings extends IDc {
     boolean isCrossSimEnabledByPlatform();
 
     /**
+     * Returns whether emergency callback mode is supported.
+     */
+    boolean isEmergencyCallbackModeSupported();
+
+    /**
      * Returns preferred IP version for connection.
      */
     int getPreferredIpVersion();

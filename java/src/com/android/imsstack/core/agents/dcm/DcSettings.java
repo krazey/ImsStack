@@ -111,6 +111,18 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
+    public boolean isEmergencyCallbackModeSupported() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getBoolean(
+                    CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL,
+                    false);
+        }
+        return false;
+    }
+
+    @Override
     public int getPreferredIpVersion() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 

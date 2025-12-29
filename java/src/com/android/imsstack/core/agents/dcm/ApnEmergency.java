@@ -142,6 +142,10 @@ public final class ApnEmergency extends Apn {
                 ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
+                if (mDcSettings != null && !mDcSettings.isEmergencyCallbackModeSupported()) {
+                    ImsLog.d(mSlotId, "network release due to not support ECBM");
+                    disconnect();
+                }
                 sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
             }
         }
