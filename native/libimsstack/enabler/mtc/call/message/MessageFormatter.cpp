@@ -905,7 +905,14 @@ void MessageFormatter::GetTerminateReason(
             strReason = GetTerminateReason(TerminateType::RTP_TIMEOUT);
             break;
         case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:
-            strReason = GetTerminateReason(TerminateType::MEDIA_BEARER_LOSS);
+            if (m_objContext.IsEstablished())
+            {
+                strReason = GetTerminateReason(TerminateType::MEDIA_BEARER_LOSS);
+            }
+            else
+            {
+                strReason = GetTerminateReason(TerminateType::MEDIA_BEARER_NOT_MET);
+            }
             break;
         case CODE_SIP_REQUEST_CANCELLED:
             strReason = GetTerminateReason(TerminateType::SIP_TIMEOUT);

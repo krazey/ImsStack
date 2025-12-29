@@ -954,6 +954,36 @@ TEST_F(MessageFormatterTest, SetTerminateReason)
     pFormatter->FormTerminateMessage(objReasonInfo);
 }
 
+TEST_F(MessageFormatterTest, FormTerminateMessageWithMediaBearerNotMet)
+{
+    const AString strReason = "SIP;text=\"QOS not met\"";
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_NOT_MET_STRING))
+            .WillByDefault(Return(strReason));
+    EXPECT_CALL(objContext, IsEstablished()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, strReason, ISipHeader::REASON, _))
+            .Times(1);
+
+    const CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+    pFormatter->FormTerminateMessage(objReasonInfo);
+}
+
+TEST_F(MessageFormatterTest, FormTerminateMessageWithMediaBearerLoss)
+{
+    const AString strReason = "USER;text=\"Media bearer loss\"";
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_LOSS_STRING))
+            .WillByDefault(Return(strReason));
+    EXPECT_CALL(objContext, IsEstablished()).WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, strReason, ISipHeader::REASON, _))
+            .Times(1);
+
+    const CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+    pFormatter->FormTerminateMessage(objReasonInfo);
+}
+
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersByNoConfiguration)
 {
     MockISipMessage objMessage;

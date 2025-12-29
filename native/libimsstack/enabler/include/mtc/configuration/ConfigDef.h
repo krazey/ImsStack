@@ -30,6 +30,9 @@ enum class TerminateType
     TERMINATING_EARLY_DIALOG = 8,
     SESSION_REFRESH_FAILURE = 9,
     CONFERENCE_CALL_JOINED = 10,
+    NETWORK_LOST = 11,
+    MEDIA_NOT_SUPPORTED = 12,
+    MEDIA_BEARER_NOT_MET = 13,
 };
 
 enum class RejectType

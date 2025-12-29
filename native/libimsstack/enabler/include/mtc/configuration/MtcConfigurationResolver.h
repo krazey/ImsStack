@@ -95,6 +95,16 @@ public:
             case TerminateType::CONFERENCE_CALL_JOINED:
                 return objProxy.GetString(ConfigVoice::
                                 KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING);
+            case TerminateType::NETWORK_LOST:
+                return objProxy.GetString(
+                        ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_NETWORK_LOST_STRING);
+            case TerminateType::MEDIA_NOT_SUPPORTED:
+                return objProxy.GetString(
+                        ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_NOT_SUPPORTED_STRING);
+            case TerminateType::MEDIA_BEARER_NOT_MET:
+                return objProxy.GetString(
+                        ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_NOT_MET_STRING);
+
             default:
                 return AString::ConstNull();
         }

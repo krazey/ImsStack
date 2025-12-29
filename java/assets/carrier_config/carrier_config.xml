@@ -190,6 +190,9 @@
     <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string"></string>
     <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string"></string>
     <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string"></string>
+    <string name="imsvoice.call_terminate_reason_header_network_lost_string">RELEASE_CAUSE;cause=1;text=&quot;User ends call&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_media_not_supported_string"></string>
+    <string name="imsvoice.call_terminate_reason_header_media_bearer_not_met_string">RELEASE_CAUSE;cause=3;text=&quot;Media bearer loss&quot;</string>
     <string name="imsvoice.call_reject_reason_phrase_on_cscall_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_on_vilte_and_no_lte_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_on_connecting_call_string"></string>

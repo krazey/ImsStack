@@ -966,6 +966,14 @@ const IMS_CHAR
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_conference_call_joined_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_NETWORK_LOST_STRING[] =
+        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_network_lost_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_NOT_SUPPORTED_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_media_not_supported_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_NOT_MET_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_media_bearer_not_met_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_on_cscall_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_AND_NO_LTE_STRING[] =
