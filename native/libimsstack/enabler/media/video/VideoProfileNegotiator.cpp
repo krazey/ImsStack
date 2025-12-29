@@ -87,20 +87,8 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
 
     if (bNegotiatedPayload)
     {
-        if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0 ||
-                pNegotiatedProfile->GetPayloadList().GetSize() == 0)
-        {
-            pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
-        }
-        else
-        {
-            pNegotiatedProfile->SetDirection(UpdateDirectionToMine(pPeerProfile->GetDirection(),
-                    pLocalProfile->GetDirection(), m_bIsOfferReceived));
-        }
-
-        // if the case using different interval in live and hold, set here.
-        pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
-        pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
+        pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
+                pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), m_bIsOfferReceived));
 
         // Setting bandwidth AS/RS/RR
         MakeNegotiatedBandwidth(static_cast<VideoConfiguration*>(pConfig), pLocalProfile,
@@ -117,6 +105,11 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
         ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile,
                 reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
         pNegotiatedProfile->SetOmitAttributes(IMS_TRUE);
+    }
+
+    if (pNegotiatedProfile->GetDataPort() == 0)
+    {
+        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
     }
 
     // RTCP interval
