@@ -45,6 +45,7 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_bAudioRtcpXrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
         m_bAmrPayloadFormatRelaxedMatching(IMS_FALSE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
+        m_bCodecBasedDynamicAsEnabled(IMS_FALSE),
         m_objAudioCandidateAttribute(ImsVector<AString>()),
         m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
 {
@@ -153,6 +154,9 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
                     DEFAULT_DTMF_DURATION);
 
+    m_bCodecBasedDynamicAsEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL, IMS_FALSE);
+
     // Creates a codec configuration
     if (!CreateCodecConfigs(piCc))
     {
@@ -260,6 +264,7 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             m_bAudioRtcpXrPacketDuplicateRleEnabled);
     IMS_TRACE_D("RecvOnlyEarlySessionEnabled[%d]", m_bRecvOnlyEarlySessionEnabled, 0, 0);
     IMS_TRACE_D("AmrPayloadFormatRelaxedMatching[%d]", m_bAmrPayloadFormatRelaxedMatching, 0, 0);
+    IMS_TRACE_D("CodecBasedDynamicAsEnabled[%d]", m_bCodecBasedDynamicAsEnabled, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
@@ -397,4 +402,10 @@ IMS_BOOL AudioConfiguration::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReaso
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsCodecBasedDynamicAsEnabled() const
+{
+    return m_bCodecBasedDynamicAsEnabled;
 }

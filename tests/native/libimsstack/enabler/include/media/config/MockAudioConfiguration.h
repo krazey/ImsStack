@@ -70,6 +70,7 @@ public:
             IMS_BOOL, IsAudioInactivityCallEndReason, (IN IMS_SINT32 nReason), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRecvOnlyEarlySessionEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsAmrPayloadFormatRelaxedMatching, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCodecBasedDynamicAsEnabled, (), (const, override));
 };
 
 #endif  // MOCK_AUDIO_CONFIGURATION_H_

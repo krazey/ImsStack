@@ -1404,6 +1404,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "media_recvonly_early_session_bool";
         public static final String KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL =
                 KEY_PREFIX + "amr_codec_attribute_dtx_bool";
+        public static final String KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL =
+                KEY_PREFIX + "codec_based_dynamic_as_enabled_bool";
         public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_CAPABILITY_BOOL =
                 KEY_PREFIX + "codec_attribute_visible_mode_change_capability_bool";
         public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_PERIOD_BOOL =

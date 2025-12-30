@@ -56,4 +56,7 @@
         <item value="5"/>
         <item value="2"/>
     </int-array>
+
+    <!-- Media -->
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
 </carrier_config>
