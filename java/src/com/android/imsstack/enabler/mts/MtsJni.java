@@ -26,10 +26,63 @@ import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
 public class MtsJni {
+
+    /**
+     * Wrapper for JNI calls to MTS.
+     * Can be mocked for testing.
+     */
+    @VisibleForTesting
+    public static class JniImsProxyWrapper {
+        /**
+         * Gets the native interface for a given object and slot.
+         * @param objectId The ID of the object.
+         * @param slotId The slot ID.
+         * @return A handle to the native object.
+         */
+        public long getInterface(int objectId, int slotId) {
+            return JniImsProxy.getInterface(objectId, slotId);
+        }
+
+        /**
+         * Sets a listener on the native object to receive callbacks.
+         * @param nativeObj The handle to the native object.
+         * @param listener The listener to set.
+         */
+        public void setListener(long nativeObj, JniImsListener listener) {
+            JniImsProxy.setListener(nativeObj, listener);
+        }
+
+        /**
+         * Releases the native interface.
+         * @param nativeObj The handle to the native object.
+         */
+        public void releaseInterface(long nativeObj) {
+            JniImsProxy.releaseInterface(nativeObj);
+        }
+
+        /**
+         * Removes the listener from the native object.
+         * @param nativeObj The handle to the native object.
+         */
+        public void removeListener(long nativeObj) {
+            JniImsProxy.removeListener(nativeObj);
+        }
+
+        /**
+         * Sends a byte array to the native layer.
+         * @param nativeObj The handle to the native object.
+         * @param data The data to send.
+         */
+        public void sendData(long nativeObj, byte[] data) {
+            JniImsProxy.sendData(nativeObj, data);
+        }
+    }
+
     /* JNI Message */
     private static final int JAVA2MTSENABLER = 1000;
     private static final int MTSENABLER2JAVA = 1050;
@@ -38,13 +91,24 @@ public class MtsJni {
     public static final int NOTI_MTSENABLER_MO_SMS_TIMED_OUT = JAVA2MTSENABLER + 2;
     public static final int NOTI_MTSENABLER_MT_SMS_TIMED_OUT = JAVA2MTSENABLER + 3;
 
-    private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
-    private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
+    public static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
+    public static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
 
     private static MtsJni mMtsJni = null;
-    private HashMap<Integer, MtsJniImsListener> mMtsJniImsListenerMap =
+    private final HashMap<Integer, MtsJniImsListener> mMtsJniImsListenerMap =
             new HashMap<Integer, MtsJniImsListener>();
-    private HashMap<Integer, Long> mNativeObjMap = new HashMap<Integer, Long>();
+    private final HashMap<Integer, Long> mNativeObjMap = new HashMap<Integer, Long>();
+    private final JniImsProxyWrapper mJniProxy;
+
+    @VisibleForTesting
+    public MtsJni() {
+        mJniProxy = new JniImsProxyWrapper();
+    }
+
+    @VisibleForTesting
+    public MtsJni(JniImsProxyWrapper jniProxy) {
+        mJniProxy = jniProxy;
+    }
 
     static public MtsJni getInstance() {
         synchronized (MtsJni.class) {
@@ -58,11 +122,11 @@ public class MtsJni {
     public void init(Handler handler, int slotId) {
         ImsLog.d(slotId, "");
         if (!mMtsJniImsListenerMap.containsKey(slotId)) {
-            long nativeObj = JniImsProxy.getInterface(JniObjectId.MTS, slotId);
+            long nativeObj = mJniProxy.getInterface(JniObjectId.MTS, slotId);
             ImsLog.i(slotId, "mNativeObj: " + nativeObj);
             mNativeObjMap.put(slotId, nativeObj);
             mMtsJniImsListenerMap.put(slotId, new MtsJniImsListener());
-            JniImsProxy.setListener(nativeObj, mMtsJniImsListenerMap.get(slotId));
+            mJniProxy.setListener(nativeObj, mMtsJniImsListenerMap.get(slotId));
         }
         mMtsJniImsListenerMap.get(slotId).setHandler(handler);
     }
@@ -73,8 +137,8 @@ public class MtsJni {
         if (mMtsJniImsListenerMap.containsKey(slotId)) {
             long nativeObj = mNativeObjMap.get(slotId);
             ImsLog.i(slotId, "mNativeObj: " + nativeObj);
-            JniImsProxy.releaseInterface(nativeObj);
-            JniImsProxy.removeListener(nativeObj);
+            mJniProxy.releaseInterface(nativeObj);
+            mJniProxy.removeListener(nativeObj);
         }
 
         mNativeObjMap.remove(slotId);
@@ -91,17 +155,18 @@ public class MtsJni {
         byte[] baData = parcel.marshall();
 
         if (mNativeObjMap.containsKey(slotId)) {
-            JniImsProxy.sendData(mNativeObjMap.get(slotId), baData);
+            mJniProxy.sendData(mNativeObjMap.get(slotId), baData);
         }
 
         parcel.recycle();
         parcel = null;
     }
 
-    private class MtsJniImsListener implements JniImsListener {
+    public static class MtsJniImsListener implements JniImsListener {
         private Handler mHandler;
 
-        private void setHandler(Handler handler) {
+        @VisibleForTesting
+        public void setHandler(Handler handler) {
             mHandler = handler;
         }
 
@@ -128,7 +193,7 @@ public class MtsJni {
                     int smsformat = parcel.readInt();
                     String encodedData = parcel.readString();
                     Message msg = Message.obtain();
-                    msg.what =  MtsController.REQUEST_REPORT_MT_SMS;
+                    msg.what = MtsController.REQUEST_REPORT_MT_SMS;
                     msg.arg1 = smsformat;
                     msg.obj = encodedData;
                     mHandler.sendMessage(msg);

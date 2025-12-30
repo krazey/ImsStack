@@ -138,7 +138,9 @@ public class MtsController {
     public void cleanup() {
         ImsLog.d(mSlotId, "");
 
-        mMtsJni.release(mSlotId);
+        if (mMtsJni != null) {
+            mMtsJni.release(mSlotId);
+        }
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -190,6 +192,11 @@ public class MtsController {
      */
     public boolean sendMessage(int smsFormat, byte[] smsData, String psiSmsc,
             String dialedNumber, int seqId, boolean isRetry) {
+        if (smsData == null) {
+            ImsLog.e(mSlotId, "smsData is null");
+            processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_GENERIC);
+            return false;
+        }
         ImsLog.d(mSlotId, "smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
                 + ", seqId = " + seqId + ", isRetry = " + isRetry);
@@ -202,21 +209,21 @@ public class MtsController {
 
         String encodedPdu = Base64.encodeToString(smsData, Base64.DEFAULT);
         if (encodedPdu == null || psiSmsc == null) {
-            processNotifySendMoSmsError(smsFormat, seqId);
+            processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_RETRY);
             return false;
         }
 
         Parcel parcel = Parcel.obtain();
         if (parcel == null) {
             ImsLog.e(mSlotId, "parcel is null");
-            processNotifySendMoSmsError(smsFormat, seqId);
+            processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_RETRY);
             return false;
         }
 
         String targetAddress = psiSmsc;
         if (mUseDialedNumber) {
             if (dialedNumber == null) {
-                processNotifySendMoSmsError(smsFormat, seqId);
+                processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_RETRY);
                 return false;
             } else {
                 targetAddress = dialedNumber;
@@ -267,7 +274,7 @@ public class MtsController {
         mMtsJni.sendMessage(parcel, mSlotId);
     }
 
-    private void processNotifySendMoSmsError(int smsFormat, int seqId) {
+    private void processNotifySendMoSmsError(int smsFormat, int seqId, int reason) {
         ImsLog.d(mSlotId, "");
 
         if (mHandler == null) {
@@ -276,7 +283,7 @@ public class MtsController {
         }
 
         Bundle bundle = new Bundle();
-        bundle.putInt(REPORTMOSTATUS_REASON, MO_ERROR_RETRY);
+        bundle.putInt(REPORTMOSTATUS_REASON, reason);
         bundle.putInt(REPORTMOSTATUS_SMSFORMAT, smsFormat);
         bundle.putInt(REPORTMOSTATUS_SEQID, seqId);
 
