@@ -59,6 +59,7 @@
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
     <string name="imsss.ut_target_address_country_code_replace_to_zero_string">+81</string>
+    <boolean name="imsss.ut_update_cb_without_password_bool" value="true"/>
 
     <!-- MTC -->
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>

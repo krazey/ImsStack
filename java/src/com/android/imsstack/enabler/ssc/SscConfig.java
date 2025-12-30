@@ -374,6 +374,10 @@ public final class SscConfig {
                 CarrierConfig.ImsSs.KEY_UT_NETWORK_QUERY_FOR_TB_OIR_NETWORK_DEFAULT_BOOL);
     }
 
+    static boolean isUpdateCbWithoutPassword(int slotId) {
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITHOUT_PASSWORD_BOOL);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);
