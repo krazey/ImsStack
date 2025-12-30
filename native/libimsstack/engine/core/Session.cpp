@@ -7387,7 +7387,7 @@ void Session::TerminateForkedSession()
 PRIVATE
 void Session::ClearForkedSessionsByTerminated()
 {
-    IMS_TRACE_I("ClearForkedSessionsByTerminated :: %p state=%d", this, GetState(), 0);
+    IMS_TRACE_I("ClearForkedSessionsByTerminated: %p on %s", this, StateToString(GetState()), 0);
 
     if (m_pForkedSessions.IsNull())
     {
@@ -7405,7 +7405,7 @@ void Session::ClearForkedSessionsByTerminated()
     {
         Session* pSession = DYNAMIC_CAST(Session*, objMethods.GetAt(i));
 
-        if (pSession != IMS_NULL)
+        if (pSession != IMS_NULL && pSession->GetState() != STATE_TERMINATED)
         {
             pSession->HandleForkedSessionTerminated();
         }
@@ -7415,7 +7415,7 @@ void Session::ClearForkedSessionsByTerminated()
 PRIVATE
 void Session::HandleForkedSessionTerminated()
 {
-    IMS_TRACE_I("HandleForkedSessionTerminated :: %p state=%d", this, GetState(), 0);
+    IMS_TRACE_I("HandleForkedSessionTerminated: %p on %s", this, StateToString(GetState()), 0);
 
     if (GetState() == STATE_NEGOTIATING)
     {
