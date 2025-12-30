@@ -122,7 +122,6 @@ AString MtsDialingPlan::Translate(
 PRIVATE
 AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo& objAni)
 {
-    // TODO: service type. normal or emergency.
     INetworkConnection* piConnection =
             NetworkService::GetNetworkService()->FindConnection(NetworkPolicy::APN_IMS, m_nSlotId);
 

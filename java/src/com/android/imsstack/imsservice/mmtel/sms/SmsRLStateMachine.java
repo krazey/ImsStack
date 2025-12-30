@@ -44,8 +44,7 @@ import java.util.Arrays;
  */
 public class SmsRLStateMachine {
     private static final String TAG = "[GII-SmsRLSM] ";
-    //TODO: b/245837957: To be changed to False or ImsLog.isDebuggable()
-    private static final boolean DBG = true;
+    private static final boolean DBG = ImsLog.isDebuggable();
     private MtsController mMtsController = null;
     private SmsRelayLayer.Listener mListener = null;
     private SmsRLState mCurrentState;

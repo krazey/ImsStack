@@ -48,8 +48,7 @@ public class SmsRelayLayer {
     private AtomicInteger mToken = new AtomicInteger();
     public Map<Integer, Integer> mMoMRTokenMap = new ConcurrentHashMap<>();
     public Map<Integer, Integer> mMTTokenMRMap = new ConcurrentHashMap<>();
-    //TODO: b/245837957: To be changed to False or ImsLog.isDebuggable()
-    private static final boolean DBG = true;
+    private static final boolean DBG = ImsLog.isDebuggable();
     public Map<Integer, SmsRLStateMachine> mTokenStateTrackerMap = new ConcurrentHashMap<>();
 
     //TODO: to be included in ImsSmsImplBase

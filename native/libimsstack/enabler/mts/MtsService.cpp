@@ -370,10 +370,6 @@ void MtsService::Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 n
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
 {
     IMS_TRACE_I("Traffic_OnConnectionFailed", 0, 0, 0);
-    /*
-     * TODO(Mts): Consider of nFailureReason, nCauseCode and nWaitTimeMillis
-     *            if there are some further required actions
-     */
     (void)nType;
     (void)nDirection;
     (void)nFailureReason;
