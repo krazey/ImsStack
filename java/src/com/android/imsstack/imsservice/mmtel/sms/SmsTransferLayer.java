@@ -59,8 +59,7 @@ public class SmsTransferLayer {
     private MessageHandler mSmsHandler = null;
     private HandlerThread mSmsHandlerThread = new HandlerThread("ImsSmsHandlerThread");
     public static final int REQUEST_SEND_NEXT_SMS_TO_RL = 1;
-    //TODO: b/245837957 - To be changed to False or ImsLog.isDebuggable()
-    private static final boolean DBG = true;
+    private static final boolean DBG = ImsLog.isDebuggable();
     private UsatBasedSms mUsatBasedSms = null;
     public Map<Usat.MoSmsControlCommand, TpduParam> mUsatCmdMessageMap = new ConcurrentHashMap<>();
     private boolean mIsSmmaRetry = false;

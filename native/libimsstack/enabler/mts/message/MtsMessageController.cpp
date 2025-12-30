@@ -689,8 +689,6 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
         return IMS_FALSE;
     }
 
-    // TODO: Add SIP Header for MESSAGE Method here.
-
     if (piMessage->AddHeader(AString("Request-Disposition"), AString("no-fork")) == IMS_FAILURE)
     {
         IMS_TRACE_E(0, "Failed to add the Request-Disposition header", 0, 0, 0);

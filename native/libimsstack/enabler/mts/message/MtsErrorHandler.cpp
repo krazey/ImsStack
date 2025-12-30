@@ -315,7 +315,6 @@ IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) c
 
             if (strPhrase.MakeUpper().Contains("OUTAGE"))
             {
-                // TODO(Mts): Check IMS is connected or not, then report MO_ERROR_GENERIC
                 return nPolicy;
             }
         }
@@ -403,7 +402,6 @@ IMS_BOOL MtsErrorHandler::IsRegisterWithNextPcscfRequired(IN const IMessage* piM
 PRIVATE
 IMS_BOOL MtsErrorHandler::NeedToCheckRadioStatusForRetry(IN IMS_UINT32 nRetryCount) const
 {
-    // TODO: To be more generic, introduce an int config for customizable retry attempts.
     return m_piCarrierConfig->GetBoolean(
                    CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL,
                    IMS_FALSE) &&

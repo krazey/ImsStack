@@ -25,7 +25,6 @@ public enum  SmsRPErrorCause {
 
     SMS_NO_ERROR(0, ImsSmsImplBase.SEND_STATUS_OK, SmsManager.RESULT_ERROR_NONE),
 
-    //TODO:b/242793727 -Need to add new error result to SMSManager which match with below RPCause
     SMS_UNALLOCATED_NUMBER(1, ImsSmsImplBase.SEND_STATUS_ERROR,
      SmsManager.RESULT_ERROR_GENERIC_FAILURE),
 

@@ -15,6 +15,7 @@
  */
 
 #include "message/MtsMessage.h"
+#include "MockIPageMessage.h"
 #include <gtest/gtest.h>
 
 namespace android
@@ -69,14 +70,19 @@ TEST_F(MtsMessageTest, GetterAndSetterForMti)
 
     EXPECT_EQ(nMti, pMtsMessage->GetMti());
 }
-
-// TODO: Need to improve
 TEST_F(MtsMessageTest, GetterAndSetterForPageMessage)
 {
-    IPageMessage* piPageMessage = IMS_NULL;
-    pMtsMessage->SetPageMessage(piPageMessage);
+    MockIPageMessage* piMockPageMessage = new MockIPageMessage();
+    EXPECT_CALL(*piMockPageMessage, Destroy())
+            .WillOnce(::testing::Invoke(
+                    [piMockPageMessage]()
+                    {
+                        delete piMockPageMessage;
+                    }));
 
-    EXPECT_EQ(piPageMessage, pMtsMessage->GetPageMessage());
+    pMtsMessage->SetPageMessage(piMockPageMessage);
+
+    EXPECT_EQ(piMockPageMessage, pMtsMessage->GetPageMessage());
 }
 
 TEST_F(MtsMessageTest, GetterAndSetterForSeqId)

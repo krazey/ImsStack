@@ -51,7 +51,6 @@ public final class SmsRPdu {
     public static final byte RP_UD_IEI = 0x41;
     public static final byte RP_CAUSE_IEI = 0x42;
 
-    //TODO: More Values to be added as per specification
     //RP-Cause Values as per 3GPP 24.011 Table 8.4
     public static final byte RP_CAUSE_PROTOCOL_UNSPECIFIED = 0x6f;
 
@@ -221,7 +220,6 @@ public final class SmsRPdu {
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ERROR_MTI);
         bo.write((byte) mMessageRef);
-        // FIXME: Need to update Accurate Cause Values
         // RP-CAUSE Header as per 3GPP 24.011 section 8.2.5.4
         bo.write(RP_CAUSE_LENGTH_INDICATOR);
         bo.write((byte) mRpCause);
