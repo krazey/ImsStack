@@ -1125,6 +1125,47 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsCmrAndModeSet)
     EXPECT_TRUE(pNegoFmtp->IsModeSetVisible());
 }
 
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsCmrWithModeSwitchOne)
+{
+    // Arrange: Test NegotiateCmr when evs-mode-switch is 1
+    // Local: EVS, br=5.9-24.4, evs-mode-switch=1, cmr=-1
+    // 0x0F: bw=nb-swb, 0x01FF: br=5.9-24.4
+    auto pLocalEvs = CreateEvsPayload(kLocalPayload, 0x0F, 0x01FF);
+    auto pLocalFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pLocalEvs->GetFmtp());
+    pLocalFmtp->SetEvsModeSwitch(1);
+    pLocalFmtp->SetCmr(-1);
+    pLocalFmtp->SetShowCmr(IMS_TRUE);
+    m_pLocalProfile->AddPayload(pLocalEvs);
+
+    // Peer: EVS, br=5.9-24.4, evs-mode-switch=1, cmr=-1
+    auto pPeerEvs = CreateEvsPayload(kPeerPayload, 0x0F, 0x01FF);
+    auto pPeerFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPeerEvs->GetFmtp());
+    pPeerFmtp->SetEvsModeSwitch(1);
+    pPeerFmtp->SetCmr(-1);
+    pPeerFmtp->SetShowCmr(IMS_TRUE);
+    m_pPeerProfile->AddPayload(pPeerEvs);
+
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6058);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    auto pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    ASSERT_NE(pNegoPayload, nullptr);
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+
+    // Verify: Even with evs-mode-switch=1, cmr should be negotiated and visible
+    EXPECT_EQ(pNegoFmtp->GetEvsModeSwitch(), 1);
+    EXPECT_EQ(pNegoFmtp->GetCmr(), -1);
+    EXPECT_TRUE(pNegoFmtp->IsCmrVisible());
+}
+
 TEST_F(AudioProfileNegotiatorTest, NegotiateEvsCmrDisabledWhenBrCountIsOne)
 {
     // Arrange: Test NegotiateCmr when bitrate count is 1

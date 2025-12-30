@@ -398,7 +398,7 @@ TEST_F(AudioSdpGeneratorEvsTest, TestGenerateEvsFmtp)
     EXPECT_TRUE(strFmtp.Contains(STR_BR_SEND_LIST));
     EXPECT_TRUE(strFmtp.Contains(STR_BR_RECV_LIST));
 
-    EXPECT_FALSE(strFmtp.Contains(STR_CMR));
+    EXPECT_TRUE(strFmtp.Contains(STR_CMR));
     EXPECT_FALSE(strFmtp.Contains(STR_CH_AW_RECV));
 
     m_pEvsFmtpFull->SetEvsModeSwitch(0);
@@ -552,7 +552,8 @@ TEST_F(AudioSdpGeneratorEvsTest, TestAddCmrToFmtp)
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AddCmrToFmtp(m_pEvsFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
+    EXPECT_EQ(strFmtp, STR_CMR);
+    strFmtp = AString::ConstNull();
 
     m_pEvsFmtpFull->SetEvsModeSwitch(0);
     AddCmrToFmtp(m_pEvsFmtpFull, strFmtp);

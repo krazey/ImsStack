@@ -634,7 +634,7 @@ PROTECTED void AudioSdpGenerator::AddCmrToFmtp(
 
     IMS_TRACE_I("AddCmrToFmtp(): cmr[%d], visible[%d]", pFmtp->GetCmr(), pFmtp->IsCmrVisible(), 0);
 
-    if (pFmtp->IsCmrVisible() == IMS_TRUE && pFmtp->GetEvsModeSwitch() != 1)
+    if (pFmtp->IsCmrVisible())
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
