@@ -1019,7 +1019,18 @@ IMS_RESULT MtsMessageController::RespondReceivedMessage(
         {
             Add(piMtsMessage);
         }
-        piPageMessage->Accept();
+
+        if (piPageMessage->Accept() != IMS_SUCCESS)
+        {
+            IMS_TRACE_E(0, "RespondReceivedMessage : Accept failed", 0, 0, 0);
+            m_bProcessingMsg = IMS_FALSE;
+            if (bAdded)
+            {
+                Remove(piMtsMessage);
+            }
+            delete piMtsMessage;
+            return IMS_FAILURE;
+        }
         return IMS_SUCCESS;
     }
     else if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_N || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_N)
