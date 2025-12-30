@@ -2689,7 +2689,7 @@ TEST_F(OutgoingStateTest,
 }
 
 TEST_F(OutgoingStateTest,
-        SessionRprReceivedInvokesLocalResourceConfirmationWithPrackIfResourceReserved)
+        SessionRprReceivedInvokesLocalResourceConfirmationWithPrackAfterMediaRunIfResourceReserved)
 {
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -2708,12 +2708,15 @@ TEST_F(OutgoingStateTest,
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, IsForkedSession(_)).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _))
-            .Times(1);
-    EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
-    EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendProgressing());
+    {
+        InSequence s;
+        EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
+        EXPECT_CALL(
+                objMediaManager, AdjustDirectionForLocalResourceConfirmation(Ref(objSession), _));
+        EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
+    }
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }
