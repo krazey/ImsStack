@@ -114,8 +114,6 @@ public:
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyTrace, (IN AosRegistrationType eType, IN const AString& strLog),
             (override));
-    MOCK_METHOD(IMS_BOOL, RequestPhoneNumberRetry, (IN AosPhoneNumberRetryCommand eCommand),
-            (override));
     MOCK_METHOD(IMS_BOOL, RequestWifiService, (IN IMS_BOOL bIsOn), (override));
     MOCK_METHOD((ImsMap<IMS_UINT32, IMS_UINT32>&), GetCapabilities, (), (override));
     MOCK_METHOD(IMS_UINT32, GetCapabilitiesForNetwork, (AosNetworkType eNetworkType), (override));

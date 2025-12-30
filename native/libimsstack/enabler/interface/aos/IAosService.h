@@ -33,7 +33,6 @@ enum class AosRegistrationType;
 enum class AosNetworkType;
 enum class AosCapability : IMS_UINT32;
 enum class AosIsimState;
-enum class AosPhoneNumberRetryCommand;
 enum class AosRegRequestType;
 enum class AosPcscfOrder;
 
@@ -249,15 +248,6 @@ public:
      * @return IMS_TRUE if the notification was successfully sent to Java, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL NotifyTrace(IN AosRegistrationType eType, IN const AString& strLog) = 0;
-
-    /**
-     * Request the application to phone number retry.
-     * AosService(Native) -> AosService(Java)
-     *
-     * @param nCommand is type of AosPhoneNumberRetryCommand.
-     * @see enum AosPhoneNumberRetryCommand
-     */
-    virtual IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) = 0;
 
     /**
      * Request the application to Wifi on or off.
@@ -580,16 +570,6 @@ enum class AosIsimState
     VALID = 1,
     REFRESH_STARTED = 2,
     REFRESH_COMPLETE = 3
-};
-
-/**
- * Phone number retry request command
- */
-enum class AosPhoneNumberRetryCommand
-{
-    INITIAL = 0,
-    REFRESH = 1,
-    CLEAR = 2
 };
 
 #endif  // INTERFACE_AOS_SERVICE_H_

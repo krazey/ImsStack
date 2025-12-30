@@ -104,7 +104,6 @@ public:
     IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
             IN IMS_UINT32 nFeatureTagBits) override;
     IMS_BOOL NotifyTrace(IN AosRegistrationType eType, IN const AString& strLog) override;
-    IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
     ImsMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
     IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;

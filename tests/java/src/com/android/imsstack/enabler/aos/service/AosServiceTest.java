@@ -1533,20 +1533,6 @@ public class AosServiceTest extends ImsStackTest {
                 NetworkType.LTE, FeatureTagMask.MMTEL);
     }
 
-    @Test
-    public void jniImsListenerProxy_requestPhoneNumberRetry() {
-        mAosService.addListener(mMockAosRegistrationListener);
-
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY);
-        parcel.writeInt(0); // command
-        parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
-        jniImsListener.onMessage(parcel);
-        processAllMessages();
-
-        // TODO: No implementation
-    }
 
     @Test
     public void jniImsListenerProxy_requestWifiService() {

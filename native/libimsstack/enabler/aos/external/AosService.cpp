@@ -876,18 +876,6 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTrace(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand)
-{
-    A_IMS_TRACE_I(AOSTAG, "RequestPhoneNumberRetry", 0, 0, 0);
-    IJniAosServiceThread* piJniThread = GetJniThread();
-    if (piJniThread)
-    {
-        piJniThread->RequestPhoneNumberRetry(static_cast<IMS_SINT32>(eCommand));
-    }
-
-    return IMS_TRUE;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosService::RequestWifiService(IN IMS_BOOL bIsOn)
 {
     A_IMS_TRACE_I(AOSTAG, "RequestWifiService", 0, 0, 0);

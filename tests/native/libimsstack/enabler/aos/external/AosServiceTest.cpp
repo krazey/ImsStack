@@ -1124,11 +1124,6 @@ TEST_F(AosServiceTest, NotifyImsFeatureChanged)
             IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1));
 }
 
-TEST_F(AosServiceTest, RequestPhoneNumberRetry)
-{
-    EXPECT_TRUE(m_pAosService->RequestPhoneNumberRetry(AosPhoneNumberRetryCommand::INITIAL));
-}
-
 TEST_F(AosServiceTest, RequestWifiService)
 {
     EXPECT_TRUE(m_pAosService->RequestWifiService(IMS_TRUE));

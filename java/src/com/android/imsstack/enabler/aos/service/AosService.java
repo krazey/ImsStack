@@ -979,11 +979,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @SuppressWarnings("unused")
-    private void onPhoneNumberRetryRequest(int command) {
-        // TODO : FIX
-    }
-
-    @SuppressWarnings("unused")
     private void onWifiServiceRequest(int command) {
         // TODO : FIX
     }
@@ -1095,11 +1090,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             case RegistrationType.EMERGENCY -> mEmergencyTraceLog.log(trace);
             default -> { /* Do nothing */ }
         }
-    }
-
-    private void requestPhoneNumberRetry(int command) {
-        ImsLog.d(mSlotId, "RequestPhoneNumberRetry :: command(" + command + ")");
-        mHandler.post(() -> onPhoneNumberRetryRequest(command));
     }
 
     private void requestWifiService(int command) {
@@ -1354,11 +1344,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     int regType = parcel.readInt();
                     String trace = parcel.readString();
                     recordTrace(regType, trace);
-                }
-                case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY -> {
-                    int command = parcel.readInt();
-                    mLocalLog.log("N2J_REQUEST_PHONE_NUMBER_RETRY: command=" + command);
-                    requestPhoneNumberRetry(command);
                 }
                 case IIAosService.N2J_REQUEST_WIFI_SERVICE -> {
                     int command = parcel.readInt();

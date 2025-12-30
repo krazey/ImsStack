@@ -42,7 +42,6 @@ public:
     virtual IMS_BOOL NotifyImsFeatureChanged(
             IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits) = 0;
     virtual IMS_BOOL NotifyTrace(IN IMS_SINT32 nRegType, IN const AString& strLog) = 0;
-    virtual IMS_BOOL RequestPhoneNumberRetry(IN IMS_UINT32 nCommand) = 0;
     virtual IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) = 0;
 };
 

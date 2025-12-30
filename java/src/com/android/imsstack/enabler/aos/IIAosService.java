@@ -87,6 +87,5 @@ public interface IIAosService {
 
     /// AosService(Native) -> IAosInfoListener(Java) or Send it directly without a listener
     int N2J_NOTIFY_AOS_ISIM_STATE = EVENT_N2J_INFO + 1;
-    int N2J_REQUEST_PHONE_NUMBER_RETRY = EVENT_N2J_INFO + 2;
-    int N2J_REQUEST_WIFI_SERVICE = EVENT_N2J_INFO + 3;
+    int N2J_REQUEST_WIFI_SERVICE = EVENT_N2J_INFO + 2;
 }

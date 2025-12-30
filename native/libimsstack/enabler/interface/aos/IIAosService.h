@@ -93,8 +93,7 @@ public:
 
     /// AosService(Native) -> IAosInfoListener(Java)
     static const IMS_SINT32 N2J_NOTIFY_AOS_ISIM_STATE = EVENT_N2J_INFO + 1;
-    static const IMS_SINT32 N2J_REQUEST_PHONE_NUMBER_RETRY = EVENT_N2J_INFO + 2;
-    static const IMS_SINT32 N2J_REQUEST_WIFI_SERVICE = EVENT_N2J_INFO + 3;
+    static const IMS_SINT32 N2J_REQUEST_WIFI_SERVICE = EVENT_N2J_INFO + 2;
 };
 
 #endif  // INTERFACE_IMS_AOS_SERVICE_H_

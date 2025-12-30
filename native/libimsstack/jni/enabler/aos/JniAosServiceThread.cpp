@@ -221,18 +221,6 @@ IMS_BOOL JniAosServiceThread::NotifyTrace(IN IMS_SINT32 nRegType, IN const AStri
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
-{
-    IMS_TRACE_D("RequestPhoneNumberRetry", 0, 0, 0);
-
-    Parcel objParcel;
-    objParcel.writeInt32(IIAosService::N2J_REQUEST_PHONE_NUMBER_RETRY);
-    objParcel.writeInt32(nState);
-
-    return SendData2Java(objParcel);
-}
-
-PUBLIC
 IMS_BOOL JniAosServiceThread::RequestWifiService(IN IMS_BOOL bIsOn)
 {
     IMS_TRACE_D("RequestWifiService", 0, 0, 0);

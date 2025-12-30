@@ -170,16 +170,6 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyTrace)
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenRequestPhoneNumberRetry)
-{
-    // GIVEN
-    // WHEN
-    IMS_BOOL bResult = m_pJniAosServiceThread->RequestPhoneNumberRetry(0);
-
-    // THEN
-    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
-}
-
 TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenRequestWifiService)
 {
     // GIVEN
