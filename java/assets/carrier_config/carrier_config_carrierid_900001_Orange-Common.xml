@@ -47,7 +47,7 @@
         <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
-        <item value="488:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+        <item value="488:2,17"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO -->
         <item value="500:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
         <item value="501:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->
         <item value="502:15"/> <!-- START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF  -->

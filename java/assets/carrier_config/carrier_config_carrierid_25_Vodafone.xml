@@ -37,7 +37,7 @@
         <item value="413:3"/>
         <item value="480:3"/>
         <item value="486:3"/>
-        <item value="488:2"/>
+        <item value="488:2,17"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO -->
         <item value="500:11,0"/>
         <item value="503:11,0"/>
         <item value="504:4"/>

@@ -141,7 +141,7 @@
         <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
-        <item value="488:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+        <item value="488:2,17"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO -->
         <item value="500:3,12"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE -->
         <item value="503:10"/> <!-- BLOCK_CALL_BY_TIMER -->
         <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
