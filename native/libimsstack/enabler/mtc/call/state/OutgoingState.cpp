@@ -609,6 +609,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
         }
     }
 
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
+
     if (piSession->IsFinalResponseReceivedForInitialInviteRequest())
     {
         IMS_TRACE_E(0, "SessionRprReceived - Session already has final response.", 0, 0, 0);
@@ -637,7 +639,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
-    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
