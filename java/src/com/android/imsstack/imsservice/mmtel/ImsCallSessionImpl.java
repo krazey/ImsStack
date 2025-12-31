@@ -2263,22 +2263,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private boolean updateCallTypeChangeCapability() {
         int callType = mCallProfile.getCallType();
-        // Google-Native: enable call switch capability from voice to video
-        // Q-OS: enable call switch capability from voice to video
-        if (mCallProfile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, false)) {
-            callType = ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE;
-        }
 
-        if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-            if (mCT.getActiveCalls() > 1) {
-                logi("CallTypeChangeCapability :: multiple calls");
-                callType = mCallProfile.getCallType();
-            } else {
-                if (mCall.isOnHeld() || mCall.isOnHold()) {
-                    logi("CallTypeChangeCapability :: on-hold call");
-                    callType = mCallProfile.getCallType();
-                }
-            }
+        if (mCall.isOnHeld() || mCall.isOnHold()) {
+            logi("CallTypeChangeCapability :: on-hold call");
+        } else if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)
+                && mCT.getActiveCalls() > 1) {
+            logi("CallTypeChangeCapability :: multiple calls");
+        } else if (mCallProfile.getCallExtraBoolean(
+                ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, false)) {
+            // Google-Native: enable call switch capability from voice to video
+            // Q-OS: enable call switch capability from voice to video
+            callType = ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE;
         }
 
         int oldLocalCallType = mLocalCallProfile.getCallType();
@@ -3475,9 +3470,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             mCallDetails.clear(CallDetails.ON_HOLDING);
 
-            if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-                updateCallTypeChangeCapability();
-            }
+            updateCallTypeChangeCapability();
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
                     mCallContext, callInfo, mediaInfo);
@@ -3592,10 +3585,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, mCallProfile, mediaInfo);
             updateCallExtraForHDVoice(mCallProfile, mediaInfo);
 
-            if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-                if (updateCallTypeChangeCapability()) {
-                    invokeUpdatedRequired = true;
-                }
+            if (updateCallTypeChangeCapability()) {
+                invokeUpdatedRequired = true;
             }
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
@@ -3700,9 +3691,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             mCallDetails.clear(CallDetails.ON_UNHOLDING);
 
-            if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-                updateCallTypeChangeCapability();
-            }
+            updateCallTypeChangeCapability();
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
                     mCallContext, callInfo, mediaInfo);
@@ -3778,10 +3767,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, mCallProfile, mediaInfo);
             updateCallExtraForHDVoice(mCallProfile, mediaInfo);
 
-            if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-                if (updateCallTypeChangeCapability()) {
-                    invokeUpdatedRequired = true;
-                }
+            if (updateCallTypeChangeCapability()) {
+                invokeUpdatedRequired = true;
             }
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(

@@ -1248,6 +1248,119 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallProfile.class));
     }
 
+
+   @Test
+    public void testVtCapabilityUpdateWhenHoldOrResume() {
+        mMockCallInfo.videoCapable = true;
+        mMockCallInfo.callType = IUMtcCall.CALLTYPE_VOIP;
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallProfile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, true);
+        mImsCallSession = createImsCallSession("1", true);
+
+        // onCallHeld: verify VT restricted when local initiates hold
+        mImsCallSession.getLocalCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE));
+        mImsCallSession.getRemoteCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE));
+        when(mMockMtcCall.isOnHold()).thenReturn(true);
+        when(mMockMtcCall.isOnHeld()).thenReturn(false);
+        mImsCallSession.getMtcCallListenerProxy().onCallHeld(mMockMtcCall, mMockCallInfo,
+                mMockMediaInfo, Mockito.mock(SuppInfo.class));
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getLocalCallProfile().getCallType());
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getRemoteCallProfile().getCallType());
+
+        // onCallHoldReceived: VT restricted when remote initiates hold
+        Mockito.clearInvocations(mMockImsCallSessionCallback);
+        mImsCallSession.getLocalCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE));
+        mImsCallSession.getRemoteCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE));
+        when(mMockMtcCall.isOnHold()).thenReturn(false);
+        when(mMockMtcCall.isOnHeld()).thenReturn(true);
+        mImsCallSession.getMtcCallListenerProxy().onCallHoldReceived(
+                mMockMtcCall, mMockCallInfo, mMockMediaInfo, Mockito.mock(SuppInfo.class));
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getLocalCallProfile().getCallType());
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getRemoteCallProfile().getCallType());
+        verify(mMockImsCallSessionCallback, times(1)).invokeUpdated(any(), any());
+
+        // onCallResumed: VT restored when local resumes and not hold by remote
+        mImsCallSession.getLocalCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        mImsCallSession.getRemoteCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        when(mMockMtcCall.isOnHold()).thenReturn(false);
+        when(mMockMtcCall.isOnHeld()).thenReturn(false);
+        mImsCallSession.getCallListenerProxy().onCallResumed(
+                mMockMtcCall, mMockCallInfo, mMockMediaInfo, Mockito.mock(SuppInfo.class));
+        assertEquals(ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+                mImsCallSession.getLocalCallProfile().getCallType());
+        assertEquals(ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+                mImsCallSession.getRemoteCallProfile().getCallType());
+
+        // onCallResumed: VT remains restricted when local resumes but hold by remote
+        mImsCallSession.getLocalCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        mImsCallSession.getRemoteCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        when(mMockMtcCall.isOnHold()).thenReturn(false);
+        when(mMockMtcCall.isOnHeld()).thenReturn(true);
+        mImsCallSession.getCallListenerProxy().onCallResumed(
+                mMockMtcCall, mMockCallInfo, mMockMediaInfo, Mockito.mock(SuppInfo.class));
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getLocalCallProfile().getCallType());
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getRemoteCallProfile().getCallType());
+
+        // onCallResumeReceived: VT restored when remote resumes and not hold by local
+        Mockito.clearInvocations(mMockImsCallSessionCallback);
+        mImsCallSession.getLocalCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        mImsCallSession.getRemoteCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        when(mMockMtcCall.isOnHold()).thenReturn(false);
+        when(mMockMtcCall.isOnHeld()).thenReturn(false);
+        mImsCallSession.getCallListenerProxy().onCallResumeReceived(
+                mMockMtcCall, mMockCallInfo, mMockMediaInfo, Mockito.mock(SuppInfo.class));
+        assertEquals(ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+                mImsCallSession.getLocalCallProfile().getCallType());
+        assertEquals(ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+                mImsCallSession.getRemoteCallProfile().getCallType());
+        verify(mMockImsCallSessionCallback, times(1)).invokeUpdated(any(), any());
+
+        // onCallResumeReceived: VT remains restricted when remote resumes but hold by local
+        Mockito.clearInvocations(mMockImsCallSessionCallback);
+        mImsCallSession.getLocalCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        mImsCallSession.getRemoteCallProfile().updateCallType(
+                new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VOICE));
+        when(mMockMtcCall.isOnHold()).thenReturn(true);
+        when(mMockMtcCall.isOnHeld()).thenReturn(false);
+        mImsCallSession.getCallListenerProxy().onCallResumeReceived(
+                mMockMtcCall, mMockCallInfo, mMockMediaInfo, Mockito.mock(SuppInfo.class));
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getLocalCallProfile().getCallType());
+        assertEquals(ImsCallProfile.CALL_TYPE_VOICE,
+                mImsCallSession.getRemoteCallProfile().getCallType());
+        verify(mMockImsCallSessionCallback, never()).invokeUpdated(any(), any());
+    }
+
     @Test
     public void testOnCallHoldFailedWithUserTerminated() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
@@ -1540,6 +1653,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, never()).invokeUpdated(
                 any(ImsCallSessionImplBase.class), any(ImsCallProfile.class));
 
+        mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                ImsCallProfile.CALL_TYPE_VT);
         mImsCallSession = new TestImsCallSessionImpl(
                 mMockCallContext, mMockCallTracker, mMockMtcCall,
                 mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
