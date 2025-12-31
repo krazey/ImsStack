@@ -689,6 +689,9 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
 
+    SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_488));
     EXPECT_EQ(
             CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdateReceived(&objISession));

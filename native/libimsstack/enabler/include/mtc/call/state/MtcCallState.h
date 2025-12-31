@@ -199,6 +199,7 @@ protected:
     void SendIncomingUpdateToUi(IN CallType eCallType);
 
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
+    IMS_BOOL IsSdpPreviewModeAllowedByPolicy() const;
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
 

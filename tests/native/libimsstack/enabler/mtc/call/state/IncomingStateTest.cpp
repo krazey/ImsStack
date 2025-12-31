@@ -270,10 +270,13 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
             .WillByDefault(Return(&objIMessage));
     ON_CALL(objMtcSession, HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, Ref(objIMessage)))
             .WillByDefault(Return());
-
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
 
-    const SipMethod objMethod(SipMethod::INVITE);
+    const SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    MockISipMessage objSipMessage;
+    ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
 
     ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
@@ -379,10 +382,14 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objIMessage));
+    const SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    MockISipMessage objSipMessage;
+    ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
-
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_488))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
@@ -393,6 +400,11 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objIMessage));
+    const SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    MockISipMessage objSipMessage;
+    ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
     ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
