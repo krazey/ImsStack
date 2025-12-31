@@ -396,7 +396,7 @@ public class ImsTestHelperTest extends ImsStackTest {
 
         // Create a mock for incoming call and call onCallIncomingReceived to simulate the event.
         IncomingMtcCall incomingCall = mock(IncomingMtcCall.class);
-        mtcCallListener.onCallIncomingReceived(mtcCall, incomingCall, 0);
+        mtcCallListener.onCallIncomingReceived(mtcCall, incomingCall);
 
         // accept call
         int[] extra = new int[]{1, 3, -1, -1};

@@ -142,12 +142,12 @@ TEST_F(MtcUiNotifierTest, SendIncomingCallReceived)
     MockIMtcService objService;
     ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
     ON_CALL(objService, GetRatType).WillByDefault(Return(0));
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _, 0)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(1);
 
     pNotifier->SendIncomingCallReceived();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _, 0)).Times(0);
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(0);
     pNotifier->SendIncomingCallReceived();
 }
 
@@ -217,11 +217,11 @@ TEST_F(MtcUiNotifierTest, SendInitiating)
     MockIMtcService objService;
     ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
     ON_CALL(objService, GetRatType).WillByDefault(Return(0));
-    EXPECT_CALL(objMockCallThread, OnInitiating(_, _, 0)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnInitiating(_, _)).Times(1);
     pNotifier->SendInitiating();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnInitiating(_, _, 0)).Times(0);
+    EXPECT_CALL(objMockCallThread, OnInitiating(_, _)).Times(0);
     pNotifier->SendInitiating();
 }
 
@@ -485,6 +485,18 @@ TEST_F(MtcUiNotifierTest, SendCallPushCompleted)
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
     pNotifier->SendCallPushCompleted(IMS_SUCCESS, *pReason);
+}
+
+TEST_F(MtcUiNotifierTest, SendCallInfoChanged)
+{
+    EXPECT_CALL(objMockCallThread, OnCallInfoChanged(_)).Times(1);
+
+    pNotifier->SendCallInfoChanged();
+
+    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
+    EXPECT_CALL(objMockCallThread, OnCallInfoChanged(_)).Times(0);
+
+    pNotifier->SendCallInfoChanged();
 }
 
 TEST_F(MtcUiNotifierTest, OnCallSessionReleasedDoesNothingIfNothingIsBlocking)

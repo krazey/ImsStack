@@ -85,8 +85,7 @@ void MtcUiNotifier::SendIncomingCallReceived()
             m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
-            m_objContext.GetParticipantInfo().GetRemoteNumber(),
-            m_objContext.GetService().GetRatType());
+            m_objContext.GetParticipantInfo().GetRemoteNumber());
 }
 
 PUBLIC
@@ -168,8 +167,7 @@ void MtcUiNotifier::SendInitiating()
     }
 
     piThread->OnInitiating(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
-            m_objContext.GetService().GetRatType());
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()));
 }
 
 PUBLIC
@@ -456,9 +454,9 @@ void MtcUiNotifier::SendCallPushCompleted(
     IMS_TRACE_I("SendCallPushCompleted", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL void MtcUiNotifier::SendRatChanged(IN IMS_SINT32 eRatType)
+PUBLIC VIRTUAL void MtcUiNotifier::SendCallInfoChanged()
 {
-    IMS_TRACE_I("SendRatChanged RAT=%d", eRatType, 0, 0);
+    IMS_TRACE_I("SendCallInfoChanged", 0, 0, 0);
 
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
@@ -466,7 +464,7 @@ PUBLIC VIRTUAL void MtcUiNotifier::SendRatChanged(IN IMS_SINT32 eRatType)
         return;
     }
 
-    piThread->OnRatChanged(eRatType);
+    piThread->OnCallInfoChanged(m_objContext.CreateJniCallInfo());
 }
 
 PUBLIC VIRTUAL void MtcUiNotifier::OnCallSessionReleased()

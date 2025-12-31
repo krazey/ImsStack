@@ -171,13 +171,13 @@ TEST_F(MtcAosEventHandlerTest, OnServiceConnectedDoesNothing)
     pEventHandler->OnServiceConnected(1, 1);
 }
 
-TEST_F(MtcAosEventHandlerTest, OnEventNotifyDoesNothing)
+TEST_F(MtcAosEventHandlerTest, OnEventNotifyNotifiesListener)
 {
     MockIMtcAosStateListener objListener;
     pEventHandler->AddListener(&objListener);
 
-    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener, OnAosStateChanged(_, _, _, _)).Times(0);
+    EXPECT_CALL(objListener, OnEventNotify(_, _)).Times(1);
 
     pEventHandler->OnEventNotify(1, 1);
 }

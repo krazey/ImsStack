@@ -1962,6 +1962,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 mCallProfile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
 
+        ImsCallUtils.setCallExtraIfPresent(mCallProfile,
+                 ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL, ImsCallUtils.VAR_TYPE_BOOLEAN, profile);
         // Call RAT type : NR/ LTE / IWLAN / UNKNOWN
         ImsCallUtils.setCallExtraIfPresent(mCallProfile,
                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, profile);
@@ -2247,8 +2249,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         log("updateCallProfile");
 
         if (callInfo != null) {
-            ImsCallUtils.updateCallProfileFromCallInfo(
-                    mCallContext, mCallProfile, callInfo);
+            ImsCallUtils.updateCallProfileFromCallInfo(mCallContext, mCallProfile, callInfo);
         }
 
         if (mediaInfo != null) {
@@ -3214,12 +3215,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         @Override
         public void onCallInitiating(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
+                CallInfo callInfo, MediaInfo mediaInfo) {
             if (!call.equals(mCall)) {
                 return;
             }
-
-            mCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
                     mCallContext, callInfo, mediaInfo);
@@ -4087,7 +4086,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         @Override
         public void onCallIncomingReceived(
-                MtcCall call, IncomingMtcCall incomingCall, int ratType) {
+                MtcCall call, IncomingMtcCall incomingCall) {
             if (!call.equals(mCall)) {
                 return;
             }
@@ -4099,7 +4098,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromIncomingCallInfo(
                     mCallContext, incomingCall);
-            profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
             initCallProfile(profile);
 
             // For Google native behavior
@@ -4123,13 +4121,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         @Override
-        public void onCallRatChanged(int ratType) {
-            log("onCallRatChanged ratType=" + ratType);
-            if (!mCallProfile.getCallExtras().containsKey(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE)) {
+        public void onCallInfoChanged(MtcCall call, CallInfo callInfo) {
+            if (!call.equals(mCall)) {
                 return;
             }
+            log("onCallInfoChanged");
 
-            mCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
+            ImsCallUtils.updateCallProfileFromCallInfo(mCallContext, mCallProfile, callInfo);
+
             mCallback.invokeUpdated(ImsCallSessionImpl.this,
                     ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
         }

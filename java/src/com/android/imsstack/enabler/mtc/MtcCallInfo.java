@@ -167,6 +167,16 @@ public final class MtcCallInfo {
         return ci.emergencyType;
     }
 
+    /**
+     * Returns the radio access technology type for the given call.
+     *
+     * @param ci The {@link CallInfo} object to get.
+     * @return The radio access technology type.
+     */
+    public static int getRatType(CallInfo ci) {
+        return ci.ratType;
+    }
+
     public static boolean isOffline(CallInfo ci) {
         return ci.offline;
     }
@@ -252,5 +262,25 @@ public final class MtcCallInfo {
 
     public static void setVideoCapable(CallInfo ci, boolean enabled) {
         ci.videoCapable = enabled;
+    }
+
+    /**
+     * Sets whether the call is a cross-SIM call.
+     *
+     * @param ci The {@link CallInfo} object to modify.
+     * @param enabled {@code true} to mark the call as a cross-SIM call, {@code false} otherwise.
+     */
+    public static void setCrossSim(CallInfo ci, boolean enabled) {
+        ci.crossSim = enabled;
+    }
+
+    /**
+     * Sets the radio access technology (RAT) type for the call.
+     *
+     * @param ci The {@link CallInfo} object to modify.
+     * @param ratType The radio access technology type.
+     */
+    public static void setRatType(CallInfo ci, int ratType) {
+        ci.ratType = ratType;
     }
 }

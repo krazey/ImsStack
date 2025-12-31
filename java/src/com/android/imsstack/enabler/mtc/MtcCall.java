@@ -79,8 +79,14 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallInitiating(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
+        /**
+         * Called when the call is initiating.
+         *
+         * @param call The {@link MtcCall} object.
+         * @param callInfo The {@link CallInfo} of the call.
+         * @param mediaInfo The {@link MediaInfo} of the call.
+         */
+        public void onCallInitiating(MtcCall call, CallInfo callInfo, MediaInfo mediaInfo) {
             // no-op
         }
 
@@ -187,15 +193,14 @@ public class MtcCall extends Call implements ConferenceTracker {
         /**
          * When incoming call received, notify ImsCallManager.
          */
-        public void onCallIncomingReceived(
-                MtcCall call, IncomingMtcCall incomingCall, int ratType) {
+        public void onCallIncomingReceived(MtcCall call, IncomingMtcCall incomingCall) {
             // no-op
         }
 
         /**
          * called when network is changed.
          */
-        public void onCallRatChanged(int ratType) {
+        public void onCallInfoChanged(MtcCall call, CallInfo callInfo) {
             // no-op
         }
 
@@ -1321,7 +1326,7 @@ public class MtcCall extends Call implements ConferenceTracker {
      */
     public void invokeIncomingCallReceivedForAutoRejecting(IncomingMtcCall incomingCall) {
         log("invokeIncomingCallReceivedForAutoRejecting");
-        mNativeListener.onIncomingCallReceived(incomingCall, 0);
+        mNativeListener.onIncomingCallReceived(incomingCall);
     }
 
     private boolean checkAndHandleMediaMessage(int msg, Parcel parcel) {
@@ -1865,9 +1870,8 @@ public class MtcCall extends Call implements ConferenceTracker {
                 case IUMtcCall.INITIATING: {
                     CallInfo callInfo = new CallInfo(parcel);
                     MediaInfo mediaInfo = new MediaInfo(parcel);
-                    int ratType = parcel.readInt();
 
-                    onInitiating(callInfo, mediaInfo, ratType);
+                    onInitiating(callInfo, mediaInfo);
                     break;
                 }
                 case IUMtcCall.PROGRESSING: {
@@ -1981,13 +1985,12 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.INCOMING_CALL_RECEIVED: {
-                    IncomingMtcCall incomingCall = new IncomingMtcCall(parcel);
-                    int ratType = parcel.readInt();
-                    onIncomingCallReceived(incomingCall, ratType);
+                    onIncomingCallReceived(new IncomingMtcCall(parcel));
                     break;
                 }
-                case IUMtcCall.NETWORK_CHANGED: {
-                    onRatChanged(parcel.readInt());
+                case IUMtcCall.CALL_INFO_CHANGED: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    onCallInfoChanged(callInfo);
                     break;
                 }
                 case IUMtcCall.ECT_COMPLETED: {
@@ -2061,11 +2064,11 @@ public class MtcCall extends Call implements ConferenceTracker {
             closeInternal(MtcCall.this);
         }
 
-        private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
+        private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo) {
             logi("INITIATING");
 
             if (hasListener()) {
-                mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo, ratType);
+                mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo);
             }
         }
 
@@ -2386,7 +2389,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onIncomingCallReceived(IncomingMtcCall incomingCall, int ratType) {
+        private void onIncomingCallReceived(IncomingMtcCall incomingCall) {
             logi("INCOMING_CALL_RECEIVED");
             setDetails(Details.ON_PRE_INCOMING, false);
             setRemoteNumber(incomingCall.callerPartyNum);
@@ -2396,13 +2399,13 @@ public class MtcCall extends Call implements ConferenceTracker {
                     MtcCall.this, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
 
             if (hasListener()) {
-                mListener.onCallIncomingReceived(MtcCall.this, incomingCall, ratType);
+                mListener.onCallIncomingReceived(MtcCall.this, incomingCall);
             }
         }
 
-        private void onRatChanged(int ratType) {
+        private void onCallInfoChanged(CallInfo callInfo) {
             if (hasListener()) {
-                mListener.onCallRatChanged(ratType);
+                mListener.onCallInfoChanged(MtcCall.this, callInfo);
             }
         }
 

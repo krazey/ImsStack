@@ -39,8 +39,7 @@ public:
     void OnStarted(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsList<SuppService*>& objSuppServices) override;
     void OnStartFailed(IN const CallReasonInfo& objReason) override;
-    void OnInitiating(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN IMS_SINT32 eRatType) override;
+    void OnInitiating(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) override;
     void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsList<SuppService*>& objSuppServices) override;
     void OnHeld(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
@@ -81,12 +80,11 @@ public:
 
     void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
-            IN OipType eOipType, IN const AString& strRemoteNumber,
-            IN IMS_SINT32 eRatType) override;
+            IN OipType eOipType, IN const AString& strRemoteNumber) override;
 
     void OnInformationNotificationReceived(IN IMS_UINT32 eType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) override;
-    void OnRatChanged(IN IMS_SINT32 eRatType) override;
+    void OnCallInfoChanged(IN const JniCallInfo& objCallInfo) override;
 
 private:
     static void SetCallDetails(IN_OUT android::Parcel& objParcel, IN const JniCallInfo& objCallInfo,

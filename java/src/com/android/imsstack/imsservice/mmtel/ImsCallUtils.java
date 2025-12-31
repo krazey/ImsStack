@@ -144,9 +144,6 @@ public class ImsCallUtils {
         newProfile.updateCallExtras(profile);
         newProfile.getMediaProfile().copyFrom(profile.getMediaProfile());
 
-        ImsCallUtils.setCallExtraIfPresent(profile,
-                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, newProfile);
-
         return newProfile;
     }
 
@@ -891,6 +888,10 @@ public class ImsCallUtils {
         profile.setCallExtra(ImsCallProfile.EXTRA_USSD,
                 MtcCallInfo.isUssi(ci) ? "true" : "false");
         profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, MtcCallInfo.isRttCapable(ci));
+        profile.setCallExtraBoolean(
+                ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL, MtcCallInfo.isCrossSim(ci));
+        profile.setCallExtraInt(
+                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, MtcCallInfo.getRatType(ci));
 
         int callType = getProfileCallTypeFromCallInfo(ci);
 

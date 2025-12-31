@@ -330,6 +330,7 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
+    void OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
     void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
             IN IMS_SINT32 eRatType) override;

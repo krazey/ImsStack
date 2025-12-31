@@ -120,7 +120,7 @@ TEST_F(JniMtcCallThreadTest, OnInitiating)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnInitiating(objCallInfo, objMediaInfo, 0);
+    pJniCallThread->OnInitiating(objCallInfo, objMediaInfo);
 }
 
 TEST_F(JniMtcCallThreadTest, OnProgressing)
@@ -388,7 +388,7 @@ TEST_F(JniMtcCallThreadTest, OnIncomingCallReceived)
 
     ImsList<ConfUser*> objUsers;
     pJniCallThread->OnIncomingCallReceived(
-            1, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", 0);
+            1, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "");
 }
 
 TEST_F(JniMtcCallThreadTest, OnInformationNotificationReceived)
@@ -402,6 +402,18 @@ TEST_F(JniMtcCallThreadTest, OnInformationNotificationReceived)
 
     ImsList<ConfUser*> objUsers;
     pJniCallThread->OnInformationNotificationReceived(0, "", 0, 0);
+}
+
+TEST_F(JniMtcCallThreadTest, OnCallInfoChanged)
+{
+    IMS_UINT32 eType = IuMtcCall::CALL_INFO_CHANGED;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    pJniCallThread->OnCallInfoChanged(objCallInfo);
 }
 
 }  // namespace android

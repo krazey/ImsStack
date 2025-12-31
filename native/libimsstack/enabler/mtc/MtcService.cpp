@@ -384,8 +384,6 @@ PUBLIC VIRTUAL void MtcService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS
 {
     IMS_TRACE_I("ImsAosMonitor_Notify :: nType(%d), nState(%d)", nType, nState, 0);
 
-    m_pAosEventHandler->OnEventNotify(nType, nState);
-
     if (nType == IImsAosMonitor::TYPE_REG_RECOVERY_PENDING)
     {
         // Registration refreshing is pending so AoS cannot trigger ImsAos_Connected() even if
@@ -400,6 +398,12 @@ PUBLIC VIRTUAL void MtcService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS
             m_pNetworkWatcher->OnConnected(eCurrentPdnIpcanType);
         }
     }
+    else if (nType == IImsAosMonitor::TYPE_CROSS_SIM_STATUS)
+    {
+        m_bCrossSimConnected = nState;
+    }
+
+    m_pAosEventHandler->OnEventNotify(nType, nState);
 }
 
 PRIVATE

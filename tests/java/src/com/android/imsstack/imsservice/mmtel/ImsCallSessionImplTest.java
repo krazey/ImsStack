@@ -63,6 +63,7 @@ import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
+import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.MtcEmergencyServiceManager;
 import com.android.imsstack.enabler.mtc.SuppInfo;
@@ -922,13 +923,13 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     public void testOnCallInitiating() {
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.getCallListenerProxy().onCallInitiating(mockMtcCall, mMockCallInfo,
-                mMockMediaInfo, 0);
+                mMockMediaInfo);
         verify(mMockImsCallSessionCallback, never()).invokeInitiating(any(
                     ImsCallSessionImplBase.class), any(ImsCallProfile.class));
 
         int state = mImsCallSession.getState();
         mImsCallSession.getCallListenerProxy().onCallInitiating(mMockMtcCall, mMockCallInfo,
-                mMockMediaInfo, 0);
+                mMockMediaInfo);
 
         assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.INITIATED);
         assertEquals(state, mImsCallSession.getState());
@@ -1698,7 +1699,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
-    public void testOnCallRatChanged() {
+    public void testOnCallInfoChanged() {
         mImsCallProfile = new ImsCallProfile(
                 ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
         mImsCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, 0);
@@ -1708,7 +1709,10 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 mMockCallContext, mMockCallTracker, mMockMtcCall,
                 mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
 
-        mImsCallSession.getCallListenerProxy().onCallRatChanged(1);
+        CallInfo callInfo = new CallInfo();
+        MtcCallInfo.setCrossSim(callInfo, true);
+        MtcCallInfo.setRatType(callInfo, 1);
+        mImsCallSession.getCallListenerProxy().onCallInfoChanged(mMockMtcCall, callInfo);
         processAllMessages();
 
         ArgumentCaptor<ImsCallProfile> profileCaptor =
@@ -1717,6 +1721,10 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class), profileCaptor.capture());
         assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
                 profileCaptor.getValue().getMediaProfile().getVideoDirection());
+        assertTrue(profileCaptor.getValue().getCallExtraBoolean(
+                ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL));
+        assertEquals(1, profileCaptor.getValue().getCallExtraInt(
+                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
     }
 
     @Test
