@@ -880,6 +880,7 @@ public:
         // }
         // Public carrier-config - ends
 
+        static const IMS_CHAR KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT[];
         static const IMS_CHAR KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL[];
 
         // Aos
@@ -1371,6 +1372,15 @@ public:
         {
             PAI_POLICY_PREFER_TOPMOST = 0,
             PAI_POLICY_PREFER_SIP_URI = 1,
+        };
+
+        // KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT
+        enum
+        {
+            SDP_PREVIEW_MODE_DISABLED = 0,
+            SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY = 1,
+            SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY = 2,
+            SDP_PREVIEW_MODE_FOR_ALL_CALLS = 3,
         };
     };
 

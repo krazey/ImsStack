@@ -1075,6 +1075,8 @@ public class CarrierConfig {
 
         public static final String KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL =
                 KEY_PREFIX + "ignore_subsequent_sdp_answer_in_preview_mode_bool";
+        public static final String KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT =
+                KEY_PREFIX + "policy_for_sdp_preview_mode_int";
 
         // Aos
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =

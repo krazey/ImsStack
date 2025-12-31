@@ -187,6 +187,108 @@ TEST_F(MtcSessionTest, CreateMtSessionInvokesAddISessionInSessionHolder)
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 }
 
+TEST_F(MtcSessionTest, ConstructorSetsPreviewModeWhenPolicyIsAllCalls)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::SDP_PREVIEW_MODE_FOR_ALL_CALLS));
+    ON_CALL(objSession, GetConfiguration()).WillByDefault(Return(0));
+
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR));
+    CreateMtcSession();
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR));
+    CreateMtcSession();
+}
+
+TEST_F(MtcSessionTest, ConstructorDoesNotSetPreviewModeWhenPolicyIsDisabled)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::SDP_PREVIEW_MODE_DISABLED));
+    ON_CALL(objSession, GetConfiguration()).WillByDefault(Return(0));
+
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR))
+            .Times(0);
+    CreateMtcSession();
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR))
+            .Times(0);
+    CreateMtcSession();
+}
+
+TEST_F(MtcSessionTest, ConstructorSetsPreviewModeWhenPolicyIsNormalOnlyAndCallIsNormal)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY));
+    ON_CALL(objSession, GetConfiguration()).WillByDefault(Return(0));
+
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR));
+    CreateMtcSession();
+}
+
+TEST_F(MtcSessionTest, ConstructorDoesNotSetPreviewModeWhenPolicyIsNormalOnlyAndCallIsEmergency)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY));
+    ON_CALL(objSession, GetConfiguration()).WillByDefault(Return(0));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR))
+            .Times(0);
+    CreateMtcSession();
+}
+
+TEST_F(MtcSessionTest, ConstructorSetsPreviewModeWhenPolicyIsEmergencyOnlyAndCallIsEmergency)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY));
+    ON_CALL(objSession, GetConfiguration()).WillByDefault(Return(0));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR));
+    CreateMtcSession();
+}
+
+TEST_F(MtcSessionTest, ConstructorDoesNotSetPreviewModeWhenPolicyIsEmergencyOnlyAndCallIsNormal)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY));
+    ON_CALL(objSession, GetConfiguration()).WillByDefault(Return(0));
+
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    EXPECT_CALL(objSession, SetConfiguration(ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_CALL(objSession,
+            SetConfiguration(ISession::CONFIG_SUPPORT_PREVIEW |
+                    ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR))
+            .Times(0);
+    CreateMtcSession();
+}
+
 TEST_F(MtcSessionTest, DestructorDestroysMediaProfileAndQosInfo)
 {
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);

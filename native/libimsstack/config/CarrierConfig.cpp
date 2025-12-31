@@ -832,6 +832,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR
 
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "ignore_subsequent_sdp_answer_in_preview_mode_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT[] =
+        KEY_IMS_VOICE_PREFIX "policy_for_sdp_preview_mode_int";
 
 // Aos
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =

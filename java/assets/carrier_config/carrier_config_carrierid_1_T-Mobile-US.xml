@@ -34,6 +34,7 @@
     <int name="ims.location_geodetic_shape_int" value="1"/>
 
     <boolean name="imsvoice.ignore_subsequent_sdp_answer_in_preview_mode_bool" value="false"/>
+    <int name="imsvoice.policy_for_sdp_preview_mode_int" value="2"/>
 
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>

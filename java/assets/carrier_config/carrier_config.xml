@@ -452,6 +452,7 @@
     <boolean name="ims.cellular_network_info_utc_offset_enabled_bool" value="false"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">no</string>
     <boolean name="imsvoice.ignore_subsequent_sdp_answer_in_preview_mode_bool" value="true"/>
+    <int name="imsvoice.policy_for_sdp_preview_mode_int" value="3"/>
 
     <!-- Aos -->
     <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="true"/>
