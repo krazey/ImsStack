@@ -178,11 +178,43 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
 
-        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mTextSessionHandler.getMediaState());
+
+        // Receive onSessionClosed callback
+        mTextSessionCallback.onSessionClosed();
+        processAllMessages();
+
+        // Verify timeout is cancelled and session is closed
+        assertEquals(false, mTextSessionHandler.getTextMessageHandler().hasMessages(
+                MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT));
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mTextSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testCloseSessionWithTimeout() {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         testParcel.setDataPosition(0);
+        mTextSessionHandler.setTextQosAgent(mMockQosAgent);
+        mTextSessionHandler.setRtpSocket(mRtpSocketPair);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
+
         verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mTextSessionHandler.getMediaState());
+
+        // Do not receive onSessionClosed, and timeout scheduled for 5000ms is fired
+        moveTimeForward(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+        processAllMessages();
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mTextSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
         testParcel.recycle();
     }
 

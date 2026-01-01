@@ -48,7 +48,7 @@ public class TextSessionCallbackHandler {
      * @param result result of the open session request
      */
     public void openSessionResponse(@ImsMediaSession.SessionOperationResult int result) {
-        ImsLog.d("openSession Result=" + result);
+        ImsLog.d("openSessionResponse Result=" + result);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.RESPONSE_OPEN_SESSION);
