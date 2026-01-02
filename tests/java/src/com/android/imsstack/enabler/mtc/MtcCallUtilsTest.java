@@ -30,11 +30,117 @@ import org.mockito.Mockito;
 @RunWith(JUnit4.class)
 public class MtcCallUtilsTest {
     @Test
-    public void testAddUserWithEntity() {
+    public void addUser_withTargetOnly_addsUserWithCorrectDefaults() {
+        // Verifies addUser with 3 parameters.
         UsersInfo userInfo = new UsersInfo();
-        MtcCallUtils.addUser(userInfo, 100, null, null, null);
+        final long callId = 100;
+        final String target = "sip:test@example.com";
 
-        assertEquals(100, userInfo.getUser(0).callID);
+        MtcCallUtils.addUser(userInfo, callId, target);
+
+        assertEquals(1, userInfo.Users.size());
+        UsersInfo.User user = userInfo.getUser(0);
+        assertEquals(callId, user.callID);
+        assertEquals(target, user.target);
+        assertEquals("", user.userEntity);
+        assertEquals("", user.epEntity);
+        assertEquals(UsersInfo.USER_STATUS_IDLE, user.status);
+    }
+
+    @Test
+    public void addUser_withNullUsersInfo_doesNotCrash() {
+        // Verifies that addUser does not crash with null UsersInfo.
+        MtcCallUtils.addUser(null, 100, "target");
+        MtcCallUtils.addUser(null, 100, "target", "user", "endpoint");
+    }
+
+    @Test
+    public void addUser_withEntityInfo_addsUserWithCorrectDetails() {
+        UsersInfo userInfo = new UsersInfo();
+        final long callId = 100;
+        final String target = "sip:test@example.com";
+        final String userEntity = "userEntity";
+        final String endpointEntity = "endpointEntity";
+
+        // Verifies addUser with 5 parameters.
+        MtcCallUtils.addUser(userInfo, callId, target, userEntity, endpointEntity);
+
+        assertEquals(1, userInfo.Users.size());
+        UsersInfo.User user = userInfo.getUser(0);
+        assertEquals(callId, user.callID);
+        assertEquals(target, user.target);
+        assertEquals(userEntity, user.userEntity);
+        assertEquals(endpointEntity, user.epEntity);
+        assertEquals(UsersInfo.USER_STATUS_IDLE, user.status);
+    }
+
+    @Test
+    public void copyMediaInfo_copiesAllFieldsCorrectly() {
+        MediaInfo src = new MediaInfo();
+        src.audioQuality = MediaInfo.AUDIO_QUALITY_AMR_WB;
+        src.videoQuality = MediaInfo.VIDEO_QUALITY_QCIF;
+        src.audioDir = MediaInfo.DIRECTION_SEND;
+        src.videoDir = MediaInfo.DIRECTION_RECEIVE;
+        src.textDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+        src.gttMode = MediaInfo.GTTMODE_FULL;
+
+        MediaInfo dest = new MediaInfo();
+        MtcCallUtils.copyMediaInfo(src, dest);
+
+        // Verifies all fields are copied correctly for a standard case.
+        assertEquals(src.audioQuality, dest.audioQuality);
+        assertEquals(src.videoQuality, dest.videoQuality);
+        assertEquals(src.audioDir, dest.audioDir);
+        assertEquals(src.videoDir, dest.videoDir);
+        assertEquals(src.textDir, dest.textDir);
+        assertEquals(src.gttMode, dest.gttMode);
+    }
+
+    @Test
+    public void copyMediaInfo_whenVideoQualityIsNone_setsVideoDirectionToInvalid() {
+        MediaInfo src = new MediaInfo();
+        src.videoQuality = MediaInfo.VIDEO_QUALITY_NONE;
+        src.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+
+        MediaInfo dest = new MediaInfo();
+        MtcCallUtils.copyMediaInfo(src, dest);
+
+        assertEquals(src.videoQuality, dest.videoQuality);
+        assertEquals(MediaInfo.DIRECTION_INVALID, dest.videoDir);
+    }
+
+    @Test
+    public void copyMediaInfo_whenVideoQualityIsNotUsed_setsVideoDirectionToInvalid() {
+        MediaInfo src = new MediaInfo();
+        src.videoQuality = MediaInfo.VIDEO_QUALITY_NOTUSED;
+        src.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+
+        MediaInfo dest = new MediaInfo();
+        MtcCallUtils.copyMediaInfo(src, dest);
+
+        assertEquals(src.videoQuality, dest.videoQuality);
+        assertEquals(MediaInfo.DIRECTION_INVALID, dest.videoDir);
+    }
+
+    @Test
+    public void createUsersInfo_withMultipleParticipants_createsCorrectUsersInfo() {
+        String[] participants = new String[]{"participant1", "participant2"};
+        UsersInfo usersInfo = MtcCallUtils.createUsersInfo(participants);
+
+        assertEquals(2, usersInfo.Users.size());
+        assertEquals("participant1", usersInfo.getUser(0).target);
+        assertEquals(0L, usersInfo.getUser(0).callID);
+        assertEquals(UsersInfo.USER_STATUS_IDLE, usersInfo.getUser(0).status);
+        assertEquals("participant2", usersInfo.getUser(1).target);
+        assertEquals(0L, usersInfo.getUser(1).callID);
+        assertEquals(UsersInfo.USER_STATUS_IDLE, usersInfo.getUser(1).status);
+    }
+
+    @Test
+    public void createUsersInfo_withEmptyParticipants_createsEmptyUsersInfo() {
+        String[] participants = new String[]{};
+        UsersInfo usersInfo = MtcCallUtils.createUsersInfo(participants);
+        assertEquals(0, usersInfo.Users.size());
     }
 
     @Test
@@ -261,14 +367,32 @@ public class MtcCallUtilsTest {
     }
 
     @Test
-    public void testIsOutgoingCallsBarred() {
+    public void isOutgoingCallsBarred_withDefaultReason_returnsFalse() {
         CallReasonInfo callReasonInfo = new CallReasonInfo();
-
         assertFalse(MtcCallUtils.isOutgoingCallsBarred(callReasonInfo));
+    }
 
+    @Test
+    public void isOutgoingCallsBarred_withCorrectCodeAndIncorrectExtraCode_returnsFalse() {
+        CallReasonInfo callReasonInfo = new CallReasonInfo();
+        callReasonInfo.mCode = CallReasonInfo.CODE_SIP_USER_REJECTED;
+        callReasonInfo.mExtraCode = 1; // some other code
+        assertFalse(MtcCallUtils.isOutgoingCallsBarred(callReasonInfo));
+    }
+
+    @Test
+    public void isOutgoingCallsBarred_withIncorrectCodeAndCorrectExtraCode_returnsFalse() {
+        CallReasonInfo callReasonInfo = new CallReasonInfo();
+        callReasonInfo.mCode = CallReasonInfo.CODE_USER_TERMINATED;
+        callReasonInfo.mExtraCode = 53;
+        assertFalse(MtcCallUtils.isOutgoingCallsBarred(callReasonInfo));
+    }
+
+    @Test
+    public void isOutgoingCallsBarred_withCorrectCodes_returnsTrue() {
+        CallReasonInfo callReasonInfo = new CallReasonInfo();
         callReasonInfo.mCode = CallReasonInfo.CODE_SIP_USER_REJECTED;
         callReasonInfo.mExtraCode = 53;
-
         assertTrue(MtcCallUtils.isOutgoingCallsBarred(callReasonInfo));
     }
 
