@@ -248,7 +248,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedNotifiesUnavailabl
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
-    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest,
@@ -266,7 +266,7 @@ TEST_F(EmergencyServiceControllerTest,
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
-    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedDoesNothingIfNormalServiceIsNull)
@@ -286,7 +286,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedDoesNothingIfNorma
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
-    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest,
@@ -306,7 +306,7 @@ TEST_F(EmergencyServiceControllerTest,
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
-    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedOnWlanStartsTimer)
@@ -374,6 +374,8 @@ TEST_F(EmergencyServiceControllerTest, RatChangedToWwanRetriesOnImsPdn)
 
     pController->OnRatChanged(ServiceType::NORMAL, INetworkWatcher::RADIOTECH_TYPE_IWLAN,
             INetworkWatcher::RADIOTECH_TYPE_LTE);
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, RatChangedToWwanInRoamingNotifiesUnavailable)
@@ -429,7 +431,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesU
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
-    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedWithDataPermanentlyFailed)
@@ -487,6 +489,8 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedRetriesOverImsPdnW
     // EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(1); - By AsyncRunner
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosConnectedNotifiesOpened)
@@ -799,4 +803,59 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosControlFailsNotifiesUnavailabl
     pController->Start();
 
     EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+}
+
+TEST_F(EmergencyServiceControllerTest, FinishTransitionsToClosedState)
+{
+    pController->Start();
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::IDLE,
+                    EmergencyServiceUnavailableReason::UNKNOWN, ServiceType::EMERGENCY))
+            .Times(1);
+    EXPECT_CALL(objContext, RunAsyncOperation(pController, _)).Times(1);
+
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED, 0);
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
+}
+
+TEST_F(EmergencyServiceControllerTest, AosStateChangedIgnoredInClosedState)
+{
+    pController->Start();
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED, 0);
+    ASSERT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
+
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objContext, RunAsyncOperation(pController, _)).Times(0);
+
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED, 0);
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
+}
+
+TEST_F(EmergencyServiceControllerTest, StartInClosedStateNotifiesUnavailable)
+{
+    pController->Start();
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED, 0);
+    ASSERT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                    EmergencyServiceUnavailableReason::NONE, ServiceType::EMERGENCY))
+            .Times(1);
+
+    pController->Start();
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }

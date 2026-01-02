@@ -30,6 +30,7 @@ public:
         IDLE,
         OPENING,
         OPENED,
+        CLOSED,
     };
 
     virtual ~IEmergencyServiceController() {};

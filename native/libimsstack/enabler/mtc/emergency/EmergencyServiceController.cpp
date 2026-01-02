@@ -94,6 +94,10 @@ PUBLIC VIRTUAL void EmergencyServiceController::Start()
         case IEmergencyServiceController::State::OPENED:
             Notify(IuMtcService::EmergencyServiceState::OPENED);
             break;
+        case IEmergencyServiceController::State::CLOSED:
+            Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                    EmergencyServiceUnavailableReason::NONE);
+            break;
     }
 }
 
@@ -117,6 +121,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
     switch (m_eState)
     {
         case IEmergencyServiceController::State::IDLE:
+        case IEmergencyServiceController::State::CLOSED:
             break;
 
         case IEmergencyServiceController::State::OPENING:
@@ -350,6 +355,7 @@ PRIVATE IMS_BOOL EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) con
 
 PRIVATE void EmergencyServiceController::Finish()
 {
+    SetState(IEmergencyServiceController::State::CLOSED);
     Stop18xWaitingTimer();
 
     m_objContext.RunAsyncOperation(this,
@@ -361,6 +367,7 @@ PRIVATE void EmergencyServiceController::Finish()
 
 PRIVATE void EmergencyServiceController::FinishAndRetryOverImsPdn()
 {
+    SetState(IEmergencyServiceController::State::CLOSED);
     m_objContext.RunAsyncOperation(this,
             [&]()
             {
