@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +36,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -48,9 +48,7 @@ import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.system.ISystem;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -62,7 +60,6 @@ import java.lang.reflect.Field;
 @TestableLooper.RunWithLooper
 public class ApnEmergencyTest {
     private static final int SLOT_0 = 0;
-    static ContextFixture sContext;
     ApnEmergency mApnEmergency;
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
@@ -72,25 +69,24 @@ public class ApnEmergencyTest {
     @Mock private IDcUtils mMockIDcUtils;
     @Mock private ISystem mMockISystem;
 
+    private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
-    private ConnectivityManager mConnectivityManager;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
+    private TestAppContext mTestAppContext;
+    private ConnectivityManagerProxy mConnectivityManagerProxy;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mContextFixture = new ContextFixture();
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUp();
+
+        mConnectivityManagerProxy =
+                mTestAppContext.getSystemServiceProxy(ConnectivityManagerProxy.class);
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockIDcNetWatcher, SLOT_0);
 
-        // create the instance to test
-        mApnEmergency = new ApnEmergency(AppContext.getInstance(), SLOT_0);
-        mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
+        mApnEmergency = new ApnEmergency(mContextFixture.getTestDouble(), SLOT_0);
         mTestableLooper = TestableLooper.get(ApnEmergencyTest.this);
         mTestableLooper.processAllMessages();
 
@@ -100,19 +96,18 @@ public class ApnEmergencyTest {
 
     @After
     public void tearDown() throws Exception {
+        TestableLooper.remove(ApnEmergencyTest.this);
+        mTestableLooper = null;
         if (mApnEmergency != null) {
             mApnEmergency.cleanup();
             mApnEmergency = null;
         }
-        mTestableLooper = null;
 
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        AppContext.deinit();
-        sContext = null;
+        mConnectivityManagerProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+        mContextFixture = null;
     }
 
     @Test
@@ -121,7 +116,7 @@ public class ApnEmergencyTest {
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnEmergency.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnEmergency.getDataState());
         verify(mMockIDcNetWatcher).clearNetworkRegistrationRejectCause();
-        verify(mConnectivityManager).requestNetwork(
+        verify(mConnectivityManagerProxy).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class),
                 any(Handler.class));
 
@@ -142,7 +137,7 @@ public class ApnEmergencyTest {
         mApnEmergency.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
 
         assertTrue(mApnEmergency.disconnect());
-        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManagerProxy).unregisterNetworkCallback(mMockNetworkCallback);
         assertEquals(EApnReqState.APN_REQUEST_IDLE, mApnEmergency.getApnReqState());
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnEmergency.getDataState());
         mTestableLooper.processAllMessages();
@@ -203,38 +198,41 @@ public class ApnEmergencyTest {
     }
 
     @Test
-    public void testHandleNetworkLost_releaseNetworkDependingOnWhetherEcbmSupported() throws Exception {
+    public void testHandleNetworkLost_releaseNetworkIfEcbmNotSupported() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
-
-        // if ECBM is supported, do not release network
-        when(mMockIDcSettings.isEmergencyCallbackModeSupported()).thenReturn(true);
-        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
-        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
-        mTestableLooper.processAllMessages();
-
-        verify(mConnectivityManager, never()).unregisterNetworkCallback(
-                any(ConnectivityManager.NetworkCallback.class));
-
-        // if ECBM is not supported, release network
-        clearInvocations(mConnectivityManager);
         when(mMockIDcSettings.isEmergencyCallbackModeSupported()).thenReturn(false);
         mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
         mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
-        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManagerProxy).unregisterNetworkCallback(mMockNetworkCallback);
+    }
 
-        // if whether ECBM is supported is unknown, do not release network
-        clearInvocations(mConnectivityManager);
+    @Test
+    public void testHandleNetworkLost_doNotReleaseNetworkIfEcbmSupported() throws Exception {
+        when(mMockIDcSettings.isEmergencyCallbackModeSupported()).thenReturn(true);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
+        mTestableLooper.processAllMessages();
+
+        verify(mConnectivityManagerProxy, never()).unregisterNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testHandleNetworkLost_doNotReleaseNetworkIfEcbmSupportUnknown() throws Exception {
         replaceInstance(Apn.class, "mDcSettings", mApnEmergency, null);
         mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
         mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
-        verify(mConnectivityManager, never()).unregisterNetworkCallback(
+        verify(mConnectivityManagerProxy, never()).unregisterNetworkCallback(
                 any(ConnectivityManager.NetworkCallback.class));
     }
 
