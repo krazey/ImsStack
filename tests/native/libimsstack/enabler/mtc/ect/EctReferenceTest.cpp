@@ -58,7 +58,12 @@ class EctReferenceTest : public ::testing::Test
 {
 public:
     inline EctReferenceTest() :
-            objMessageUtils(objMockContext)
+            pConfigurationProxy(IMS_NULL),
+            pMockReferenceInterfaceHolder(IMS_NULL),
+            pParticipantInfo(IMS_NULL),
+            pEctReference(IMS_NULL),
+            objMessageUtils(objMockContext),
+            pSupplementaryService(IMS_NULL)
     {
     }
 

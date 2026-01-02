@@ -55,6 +55,11 @@ class ConferenceInfoUpdaterTest : public ::testing::Test
 {
 public:
     inline ConferenceInfoUpdaterTest() :
+            pInfo(IMS_NULL),
+            pDescription(IMS_NULL),
+            pFactory(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
+            pUpdater(IMS_NULL),
             objMessageUtils(objContext)
     {
     }

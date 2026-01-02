@@ -53,6 +53,7 @@ class MtcMessageMediatorTest : public ::testing::Test
 {
 public:
     inline MtcMessageMediatorTest() :
+            pMessageMediator(IMS_NULL),
             objMessageUtils(objContext)
     {
     }

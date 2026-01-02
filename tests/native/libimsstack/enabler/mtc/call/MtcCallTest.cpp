@@ -101,7 +101,12 @@ class MtcCallTest : public ::testing::Test
 {
 public:
     inline MtcCallTest() :
-            objMessageUtils(objContext)
+            pConfigurationProxy(IMS_NULL),
+            pSessionInterfaceHolder(IMS_NULL),
+            objMessageUtils(objContext),
+            m_pOldConfigService(IMS_NULL),
+            m_pConfigService(IMS_NULL),
+            pConnector(IMS_NULL)
     {
     }
 
@@ -118,6 +123,7 @@ public:
     PlatformService* m_pOldConfigService;
     TestConfigService* m_pConfigService;
     MockIJniEnabler objJniEnabler;
+    // cppcheck-suppress unusedStructMember
     MockIJniMtcCallThread objCallThread;
     JniEnablerConnector* pConnector;
 

@@ -83,6 +83,9 @@ class MessageUtilsTest : public ::testing::Test
 {
 public:
     inline MessageUtilsTest() :
+            piMessage(IMS_NULL),
+            piSipMessage(IMS_NULL),
+            piSession(IMS_NULL),
             objMessageUtils(objContext)
     {
     }

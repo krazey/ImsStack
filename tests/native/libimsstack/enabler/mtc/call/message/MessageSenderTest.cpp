@@ -41,6 +41,9 @@ class MessageSenderTest : public ::testing::Test
 {
 public:
     inline MessageSenderTest() :
+            pSender(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
+            pSupplementaryService(IMS_NULL),
             objMessageUtils(objContext)
     {
     }
