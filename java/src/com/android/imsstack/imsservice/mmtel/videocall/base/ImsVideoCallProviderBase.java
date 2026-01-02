@@ -28,24 +28,25 @@ import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 
 public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         implements IVideoCallSession.EventListener {
-    protected static final int CAMERA_ID_NONE = -1;
-
-    protected static final int CALL_STATE_IDLE = 0;
+    public static final int CALL_STATE_IDLE = 0;
     // Originating call is started
-    protected static final int CALL_STATE_INITIATING = 1;
+    public static final int CALL_STATE_INITIATING = 1;
     // Incoming call is notified to framework and user alert will be done soon.
-    protected static final int CALL_STATE_ALERTING = 2;
+    public static final int CALL_STATE_ALERTING = 2;
     // Call establishment is completed
-    protected static final int CALL_STATE_ESTABLISHED = 3;
+    public static final int CALL_STATE_ESTABLISHED = 3;
     // Call is terminated
-    protected static final int CALL_STATE_TERMINATED = 4;
+    public static final int CALL_STATE_TERMINATED = 4;
     // Video call upgrade request is in progress
-    protected static final int CALL_STATE_VIDEO_UPGRADE_REQUESTED = 5;
+    public static final int CALL_STATE_VIDEO_UPGRADE_REQUESTED = 5;
+
+    protected static final int CAMERA_ID_NONE = -1;
 
     /*
      * Display type for video call
@@ -228,16 +229,17 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         }
     }
 
+    @VisibleForTesting
+    public int getCallState() {
+        return mCallState;
+    }
+
     protected final MtcMediaSession getMediaSession() {
         return mMediaSession;
     }
 
     protected final IVideoCallSession getVideoCallSession() {
         return mCallSession;
-    }
-
-    protected int getCallState() {
-        return mCallState;
     }
 
     protected void setCallState(int state) {

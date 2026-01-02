@@ -56,6 +56,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.IpSecManager;
@@ -311,6 +312,8 @@ public class ContextFixture implements TestFixture<Context> {
                     return mIpSecManager;
                 case Context.SENSOR_SERVICE:
                     return mSensorManager;
+                case Context.CAMERA_SERVICE:
+                    return mCameraManager;
                 default:
                     return null;
             }
@@ -364,6 +367,8 @@ public class ContextFixture implements TestFixture<Context> {
                 return Context.IPSEC_SERVICE;
             } else if (serviceClass == SensorManager.class) {
                 return Context.SENSOR_SERVICE;
+            } else if (serviceClass == CameraManager.class) {
+                return Context.CAMERA_SERVICE;
             }
             return super.getSystemServiceName(serviceClass);
         }
@@ -742,6 +747,7 @@ public class ContextFixture implements TestFixture<Context> {
     private final SmsManager mSmsManager = mock(SmsManager.class);
     private final IpSecManager mIpSecManager = mock(IpSecManager.class);
     private final SensorManager mSensorManager = mock(SensorManager.class);
+    private final CameraManager mCameraManager = mock(CameraManager.class);
     private final Configuration mConfiguration = new Configuration();
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final SharedPreferences mSharedPreferences = PreferenceManager

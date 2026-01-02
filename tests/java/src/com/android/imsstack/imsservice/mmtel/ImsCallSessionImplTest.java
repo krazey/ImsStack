@@ -138,16 +138,17 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mMockCarrierConfig = Mockito.mock(CarrierConfig.class);
         mMockConfigInterface = Mockito.mock(ConfigInterface.class);
-        mVideoCallSession = Mockito.mock(ImsVideoCallSession.class);
-        mImsCallSession = new TestImsCallSessionImpl(mMockCallContext, mMockCallTracker,
-                mMockMtcCall, mCallId, mImsCallProfile, true, mMockImsCallSessionCallback,
-                mVideoCallSession);
-
         MessageExecutor executor = new MessageExecutor(mTestableLooper.getLooper());
         when(mMockCallContext.getExecutor()).thenReturn(executor);
         when(mMockCallContext.getCallHandler()).thenReturn(executor);
         when(mMockCallContext.getCallLooper()).thenReturn(mTestableLooper.getLooper());
         when(mMockCallContext.getServiceStateTracker()).thenReturn(mMockServiceStateTracker);
+        mVideoCallSession = Mockito.mock(ImsVideoCallSession.class);
+        when(mVideoCallSession.getCallContext()).thenReturn(mMockCallContext);
+        mImsCallSession = new TestImsCallSessionImpl(mMockCallContext, mMockCallTracker,
+                mMockMtcCall, mCallId, mImsCallProfile, true, mMockImsCallSessionCallback,
+                mVideoCallSession);
+
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface,
                 MSimUtils.DEFAULT_SLOT_ID);
