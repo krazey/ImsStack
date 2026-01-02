@@ -448,7 +448,6 @@ PRIVATE
 void JniMtcCall::MergeToConference(
         IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    // TODO: delete pointers after function call.
     ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
