@@ -45,6 +45,8 @@ public:
     MOCK_METHOD(void, SetSecurityServerPortInRegContact, (), (override));
     MOCK_METHOD(void, IgnoreCurrentPolicyExpired, (), (override));
     MOCK_METHOD(void, SetSecurityServerPortInRegistration, (), (override));
+    MOCK_METHOD(IMS_UINT32, FindAvailableUePort,
+            (IN UePortType ePortType, IN IMS_UINT32& nLastPort), (override));
     MOCK_METHOD(void, SetUePortnSpi, (IN IMS_BOOL bInitial), (override));
     MOCK_METHOD(IMS_BOOL, SetSecurityClientHeader, (), (override));
     MOCK_METHOD(IMS_BOOL, CheckSecurityServerHeader, (), (override));

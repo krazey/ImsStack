@@ -122,7 +122,6 @@ public:
     void IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolicy) override;
 
     /// Create UE Transport Port and SPI Identity
-    IMS_UINT32 CreateUePort();
     IMS_UINT32 CreateUeSpi();
 
     /// Create SPs for TCP or UDP
@@ -202,8 +201,8 @@ private:
 public:
     // ePDG requires a certain range of UE ports. So here we made a change from 58001 to 38001.
     // Plain TCP can be transmitted from a port 40000 to 50000. Avoid this range for Ipsec.
-    static const IMS_UINT32 UE_PORT_LOWER = 38000;
-    static const IMS_UINT32 UE_PORT_UPPER = 38999;
+    static const IMS_UINT32 UE_PORT_LOWER = 38001;
+    static const IMS_UINT32 UE_PORT_UPPER = 39000;
     // UE Server Port 39000 ~ 39999
     static const IMS_UINT32 PCSCF_PORT_LOWER = 10001;
     static const IMS_UINT32 PCSCF_PORT_UPPER = 11000;

@@ -60,6 +60,8 @@ enum
     TYPE_CLIENT
 };
 
+#define DECLARE_USING(Base) using Base::FindAvailableUePort;
+
 class TestAosIpsecEx : public AosIpsec
 {
 public:
@@ -81,6 +83,8 @@ public:
 class TestAosIpsecHelper : public AosIpsecHelper
 {
 public:
+    DECLARE_USING(AosIpsecHelper)
+
     inline TestAosIpsecHelper(IN IRegContact* piRegContact, IN IRegParameter* piRegParameter,
             IN IAosAppContext* piAppContext, IN AString& strRegId) :
             AosIpsecHelper(piRegContact, piRegParameter, piAppContext, strRegId)
@@ -270,6 +274,8 @@ public:
     const AString m_strIpAddr1 = AString("10.168.219.102");
     const AString m_strIpAddr2 = AString("10.168.219.104");
 
+    ImsVector<IMS_SINT32> m_objEmptyPort;
+
 protected:
     void SetUp() override
     {
@@ -283,6 +289,12 @@ protected:
 
         m_pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockAosConfig, SLOT_ID);
+        ON_CALL(m_objMockAosConfig, GetIpsecUeClientPortRange())
+                .WillByDefault(ReturnRef(m_objEmptyPort));
+        ON_CALL(m_objMockAosConfig, GetIpsecUeServerPortRange())
+                .WillByDefault(ReturnRef(m_objEmptyPort));
+
+        ON_CALL(m_objMockIRegContact, GetIpAddress()).WillByDefault(ReturnRef(IpAddress::LOOPBACK));
 
         m_pAosOldIpsec = new TestAosIpsecEx(&m_objIAosIpsecListener, SLOT_ID);
         m_pAosCurrIpsec = new TestAosIpsecEx(&m_objIAosIpsecListener, SLOT_ID);
@@ -388,6 +400,89 @@ TEST_F(AosIpsecHelperTest, Create)
     EXPECT_TRUE(m_pAosIpsecHelper->Create(IMS_FALSE));
 
     m_pAosIpsecHelper->DestroyIpsec(NEW_IPSEC);
+}
+
+TEST_F(AosIpsecHelperTest, ClientPortIsDefaultPortRangeWhenFindAvailableUePort)
+{
+    IMS_UINT32 nPort = 0;
+    m_pAosIpsecHelper->FindAvailableUePort(AosIpsecHelper::UePortType::CLIENT_PORT, nPort);
+
+    EXPECT_GE(nPort, 38001);
+    EXPECT_LT(nPort, 39000);
+}
+
+TEST_F(AosIpsecHelperTest, ServerPortIsDefaultPortRangeWhenFindAvailableUePort)
+{
+    IMS_UINT32 nPort = 0;
+
+    m_pAosIpsecHelper->FindAvailableUePort(AosIpsecHelper::UePortType::SERVER_PORT, nPort);
+
+    EXPECT_GE(nPort, 39001);
+    EXPECT_LT(nPort, 40000);
+}
+
+TEST_F(AosIpsecHelperTest, ClientPortIsInClientPortRangeWhenFindAvailableUePort)
+{
+    IMS_UINT32 nPort = 0;
+    ImsVector<IMS_SINT32> objClientPort;
+    objClientPort.Add(38000);
+    objClientPort.Add(38999);
+    ON_CALL(m_objMockAosConfig, GetIpsecUeClientPortRange())
+            .WillByDefault(ReturnRef(objClientPort));
+
+    m_pAosIpsecHelper->FindAvailableUePort(AosIpsecHelper::UePortType::CLIENT_PORT, nPort);
+
+    EXPECT_GE(nPort, 38000);
+    EXPECT_LT(nPort, 38999);
+}
+
+TEST_F(AosIpsecHelperTest, ServerPortIsInServerPortRangeWhenFindAvailableUePort)
+{
+    IMS_UINT32 nPort = 0;
+    ImsVector<IMS_SINT32> objServerPort;
+    objServerPort.Add(39000);
+    objServerPort.Add(39999);
+    ON_CALL(m_objMockAosConfig, GetIpsecUeServerPortRange())
+            .WillByDefault(ReturnRef(objServerPort));
+
+    m_pAosIpsecHelper->FindAvailableUePort(AosIpsecHelper::UePortType::SERVER_PORT, nPort);
+
+    EXPECT_GE(nPort, 39000);
+    EXPECT_LT(nPort, 39999);
+}
+
+TEST_F(AosIpsecHelperTest, ClientPortIsMaxAddedWhenFindAvailableUePortWithInvalidIp)
+{
+    IpAddress objInvalidIpAddress(AString("192-168-2-5"));
+    ON_CALL(m_objMockIRegContact, GetIpAddress()).WillByDefault(ReturnRef(objInvalidIpAddress));
+    IMS_UINT32 nPort = 0;
+    ImsVector<IMS_SINT32> objClientPort;
+    objClientPort.Add(38001);
+    objClientPort.Add(39000);
+    ON_CALL(m_objMockAosConfig, GetIpsecUeClientPortRange())
+            .WillByDefault(ReturnRef(objClientPort));
+
+    m_pAosIpsecHelper->FindAvailableUePort(AosIpsecHelper::UePortType::CLIENT_PORT, nPort);
+
+    // The max count is 20;
+    EXPECT_EQ(nPort, 38020);
+}
+
+TEST_F(AosIpsecHelperTest,
+        ServerPortIsLastPortIfRangeIslessThenMaxWhenFindAvailableUePortWithInvalidIpAndRange)
+{
+    IpAddress objInvalidIpAddress(AString("192-168-2-5"));
+    ON_CALL(m_objMockIRegContact, GetIpAddress()).WillByDefault(ReturnRef(objInvalidIpAddress));
+    IMS_UINT32 nPort = 0;
+    ImsVector<IMS_SINT32> objServerPort;
+    objServerPort.Add(65005);
+    objServerPort.Add(65010);
+    ON_CALL(m_objMockAosConfig, GetIpsecUeServerPortRange())
+            .WillByDefault(ReturnRef(objServerPort));
+
+    m_pAosIpsecHelper->FindAvailableUePort(AosIpsecHelper::UePortType::SERVER_PORT, nPort);
+
+    EXPECT_EQ(nPort, 65009);
 }
 
 TEST_F(AosIpsecHelperTest, CreateOnChallenging)

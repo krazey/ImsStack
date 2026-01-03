@@ -28,9 +28,6 @@ __IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 
-IMS_UINT32 gRandUePort = AosIpsec::UE_PORT_LOWER;
-IMS_UINT32 gRandPcscfPort = AosIpsec::PCSCF_PORT_LOWER;
-
 PUBLIC
 AosIpsec::AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId) :
         m_piNetIpsec(IMS_NULL),
@@ -117,26 +114,6 @@ void AosIpsec::IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolic
     }
 
     delete this;
-}
-
-PUBLIC
-IMS_UINT32 AosIpsec::CreateUePort()
-{
-    IMS_UINT32 nPort = 0;
-    // 1. Crate UE Port
-    if (gRandUePort < UE_PORT_UPPER)
-    {
-        nPort = ++gRandUePort;
-    }
-    else
-    {
-        gRandUePort = UE_PORT_LOWER;
-        nPort = gRandUePort;
-    }
-
-    A_IMS_TRACE_I(AOSTAG, "Create UE Port (%d)", nPort, 0, 0);
-
-    return nPort;
 }
 
 PUBLIC

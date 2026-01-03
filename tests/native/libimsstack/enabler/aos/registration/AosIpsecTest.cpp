@@ -86,12 +86,6 @@ TEST_F(AosIpsecTest, IpSecPolicy_OnSecurityAssociationExpired)
     //        static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
 }
 
-TEST_F(AosIpsecTest, CreateUePort)
-{
-    EXPECT_GE(38999, m_pAosIpsec->CreateUePort());
-    EXPECT_LE(38000, m_pAosIpsec->CreateUePort());
-}
-
 TEST_F(AosIpsecTest, CreateUeSpi)
 {
     EXPECT_LE(1000000000, m_pAosIpsec->CreateUeSpi());

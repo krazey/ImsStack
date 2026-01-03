@@ -38,6 +38,12 @@ private:
     AosIpsecHelper& operator=(IN const AosIpsecHelper& objRhs);
 
 public:
+    enum class UePortType
+    {
+        CLIENT_PORT,
+        SERVER_PORT
+    };
+
     virtual IMS_BOOL Create(IN IMS_BOOL bInitial);
     virtual void CreateOnChallenging();
 
@@ -60,6 +66,7 @@ public:
 
 protected:
     virtual void SetSecurityServerPortInRegistration();
+    virtual IMS_UINT32 FindAvailableUePort(IN UePortType ePortType, OUT IMS_UINT32& nLastPort);
     virtual void SetUePortnSpi(IN IMS_BOOL bInitial);
     virtual IMS_BOOL SetSecurityClientHeader();
     virtual IMS_BOOL CheckSecurityServerHeader();
@@ -73,7 +80,8 @@ protected:
 private:
     void CloseUnsecureTCPSocket();
     void CloseSecureTCPSocket(IN AosIpsec* pIpsec);
-    IMS_UINT32 GetValidUePort(IN IMS_SINT32 nStartPort = 0, IN IMS_SINT32 nPadding = 0);
+    IMS_UINT32 GetValidUePort(
+            IN IMS_UINT32 nLowerPort, IN IMS_UINT32 nUpperPort, OUT IMS_UINT32& nUePort);
     void DeleteSamePolicy();
 
 protected:
@@ -89,7 +97,7 @@ protected:
 
     AString m_strTag;
 
-    static const IMS_UINT32 IPSEC_PORT_INTERVAL = 1000;
     static const IMS_UINT32 IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS = 30000;
+    static const IMS_UINT32 IPSEC_PORT_RANGE_MAX_COUNT = 20;
 };
 #endif  // AOS_IPSEC_HELPER_H_
