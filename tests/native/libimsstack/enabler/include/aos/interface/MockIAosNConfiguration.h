@@ -221,6 +221,8 @@ public:
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetNetworkAttachRejectCausesForCrossStackRedial, (),
             (override));
     MOCK_METHOD(ImsVector<AString>&, GetPlmnsReleaseEPdnUponECallEndInFakeMode, (), (override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetIpsecUeClientPortRange, (), (override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetIpsecUeServerPortRange, (), (override));
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };
 

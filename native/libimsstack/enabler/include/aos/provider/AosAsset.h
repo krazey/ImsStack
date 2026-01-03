@@ -134,7 +134,9 @@ public:
             objUnavailableFeaturesInLimitedReg(ImsVector<IMS_SINT32>()),
             objERegErrCodeNotSupportedCommonPolicy(ImsVector<IMS_SINT32>()),
             objNetworkAttachRejectCausesForCrossStackRedial(ImsVector<IMS_SINT32>()),
-            objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>())
+            objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>()),
+            objIpsecUeClientPortRange(ImsVector<IMS_SINT32>()),
+            objIpsecUeServerPortRange(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -251,5 +253,9 @@ public:
     ImsVector<IMS_SINT32> objNetworkAttachRejectCausesForCrossStackRedial;
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
     ImsVector<AString> objPlmnsReleaseEPdnUponECallEndInFakeMode;
+
+    // Ims general
+    ImsVector<IMS_SINT32> objIpsecUeClientPortRange;
+    ImsVector<IMS_SINT32> objIpsecUeServerPortRange;
 };
 #endif  // AOS_ASSET_H_
