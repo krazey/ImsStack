@@ -1035,6 +1035,19 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
         SipStack::DestroyTxnContext(pTxnContext);
     }
 
+    SipMessageInfo objMsgInfo(
+            pCtState->GetSlotId(), objMethod, pSipMsg, SipMessageInfo::DIRECTION_INCOMING);
+    LogSipMessageInfo(objMsgInfo);
+
+    // ACK request for a failure response of INVITE client transaction.
+    if (objUserData.GetSipMsg() != IMS_NULL)
+    {
+        const SipMethod objNewMethod = SipStack::GetMethod(objUserData.GetSipMsg());
+        SipMessageInfo objNewMsgInfo(pCtState->GetSlotId(), objNewMethod, objUserData.GetSipMsg(),
+                SipMessageInfo::DIRECTION_OUTGOING);
+        LogSipMessageInfo(objNewMsgInfo);
+    }
+
     // SIP_MESSAGE_TRACKER
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 

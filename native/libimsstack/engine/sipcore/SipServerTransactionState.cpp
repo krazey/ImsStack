@@ -310,6 +310,9 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         }
     }
 
+    SipMessageInfo objMsgInfo(GetSlotId(), objMethod, pSipMsg, SipMessageInfo::DIRECTION_INCOMING);
+    LogSipMessageInfo(objMsgInfo);
+
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
     /* NOTE::
     If the message is an ACK request for non-2xx response to INVITE request,
@@ -339,13 +342,12 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
         if (m_pTxnKey != IMS_NULL)
         {
-            pMessageTracker->NotifyMessageReceived(SipStack::GetMethod(m_pSipMsg), 0,
-                    AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
+            pMessageTracker->NotifyMessageReceived(
+                    objMethod, 0, AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
         }
         else
         {
-            pMessageTracker->NotifyMessageReceived(
-                    SipStack::GetMethod(m_pSipMsg), 0, AString::ConstNull());
+            pMessageTracker->NotifyMessageReceived(objMethod, 0, AString::ConstNull());
         }
     }
     return SipPrivate::MESSAGE_VALID;

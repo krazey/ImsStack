@@ -32,6 +32,7 @@ class SipTxnContext;
 
 class ISipTransactionStateListener;
 class ISipTransportListener;
+class SipMessageInfo;
 class SipMethod;
 class SipTimerValues;
 class SipTransport;
@@ -88,6 +89,8 @@ protected:
     IMS_BOOL Send(IN ::SipMessage* pSipMsg, IN const SipTimerValues* pTimerValues);
     void SetTimerValues(IN const SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext);
     void SetFlowControlOption(IN const SipMethod& objMethod);
+
+    static void LogSipMessageInfo(IN const SipMessageInfo& objMsgInfo);
 
 public:
     enum
