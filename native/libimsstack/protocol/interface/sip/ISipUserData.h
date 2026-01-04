@@ -18,6 +18,7 @@
 
 #include "SipConfiguration.h"
 #include "SipDatatypes.h"
+#include "msg/SipMessage.h"
 /****************************************************************************
 ISipUserData: Class Declaration Starts
  *****************************************************************************/
@@ -26,12 +27,14 @@ class ISipUserData
 private:
     SIP_UINT32 m_nMsgOptions;
     SIP_BOOL m_bDeleteFlag;
+    SipMessage* m_pSipMsg;  // Tracks the SIP message sent by the SIP stack.
     SIP_VOID* m_pvUserData; /* Stack User Specific Data */
 
 public:
     inline ISipUserData() :
             m_nMsgOptions(SipConfiguration::MSG_OPT_ENCODE_NONE),
             m_bDeleteFlag(SIP_FALSE),
+            m_pSipMsg(SIP_NULL),
             m_pvUserData(SIP_NULL)
     {
     }
@@ -39,6 +42,7 @@ public:
     inline explicit ISipUserData(SIP_VOID* pvUserData) :
             m_nMsgOptions(SipConfiguration::MSG_OPT_ENCODE_NONE),
             m_bDeleteFlag(SIP_FALSE),
+            m_pSipMsg(SIP_NULL),
             m_pvUserData(pvUserData)
     {
     }
@@ -55,7 +59,30 @@ public:
 
     inline void SetMsgOptions(SIP_UINT32 nMsgOptions) { m_nMsgOptions = nMsgOptions; }
 
-    inline virtual ~ISipUserData() {}
+    inline SipMessage* GetSipMsg() const { return m_pSipMsg; }
+
+    inline void SetSipMsg(SipMessage* pSipMsg)
+    {
+        if (m_pSipMsg != SIP_NULL)
+        {
+            m_pSipMsg->SipDelete();
+        }
+
+        m_pSipMsg = pSipMsg;
+
+        if (m_pSipMsg != SIP_NULL)
+        {
+            m_pSipMsg->Increment();
+        }
+    }
+
+    inline virtual ~ISipUserData()
+    {
+        if (m_pSipMsg != SIP_NULL)
+        {
+            m_pSipMsg->SipDelete();
+        }
+    }
 };
 
 #endif  //__INTERFACE_SIP_USER_DATA_H__

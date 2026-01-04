@@ -379,6 +379,8 @@ send to network
                     objTxnInfo.m_pSendSipMsg, objTxnInfo.m_pUserData);
         }
 
+        pUserData->SetSipMsg(objTxnInfo.m_pSendSipMsg);
+
         /* BSP_TODO:
            In case of 100 Trying, Txn Obj may not have user date, better to use user passed data
            For failure ACK, better to user Txn stored data */

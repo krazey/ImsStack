@@ -68,7 +68,7 @@ protected:
 
         ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
                 .WillByDefault(Invoke(
-                        [](IN const SipTxnKey* pTxnKey, Unused, OUT SipTxn*& pOutTxn)
+                        [](Unused, Unused, OUT SipTxn*& pOutTxn)
                         {
                             if (pTxn == SIP_NULL)
                             {
@@ -488,6 +488,7 @@ Content-Length: 0\r\n\
                     &eTxnStatus, &pTxnKey, &nError));
 
     EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
+    EXPECT_NE(objUserData.GetSipMsg(), nullptr);
 
     pRespSipMessage->SipDelete();
 
