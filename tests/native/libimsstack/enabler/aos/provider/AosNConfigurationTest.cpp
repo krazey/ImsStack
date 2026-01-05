@@ -171,8 +171,8 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objCarrierNrAvailabilities;
     objCarrierNrAvailabilities.Clear();
-    objCarrierNrAvailabilities.Add(CarrierConfig::Ims::CARRIER_NR_AVAILABILITY_NSA);
-    objCarrierNrAvailabilities.Add(CarrierConfig::Ims::CARRIER_NR_AVAILABILITY_SA);
+    objCarrierNrAvailabilities.Add(CarrierConfig::CARRIER_NR_AVAILABILITY_NSA);
+    objCarrierNrAvailabilities.Add(CarrierConfig::CARRIER_NR_AVAILABILITY_SA);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY, _))
             .Times(2)
