@@ -114,8 +114,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateNullInputsReturnsFalse)
 TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferReceivedSuccess)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
     // Act
@@ -127,7 +127,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferReceivedSuccess)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
     TextProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);  // Takes peer PT
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(),
+            TextProfileNegotiatorTest::kPeerT140Payload);  // Takes peer PT
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
     EXPECT_GT(m_pNegotiatedProfile->GetDataPort(), 0);
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 2);    // Default AS from mock
@@ -139,8 +140,9 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferReceivedSuccess)
 TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferSentSuccess)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));  // Peer Answer
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(
+            CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));  // Peer Answer
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
     // Act: Offer Sent (bIsOfferReceived = false)
@@ -152,7 +154,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferSentSuccess)
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
     TextProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);  // Takes peer PT
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(),
+            TextProfileNegotiatorTest::kPeerT140Payload);  // Takes peer PT
     EXPECT_EQ(
             m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);  // Uses local dir
     EXPECT_GT(m_pNegotiatedProfile->GetDataPort(), 0);
@@ -165,12 +168,12 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBasicT140OfferSentSuccess)
 TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pLocalProfile->AddPayload(CreateRedPayload(
-            kLocalRedPayload, kLocalT140Payload, 1));  // Local RED PT 99, T140 PT 98
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
-    m_pPeerProfile->AddPayload(CreateRedPayload(
-            kPeerRedPayload, kPeerT140Payload, 1));  // Peer RED PT 101, T140 PT 100
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kLocalRedPayload,
+            TextProfileNegotiatorTest::kLocalT140Payload, 1));  // Local RED PT 99, T140 PT 98
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1));  // Peer RED PT 101, T140 PT 100
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7004);
 
@@ -186,25 +189,26 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOfferReceivedSuccess)
     // Check T140
     TextProfile::Payload* pNegoT140 = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    EXPECT_EQ(
+            pNegoT140->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerT140Payload);
 
     // Check RED
     TextProfile::Payload* pNegoRed = m_pNegotiatedProfile->GetPayloadAt(1);
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
-    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerRedPayload);
 
     ASSERT_NE(pNegoRed->GetFmtp(), nullptr);
     auto pNegoFmtp = std::static_pointer_cast<TextProfile::RedFmtp>(pNegoRed->GetFmtp());
     // Check if the FMTP string reflects the peer's primary payload type
-    EXPECT_EQ(pNegoFmtp->GetRedPayload(), kPeerT140Payload);
+    EXPECT_EQ(pNegoFmtp->GetRedPayload(), TextProfileNegotiatorTest::kPeerT140Payload);
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferSentPeerNoBw)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetBandwidthAs(0);  // Peer has no AS bandwidth
     m_pPeerProfile->SetBandwidthRs(0);  // Peer has no RS bandwidth
@@ -227,11 +231,11 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferSentPeerNoBw)
 TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferReceivedLocalNoBw)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
     m_pLocalProfile->SetBandwidthAs(0);
     m_pLocalProfile->SetBandwidthRs(0);
     m_pLocalProfile->SetBandwidthRs(0);
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
     // Act: Offer Received
@@ -250,8 +254,9 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferReceivedLocalNoBw)
 TEST_F(TextProfileNegotiatorTest, NegotiateRedWithMissingT140InPeer)
 {
     // Arrange: Local has T140, Peer has RED but is missing the T140 payload in its list.
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1));
 
     // Act
     IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
@@ -266,11 +271,13 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOnlyInPeer)
 {
     // Arrange
     // Local: T140, RED
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pLocalProfile->AddPayload(CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kLocalRedPayload,
+            TextProfileNegotiatorTest::kLocalT140Payload, 1));
 
     // Peer: RED only, with a T140 subtype that doesn't exist in the peer's own payload list
-    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pPeerProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7018);
 
@@ -286,12 +293,13 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedOnlyInPeer)
     TextProfile::Payload* pNegoRed = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoRed->GetFmtp(), nullptr);
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
-    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerRedPayload);
 
     // Check T140
     TextProfile::Payload* pNegoT140 = m_pNegotiatedProfile->GetPayloadAt(1);
     EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    EXPECT_EQ(
+            pNegoT140->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerT140Payload);
 
     // Check direction
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
@@ -301,14 +309,16 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInLocalPayloa
 {
     // Arrange
     // Local profile has a valid T140, but its RED payload has a null fmtp.
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    TextProfile::Payload* pLocalRed = CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1);
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    TextProfile::Payload* pLocalRed = CreateRedPayload(TextProfileNegotiatorTest::kLocalRedPayload,
+            TextProfileNegotiatorTest::kLocalT140Payload, 1);
     pLocalRed->SetFmtp(IMS_NULL);
     m_pLocalProfile->AddPayload(pLocalRed);
 
     // Peer profile has valid T140 and RED payloads.
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
-    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7004);
 
@@ -323,10 +333,12 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInLocalPayloa
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
     TextProfile::Payload* pNegoPayload1 = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadNumber(),
+            TextProfileNegotiatorTest::kPeerT140Payload);
     TextProfile::Payload* pNegoPayload2 = m_pNegotiatedProfile->GetPayloadAt(1);
     EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadType(), "red");
-    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadNumber(),
+            TextProfileNegotiatorTest::kPeerRedPayload);
     EXPECT_NE(pNegoPayload2->GetFmtp(), IMS_NULL);
 }
 
@@ -334,12 +346,14 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInPeerPayload
 {
     // Arrange
     // Local profile has a valid T140, but its RED payload has a null fmtp.
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pLocalProfile->AddPayload(CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kLocalRedPayload,
+            TextProfileNegotiatorTest::kLocalT140Payload, 1));
 
     // Peer profile has valid T140 and RED payloads.
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
-    TextProfile::Payload* pPeerRed = CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1);
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
+    TextProfile::Payload* pPeerRed = CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1);
     pPeerRed->SetFmtp(IMS_NULL);
     m_pPeerProfile->AddPayload(pPeerRed);
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
@@ -356,17 +370,19 @@ TEST_F(TextProfileNegotiatorTest, NegotiateRedSuccessEvenIfNullFmtpInPeerPayload
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 2);
     TextProfile::Payload* pNegoPayload1 = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    EXPECT_EQ(pNegoPayload1->GetRtpMap().GetPayloadNumber(),
+            TextProfileNegotiatorTest::kPeerT140Payload);
     TextProfile::Payload* pNegoPayload2 = m_pNegotiatedProfile->GetPayloadAt(1);
     EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadType(), "red");
-    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_EQ(pNegoPayload2->GetRtpMap().GetPayloadNumber(),
+            TextProfileNegotiatorTest::kPeerRedPayload);
     EXPECT_NE(pNegoPayload2->GetFmtp(), IMS_NULL);
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateNoMatchingPayloadReturnsFalse)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
     // Peer profile has no payloads (or incompatible ones)
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7006);
@@ -386,8 +402,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateNoMatchingPayloadReturnsFalse)
 TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND);  // Peer offers SEND
     m_pPeerProfile->SetDataPort(7008);
 
@@ -405,9 +421,9 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerSendReturnsReceive)
 TEST_F(TextProfileNegotiatorTest, NegotiateDirectionInvalidPeerDirReturnsInactive)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
     m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INVALID);
 
     // Act
@@ -424,8 +440,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionInvalidPeerDirReturnsInactiv
 TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_RECEIVE);  // Peer offers RECEIVE
     m_pPeerProfile->SetDataPort(7010);
 
@@ -443,8 +459,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionOfferPeerReceiveReturnsSend)
 TEST_F(TextProfileNegotiatorTest, NegotiateDirectionInactiveReturnsInactive)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);  // Peer offers INACTIVE
 
     // Act
@@ -463,8 +479,8 @@ TEST_F(TextProfileNegotiatorTest, NegotiateDirectionInactiveReturnsInactive)
 TEST_F(TextProfileNegotiatorTest, NegotiateRtcpIntervalDisabledWhenRsRrZero)
 {
     // Arrange
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7012);
     m_pPeerProfile->SetBandwidthRs(0);  // Peer has zero RS/RR
@@ -486,12 +502,14 @@ TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerRedFirst)
 {
     // Arrange
     // Local: T140, RED
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
-    m_pLocalProfile->AddPayload(CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kLocalRedPayload,
+            TextProfileNegotiatorTest::kLocalT140Payload, 1));
 
     // Peer: RED, T140 (RED has higher priority)
-    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7014);
 
@@ -506,23 +524,26 @@ TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerRedFirst)
     // Check that negotiated order matches peer's priority
     TextProfile::Payload* pNegoRed = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
-    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerRedPayload);
 
     TextProfile::Payload* pNegoT140 = m_pNegotiatedProfile->GetPayloadAt(1);
     EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    EXPECT_EQ(
+            pNegoT140->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerT140Payload);
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerT140First)
 {
     // Arrange
     // Local: RED, T140
-    m_pLocalProfile->AddPayload(CreateRedPayload(kLocalRedPayload, kLocalT140Payload, 1));
-    m_pLocalProfile->AddPayload(CreateT140Payload(kLocalT140Payload));
+    m_pLocalProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kLocalRedPayload,
+            TextProfileNegotiatorTest::kLocalT140Payload, 1));
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
 
     // Peer: T140, RED (T140 has higher priority)
-    m_pPeerProfile->AddPayload(CreateT140Payload(kPeerT140Payload));
-    m_pPeerProfile->AddPayload(CreateRedPayload(kPeerRedPayload, kPeerT140Payload, 1));
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
+    m_pPeerProfile->AddPayload(CreateRedPayload(TextProfileNegotiatorTest::kPeerRedPayload,
+            TextProfileNegotiatorTest::kPeerT140Payload, 1));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_pPeerProfile->SetDataPort(7016);
 
@@ -537,9 +558,10 @@ TEST_F(TextProfileNegotiatorTest, NegotiateMultiplePayloadsPeerT140First)
     // Check that negotiated order matches peer's priority
     TextProfile::Payload* pNegoT140 = m_pNegotiatedProfile->GetPayloadAt(0);
     EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadType(), "t140");
-    EXPECT_EQ(pNegoT140->GetRtpMap().GetPayloadNumber(), kPeerT140Payload);
+    EXPECT_EQ(
+            pNegoT140->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerT140Payload);
 
     TextProfile::Payload* pNegoRed = m_pNegotiatedProfile->GetPayloadAt(1);
     EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadType(), "red");
-    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), kPeerRedPayload);
+    EXPECT_EQ(pNegoRed->GetRtpMap().GetPayloadNumber(), TextProfileNegotiatorTest::kPeerRedPayload);
 }

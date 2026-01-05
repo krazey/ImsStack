@@ -639,7 +639,6 @@ TEST_F(AudioNegoTest, testFormAnswerWithValidNegoModel)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    MEDIA_DIRECTION eDirection;
 
     // First, successfully negotiate an offer to create a valid OA model
     SetUpNegotiatedProfile("AMR-WB");

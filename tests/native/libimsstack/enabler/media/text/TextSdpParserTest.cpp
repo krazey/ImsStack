@@ -42,6 +42,7 @@ protected:
     std::unique_ptr<TextSdpParser> m_pParser;
     std::unique_ptr<TextProfile> m_pProfile;
     MockISessionDescriptor m_objMockSessionDescriptor;
+    // cppcheck-suppress knownConditionTrueFalse
     MockIMediaDescriptor m_objMockMediaDescriptor;
 };
 

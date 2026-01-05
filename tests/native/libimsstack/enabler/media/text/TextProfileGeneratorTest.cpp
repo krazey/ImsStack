@@ -80,8 +80,8 @@ protected:
 TEST_F(TextProfileGeneratorTest, SetProfileBasic)
 {
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), TextProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<TextProfile>(pBaseProfile);
 
     // Assert
@@ -111,8 +111,8 @@ TEST_F(TextProfileGeneratorTest, CreateT140Payload)
     ON_CALL(*m_pConfig, GetCodecConfigs()).WillByDefault(testing::ReturnRef(codecConfigs));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), TextProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<TextProfile>(pBaseProfile);
 
     // Assert
@@ -155,8 +155,8 @@ TEST_F(TextProfileGeneratorTest, CreateRedPayload)
     ON_CALL(*m_pConfig, GetCodecConfigs()).WillByDefault(testing::ReturnRef(codecConfigs));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), TextProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<TextProfile>(pBaseProfile);
 
     // Assert

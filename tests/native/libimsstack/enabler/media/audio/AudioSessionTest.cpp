@@ -342,7 +342,8 @@ TEST_F(AudioSessionTest, RequestRtpReceptionStats)
                     testing::Truly(
                             [](ImsMediaMsgParamBase* p)
                             {
-                                auto* param = static_cast<ImsMediaMsgRtpReceptionStatsParam*>(p);
+                                const auto param =
+                                        static_cast<ImsMediaMsgRtpReceptionStatsParam*>(p);
                                 return param && param->m_nIntervalMs == intervalMs;
                             })))
             .Times(1)

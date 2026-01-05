@@ -132,7 +132,7 @@ PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
 
     IMS_TRACE_I("CreateAvcPayload()", 0, 0, 0);
 
-    auto pAvcConfig = static_cast<CodecAvcConfig*>(pCodecConfig);
+    const auto pAvcConfig = static_cast<CodecAvcConfig*>(pCodecConfig);
     const VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
     auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
 

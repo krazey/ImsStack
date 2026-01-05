@@ -94,8 +94,8 @@ TEST_F(VideoProfileGeneratorTest, SetProfileBasic)
     EXPECT_CALL(*m_pConfig, IsVideoAvpfEnabled()).WillRepeatedly(Return(IMS_FALSE));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), VideoProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<VideoProfile>(pBaseProfile);
 
     // Assert
@@ -119,8 +119,8 @@ TEST_F(VideoProfileGeneratorTest, SetProfileAvpfEnabled)
     EXPECT_CALL(*m_pConfig, IsAvpfCapabilityNegotiationEnabled()).WillRepeatedly(Return(IMS_FALSE));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), VideoProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<VideoProfile>(pBaseProfile);
 
     // Assert
@@ -142,8 +142,8 @@ TEST_F(VideoProfileGeneratorTest, SetProfileAvpfWithCapaNegoNoAcap)
             .WillRepeatedly(Return(MediaConfiguration::CAPNEG_OFFER_WITHOUT_ACAP));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), VideoProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<VideoProfile>(pBaseProfile);
 
     // Assert
@@ -174,8 +174,8 @@ TEST_F(VideoProfileGeneratorTest, SetProfileAvpfWithCapaNegoWithAcap)
     EXPECT_CALL(*m_pConfig, IsVideoAvpfPliEnabled()).WillRepeatedly(Return(IMS_TRUE));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), VideoProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<VideoProfile>(pBaseProfile);
 
     // Assert
@@ -233,8 +233,8 @@ TEST_F(VideoProfileGeneratorTest, CreateAvcPayload)
     EXPECT_CALL(*m_pConfig, GetVideoSamplingRate()).WillRepeatedly(Return(90000));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), VideoProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<VideoProfile>(pBaseProfile);
 
     // Assert
@@ -305,8 +305,8 @@ TEST_F(VideoProfileGeneratorTest, CreateHevcPayload)
     EXPECT_CALL(*m_pConfig, GetVideoSamplingRate()).WillRepeatedly(Return(90000));
 
     // Act
-    auto pBaseProfile = m_pGenerator->Generate(
-            MEDIA_SERVICE_DEFAULT, m_pIService.get(), m_pConfig.get(), SLOT_ID);
+    auto pBaseProfile = m_pGenerator->Generate(MEDIA_SERVICE_DEFAULT, m_pIService.get(),
+            m_pConfig.get(), VideoProfileGeneratorTest::SLOT_ID);
     auto pProfile = std::static_pointer_cast<VideoProfile>(pBaseProfile);
 
     // Assert
