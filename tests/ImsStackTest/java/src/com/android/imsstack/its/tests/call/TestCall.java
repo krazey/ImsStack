@@ -187,8 +187,11 @@ public class TestCall extends ServerFailureHandler {
     }
 
     /**
-     * Checks for an event that have already been triggered.
-     * {@link TestCall#expectWithin} reset the history.
+     * Checks for an event that has already been triggered.
+     * {@link TestCall#expectWithin} resets the history.
+     *
+     * Note: {@code incomingCall} check must be preceded by {@link TimedExpectation#incomingCall}
+     * using {@link TestCall#expectWithin} or {@link TestCall#expect} to be aware of incoming calls.
      */
     public @NonNull Expectation expectToHaveBeen() {
         return new EventTriggerExpectation();

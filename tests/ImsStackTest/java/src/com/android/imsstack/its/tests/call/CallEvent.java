@@ -58,6 +58,11 @@ public final class CallEvent<T1, T2, T3> {
         mParam3Matcher = param3Matcher;
     }
 
+    @Override
+    public String toString() {
+        return mEventType.toString();
+    }
+
     /**
      * Checks if this event's type aligns with the specified event type.
      *
