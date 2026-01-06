@@ -218,11 +218,43 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
 
-        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockVideoSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mVideoSessionHandler.getMediaState());
+
+        // Receive onSessionClosed callback
+        mVideoSessionCallback.onSessionClosed();
+        processAllMessages();
+
+        // Verify timeout is cancelled and session is closed
+        assertFalse(mVideoSessionHandler.getVideoMessageHandler().hasMessages(
+                MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT));
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mVideoSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testCloseSessionWithTimeout() {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         testParcel.setDataPosition(0);
+        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
+        mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
+
         verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockVideoSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mVideoSessionHandler.getMediaState());
+
+        // Do not receive onSessionClosed, and timeout scheduled for 5000ms is fired
+        moveTimeForward(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+        processAllMessages();
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mVideoSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
         testParcel.recycle();
     }
 

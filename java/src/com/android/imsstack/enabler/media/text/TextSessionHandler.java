@@ -196,8 +196,24 @@ public class TextSessionHandler extends MediaState {
                     break;
 
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
+                {
+                    mTextMessageHandler.removeMessages(
+                            MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT);
+                    handleTextSessionClosed();
+                }
+                    break;
+
                 case MediaConstants.NOTIFY_MEDIA_DETACH:
                 {
+                    handleTextSessionClosed();
+                }
+                    break;
+
+                case MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT:
+                {
+                    ImsLog.e("onSessionClosed is not received within "
+                            + MediaConstants.RESPONSE_WAIT_TIMEOUT + "ms for SessionId["
+                            + getTextSessionId() + "]. Forcing cleanup.");
                     handleTextSessionClosed();
                 }
                     break;
@@ -465,6 +481,9 @@ public class TextSessionHandler extends MediaState {
         if (mTextSession != null) {
             mMediaManager.closeSession(mTextSession);
             setMediaState(MEDIA_STATE_CLOSED);
+            mTextMessageHandler.sendEmptyMessageDelayed(
+                    MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT,
+                    MediaConstants.RESPONSE_WAIT_TIMEOUT);
         }
     }
 

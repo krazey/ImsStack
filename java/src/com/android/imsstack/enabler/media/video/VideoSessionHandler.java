@@ -125,6 +125,11 @@ public class VideoSessionHandler extends MediaState {
     }
 
     @VisibleForTesting
+    VideoMessageHandler getVideoMessageHandler() {
+        return mVideoMessageHandler;
+    }
+
+    @VisibleForTesting
     int getVideoSessionId() {
         return mVideoSessionId;
     }
@@ -216,7 +221,17 @@ public class VideoSessionHandler extends MediaState {
                     handleVideoOpenSessionResponse((ImsMediaSession) msg.obj, msg.arg1);
                     break;
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
+                    mVideoMessageHandler.removeMessages(
+                            MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT);
+                    handleVideoSessionClosed();
+                    break;
                 case MediaConstants.NOTIFY_MEDIA_DETACH:
+                    handleVideoSessionClosed();
+                    break;
+                case MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT:
+                    ImsLog.e("onSessionClosed is not received within "
+                            + MediaConstants.RESPONSE_WAIT_TIMEOUT + "ms for SessionId["
+                            + getVideoSessionId() + "]. Forcing cleanup.");
                     handleVideoSessionClosed();
                     break;
                 case MediaConstants.RESPONSE_MODIFY_SESSION:
@@ -532,6 +547,9 @@ public class VideoSessionHandler extends MediaState {
         if (mVideoSession != null) {
             mMediaManager.closeSession(mVideoSession);
             setMediaState(MEDIA_STATE_CLOSED);
+            mVideoMessageHandler.sendEmptyMessageDelayed(
+                    MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT,
+                    MediaConstants.RESPONSE_WAIT_TIMEOUT);
         }
     }
 
