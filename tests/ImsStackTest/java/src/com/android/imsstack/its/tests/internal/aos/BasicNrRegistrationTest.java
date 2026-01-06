@@ -33,6 +33,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.its.filters.P0;
+import com.android.imsstack.its.filters.P1;
+import com.android.imsstack.its.filters.P2;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
@@ -74,6 +77,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onNr_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, video, and SMSIP features.
@@ -109,6 +113,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onNr_withVoiceOnly_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL and audio, but not video or SMSIP.
@@ -153,6 +158,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onNr_withVoiceVideo_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and video, but not SMSIP.
@@ -197,6 +203,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onNr_withVoiceSms_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and SMSIP, but not video.
@@ -238,6 +245,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onNr_byDisablingVideoCapability_succeeds() throws Exception {
         // 1. Initially, the device registers successfully on NR with video capability enabled.
         // 2. The server verifies that the first REGISTER request's Contact header includes
@@ -292,6 +300,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onNr_byEnablingVideoCapability_succeeds() throws Exception {
         // 1. Initially, the device registers on NR with video capability disabled.
         // 2. The server verifies the first REGISTER request's Contact header does not
@@ -355,7 +364,8 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
-    public void register_onNR_with305AsPolicy3gpp_triggersDeregistered() throws Exception {
+    @P2
+    public void register_onNr_with305AsPolicy3gpp_triggersDeregistered() throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 305 Use Proxy response.
         // 2. This test simulates a scenario where only a single P-CSCF is available, so the
         //    device cannot retry registration with an alternative P-CSCF.
@@ -384,6 +394,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onNr_with423Response_retriesAndSucceeds() throws Exception {
         // 1. Set up the server to respond to the first REGISTER request with a 423 Interval Too
         //    Brief.
@@ -412,6 +423,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with403AsRepeatedError_triggersDeregistered()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -452,6 +464,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with403AsCriticalError_triggersPlmnBlock() throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
         // 2. Configure the device via CarrierConfig to define the 403 response as a 'critical'
@@ -491,6 +504,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with403AsRatBlockError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -532,6 +546,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with404AsCriticalError_triggersPlmnBlock() throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 404 Not Found.
         // 2. Configure the device via CarrierConfig to define the 404 response as a 'critical'
@@ -571,6 +586,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with500AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
@@ -612,6 +628,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with500AsRepeatedOnlyAttachedNetwork_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
@@ -653,6 +670,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with503AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
@@ -697,6 +715,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with503RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable
@@ -742,6 +761,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with503AndTempPlmnBlockRats_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
@@ -786,6 +806,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with504AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out.
@@ -827,6 +848,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onNr_with504RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out
@@ -872,6 +894,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void handover_fromNr_toWlan_succeeds() throws Exception {
         // 1. Set up the server to complete a normal registration and subscription flow, and then
         //    expect a re-REGISTER.
@@ -911,6 +934,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void subscribe_onNr_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
         // 2. Verify the received SUBSCRIBE request contains a P-Access-Network-Info header
@@ -943,6 +967,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onNr_byNotifyUnregistered_succeeds() throws Exception {
         // 1. The device completes registration and subscription on NR.
         // 2. The server sends a NOTIFY message with event="unregistered" to terminate
@@ -971,6 +996,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onNr_byNotifyUnregistered_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription on NR.
@@ -1015,6 +1041,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onNr_byNotifyRejected_succeeds() throws Exception {
         // 1. The device completes registration and subscription on NR.
         // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
@@ -1042,6 +1069,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onNr_byNotifyRejected_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription on NR.
@@ -1085,6 +1113,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onNr_byNotifyDeactivated_succeeds() throws Exception {
         // 1. The device completes registration and subscription on NR.
         // 2. The server sends a NOTIFY message with event="deactivated" to terminate
@@ -1113,6 +1142,7 @@ public class BasicNrRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onNr_byNotifyDeactivated_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription on NR.

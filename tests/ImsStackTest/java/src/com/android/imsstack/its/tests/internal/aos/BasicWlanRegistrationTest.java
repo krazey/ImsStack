@@ -33,6 +33,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.its.filters.P0;
+import com.android.imsstack.its.filters.P1;
+import com.android.imsstack.its.filters.P2;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
@@ -74,6 +77,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onWlan_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, video, and SMSIP features.
@@ -112,6 +116,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onWlan_withVoiceOnly_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL and audio, but not video or SMSIP.
@@ -157,6 +162,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onWlan_withVoiceVideo_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and video, but not SMSIP.
@@ -202,6 +208,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onWlan_withVoiceSms_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and SMSIP, but not video.
@@ -246,6 +253,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onWlan_byDisablingVideoCapability_succeeds() throws Exception {
         // 1. Initially, the device registers successfully on IWLAN with video capability enabled.
         // 2. The server verifies that the first REGISTER request's Contact header includes
@@ -303,6 +311,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onWlan_byEnablingVideoCapability_succeeds() throws Exception {
         // 1. Initially, the device registers on IWLAN with video capability disabled.
         // 2. The server verifies the first REGISTER request's Contact header does not
@@ -368,6 +377,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with305AsPolicy3gpp_triggersDeregistered() throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 305 Use Proxy response.
         // 2. This test simulates a scenario where only a single P-CSCF is available, so the
@@ -400,6 +410,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onWlan_with423Response_retriesAndSucceeds() throws Exception {
         // 1. Set up the server to respond to the first REGISTER request with a 423 Interval Too
         //    Brief.
@@ -431,6 +442,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with403AsRepeatedError_triggersDeregistered()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -471,6 +483,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with403AsCriticalError_triggersPlmnBlock()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -513,6 +526,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with403AsRatBlockError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -554,6 +568,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with404AsCriticalError_triggersPlmnBlock()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 404 Not Found.
@@ -596,6 +611,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with500AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
@@ -639,6 +655,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with503AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
@@ -682,6 +699,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with503RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable
@@ -729,6 +747,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with504AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out.
@@ -772,6 +791,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onWlan_with504RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out
@@ -819,6 +839,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void handover_fromWlan_toLte_succeeds() throws Exception {
         // 1. Set up the server to complete a normal registration and subscription flow, and then
         //    expect a re-REGISTER.
@@ -858,6 +879,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void handover_fromWlan_toNr_succeeds() throws Exception {
         // 1. Set up the server to complete a normal registration and subscription flow, and then
         //    expect a re-REGISTER.
@@ -897,6 +919,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void subscribe_onWlan_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
         // 2. Configure the device for Wi-Fi Calling.
@@ -924,6 +947,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onWlan_byNotifyUnregistered_succeeds() throws Exception {
         // 1. The device completes registration and subscription on IWLAN.
         // 2. The server sends a NOTIFY message with event="unregistered" to terminate
@@ -955,6 +979,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onWlan_byNotifyUnregistered_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription on IWLAN.
@@ -1000,6 +1025,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onWlan_byNotifyRejected_succeeds() throws Exception {
         // 1. The device completes registration and subscription on IWLAN.
         // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
@@ -1030,6 +1056,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onWlan_byNotifyRejected_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription on IWLAN.
@@ -1075,6 +1102,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onWlan_byNotifyDeactivated_succeeds() throws Exception {
         // 1. The device completes registration and subscription on IWLAN.
         // 2. The server sends a NOTIFY message with event="rejected".
@@ -1107,6 +1135,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onWlan_byNotifyDeactivated_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription on IWLAN.

@@ -33,6 +33,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.its.filters.P0;
+import com.android.imsstack.its.filters.P1;
+import com.android.imsstack.its.filters.P2;
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
@@ -74,6 +77,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onLte_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, video, and SMSIP features.
@@ -105,6 +109,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onLte_withVoiceOnly_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL and audio, but not video or SMSIP.
@@ -147,6 +152,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onLte_withVoiceVideo_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and video, but not SMSIP.
@@ -189,6 +195,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void register_onLte_withVoiceSms_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and SMSIP, but not video.
@@ -228,6 +235,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onLte_byDisablingVideoCapability_succeeds() throws Exception {
         // 1. Initially, the device registers successfully on LTE with video capability enabled.
         // 2. The server verifies that the first REGISTER request's Contact header includes
@@ -281,6 +289,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onLte_byEnablingVideoCapability_succeeds() throws Exception {
         // 1. Initially, the device registers on LTE with video capability disabled.
         // 2. The server verifies the first REGISTER request's Contact header does not
@@ -342,6 +351,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with305AsPolicy3gpp_triggersDeregistered() throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 305 Use Proxy response.
         // 2. This test simulates a scenario where only a single P-CSCF is available, so the
@@ -368,6 +378,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void register_onLte_with423Response_retriesAndSucceeds() throws Exception {
         // 1. Set up the server to respond to the first REGISTER request with a 423 Interval Too
         //    Brief.
@@ -392,6 +403,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with403AsRepeatedError_triggersDeregistered()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -430,6 +442,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with403AsCriticalError_triggersPlmnBlock()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -468,6 +481,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with403AsRatBlockError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 403 Forbidden.
@@ -507,6 +521,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with404AsCriticalError_triggersPlmnBlock()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 404 Not Found.
@@ -545,6 +560,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with500AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
@@ -584,6 +600,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with500AsRepeatedOnlyAttachedNetwork_triggersDeregistered()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
@@ -624,6 +641,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with500AsRepeatedOnlyAttachedNetwork_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 500 Server Internal Error.
@@ -665,6 +683,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with503AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable.
@@ -704,6 +723,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with503RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 503 Service Unavailable
@@ -748,6 +768,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with504AsRepeatedError_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out.
@@ -787,6 +808,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void register_onLte_with504RetryAfter_triggersPlmnBlockWithTimeout()
             throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 504 Server Time-out
@@ -830,6 +852,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void handover_fromLte_toWlan_succeeds() throws Exception {
         // 1. Set up the server to complete a normal registration and subscription flow, and then
         //    expect a re-REGISTER.
@@ -867,6 +890,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void subscribe_onLte_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
         // 2. Verify the received SUBSCRIBE request contains a P-Access-Network-Info header
@@ -896,6 +920,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onLte_byNotifyUnregistered_succeeds() throws Exception {
         // 1. The device completes registration and subscription.
         // 2. The server sends a NOTIFY message with event="unregistered" to terminate
@@ -924,6 +949,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onLte_byNotifyUnregistered_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription.
@@ -967,6 +993,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onLte_byNotifyRejected_succeeds() throws Exception {
         // 1. The device completes registration and subscription.
         // 2. The server sends a NOTIFY message with event="rejected" to terminate the registration.
@@ -991,6 +1018,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onLte_byNotifyRejected_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription.
@@ -1031,6 +1059,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onLte_byNotifyDeactivated_succeeds() throws Exception {
         // 1. The device completes registration and subscription.
         // 2. The server sends a NOTIFY message with event="deactivated" to terminate
@@ -1056,6 +1085,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void deregister_onLte_byNotifyDeactivated_triggersRegistration()
             throws Exception {
         // 1. The device completes registration and subscription.

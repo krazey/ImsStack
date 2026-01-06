@@ -23,6 +23,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.its.filters.P0;
+import com.android.imsstack.its.filters.P2;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
 import com.android.imsstack.its.tests.registration.tests.RegistrationTestBase;
@@ -65,6 +67,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIsimAndUsim_priorityIsimUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
@@ -81,6 +84,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIsimAndUsim_priorityIsimImsi_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
@@ -97,6 +101,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIsimAndUsim_priorityIsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only ISIM.
@@ -113,6 +118,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIsimAndUsim_priorityUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only USIM.
@@ -129,6 +135,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIncompIsimAndUsim_priorityIsimUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
@@ -146,6 +153,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIncompIsimAndUsim_priorityIsimImsi_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
@@ -163,6 +171,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void provisioning_supportIncompIsimAndUsim_priorityIsim_fails()
             throws Exception {
         // 1. Configure the IMS identity priority to support only ISIM.
@@ -180,6 +189,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportIncompIsimAndUsim_priorityUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only USIM.
@@ -196,6 +206,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportUsim_priorityIsimUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
@@ -211,6 +222,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportUsim_priorityIsimImsi_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
@@ -226,6 +238,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P2
     public void provisioning_supportUsim_priorityIsim_fails()
             throws Exception {
         // 1. Configure the IMS identity priority to support only ISIM.
@@ -242,6 +255,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
     }
 
     @Test
+    @P0
     public void provisioning_supportUsim_priorityUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only USIM.

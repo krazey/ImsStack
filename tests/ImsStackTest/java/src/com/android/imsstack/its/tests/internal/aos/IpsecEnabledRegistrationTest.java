@@ -29,6 +29,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.its.filters.P1;
 import com.android.imsstack.its.servercontrol.RuleSet;
 import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
@@ -68,6 +69,7 @@ public class IpsecEnabledRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void reregister_onLte_withoutIpsec_after406Response_succeeds()
             throws Exception {
         // 1. The device first attempts to register on LTE with IPSec enabled.
@@ -143,6 +145,7 @@ public class IpsecEnabledRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void reregister_onNr_withoutIpsec_after406Response_succeeds()
             throws Exception {
         // 1. The device first attempts to register on NR with IPSec enabled.
@@ -220,6 +223,7 @@ public class IpsecEnabledRegistrationTest extends RegistrationTestBase {
     }
 
     @Test
+    @P1
     public void reregister_onWlan_withoutIpsec_after406Response_succeeds()
             throws Exception {
         // 1. The device first attempts to register on IWLAN with IPSec enabled.
