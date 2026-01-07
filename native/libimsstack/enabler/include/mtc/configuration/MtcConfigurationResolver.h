@@ -50,7 +50,7 @@ public:
                 objProxy.Contains(
                         ConfigWfc::KEY_PIDF_SHORT_CODE_STRING_ARRAY, strRemoteNumber.GetStr()))
         {
-            return ConfigVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE;
+            return ConfigIms::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE;
         }
         return objProxy.GetIntFromArray(
                 ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY,

@@ -312,7 +312,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsOverNrEnabled() const
     for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objCarrierNrAvailabilities.GetSize(); i++)
     {
         if (m_objCarrierConfig.objCarrierNrAvailabilities.GetAt(i) ==
-                CarrierConfig::Ims::CARRIER_NR_AVAILABILITY_SA)
+                CarrierConfig::CARRIER_NR_AVAILABILITY_SA)
         {
             return IMS_TRUE;
         }

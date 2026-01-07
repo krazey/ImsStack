@@ -31,7 +31,16 @@ public:
     static const IMS_CHAR KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL[];
     static const IMS_CHAR KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL[];
     static const IMS_CHAR KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL[];
+
     static const IMS_CHAR KEY_CARRIER_USSD_METHOD_INT[];
+    enum
+    {
+        USSD_OVER_CS_PREFERRED = 0,
+        USSD_OVER_IMS_PREFERRED,
+        USSD_OVER_CS_ONLY,
+        USSD_OVER_IMS_ONLY
+    };
+
     static const IMS_CHAR KEY_RTT_SUPPORTED_BOOL[];
     static const IMS_CHAR KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL[];
     static const IMS_CHAR KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL[];
@@ -44,7 +53,14 @@ public:
     static const IMS_CHAR KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL[];
     static const IMS_CHAR KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL[];
     static const IMS_CHAR KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL[];
+
     static const IMS_CHAR KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY[];
+    enum
+    {
+        CARRIER_NR_AVAILABILITY_NSA = 1,
+        CARRIER_NR_AVAILABILITY_SA = 2
+    };
+
     static const IMS_CHAR KEY_RTT_AUTO_UPGRADE_BOOL[];
     static const IMS_CHAR KEY_RTT_SUPPORTED_FOR_VT_BOOL[];
     static const IMS_CHAR KEY_RTT_UPGRADE_SUPPORTED_BOOL[];
@@ -53,15 +69,6 @@ public:
     static const IMS_CHAR KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL[];
     static const IMS_CHAR KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY[];
     // Public carrier-config - ends
-
-    // USSD Method
-    enum
-    {
-        USSD_OVER_CS_PREFERRED = 0,
-        USSD_OVER_IMS_PREFERRED,
-        USSD_OVER_CS_ONLY,
-        USSD_OVER_IMS_ONLY
-    };
 
     class Ims
     {
@@ -86,25 +93,76 @@ public:
         static const IMS_CHAR KEY_SIP_TIMER_J_MILLIS_INT[];
         static const IMS_CHAR KEY_SIP_SERVER_PORT_NUMBER_INT[];
         static const IMS_CHAR KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING[];
+
         static const IMS_CHAR KEY_REQUEST_URI_TYPE_INT[];
+        enum
+        {
+            REQUEST_URI_FORMAT_TEL = 0,
+            REQUEST_URI_FORMAT_SIP = 1
+        };
+
         static const IMS_CHAR KEY_GRUU_ENABLED_BOOL[];
         static const IMS_CHAR KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL[];
+
         static const IMS_CHAR KEY_SIP_PREFERRED_TRANSPORT_INT[];
+        enum
+        {
+            PREFERRED_TRANSPORT_UDP = 0,
+            PREFERRED_TRANSPORT_TCP = 1,
+            PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP = 2,
+            PREFERRED_TRANSPORT_TLS = 3
+        };
+
         static const IMS_CHAR KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT[];
         static const IMS_CHAR KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT[];
         static const IMS_CHAR KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY[];
         static const IMS_CHAR KEY_SIP_OVER_IPSEC_ENABLED_BOOL[];
+
         static const IMS_CHAR KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY[];
+        enum
+        {
+            IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5 = 0,
+            IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1 = 1
+        };
+
         static const IMS_CHAR KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY[];
+        enum
+        {
+            IPSEC_ENCRYPTION_ALGORITHM_NULL = 0,
+            IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1,
+            IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2
+        };
+
         static const IMS_CHAR KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT[];
         static const IMS_CHAR KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT[];
+
         static const IMS_CHAR KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY[];
         static const IMS_CHAR KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY[];
+        enum
+        {
+            GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI = 1,
+            GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI = 2,
+            GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR = 3,
+            GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR = 4,
+            GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI = 5,
+            GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR = 6
+        };
+
         static const IMS_CHAR KEY_IMS_USER_AGENT_STRING[];
+
         static const IMS_CHAR KEY_SUPPORTED_RATS_INT_ARRAY[];
+        enum
+        {
+            ACCESS_NETWORK_TYPE_GERAN = 1,
+            ACCESS_NETWORK_TYPE_UTRAN = 2,
+            ACCESS_NETWORK_TYPE_EUTRAN = 3,
+            ACCESS_NETWORK_TYPE_IWLAN = 5,
+            ACCESS_NETWORK_TYPE_NGRAN = 6
+        };
+
         // Bundle {
         static const IMS_CHAR KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE[];
         static const IMS_CHAR KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY[];
@@ -128,9 +186,28 @@ public:
         static const IMS_CHAR KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[];
         static const IMS_CHAR KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[];
+
         static const IMS_CHAR KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT[];
+        enum
+        {
+            /// Default, use time-based UUID
+            REGISTRATION_CONTACT_USER_INFO_PART_UUID = 0,
+            /// Use user-info part from IMPU
+            REGISTRATION_CONTACT_USER_INFO_PART_IMPU = 1,
+            /// No user-info part
+            REGISTRATION_CONTACT_USER_INFO_PART_EMPTY = 2,
+        };
+
         static const IMS_CHAR KEY_SIP_DEVICE_ID_TYPE_INT[];
+
         static const IMS_CHAR KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[];
+        enum
+        {
+            PCSCF_DISCOVERY_METHOD_PCO = 0,
+            PCSCF_DISCOVERY_METHOD_CONFIG = 1,
+            PCSCF_DISCOVERY_METHOD_ISIM = 2
+        };
+
         static const IMS_CHAR KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL[];
         static const IMS_CHAR KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL[];
         static const IMS_CHAR
@@ -149,21 +226,55 @@ public:
         static const IMS_CHAR KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT[];
         static const IMS_CHAR KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[];
+
         static const IMS_CHAR KEY_SUPPORT_MULTIPLE_REGISTRATION_INT[];
+        enum
+        {
+            MULTIPLE_REGISTRATION_NONE = 0,
+            MULTIPLE_REGISTRATION_REG_ID_ONLY = 1,
+            MULTIPLE_REGISTRATION_FULL = 2
+        };
+
         static const IMS_CHAR KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[];
         static const IMS_CHAR KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL[];
         static const IMS_CHAR KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT[];
         static const IMS_CHAR KEY_IPSEC_UE_CLIENT_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_IPSEC_UE_SERVER_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_SIP_TCP_CLIENT_PORT_RANGE_INT_ARRAY[];
+
         // Aos
+
         static const IMS_CHAR KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY[];
+        enum
+        {
+            IMS_IDENTITY_PRIORITY_ISIM = 0,
+            IMS_IDENTITY_PRIORITY_USIM = 1,
+            IMS_IDENTITY_PRIORITY_ISIM_IMSI = 2,
+            IMS_IDENTITY_PRIORITY_CONF = 3
+        };
+
         static const IMS_CHAR KEY_ISIM_INDEX_FOR_IMPU_INT[];
         static const IMS_CHAR KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[];
         static const IMS_CHAR KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL[];
+
         static const IMS_CHAR KEY_PREFERRED_IMS_DSCP_INT[];
+        enum
+        {
+            PREFERRED_DSCP_NONE = 0,
+            PREFERRED_DSCP_CELLULAR = 1,
+            PREFERRED_DSCP_WIFI = 2,
+            PREFERRED_DSCP_CELLULAR_WIFI = 3
+        };
+
         static const IMS_CHAR KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT[];
+        enum
+        {
+            PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED = 0,
+            PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED = 1,
+            PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE = 2
+        };
+
         static const IMS_CHAR KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY[];
         static const IMS_CHAR KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL[];
         static const IMS_CHAR KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[];
@@ -194,35 +305,133 @@ public:
         static const IMS_CHAR KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL[];
         static const IMS_CHAR KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL[];
         static const IMS_CHAR KEY_AUTH_FAILURE_RETRY_MAX_CNT_INT[];
+
         static const IMS_CHAR KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT[];
+        enum
+        {
+            CONTACT_USER_INFO_POLICY_DEFAULT = 1,
+            CONTACT_USER_INFO_POLICY_NONE = 2,
+            CONTACT_USER_INFO_POLICY_AUTHORIZED_IMPU = 3
+        };
+
         static const IMS_CHAR KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[];
+        enum
+        {
+            GEOLOCATION_POLICY_WITHOUT_POSITION = 1,
+            GEOLOCATION_POLICY_WITH_POSITION = 2,
+            GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY = 3,
+            GEOLOCATION_POLICY_WITHOUT_CIVIC = 4
+        };
+
         static const IMS_CHAR KEY_IMS_ESTABLISHMENT_TIME_FOR_LTE_SEC_INT[];
         static const IMS_CHAR KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT[];
+
         static const IMS_CHAR KEY_IMS_PREFERRED_IPTYPE_INT[];
+        enum
+        {
+            IP_VERSION_4 = 0,
+            IP_VERSION_6 = 1
+        };
+
         static const IMS_CHAR KEY_IMS_SIGNALLING_DSCP_INT[];
         static const IMS_CHAR KEY_MAX_ALLOWED_NETWORK_MTU_INT[];
         static const IMS_CHAR
                 KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT[];
+
         static const IMS_CHAR KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[];
+        enum
+        {
+            AWT_POLICY_RFC_RULE = 0,
+            AWT_POLICY_FAILURE_TO_EVERY_PCSCF = 1,
+            AWT_POLICY_FAILURE_TO_EACH_PCSCF = 2,
+            AWT_POLICY_SPECIFIED_INTERVAL = 3,
+            AWT_POLICY_ONLY_RETRY_AFTER = 4
+        };
+
         static const IMS_CHAR KEY_REG_DEFAULT_WAIT_TIME_INT[];
+
         static const IMS_CHAR KEY_REG_OUT_OF_SERVICE_POLICY_INT[];
+        enum
+        {
+            REG_OOS_POLICY_DEFAULT = 0,
+            REG_OOS_POLICY_DESTROY = 1
+        };
+
         static const IMS_CHAR KEY_REG_PCSCF_UPDATE_POLICY_INT[];
+        enum
+        {
+            REG_PCSCF_UPDATE_POLICY_DEFAULT = 0,
+            REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME = 1
+        };
+
         static const IMS_CHAR KEY_REG_RETRY_305_POLICY_INT[];
+        enum
+        {
+            SIP_305_CODE_POLICY_DEFAULT = 0,
+            SIP_305_CODE_POLICY_3GPP = 1,
+            SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF = 2,
+            SIP_305_CODE_POLICY_USE_CONTACT_VALUE = 3
+        };
+
         static const IMS_CHAR KEY_REG_RETRY_503_POLICY_INT[];
+        enum
+        {
+            SIP_503_CODE_POLICY_DEFAULT = 0,
+            SIP_503_CODE_POLICY_3GPP = 1
+        };
+
         static const IMS_CHAR KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT[];
         static const IMS_CHAR KEY_REG_RETRY_CNT_PER_PCSCF_INT[];
         static const IMS_CHAR KEY_REG_RETRY_CNT_PER_PCSCF_WITH_RA_TIME_INT[];
+
         static const IMS_CHAR KEY_REG_RETRY_CNT_RESET_POLICY_INT[];
+        enum
+        {
+            REG_RETRY_CNT_RESET_POLICY_REGISTRATION = 0,
+            REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION = 1,
+            REG_RETRY_CNT_RESET_POLICY_NOTIFY = 2
+        };
+
         static const IMS_CHAR KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT[];
+
         static const IMS_CHAR KEY_REG_RETRY_DEFAULT_POLICY_INT[];
+        enum
+        {
+            DEFAULT_RETRY_POLICY_SPEC = 0,
+            DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF = 1,
+            DEFAULT_RETRY_POLICY_NEXT_PCSCF = 2
+        };
+
         static const IMS_CHAR KEY_REG_RETRY_TIMER_F_POLICY_INT[];
+        enum
+        {
+            TIMER_F_POLICY_NONE = 0,
+            TIMER_F_POLICY_SPEC = 1,
+            TIMER_F_POLICY_SPEC_WITH_AWT = 2
+        };
+
         static const IMS_CHAR KEY_REG_TRANSACTION_TIMEOUT_ON_PCSCF_RESTORATION_SEC_INT[];
         static const IMS_CHAR KEY_RELEASE_PDN_DELAY_SEC_AFTER_TEMP_PLMN_BLOCK_INT[];
         static const IMS_CHAR KEY_REREG_RETRY_305_POLICY_INT[];
         static const IMS_CHAR KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[];
         static const IMS_CHAR KEY_SUB_RETRY_503_POLICY_INT[];
+
         static const IMS_CHAR KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[];
+        enum
+        {
+            USAT_REG_EVENT_NOT_DOWNLOAD = 0,
+            USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1,
+            USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2
+        };
+
         static const IMS_CHAR KEY_KEEP_REG_WITH_MMTEL_FEATURE_TAG_POLICY_INT_ARRAY[];
+        enum
+        {
+            UNAVAILABLE_FEATURE_POLICY_VOPS = 1,
+            UNAVAILABLE_FEATURE_POLICY_SSAC = 2,
+            UNAVAILABLE_FEATURE_POLICY_3G = 3
+        };
+
         static const IMS_CHAR KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[];
         static const IMS_CHAR KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY[];
         static const IMS_CHAR KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY[];
@@ -235,18 +444,66 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY[];
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
         static const IMS_CHAR KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[];
+
         static const IMS_CHAR KEY_TEST_MODE_INT_ARRAY[];
+        enum
+        {
+            TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION = 1
+        };
+
         static const IMS_CHAR KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY[];
+        enum
+        {
+            REG_FEATURE_MMTEL = 0,
+            REG_FEATURE_VIDEO = 1,
+            REG_FEATURE_TEXT = 2,
+            REG_FEATURE_SMS = 3
+        };
+
         // Bundle {
         static const IMS_CHAR KEY_EXTRA_REG_ERR_BUNDLE[];
         static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL[];
         static const IMS_CHAR KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL[];
+
         static const IMS_CHAR KEY_EXTRA_REG_ERR_FINAL_TYPE_INT[];
+        enum
+        {
+            ERROR_TYPE_NOT_SPECIFIED = 0,
+            ERROR_TYPE_REPEATED = 1,
+            ERROR_TYPE_CRITICAL = 2,
+            ERROR_TYPE_ROAMING = 3,
+            ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4,
+            ERROR_TYPE_RAT_BLOCK = 5
+        };
+
         static const IMS_CHAR KEY_EXTRA_REG_ERR_MAX_CNT_INT[];
         static const IMS_CHAR KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT[];
         static const IMS_CHAR KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT[];
+
         static const IMS_CHAR KEY_EXTRA_REG_ERR_POLICY_INT[];
+        enum
+        {
+            ERROR_POLICY_NOT_SPECIFIED = 0,
+            ERROR_POLICY_PCSCF_FAILED = 1,
+            ERROR_POLICY_SUBSCRIBER_FAILED = 2,
+            ERROR_POLICY_PDN_REACTIVATED = 3,
+            ERROR_POLICY_SUBSCRIBER_FAILED_NO_IMSI_FALLBACK = 4
+        };
+
         static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_INT_ARRAY[];
+        enum
+        {
+            REG_ERROR_CODE_TIMER_F = 0,
+            REG_ERROR_CODE_TRANSPORT = 1,
+            REG_ERROR_CODE_OTHER = 2,
+            REG_ERROR_CODE_3XX = 3,
+            REG_ERROR_CODE_4XX = 4,
+            REG_ERROR_CODE_5XX = 5,
+            REG_ERROR_CODE_6XX = 6,
+            REG_ERROR_CODE_ALL_RESP = 9,
+            REG_ERROR_CODE_USIM_AUTHENTICATION = 10
+        };
+
         static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY[];
         static const IMS_CHAR KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY[];
         // }
@@ -289,56 +546,15 @@ public:
 
         // Mtc
         static const IMS_CHAR KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[];
-
-        // Carrier NR availabilities
         enum
         {
-            CARRIER_NR_AVAILABILITY_NSA = 1,
-            CARRIER_NR_AVAILABILITY_SA = 2
+            GEOLOCATION_PIDF_INFO_LAT_AND_LONG = 0,
+            GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC = 1,
+            GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY = 2,
+            GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE = 3,
         };
 
-        // Request URI formats
-        enum
-        {
-            REQUEST_URI_FORMAT_TEL = 0,
-            REQUEST_URI_FORMAT_SIP = 1
-        };
-
-        // Preferred SIP transport types
-        enum
-        {
-            PREFERRED_TRANSPORT_UDP = 0,
-            PREFERRED_TRANSPORT_TCP = 1,
-            PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP = 2,
-            PREFERRED_TRANSPORT_TLS = 3
-        };
-
-        // IpSec authentication algorithms
-        enum
-        {
-            IPSEC_AUTHENTICATION_ALGORITHM_HMAC_MD5 = 0,
-            IPSEC_AUTHENTICATION_ALGORITHM_HMAC_SHA1 = 1
-        };
-
-        // IpSec encryption algorithms
-        enum
-        {
-            IPSEC_ENCRYPTION_ALGORITHM_NULL = 0,
-            IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1,
-            IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2
-        };
-
-        // Geolocation-PIDF allowed types
-        enum
-        {
-            GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI = 1,
-            GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI = 2,
-            GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR = 3,
-            GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR = 4,
-            GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI = 5,
-            GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR = 6
-        };
-
+        // Unused.
         // Network types
         enum
         {
@@ -346,143 +562,7 @@ public:
             NETWORK_TYPE_ROAMING = 1
         };
 
-        // Media inactivity reasons
-        enum
-        {
-            RTCP_INACTIVITY_ON_HOLD = 0,
-            RTCP_INACTIVITY_ON_CONNECTED = 1,
-            RTP_INACTIVITY_ON_CONNECTED = 2,
-            E911_RTCP_INACTIVITY_ON_CONNECTED = 3,
-            E911_RTP_INACTIVITY_ON_CONNECTED = 4
-        };
-
-        // Access network types
-        enum
-        {
-            ACCESS_NETWORK_TYPE_GERAN = 1,
-            ACCESS_NETWORK_TYPE_UTRAN = 2,
-            ACCESS_NETWORK_TYPE_EUTRAN = 3,
-            ACCESS_NETWORK_TYPE_IWLAN = 5,
-            ACCESS_NETWORK_TYPE_NGRAN = 6
-        };
-
-        // P-CSCF discovery methods
-        enum
-        {
-            PCSCF_DISCOVERY_METHOD_PCO = 0,
-            PCSCF_DISCOVERY_METHOD_CONFIG = 1,
-            PCSCF_DISCOVERY_METHOD_ISIM = 2
-        };
-
-        // IMS identity priority types
-        enum
-        {
-            IMS_IDENTITY_PRIORITY_ISIM = 0,
-            IMS_IDENTITY_PRIORITY_USIM = 1,
-            IMS_IDENTITY_PRIORITY_ISIM_IMSI = 2,
-            IMS_IDENTITY_PRIORITY_CONF = 3
-        };
-
-        // Preferred IMS DSCP types
-        enum
-        {
-            PREFERRED_DSCP_NONE = 0,
-            PREFERRED_DSCP_CELLULAR = 1,
-            PREFERRED_DSCP_WIFI = 2,
-            PREFERRED_DSCP_CELLULAR_WIFI = 3
-        };
-
-        // Registration Preferred Accesstype feature tag
-        enum
-        {
-            PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED = 0,
-            PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED = 1,
-            PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE = 2
-        };
-
-        // Registration retry sip 305 policy
-        enum
-        {
-            SIP_305_CODE_POLICY_DEFAULT = 0,
-            SIP_305_CODE_POLICY_3GPP = 1,
-            SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF = 2,
-            SIP_305_CODE_POLICY_USE_CONTACT_VALUE = 3
-        };
-
-        // Registration Retry Timer F Policy
-        enum
-        {
-            TIMER_F_POLICY_NONE = 0,
-            TIMER_F_POLICY_SPEC = 1,
-            TIMER_F_POLICY_SPEC_WITH_AWT = 2
-        };
-
-        // Registration Retry Default Policy
-        enum
-        {
-            DEFAULT_RETRY_POLICY_SPEC = 0,
-            DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF = 1,
-            DEFAULT_RETRY_POLICY_NEXT_PCSCF = 2
-        };
-
-        // Registration and Subscription(reg event package) retry sip 503 policy
-        enum
-        {
-            SIP_503_CODE_POLICY_DEFAULT = 0,
-            SIP_503_CODE_POLICY_3GPP = 1
-        };
-
-        // specific registration error final type
-        enum
-        {
-            ERROR_TYPE_NOT_SPECIFIED = 0,
-            ERROR_TYPE_REPEATED = 1,
-            ERROR_TYPE_CRITICAL = 2,
-            ERROR_TYPE_ROAMING = 3,
-            ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4,
-            ERROR_TYPE_RAT_BLOCK = 5
-        };
-
-        // specific registration error policy
-        enum
-        {
-            ERROR_POLICY_NOT_SPECIFIED = 0,
-            ERROR_POLICY_PCSCF_FAILED = 1,
-            ERROR_POLICY_SUBSCRIBER_FAILED = 2,
-            ERROR_POLICY_PDN_REACTIVATED = 3,
-            ERROR_POLICY_SUBSCRIBER_FAILED_NO_IMSI_FALLBACK = 4
-        };
-
-        // error code mapping for registration
-        // specific registration error policy
-        enum
-        {
-            REG_ERROR_CODE_TIMER_F = 0,
-            REG_ERROR_CODE_TRANSPORT = 1,
-            REG_ERROR_CODE_OTHER = 2,
-            REG_ERROR_CODE_3XX = 3,
-            REG_ERROR_CODE_4XX = 4,
-            REG_ERROR_CODE_5XX = 5,
-            REG_ERROR_CODE_6XX = 6,
-            REG_ERROR_CODE_ALL_RESP = 9,
-            REG_ERROR_CODE_USIM_AUTHENTICATION = 10
-        };
-
-        // registration retry count reset policy
-        enum
-        {
-            REG_RETRY_CNT_RESET_POLICY_REGISTRATION = 0,
-            REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION = 1,
-            REG_RETRY_CNT_RESET_POLICY_NOTIFY = 2
-        };
-
-        // IP verion types
-        enum
-        {
-            IP_VERSION_4 = 0,
-            IP_VERSION_6 = 1
-        };
-
+        // Unused.
         // Reasons for terminated state of "reg" event package
         enum
         {
@@ -491,98 +571,6 @@ public:
             REG_EVENT_TERMINATED_REASON_PROBATION = 3,
             REG_EVENT_TERMINATED_REASON_UNREGITERED = 4,
             REG_EVENT_TERMINATED_REASON_REJECTED = 5
-        };
-
-        // Registration Actual Wait Time policy
-        enum
-        {
-            AWT_POLICY_RFC_RULE = 0,
-            AWT_POLICY_FAILURE_TO_EVERY_PCSCF = 1,
-            AWT_POLICY_FAILURE_TO_EACH_PCSCF = 2,
-            AWT_POLICY_SPECIFIED_INTERVAL = 3,
-            AWT_POLICY_ONLY_RETRY_AFTER = 4
-        };
-
-        // Registration out-of-service policy
-        enum
-        {
-            REG_OOS_POLICY_DEFAULT = 0,
-            REG_OOS_POLICY_DESTROY = 1
-        };
-
-        // Registration With Feature Tag Policy Unavailable
-        enum
-        {
-            UNAVAILABLE_FEATURE_POLICY_VOPS = 1,
-            UNAVAILABLE_FEATURE_POLICY_SSAC = 2,
-            UNAVAILABLE_FEATURE_POLICY_3G = 3
-        };
-
-        // Update Pcscf Policy for registration
-        enum
-        {
-            REG_PCSCF_UPDATE_POLICY_DEFAULT = 0,
-            REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME = 1
-        };
-
-        // User Info Policy for non register message
-        enum
-        {
-            CONTACT_USER_INFO_POLICY_DEFAULT = 1,
-            CONTACT_USER_INFO_POLICY_NONE = 2,
-            CONTACT_USER_INFO_POLICY_AUTHORIZED_IMPU = 3
-        };
-
-        // Geolocation pidf Forming policy
-        enum
-        {
-            GEOLOCATION_POLICY_WITHOUT_POSITION = 1,
-            GEOLOCATION_POLICY_WITH_POSITION = 2,
-            GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY = 3,
-            GEOLOCATION_POLICY_WITHOUT_CIVIC = 4
-        };
-
-        // USAT Registration event download policy
-        enum
-        {
-            USAT_REG_EVENT_NOT_DOWNLOAD = 0,
-            USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1,
-            USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2
-        };
-
-        // Registration Features
-        enum
-        {
-            REG_FEATURE_MMTEL = 0,
-            REG_FEATURE_VIDEO = 1,
-            REG_FEATURE_TEXT = 2,
-            REG_FEATURE_SMS = 3
-        };
-
-        // Test Mode
-        enum
-        {
-            TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION = 1
-        };
-
-        // Feature: Multiple Registration
-        enum
-        {
-            MULTIPLE_REGISTRATION_NONE = 0,
-            MULTIPLE_REGISTRATION_REG_ID_ONLY = 1,
-            MULTIPLE_REGISTRATION_FULL = 2
-        };
-
-        // Rule for forming the user-info part of Contact header in REGISTER request
-        // - KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT
-        enum
-        {
-            /// Default, use time-based UUID
-            REGISTRATION_CONTACT_USER_INFO_PART_UUID = 0,
-            /// Use user-info part from IMPU
-            REGISTRATION_CONTACT_USER_INFO_PART_IMPU = 1,
-            /// No user-info part
-            REGISTRATION_CONTACT_USER_INFO_PART_EMPTY = 2,
         };
     };
 
@@ -603,8 +591,25 @@ public:
         // Aos
         static const IMS_CHAR KEY_RELEASE_EPDN_UPON_ECALL_END_IF_EATTACH_BOOL[];
         static const IMS_CHAR KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL[];
+
         static const IMS_CHAR KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT[];
+        enum
+        {
+            IPCAN_NONE = 0,
+            IPCAN_CELLULAR = 1,
+            IPCAN_WLAN = 2,
+            IPCAN_ALL = 3
+        };
+
         static const IMS_CHAR KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[];
+        enum
+        {
+            PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED = -1,
+            PREFERRED_EMERGENCY_REGISTRATION_SKIP = 0,
+            PREFERRED_EMERGENCY_REGISTRATION_NORMAL = 1,
+            PREFERRED_EMERGENCY_REGISTRATION_FALLBACK = 2
+        };
+
         static const IMS_CHAR KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT[];
         static const IMS_CHAR KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[];
         static const IMS_CHAR KEY_EREG_ON_RANDOM_PCSCF_BOOL[];
@@ -623,7 +628,14 @@ public:
         static const IMS_CHAR KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[];
         static const IMS_CHAR KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[];
         static const IMS_CHAR KEY_EPDN_PREFERRED_IPTYPE_INT[];
+
         static const IMS_CHAR KEY_EREG_RETRY_MAX_CNT_INT[];
+        enum
+        {
+            EREG_RETRY_MAX_CNT_NO_RETRY = -1,
+            EREG_RETRY_MAX_CNT_EVERY_PCSCF_RETRY = 0
+        };
+
         static const IMS_CHAR KEY_EREG_RETRY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[];
         static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
@@ -637,8 +649,7 @@ public:
         static const IMS_CHAR
                 KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL
                         [];
-        static const IMS_CHAR KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL
-                        [];
+        static const IMS_CHAR KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[];
         static const IMS_CHAR KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_18X_TIMER_MILLIS_INT[];
@@ -655,52 +666,18 @@ public:
         static const IMS_CHAR KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING[];
         static const IMS_CHAR KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY[];
         static const IMS_CHAR KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY[];
+
         static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT[];
-        static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[];
-        static const IMS_CHAR KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
-        static const IMS_CHAR
-                KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[];
-        static const IMS_CHAR KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[];
-        static const IMS_CHAR KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY[];
-        static const IMS_CHAR KEY_NUMBER_NEED_OIP_STRING_ARRAY[];
-        static const IMS_CHAR KEY_NUMBER_NEED_OIR_STRING_ARRAY[];
-        static const IMS_CHAR
-                KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[];
-        static const IMS_CHAR KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY[];
-
-        // Preferred Emergency Registration Type
-        enum
-        {
-            PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED = -1,
-            PREFERRED_EMERGENCY_REGISTRATION_SKIP = 0,
-            PREFERRED_EMERGENCY_REGISTRATION_NORMAL = 1,
-            PREFERRED_EMERGENCY_REGISTRATION_FALLBACK = 2
-        };
-
-        enum
-        {
-            IPCAN_NONE = 0,
-            IPCAN_CELLULAR = 1,
-            IPCAN_WLAN = 2,
-            IPCAN_ALL = 3
-        };
-
-        // Specified Define for KEY_EREG_RETRY_MAX_CNT_INT
-        enum
-        {
-            EREG_RETRY_MAX_CNT_NO_RETRY = -1,
-            EREG_RETRY_MAX_CNT_EVERY_PCSCF_RETRY = 0
-        };
-
-        // KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT
         enum
         {
             CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_NONE = 0,
             CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_UPDATE = 1
         };
 
-        // KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY
+        static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[];
+
+        static const IMS_CHAR KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
         enum
         {
             START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN = 0,
@@ -713,6 +690,16 @@ public:
             START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE = 7,
             START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF = 8
         };
+
+        static const IMS_CHAR
+                KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[];
+        static const IMS_CHAR KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[];
+        static const IMS_CHAR KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY[];
+        static const IMS_CHAR KEY_NUMBER_NEED_OIP_STRING_ARRAY[];
+        static const IMS_CHAR KEY_NUMBER_NEED_OIR_STRING_ARRAY[];
+        static const IMS_CHAR
+                KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[];
+        static const IMS_CHAR KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY[];
     };
 
     class ImsRtt
@@ -746,7 +733,14 @@ public:
         // Public carrier-config - starts
         static const IMS_CHAR KEY_SMS_OVER_IMS_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL[];
+
         static const IMS_CHAR KEY_SMS_OVER_IMS_FORMAT_INT[];
+        enum
+        {
+            SMS_FORMAT_3GPP = 0,
+            SMS_FORMAT_3GPP2 = 1
+        };
+
         static const IMS_CHAR KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY[];
         // Public carrier-config - ends
 
@@ -780,13 +774,6 @@ public:
         static const IMS_CHAR KEY_SMS_ERROR_CODE_WHEN_MT_SMS_BLOCKED_INT[];
         static const IMS_CHAR KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY[];
         static const IMS_CHAR KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY[];
-
-        // SMS formats
-        enum
-        {
-            SMS_FORMAT_3GPP = 0,
-            SMS_FORMAT_3GPP2 = 1
-        };
     };
 
     class ImsUce
@@ -829,23 +816,72 @@ public:
         static const IMS_CHAR KEY_SESSION_TIMER_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_SESSION_EXPIRES_TIMER_SEC_INT[];
         static const IMS_CHAR KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT[];
+
         static const IMS_CHAR KEY_SESSION_REFRESHER_TYPE_INT[];
+        enum
+        {
+            SESSION_REFRESHER_TYPE_UNKNOWN = 0,
+            SESSION_REFRESHER_TYPE_UAC = 1,
+            SESSION_REFRESHER_TYPE_UAS = 2
+        };
+
         static const IMS_CHAR KEY_SESSION_PRIVACY_TYPE_INT[];
+        enum
+        {
+            SESSION_PRIVACY_TYPE_HEADER = 0,
+            SESSION_PRIVACY_TYPE_NONE = 1,
+            SESSION_PRIVACY_TYPE_ID = 2
+        };
+
         static const IMS_CHAR KEY_PRACK_SUPPORTED_FOR_18X_BOOL[];
+
         static const IMS_CHAR KEY_CONFERENCE_SUBSCRIBE_TYPE_INT[];
+        enum
+        {
+            CONFERENCE_SUBSCRIBE_NOT_SUPPORT = -1,
+            CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG = 0,
+            CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG = 1
+        };
+
         static const IMS_CHAR KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT[];
+
         static const IMS_CHAR KEY_SRVCC_TYPE_INT_ARRAY[];
+        enum
+        {
+            BASIC_SRVCC_SUPPORT = 0,
+            ALERTING_SRVCC_SUPPORT = 1,
+            PREALERTING_SRVCC_SUPPORT = 2,
+            MIDCALL_SRVCC_SUPPORT = 3
+        };
+
         static const IMS_CHAR KEY_RINGING_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_RINGBACK_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_CONFERENCE_FACTORY_URI_STRING[];
+
         static const IMS_CHAR KEY_SESSION_REFRESH_METHOD_INT[];
+        enum
+        {
+            SESSION_REFRESH_METHOD_INVITE = 0,
+            SESSION_REFRESH_METHOD_UPDATE_PREFERRED = 1
+        };
+
         static const IMS_CHAR KEY_OIP_SOURCE_FROM_HEADER_BOOL[];
         static const IMS_CHAR KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT[];
+
         static const IMS_CHAR KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY[];
+        enum
+        {
+            RTCP_INACTIVITY_ON_HOLD = 0,
+            RTCP_INACTIVITY_ON_CONNECTED = 1,
+            RTP_INACTIVITY_ON_CONNECTED = 2,
+            E911_RTCP_INACTIVITY_ON_CONNECTED = 3,
+            E911_RTP_INACTIVITY_ON_CONNECTED = 4
+        };
+
         static const IMS_CHAR KEY_AUDIO_AS_BANDWIDTH_KBPS_INT[];
         static const IMS_CHAR KEY_AUDIO_RS_BANDWIDTH_BPS_INT[];
         static const IMS_CHAR KEY_AUDIO_RR_BANDWIDTH_BPS_INT[];
@@ -881,6 +917,14 @@ public:
         // Public carrier-config - ends
 
         static const IMS_CHAR KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT[];
+        enum
+        {
+            SDP_PREVIEW_MODE_DISABLED = 0,
+            SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY = 1,
+            SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY = 2,
+            SDP_PREVIEW_MODE_FOR_ALL_CALLS = 3,
+        };
+
         static const IMS_CHAR KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL[];
 
         // Aos
@@ -894,42 +938,173 @@ public:
         static const IMS_CHAR KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[];
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
+
         static const IMS_CHAR KEY_CONFERENCE_SIP_FLOW_ORDER_INT[];
+        enum
+        {
+            CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER = 0,
+            CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE = 1,
+            CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER = 2
+        };
+
         static const IMS_CHAR KEY_CONFERENCE_INVITING_REFER_TYPE_INT[];
+        enum
+        {
+            CONFERENCE_INVITE_COPYCONTROL = 0,
+            CONFERENCE_INVITE_REFER_SINGLE = 1,
+            CONFERENCE_INVITE_REFER_MULTIPLE = 2
+        };
+
         static const IMS_CHAR KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL[];
         static const IMS_CHAR KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT[];
         static const IMS_CHAR KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT[];
         static const IMS_CHAR KEY_PRACK_WAIT_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_PRACK_UPDATE_RESPONSE_WAIT_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT[];
+
         static const IMS_CHAR KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT[];
+        enum
+        {
+            REGISTRATION_RESTORATION_NOT_APPLICABLE = 0,
+            REGISTRATION_RESTORATION_NEXT_PCSCF = 1,
+            REGISTRATION_RESTORATION_SAME_PCSCF = 2,
+            REGISTRATION_RESTORATION_NEXT_PCSCF_BY_NETWORK_CONTEXT = 3,
+            REGISTRATION_RESTORATION_NEXT_PCSCF_WITH_SILENT_REDIAL = 4
+        };
+
         static const IMS_CHAR
                 KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT[];
+        enum
+        {
+            QOS_DEACTIVATION_POLICY_TERMINATE_CALL = 0,
+            QOS_DEACTIVATION_POLICY_MAINTAIN_CALL = 1,
+            QOS_DEACTIVATION_POLICY_MODIFY_CALL = 2
+        };
+
         static const IMS_CHAR KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL[];
         static const IMS_CHAR KEY_ALLOW_SDP_IN_PRACK_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_INT[];
         static const IMS_CHAR KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING_INT[];
+        enum
+        {
+            MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_NONE = 0,
+            MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO = 1,
+            MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO_AND_VIDEO = 2
+        };
+
         static const IMS_CHAR KEY_POLICY_OF_LOCAL_NUMBERS_INT[];
+        enum
+        {
+            NUMBER_FORMAT_HOME_LOCAL = 0,
+            NUMBER_FORMAT_GEO_LOCAL = 1,
+            NUMBER_FORMAT_GEO_LOCAL_ONLY_IN_ROAMING = 2
+        };
+
         static const IMS_CHAR KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT[];
         static const IMS_CHAR KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT[];
         static const IMS_CHAR KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT[];
+
         static const IMS_CHAR KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT[];
+        enum
+        {
+            SILENT_REDIAL_FAILURE_ACTION_TERMINATE = 0,
+            SILENT_REDIAL_FAILURE_ACTION_REGISTRATION = 1,
+            SILENT_REDIAL_FAILURE_ACTION_CSFB = 2
+        };
+
         static const IMS_CHAR KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT[];
+
         static const IMS_CHAR KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[];
+        enum
+        {
+            CALL_MERGE_AS_AUDIO = 0,
+            CALL_MERGE_AS_AUDIO_VIDEO = 1
+        };
+
         static const IMS_CHAR KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY[];
         static const IMS_CHAR KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY[];
         static const IMS_CHAR KEY_SHORT_CALL_CODE_INT_ARRAY[];
         static const IMS_CHAR KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING[];
         static const IMS_CHAR KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[];
         static const IMS_CHAR KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[];
+
         static const IMS_CHAR KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
+        enum
+        {
+            START_ERROR_ACTION_CSFB = 0,
+            START_ERROR_ACTION_SILENT_REINVITE = 1,
+            START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT = 2,
+            START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER = 3,
+            START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY = 4,
+            START_ERROR_ACTION_REDIRECTION_BY_CONTACT = 5,
+            START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL = 6,
+            START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY = 7,
+            START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE = 8,
+            START_ERROR_ACTION_USSI_CSFB = 9,
+            START_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 10,
+            START_ERROR_ACTION_TRIGGER_EPSFB = 11,
+            START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE = 12,
+            START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT = 13,
+            START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF = 14,
+            START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF = 15,
+            START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE = 16,
+            START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO = 17
+        };
+
         static const IMS_CHAR KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
+        enum
+        {
+            UPDATE_ERROR_ACTION_TERMINATE = 0,
+            UPDATE_ERROR_ACTION_RETRY = 1,
+            UPDATE_ERROR_ACTION_GLARE_CONDITION = 2,
+            UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 3
+        };
+
         static const IMS_CHAR KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
+        enum
+        {
+            EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG = 0,
+            EARLY_UPDATE_ERROR_ACTION_TERMINATE_CALL = 1,
+            EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION = 2,
+            EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 3,
+            EARLY_UPDATE_ERROR_ACTION_TIMEOUT = 4,
+            EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION = 5
+        };
+
         static const IMS_CHAR KEY_CSFB_BLOCK_CONDITION_INT_ARRAY[];
+        enum
+        {
+            CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH = 0,
+            CSFB_BLOCK_CONDITION_IN_NR = 1,
+            CSFB_BLOCK_CONDITION_IN_WIFI = 2,
+            CSFB_BLOCK_CONDITION_IN_ROAMING = 3,
+            CSFB_BLOCK_CONDITION_IN_HOME = 4
+        };
+
         static const IMS_CHAR KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT[];
+        enum
+        {
+            SIP_403_POLICY_TERMINATE_CALL = 0,
+            SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION = 1,
+            SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION = 2,
+            SIP_403_POLICY_CSFB = 3,
+            SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION = 4,
+            SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING = 5
+        };
+
         static const IMS_CHAR KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT[];
+        enum
+        {
+            QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE = 0,
+            QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE = 1,
+            QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING = 2
+        };
+
         static const IMS_CHAR KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL[];
         static const IMS_CHAR KEY_REJECT_OFFERLESS_INVITE_BOOL[];
@@ -965,21 +1140,73 @@ public:
         static const IMS_CHAR KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[];
         static const IMS_CHAR KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL[];
+
         static const IMS_CHAR KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT[];
+        enum
+        {
+            CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE = 0,
+            CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE = 1
+        };
+
         static const IMS_CHAR KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT[];
+        enum
+        {
+            OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY = 0,
+            OFFERLESS_INVITE_MEDIA_TYPE_AUDIO = 1
+        };
+
         static const IMS_CHAR KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT[];
+        enum
+        {
+            OFFERLESS_REINVITE_MEDIA_TYPE_FULL = 0,
+            OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO = 1,
+            OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT = 2,
+            OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY = 3,
+            OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED = 4,
+        };
+
         static const IMS_CHAR KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[];
         static const IMS_CHAR KEY_PREALERTING_TIMER_MILLIS_INT[];
+
         static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[];
+        enum
+        {
+            MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END = 0,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB = 1,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB = 2,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE = 3,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF = 4,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF = 5,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB = 6,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL = 7,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY = 8
+        };
+
         static const IMS_CHAR KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[];
         static const IMS_CHAR
                 KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[];
+        enum
+        {
+            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_NONE = 0,
+            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_AUDIO_ONLY = 1,
+            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_ALL = 2
+        };
+
         static const IMS_CHAR KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[];
         static const IMS_CHAR KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[];
         static const IMS_CHAR KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[];
         static const IMS_CHAR KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT[];
+        enum
+        {
+            PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG = 0,
+            PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_CALL = 1,
+            PRACK_DELIVERY_FAILURE_POLICY_IGNORE = 2,
+        };
+
         static const IMS_CHAR KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[];
         static const IMS_CHAR
                 KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL
@@ -994,7 +1221,14 @@ public:
         static const IMS_CHAR KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL[];
         static const IMS_CHAR KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[];
         static const IMS_CHAR KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY[];
+
         static const IMS_CHAR KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY[];
+        enum
+        {
+            GEOLOCATION_BLOCK_CONDITION_IN_ROAMING = 0,
+            GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL = 1,
+        };
+
         static const IMS_CHAR KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[];
         static const IMS_CHAR KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[];
@@ -1016,14 +1250,29 @@ public:
                 KEY_WAIT_VIDEO_TEXT_QOS_AFTER_AUDIO_QOS_ACQUISITION_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_QOS_LOST_GUARD_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT[];
+
         static const IMS_CHAR KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY[];
+        enum
+        {
+            NO_WAIT_DEDICATED_BEARER_IN_NR = 0,
+            NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK = 1,
+            NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH = 2,
+        };
+
         static const IMS_CHAR
                 KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL[];
         static const IMS_CHAR KEY_RESTART_DEDICATED_BEARER_WAIT_TIMER_BY_EPS_FALLBACK_BOOL[];
         static const IMS_CHAR KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL[];
         static const IMS_CHAR KEY_CONTENT_ID_FOR_GEOLOCATION_STRING[];
         static const IMS_CHAR KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT[];
+        enum
+        {
+            PAI_POLICY_PREFER_TOPMOST = 0,
+            PAI_POLICY_PREFER_SIP_URI = 1,
+        };
+
         // Media
         static const IMS_CHAR KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY[];
@@ -1060,46 +1309,6 @@ public:
         static const IMS_CHAR KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL[];
         static const IMS_CHAR KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL[];
         static const IMS_CHAR KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL[];
-
-        // Session refresher types
-        enum
-        {
-            SESSION_REFRESHER_TYPE_UNKNOWN = 0,
-            SESSION_REFRESHER_TYPE_UAC = 1,
-            SESSION_REFRESHER_TYPE_UAS = 2
-        };
-
-        // Session refresh methods
-        enum
-        {
-            SESSION_REFRESH_METHOD_INVITE = 0,
-            SESSION_REFRESH_METHOD_UPDATE_PREFERRED = 1
-        };
-
-        // Session privacy types
-        enum
-        {
-            SESSION_PRIVACY_TYPE_HEADER = 0,
-            SESSION_PRIVACY_TYPE_NONE = 1,
-            SESSION_PRIVACY_TYPE_ID = 2
-        };
-
-        // Conference subscribe types
-        enum
-        {
-            CONFERENCE_SUBSCRIBE_NOT_SUPPORT = -1,
-            CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG = 0,
-            CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG = 1
-        };
-
-        // SRVCC types
-        enum
-        {
-            BASIC_SRVCC_SUPPORT = 0,
-            ALERTING_SRVCC_SUPPORT = 1,
-            PREALERTING_SRVCC_SUPPORT = 2,
-            MIDCALL_SRVCC_SUPPORT = 3
-        };
 
         // AMR payload formats
         enum
@@ -1144,189 +1353,7 @@ public:
             EVS_PRIMARY_MODE_BITRATE_128_0_KBPS = 11
         };
 
-        // Conference SIP flow order types
-        enum
-        {
-            CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER = 0,
-            CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE = 1,
-            CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER = 2
-        };
-
-        // Conference invite types
-        enum
-        {
-            CONFERENCE_INVITE_COPYCONTROL = 0,
-            CONFERENCE_INVITE_REFER_SINGLE = 1,
-            CONFERENCE_INVITE_REFER_MULTIPLE = 2
-        };
-
-        // Registration restoration methods (INVITE/504)
-        enum
-        {
-            REGISTRATION_RESTORATION_NOT_APPLICABLE = 0,
-            REGISTRATION_RESTORATION_NEXT_PCSCF = 1,
-            REGISTRATION_RESTORATION_SAME_PCSCF = 2,
-            REGISTRATION_RESTORATION_NEXT_PCSCF_BY_NETWORK_CONTEXT = 3,
-            REGISTRATION_RESTORATION_NEXT_PCSCF_WITH_SILENT_REDIAL = 4
-        };
-
-        // KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT
-        enum
-        {
-            SILENT_REDIAL_FAILURE_ACTION_TERMINATE = 0,
-            SILENT_REDIAL_FAILURE_ACTION_REGISTRATION = 1,
-            SILENT_REDIAL_FAILURE_ACTION_CSFB = 2
-        };
-
-        // KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY
-        enum
-        {
-            START_ERROR_ACTION_CSFB = 0,
-            START_ERROR_ACTION_SILENT_REINVITE = 1,
-            START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT = 2,
-            START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER = 3,
-            START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY = 4,
-            START_ERROR_ACTION_REDIRECTION_BY_CONTACT = 5,
-            START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL = 6,
-            START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY = 7,
-            START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE = 8,
-            START_ERROR_ACTION_USSI_CSFB = 9,
-            START_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 10,
-            START_ERROR_ACTION_TRIGGER_EPSFB = 11,
-            START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE = 12,
-            START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT = 13,
-            START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF = 14,
-            START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF = 15,
-            START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE = 16,
-            START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO = 17
-        };
-
-        // KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY
-        enum
-        {
-            UPDATE_ERROR_ACTION_TERMINATE = 0,
-            UPDATE_ERROR_ACTION_RETRY = 1,
-            UPDATE_ERROR_ACTION_GLARE_CONDITION = 2,
-            UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 3
-        };
-
-        // KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY
-        enum
-        {
-            EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG = 0,
-            EARLY_UPDATE_ERROR_ACTION_TERMINATE_CALL = 1,
-            EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION = 2,
-            EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 3,
-            EARLY_UPDATE_ERROR_ACTION_TIMEOUT = 4,
-            EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION = 5
-        };
-
-        // KEY_CSFB_BLOCK_CONDITION_INT_ARRAY
-        enum
-        {
-            CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH = 0,
-            CSFB_BLOCK_CONDITION_IN_NR = 1,
-            CSFB_BLOCK_CONDITION_IN_WIFI = 2,
-            CSFB_BLOCK_CONDITION_IN_ROAMING = 3,
-            CSFB_BLOCK_CONDITION_IN_HOME = 4
-        };
-
-        // Call handling when QoS is deactivated
-        enum
-        {
-            QOS_DEACTIVATION_POLICY_TERMINATE_CALL = 0,
-            QOS_DEACTIVATION_POLICY_MAINTAIN_CALL = 1,
-            QOS_DEACTIVATION_POLICY_MODIFY_CALL = 2
-        };
-
-        // Media type restriction on cellular
-        enum
-        {
-            MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_NONE = 0,
-            MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO = 1,
-            MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO_AND_VIDEO = 2
-        };
-
-        // Local number formats
-        enum
-        {
-            NUMBER_FORMAT_HOME_LOCAL = 0,
-            NUMBER_FORMAT_GEO_LOCAL = 1,
-            NUMBER_FORMAT_GEO_LOCAL_ONLY_IN_ROAMING = 2
-        };
-
-        // Call types after merging between the different calls
-        enum
-        {
-            CALL_MERGE_AS_AUDIO = 0,
-            CALL_MERGE_AS_AUDIO_VIDEO = 1
-        };
-
-        // Policy when 403 response is received
-        enum
-        {
-            SIP_403_POLICY_TERMINATE_CALL = 0,
-            SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION = 1,
-            SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION = 2,
-            SIP_403_POLICY_CSFB = 3,
-            SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION = 4,
-            SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING = 5
-        };
-
-        // Policy for QoS checking while upgrading call
-        enum
-        {
-            QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE = 0,
-            QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE = 1,
-            QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING = 2
-        };
-
-        // Conference drop Refer-To URI source type
-        enum
-        {
-            CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE = 0,
-            CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE = 1
-        };
-
-        // Media type for an incoming INVITE without SDP
-        enum
-        {
-            OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY = 0,
-            OFFERLESS_INVITE_MEDIA_TYPE_AUDIO = 1
-        };
-
-        // Media type for an incoming re-INVITE without SDP
-        enum
-        {
-            OFFERLESS_REINVITE_MEDIA_TYPE_FULL = 0,
-            OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO = 1,
-            OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT = 2,
-            OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY = 3,
-            OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED = 4,
-        };
-
-        // Policy for MO call timeout
-        enum
-        {
-            MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END = 0,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB = 1,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB = 2,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE = 3,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF = 4,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF = 5,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB = 6,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL = 7,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY = 8
-        };
-
-        // Policy for maintaining the call on registration suspended
-        enum
-        {
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_NONE = 0,
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_AUDIO_ONLY = 1,
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_ALL = 2
-        };
-
+        // Unused. Duplicated {@code GEOLOCATION_PIDF_FOR_...}.
         // Index for Geolocation-PIDF information level
         enum
         {
@@ -1334,53 +1361,6 @@ public:
             GEOLOCATION_PIDF_INFO_INDEX_EMERGENCY_WIFI = 1,
             GEOLOCATION_PIDF_INFO_INDEX_CELLULAR = 2,
             GEOLOCATION_PIDF_INFO_INDEX_WIFI = 3
-        };
-
-        // Geolocation-PIDF information level
-        enum
-        {
-            GEOLOCATION_PIDF_INFO_LAT_AND_LONG = 0,
-            GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC = 1,
-            GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY = 2,
-            GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE = 3,
-        };
-
-        // Conditions to block geolocation
-        enum
-        {
-            GEOLOCATION_BLOCK_CONDITION_IN_ROAMING = 0,
-            GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL = 1,
-        };
-
-        // KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY
-        enum
-        {
-            NO_WAIT_DEDICATED_BEARER_IN_NR = 0,
-            NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK = 1,
-            NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH = 2,
-        };
-
-        enum
-        {
-            PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG = 0,
-            PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_CALL = 1,
-            PRACK_DELIVERY_FAILURE_POLICY_IGNORE = 2,
-        };
-
-        // KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT
-        enum
-        {
-            PAI_POLICY_PREFER_TOPMOST = 0,
-            PAI_POLICY_PREFER_SIP_URI = 1,
-        };
-
-        // KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT
-        enum
-        {
-            SDP_PREVIEW_MODE_DISABLED = 0,
-            SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY = 1,
-            SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY = 2,
-            SDP_PREVIEW_MODE_FOR_ALL_CALLS = 3,
         };
     };
 
@@ -1412,7 +1392,15 @@ public:
         static const IMS_CHAR KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT[];
         static const IMS_CHAR KEY_SUPPORT_EARLY_SESSION_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT[];
+        enum
+        {
+            TEXT_VIDEO_NOT_ALLOWED = 0,
+            TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE = 1,
+            TEXT_VIDEO_ALLOWED = 2,
+        };
+
         static const IMS_CHAR KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[];
         static const IMS_CHAR KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL[];
         static const IMS_CHAR KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL[];
@@ -1445,14 +1433,6 @@ public:
         static const IMS_CHAR KEY_VIDEO_LOWEST_BITRATE_BPS_INT[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[];
         static const IMS_CHAR KEY_VIDEO_INACTIVE_HOLD_BOOL[];
-
-        // Policy of supporting text and video media in a call
-        enum
-        {
-            TEXT_VIDEO_NOT_ALLOWED = 0,
-            TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE = 1,
-            TEXT_VIDEO_ALLOWED = 2,
-        };
     };
 
     class ImsWfc
@@ -1465,6 +1445,13 @@ public:
 
         // Aos
         static const IMS_CHAR KEY_REGISTRATION_PRIVATE_HEADER_INT[];
+        enum
+        {
+            REGISTRATION_P_NOT_SUPPORTED = 0,
+            REGISTRATION_P_CELLULAR_NETWORK_INFO = 1,
+            REGISTRATION_P_LAST_ACCESS_NETWORK_INFO = 2
+        };
+
         static const IMS_CHAR KEY_COUNTRY_CODE_INT[];
         static const IMS_CHAR KEY_GEOLOCATION_PIDF_IN_WFC_INIT_REG_BOOL[];
         static const IMS_CHAR KEY_PANI_HEADER_IN_WFC_INIT_REG_BOOL[];
@@ -1474,6 +1461,7 @@ public:
         static const IMS_CHAR KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL[];
         static const IMS_CHAR KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT[];
         static const IMS_CHAR KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
+
         // Bundle {
         static const IMS_CHAR KEY_WFC_ERR_MESSAGE_BUNDLE[];
         static const IMS_CHAR KEY_WFC_ERR_REG_403_STRING[];
@@ -1482,22 +1470,6 @@ public:
         static const IMS_CHAR KEY_WFC_ERR_SUB_403_STRING[];
         static const IMS_CHAR KEY_WFC_ERR_NOTIFY_TERMINATED_STRING[];
         static const IMS_CHAR KEY_WFC_ERR_OTHER_FAILURES_STRING[];
-        // }
-        // Mtc
-        static const IMS_CHAR KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[];
-        static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[];
-        static const IMS_CHAR KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[];
-        static const IMS_CHAR KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[];
-
-        // registration private header
-        enum
-        {
-            REGISTRATION_P_NOT_SUPPORTED = 0,
-            REGISTRATION_P_CELLULAR_NETWORK_INFO = 1,
-            REGISTRATION_P_LAST_ACCESS_NETWORK_INFO = 2
-        };
-
-        // WFC error
         enum
         {
             WFC_ERROR_REG_403 = 1,
@@ -1507,6 +1479,13 @@ public:
             WFC_ERROR_NOTIFY_TERMINATED = 5,
             WFC_ERROR_OTHER_FAILURES = 6
         };
+        // }
+
+        // Mtc
+        static const IMS_CHAR KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[];
+        static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[];
+        static const IMS_CHAR KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[];
+        static const IMS_CHAR KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[];
     };
 
     class ImsSs
@@ -1517,6 +1496,7 @@ public:
         static const IMS_CHAR KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL[];
         // Public carrier-config - ends
 
+        // Unused. Using {@code CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_...}.
         // ut terminal based services
         enum
         {

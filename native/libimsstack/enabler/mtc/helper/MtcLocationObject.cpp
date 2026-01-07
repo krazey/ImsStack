@@ -172,15 +172,15 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     }
 
     IMS_SINT32 nInformationLevel = GetInformationLevel();
-    if (nInformationLevel == ConfigVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG)
+    if (nInformationLevel == ConfigIms::GEOLOCATION_PIDF_INFO_LAT_AND_LONG)
     {
         pPidfCreator->CreateWithoutCivic(AString::ConstNull(), objContent);
     }
-    else if (nInformationLevel == ConfigVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC)
+    else if (nInformationLevel == ConfigIms::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC)
     {
         pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent);
     }
-    else if (nInformationLevel == ConfigVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY)
+    else if (nInformationLevel == ConfigIms::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY)
     {
         pPidfCreator->CreateWithoutPosition(AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent);
     }

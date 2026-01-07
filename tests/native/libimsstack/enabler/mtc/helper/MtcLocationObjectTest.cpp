@@ -591,7 +591,7 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLong)
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
     ON_CALL(objConfigurationProxy,
             GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
-            .WillByDefault(Return(ConfigVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG));
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_LAT_AND_LONG));
     SetupDeviceLocation();
 
     AString strExpected =
@@ -633,7 +633,7 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLongAnd
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
     ON_CALL(objConfigurationProxy,
             GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
-            .WillByDefault(Return(ConfigVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC));
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC));
     SetupDeviceLocation();
 
     AString strExpected =
@@ -681,7 +681,7 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountry)
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
     ON_CALL(objConfigurationProxy,
             GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
-            .WillByDefault(Return(ConfigVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY));
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY));
     SetupDeviceLocation();
 
     AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -714,7 +714,7 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountryAndSta
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
     ON_CALL(objConfigurationProxy,
             GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
-            .WillByDefault(Return(ConfigVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE));
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE));
     SetupDeviceLocation();
 
     AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
