@@ -216,6 +216,8 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      */
     private static Surface mPreviewSurface = null;
     private static Surface mDisplaySurface = null;
+    // Static lock for static variables
+    private static final Object sSurfaceLock = new Object();
 
     private final Object mLock = new Object();
     private Call mCall;
@@ -328,7 +330,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
         Parcel parcel = Parcel.obtain();
 
-        mPreviewSurface = surface;
+        // Use a separate static lock for static variables
+        synchronized (sSurfaceLock) {
+            mPreviewSurface = surface;
+        }
 
         /**
          * The argument will be passed the following orders:
@@ -347,7 +352,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
         Parcel parcel = Parcel.obtain();
 
-        mDisplaySurface = surface;
+        // Use a separate static lock for static variables
+        synchronized (sSurfaceLock) {
+            mDisplaySurface = surface;
+        }
 
         /**
          * The argument will be passed the following orders:
@@ -362,11 +370,15 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     public Surface getPreviewSurface() {
-        return mPreviewSurface;
+        synchronized (sSurfaceLock) {
+            return mPreviewSurface;
+        }
     }
 
     public Surface getDisplaySurface() {
-        return mDisplaySurface;
+        synchronized (sSurfaceLock) {
+            return mDisplaySurface;
+        }
     }
 
     /**
