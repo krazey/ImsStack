@@ -17,6 +17,8 @@
 #ifndef MEDIA_MANAGER_H_
 #define MEDIA_MANAGER_H_
 
+#include <memory>
+
 #include "IJniMediaManager.h"
 #include "ImsActivityEx.h"
 #include "ImsMap.h"

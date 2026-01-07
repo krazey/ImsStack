@@ -17,6 +17,8 @@
 #ifndef AUDIO_PROFILE_H_
 #define AUDIO_PROFILE_H_
 
+#include <memory>
+
 #include "config/CodecAudioConfig.h"
 #include "MediaBaseProfile.h"
 
