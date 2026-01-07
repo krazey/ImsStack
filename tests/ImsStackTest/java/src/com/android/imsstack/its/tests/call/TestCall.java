@@ -55,7 +55,7 @@ public class TestCall extends ServerFailureHandler {
     private @NonNull CallEvent<?, ?, ?> mExpectedEvent = new CallEvent<>(CallEvent.Type.NONE);
     private final @NonNull EnumMap<CallEvent.Type, CallEvent.EventRecord> mEventRecords =
             new EnumMap<>(CallEvent.Type.class);
-    private @NonNull SingleLatch mLatch = new SingleLatch(TestCall.class.getSimpleName());
+    private SingleLatch mLatch = null;
 
     public TestCall(@NonNull ImsMmTelFeatureWrapper mmTelFeature) {
         mMmTelFeature = mmTelFeature;
@@ -212,7 +212,10 @@ public class TestCall extends ServerFailureHandler {
 
     @Override
     protected void handleServerFailure() {
-        mLatch.countDownAndInit();
+        if (mLatch != null) {
+            mLatch.countDown();
+            mLatch = null;
+        }
     }
 
     /**
@@ -234,9 +237,10 @@ public class TestCall extends ServerFailureHandler {
             return;
         }
 
-        if (((CallEvent<T1, T2, T3>) mExpectedEvent).matchParameters(
+        if (mLatch != null && ((CallEvent<T1, T2, T3>) mExpectedEvent).matchParameters(
                 (T1) record.param1, (T2) record.param2, (T3) record.param3)) {
-            mLatch.countDownAndInit();
+            mLatch.countDown();
+            mLatch = null;
         }
     }
 
@@ -253,23 +257,10 @@ public class TestCall extends ServerFailureHandler {
      * with the given parameters occur.
      */
     private class TimedExpectation extends Expectation {
-        private @NonNull final Runnable mWait;
         private final int mWaitingTimeInMillis;
 
         TimedExpectation(int waitingTimeInMillis) {
             super();
-
-            mWait = () -> {
-                if (isExpectToBeTriggered()) {
-                    mLatch.await(waitingTimeInMillis);
-                } else {
-                    mLatch.awaitTimeout(waitingTimeInMillis);
-                }
-
-                if (mFailureDetail != null) {
-                    fail(mFailureDetail);
-                }
-            };
             mWaitingTimeInMillis = waitingTimeInMillis;
         }
 
@@ -425,7 +416,18 @@ public class TestCall extends ServerFailureHandler {
 
         private void waitFor(@NonNull CallEvent<?, ?, ?> event) {
             mExpectedEvent = event;
-            mWait.run();
+
+            mLatch = new SingleLatch(event.toString());
+            if (isExpectToBeTriggered()) {
+                mLatch.await(mWaitingTimeInMillis);
+            } else {
+                mLatch.awaitTimeout(mWaitingTimeInMillis);
+            }
+            mLatch = null;
+
+            if (mFailureDetail != null) {
+                fail(mFailureDetail);  // Failure from the test server
+            }
         }
     }
 
@@ -614,7 +616,7 @@ public class TestCall extends ServerFailureHandler {
                 @NonNull IImsCallSession c, @Nullable String callId, @Nullable Bundle extras) {
             mCallSession = new ImsCallSessionWrapper(c, mCallSessionListener);
 
-            Log.d(this, "onIncomingCall");
+            Log.d(TestCall.this, "Received onIncomingCall");
             onCallEventReceived(
                     CallEvent.Type.MMTEL_INCOMING_CALL, new CallEvent.EventRecord(extras));
 
@@ -626,28 +628,28 @@ public class TestCall extends ServerFailureHandler {
     private class CallSessionListener extends ImsCallSessionWrapper.ImsCallSessionListener {
         @Override
         public void callSessionInitiatingFailed(ImsReasonInfo reason) {
-            Log.d(this, "callSessionInitiatingFailed - reason: " + reason);
+            Log.d(TestCall.this, "Received callSessionInitiatingFailed - reason: " + reason);
             onCallEventReceived(CallEvent.Type.SESSION_INITIATING_FAILED,
                     new CallEvent.EventRecord(reason));
         }
 
         @Override
         public void callSessionProgressing(ImsStreamMediaProfile profile) {
-            Log.d(this, "callSessionProgressing - profile: " + profile);
+            Log.d(TestCall.this, "Received callSessionProgressing - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_PROGRESSING,
                     new CallEvent.EventRecord(profile));
         }
 
         @Override
         public void callSessionInitiated(ImsCallProfile profile) {
-            Log.d(this, "callSessionInitiated - profile: " + profile);
+            Log.d(TestCall.this, "Received callSessionInitiated - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_INITIATED,
                     new CallEvent.EventRecord(profile));
         }
 
         @Override
         public void callSessionTerminated(ImsReasonInfo reason) {
-            Log.d(this, "callSessionTerminated - reason: " + reason);
+            Log.d(TestCall.this, "Received callSessionTerminated - reason: " + reason);
             onCallEventReceived(CallEvent.Type.SESSION_TERMINATED,
                     new CallEvent.EventRecord(reason));
 
@@ -659,102 +661,104 @@ public class TestCall extends ServerFailureHandler {
 
         @Override
         public void callSessionHeld(ImsCallProfile profile) {
-            Log.d(this, "callSessionHeld - profile: " + profile);
+            Log.d(TestCall.this, "Received callSessionHeld - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_HELD, new CallEvent.EventRecord(profile));
         }
 
         @Override
         public void callSessionHoldFailed(ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionHoldFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionHoldFailed - reason: " + reasonInfo);
             onCallEventReceived(CallEvent.Type.SESSION_HOLD_FAILED,
                     new CallEvent.EventRecord(reasonInfo));
         }
 
         @Override
         public void callSessionResumed(ImsCallProfile profile) {
-            Log.d(this, "callSessionResumed - profile: " + profile);
+            Log.d(TestCall.this, "Received callSessionResumed - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_RESUMED, new CallEvent.EventRecord(profile));
         }
 
         @Override
         public void callSessionResumeFailed(ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionResumeFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionResumeFailed - reason: " + reasonInfo);
             onCallEventReceived(CallEvent.Type.SESSION_RESUME_FAILED,
                     new CallEvent.EventRecord(reasonInfo));
         }
 
         @Override
         public void callSessionMergeStarted(IImsCallSession newSession, ImsCallProfile profile) {
-            Log.d(this, "callSessionMergeStarted - profile: " + profile);
+            Log.d(TestCall.this, "Received callSessionMergeStarted - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_MERGE_STARTED,
                     new CallEvent.EventRecord(newSession, profile));
         }
 
         @Override
         public void callSessionMergeComplete(IImsCallSession newSession) {
-            Log.d(this, "callSessionMergeComplete");
+            Log.d(TestCall.this, "Received callSessionMergeComplete");
             onCallEventReceived(CallEvent.Type.SESSION_MERGE_COMPLETE,
                     new CallEvent.EventRecord(newSession));
         }
 
         @Override
         public void callSessionMergeFailed(ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionMergeFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionMergeFailed - reason: " + reasonInfo);
             onCallEventReceived(CallEvent.Type.SESSION_MERGE_FAILED,
                     new CallEvent.EventRecord(reasonInfo));
         }
 
         @Override
         public void callSessionUpdated(ImsCallProfile profile) {
-            Log.d(this, "callSessionUpdated - profile: " + profile);
+            Log.d(TestCall.this, "Received callSessionUpdated - profile: " + profile);
             onCallEventReceived(CallEvent.Type.SESSION_UPDATED, new CallEvent.EventRecord(profile));
         }
 
         @Override
         public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionUpdateFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionUpdateFailed - reason: " + reasonInfo);
             onCallEventReceived(
                     CallEvent.Type.SESSION_UPDATE_FAILED, new CallEvent.EventRecord(reasonInfo));
         }
 
         @Override
         public void callSessionInviteParticipantsRequestDelivered() {
-            Log.d(this, "callSessionInviteParticipantsRequestDelivered");
+            Log.d(TestCall.this, "Received callSessionInviteParticipantsRequestDelivered");
             onCallEventReceived(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_DELIVERED,
                     new CallEvent.EventRecord());
         }
 
         @Override
         public void callSessionInviteParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionInviteParticipantsRequestFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionInviteParticipantsRequestFailed - "
+                    + "reason: " + reasonInfo);
             onCallEventReceived(CallEvent.Type.SESSION_INVITE_PARTICIPANTS_REQUEST_FAILED,
                     new CallEvent.EventRecord(reasonInfo));
         }
 
         @Override
         public void callSessionRemoveParticipantsRequestDelivered() {
-            Log.d(this, "callSessionRemoveParticipantsRequestDelivered");
+            Log.d(TestCall.this, "Received callSessionRemoveParticipantsRequestDelivered");
             onCallEventReceived(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_DELIVERED,
                     new CallEvent.EventRecord());
         }
 
         @Override
         public void callSessionRemoveParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionRemoveParticipantsRequestFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionRemoveParticipantsRequestFailed - "
+                    + "reason: " + reasonInfo);
             onCallEventReceived(CallEvent.Type.SESSION_REMOVE_PARTICIPANTS_REQUEST_FAILED,
                     new CallEvent.EventRecord(reasonInfo));
         }
 
         @Override
         public void callSessionConferenceStateUpdated(ImsConferenceState state) {
-            Log.d(this, "callSessionConferenceStateUpdated - state: " + state);
+            Log.d(TestCall.this, "Received callSessionConferenceStateUpdated - state: " + state);
             onCallEventReceived(CallEvent.Type.SESSION_CONFERENCE_STATE_UPDATED,
                     new CallEvent.EventRecord(state));
         }
 
         @Override
         public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
-            Log.d(this, "callSessionUssdMessageReceived - "
+            Log.d(TestCall.this, "Received callSessionUssdMessageReceived - "
                     + "mode: " + mode + " ussdMessage: " + ussdMessage);
             onCallEventReceived(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
                     new CallEvent.EventRecord(mode, ussdMessage));
@@ -762,20 +766,21 @@ public class TestCall extends ServerFailureHandler {
 
         @Override
         public void callSessionRttMessageReceived(String rttMessage) {
-            Log.d(this, "callSessionRttMessageReceived - rttMessage: " + rttMessage);
+            Log.d(TestCall.this, "Received callSessionRttMessageReceived - "
+                    + "rttMessage: " + rttMessage);
             onCallEventReceived(CallEvent.Type.SESSION_RTT_MESSAGE_RECEIVED,
                     new CallEvent.EventRecord(rttMessage));
         }
 
         @Override
         public void callSessionTransferred() {
-            Log.d(this, "callSessionTransferred");
+            Log.d(TestCall.this, "Received callSessionTransferred");
             onCallEventReceived(CallEvent.Type.SESSION_TRANSFERRED, new CallEvent.EventRecord());
         }
 
         @Override
         public void callSessionTransferFailed(@Nullable ImsReasonInfo reasonInfo) {
-            Log.d(this, "callSessionTransferFailed - reason: " + reasonInfo);
+            Log.d(TestCall.this, "Received callSessionTransferFailed - reason: " + reasonInfo);
             onCallEventReceived(CallEvent.Type.SESSION_TRANSFER_FAILED,
                     new CallEvent.EventRecord(reasonInfo));
         }
