@@ -882,8 +882,12 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                                 NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID) > 0)
                     {
                         m_pAudioController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
+                    }
+                    if (!m_bSessionConfirmed)
+                    {
                         m_pClientListener->MediaSession_Notify(
                                 REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
+                        IMS_TRACE_I("OnNotify() - NW tone receive started", 0, 0, 0);
                     }
                 }
 
