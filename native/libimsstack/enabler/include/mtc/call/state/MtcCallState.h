@@ -34,7 +34,6 @@ class IMtcSession;
 class IReference;
 class ISession;
 class ISipClientConnection;
-class ISipConnection;
 class ISipServerConnection;
 class MtcSession;
 enum class QosLossPolicy;
@@ -86,10 +85,6 @@ public:
     CallStateName SendUssd(IN const AString& strUssd) override;
     CallStateName UssiInfoReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
-    CallStateName NotifyResponseToUssiInfo(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
-    CallStateName NotifyErrorToUssiInfo(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     CallStateName SessionAlerting(IN ISession* piSession) override;
     CallStateName SessionReferenceReceived(
@@ -131,11 +126,6 @@ public:
 
     CallStateName OnInternalFailure() override;
     CallStateName OnAttached() override;
-
-    CallStateName ClientConnection_NotifyResponse(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
-    CallStateName Error_NotifyError(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     CallStateName OnReceivingMediaDataStarted(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;

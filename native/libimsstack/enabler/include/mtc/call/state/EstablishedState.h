@@ -50,10 +50,6 @@ public:
     CallStateName SendUssd(IN const AString& strUssd) override;
     CallStateName UssiInfoReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
-    CallStateName NotifyResponseToUssiInfo(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
-    CallStateName NotifyErrorToUssiInfo(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
     CallStateName Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
     CallStateName OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
@@ -78,8 +74,6 @@ private:
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);
     IMS_BOOL ShouldPendOperation() const;
-
-    CallStateName TerminateUssiAfterInfoTransaction();
 };
 
 #endif

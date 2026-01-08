@@ -23,7 +23,10 @@
 #include "MockISipMessageBodyPart.h"
 #include "MockISipServerConnection.h"
 #include "SipHeaderName.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
@@ -38,6 +41,11 @@
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+MATCHER_P(IsEqualSipMethod, method, "")
+{
+    return arg.Equals(method);
+}
 
 LOCAL const AString HEADER_APPLICATION_USSDXML(UssiConstants::HEADER_APPLICATION_USSDXML);
 LOCAL const AString HEADER_USSD_PACKAGE(UssiConstants::HEADER_USSD_PACKAGE);
@@ -131,6 +139,132 @@ protected:
         ON_CALL(*pUssiData, GetErrorCode).WillByDefault(Return(eError));
     }
 };
+
+TEST_F(UssiControllerTest, DestructorInvokesConnectionCloseIfNotNull)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    EXPECT_CALL(objSipClientConnection, Close);
+}
+
+TEST_F(UssiControllerTest, ClientConnectionNotifyResponseClosesConnectionIfReceiveFails)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    ON_CALL(objSipClientConnection, Receive).WillByDefault(Return(IMS_FAILURE));
+    EXPECT_CALL(objSipClientConnection, Close);
+
+    objUssiController.ClientConnection_NotifyResponse(
+            &objSipClientConnection, &objSipClientConnection);
+}
+
+TEST_F(UssiControllerTest, ClientConnectionNotifyResponseDoesNothingProvisionalResponse)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    ON_CALL(objSipClientConnection, Receive).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objSipClientConnection, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_180));
+
+    EXPECT_CALL(objSipClientConnection, Close).Times(0);
+    objUssiController.ClientConnection_NotifyResponse(
+            &objSipClientConnection, &objSipClientConnection);
+
+    testing::Mock::VerifyAndClearExpectations(&objSipClientConnection);
+}
+
+TEST_F(UssiControllerTest, ClientConnectionNotifyResponseClosesConnectionIfFinalResponse)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    ON_CALL(objSipClientConnection, Receive).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objSipClientConnection, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
+
+    EXPECT_CALL(objSipClientConnection, Close);
+    objUssiController.ClientConnection_NotifyResponse(
+            &objSipClientConnection, &objSipClientConnection);
+
+    testing::Mock::VerifyAndClearExpectations(&objSipClientConnection);
+}
+
+TEST_F(UssiControllerTest, ClientConnectionNotifyResponseTerminatesCallIfLastActionTerminate)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    ON_CALL(objSipClientConnection, Receive).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objSipClientConnection, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
+
+    EXPECT_CALL(objSipClientConnection, Close);
+    MockIMtcCall objCall;
+    ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objCall));
+    EXPECT_CALL(objCall, Terminate(_));
+
+    objUssiController.SetNextActionByTerminateUssi();
+    objUssiController.ClientConnection_NotifyResponse(
+            &objSipClientConnection, &objSipClientConnection);
+
+    testing::Mock::VerifyAndClearExpectations(&objSipClientConnection);
+}
+
+TEST_F(UssiControllerTest, ErrorNotifyErrorClosesConnection)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    EXPECT_CALL(objSipClientConnection, Close);
+
+    objUssiController.Error_NotifyError(&objSipClientConnection, SipStatusCode::SC_INVALID, "");
+
+    testing::Mock::VerifyAndClearExpectations(&objSipClientConnection);
+}
+
+TEST_F(UssiControllerTest, ErrorNotifyErrorTerminatesCallIfLastActionTerminate)
+{
+    // Sets up objSipClientConnection.
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+    objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE);
+
+    EXPECT_CALL(objSipClientConnection, Close);
+    MockIMtcCall objCall;
+    ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objCall));
+    EXPECT_CALL(objCall, Terminate(_));
+
+    objUssiController.SetNextActionByTerminateUssi();
+    objUssiController.Error_NotifyError(&objSipClientConnection, SipStatusCode::SC_INVALID, "");
+
+    testing::Mock::VerifyAndClearExpectations(&objSipClientConnection);
+}
 
 TEST_F(UssiControllerTest, HasValidXmlReturnsFalseIfMessageIsNull)
 {
@@ -239,8 +373,6 @@ TEST_F(UssiControllerTest, ParseUssiReturnsDefaultResultIfParsingUssiDataFails)
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
-    EXPECT_EQ(objUssiController.GetLastResult(),
-            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
 TEST_F(UssiControllerTest, ParseUssiInByeNotifiesResultWithUssiNotifyType)
@@ -255,8 +387,6 @@ TEST_F(UssiControllerTest, ParseUssiInByeNotifiesResultWithUssiNotifyType)
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
-    EXPECT_EQ(objUssiController.GetLastResult(),
-            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
 TEST_F(UssiControllerTest, ParseUssiSetsResultWithErrorCode1IfNoUssdString)
@@ -268,8 +398,6 @@ TEST_F(UssiControllerTest, ParseUssiSetsResultWithErrorCode1IfNoUssdString)
     EXPECT_CALL(objUiNotifier, SendNotifyInfo(_, _, _, _)).Times(0);
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INVITE),
-            UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1));
-    EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1));
 }
 
@@ -290,8 +418,6 @@ TEST_F(UssiControllerTest, ParseUssiInAckSetsResultWithErrorCode4IfAnotherCallEx
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::ACK),
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_4));
-    EXPECT_EQ(objUssiController.GetLastResult(),
-            UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_4));
 }
 
 TEST_F(UssiControllerTest, ParseUssiInInfoNotifiesResultWithUssiNotifyTypeIfMo)
@@ -305,8 +431,6 @@ TEST_F(UssiControllerTest, ParseUssiInInfoNotifiesResultWithUssiNotifyTypeIfMo)
             SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::REQUEST, _));
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INFO),
-            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
-    EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
@@ -323,8 +447,6 @@ TEST_F(UssiControllerTest, ParseUssiNotifiesResultWithUssiNotifyTypeIfMtAndUssdD
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INVITE),
             UssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE));
-    EXPECT_EQ(objUssiController.GetLastResult(),
-            UssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE));
 }
 
 TEST_F(UssiControllerTest, ParseUssiNotifiesUssiErrorIfUssiDataIsError)
@@ -339,8 +461,6 @@ TEST_F(UssiControllerTest, ParseUssiNotifiesUssiErrorIfUssiDataIsError)
             SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::ERROR, _));
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
-            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
-    EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
@@ -520,26 +640,41 @@ TEST_F(UssiControllerTest, FormAcceptUssiSetsAcceptHeader)
     EXPECT_EQ(IMS_SUCCESS, objUssiController.FormAcceptUssi());
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfConnectionIsNull)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfConnectionIsNull)
 {
-    const AString strAnyUssdString("anyUssdString");
-    EXPECT_EQ(IMS_FAILURE,
-            objUssiController.FormInfoRequest(IMS_NULL, strAnyUssdString, UssiError::CODE_NONE));
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(IMS_NULL));
+
+    EXPECT_EQ(IMS_FAILURE, objUssiController.SendInfo(objSession, "", UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingInfoPackageFails)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfSettingInfoPackageFails)
 {
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
+    EXPECT_CALL(objSipClientConnection, SetListener(&objUssiController));
+    EXPECT_CALL(objSipClientConnection, SetErrorListener(&objUssiController));
+
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_FAILURE));
-
     const AString strAnyUssdString("anyUssdString");
+
     EXPECT_EQ(IMS_FAILURE,
-            objUssiController.FormInfoRequest(
-                    &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingApplicationUssdxmlFails)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfSettingApplicationUssdxmlFails)
 {
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_SUCCESS));
     const AString strContentType(SipHeaderName::CONTENT_TYPE);
@@ -547,51 +682,93 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingApplicationUssd
             .WillOnce(Return(IMS_FAILURE));
 
     const AString strAnyUssdString("anyUssdString");
+
     EXPECT_EQ(IMS_FAILURE,
-            objUssiController.FormInfoRequest(
-                    &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingContentDispositionFails)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfSettingContentDispositionFails)
 {
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_SUCCESS));
     const AString strContentType(SipHeaderName::CONTENT_TYPE);
     EXPECT_CALL(objSipClientConnection, SetHeader(strContentType, HEADER_APPLICATION_USSDXML))
-            .WillOnce(Return(IMS_SUCCESS));
-    const AString strContentDisposition(SipHeaderName::CONTENT_DISPOSITION);
-    EXPECT_CALL(objSipClientConnection, SetHeader(strContentDisposition, HEADER_INFO_PACKAGE))
             .WillOnce(Return(IMS_FAILURE));
 
     const AString strAnyUssdString("anyUssdString");
+    EXPECT_CALL(objSipClientConnection, Close);
+
     EXPECT_EQ(IMS_FAILURE,
-            objUssiController.FormInfoRequest(
-                    &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSipMessageIsNull)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfSipMessageIsNull)
 {
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
     ON_CALL(objSipClientConnection, SetHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objSipClientConnection, GetMessage).WillByDefault(Return(nullptr));
 
     const AString strAnyUssdString("anyUssdString");
+
+    EXPECT_CALL(objSipClientConnection, Close);
     EXPECT_EQ(IMS_FAILURE,
-            objUssiController.FormInfoRequest(
-                    &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfCreateBodyPartFails)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfCreateBodyPartFails)
 {
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
     ON_CALL(objSipMessage, CreateBodyPart).WillByDefault(Return(nullptr));
 
     const AString strAnyUssdString("anyUssdString");
+
+    EXPECT_CALL(objSipClientConnection, Close);
     EXPECT_EQ(IMS_FAILURE,
-            objUssiController.FormInfoRequest(
-                    &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestSetsBodyPart)
+TEST_F(UssiControllerTest, SendInfoReturnsFailureIfSendFails)
 {
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
+    EXPECT_CALL(objSipClientConnection, SetListener(&objUssiController));
+    EXPECT_CALL(objSipClientConnection, SetErrorListener(&objUssiController));
+
+    const AString strAnyUssdString("anyUssdString");
+
+    EXPECT_CALL(objSipClientConnection, Send).WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objSipClientConnection, Close);
+
+    EXPECT_EQ(IMS_FAILURE,
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
+}
+
+TEST_F(UssiControllerTest, SendInfoReturnsSuccess)
+{
+    MockISession objSession;
+    SipMethod objMethod(SipMethod::INFO);
+    ON_CALL(objSession, CreateTransaction(IsEqualSipMethod(objMethod)))
+            .WillByDefault(Return(&objSipClientConnection));
+
+    EXPECT_CALL(objSipClientConnection, SetListener(&objUssiController));
+    EXPECT_CALL(objSipClientConnection, SetErrorListener(&objUssiController));
+
     const AString strAnyUssdString("anyUssdString");
 
     // to cover for statement in GetParsedUssiData
@@ -600,18 +777,10 @@ TEST_F(UssiControllerTest, FormInfoRequestSetsBodyPart)
     ON_CALL(objSipMessage, GetBodyParts).WillByDefault(Return(objMessageBodyPartList));
 
     EXPECT_CALL(objMessageBodyPart, SetContent(IsByteArrayContains(strAnyUssdString)));
-    EXPECT_EQ(IMS_SUCCESS,
-            objUssiController.FormInfoRequest(
-                    &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
-}
+    EXPECT_CALL(objSipClientConnection, Send).WillOnce(Return(IMS_SUCCESS));
 
-TEST_F(UssiControllerTest, SetNextActionByTerminateUssiSetsLastResultWithErrorCode1)
-{
-    EXPECT_EQ(objUssiController.GetLastResult(),
-            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
-    objUssiController.SetNextActionByTerminateUssi();
-    EXPECT_EQ(objUssiController.GetLastResult(),
-            UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_1));
+    EXPECT_EQ(IMS_SUCCESS,
+            objUssiController.SendInfo(objSession, strAnyUssdString, UssiError::CODE_NONE));
 }
 
 }  // namespace android

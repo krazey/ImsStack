@@ -28,7 +28,6 @@ class IMtcCallContext;
 class IReference;
 class ISession;
 class ISipClientConnection;
-class ISipConnection;
 class ISipServerConnection;
 class MtcSession;
 enum class MtcAosState;
@@ -274,27 +273,6 @@ public:
      */
     virtual CallStateName UssiInfoReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) = 0;
-
-    /**
-     * @brief Notifys
-     *
-     * @param piScc
-     * @param piForkedScc
-     * @return
-     */
-    virtual CallStateName NotifyResponseToUssiInfo(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) = 0;
-
-    /**
-     * @brief Notifys
-     *
-     * @param piSc
-     * @param nCode
-     * @param strMessage
-     * @return
-     */
-    virtual CallStateName NotifyErrorToUssiInfo(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;
 
     /**
      * @brief Sessions
@@ -552,27 +530,6 @@ public:
      * @return
      */
     virtual CallStateName OnAttached() = 0;
-
-    /**
-     * @brief Clients
-     *
-     * @param piScc
-     * @param piForkedScc
-     * @return
-     */
-    virtual CallStateName ClientConnection_NotifyResponse(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) = 0;
-
-    /**
-     * @brief Error_s
-     *
-     * @param piSc
-     * @param nCode
-     * @param strMessage
-     * @return
-     */
-    virtual CallStateName Error_NotifyError(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;
 
     /**
      * @brief Notifies

@@ -18,7 +18,6 @@
 #include "IMessage.h"
 #include "INetworkWatcher.h"
 #include "ISipClientConnection.h"
-#include "ISipConnection.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsAosReason.h"
@@ -204,18 +203,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::UssiInfoReceived(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::NotifyResponseToUssiInfo(
-        IN ISipClientConnection* /* piScc */, IN ISipClientConnection* /* piForkedScc */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::NotifyErrorToUssiInfo(IN ISipConnection* /* piSc */,
-        IN IMS_SINT32 /* nCode */, IN const AString& /* strMessage */)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName MtcCallState::SessionAlerting(IN ISession* /* piSession */)
 {
     return GetStateName();
@@ -388,34 +375,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnInternalFailure()
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnAttached()
 {
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::ClientConnection_NotifyResponse(
-        IN ISipClientConnection* piScc, IN ISipClientConnection* /*piForkedScc*/)
-{
-    if (piScc->Receive() != IMS_SUCCESS)
-    {
-        return GetStateName();
-    }
-
-    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
-
-    IMS_TRACE_D("ClientConnection_NotifyResponse : StatusCode[%d]", nStatusCode, 0, 0);
-
-    if (SipStatusCode::IsFinal(nStatusCode))
-    {
-        piScc->Close();
-    }
-
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(IN ISipConnection* piSc,
-        IN [[maybe_unused]] IMS_SINT32 nCode, IN [[maybe_unused]] const AString& strMessage)
-{
-    piSc->Close();
-
     return GetStateName();
 }
 
@@ -989,21 +948,12 @@ PROTECTED
 void MtcCallState::SendInfoForUssi(
         IN const AString& strUssdString, IN UssiError eErrorCode /*= UssiError::CODE_NONE*/)
 {
-    IMS_TRACE_D("SendInfoForUssi", 0, 0, 0);
-    ISipClientConnection* piConnection = m_objContext.CreateClientConnection(SipMethod::INFO);
-    if (!piConnection)
+    ISession* piSession = GetISession();
+    if (!piSession ||
+            m_objContext.GetUssiController()->SendInfo(*piSession, strUssdString, eErrorCode) ==
+                    IMS_FAILURE)
     {
-        return;
-    }
-
-    if (m_objContext.GetUssiController()->FormInfoRequest(
-                piConnection, strUssdString, eErrorCode) == IMS_SUCCESS)
-    {
-        piConnection->Send();
-    }
-    else
-    {
-        piConnection->Close();
+        IMS_TRACE_E(0, "Send INFO failed.", 0, 0, 0);
     }
 }
 

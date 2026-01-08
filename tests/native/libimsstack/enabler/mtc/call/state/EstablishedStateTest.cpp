@@ -75,12 +75,6 @@ MATCHER_P(IsEqualCallReason, reason, "")
 namespace android
 {
 
-// SipMethod
-MATCHER_P(IsEqualSipMethod, method, "")
-{
-    return arg.Equals(method);
-}
-
 MATCHER_P(IsSameCallReasonInfoCode, code, "")
 {
     return arg.nCode == code;
@@ -112,7 +106,6 @@ public:
     CallInfo objCallInfo;
     MtcSupplementaryService* pSupplementaryService;
     MockIMtcCallManager objMockIMtcCallManager;
-    MockISipClientConnection objMockISipClientConnection;
     MockUssiController* pMockUssiController;
     MockEpsFallbackTrigger* pEpsFbTrigger;
 
@@ -156,8 +149,6 @@ protected:
         ON_CALL(objMockCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
         ON_CALL(objMockCallContext, GetCallManager)
                 .WillByDefault(ReturnRef(objMockIMtcCallManager));
-        ON_CALL(objMockCallContext, CreateClientConnection(IsEqualSipMethod(SipMethod::INFO)))
-                .WillByDefault(Return(&objMockISipClientConnection));
         pMockUssiController = new MockUssiController(objMockCallContext, new UssiDataParser());
         ON_CALL(objMockCallContext, GetUssiController).WillByDefault(Return(pMockUssiController));
 
@@ -266,6 +257,23 @@ TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     CallReasonInfo objReason(CODE_USER_TERMINATED);
     pEstablishedState->Terminate(objReason);
     pEstablishedState->Terminate(objReason);
+}
+
+TEST_F(EstablishedStateTest, TerminateUssiWithUssiCompletedCodeInvokesNormalTerminate)
+{
+    CallReasonInfo objReason(CODE_INTERNAL_USSI_COMPLETED);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, IsEqualCallReason(objReason)));
+    pEstablishedState->TerminateUssi(objReason);
+}
+
+TEST_F(EstablishedStateTest, TerminateUssiInvokesSendInfoUssiWithErrorCode1)
+{
+    CallReasonInfo objReason(CODE_USER_TERMINATED);
+    EXPECT_CALL(objMockMtcSession, Terminate(_, _)).Times(0);
+    EXPECT_CALL(*pMockUssiController, SendInfo(_, _, UssiError::CODE_1));
+    EXPECT_CALL(*pMockUssiController, SetNextActionByTerminateUssi);
+
+    pEstablishedState->TerminateUssi(objReason);
 }
 
 TEST_F(EstablishedStateTest, SessionTerminatedInvokesSendTerminated)
@@ -818,26 +826,6 @@ TEST_F(EstablishedStateTest,
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
-TEST_F(EstablishedStateTest, TerminateUssiSendsInfoWithErrorCode)
-{
-    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_SUCCESS));
-    EXPECT_CALL(objMockISipClientConnection, Send);
-    EXPECT_CALL(*pMockUssiController, SetNextActionByTerminateUssi);
-
-    CallReasonInfo objCallReasonInfo(CODE_UNSPECIFIED);
-    pEstablishedState->TerminateUssi(objCallReasonInfo);
-}
-
-TEST_F(EstablishedStateTest, TerminateUssiNotSendsInfoWithErrorCode)
-{
-    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_FAILURE));
-    EXPECT_CALL(objMockISipClientConnection, Close);
-    EXPECT_CALL(*pMockUssiController, SetNextActionByTerminateUssi);
-
-    CallReasonInfo objCallReasonInfo(CODE_UNSPECIFIED);
-    pEstablishedState->TerminateUssi(objCallReasonInfo);
-}
-
 TEST_F(EstablishedStateTest, UssiTerminateJustInvokesSendTerminated)
 {
     ON_CALL(*pMockUssiController, IsByeForUssi(_)).WillByDefault(Return(IMS_FALSE));
@@ -858,24 +846,6 @@ TEST_F(EstablishedStateTest, UssiTerminateInvokesCheckingUssiBodyAndSendTerminat
     EXPECT_CALL(objUiNotifier, SendTerminated(_)).Times(1);
 
     pEstablishedState->UssiTerminated(&objMockISession);
-}
-
-TEST_F(EstablishedStateTest, SendUssdSendsInfo)
-{
-    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_SUCCESS));
-    EXPECT_CALL(objMockISipClientConnection, Send);
-
-    AString strUssd;
-    pEstablishedState->SendUssd(strUssd);
-}
-
-TEST_F(EstablishedStateTest, SendUssdNotSendsInfo)
-{
-    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_FAILURE));
-    EXPECT_CALL(objMockISipClientConnection, Close);
-
-    AString strUssd;
-    pEstablishedState->SendUssd(strUssd);
 }
 
 TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNotInfoMethod)
@@ -921,7 +891,6 @@ TEST_F(EstablishedStateTest,
     EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _))
             .Times(1)
             .WillOnce(Return(objUssiResult));
-    EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, IsEmptyString(), UssiError::CODE_1));
 
     pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
 }
@@ -940,7 +909,6 @@ TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesTransactionResponseAndSendIn
     EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _))
             .Times(1)
             .WillOnce(Return(objUssiResult));
-    EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, IsEmptyString(), UssiError::CODE_NONE));
 
     pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
 }
@@ -959,53 +927,8 @@ TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNoP
     EXPECT_CALL(*pMockUssiController, HandleUssiBody(_, _))
             .Times(1)
             .WillOnce(Return(objUssiResult));
-    EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).Times(0);
 
     pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
-}
-
-TEST_F(EstablishedStateTest, NotifyResponseToUssiInfoCallsTerminateUssiAfterInfoTransaction)
-{
-    UssiResult objUssiResult(
-            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(1);
-
-    pEstablishedState->NotifyResponseToUssiInfo(
-            &objMockISipClientConnection, &objMockISipClientConnection);
-}
-
-TEST_F(EstablishedStateTest, NotifyResponseToUssiInfoNotInvokesTerminateUssiAfterInfoTransaction)
-{
-    UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
-
-    pEstablishedState->NotifyResponseToUssiInfo(
-            &objMockISipClientConnection, &objMockISipClientConnection);
-}
-
-TEST_F(EstablishedStateTest, NotifyErrorToUssiInfoInvokesTerminateUssiAfterInfoTransaction)
-{
-    EXPECT_CALL(objMockISipClientConnection, Close);
-    UssiResult objUssiResult(
-            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(1);
-
-    AString strAny;
-    pEstablishedState->NotifyErrorToUssiInfo(&objMockISipClientConnection, 0, strAny);
-}
-
-TEST_F(EstablishedStateTest, NotifyErrorToUssiInfoNotInvokesTerminateUssiAfterInfoTransaction)
-{
-    EXPECT_CALL(objMockISipClientConnection, Close);
-    UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_NONE);
-    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
-
-    AString strAny;
-    pEstablishedState->NotifyErrorToUssiInfo(&objMockISipClientConnection, 0, strAny);
 }
 
 TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHeldBy)

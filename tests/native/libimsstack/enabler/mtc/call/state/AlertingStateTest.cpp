@@ -802,9 +802,6 @@ TEST_F(AlertingStateTest, UssiStartedParsesBodyInInvite)
 
     UssiResult objResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
     EXPECT_CALL(*pUssiController, HandleUssiBody(_, _)).Times(1).WillOnce(Return(objResult));
-    EXPECT_CALL(objCallContext, CreateClientConnection(_))
-            .Times(1)
-            .WillOnce(Return(reinterpret_cast<ISipClientConnection*>(0x0)));
     EXPECT_CALL(objUiNotifier, SendStarted).Times(1);
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->UssiStarted(&objISession));

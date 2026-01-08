@@ -19,8 +19,6 @@
 
 #include "AString.h"
 #include "ISessionListener.h"
-#include "ISipClientConnectionListener.h"
-#include "ISipErrorListener.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "base/IRefreshListener.h"
@@ -69,6 +67,7 @@ class IMutex;
 class IPassiveTimerHolder;
 class IReference;
 class ISession;
+class ISipClientConnection;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
@@ -91,8 +90,6 @@ class MtcCall final :
         public IMtcBlockCheckListener,
         public IMtcPreconditionListener,
         public IMtcCallStateWatcher,
-        public ISipClientConnectionListener,
-        public ISipErrorListener,
         public IMediaReportEventListener,
         public ISrvccStateListener,
         public IMtcAosStateListener,
@@ -175,7 +172,6 @@ public:
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
-    ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) override;
     UdpKeepAliveSender* CreateUdpKeepAliveSender() override;
     void RemoveSession(IN IMtcSession& objSession) override;
     void RemoveAllSessions() override;
@@ -313,10 +309,6 @@ public:
     void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
     void OnStateTransition(IN CallStateName eState) override;
-    void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
-            IN ISipClientConnection* piForkedScc = IMS_NULL) override;
-    void Error_NotifyError(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     void OnReceivingMediaDataStarted(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;

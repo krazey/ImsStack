@@ -21,7 +21,6 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
-#include "SipMethod.h"
 
 class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
@@ -274,14 +273,6 @@ public:
      * @return
      */
     virtual JniCallInfo CreateJniCallInfo() = 0;
-
-    /**
-     * @brief Creates
-     *
-     * @param eMethod
-     * @return
-     */
-    virtual ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) = 0;
 
     /**
      * Creates UdpKeepAliveSender with the current configuration and context.

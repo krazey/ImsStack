@@ -554,26 +554,6 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     return objJniCallInfo;
 }
 
-PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN SipMethod eMethod)
-{
-    IMtcSession* pSession = GetSession();
-    if (!pSession)
-    {
-        return IMS_NULL;
-    }
-
-    ISipClientConnection* piSipClientConnection =
-            pSession->GetISession().CreateTransaction(eMethod);
-
-    if (piSipClientConnection)
-    {
-        piSipClientConnection->SetListener(this);
-        piSipClientConnection->SetErrorListener(this);
-    }
-
-    return piSipClientConnection;
-}
-
 PUBLIC VIRTUAL UdpKeepAliveSender* MtcCall::CreateUdpKeepAliveSender()
 {
     ISipKeepAliveHelper* pKeepAliveHelper = SipFactory::CreateKeepAliveHelper(GetSlotId());
@@ -1161,63 +1141,6 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
         m_bEstablished = IMS_TRUE;
     }
     GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.IsEmergency());
-}
-
-PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
-        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc /*= IMS_NULL*/)
-{
-    IMS_TRACE_I("%s - ClientConnection_NotifyResponse", ToString().GetStr(), 0, 0);
-    if (piScc == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
-    if (IsUssi())
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->NotifyResponseToUssiInfo(piScc, piForkedScc);
-                });
-    }
-    else
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->ClientConnection_NotifyResponse(piScc, piForkedScc);
-                });
-    }
-}
-
-PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
-        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
-{
-    IMS_TRACE_I("%s - Error_NotifyError : code[%d] message[%s]", ToString().GetStr(), nCode,
-            strMessage.GetStr());
-    if (piSc == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
-    if (IsUssi())
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->NotifyErrorToUssiInfo(piSc, nCode, strMessage);
-                });
-    }
-    else
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->Error_NotifyError(piSc, nCode, strMessage);
-                });
-    }
 }
 
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(

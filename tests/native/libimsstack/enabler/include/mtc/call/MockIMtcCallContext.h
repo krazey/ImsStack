@@ -40,7 +40,6 @@ class IMtcUiNotifier;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class ISession;
-class ISipClientConnection;
 class MessageUtils;
 class MtcPendingOperationHolder;
 class MtcSupplementaryService;
@@ -87,7 +86,6 @@ public:
     MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const ImsList<IMtcBlockRule*>& lstRules),
             (override));
     MOCK_METHOD(JniCallInfo, CreateJniCallInfo, (), (override));
-    MOCK_METHOD(ISipClientConnection*, CreateClientConnection, (IN SipMethod eMethod), (override));
     MOCK_METHOD(UdpKeepAliveSender*, CreateUdpKeepAliveSender, (), (override));
     MOCK_METHOD(void, RemoveSession, (IN IMtcSession & objSession), (override));
     MOCK_METHOD(void, RemoveAllSessions, (), (override));
